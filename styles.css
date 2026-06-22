@@ -338,3 +338,40 @@ body.dragging { overflow: hidden; touch-action: none; }           /* no scroll-j
 .add-ex:active { background:var(--box-2); color:var(--accent); border-color:var(--accent); }
 
 .sessclock { font-family:var(--tnum); color:var(--accent); font-size:13px; font-weight:600; margin-left:8px; }
+
+/* ============================================================
+   Work Mode polish (feedback pass 5)
+   ============================================================ */
+html, body { touch-action: manipulation; }      /* kill double-tap-to-zoom (keeps pinch) */
+
+/* tap-to-type big number */
+.big-input { width: 3.2ch; text-align:center; background:none; border:none; color:var(--text);
+  font-size:86px; font-weight:800; font-family:var(--tnum); font-variant-numeric:tabular-nums;
+  line-height:1; letter-spacing:-0.04em; -moz-appearance:textfield; padding:0; }
+.big-input::-webkit-outer-spin-button, .big-input::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+.big-input:focus { outline:none; color:var(--accent); }
+
+/* session clock — fixed, non-moving */
+.run-head { gap:8px; }
+.run-head .blk { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.run-head .right { display:flex; align-items:center; gap:10px; flex:0 0 auto; }
+.sessclock { margin-left:0; min-width:46px; text-align:right; }
+
+/* side-by-side R/L inputs */
+.sides { display:flex; gap:14px; justify-content:center; align-items:flex-end; margin:18px 0; }
+.side-col { text-align:center; }
+.side-col .lbl { color:var(--muted); font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px; }
+.side-col .big-input { font-size:60px; width:2.4ch; }
+.wfield { display:flex; align-items:center; justify-content:center; gap:8px; margin:8px 0 0; }
+.wfield input { width:90px; text-align:center; background:var(--box-2); border:1px solid var(--line); border-radius:10px; color:var(--text); font-size:22px; font-weight:700; font-family:var(--tnum); padding:8px; }
+.wfield .u { color:var(--muted); font-size:14px; }
+
+/* get-ready */
+.getready .name { color:var(--accent); }
+
+/* grouped log */
+.loggroup { padding:10px 0; border-bottom:1px solid var(--line); }
+.loggroup:last-child { border-bottom:none; }
+.loggroup .gname { font-size:15px; font-weight:600; margin-bottom:8px; }
+.logset { display:flex; align-items:center; gap:10px; padding:5px 0; }
+.logset .sn { color:var(--muted); font-size:12px; width:54px; }

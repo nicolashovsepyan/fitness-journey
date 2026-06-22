@@ -11,7 +11,9 @@ import { store } from '../store.js';
 import { say, beep, buzz, fmt, initAudio, keepAwake, releaseAwake } from '../timer.js';
 
 const UNIT = { reps: 'reps', hold: 'sec', cals: 'cals' };
+const WUNIT = 'lb';                       // weight unit (Nicolas trains in pounds)
 let S = null, host = null, cb = {}, ticker = null, onStepDone = null, curVal = 0, roundBuf = {};
+const numAt = id => { const e = document.getElementById(id); return e && e.value !== '' ? Number(e.value) : null; };
 
 /* ---------------- lifecycle ---------------- */
 export function startWorkout(plan, callbacks = {}) {
@@ -51,8 +53,20 @@ function enterBlock(i, resuming) {
   roundBuf = {}; onStepDone = null;
   const b = block();
   if (!S.captured[b.id]) buildEntries(b);
-  beep('go'); say(b.name);
-  renderActive();
+  if (resuming) { beep('go'); say(b.name); return renderActive(); }
+  renderGetReady();
+}
+/* 10-second "get set up" countdown before each block (skippable) */
+function renderGetReady() {
+  const b = block();
+  beep('go'); say(`Get ready. ${b.name}.`);
+  shell(`<div class="now-ex getready"><div class="label">Get ready</div><div class="name">${b.name}</div>
+      <div class="side">${b.role}</div></div>
+    <div class="timer-wrap">${timerSvg('buffer')}</div>
+    <div class="actionbar"><button class="btn lg" id="go">I'm ready ▸</button></div>`);
+  const begin = () => { R.clearStep(S); onStepDone = null; renderActive(); };
+  R.beginStep(S, 10); onStepDone = begin;
+  document.getElementById('go').addEventListener('click', begin);
 }
 function buildEntries(b) {
   S.captured[b.id] = (b.items || []).map(it => ({
@@ -96,8 +110,8 @@ function shell(inner, { progress = true } = {}) {
   host.innerHTML = `
     <div class="screen run fade-in">
       <div class="run-head">
-        <div class="blk">${b.role} · ${b.name} <span class="sessclock" id="sessClock">${fmt(R.sessionElapsed(S))}</span></div>
-        <button class="x" id="exitBtn">✕</button>
+        <div class="blk">${b.role} · ${b.name}</div>
+        <div class="right"><span class="sessclock" id="sessClock">${fmt(R.sessionElapsed(S))}</span><button class="x" id="exitBtn">✕</button></div>
       </div>
       ${progress ? `<div class="progress">${segs}</div>` : ''}
       ${inner}
@@ -126,13 +140,16 @@ function updateTimer(rem, total) {
 }
 function bigEditable(val, unit) {
   return `<div class="big-edit"><button class="rnd" id="decBig">−</button>
-    <div><div class="big" id="bigVal">${val}</div><div class="unit">${unit}</div></div>
+    <div><input class="big-input" id="bigVal" type="number" inputmode="numeric" value="${val}" onfocus="this.select()"/><div class="unit">${unit}</div></div>
     <button class="rnd" id="incBig">+</button></div>`;
 }
 function wireBig() {
-  const upd = () => { const e = document.getElementById('bigVal'); if (e) e.textContent = curVal; };
-  document.getElementById('decBig')?.addEventListener('click', () => { curVal = Math.max(0, curVal - 1); upd(); buzz(15); });
-  document.getElementById('incBig')?.addEventListener('click', () => { curVal += 1; upd(); buzz(15); });
+  const inp = document.getElementById('bigVal');
+  const set = v => { curVal = Math.max(0, v); if (inp) inp.value = curVal; };
+  document.getElementById('decBig')?.addEventListener('click', () => { set((Number(inp?.value) || 0) - 1); buzz(15); });
+  document.getElementById('incBig')?.addEventListener('click', () => { set((Number(inp?.value) || 0) + 1); buzz(15); });
+  inp?.addEventListener('input', () => { curVal = Math.max(0, Number(inp.value) || 0); });
+  inp?.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
 }
 
 /* ---------------- SETS (straight / tempo / isometric / yates / rest_pause) ---------------- */
@@ -157,18 +174,39 @@ function renderSets() {
       <div class="actionbar"><button class="btn ghost" id="skip">Skip ▸</button></div>`);
     document.getElementById('skip').addEventListener('click', () => { R.clearStep(S); onStepDone = null; capture(target); afterSet(); });
     R.beginStep(S, target); say(`${item.name}. Hold.`); onStepDone = () => { capture(target); afterSet(); };
-  } else {                                              // reps set → inline ± then "Set done"
-    curVal = failureSet ? (item.reps || 0) : (item.reps || item.target || 0);
+  } else {                                              // reps set → tap-to-type, weight + R/L
+    const weighted = item.load === 'weighted';
+    const uni = item.laterality === 'unilateral' || item.perSide;
+    const base = failureSet ? (item.reps || 0) : (item.reps || item.target || 0);
+    curVal = base;
+    const lastW = item.exId ? (store.getLast(item.exId)?.weight ?? '') : '';
+    const wField = weighted
+      ? `<div class="wfield"><input id="wMain" type="number" inputmode="decimal" placeholder="weight" value="${lastW}" onfocus="this.select()"/><span class="u">${WUNIT}</span></div>` : '';
+    const inputArea = uni
+      ? `<div class="sides">
+           <div class="side-col"><div class="lbl">Left</div><input class="big-input" id="valL" type="number" inputmode="numeric" value="${base}" onfocus="this.select()"/></div>
+           <div class="side-col"><div class="lbl">Right</div><input class="big-input" id="valR" type="number" inputmode="numeric" value="${base}" onfocus="this.select()"/></div>
+         </div><div class="center unit">${unit} · per side</div>`
+      : `<div class="target">${bigEditable(base, `${unit} · tap to type`)}</div>`;
     shell(`<div class="now-ex"><div class="label">${label}</div><div class="name">${item.name}</div>${item.tempo ? `<div class="side">tempo ${item.tempo}</div>` : ''}</div>
-      <div class="target">${bigEditable(curVal, `${unit} · tap ± to log actual`)}</div>
+      ${inputArea}${wField}
       <div class="actionbar"><button class="btn lg" id="done">${failureSet ? 'Failure set done ✓' : 'Set done ✓'}</button></div>`);
-    wireBig();
-    document.getElementById('done').addEventListener('click', () => { buzz(40); capture(curVal); afterSet(); });
+    if (!uni) wireBig();
+    document.querySelectorAll('.big-input, #wMain').forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') el.blur(); }));
+    document.getElementById('done').addEventListener('click', () => {
+      buzz(40);
+      const w = weighted ? numAt('wMain') : null;
+      if (uni) { capture(numAt('valL') ?? base, w, 'L'); capture(numAt('valR') ?? base, w, 'R'); }
+      else capture(curVal, w);
+      afterSet();
+    });
   }
 }
-function capture(val) {
-  const it = block().items[S.ii];
-  S.captured[block().id][S.ii].sets.push({ value: val }); R.save(S);
+function capture(val, weight, side) {
+  const rec = { value: val };
+  if (weight != null && !Number.isNaN(weight)) rec.weight = weight;
+  if (side) rec.side = side;
+  S.captured[block().id][S.ii].sets.push(rec); R.save(S);
 }
 function afterSet() {
   const b = block(); const item = b.items[S.ii];
@@ -252,7 +290,7 @@ function endRound() {
   b.items.forEach((it, i) => S.captured[b.id][i].sets.push({ value: roundBuf[i] ?? (it.hold ?? it.reps ?? it.target) }));
   R.save(S); buzz(60); say(`Round ${S.round} done.`);
   if (S.round < (b.rounds || 1)) {
-    if (b.roundRest > 0) { S.sub = 'roundrest'; R.save(S); renderRoundRest(); }
+    if ((b.roundRest ?? 30) > 0) { S.sub = 'roundrest'; R.save(S); renderRoundRest(); }
     else { S.round += 1; S.ci = 0; roundBuf = {}; S.sub = 'work'; R.save(S); renderCircuit(); }
   } else renderSummary();
 }
@@ -332,12 +370,18 @@ function renderBenchmark() {
 /* ---------------- log card + summary ---------------- */
 function renderLog() {
   const b = block(); const entries = S.captured[b.id];
-  // ensure at least the prescribed sets are present (if user hasn't gone through, prefill)
-  const rows = entries.map((e, ei) => (e.sets.length ? e.sets : [{ value: null }]).map((st, si) =>
-    logRow({ name: e.name, measure: e.measure, load: e.load }, `b${ei}_${si}`, st.value, e.exId, st.weight)).join('')).join('');
+  // grouped: exercise name once, its sets underneath (no repeated names)
+  const groups = entries.map((e, ei) => {
+    const sets = e.sets.length ? e.sets : [{ value: null }];
+    const rows = sets.map((st, si) => {
+      const lbl = st.side ? st.side : (sets.length > 1 ? `Set ${si + 1}` : 'Set');
+      return `<div class="logset"><span class="sn">${lbl}</span>${cellInputs({ measure: e.measure, load: e.load }, `b${ei}_${si}`, st.value, st.weight, e.exId)}</div>`;
+    }).join('');
+    return `<div class="loggroup"><div class="gname">${e.name}</div>${rows}</div>`;
+  }).join('');
   shell(`<div class="center"><div class="eyebrow">${b.role}</div><h2 style="font-size:22px;margin:8px 0 4px;">Log — ${b.name}</h2>
       <p class="muted" style="margin:0 0 14px;">Tweak then confirm.</p></div>
-    <div class="card logcard">${rows}</div>
+    <div class="card logcard">${groups}</div>
     <div class="actionbar"><button class="btn lg" id="confirm">${isLastBlock() ? 'Finish workout ✓' : 'Confirm ▸'}</button></div>`, { progress: false });
   document.getElementById('confirm').addEventListener('click', () => {
     entries.forEach((e, ei) => {
@@ -357,15 +401,17 @@ function renderSummary() {
   document.getElementById('confirm').addEventListener('click', sectionNext);
 }
 
-function logRow(meta, key, value, exId, weight) {
+function cellInputs(meta, key, value, weight, exId) {
   const unit = UNIT[meta.measure]; const step = meta.measure === 'hold' ? 5 : 1;
   const wField = meta.load === 'weighted'
-    ? `<div class="weight-field ${weight == null ? 'empty' : ''}"><input id="w_${key}" type="number" inputmode="decimal" placeholder="–" onfocus="this.select()" value="${weight ?? (exId ? (store.getLast(exId)?.weight ?? '') : '')}"/><span class="u">kg</span></div>` : '';
+    ? `<div class="weight-field ${weight == null ? 'empty' : ''}"><input id="w_${key}" type="number" inputmode="decimal" placeholder="–" onfocus="this.select()" value="${weight ?? (exId ? (store.getLast(exId)?.weight ?? '') : '')}"/><span class="u">${WUNIT}</span></div>` : '';
   const val = value == null || value === 'MAX' ? '' : value;
-  return `<div class="row"><span class="nm">${meta.name}</span>${wField}
-    <div class="stepper"><button data-step="-${step}" data-k="${key}">−</button>
+  return `${wField}<div class="stepper"><button data-step="-${step}" data-k="${key}">−</button>
       <input id="i_${key}" type="number" inputmode="numeric" value="${val}" placeholder="${value === 'MAX' ? 'max' : '0'}" onfocus="this.select()"/>
-      <button data-step="${step}" data-k="${key}">+</button><span class="u">${unit}</span></div></div>`;
+      <button data-step="${step}" data-k="${key}">+</button><span class="u">${unit}</span></div>`;
+}
+function logRow(meta, key, value, exId, weight) {
+  return `<div class="row"><span class="nm">${meta.name}</span>${cellInputs(meta, key, value, weight, exId)}</div>`;
 }
 function readInput(key) { const el = document.getElementById(`i_${key}`); if (!el || el.value === '') return null; return Number(el.value); }
 document.addEventListener('click', e => {
