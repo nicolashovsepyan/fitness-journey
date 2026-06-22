@@ -11,6 +11,7 @@ const DEFAULT = {
   sessions: [],       // completed session logs
   prs: {},            // { exerciseId: { value, unit, date } }
   lastValues: {},     // { exerciseId: { reps, weight, hold } } for pre-fill
+  swaps: {},          // { sessionId: { originalExId: newExId } } — exercise swaps
 };
 
 function read() {
@@ -39,6 +40,13 @@ export const store = {
 
   getGoals() { return read().goals; },
   setGoals(goals) { const s = read(); s.goals = goals; write(s); },
+
+  getSwaps(sessionId) { return read().swaps[sessionId] || {}; },
+  setSwap(sessionId, fromEx, toEx) {
+    const s = read(); s.swaps[sessionId] = s.swaps[sessionId] || {};
+    if (toEx) s.swaps[sessionId][fromEx] = toEx; else delete s.swaps[sessionId][fromEx];
+    write(s);
+  },
 
   getLast(exId) { return read().lastValues[exId] || null; },
   getPR(exId) { return read().prs[exId] || null; },

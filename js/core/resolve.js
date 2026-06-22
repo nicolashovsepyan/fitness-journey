@@ -70,15 +70,19 @@ function scaleForDuration(session, duration) {
   return out;
 }
 
-export function resolveSession(sessionId, { duration = 30, sessionIndex = 0 } = {}) {
+export function resolveSession(sessionId, { duration = 30, sessionIndex = 0, swaps = {} } = {}) {
   const s = SESSIONS[sessionId];
   if (!s) throw new Error(`Unknown session '${sessionId}'`);
 
   let fillerIndex = 0;
-  const blocks = scaleForDuration(s, duration).map(b => {
-    const items = b.items.map(it => ({ ...meta(it.ex), ...it }));   // meta + prescription, ex id kept
+  const blocks = scaleForDuration(s, duration).map((b, i) => {
+    const items = b.items.map(it => {
+      const swapTo = swaps[it.ex];                       // apply a saved swap
+      const useId = swapTo || it.ex;
+      return { ...meta(useId), ...it, exId: useId, swappedFrom: swapTo ? it.ex : null };
+    });
     const block = {
-      id: b.id, role: b.role, type: b.role, name: b.name, format: b.format, note: b.note || '',
+      id: b.id || `b${i}`, role: b.role, type: b.role, name: b.name, format: b.format, note: b.note || '',
       anchor: !!b.anchor, rounds: b.rounds, work: b.work, rest: b.rest,
       transition: b.transition, roundRest: b.roundRest, minutes: b.minutes, items,
     };
@@ -129,4 +133,17 @@ function fmtRest(s) {
   if (s < 60) return `${s}s`;
   const m = Math.floor(s / 60), ss = s % 60;
   return ss ? `${m}:${String(ss).padStart(2, '0')}` : `${m}:00`;
+}
+
+/* swap candidates for an exercise: same pattern + same measure + same warm-up-ness,
+   minus what's already in the block, respecting a forearm grip constraint. */
+export function alternatives(exId, { constraint } = {}, exclude = []) {
+  const cur = EXERCISES[exId];
+  if (!cur) return [];
+  let out = Object.entries(EXERCISES).filter(([id, m]) =>
+    id !== exId && !exclude.includes(id) &&
+    m.pattern === cur.pattern && m.measure === cur.measure && (!!m.noPR === !!cur.noPR));
+  if (constraint && /supinated|neutral/.test(constraint))
+    out = out.filter(([, m]) => m.grip !== 'pronated');
+  return out.map(([id, m]) => ({ id, name: m.name }));
 }

@@ -282,3 +282,12 @@ body {
 .week-day.img::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg, var(--box) 32%, rgba(27,27,34,0.25) 100%); }
 .week-day.img .content { position:relative; z-index:2; display:flex; align-items:center; gap:14px; padding:20px 16px; }
 .week-day.img.done::before { opacity:0.32; }
+
+/* exercise swap */
+.ex-row .swap { flex:0 0 auto; width:32px; height:32px; border-radius:8px; background:var(--box-2); border:1px solid var(--line); color:var(--muted); font-size:15px; cursor:pointer; }
+.ex-row .swap:active { background:var(--line); transform:scale(0.94); }
+.swapped { display:inline-block; margin-left:6px; background:var(--accent-dim); border:1px solid #3a4422; color:var(--accent); font-size:10px; font-weight:700; padding:2px 7px; border-radius:999px; text-transform:uppercase; letter-spacing:0.04em; vertical-align:middle; }
+.swap-opt { display:flex; align-items:center; justify-content:space-between; padding:13px 14px; background:var(--box-2); border:1px solid var(--line); border-radius:var(--radius-sm); margin-bottom:8px; cursor:pointer; font-size:15px; font-weight:550; }
+.swap-opt:active { background:var(--line); }
+.swap-opt.cur { border-color:var(--accent); }
+.swap-opt.revert { color:var(--muted); }
