@@ -70,19 +70,24 @@ function scaleForDuration(session, duration) {
   return out;
 }
 
-export function resolveSession(sessionId, { duration = 30, sessionIndex = 0, swaps = {}, removed = [] } = {}) {
+const TIER = { 'Joint Prep': 0, Primer: 1, Work: 2, Finisher: 3, Benchmark: 4, Mobility: 5 };
+const oidx = (arr, v) => { const i = (arr || []).indexOf(v); return i < 0 ? 1e6 : i; };
+
+export function resolveSession(sessionId, { duration = 30, sessionIndex = 0, swaps = {}, removed = [], order = {} } = {}) {
   const s = SESSIONS[sessionId];
   if (!s) throw new Error(`Unknown session '${sessionId}'`);
 
   let fillerIndex = 0;
   const blocks = scaleForDuration(s, duration).map((b, i) => {
-    const items = b.items
+    let items = b.items
       .filter(it => !removed.includes(it.ex))            // drop removed exercises (by original id)
       .map(it => {
         const swapTo = swaps[it.ex];                     // apply a saved swap
         const useId = swapTo || it.ex;
         return { ...meta(useId), ...it, exId: useId, swappedFrom: swapTo ? it.ex : null };
       });
+    const io = order.items && order.items[b.name];        // apply saved item order
+    if (io) items = items.slice().sort((x, y) => oidx(io, x.ex) - oidx(io, y.ex));
     const block = {
       id: b.id || `b${i}`, role: b.role, type: b.role, name: b.name, format: b.format, note: b.note || '',
       anchor: !!b.anchor, rounds: b.rounds, work: b.work, rest: b.rest,
@@ -91,6 +96,9 @@ export function resolveSession(sessionId, { duration = 30, sessionIndex = 0, swa
     if (b.filler && block.items.length) block.filler = pickFiller(b, sessionIndex, fillerIndex++);
     return block;
   }).filter(block => block.items.length > 0 || block.format === 'jointprep');
+
+  // saved block order — within each role section (sections stay grouped)
+  blocks.sort((a, b) => ((TIER[a.role] ?? 9) - (TIER[b.role] ?? 9)) || (oidx(order.blocks, a.name) - oidx(order.blocks, b.name)));
 
   return {
     name: s.name, sessionId: s.id, pattern: s.pattern, category: s.category,
@@ -156,15 +164,18 @@ export function blockMinutes(b) {
   return Math.max(1, Math.round(sec / 60));
 }
 
-/* swap candidates for an exercise: same pattern + same measure + same warm-up-ness,
-   minus what's already in the block, respecting a forearm grip constraint. */
+/* swap candidates from the FULL library: any exercise of the same measure
+   (so the prescription stays valid), minus what's already in the day,
+   respecting the forearm grip constraint. Same-pattern ones are flagged
+   `recommended` and sorted first. */
 export function alternatives(exId, { constraint } = {}, exclude = []) {
   const cur = EXERCISES[exId];
   if (!cur) return [];
-  let out = Object.entries(EXERCISES).filter(([id, m]) =>
-    id !== exId && !exclude.includes(id) &&
-    m.pattern === cur.pattern && m.measure === cur.measure && (!!m.noPR === !!cur.noPR));
+  let list = Object.entries(EXERCISES).filter(([id, m]) =>
+    id !== exId && !exclude.includes(id) && m.measure === cur.measure && (!!m.noPR === !!cur.noPR));
   if (constraint && /supinated|neutral/.test(constraint))
-    out = out.filter(([, m]) => m.grip !== 'pronated');
-  return out.map(([id, m]) => ({ id, name: m.name }));
+    list = list.filter(([, m]) => m.grip !== 'pronated');
+  return list
+    .map(([id, m]) => ({ id, name: m.name, pattern: m.pattern, recommended: m.pattern === cur.pattern }))
+    .sort((a, b) => (b.recommended - a.recommended) || a.name.localeCompare(b.name));
 }

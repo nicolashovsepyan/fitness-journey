@@ -300,3 +300,16 @@ body {
 .swap-opt:active { background:var(--line); }
 .swap-opt.cur { border-color:var(--accent); }
 .swap-opt.revert { color:var(--muted); }
+.swap-opt .muted { font-size:11px; text-transform:capitalize; }
+.swap-divider { color:var(--faint); font-size:11px; text-transform:uppercase; letter-spacing:0.06em; margin:14px 2px 8px; }
+.overlay-card.scroll { max-height:78vh; overflow-y:auto; }
+
+/* drag-to-reorder */
+.drag-handle { flex:0 0 auto; background:none; border:none; color:var(--faint); font-size:18px; line-height:1; cursor:grab; padding:4px 6px; touch-action:none; letter-spacing:-2px; }
+.drag-handle.sm { font-size:15px; padding:4px; color:var(--muted); }
+.drag-handle:active { cursor:grabbing; color:var(--accent); }
+.bleft { display:flex; align-items:center; gap:8px; min-width:0; }
+.block-card.dragging, .ex-row.dragging { opacity:0.6; }
+.block-card.dragging { outline:2px solid var(--accent); }
+.ex-row.dragging .ex-inner { background:var(--box-2); }
+.sec-blocks > .block-card { margin-bottom:12px; }

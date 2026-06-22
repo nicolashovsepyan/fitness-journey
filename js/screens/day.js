@@ -1,7 +1,7 @@
 /* ============================================================
-   SCREEN — DAY (sectioned, with per-block time, swap & remove)
-   Pure view over a resolved RunPlan. Edits (swap/remove) persist
-   per day via the store. Reorder (drag) is the next build.
+   SCREEN — DAY: sections, per-block time, swap (full library),
+   swipe-to-remove, and drag-to-reorder (items within a block,
+   blocks within a section). Edits persist per day via the store.
    ============================================================ */
 import { resolveSession, describeItem, alternatives, blockMinutes } from '../core/resolve.js';
 import { FORMATS } from '../data/formats.js';
@@ -24,22 +24,21 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
 
   const plan = () => resolveSession(sessionId, {
     duration: dur, sessionIndex,
-    swaps: store.getSwaps(sessionId), removed: store.getRemoved(sessionId),
+    swaps: store.getSwaps(sessionId), removed: store.getRemoved(sessionId), order: store.getOrder(sessionId),
   });
 
   function draw() {
     const rp = plan();
     const tags = [rp.category && rp.category.replace('_', ' '), rp.coreDominant ? 'core-dominant' : null, rp.variant].filter(Boolean);
     const total = rp.blocks.reduce((t, b) => t + blockMinutes(b), 0);
-    const edited = Object.keys(store.getSwaps(sessionId)).length || store.getRemoved(sessionId).length;
+    const edited = Object.keys(store.getSwaps(sessionId)).length || store.getRemoved(sessionId).length || Object.keys(store.getOrder(sessionId)).length;
 
-    // group blocks into role sections (preserve order)
     let html = '', lastRole = null, group = [];
     const flush = () => {
       if (!group.length) return;
       const mins = group.reduce((t, b) => t + blockMinutes(b), 0);
       html += `<div class="sec-head"><span>${SECTION[lastRole] || lastRole}</span><span>~${mins} min</span></div>`;
-      html += group.map(blockCard).join('');
+      html += `<div class="sec-blocks" data-section="${lastRole}">${group.map(blockCard).join('')}</div>`;
       group = [];
     };
     rp.blocks.forEach(b => { if (b.role !== lastRole) { flush(); lastRole = b.role; } group.push(b); });
@@ -53,16 +52,13 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
           ${tags.map(t => `<span class="tag">${t}</span>`).join('')}
           ${rp.constraint ? `<span class="tag warn">⚠ ${rp.constraint}</span>` : ''}
         </div>
-
         <div class="section-title">Time available · ≈ ${total} min total</div>
         <div class="dur-grid" id="durs">
           ${DURATIONS.map(d => `<div class="dur ${dur === d ? 'on' : ''}" data-d="${d}"><div class="m">${d}</div><div class="x">${DUR_LABEL[d]}</div></div>`).join('')}
         </div>
         ${rp.scalingNote ? `<div class="scaling-note">@${dur}min · ${rp.scalingNote}</div>` : ''}
-        <div class="edit-hint">Tap ⇄ to swap · swipe an exercise left to remove${edited ? ` · <a id="resetEdits">reset edits</a>` : ''}</div>
-
+        <div class="edit-hint">⇄ swap · ⋮⋮ drag to reorder · swipe left to remove${edited ? ` · <a id="resetEdits">reset edits</a>` : ''}</div>
         ${html}
-
         <div class="actionbar"><button class="btn lg" id="start">Start workout ▸</button></div>
       </div>`;
 
@@ -76,18 +72,25 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
     host.querySelectorAll('.swap[data-from]').forEach(el => el.addEventListener('click', () => openSwap(el.dataset.from, el.dataset.block, rp)));
     host.querySelectorAll('.ex-remove[data-from]').forEach(el => el.addEventListener('click', () => { store.setRemoved(sessionId, el.dataset.from, true); draw(); }));
     host.querySelectorAll('.ex-row').forEach(wireSwipe);
+
+    // drag-to-reorder: items within each block, blocks within each section
+    host.querySelectorAll('.ex-list').forEach(list => makeSortable(list, ids => { store.setItemOrder(sessionId, list.dataset.block, ids); }));
+    host.querySelectorAll('.sec-blocks').forEach(sec => makeSortable(sec, () => {
+      const names = [...host.querySelectorAll('.block-card[data-id]')].map(c => c.dataset.id);
+      store.setBlockOrder(sessionId, names);
+    }));
   }
 
   function blockCard(b) {
     const tag = blockTag(b);
     return `
-      <div class="block-card">
+      <div class="block-card" data-sortable-item data-id="${b.name}">
         <div class="bhead">
-          <div class="bname">${b.name} ${b.anchor ? '<span class="anchor-dot">●</span>' : ''}</div>
+          <div class="bleft"><button class="drag-handle" data-drag title="Move block">⋮⋮</button>
+            <div><div class="bname">${b.name} ${b.anchor ? '<span class="anchor-dot">●</span>' : ''}</div><div class="bmeta">~${blockMinutes(b)} min${tag ? ` · ${tag}` : ''}</div></div></div>
           <span class="fmt-chip ${b.anchor ? 'anchor' : ''}">${FORMATS[b.format]?.short || b.format}</span>
         </div>
-        <div class="bmeta">~${blockMinutes(b)} min${tag ? ` · ${tag}` : ''}</div>
-        ${b.items.map(it => exRow(it, b)).join('')}
+        <div class="ex-list" data-block="${b.name}">${b.items.map(it => exRow(it, b)).join('')}</div>
         ${b.filler ? `<div class="filler-note">⚡ Rest superset (${b.filler.type}): <b>${b.filler.name}</b> · ${b.filler.reps ? b.filler.reps + ' reps' : b.filler.hold + 's'}</div>` : ''}
         ${b.note ? `<div class="bnote">${b.note}</div>` : ''}
       </div>`;
@@ -97,8 +100,9 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
     const cue = EXERCISES[it.exId]?.cues || '';
     const from = it.swappedFrom || it.exId;
     return `
-      <div class="ex-row">
+      <div class="ex-row" data-sortable-item data-id="${from}">
         <div class="ex-inner">
+          <button class="drag-handle sm" data-drag title="Move">⋮⋮</button>
           <div class="demo" data-cue="1" title="info">ⓘ</div>
           <div class="exmeta">
             <div class="exname">${it.name} ${it.swappedFrom ? '<span class="swapped">swapped</span>' : ''}</div>
@@ -111,18 +115,49 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
       </div>`;
   }
 
-  /* swipe-left to reveal Remove (touch); harmless on desktop */
+  /* pointer-based reorder (works on touch + mouse). Reorders DOM live, commits ids on drop. */
+  function makeSortable(container, onCommit) {
+    container.querySelectorAll('[data-drag]').forEach(handle => {
+      const item = handle.closest('[data-sortable-item]');
+      if (!item || item.parentElement !== container) return;     // scope to direct children
+      handle.style.touchAction = 'none';
+      handle.addEventListener('pointerdown', e => {
+        e.preventDefault(); e.stopPropagation();
+        item.classList.add('dragging');
+        const move = ev => {
+          const sibs = [...container.querySelectorAll(':scope > [data-sortable-item]:not(.dragging)')];
+          let before = null;
+          for (const s of sibs) { const r = s.getBoundingClientRect(); if (ev.clientY < r.top + r.height / 2) { before = s; break; } }
+          if (before) container.insertBefore(item, before); else container.appendChild(item);
+        };
+        const up = () => {
+          item.classList.remove('dragging');
+          document.removeEventListener('pointermove', move);
+          document.removeEventListener('pointerup', up);
+          onCommit([...container.querySelectorAll(':scope > [data-sortable-item]')].map(el => el.dataset.id));
+        };
+        document.addEventListener('pointermove', move);
+        document.addEventListener('pointerup', up);
+      });
+    });
+  }
+
+  /* swipe-left to reveal Remove (touch); ignores touches that begin on a control */
   function wireSwipe(row) {
     const inner = row.querySelector('.ex-inner');
     if (!inner) return;
     let x0 = null, dx = 0;
-    inner.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+    inner.addEventListener('touchstart', e => {
+      if (e.target.closest('[data-drag],.swap,.demo')) { x0 = null; return; }
+      x0 = e.touches[0].clientX;
+    }, { passive: true });
     inner.addEventListener('touchmove', e => {
       if (x0 == null) return;
       dx = Math.max(-92, Math.min(0, e.touches[0].clientX - x0));
       inner.style.transform = `translateX(${dx}px)`;
     }, { passive: true });
     inner.addEventListener('touchend', () => {
+      if (x0 == null) return;
       const open = dx < -46;
       inner.style.transition = 'transform .18s ease';
       inner.style.transform = open ? 'translateX(-92px)' : 'translateX(0)';
@@ -137,14 +172,21 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
     const alts = alternatives(fromEx, { constraint: rp.constraint }, used);
     const current = block?.items.find(i => (i.swappedFrom || i.exId) === fromEx)?.exId;
     const origName = EXERCISES[fromEx]?.name || fromEx;
+    let dividerInserted = false;
+
+    const rows = alts.map(a => {
+      let pre = '';
+      if (!a.recommended && !dividerInserted) { dividerInserted = true; pre = '<div class="swap-divider">More from your library</div>'; }
+      return pre + `<div class="swap-opt ${a.id === current ? 'cur' : ''}" data-id="${a.id}"><span>${a.name}</span>${a.id === current ? '<span class="muted">current</span>' : `<span class="muted">${a.pattern}</span>`}</div>`;
+    }).join('');
 
     const ov = document.createElement('div');
     ov.className = 'overlay';
     ov.innerHTML = `
-      <div class="overlay-card">
+      <div class="overlay-card scroll">
         <div class="eyebrow">Swap exercise</div>
         <h2 style="margin:6px 0 12px;">${origName}</h2>
-        ${alts.length ? alts.map(a => `<div class="swap-opt ${a.id === current ? 'cur' : ''}" data-id="${a.id}"><span>${a.name}</span>${a.id === current ? '<span class="muted">current</span>' : ''}</div>`).join('') : '<div class="muted" style="padding:8px 0;">No matching alternatives.</div>'}
+        ${alts.length ? rows : '<div class="muted" style="padding:8px 0;">No alternatives.</div>'}
         ${current !== fromEx ? `<div class="swap-opt revert" data-id="__revert"><span>↩ Revert to ${origName}</span></div>` : ''}
         <button class="btn ghost" id="swapCancel" style="margin-top:12px;">Cancel</button>
       </div>`;

@@ -13,6 +13,7 @@ const DEFAULT = {
   lastValues: {},     // { exerciseId: { reps, weight, hold } } for pre-fill
   swaps: {},          // { sessionId: { originalExId: newExId } } — exercise swaps
   removed: {},        // { sessionId: [originalExId] } — removed exercises
+  order: {},          // { sessionId: { blocks:[blockName], items:{blockName:[exId]} } } — reorder
 };
 
 function read() {
@@ -49,7 +50,17 @@ export const store = {
     s.removed[sessionId] = [...list]; write(s);
   },
   resetDay(sessionId) {
-    const s = read(); delete s.swaps[sessionId]; delete s.removed[sessionId]; write(s);
+    const s = read(); delete s.swaps[sessionId]; delete s.removed[sessionId]; delete s.order[sessionId]; write(s);
+  },
+
+  getOrder(sessionId) { return read().order[sessionId] || {}; },
+  setBlockOrder(sessionId, names) {
+    const s = read(); s.order[sessionId] = s.order[sessionId] || {}; s.order[sessionId].blocks = names; write(s);
+  },
+  setItemOrder(sessionId, blockName, exIds) {
+    const s = read(); s.order[sessionId] = s.order[sessionId] || {};
+    s.order[sessionId].items = s.order[sessionId].items || {};
+    s.order[sessionId].items[blockName] = exIds; write(s);
   },
 
   getSwaps(sessionId) { return read().swaps[sessionId] || {}; },
