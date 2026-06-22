@@ -336,3 +336,5 @@ body.dragging { overflow: hidden; touch-action: none; }           /* no scroll-j
 
 .add-ex { width:100%; margin-top:10px; background:transparent; border:1px dashed var(--line); color:var(--muted); font-size:13px; font-weight:600; padding:10px; border-radius:var(--radius-sm); cursor:pointer; }
 .add-ex:active { background:var(--box-2); color:var(--accent); border-color:var(--accent); }
+
+.sessclock { font-family:var(--tnum); color:var(--accent); font-size:13px; font-weight:600; margin-left:8px; }

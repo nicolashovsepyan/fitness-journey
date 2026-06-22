@@ -14,7 +14,8 @@ const KEY = 'fj.run';
 export function start(plan) {
   const st = {
     plan, startedAt: Date.now(),
-    bi: 0, si: 0, round: 1, sub: 'work',       // block / set / round / phase cursor
+    bi: 0, ii: 0, si: 0, ci: 0, round: 1, sub: 'work',   // block / item / set / circuit / round / phase cursor
+    amrapRounds: 0, iv: null, ivPhase: 'work',
     stepStartedAt: null, stepDur: null,          // active timed step (countdown)
     pausedAccum: 0,                              // total paused ms (excluded from clocks)
     pausedAt: null,
