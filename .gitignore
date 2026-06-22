@@ -3,3 +3,6 @@ feedback/
 *.mov
 *.MOV
 .DS_Store
+
+MEMORY.md
+ARCHITECTURE.md
