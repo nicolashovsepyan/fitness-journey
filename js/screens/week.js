@@ -23,7 +23,7 @@ function doneThisWeek(s) {
   } catch (e) { return false; }
 }
 
-export function renderWeek(host, { onOpenDay }) {
+export function renderWeek(host, { onOpenDay, onOpenHistory }) {
   const total = PROGRAM.week.length;
   const done = PROGRAM.week.filter(d => doneThisWeek(SESSIONS[d.sessionId])).length;
   const pct = Math.round((done / total) * 100);
@@ -34,7 +34,10 @@ export function renderWeek(host, { onOpenDay }) {
 
       <div class="topbar" style="margin-bottom:10px;">
         <div><h1>This week</h1><div class="sub">${PROGRAM.name} · ${PROGRAM.phases[0]} phase</div></div>
-        <button class="gear" id="settingsBtn" title="Settings">⚙</button>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="gear" id="historyBtn" title="Progress">📊</button>
+          <button class="gear" id="settingsBtn" title="Settings">⚙</button>
+        </div>
       </div>
 
       <div class="progress-pct"><span>${done} of ${total} done</span><span>${pct}%</span></div>
@@ -62,6 +65,7 @@ export function renderWeek(host, { onOpenDay }) {
     el.addEventListener('click', () => onOpenDay(el.dataset.day)));
 
   host.querySelector('#settingsBtn').addEventListener('click', openSettings);
+  host.querySelector('#historyBtn').addEventListener('click', () => onOpenHistory?.());
 
   function openSettings() {
     const ov = document.createElement('div'); ov.className = 'overlay';

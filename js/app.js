@@ -4,6 +4,7 @@
    ============================================================ */
 import { renderWeek } from './screens/week.js';
 import { renderDay } from './screens/day.js';
+import { renderHistory } from './screens/history.js';
 import { startWorkout, resumeWorkout } from './runner/workmode.js';
 import * as R from './runner/runstate.js';
 
@@ -16,7 +17,8 @@ const runCb = { onExit: () => go('week'), onFinish: () => go('week') };
 
 function render() {
   if (view.name === 'day') return renderDay(app, view.sessionId, { onBack: () => go('week'), onStart: rp => startWorkout(rp, runCb) });
-  renderWeek(app, { onOpenDay: (id) => go('day', id) });
+  if (view.name === 'history') return renderHistory(app, { onBack: () => go('week') });
+  renderWeek(app, { onOpenDay: (id) => go('day', id), onOpenHistory: () => go('history') });
   if (R.isActive()) injectResume();    // a workout was left in progress
 }
 

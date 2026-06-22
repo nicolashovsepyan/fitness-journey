@@ -106,17 +106,49 @@ function sectionNext() {
 /* ---------------- shells ---------------- */
 function shell(inner, { progress = true } = {}) {
   const b = block();
-  const segs = S.plan.blocks.map((bl, i) => `<div class="seg ${i < S.bi ? 'done' : i === S.bi ? 'now' : ''}"></div>`).join('');
   host.innerHTML = `
     <div class="screen run fade-in">
       <div class="run-head">
+        <button class="x back" id="backBtn" ${S.bi <= 0 ? 'disabled' : ''}>‹</button>
         <div class="blk">${b.role} · ${b.name}</div>
         <div class="right"><span class="sessclock" id="sessClock">${fmt(R.sessionElapsed(S))}</span><button class="x" id="exitBtn">✕</button></div>
       </div>
-      ${progress ? `<div class="progress">${segs}</div>` : ''}
+      <div class="wprog"><div class="wprog-fill" style="width:${overallPct()}%"></div></div>
+      <div class="blockstrip">${blockStrip()}</div>
       ${inner}
     </div>`;
   document.getElementById('exitBtn').addEventListener('click', confirmExit);
+  document.getElementById('backBtn')?.addEventListener('click', backBlock);
+  const now = host.querySelector('.bchip.now'); if (now) now.scrollIntoView({ inline: 'center', block: 'nearest' });
+}
+/* overall workout completion (0–100), climbs with the clock */
+function overallPct() {
+  const n = S.plan.blocks.length || 1;
+  return Math.min(100, Math.round(((S.bi + blockFrac()) / n) * 100));
+}
+function blockFrac() {
+  const b = block(); if (!b) return 0;
+  if (b.format === 'circuit') return Math.min(1, (S.round - 1) / (b.rounds || 1));
+  if (['amrap', 'tabata', 'emom', 'skill', 'benchmark', 'max_test'].includes(b.format)) return 0.5;
+  const items = b.items || []; const per = 1 / (items.length || 1);
+  const item = items[S.ii] || {}; const total = b.format === 'yates' ? (item.warmups || 0) + 1 : (item.sets || 1);
+  return Math.min(1, S.ii * per + (S.si / (total || 1)) * per);
+}
+/* done ✓ / now / next strip */
+function blockStrip() {
+  return S.plan.blocks.map((bl, i) => {
+    const st = i < S.bi ? 'done' : i === S.bi ? 'now' : 'next';
+    const nm = (bl.name || bl.role || '').replace(/—.*$/, '').trim();
+    return `<div class="bchip ${st}">${st === 'done' ? '✓ ' : ''}${nm}</div>`;
+  }).join('');
+}
+/* step back to the previous block (clears its log so it's re-done cleanly) */
+function backBlock() {
+  if (S.bi <= 0) return;
+  const prev = S.plan.blocks[S.bi - 1];
+  (S.captured[prev.id] || []).forEach(e => e.sets = []);
+  R.clearStep(S); onStepDone = null; roundBuf = {};
+  enterBlock(S.bi - 1);
 }
 function shellPlain(inner) {
   host.innerHTML = `<div class="screen fade-in center">

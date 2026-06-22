@@ -375,3 +375,49 @@ html, body { touch-action: manipulation; }      /* kill double-tap-to-zoom (keep
 .loggroup .gname { font-size:15px; font-weight:600; margin-bottom:8px; }
 .logset { display:flex; align-items:center; gap:10px; padding:5px 0; }
 .logset .sn { color:var(--muted); font-size:12px; width:54px; }
+
+/* ============================================================
+   Work Mode header redesign + History (feedback pass 6)
+   ============================================================ */
+/* smaller, fully-visible block title (no truncation) */
+.run-head .blk { font-size:13px; font-weight:700; line-height:1.25; white-space:normal;
+  overflow:visible; text-overflow:clip; letter-spacing:0; color:var(--muted);
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+.run-head .x.back { font-size:24px; line-height:1; padding:0 6px 0 0; }
+.run-head .x.back[disabled] { opacity:0; pointer-events:none; }
+
+/* overall workout progress — thin line that climbs to 100% with the clock */
+.wprog { height:6px; border-radius:99px; background:var(--box-2,#23232c); overflow:hidden; margin:4px 0 8px; }
+.wprog-fill { height:100%; background:linear-gradient(90deg,var(--accent),#9ae23a); border-radius:99px; transition:width .35s ease; }
+
+/* done / now / next block strip */
+.blockstrip { display:flex; gap:6px; overflow-x:auto; padding-bottom:8px; margin-bottom:6px; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+.blockstrip::-webkit-scrollbar { display:none; }
+.bchip { flex:0 0 auto; font-size:11px; font-weight:700; padding:5px 9px; border-radius:99px;
+  background:var(--box-2,#23232c); color:var(--muted); white-space:nowrap; max-width:120px; overflow:hidden; text-overflow:ellipsis;
+  border:1px solid transparent; }
+.bchip.done { color:var(--accent); opacity:.65; }
+.bchip.now  { background:var(--accent); color:#15150f; opacity:1; }
+.bchip.next { opacity:.8; }
+
+/* History screen */
+.hist-tabs { display:flex; gap:8px; margin:8px 0 14px; }
+.hist-tabs button { flex:1; padding:10px; border-radius:12px; background:var(--box); color:var(--muted); border:1px solid var(--line); font-weight:700; }
+.hist-tabs button.on { background:var(--accent); color:#15150f; border-color:var(--accent); }
+.hist-card { background:var(--box); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:10px; }
+.hist-card .htop { display:flex; justify-content:space-between; align-items:baseline; gap:10px; cursor:pointer; }
+.hist-card .hname { font-weight:700; font-size:16px; }
+.hist-card .hdate { color:var(--muted); font-size:12px; }
+.hist-card .hmeta { color:var(--muted); font-size:12px; margin-top:2px; }
+.hist-body { margin-top:12px; border-top:1px solid var(--line); padding-top:10px; }
+.hist-ex { padding:7px 0; }
+.hist-ex .en { font-size:14px; font-weight:600; }
+.hist-ex .es { color:var(--muted); font-size:13px; margin-top:2px; }
+.hist-ex .blkname { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--accent); margin:8px 0 2px; opacity:.8; }
+.pr-row { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--line); }
+.pr-row:last-child { border-bottom:none; }
+.pr-row .pn { font-weight:600; }
+.pr-row .pv { font-weight:800; color:var(--accent); font-family:var(--tnum); }
+.pr-row .pd { color:var(--muted); font-size:11px; }
+.hist-empty { color:var(--muted); text-align:center; padding:40px 0; }
+.histbtn { background:var(--box); border:1px solid var(--line); color:var(--text); border-radius:12px; padding:9px 12px; font-weight:700; font-size:13px; }
