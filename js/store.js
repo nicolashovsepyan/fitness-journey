@@ -14,6 +14,7 @@ const DEFAULT = {
   swaps: {},          // { sessionId: { originalExId: newExId } } — exercise swaps
   removed: {},        // { sessionId: [originalExId] } — removed exercises
   order: {},          // { sessionId: { blocks:[blockName], items:{blockName:[exId]} } } — reorder
+  added: {},          // { sessionId: { blockName: [ {ex, ...prescription} ] } } — added exercises
 };
 
 function read() {
@@ -50,7 +51,20 @@ export const store = {
     s.removed[sessionId] = [...list]; write(s);
   },
   resetDay(sessionId) {
-    const s = read(); delete s.swaps[sessionId]; delete s.removed[sessionId]; delete s.order[sessionId]; write(s);
+    const s = read();
+    delete s.swaps[sessionId]; delete s.removed[sessionId]; delete s.order[sessionId]; delete s.added[sessionId];
+    write(s);
+  },
+
+  getAdded(sessionId) { return read().added[sessionId] || {}; },
+  addItem(sessionId, blockName, item) {
+    const s = read(); s.added[sessionId] = s.added[sessionId] || {};
+    s.added[sessionId][blockName] = s.added[sessionId][blockName] || [];
+    s.added[sessionId][blockName].push(item); write(s);
+  },
+  removeAdded(sessionId, blockName, ex) {
+    const s = read(); const list = s.added[sessionId]?.[blockName]; if (!list) return;
+    s.added[sessionId][blockName] = list.filter(i => i.ex !== ex); write(s);
   },
 
   getOrder(sessionId) { return read().order[sessionId] || {}; },

@@ -73,7 +73,7 @@ function scaleForDuration(session, duration) {
 const TIER = { 'Joint Prep': 0, Primer: 1, Work: 2, Finisher: 3, Benchmark: 4, Mobility: 5 };
 const oidx = (arr, v) => { const i = (arr || []).indexOf(v); return i < 0 ? 1e6 : i; };
 
-export function resolveSession(sessionId, { duration = 30, sessionIndex = 0, swaps = {}, removed = [], order = {} } = {}) {
+export function resolveSession(sessionId, { duration = 30, sessionIndex = 0, swaps = {}, removed = [], order = {}, added = {} } = {}) {
   const s = SESSIONS[sessionId];
   if (!s) throw new Error(`Unknown session '${sessionId}'`);
 
@@ -86,6 +86,8 @@ export function resolveSession(sessionId, { duration = 30, sessionIndex = 0, swa
         const useId = swapTo || it.ex;
         return { ...meta(useId), ...it, exId: useId, swappedFrom: swapTo ? it.ex : null };
       });
+    const add = (added[b.name] || []).map(ai => ({ ...meta(ai.ex), ...ai, exId: ai.ex, added: true }));
+    items = items.concat(add);                            // append added exercises
     const io = order.items && order.items[b.name];        // apply saved item order
     if (io) items = items.slice().sort((x, y) => oidx(io, x.ex) - oidx(io, y.ex));
     const block = {
@@ -162,6 +164,14 @@ export function blockMinutes(b) {
     sec += sets * (itemWorkSec(it) + rest);
   }
   return Math.max(1, Math.round(sec / 60));
+}
+
+/* addable exercises of a given measure (for "+ Add exercise"), forearm-aware */
+export function libraryFor(measure, { constraint } = {}, exclude = []) {
+  let list = Object.entries(EXERCISES).filter(([id, m]) => m.measure === measure && !exclude.includes(id));
+  if (constraint && /supinated|neutral/.test(constraint)) list = list.filter(([, m]) => m.grip !== 'pronated');
+  return list.map(([id, m]) => ({ id, name: m.name, pattern: m.pattern }))
+    .sort((a, b) => a.pattern.localeCompare(b.pattern) || a.name.localeCompare(b.name));
 }
 
 /* swap candidates from the FULL library: any exercise of the same measure

@@ -3,7 +3,7 @@
    swipe-to-remove, and drag-to-reorder (items within a block,
    blocks within a section). Edits persist per day via the store.
    ============================================================ */
-import { resolveSession, describeItem, alternatives, blockMinutes } from '../core/resolve.js';
+import { resolveSession, describeItem, alternatives, blockMinutes, libraryFor } from '../core/resolve.js';
 import { FORMATS } from '../data/formats.js';
 import { EXERCISES } from '../data/exercises.js';
 import { store } from '../store.js';
@@ -11,6 +11,7 @@ import { store } from '../store.js';
 const DURATIONS = [20, 30, 45, 60];
 const DUR_LABEL = { 20: 'Quick', 30: 'Short', 45: 'Full', 60: 'Long' };
 const SECTION = { 'Joint Prep': 'Joint Prep', Primer: 'Primer', Work: 'Work', Finisher: 'Finisher', Benchmark: 'Benchmark', Mobility: 'Mobility' };
+const SEC_COLOR = { 'Joint Prep': '#b39dff', Primer: '#7cb3ff', Work: '#c8ff4d', Finisher: '#ffb84d', Benchmark: '#ff8f6b', Mobility: '#4dd98b' };
 
 function blockTag(b) {
   if (b.format === 'circuit') return `${b.rounds || ''} rounds`;
@@ -24,7 +25,8 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
 
   const plan = () => resolveSession(sessionId, {
     duration: dur, sessionIndex,
-    swaps: store.getSwaps(sessionId), removed: store.getRemoved(sessionId), order: store.getOrder(sessionId),
+    swaps: store.getSwaps(sessionId), removed: store.getRemoved(sessionId),
+    order: store.getOrder(sessionId), added: store.getAdded(sessionId),
   });
 
   function draw() {
@@ -37,7 +39,8 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
     const flush = () => {
       if (!group.length) return;
       const mins = group.reduce((t, b) => t + blockMinutes(b), 0);
-      html += `<div class="sec-head"><span>${SECTION[lastRole] || lastRole}</span><span>~${mins} min</span></div>`;
+      const c = SEC_COLOR[lastRole] || 'var(--accent)';
+      html += `<div class="sec-head" style="--sc:${c}"><span class="sec-name">${SECTION[lastRole] || lastRole}</span><span class="sec-line"></span><span class="sec-time">~${mins} min</span></div>`;
       html += `<div class="sec-blocks" data-section="${lastRole}">${group.map(blockCard).join('')}</div>`;
       group = [];
     };
@@ -70,7 +73,12 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
       const cue = el.parentElement.querySelector('.cue'); if (cue) cue.style.display = cue.style.display === 'block' ? 'none' : 'block';
     }));
     host.querySelectorAll('.swap[data-from]').forEach(el => el.addEventListener('click', () => openSwap(el.dataset.from, el.dataset.block, rp)));
-    host.querySelectorAll('.ex-remove[data-from]').forEach(el => el.addEventListener('click', () => { store.setRemoved(sessionId, el.dataset.from, true); draw(); }));
+    host.querySelectorAll('.add-ex[data-block]').forEach(el => el.addEventListener('click', () => openAdd(el.dataset.block, el.dataset.bid, rp)));
+    host.querySelectorAll('.ex-remove[data-from]').forEach(el => el.addEventListener('click', () => {
+      if (el.dataset.added) store.removeAdded(sessionId, el.dataset.bn, el.dataset.from);
+      else store.setRemoved(sessionId, el.dataset.from, true);
+      draw();
+    }));
     host.querySelectorAll('.ex-row').forEach(wireSwipe);
 
     // drag-to-reorder: items within each block, blocks within each section
@@ -91,6 +99,7 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
           <span class="fmt-chip ${b.anchor ? 'anchor' : ''}">${FORMATS[b.format]?.short || b.format}</span>
         </div>
         <div class="ex-list" data-block="${b.name}">${b.items.map(it => exRow(it, b)).join('')}</div>
+        ${b.format !== 'jointprep' ? `<button class="add-ex" data-block="${b.name}" data-bid="${b.id}">+ Add exercise</button>` : ''}
         ${b.filler ? `<div class="filler-note">⚡ Rest superset (${b.filler.type}): <b>${b.filler.name}</b> · ${b.filler.reps ? b.filler.reps + ' reps' : b.filler.hold + 's'}</div>` : ''}
         ${b.note ? `<div class="bnote">${b.note}</div>` : ''}
       </div>`;
@@ -105,13 +114,13 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
           <button class="drag-handle sm" data-drag title="Move">⋮⋮</button>
           <div class="demo" data-cue="1" title="info">ⓘ</div>
           <div class="exmeta">
-            <div class="exname">${it.name} ${it.swappedFrom ? '<span class="swapped">swapped</span>' : ''}</div>
+            <div class="exname">${it.name} ${it.swappedFrom ? '<span class="swapped">swapped</span>' : ''}${it.added ? '<span class="swapped">added</span>' : ''}</div>
             <div class="exrx">${describeItem(b, it)}</div>
             <div class="cue" style="display:none; color:var(--faint); font-size:12px; margin-top:3px;">${cue}</div>
           </div>
           <button class="swap" data-from="${from}" data-block="${b.id}" title="Swap exercise">⇄</button>
         </div>
-        <button class="ex-remove" data-from="${from}">Remove</button>
+        <button class="ex-remove" data-from="${from}" data-bn="${b.name}" data-added="${it.added ? '1' : ''}">Remove</button>
       </div>`;
   }
 
@@ -124,7 +133,9 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
       handle.addEventListener('pointerdown', e => {
         e.preventDefault(); e.stopPropagation();
         item.classList.add('dragging');
+        document.body.classList.add('dragging');     // lock scroll + selection while dragging
         const move = ev => {
+          ev.preventDefault();
           const sibs = [...container.querySelectorAll(':scope > [data-sortable-item]:not(.dragging)')];
           let before = null;
           for (const s of sibs) { const r = s.getBoundingClientRect(); if (ev.clientY < r.top + r.height / 2) { before = s; break; } }
@@ -132,11 +143,12 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
         };
         const up = () => {
           item.classList.remove('dragging');
+          document.body.classList.remove('dragging');
           document.removeEventListener('pointermove', move);
           document.removeEventListener('pointerup', up);
           onCommit([...container.querySelectorAll(':scope > [data-sortable-item]')].map(el => el.dataset.id));
         };
-        document.addEventListener('pointermove', move);
+        document.addEventListener('pointermove', move, { passive: false });
         document.addEventListener('pointerup', up);
       });
     });
@@ -195,6 +207,37 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
     ov.querySelectorAll('.swap-opt[data-id]').forEach(el => el.addEventListener('click', () => {
       const id = el.dataset.id;
       store.setSwap(sessionId, fromEx, id === '__revert' ? null : id);
+      ov.remove(); draw();
+    }));
+  }
+
+  function openAdd(blockName, bid, rp) {
+    const block = rp.blocks.find(b => b.id === bid);
+    const measure = block?.items[0]?.measure || 'reps';
+    const used = rp.blocks.flatMap(b => b.items.map(i => i.exId));
+    const list = libraryFor(measure, { constraint: rp.constraint }, used);
+    const tmpl = block?.items[0] || {};
+    const prescription = () => {
+      const p = {};
+      ['sets', 'reps', 'hold', 'rest', 'tempo', 'perSide'].forEach(k => { if (tmpl[k] != null) p[k] = tmpl[k]; });
+      if (p.sets == null && ['straight', 'tempo', 'isometric'].includes(block?.format)) p.sets = 3;
+      if (measure === 'reps' && p.reps == null) p.reps = 10;
+      if (measure === 'hold' && p.hold == null) p.hold = 30;
+      if (p.rest == null && p.sets) p.rest = 60;
+      return p;
+    };
+    const ov = document.createElement('div'); ov.className = 'overlay';
+    ov.innerHTML = `
+      <div class="overlay-card scroll">
+        <div class="eyebrow">Add to ${blockName}</div>
+        <h2 style="margin:6px 0 12px;">Add exercise</h2>
+        ${list.length ? list.map(a => `<div class="swap-opt" data-id="${a.id}"><span>${a.name}</span><span class="muted">${a.pattern}</span></div>`).join('') : '<div class="muted" style="padding:8px 0;">Nothing to add.</div>'}
+        <button class="btn ghost" id="addCancel" style="margin-top:12px;">Cancel</button>
+      </div>`;
+    host.appendChild(ov);
+    ov.querySelector('#addCancel').addEventListener('click', () => ov.remove());
+    ov.querySelectorAll('.swap-opt[data-id]').forEach(el => el.addEventListener('click', () => {
+      store.addItem(sessionId, blockName, { ex: el.dataset.id, ...prescription() });
       ov.remove(); draw();
     }));
   }

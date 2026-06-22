@@ -273,11 +273,12 @@ body {
 .bnote { color:var(--faint); font-size:12px; margin-top:8px; }
 
 /* home/week — logo, progress, image day-cards */
-.logo-img { display:block; height:72px; margin:4px auto 18px; opacity:0.96; object-fit:contain; }
-/* day sections */
-.sec-head { display:flex; align-items:baseline; justify-content:space-between; margin:22px 2px 10px; }
-.sec-head span:first-child { font-size:15px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--text); }
-.sec-head span:last-child { font-size:12px; color:var(--muted); font-family:var(--tnum); }
+.logo-img { display:block; height:54px; margin:6px auto 20px; opacity:0.97; object-fit:contain; }
+/* day sections — color-coded name + line to the time */
+.sec-head { display:flex; align-items:center; gap:12px; margin:24px 2px 12px; }
+.sec-name { font-size:14px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--sc, var(--text)); }
+.sec-line { flex:1; height:2px; border-radius:2px; background:var(--sc, var(--line)); opacity:0.45; }
+.sec-time { font-size:12px; font-weight:600; font-family:var(--tnum); color:var(--sc, var(--muted)); }
 .bmeta { color:var(--faint); font-size:12px; font-family:var(--tnum); margin:-4px 0 10px; }
 .edit-hint { color:var(--faint); font-size:12px; margin:2px 2px 8px; }
 .edit-hint a { color:var(--accent); cursor:pointer; text-decoration:underline; }
@@ -313,3 +314,25 @@ body {
 .block-card.dragging { outline:2px solid var(--accent); }
 .ex-row.dragging .ex-inner { background:var(--box-2); }
 .sec-blocks > .block-card { margin-bottom:12px; }
+
+/* ============================================================
+   Feedback-pass-4 fixes: no blue selection, drag pickup,
+   start-button layering, settings gear
+   ============================================================ */
+body { -webkit-user-select: none; user-select: none; }           /* kill blue text-selection during drag */
+input, textarea { -webkit-user-select: text; user-select: text; } /* but keep inputs typeable */
+body.dragging { overflow: hidden; touch-action: none; }           /* no scroll-jitter while dragging */
+
+/* drag pickup — "lock and load": lifts, scales, sits above everything */
+.block-card.dragging, .ex-row.dragging { z-index: 200; position: relative; box-shadow: 0 10px 28px rgba(0,0,0,0.55); }
+.block-card.dragging { transform: scale(1.02); outline: 2px solid var(--accent); }
+.ex-row.dragging .ex-inner { background: var(--box-2); transform: scale(1.02); }
+
+.actionbar { z-index: 40; }                                       /* below a dragged item, above page */
+
+/* settings gear — clear, tappable, obvious pressed state */
+.gear { width:40px; height:40px; border-radius:12px; background:var(--box-2); border:1px solid var(--line); color:var(--text); font-size:17px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; }
+.gear:active, .gear.on { background:var(--accent); color:#14140a; border-color:var(--accent); }
+
+.add-ex { width:100%; margin-top:10px; background:transparent; border:1px dashed var(--line); color:var(--muted); font-size:13px; font-weight:600; padding:10px; border-radius:var(--radius-sm); cursor:pointer; }
+.add-ex:active { background:var(--box-2); color:var(--accent); border-color:var(--accent); }

@@ -34,7 +34,7 @@ export function renderWeek(host, { onOpenDay }) {
 
       <div class="topbar" style="margin-bottom:10px;">
         <div><h1>This week</h1><div class="sub">${PROGRAM.name} · ${PROGRAM.phases[0]} phase</div></div>
-        <button class="x" id="settingsBtn" title="Settings">⚙</button>
+        <button class="gear" id="settingsBtn" title="Settings">⚙</button>
       </div>
 
       <div class="progress-pct"><span>${done} of ${total} done</span><span>${pct}%</span></div>
@@ -56,35 +56,37 @@ export function renderWeek(host, { onOpenDay }) {
           </div>`;
       }).join('')}
 
-      <div id="settingsPanel" style="display:none;">
-        <div class="section-title">Settings</div>
-        <div class="card">
-          <div class="goal-row"><span class="goal-name">Coach voice</span>
-            <div class="focus"><button id="voiceToggle" class="${isVoiceOn() ? 'on' : ''}">${isVoiceOn() ? 'On' : 'Off'}</button></div></div>
-          <div class="goal-row"><span class="goal-name">Export my data</span>
-            <div class="focus"><button id="exportBtn">Export</button></div></div>
-        </div>
-        <button class="btn ghost" id="resetBtn">Reset all data</button>
-      </div>
     </div>`;
 
   host.querySelectorAll('.week-day[data-day]').forEach(el =>
     el.addEventListener('click', () => onOpenDay(el.dataset.day)));
 
-  host.querySelector('#settingsBtn').addEventListener('click', () => {
-    const p = host.querySelector('#settingsPanel');
-    p.style.display = p.style.display === 'none' ? 'block' : 'none';
-  });
-  host.querySelector('#voiceToggle').addEventListener('click', (e) => {
-    const on = !isVoiceOn(); setVoice(on);
-    e.target.classList.toggle('on', on); e.target.textContent = on ? 'On' : 'Off';
-  });
-  host.querySelector('#exportBtn').addEventListener('click', () => {
-    const blob = new Blob([store.exportJSON()], { type: 'application/json' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob); a.download = 'fitness-journey-backup.json'; a.click();
-  });
-  host.querySelector('#resetBtn').addEventListener('click', () => {
-    if (confirm('Erase all logs, PRs and goals?')) { store.reset(); renderWeek(host, { onOpenDay }); }
-  });
+  host.querySelector('#settingsBtn').addEventListener('click', openSettings);
+
+  function openSettings() {
+    const ov = document.createElement('div'); ov.className = 'overlay';
+    ov.innerHTML = `
+      <div class="overlay-card">
+        <div class="eyebrow">Settings</div>
+        <h2 style="margin:6px 0 14px;">Settings</h2>
+        <div class="goal-row"><span class="goal-name">Coach voice</span>
+          <div class="focus"><button id="voiceToggle" class="${isVoiceOn() ? 'on' : ''}">${isVoiceOn() ? 'On' : 'Off'}</button></div></div>
+        <div class="goal-row"><span class="goal-name">Export my data</span>
+          <div class="focus"><button id="exportBtn">Export</button></div></div>
+        <button class="btn ghost" id="resetBtn" style="margin-top:14px;">Reset all data</button>
+        <button class="btn" id="settingsClose" style="margin-top:8px;">Done</button>
+      </div>`;
+    host.appendChild(ov);
+    ov.querySelector('#settingsClose').addEventListener('click', () => ov.remove());
+    ov.querySelector('#voiceToggle').addEventListener('click', (e) => {
+      const on = !isVoiceOn(); setVoice(on); e.target.classList.toggle('on', on); e.target.textContent = on ? 'On' : 'Off';
+    });
+    ov.querySelector('#exportBtn').addEventListener('click', () => {
+      const blob = new Blob([store.exportJSON()], { type: 'application/json' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'fitness-journey-backup.json'; a.click();
+    });
+    ov.querySelector('#resetBtn').addEventListener('click', () => {
+      if (confirm('Erase all logs, PRs and goals?')) { store.reset(); ov.remove(); renderWeek(host, { onOpenDay }); }
+    });
+  }
 }
