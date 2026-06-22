@@ -258,8 +258,10 @@ body {
 .fmt-chip { flex:0 0 auto; background:var(--accent-dim); border:1px solid #3a4422; color:var(--accent); font-size:11px; font-weight:700; padding:4px 9px; border-radius:7px; letter-spacing:0.02em; white-space:nowrap; }
 .fmt-chip.anchor { background:var(--accent); color:#14140a; border-color:var(--accent); }
 
-.ex-row { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--line); }
+.ex-row { position:relative; overflow:hidden; border-bottom:1px solid var(--line); }
 .ex-row:last-child { border-bottom:none; }
+.ex-inner { position:relative; z-index:1; display:flex; align-items:center; gap:10px; padding:9px 0; background:var(--box); will-change:transform; }
+.ex-remove { position:absolute; top:0; right:0; height:100%; width:92px; border:none; background:var(--danger); color:#fff; font-weight:700; font-size:13px; letter-spacing:0.03em; cursor:pointer; z-index:0; }
 .ex-row .demo { flex:0 0 auto; width:30px; height:30px; border-radius:8px; background:var(--box-2); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:13px; cursor:pointer; }
 .ex-row .exmeta { flex:1; min-width:0; }
 .ex-row .exname { font-size:14px; font-weight:550; }
@@ -271,7 +273,14 @@ body {
 .bnote { color:var(--faint); font-size:12px; margin-top:8px; }
 
 /* home/week — logo, progress, image day-cards */
-.logo-img { display:block; height:40px; margin:8px auto 14px; opacity:0.92; object-fit:contain; }
+.logo-img { display:block; height:72px; margin:4px auto 18px; opacity:0.96; object-fit:contain; }
+/* day sections */
+.sec-head { display:flex; align-items:baseline; justify-content:space-between; margin:22px 2px 10px; }
+.sec-head span:first-child { font-size:15px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--text); }
+.sec-head span:last-child { font-size:12px; color:var(--muted); font-family:var(--tnum); }
+.bmeta { color:var(--faint); font-size:12px; font-family:var(--tnum); margin:-4px 0 10px; }
+.edit-hint { color:var(--faint); font-size:12px; margin:2px 2px 8px; }
+.edit-hint a { color:var(--accent); cursor:pointer; text-decoration:underline; }
 .progress-pct { display:flex; justify-content:space-between; font-size:12px; color:var(--muted); font-weight:600; }
 .progress-bar { height:10px; background:var(--box-2); border:1px solid var(--line); border-radius:999px; overflow:hidden; margin:6px 0 6px; }
 .progress-bar .fill { height:100%; background:var(--accent); border-radius:999px; transition:width .5s ease; }

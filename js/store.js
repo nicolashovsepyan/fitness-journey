@@ -12,6 +12,7 @@ const DEFAULT = {
   prs: {},            // { exerciseId: { value, unit, date } }
   lastValues: {},     // { exerciseId: { reps, weight, hold } } for pre-fill
   swaps: {},          // { sessionId: { originalExId: newExId } } — exercise swaps
+  removed: {},        // { sessionId: [originalExId] } — removed exercises
 };
 
 function read() {
@@ -40,6 +41,16 @@ export const store = {
 
   getGoals() { return read().goals; },
   setGoals(goals) { const s = read(); s.goals = goals; write(s); },
+
+  getRemoved(sessionId) { return read().removed[sessionId] || []; },
+  setRemoved(sessionId, exId, on) {
+    const s = read(); const list = new Set(s.removed[sessionId] || []);
+    if (on) list.add(exId); else list.delete(exId);
+    s.removed[sessionId] = [...list]; write(s);
+  },
+  resetDay(sessionId) {
+    const s = read(); delete s.swaps[sessionId]; delete s.removed[sessionId]; write(s);
+  },
 
   getSwaps(sessionId) { return read().swaps[sessionId] || {}; },
   setSwap(sessionId, fromEx, toEx) {

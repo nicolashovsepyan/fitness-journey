@@ -70,25 +70,27 @@ function scaleForDuration(session, duration) {
   return out;
 }
 
-export function resolveSession(sessionId, { duration = 30, sessionIndex = 0, swaps = {} } = {}) {
+export function resolveSession(sessionId, { duration = 30, sessionIndex = 0, swaps = {}, removed = [] } = {}) {
   const s = SESSIONS[sessionId];
   if (!s) throw new Error(`Unknown session '${sessionId}'`);
 
   let fillerIndex = 0;
   const blocks = scaleForDuration(s, duration).map((b, i) => {
-    const items = b.items.map(it => {
-      const swapTo = swaps[it.ex];                       // apply a saved swap
-      const useId = swapTo || it.ex;
-      return { ...meta(useId), ...it, exId: useId, swappedFrom: swapTo ? it.ex : null };
-    });
+    const items = b.items
+      .filter(it => !removed.includes(it.ex))            // drop removed exercises (by original id)
+      .map(it => {
+        const swapTo = swaps[it.ex];                     // apply a saved swap
+        const useId = swapTo || it.ex;
+        return { ...meta(useId), ...it, exId: useId, swappedFrom: swapTo ? it.ex : null };
+      });
     const block = {
       id: b.id || `b${i}`, role: b.role, type: b.role, name: b.name, format: b.format, note: b.note || '',
       anchor: !!b.anchor, rounds: b.rounds, work: b.work, rest: b.rest,
       transition: b.transition, roundRest: b.roundRest, minutes: b.minutes, items,
     };
-    if (b.filler) block.filler = pickFiller(b, sessionIndex, fillerIndex++);
+    if (b.filler && block.items.length) block.filler = pickFiller(b, sessionIndex, fillerIndex++);
     return block;
-  });
+  }).filter(block => block.items.length > 0 || block.format === 'jointprep');
 
   return {
     name: s.name, sessionId: s.id, pattern: s.pattern, category: s.category,
@@ -133,6 +135,25 @@ function fmtRest(s) {
   if (s < 60) return `${s}s`;
   const m = Math.floor(s / 60), ss = s % 60;
   return ss ? `${m}:${String(ss).padStart(2, '0')}` : `${m}:00`;
+}
+
+/* rough minute estimate for one resolved block (for the Day view) */
+const RS = 2;
+function itemWorkSec(it) { return it.measure === 'hold' ? (it.hold || it.target || 20) : (it.reps || it.target || 10) * RS; }
+export function blockMinutes(b) {
+  if (['jointprep', 'amrap', 'emom'].includes(b.format)) return b.minutes || 0;
+  if (b.format === 'tabata') return Math.max(1, Math.round((b.rounds * b.items.length * ((b.work || 20) + (b.rest || 10))) / 60));
+  if (b.format === 'circuit') {
+    const rt = b.items.reduce((s, it) => s + itemWorkSec(it) + (b.transition ?? 8), 0) + (b.roundRest ?? 0);
+    return Math.max(1, Math.round((b.rounds || 1) * rt / 60));
+  }
+  let sec = 0;
+  for (const it of b.items) {
+    const sets = it.sets || (b.format === 'yates' ? (it.warmups || 0) + 1 : 1);
+    const rest = it.rest ?? (b.format === 'yates' ? 120 : 60);
+    sec += sets * (itemWorkSec(it) + rest);
+  }
+  return Math.max(1, Math.round(sec / 60));
 }
 
 /* swap candidates for an exercise: same pattern + same measure + same warm-up-ness,
