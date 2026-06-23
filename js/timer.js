@@ -44,12 +44,14 @@ function tone(freq, ms, when = 0, vol = 0.5) {
   osc.connect(gain).connect(actx.destination);
   osc.start(t0); osc.stop(t0 + ms / 1000 + 0.02);
 }
+const VOL = 0.5;                 // standard cue volume (3-2-1 ticks, etc.)
+const VOL_END = VOL * 1.15;      // the final beep pops 15% louder than the others
 export function beep(kind = 'tick') {
   initAudio();
   if (kind === 'go')        { tone(880, 160, 0, 0.55); }              // start
-  else if (kind === 'end')  { tone(660, 120, 0, 0.5); tone(990, 200, 0.13, 0.55); } // finish: rising double
-  else if (kind === 'count'){ tone(740, 90, 0, 0.4); }               // 3-2-1 ticks
-  else                      { tone(700, 80, 0, 0.4); }
+  else if (kind === 'end')  { tone(700, 120, 0, VOL); tone(1040, 240, 0.13, VOL_END); } // finish: rising double, last beep louder
+  else if (kind === 'count'){ tone(740, 90, 0, VOL); }               // 3-2-1 ticks
+  else                      { tone(700, 80, 0, VOL); }
 }
 
 /* light haptic if supported */

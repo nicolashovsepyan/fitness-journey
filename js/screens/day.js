@@ -99,9 +99,29 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
           <span class="fmt-chip ${b.anchor ? 'anchor' : ''}">${FORMATS[b.format]?.short || b.format}</span>
         </div>
         <div class="ex-list" data-block="${b.name}">${b.items.map(it => exRow(it, b)).join('')}</div>
+        ${b.filler ? fillerRow(b.filler) : ''}
         ${b.format !== 'jointprep' ? `<button class="add-ex" data-block="${b.name}" data-bid="${b.id}">+ Add exercise</button>` : ''}
-        ${b.filler ? `<div class="filler-note">⚡ Rest superset (${b.filler.type}): <b>${b.filler.name}</b> · ${b.filler.reps ? b.filler.reps + ' reps' : b.filler.hold + 's'}</div>` : ''}
         ${b.note ? `<div class="bnote">${b.note}</div>` : ''}
+      </div>`;
+  }
+
+  /* the rest-filler shown as a SECONDARY exercise supersetted with the anchor (not a separate section) */
+  function fillerRow(f) {
+    const cue = EXERCISES[f.exId]?.cues || '';
+    const rx = f.reps ? `${f.reps} reps` : `${f.hold || 20}s`;
+    return `
+      <div class="ss-pair">
+        <span class="ss-link">+ superset</span>
+        <div class="ex-row static ss-row">
+          <div class="ex-inner">
+            <div class="demo" data-cue="1" title="info">ⓘ</div>
+            <div class="exmeta">
+              <div class="exname">${f.name} <span class="ss-badge">secondary</span></div>
+              <div class="exrx">${rx} · in the rest — light, just enough</div>
+              <div class="cue" style="display:none; color:var(--faint); font-size:12px; margin-top:3px;">${cue}</div>
+            </div>
+          </div>
+        </div>
       </div>`;
   }
 

@@ -20,15 +20,17 @@ function fmtPR(p) {
   return `${p.value} ${p.unit}`;
 }
 
-/* turn a set list into "L 12 @25lb · R 11 @25lb" */
-function setStr(sets) {
+const unitFor = m => m === 'hold' ? 'sec' : m === 'cals' ? 'cals' : 'reps';
+
+/* turn a set list into "L 12 @25lb · R 11 @25lb  reps" (unit appended so it's never ambiguous) */
+function setStr(sets, measure) {
   const parts = (sets || []).filter(s => s.value != null && s.value !== '').map(s => {
     let t = String(s.value);
     if (s.side) t = `${s.side} ${t}`;
     if (s.weight != null && s.weight !== '') t += ` @${s.weight}lb`;
     return t;
   });
-  return parts.length ? parts.join(' · ') : '–';
+  return parts.length ? `${parts.join(' · ')} <span class="u">${unitFor(measure)}</span>` : '–';
 }
 
 export function renderHistory(host, { onBack }) {
@@ -64,15 +66,20 @@ export function renderHistory(host, { onBack }) {
     if (!sessions.length) return `<div class="hist-empty">No workouts logged yet.<br>Finish a session and it lands here.</div>`;
     return sessions.map((s, i) => {
       const exCount = (s.blocks || []).reduce((n, b) => n + (b.entries || []).filter(e => (e.sets || []).some(x => x.value != null)).length, 0);
+      const planSec = (s.duration || 0) * 60;
+      const delta = planSec ? s.seconds - planSec : 0;
+      const deltaBadge = planSec
+        ? `<span class="tdelta ${Math.abs(delta) <= 60 ? 'on' : delta > 0 ? 'over' : 'under'}">${Math.abs(delta) <= 60 ? 'on plan' : `${delta > 0 ? '+' : '−'}${fmtDur(Math.abs(delta))} ${delta > 0 ? 'over' : 'under'}`}</span>` : '';
       const isOpen = open.has('s' + i);
       const body = isOpen ? `<div class="hist-body">${(s.blocks || []).map(b => {
         const ents = (b.entries || []).filter(e => (e.sets || []).some(x => x.value != null));
         if (!ents.length) return '';
-        return `<div class="hist-ex"><div class="blkname">${b.name || b.type || ''}</div></div>` +
-          ents.map(e => `<div class="hist-ex"><div class="en">${e.name}</div><div class="es">${setStr(e.sets)}</div></div>`).join('');
+        const bt = b.seconds ? `<span class="blktime">${fmtDur(b.seconds)}</span>` : '';
+        return `<div class="blkhead"><span class="bh-role">${b.type || ''}</span><span class="bh-name">${b.name || ''}</span>${bt}</div>` +
+          ents.map(e => `<div class="hist-ex"><div class="en">${e.name}</div><div class="es">${setStr(e.sets, e.measure)}</div></div>`).join('');
       }).join('')}</div>` : '';
       return `<div class="hist-card"><div class="htop" data-key="s${i}">
-          <div><div class="hname">${s.name}</div><div class="hmeta">${exCount} exercises · ${fmtDur(s.seconds)} · ${s.duration || ''} min plan</div></div>
+          <div><div class="hname">${s.name}</div><div class="hmeta">${exCount} exercises · ⏱ ${fmtDur(s.seconds)} · ${s.duration || ''} min plan ${deltaBadge}</div></div>
           <div class="hdate">${fmtDate(s.date)}</div></div>${body}</div>`;
     }).join('');
   }

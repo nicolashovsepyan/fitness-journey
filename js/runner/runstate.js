@@ -19,6 +19,7 @@ export function start(plan) {
     stepStartedAt: null, stepDur: null,          // active timed step (countdown)
     pausedAccum: 0,                              // total paused ms (excluded from clocks)
     pausedAt: null,
+    blockStart: null, blockTimes: {},            // per-block wall-clock seconds (for history)
     captured: {}, done: false,
   };
   save(st);

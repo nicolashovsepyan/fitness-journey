@@ -454,3 +454,58 @@ html, body { touch-action: manipulation; }      /* kill double-tap-to-zoom (keep
 .video-stub { aspect-ratio:16/9; display:flex; flex-direction:column; gap:8px; align-items:center; justify-content:center;
   background:var(--box-2,#23232c); border:1px dashed var(--line); border-radius:12px; color:var(--muted); }
 .video-stub .pl { font-size:34px; color:var(--accent); opacity:.8; }
+
+/* ============================================================
+   Transition hero + section times (feedback pass 8)
+   ============================================================ */
+/* HERO up-next — the focus: accent glow, media band, big name */
+.hero-next { border-radius:18px; overflow:hidden; border:1.5px solid var(--accent);
+  box-shadow:0 0 0 4px rgba(200,255,77,.10), 0 12px 30px rgba(0,0,0,.35); margin:4px 0 14px; cursor:pointer; }
+.hn-media { position:relative; height:118px; display:flex; align-items:center; justify-content:center;
+  background:radial-gradient(120% 140% at 50% 0%, rgba(200,255,77,.22), rgba(200,255,77,.04) 60%, transparent), var(--box-2,#23232c); }
+.hn-play { width:58px; height:58px; border-radius:50%; background:var(--accent); color:#15150f; font-size:22px;
+  display:flex; align-items:center; justify-content:center; padding-left:4px; box-shadow:0 6px 18px rgba(0,0,0,.4); }
+.hn-tag { position:absolute; top:10px; left:12px; font-size:11px; font-weight:800; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--accent); }
+.hn-body { padding:14px 16px; background:var(--box); }
+.hn-body h2 { margin:0; font-size:23px; line-height:1.1; }
+.hn-list { color:var(--muted); font-size:13px; margin-top:6px; }
+
+/* what's-left — deliberately calmer / different colour from the hero */
+.left-card { background:var(--box); border:1px solid var(--line); border-radius:16px; padding:14px 16px; }
+.lc-top { display:flex; justify-content:space-between; align-items:baseline; }
+.lc-summary { font-weight:700; font-size:15px; color:var(--text); }
+.lc-pct { font-weight:800; font-size:22px; color:var(--accent); font-family:var(--tnum); }
+.lc-bar { height:7px; border-radius:99px; background:var(--box-2,#23232c); overflow:hidden; margin:9px 0 8px; }
+.lc-fill { height:100%; background:linear-gradient(90deg,#6aa9ff,#9ae23a); border-radius:99px; }
+.lc-msg { font-size:13px; color:var(--muted); margin-bottom:10px; }
+.lc-list { display:flex; flex-direction:column; }
+.lc-row { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--line); font-size:14px; color:var(--muted); }
+.lc-row:last-child { border-bottom:none; }
+.lc-row.up { color:var(--text); font-weight:600; }
+.lc-role { font-size:11px; text-transform:uppercase; letter-spacing:.05em; opacity:.7; }
+
+/* History: per-block header with time, set units, plan delta */
+.blkhead { display:flex; align-items:baseline; gap:8px; margin:14px 0 4px; }
+.blkhead .bh-role { font-size:10px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--accent); opacity:.8; }
+.blkhead .bh-name { font-size:13px; font-weight:700; color:var(--text); flex:1; }
+.blkhead .blktime { font-size:12px; font-weight:700; color:var(--muted); font-family:var(--tnum); }
+.hist-ex .es .u { color:var(--muted); font-size:11px; }
+.tdelta { font-size:10px; font-weight:800; padding:2px 7px; border-radius:99px; text-transform:uppercase; letter-spacing:.04em; }
+.tdelta.on { background:rgba(122,210,90,.18); color:#7ed957; }
+.tdelta.over { background:rgba(255,120,120,.16); color:#ff8a8a; }
+.tdelta.under { background:rgba(106,169,255,.16); color:#6aa9ff; }
+
+/* ============================================================
+   Rest-filler as a secondary superset exercise (feedback pass 8)
+   ============================================================ */
+.ss-pair { position:relative; margin:2px 0 2px 10px; padding-left:14px; }
+.ss-pair::before { content:''; position:absolute; left:0; top:-4px; bottom:10px; width:2px;
+  border-radius:2px; background:var(--line); }            /* bracket linking it to the anchor above */
+.ss-link { display:inline-block; font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--muted); margin:2px 0 2px 2px; }
+.ss-row { opacity:.82; }
+.ss-row .exname { font-size:14px; font-weight:600; }
+.ss-row .ss-badge { font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.05em;
+  color:var(--muted); border:1px solid var(--line); border-radius:6px; padding:1px 5px; margin-left:6px; vertical-align:middle; }
+.ex-row.static { cursor:default; }

@@ -59,7 +59,7 @@ function enterBlock(i, opts = {}) {
   const resuming = opts === true || opts.resuming;          // back-compat with enterBlock(i, true)
   const skipReady = opts.skipReady;
   S.bi = i;
-  if (!resuming) { S.ii = 0; S.si = 0; S.ci = 0; S.round = 1; S.sub = 'work'; S.amrapRounds = 0; S.iv = null; S.ivPhase = 'work'; }
+  if (!resuming) { S.ii = 0; S.si = 0; S.ci = 0; S.round = 1; S.sub = 'work'; S.amrapRounds = 0; S.iv = null; S.ivPhase = 'work'; S.blockStart = Date.now(); }
   R.clearStep(S); R.save(S);
   roundBuf = {}; onStepDone = null;
   const b = block();
@@ -98,6 +98,7 @@ function renderActive() {
 function completeBlock() {
   R.clearStep(S); onStepDone = null;
   const b = block();
+  if (S.blockStart) { S.blockTimes[b.id] = Math.max(0, Math.round((Date.now() - S.blockStart) / 1000)); S.blockStart = null; R.save(S); }
   if (b.type === 'Mobility' || b.format === 'jointprep') return sectionNext();
   if (['amrap', 'tabata', 'emom'].includes(b.format)) return renderSummary();
   return renderLog();          // sets + circuit → fully editable grouped log (every round adjustable)
@@ -111,30 +112,41 @@ function sectionNext() {
   const exList = (next.items && next.items.length ? next.items.map(it => it.name) : [next.name]).slice(0, 6);
   const remaining = S.plan.blocks.slice(S.bi + 1);
   const rest = 60;
+  const pct = Math.round(((S.bi + 1) / S.plan.blocks.length) * 100);
+  // "2 main blocks · 1 finisher to go"
+  const work = remaining.filter(b => /work/i.test(b.role)).length;
+  const fin = remaining.filter(b => /finish/i.test(b.role)).length;
+  const other = remaining.length - work - fin;
+  const sp = [];
+  if (work) sp.push(`${work} main block${work > 1 ? 's' : ''}`);
+  if (fin) sp.push(`${fin} finisher`);
+  if (other) sp.push(`${other} more`);
+  const summary = (sp.join(' · ') || `${remaining.length} block${remaining.length > 1 ? 's' : ''}`) + ' to go';
+  const motiv = pct >= 80 ? 'Almost there — finish strong. 🔥' : pct >= 50 ? "Past halfway. Hold the pace." : pct >= 25 ? "Locked in. Keep stacking blocks." : "Settle in — you've got this.";
   host.innerHTML = `
-    <div class="screen run fade-in">
+    <div class="screen run fade-in transscreen">
       <div class="run-head">
         <button class="x back" id="backBtn">‹</button>
         <div class="blk">✓ ${done.name} — done</div>
         <div class="right"><span class="sessclock" id="sessClock">${fmt(R.sessionElapsed(S))}</span><button class="x" id="exitBtn">✕</button></div>
       </div>
-      <div class="wprog"><div class="wprog-fill" style="width:${Math.round(((S.bi + 1) / S.plan.blocks.length) * 100)}%"></div></div>
 
       <div class="trans-rest">
-        <div class="eyebrow">Rest — next up</div>
+        <div class="eyebrow">Rest</div>
         <div class="timer-wrap">${timerSvg('rest')}</div>
         <div class="btn-row tight"><button class="btn secondary" id="sub20">−20s</button><button class="btn secondary" id="add20">+20s</button></div>
       </div>
 
-      <div class="card nextcard">
-        <div class="eyebrow">${next.role} · up next</div>
-        <div class="nx-head"><h3>${next.name}</h3><button class="playbtn" id="playNext" title="Watch demo">▶</button></div>
-        ${exList.length > 1 ? `<div class="muted nx-list">${exList.join(' · ')}</div>` : ''}
+      <div class="hero-next" id="heroNext">
+        <div class="hn-media"><div class="hn-play">▶</div><span class="hn-tag">${next.role} · up next</span></div>
+        <div class="hn-body"><h2>${next.name}</h2>${exList.length > 1 ? `<div class="hn-list">${exList.join(' · ')}</div>` : ''}</div>
       </div>
 
-      <div class="card">
-        <div class="eyebrow">Left this session — ${remaining.length} block${remaining.length > 1 ? 's' : ''}</div>
-        ${remaining.map((bl, i) => `<div class="up-row"><span>${i + 1}. ${bl.name}</span><span class="muted">${bl.role}</span></div>`).join('')}
+      <div class="left-card">
+        <div class="lc-top"><span class="lc-summary">${summary}</span><span class="lc-pct">${pct}%</span></div>
+        <div class="lc-bar"><div class="lc-fill" style="width:${pct}%"></div></div>
+        <div class="lc-msg">${motiv}</div>
+        <div class="lc-list">${remaining.map((bl, i) => `<div class="lc-row ${i === 0 ? 'up' : ''}"><span>${bl.name}</span><span class="lc-role">${bl.role}</span></div>`).join('')}</div>
       </div>
 
       <div class="actionbar"><button class="btn lg" id="goNext">Start ${next.name} ▸</button></div>
@@ -146,7 +158,7 @@ function sectionNext() {
   document.getElementById('goNext').addEventListener('click', begin);
   document.getElementById('add20').addEventListener('click', () => { S.stepDur += 20; R.save(S); });
   document.getElementById('sub20').addEventListener('click', () => { if (R.stepRemaining(S) > 25) { S.stepDur -= 20; R.save(S); } });
-  document.getElementById('playNext').addEventListener('click', () => openDemo(firstItem));
+  document.getElementById('heroNext').addEventListener('click', () => openDemo(firstItem));
 }
 /* exercise demo overlay — wires the ▶ play button now; real clips drop in via demoUrl later */
 function openDemo(item) {
@@ -541,7 +553,7 @@ function finishSession() {
   const elapsed = R.sessionElapsed(S);
   const session = {
     date: new Date().toISOString(), name: S.plan.name, duration: S.plan.duration, seconds: elapsed,
-    blocks: S.plan.blocks.map(b => ({ id: b.id, type: b.role, name: b.name, entries: S.captured[b.id] || [] })),
+    blocks: S.plan.blocks.map(b => ({ id: b.id, type: b.role, name: b.name, seconds: S.blockTimes[b.id] || 0, entries: S.captured[b.id] || [] })),
   };
   const { prs } = store.saveSession(session);
   R.clear();
