@@ -96,25 +96,44 @@ export const store = {
 
     for (const block of session.blocks) {
       for (const entry of block.entries) {
-        // entry: { exId, name, measure, unit, sets:[{value, side, weight}] }
+        // entry: { exId, name, measure, unit, load, sets:[{value, side, weight}] }
+        const sets = (entry.sets || []).filter(x => x.value != null && x.value !== '');
         const last = s.lastValues[entry.exId] || {};
-        for (const set of entry.sets) {
-          if (set.value != null && set.value !== '') {
-            last[entry.measure] = set.value;
-            if (set.weight != null && set.weight !== '') last.weight = set.weight;
-          }
+        for (const set of sets) {
+          last[entry.measure] = set.value;
+          if (set.weight != null && set.weight !== '') last.weight = set.weight;
         }
-        s.lastValues[entry.exId] = last;
+        if (sets.length) s.lastValues[entry.exId] = last;
 
-        // PR check — best numeric value for reps/hold.
-        // Skip warm-up / mobility / joint-prep moves (entry.noPR).
-        if (!entry.noPR && (entry.measure === 'reps' || entry.measure === 'hold')) {
-          const best = Math.max(...entry.sets.map(x => Number(x.value) || 0), 0);
-          const prev = s.prs[entry.exId]?.value || 0;
-          if (best > prev) {
-            s.prs[entry.exId] = { value: best, unit: entry.unit, date: session.date };
-            newPRs.push({ exId: entry.exId, name: entry.name, value: best, unit: entry.unit });
+        // PR check. Skip warm-up / mobility (entry.noPR) and non-numeric measures.
+        if (entry.noPR || !sets.length) continue;
+        if (entry.measure !== 'reps' && entry.measure !== 'hold') continue;
+
+        const weighted = entry.load === 'weighted' || sets.some(x => x.weight != null && x.weight !== '');
+        const prev = s.prs[entry.exId];
+        let rec = null, beaten = false;
+
+        if (weighted) {
+          // record = heaviest working set (the failure set, not warm-ups), reps at that load, per side
+          const wsets = sets.filter(x => x.weight != null && x.weight !== '');
+          if (wsets.length) {
+            const maxW = Math.max(...wsets.map(x => Number(x.weight) || 0));
+            const atW = wsets.filter(x => Number(x.weight) === maxW);
+            const reps = Math.max(...atW.map(x => Number(x.value) || 0));
+            const l = Math.max(0, ...atW.filter(x => x.side === 'L').map(x => Number(x.value) || 0)) || null;
+            const r = Math.max(0, ...atW.filter(x => x.side === 'R').map(x => Number(x.value) || 0)) || null;
+            beaten = !prev || !prev.weight || maxW > prev.weight || (maxW === prev.weight && reps > (prev.value || 0));
+            rec = { weight: maxW, value: reps, l, r, unit: entry.unit, date: session.date };
           }
+        } else {
+          const best = Math.max(0, ...sets.map(x => Number(x.value) || 0));
+          beaten = best > (prev?.value || 0);
+          rec = { value: best, unit: entry.unit, date: session.date };
+        }
+
+        if (rec && beaten) {
+          s.prs[entry.exId] = rec;
+          newPRs.push({ exId: entry.exId, name: entry.name, ...rec });
         }
       }
     }

@@ -11,6 +11,15 @@ const fmtDur = s => { const m = Math.floor((s || 0) / 60), ss = Math.floor((s ||
 const fmtDate = iso => { try { return new Date(iso).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }); } catch (e) { return ''; } };
 const exName = id => EXERCISES[id]?.name || id;
 
+/* a PR record → readable best. Weighted lifts show load (per side); bodyweight shows reps/hold. */
+function fmtPR(p) {
+  if (p.weight != null) {
+    if (p.l != null || p.r != null) return `${p.weight}lb · L${p.l ?? '–'} · R${p.r ?? '–'}`;
+    return `${p.weight}lb × ${p.value}`;
+  }
+  return `${p.value} ${p.unit}`;
+}
+
 /* turn a set list into "L 12 @25lb · R 11 @25lb" */
 function setStr(sets) {
   const parts = (sets || []).filter(s => s.value != null && s.value !== '').map(s => {
@@ -78,7 +87,7 @@ export function renderHistory(host, { onBack }) {
       const body = isOpen ? `<div class="hist-body">${exHistory(id, sessions)}</div>` : '';
       return `<div class="hist-card"><div class="htop" data-key="p${id}">
           <div><div class="pn">${exName(id)}</div><div class="pd">best · ${fmtDate(p.date)}</div></div>
-          <div class="pv">${p.value} ${p.unit}</div></div>${body}</div>`;
+          <div class="pv">${fmtPR(p)}</div></div>${body}</div>`;
     }).join('');
   }
 
@@ -87,14 +96,22 @@ export function renderHistory(host, { onBack }) {
     const rows = [];
     (sessions || []).forEach(s => (s.blocks || []).forEach(b => (b.entries || []).forEach(e => {
       if (e.exId !== id) return;
-      const best = Math.max(...(e.sets || []).map(x => Number(x.value) || 0), 0);
-      const w = (e.sets || []).map(x => x.weight).find(x => x != null);
-      if (best > 0) rows.push({ date: s.date, best, w, unit: e.unit });
+      const sets = (e.sets || []).filter(x => x.value != null && x.value !== '');
+      if (!sets.length) return;
+      const weighted = sets.some(x => x.weight != null && x.weight !== '');
+      if (weighted) {
+        const maxW = Math.max(...sets.filter(x => x.weight != null).map(x => Number(x.weight) || 0));
+        const atW = sets.filter(x => Number(x.weight) === maxW);
+        const reps = Math.max(...atW.map(x => Number(x.value) || 0));
+        rows.push({ date: s.date, txt: `${maxW}lb × ${reps}` });
+      } else {
+        rows.push({ date: s.date, txt: `${Math.max(...sets.map(x => Number(x.value) || 0))} ${e.unit}` });
+      }
     })));
     rows.sort((a, b) => new Date(b.date) - new Date(a.date));
     if (!rows.length) return '<div class="es">No history yet.</div>';
     return rows.slice(0, 10).map(r =>
-      `<div class="pr-row"><span class="pd">${fmtDate(r.date)}</span><span class="pv" style="font-size:14px;">${r.best}${r.w ? ` @${r.w}lb` : ''} ${r.unit}</span></div>`).join('');
+      `<div class="pr-row"><span class="pd">${fmtDate(r.date)}</span><span class="pv" style="font-size:14px;">${r.txt}</span></div>`).join('');
   }
 
   draw();

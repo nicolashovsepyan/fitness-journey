@@ -8,11 +8,13 @@
    ============================================================ */
 import * as R from './runstate.js';
 import { store } from '../store.js';
+import { EXERCISES } from '../data/exercises.js';
 import { say, beep, buzz, fmt, initAudio, keepAwake, releaseAwake } from '../timer.js';
 
 const UNIT = { reps: 'reps', hold: 'sec', cals: 'cals' };
 const WUNIT = 'lb';                       // weight unit (Nicolas trains in pounds)
 let S = null, host = null, cb = {}, ticker = null, onStepDone = null, curVal = 0, roundBuf = {};
+let lastSec = null;                       // last whole-second of the active step (for once-per-second beeps)
 const numAt = id => { const e = document.getElementById(id); return e && e.value !== '' ? Number(e.value) : null; };
 
 /* ---------------- lifecycle ---------------- */
@@ -39,21 +41,30 @@ function stopTicker() { if (ticker) clearInterval(ticker); ticker = null; }
 function tick() {
   const sc = document.getElementById('sessClock'); if (sc) sc.textContent = fmt(R.sessionElapsed(S));
   const rem = R.stepRemaining(S);
-  if (rem != null) {
-    updateTimer(rem, S.stepDur);
-    if (rem <= 0 && onStepDone) { const f = onStepDone; onStepDone = null; R.clearStep(S); f(); }
+  if (rem == null) { lastSec = null; return; }
+  updateTimer(rem, S.stepDur);
+  if (rem !== lastSec) {                       // a whole second ticked over
+    lastSec = rem;
+    if (rem <= 3 && rem > 0) { beep('count'); buzz(20); }   // 3 · 2 · 1 audible countdown
+  }
+  if (rem <= 0 && onStepDone) {
+    const f = onStepDone; onStepDone = null; lastSec = null;
+    R.clearStep(S); beep('end'); buzz(60);     // distinct end beep + haptic
+    f();
   }
 }
 
 /* ---------------- block routing ---------------- */
-function enterBlock(i, resuming) {
+function enterBlock(i, opts = {}) {
+  const resuming = opts === true || opts.resuming;          // back-compat with enterBlock(i, true)
+  const skipReady = opts.skipReady;
   S.bi = i;
   if (!resuming) { S.ii = 0; S.si = 0; S.ci = 0; S.round = 1; S.sub = 'work'; S.amrapRounds = 0; S.iv = null; S.ivPhase = 'work'; }
   R.clearStep(S); R.save(S);
   roundBuf = {}; onStepDone = null;
   const b = block();
   if (!S.captured[b.id]) buildEntries(b);
-  if (resuming) { beep('go'); say(b.name); return renderActive(); }
+  if (resuming || skipReady) { beep('go'); say(b.name); return renderActive(); }
   renderGetReady();
 }
 /* 10-second "get set up" countdown before each block (skippable) */
@@ -88,19 +99,72 @@ function completeBlock() {
   R.clearStep(S); onStepDone = null;
   const b = block();
   if (b.type === 'Mobility' || b.format === 'jointprep') return sectionNext();
-  if (['circuit', 'amrap', 'tabata', 'emom'].includes(b.format)) return renderSummary();
-  return renderLog();
+  if (['amrap', 'tabata', 'emom'].includes(b.format)) return renderSummary();
+  return renderLog();          // sets + circuit → fully editable grouped log (every round adjustable)
 }
 function sectionNext() {
+  R.clearStep(S); onStepDone = null;
   if (isLastBlock()) return finishSession();
+  const done = block();
   const next = S.plan.blocks[S.bi + 1];
-  shellPlain(`
-    <div class="big-emoji">✓</div>
-    <h2 style="margin:4px 0;">${block().name} done</h2>
-    <p class="muted">Up next</p>
-    <div class="card" style="margin-top:10px;"><div class="eyebrow">${next.role}</div><h3 style="margin:6px 0 0;">${next.name}</h3></div>
-    <div class="actionbar"><button class="btn lg" id="goNext">Start ▸</button></div>`);
-  document.getElementById('goNext').addEventListener('click', () => enterBlock(S.bi + 1));
+  const firstItem = (next.items && next.items[0]) || { name: next.name };
+  const exList = (next.items && next.items.length ? next.items.map(it => it.name) : [next.name]).slice(0, 6);
+  const remaining = S.plan.blocks.slice(S.bi + 1);
+  const rest = 60;
+  host.innerHTML = `
+    <div class="screen run fade-in">
+      <div class="run-head">
+        <button class="x back" id="backBtn">‹</button>
+        <div class="blk">✓ ${done.name} — done</div>
+        <div class="right"><span class="sessclock" id="sessClock">${fmt(R.sessionElapsed(S))}</span><button class="x" id="exitBtn">✕</button></div>
+      </div>
+      <div class="wprog"><div class="wprog-fill" style="width:${Math.round(((S.bi + 1) / S.plan.blocks.length) * 100)}%"></div></div>
+
+      <div class="trans-rest">
+        <div class="eyebrow">Rest — next up</div>
+        <div class="timer-wrap">${timerSvg('rest')}</div>
+        <div class="btn-row tight"><button class="btn secondary" id="sub20">−20s</button><button class="btn secondary" id="add20">+20s</button></div>
+      </div>
+
+      <div class="card nextcard">
+        <div class="eyebrow">${next.role} · up next</div>
+        <div class="nx-head"><h3>${next.name}</h3><button class="playbtn" id="playNext" title="Watch demo">▶</button></div>
+        ${exList.length > 1 ? `<div class="muted nx-list">${exList.join(' · ')}</div>` : ''}
+      </div>
+
+      <div class="card">
+        <div class="eyebrow">Left this session — ${remaining.length} block${remaining.length > 1 ? 's' : ''}</div>
+        ${remaining.map((bl, i) => `<div class="up-row"><span>${i + 1}. ${bl.name}</span><span class="muted">${bl.role}</span></div>`).join('')}
+      </div>
+
+      <div class="actionbar"><button class="btn lg" id="goNext">Start ${next.name} ▸</button></div>
+    </div>`;
+  document.getElementById('exitBtn').addEventListener('click', confirmExit);
+  document.getElementById('backBtn').addEventListener('click', backBlock);
+  const begin = () => { R.clearStep(S); onStepDone = null; enterBlock(S.bi + 1, { skipReady: true }); };
+  R.beginStep(S, rest); say(`Rest. Next, ${next.name}.`); onStepDone = begin;
+  document.getElementById('goNext').addEventListener('click', begin);
+  document.getElementById('add20').addEventListener('click', () => { S.stepDur += 20; R.save(S); });
+  document.getElementById('sub20').addEventListener('click', () => { if (R.stepRemaining(S) > 25) { S.stepDur -= 20; R.save(S); } });
+  document.getElementById('playNext').addEventListener('click', () => openDemo(firstItem));
+}
+/* exercise demo overlay — wires the ▶ play button now; real clips drop in via demoUrl later */
+function openDemo(item) {
+  const ex = EXERCISES[item.exId] || {};
+  const url = item.demoUrl || ex.demoUrl;
+  const ov = document.createElement('div'); ov.className = 'overlay';
+  ov.innerHTML = `
+    <div class="overlay-card">
+      <div class="eyebrow">Demo</div>
+      <h2 style="margin:6px 0 12px;">${item.name}</h2>
+      ${url ? `<div class="video-wrap"><iframe src="${url}" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe></div>`
+            : `<div class="video-stub"><div class="pl">▶</div><div>Demo video coming soon</div></div>`}
+      <p class="muted" style="margin:12px 0 0;">${ex.cues || ''}</p>
+      <button class="btn" id="demoClose" style="margin-top:14px;">Close</button>
+    </div>`;
+  host.appendChild(ov);
+  ov.querySelector('#demoClose').addEventListener('click', () => ov.remove());
+  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
 }
 
 /* ---------------- shells ---------------- */
@@ -248,10 +312,24 @@ function afterSet() {
   completeBlock();
 }
 function renderRest(prevItem) {
-  const rest = Number(prevItem.rest) || (block().format === 'yates' ? 120 : 60);
+  const b = block();
+  const rest = Number(prevItem.rest) || (b.format === 'yates' ? 120 : 60);
   if (rest <= 0) { S.sub = 'work'; R.save(S); return renderSets(); }
+  const up = b.items[S.ii] || prevItem;
+  const isYates = b.format === 'yates';
+  const ws = isYates ? (up.warmups || 0) : 0;
+  const totalSets = isYates ? ws + 1 : (up.sets || 1);
+  const failing = isYates && S.si === totalSets - 1;
+  const setLbl = isYates ? (failing ? 'all-out set' : `warm-up ${S.si + 1} of ${ws}`) : `set ${S.si + 1} of ${totalSets}`;
+  const prevEntry = (S.captured[b.id] || []).find(e => e.name === prevItem.name);
+  const lastDone = prevEntry?.sets.at(-1);
+  const justDid = lastDone ? `${lastDone.side ? lastDone.side + ' ' : ''}${lastDone.value}${lastDone.weight ? ` @${lastDone.weight}lb` : ''} ${UNIT[prevItem.measure]}` : '';
   shell(`<div class="now-ex"><div class="label">Rest</div><div class="name">Recover</div></div>
     <div class="timer-wrap">${timerSvg('rest')}</div>
+    <div class="restctx">
+      ${justDid ? `<div class="rc done"><span class="k">✓ just did</span><span class="v">${prevItem.name} · ${justDid}</span></div>` : ''}
+      <div class="rc next"><span class="k">▸ up next</span><span class="v">${up.name} · ${setLbl}</span></div>
+    </div>
     <div class="actionbar"><div class="btn-row">
       <button class="btn secondary" id="sub20">−20s</button><button class="btn secondary" id="add20">+20s</button>
       <button class="btn" id="skip">Skip ▸</button></div></div>`);
@@ -297,9 +375,12 @@ function renderCircuit() {
     curVal = Number(roundBuf[S.ci] ?? item.reps ?? item.target) || 0;
     shell(`<div class="rounds">${dots}</div><div class="now-ex"><div class="label">Round ${S.round} / ${b.rounds}</div><div class="name">${item.name}</div></div>
       <div class="target">${bigEditable(curVal, unit)}</div><div class="circuit-list">${list}</div>
-      <div class="actionbar"><button class="btn lg" id="next">${S.ci >= b.items.length - 1 ? 'Round done ✓' : 'Next ▸'}</button></div>`);
+      <div class="actionbar"><div class="btn-row">
+        <button class="btn ghost" id="skipEx">Skip</button>
+        <button class="btn lg" id="next">${S.ci >= b.items.length - 1 ? 'Round done ✓' : 'Next ▸'}</button></div></div>`);
     wireBig();
     document.getElementById('next').addEventListener('click', () => { buzz(40); roundBuf[S.ci] = curVal; afterCircuitItem(); });
+    document.getElementById('skipEx').addEventListener('click', () => { roundBuf[S.ci] = 0; afterCircuitItem(); });
   }
 }
 function renderBuffer() {
@@ -307,14 +388,15 @@ function renderBuffer() {
   shell(`<div class="now-ex"><div class="label">Get ready</div><div class="name">${next.name}</div></div>
     <div class="timer-wrap">${timerSvg('buffer')}</div>
     <div class="actionbar"><button class="btn" id="go">Go now ▸</button></div>`);
-  const t = Number(b.transition) || 8;
-  R.beginStep(S, t);
+  const t = Number(b.transition ?? 8);
+  R.beginStep(S, t); say(`Next. ${next.name}.`);
   onStepDone = () => { S.sub = 'work'; R.save(S); renderCircuit(); };
   document.getElementById('go').addEventListener('click', () => { R.clearStep(S); onStepDone = null; S.sub = 'work'; R.save(S); renderCircuit(); });
 }
 function afterCircuitItem() {
   const b = block();
-  if (S.ci < b.items.length - 1) { S.ci += 1; S.sub = (b.transition ? 'buffer' : 'work'); R.save(S); return b.transition ? renderBuffer() : renderCircuit(); }
+  const t = b.transition ?? 8;            // default 8s between circuit exercises (incl. finisher)
+  if (S.ci < b.items.length - 1) { S.ci += 1; S.sub = (t > 0 ? 'buffer' : 'work'); R.save(S); return t > 0 ? renderBuffer() : renderCircuit(); }
   endRound();
 }
 function endRound() {
@@ -324,7 +406,7 @@ function endRound() {
   if (S.round < (b.rounds || 1)) {
     if ((b.roundRest ?? 30) > 0) { S.sub = 'roundrest'; R.save(S); renderRoundRest(); }
     else { S.round += 1; S.ci = 0; roundBuf = {}; S.sub = 'work'; R.save(S); renderCircuit(); }
-  } else renderSummary();
+  } else completeBlock();          // last round → editable log (every round adjustable)
 }
 function renderRoundRest() {
   const b = block(); const rest = Number(b.roundRest) || 30;
@@ -403,10 +485,11 @@ function renderBenchmark() {
 function renderLog() {
   const b = block(); const entries = S.captured[b.id];
   // grouped: exercise name once, its sets underneath (no repeated names)
+  const word = b.format === 'circuit' ? 'Round' : 'Set';
   const groups = entries.map((e, ei) => {
     const sets = e.sets.length ? e.sets : [{ value: null }];
     const rows = sets.map((st, si) => {
-      const lbl = st.side ? st.side : (sets.length > 1 ? `Set ${si + 1}` : 'Set');
+      const lbl = st.side ? st.side : (sets.length > 1 ? `${word} ${si + 1}` : word);
       return `<div class="logset"><span class="sn">${lbl}</span>${cellInputs({ measure: e.measure, load: e.load }, `b${ei}_${si}`, st.value, st.weight, e.exId)}</div>`;
     }).join('');
     return `<div class="loggroup"><div class="gname">${e.name}</div>${rows}</div>`;
@@ -462,8 +545,11 @@ function finishSession() {
   };
   const { prs } = store.saveSession(session);
   R.clear();
-  if (prs.length) say(`New record. ${prs[0].value} ${prs[0].unit}.`); else say('Workout complete. Strong work.');
-  const prHtml = prs.length ? `<div class="card"><div class="eyebrow">New PRs</div>${prs.map(p => `<div class="row" style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);"><span>${p.name}</span><span class="pr-flash">${p.value} ${p.unit}</span></div>`).join('')}</div>` : '';
+  const prText = p => p.weight != null
+    ? ((p.l != null || p.r != null) ? `${p.weight}lb · L${p.l ?? '–'} · R${p.r ?? '–'}` : `${p.weight}lb × ${p.value}`)
+    : `${p.value} ${p.unit}`;
+  if (prs.length) say(`New record. ${prText(prs[0])}.`); else say('Workout complete. Strong work.');
+  const prHtml = prs.length ? `<div class="card"><div class="eyebrow">New PRs</div>${prs.map(p => `<div class="row" style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);"><span>${p.name}</span><span class="pr-flash">${prText(p)}</span></div>`).join('')}</div>` : '';
   host.innerHTML = `<div class="screen fade-in center">
     <div class="big-emoji">${prs.length ? '🏆' : '✅'}</div>
     <h1 style="font-size:28px;">${prs.length ? 'New records!' : 'Done.'}</h1>
