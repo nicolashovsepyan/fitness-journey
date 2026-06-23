@@ -12,12 +12,17 @@ let voiceOn = true;
 export function setVoice(on) { voiceOn = on; }
 export function isVoiceOn() { return voiceOn; }
 
-/* pick the most natural-sounding English voice the device offers */
+/* coach voice selection — auto-pick the most natural English voice,
+   but let the user override it in Settings (saved). */
 let preferredVoice = null;
+let savedVoiceName = (() => { try { return localStorage.getItem('fj.voiceName') || ''; } catch (e) { return ''; } })();
+
+function enVoices() { try { return speechSynthesis.getVoices().filter(v => /^en/i.test(v.lang)); } catch (e) { return []; } }
 function pickVoice() {
   try {
     const vs = speechSynthesis.getVoices(); if (!vs.length) return null;
-    const want = ['Samantha', 'Ava', 'Allison', 'Serena', 'Nicky', 'Aaron', 'Daniel',
+    if (savedVoiceName) { const s = vs.find(v => v.name === savedVoiceName); if (s) return s; }
+    const want = ['Samantha', 'Ava', 'Allison', 'Serena', 'Karen', 'Moira', 'Daniel',
       'Google US English', 'Microsoft Aria', 'Microsoft Jenny', 'Microsoft Guy'];
     for (const name of want) { const v = vs.find(x => x.name.includes(name) && /en/i.test(x.lang)); if (v) return v; }
     return vs.find(x => /en[-_]US/i.test(x.lang)) || vs.find(x => /^en/i.test(x.lang)) || vs[0];
@@ -25,13 +30,18 @@ function pickVoice() {
 }
 try { speechSynthesis.onvoiceschanged = () => { preferredVoice = pickVoice(); }; } catch (e) {}
 
+/* Settings API */
+export function listVoices() { return enVoices().map(v => ({ name: v.name, lang: v.lang })); }
+export function getVoiceName() { return savedVoiceName || (preferredVoice && preferredVoice.name) || ''; }
+export function setVoiceName(name) { savedVoiceName = name || ''; try { localStorage.setItem('fj.voiceName', savedVoiceName); } catch (e) {} preferredVoice = pickVoice(); }
+
 export function say(text) {
   if (!voiceOn) return;
   try {
     if (!preferredVoice) preferredVoice = pickVoice();
     const u = new SpeechSynthesisUtterance(text);
-    if (preferredVoice) u.voice = preferredVoice;
-    u.rate = 0.94; u.pitch = 1.02; u.volume = 1.0;   // slightly slower + warmer = less robotic
+    if (preferredVoice) { u.voice = preferredVoice; u.lang = preferredVoice.lang; }
+    u.rate = 0.92; u.pitch = 1.0; u.volume = 1.0;   // slightly slower = less robotic
     speechSynthesis.cancel();   // never let lines pile up
     speechSynthesis.speak(u);
   } catch (e) { /* silent fallback */ }

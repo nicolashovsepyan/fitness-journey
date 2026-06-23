@@ -528,3 +528,24 @@ html, body { touch-action: manipulation; }      /* kill double-tap-to-zoom (keep
   box-shadow:0 0 0 4px rgba(200,255,77,.18), 0 0 22px rgba(200,255,77,.5); animation:rewardPop .6s ease; }
 @keyframes rewardPop { 0%{transform:translateY(-50%) scale(.5)} 60%{transform:translateY(-50%) scale(1.25)} 100%{transform:translateY(-50%) scale(1)} }
 .prog-card .prog-msg { color:var(--muted); font-size:13px; margin:0; }
+
+/* ============================================================
+   Flexible count-up rest · in-workout progress % + flag · voice picker (pass 10)
+   ============================================================ */
+/* count-up rest (reps coming up — no forced timer) */
+.countup-wrap { text-align:center; margin:26px 0 18px; }
+.countup { font-size:72px; font-weight:800; font-family:var(--tnum); font-variant-numeric:tabular-nums; line-height:1; letter-spacing:-0.03em; color:var(--good); }
+.countup-sub { color:var(--muted); font-size:13px; margin-top:8px; }
+
+/* in-workout progress: % + finish flag */
+.wprog-row { display:flex; align-items:center; gap:10px; margin:4px 0 10px; }
+.wprog { position:relative; flex:1; height:8px; border-radius:99px; background:var(--box-2,#23232c); }
+.wprog-fill { height:100%; border-radius:99px; background:linear-gradient(90deg,#6aa9ff,var(--accent)); transition:width .4s ease; min-width:4px; }
+.wprog-flag { position:absolute; right:-7px; top:50%; transform:translateY(-50%); font-size:13px; filter:grayscale(1); opacity:.5; transition:all .3s; }
+.wprog-flag.won { filter:none; opacity:1; text-shadow:0 0 10px rgba(200,255,77,.7); }
+.wprog-pct { font-size:13px; font-weight:800; font-family:var(--tnum); color:var(--accent); min-width:34px; text-align:right; }
+
+/* settings voice picker */
+.voicepick { display:flex; gap:8px; align-items:center; }
+.voicesel { background:var(--box-2); color:var(--text); border:1px solid var(--line); border-radius:10px; padding:7px 10px; font-size:13px; font-weight:600; max-width:150px; }
+.vtest { background:var(--box-2); color:var(--accent); border:1px solid var(--line); border-radius:10px; padding:7px 12px; font-size:12px; font-weight:700; cursor:pointer; }

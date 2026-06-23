@@ -5,7 +5,7 @@
 import { PROGRAM } from '../data/program.js';
 import { SESSIONS } from '../data/sessions.js';
 import { store } from '../store.js';
-import { setVoice, isVoiceOn } from '../timer.js';
+import { setVoice, isVoiceOn, listVoices, getVoiceName, setVoiceName, say } from '../timer.js';
 
 const DAY_IMG = {
   quads_knees: 'images/day-leg.png',
@@ -83,6 +83,8 @@ export function renderWeek(host, { onOpenDay, onOpenHistory }) {
         <h2 style="margin:6px 0 14px;">Settings</h2>
         <div class="goal-row"><span class="goal-name">Coach voice</span>
           <div class="focus"><button id="voiceToggle" class="${isVoiceOn() ? 'on' : ''}">${isVoiceOn() ? 'On' : 'Off'}</button></div></div>
+        <div class="goal-row"><span class="goal-name">Voice</span>
+          <div class="voicepick"><select id="voiceSel" class="voicesel"></select><button id="voiceTest" class="vtest">Test</button></div></div>
         <div class="goal-row"><span class="goal-name">Export my data</span>
           <div class="focus"><button id="exportBtn">Export</button></div></div>
         <button class="btn ghost" id="resetBtn" style="margin-top:14px;">Reset all data</button>
@@ -93,6 +95,18 @@ export function renderWeek(host, { onOpenDay, onOpenHistory }) {
     ov.querySelector('#voiceToggle').addEventListener('click', (e) => {
       const on = !isVoiceOn(); setVoice(on); e.target.classList.toggle('on', on); e.target.textContent = on ? 'On' : 'Off';
     });
+    const sel = ov.querySelector('#voiceSel');
+    const fillVoices = () => {
+      const vs = listVoices(); const cur = getVoiceName();
+      sel.innerHTML = vs.length
+        ? vs.map(v => `<option value="${v.name}" ${v.name === cur ? 'selected' : ''}>${v.name}</option>`).join('')
+        : '<option>Default</option>';
+    };
+    fillVoices();
+    try { speechSynthesis.addEventListener('voiceschanged', fillVoices); } catch (e) {}
+    const testLine = "This is your coach. Let's get to work.";
+    sel.addEventListener('change', () => { setVoiceName(sel.value); say(testLine); });
+    ov.querySelector('#voiceTest').addEventListener('click', () => say(testLine));
     ov.querySelector('#exportBtn').addEventListener('click', () => {
       const blob = new Blob([store.exportJSON()], { type: 'application/json' });
       const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'fitness-journey-backup.json'; a.click();

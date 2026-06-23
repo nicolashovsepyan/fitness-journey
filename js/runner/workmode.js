@@ -16,6 +16,7 @@ const WUNIT = 'lb';                       // weight unit (Nicolas trains in poun
 let S = null, host = null, cb = {}, ticker = null, onStepDone = null, curVal = 0, roundBuf = {};
 let lastSec = null;                       // last whole-second of the active step (for once-per-second beeps)
 let curStepKind = 'rest', saidHalf = false, halfStepKey = null;   // halfway-cue tracking
+let countUpStart = null;                  // flexible rest before a reps set: count UP, no forced countdown
 const numAt = id => { const e = document.getElementById(id); return e && e.value !== '' ? Number(e.value) : null; };
 /* start a timed step, tagged 'work' or 'rest' (work efforts get a halfway cue) */
 function beginStep(sec, kind = 'rest') { curStepKind = kind; saidHalf = false; halfStepKey = null; R.beginStep(S, sec); }
@@ -43,6 +44,7 @@ function startTicker() { stopTicker(); ticker = setInterval(tick, 250); }
 function stopTicker() { if (ticker) clearInterval(ticker); ticker = null; }
 function tick() {
   const sc = document.getElementById('sessClock'); if (sc) sc.textContent = fmt(R.sessionElapsed(S));
+  if (countUpStart != null) { const el = document.getElementById('countUp'); if (el) el.textContent = fmt(Math.floor((Date.now() - countUpStart) / 1000)); }
   const rem = R.stepRemaining(S);
   if (rem == null) { lastSec = null; return; }
   updateTimer(rem, S.stepDur);
@@ -95,6 +97,7 @@ function buildEntries(b) {
   R.save(S);
 }
 function renderActive() {
+  countUpStart = null;
   const f = block().format;
   if (f === 'circuit') return renderCircuit();
   if (f === 'amrap') return renderAmrap();
@@ -120,6 +123,13 @@ function sectionNext() {
   const exList = (next.items && next.items.length ? next.items.map(it => it.name) : [next.name]).slice(0, 6);
   const remaining = S.plan.blocks.slice(S.bi + 1);
   const rest = 60;
+  // force a countdown only when the next exercise is time-based (a hold). For reps → flexible count-up.
+  const nextTimed = (next.items && next.items[0] && next.items[0].measure === 'hold') || ['skill', 'amrap', 'tabata', 'emom'].includes(next.format);
+  const restBlock = nextTimed
+    ? `<div class="trans-rest"><div class="eyebrow">Rest</div><div class="timer-wrap">${timerSvg('rest')}</div>
+         <div class="btn-row tight"><button class="btn secondary" id="sub20">−20s</button><button class="btn secondary" id="add20">+20s</button></div></div>`
+    : `<div class="trans-rest"><div class="eyebrow">Rest as needed</div>
+         <div class="countup-wrap"><div class="countup" id="countUp">0:00</div><div class="countup-sub">start when ready</div></div></div>`;
   const pct = Math.round(((S.bi + 1) / S.plan.blocks.length) * 100);
   // "2 main blocks · 1 finisher to go"
   const work = remaining.filter(b => /work/i.test(b.role)).length;
@@ -139,11 +149,7 @@ function sectionNext() {
         <div class="right"><span class="sessclock" id="sessClock">${fmt(R.sessionElapsed(S))}</span><button class="x" id="exitBtn">✕</button></div>
       </div>
 
-      <div class="trans-rest">
-        <div class="eyebrow">Rest</div>
-        <div class="timer-wrap">${timerSvg('rest')}</div>
-        <div class="btn-row tight"><button class="btn secondary" id="sub20">−20s</button><button class="btn secondary" id="add20">+20s</button></div>
-      </div>
+      ${restBlock}
 
       <div class="hero-next" id="heroNext">
         <div class="hn-media"><div class="hn-play">▶</div><span class="hn-tag">${next.role} · up next</span></div>
@@ -161,11 +167,16 @@ function sectionNext() {
     </div>`;
   document.getElementById('exitBtn').addEventListener('click', confirmExit);
   document.getElementById('backBtn').addEventListener('click', backBlock);
-  const begin = () => { R.clearStep(S); onStepDone = null; enterBlock(S.bi + 1, { skipReady: true }); };
-  beginStep(rest, 'rest'); say(`Rest. Next, ${next.name}.`); onStepDone = begin;
+  const begin = () => { countUpStart = null; R.clearStep(S); onStepDone = null; enterBlock(S.bi + 1, { skipReady: true }); };
+  say(`Rest. Next, ${next.name}.`);
+  if (nextTimed) {
+    beginStep(rest, 'rest'); onStepDone = begin;
+    document.getElementById('add20').addEventListener('click', () => { S.stepDur += 20; R.save(S); });
+    document.getElementById('sub20').addEventListener('click', () => { if (R.stepRemaining(S) > 25) { S.stepDur -= 20; R.save(S); } });
+  } else {
+    countUpStart = Date.now();   // flexible: count up, start when ready
+  }
   document.getElementById('goNext').addEventListener('click', begin);
-  document.getElementById('add20').addEventListener('click', () => { S.stepDur += 20; R.save(S); });
-  document.getElementById('sub20').addEventListener('click', () => { if (R.stepRemaining(S) > 25) { S.stepDur -= 20; R.save(S); } });
   document.getElementById('heroNext').addEventListener('click', () => openDemo(firstItem));
 }
 /* exercise demo overlay — wires the ▶ play button now; real clips drop in via demoUrl later */
@@ -190,6 +201,7 @@ function openDemo(item) {
 /* ---------------- shells ---------------- */
 function shell(inner, { progress = true } = {}) {
   const b = block();
+  const pct = overallPct();
   host.innerHTML = `
     <div class="screen run fade-in">
       <div class="run-head">
@@ -197,7 +209,10 @@ function shell(inner, { progress = true } = {}) {
         <div class="blk">${b.role} · ${b.name}</div>
         <div class="right"><span class="sessclock" id="sessClock">${fmt(R.sessionElapsed(S))}</span><button class="x" id="exitBtn">✕</button></div>
       </div>
-      <div class="wprog"><div class="wprog-fill" style="width:${overallPct()}%"></div></div>
+      <div class="wprog-row">
+        <div class="wprog"><div class="wprog-fill" style="width:${pct}%"></div><span class="wprog-flag${pct >= 100 ? ' won' : ''}">🏁</span></div>
+        <span class="wprog-pct">${pct}%</span>
+      </div>
       <div class="blockstrip">${blockStrip()}</div>
       ${inner}
     </div>`;
@@ -270,6 +285,7 @@ function wireBig() {
 
 /* ---------------- SETS (straight / tempo / isometric / yates / rest_pause) ---------------- */
 function renderSets() {
+  countUpStart = null;
   const b = block();
   const item = b.items[S.ii];
   if (!item) return completeBlock();
@@ -333,8 +349,6 @@ function afterSet() {
 }
 function renderRest(prevItem) {
   const b = block();
-  const rest = Number(prevItem.rest) || (b.format === 'yates' ? 120 : 60);
-  if (rest <= 0) { S.sub = 'work'; R.save(S); return renderSets(); }
   const up = b.items[S.ii] || prevItem;
   const isYates = b.format === 'yates';
   const ws = isYates ? (up.warmups || 0) : 0;
@@ -344,16 +358,32 @@ function renderRest(prevItem) {
   const prevEntry = (S.captured[b.id] || []).find(e => e.name === prevItem.name);
   const lastDone = prevEntry?.sets.at(-1);
   const justDid = lastDone ? `${lastDone.side ? lastDone.side + ' ' : ''}${lastDone.value}${lastDone.weight ? ` @${lastDone.weight}lb` : ''} ${UNIT[prevItem.measure]}` : '';
-  shell(`<div class="now-ex"><div class="label">Rest</div><div class="name">Recover</div></div>
-    <div class="timer-wrap">${timerSvg('rest')}</div>
-    <div class="restctx">
+  const ctx = `<div class="restctx">
       ${justDid ? `<div class="rc done"><span class="k">✓ just did</span><span class="v">${prevItem.name} · ${justDid}</span></div>` : ''}
       <div class="rc next"><span class="k">▸ up next</span><span class="v">${up.name} · ${setLbl}</span></div>
-    </div>
+    </div>`;
+  const suggested = Number(prevItem.rest) || (isYates ? 120 : 60);
+
+  if (up.measure !== 'hold') {
+    // reps coming up → flexible: count UP, you start when ready (no forced countdown)
+    countUpStart = Date.now();
+    shell(`<div class="now-ex"><div class="label">Rest</div><div class="name">Rest as needed</div></div>
+      <div class="countup-wrap"><div class="countup" id="countUp">0:00</div><div class="countup-sub">suggested ~${suggested}s · start when ready</div></div>
+      ${ctx}
+      <div class="actionbar"><button class="btn lg" id="goSet">Start set ▸</button></div>`);
+    document.getElementById('goSet').addEventListener('click', () => { countUpStart = null; S.sub = 'work'; R.save(S); renderSets(); });
+    return;
+  }
+  // a timed hold is coming up → keep the countdown so you're ready to follow it
+  countUpStart = null;
+  if (suggested <= 0) { S.sub = 'work'; R.save(S); return renderSets(); }
+  shell(`<div class="now-ex"><div class="label">Rest</div><div class="name">Recover</div></div>
+    <div class="timer-wrap">${timerSvg('rest')}</div>
+    ${ctx}
     <div class="actionbar"><div class="btn-row">
       <button class="btn secondary" id="sub20">−20s</button><button class="btn secondary" id="add20">+20s</button>
       <button class="btn" id="skip">Skip ▸</button></div></div>`);
-  beginStep(rest, 'rest'); say(`Rest. ${rest} seconds.`);
+  beginStep(suggested, 'rest'); say(`Rest. ${suggested} seconds.`);
   onStepDone = () => { S.sub = 'work'; R.save(S); renderSets(); };
   document.getElementById('add20').addEventListener('click', () => { S.stepDur += 20; R.save(S); });
   document.getElementById('sub20').addEventListener('click', () => { if (R.stepRemaining(S) > 25) { S.stepDur -= 20; R.save(S); } });
