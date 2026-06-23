@@ -592,3 +592,18 @@ html, body { touch-action: manipulation; }      /* kill double-tap-to-zoom (keep
 /* transition what's-left prescription line */
 .lc-bn { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
 .lc-role { flex:0 0 auto; text-align:right; max-width:55%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* ============================================================
+   Tap-circle pause + recolored best-set target (pass 14)
+   ============================================================ */
+.timer-wrap { cursor:pointer; }
+.timer .read .cap { font-size:11px; color:var(--muted); margin-top:6px; min-height:14px; letter-spacing:.02em; }
+.timer.paused .fill { opacity:.3; }
+.timer.paused .read .t { opacity:.45; }
+
+/* best-set target → amber, so it reads as "the bar to beat", distinct from the lime UI */
+.ft-beat { border-color:var(--warn); }
+.ft-lbl { color:var(--warn); }
+.ft-beat.first { border-color:var(--line); }
+.ft-beat.first .ft-lbl { color:var(--muted); }
+.ft-val .w { color:var(--warn); }

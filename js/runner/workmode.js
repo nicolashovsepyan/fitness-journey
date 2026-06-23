@@ -24,6 +24,14 @@ function beginStep(sec, kind = 'rest') { curStepKind = kind; saidHalf = false; h
 /* re-wake audio whenever the app returns to foreground — music/Bluetooth can suspend it */
 if (typeof document !== 'undefined') {
   document.addEventListener('visibilitychange', () => { if (!document.hidden && S && !S.done) initAudio(); });
+  // tap the timer circle to pause/resume that countdown (not the session clock)
+  document.addEventListener('click', e => {
+    if (!S || S.done) return;
+    if (!e.target.closest('.timer-wrap')) return;
+    if (S.stepDur == null || S.stepStartedAt == null) return;
+    if (R.isStepPaused(S)) R.resumeStep(S); else { R.pauseStep(S); buzz(20); }
+    reflectPause();
+  });
 }
 
 /* ---------------- lifecycle ---------------- */
@@ -219,7 +227,7 @@ function shell(inner, { progress = true } = {}) {
       <div class="run-head">
         <button class="x back" id="backBtn" ${S.bi <= 0 ? 'disabled' : ''}>‹</button>
         <div class="blk">${b.role} · ${b.name}</div>
-        <div class="right"><button class="x pause" id="pauseBtn">${S.pausedAt ? '▶' : '⏸'}</button><span class="sessclock" id="sessClock">${fmt(R.sessionElapsed(S))}</span><button class="x" id="exitBtn">✕</button></div>
+        <div class="right"><span class="sessclock" id="sessClock">${fmt(R.sessionElapsed(S))}</span><button class="x" id="exitBtn">✕</button></div>
       </div>
       <div class="wprog-row">
         <div class="wprog"><div class="wprog-fill" style="width:${pct}%"></div><span class="wprog-flag${pct >= 100 ? ' won' : ''}">🏁</span></div>
@@ -230,17 +238,15 @@ function shell(inner, { progress = true } = {}) {
     </div>`;
   document.getElementById('exitBtn').addEventListener('click', confirmExit);
   document.getElementById('backBtn')?.addEventListener('click', backBlock);
-  document.getElementById('pauseBtn')?.addEventListener('click', togglePause);
-  if (S.pausedAt) host.querySelector('.screen.run')?.classList.add('paused');
   const now = host.querySelector('.bchip.now'); if (now) now.scrollIntoView({ inline: 'center', block: 'nearest' });
+  reflectPause();
 }
-/* pause/resume — freezes the session clock + active step (timing layer already excludes paused time) */
-function togglePause() {
-  if (S.pausedAt) R.resume(S); else R.pause(S);
-  const paused = !!S.pausedAt;
-  const pb = document.getElementById('pauseBtn'); if (pb) pb.textContent = paused ? '▶' : '⏸';
-  host.querySelector('.screen.run')?.classList.toggle('paused', paused);
-  say(paused ? 'Paused.' : 'Back to it.');
+/* tap anywhere on the timer circle to pause/resume that countdown (session clock keeps running) */
+function reflectPause() {
+  const paused = S && R.isStepPaused(S);
+  document.querySelector('.timer')?.classList.toggle('paused', !!paused);
+  const cap = document.getElementById('timerCap');
+  if (cap) cap.textContent = (S && S.stepDur != null) ? (paused ? '❚❚ paused — tap to resume' : 'tap to pause') : '';
 }
 /* overall workout completion (0–100), climbs with the clock */
 function overallPct() {
@@ -290,6 +296,9 @@ function updateTimer(rem, total) {
   const fillEl = document.getElementById('timerFill'), txt = document.getElementById('timerText');
   if (txt) txt.textContent = fmt(rem);
   if (fillEl) fillEl.style.strokeDashoffset = String(c * (1 - (total > 0 ? rem / total : 0)));
+  const paused = R.isStepPaused(S);
+  const cap = document.getElementById('timerCap'); if (cap) cap.textContent = paused ? '❚❚ paused — tap to resume' : 'tap to pause';
+  document.querySelector('.timer')?.classList.toggle('paused', paused);
 }
 function bigEditable(val, unit) {
   return `<div class="big-edit"><button class="rnd" id="decBig">−</button>
@@ -325,7 +334,7 @@ function failureTarget(item) {
   const warm = weights.length ? `${weights.join(' → ')} lb` : (sets.length ? [...new Set(sets.map(s => s.value))].join(' · ') : '');
   if (!beat && !warm) return '';
   return `<div class="failure-target">
-    ${beat ? `<div class="ft-beat"><span class="ft-lbl">🎯 beat last time</span><span class="ft-val">${beat}</span></div>` : `<div class="ft-beat first"><span class="ft-lbl">first time — set the bar 💪</span></div>`}
+    ${beat ? `<div class="ft-beat"><span class="ft-lbl">🏆 best set — beat it</span><span class="ft-val">${beat}</span></div>` : `<div class="ft-beat first"><span class="ft-lbl">first time — set the bar 💪</span></div>`}
     ${warm ? `<div class="ft-warm">warm-ups today · ${warm}</div>` : ''}
   </div>`;
 }
@@ -487,7 +496,9 @@ function renderCircuit() {
   if (S.sub === 'buffer') return renderBuffer();
   const unit = UNIT[item.measure];
   const dots = Array.from({ length: b.rounds || 1 }, (_, i) => `<div class="r ${i + 1 < S.round ? 'done' : i + 1 === S.round ? 'now' : ''}">${i + 1}</div>`).join('');
-  const list = b.items.map((it, i) => `<div class="ci ${i === S.ci ? 'active' : ''}"><span class="nm">${it.name}${it.side ? ' ' + it.side : ''}</span><span class="tg">${it.measure === 'hold' ? it.hold + 's' : (it.reps ?? it.target) + ' ' + UNIT[it.measure]}</span></div>`).join('');
+  const ps = it => (it.laterality === 'unilateral' || it.perSide) && !it.side ? ' /side' : '';
+  const list = b.items.map((it, i) => `<div class="ci ${i === S.ci ? 'active' : ''}"><span class="nm">${it.name}${it.side ? ' ' + it.side : ''}</span><span class="tg">${it.measure === 'hold' ? it.hold + 's' : (it.reps ?? it.target) + ' ' + UNIT[it.measure] + ps(it)}</span></div>`).join('');
+  const uniNote = (item.laterality === 'unilateral' || item.perSide) && !item.side ? ' · per side' : '';
 
   if (item.measure === 'hold') {
     shell(`<div class="rounds">${dots}</div><div class="now-ex"><div class="label">Round ${S.round} / ${b.rounds}</div><div class="name">${item.name}${item.side ? ' ' + item.side : ''}</div></div>
@@ -500,7 +511,7 @@ function renderCircuit() {
   } else {
     curVal = Number(roundBuf[S.ci] ?? item.reps ?? item.target) || 0;
     shell(`<div class="rounds">${dots}</div><div class="now-ex"><div class="label">Round ${S.round} / ${b.rounds}</div><div class="name">${item.name}</div></div>
-      <div class="target">${bigEditable(curVal, unit)}</div><div class="circuit-list">${list}</div>
+      <div class="target">${bigEditable(curVal, unit + uniNote)}</div><div class="circuit-list">${list}</div>
       <div class="actionbar"><div class="btn-row">
         <button class="btn ghost" id="skipEx">Skip</button>
         <button class="btn lg" id="next">${S.ci >= b.items.length - 1 ? 'Round done ✓' : 'Next ▸'}</button></div></div>`);
