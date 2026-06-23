@@ -5,7 +5,7 @@
 import { PROGRAM } from '../data/program.js';
 import { SESSIONS } from '../data/sessions.js';
 import { store } from '../store.js';
-import { setVoice, isVoiceOn, listVoices, getVoiceName, setVoiceName, say } from '../timer.js';
+import { setVoice, isVoiceOn, listVoices, getVoiceName, setVoiceName, say, initAudio } from '../timer.js';
 
 const DAY_IMG = {
   quads_knees: 'images/day-leg.png',
@@ -105,8 +105,9 @@ export function renderWeek(host, { onOpenDay, onOpenHistory }) {
     fillVoices();
     try { speechSynthesis.addEventListener('voiceschanged', fillVoices); } catch (e) {}
     const testLine = "This is your coach. Let's get to work.";
-    sel.addEventListener('change', () => { setVoiceName(sel.value); say(testLine); });
-    ov.querySelector('#voiceTest').addEventListener('click', () => say(testLine));
+    // wake the audio session on the tap so speech routes to the loud speaker, not the earpiece
+    sel.addEventListener('change', () => { setVoiceName(sel.value); initAudio(); say(testLine); });
+    ov.querySelector('#voiceTest').addEventListener('click', () => { initAudio(); say(testLine); });
     ov.querySelector('#exportBtn').addEventListener('click', () => {
       const blob = new Blob([store.exportJSON()], { type: 'application/json' });
       const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'fitness-journey-backup.json'; a.click();
