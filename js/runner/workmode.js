@@ -116,8 +116,23 @@ function completeBlock() {
   const b = block();
   if (S.blockStart) { S.blockTimes[b.id] = Math.max(0, Math.round((Date.now() - S.blockStart) / 1000)); S.blockStart = null; R.save(S); }
   if (b.type === 'Mobility' || b.format === 'jointprep') return sectionNext();
-  if (['amrap', 'tabata', 'emom'].includes(b.format)) return renderSummary();
-  return renderLog();          // sets + circuit → fully editable grouped log (every round adjustable)
+  if (['tabata', 'emom'].includes(b.format)) return renderSummary();
+  return renderLog();          // amrap + sets + circuit → fully editable grouped log
+}
+/* short prescription line for the "up next" card (so you know time / sets before you start) */
+function nextRx(b) {
+  const it = b.items && b.items[0];
+  if (b.format === 'amrap') return `AMRAP · ${b.minutes || 5} min${b.items && b.items.length === 1 ? ' · max reps' : ''}`;
+  if (b.format === 'tabata') return `Tabata · ${b.rounds || 8} rounds · ${b.work || 20}s on / ${b.rest ?? 10}s off`;
+  if (b.format === 'emom') return `EMOM · ${b.rounds || 10} min`;
+  if (b.format === 'skill') return `Skill · ${b.items.length} drill${b.items.length > 1 ? 's' : ''}`;
+  if (b.format === 'circuit') return `${b.rounds || 1} rounds · ${b.items.length} moves`;
+  if (it) {
+    if (it.toFailure || it.warmups) return `${it.warmups ? it.warmups + ' warm-up → ' : ''}all-out${it.reps ? ` (~${it.reps})` : ''}`;
+    if (it.measure === 'hold') return `${it.sets || 1} × ${it.hold}s${it.rest ? ` · rest ${fmt(it.rest)}` : ''}`;
+    return `${it.sets || 1} × ${it.reps ?? it.target ?? ''}${it.perSide ? '/side' : ''}${it.rest ? ` · rest ${fmt(it.rest)}` : ''}`;
+  }
+  return '';
 }
 function sectionNext() {
   R.clearStep(S); onStepDone = null;
@@ -155,7 +170,7 @@ function sectionNext() {
 
       <div class="hero-next" id="heroNext">
         <div class="hn-media"><div class="hn-play">▶</div><span class="hn-tag">${next.role} · up next</span></div>
-        <div class="hn-body"><h2>${next.name}</h2>${exList.length > 1 ? `<div class="hn-list">${exList.join(' · ')}</div>` : ''}</div>
+        <div class="hn-body"><h2>${next.name}</h2><div class="hn-rx">${nextRx(next)}</div>${exList.length > 1 ? `<div class="hn-list">${exList.join(' · ')}</div>` : ''}</div>
       </div>
 
       <div class="left-card">
@@ -366,7 +381,8 @@ function renderRest(prevItem) {
       <div class="rc next"><span class="k">▸ up next</span><span class="v">${up.name} · ${setLbl}</span></div>
     </div>`;
   const suggested = Number(prevItem.rest) || (isYates ? 120 : 60);
-  if (suggested <= 0) { S.sub = 'work'; R.save(S); return renderSets(); }
+  const resume = () => block().format === 'skill' ? renderSkill() : renderSets();
+  if (suggested <= 0) { S.sub = 'work'; R.save(S); return resume(); }
   shell(`<div class="now-ex"><div class="label">Rest</div><div class="name">Recover</div></div>
     <div class="timer-wrap">${timerSvg('rest')}</div>
     ${ctx}
@@ -374,24 +390,52 @@ function renderRest(prevItem) {
       <button class="btn secondary" id="sub20">−20s</button><button class="btn secondary" id="add20">+20s</button>
       <button class="btn" id="skip">Skip ▸</button></div></div>`);
   beginStep(suggested, 'rest'); say(`Rest. ${suggested} seconds.`);
-  onStepDone = () => { S.sub = 'work'; R.save(S); renderSets(); };
+  onStepDone = () => { S.sub = 'work'; R.save(S); resume(); };
   document.getElementById('add20').addEventListener('click', () => { S.stepDur += 20; R.save(S); });
   document.getElementById('sub20').addEventListener('click', () => { if (R.stepRemaining(S) > 25) { S.stepDur -= 20; R.save(S); } });
-  document.getElementById('skip').addEventListener('click', () => { R.clearStep(S); onStepDone = null; S.sub = 'work'; R.save(S); renderSets(); });
+  document.getElementById('skip').addEventListener('click', () => { R.clearStep(S); onStepDone = null; S.sub = 'work'; R.save(S); resume(); });
 }
 
-/* ---------------- SKILL (practice timer, or sets×hold) ---------------- */
+/* ---------------- SKILL — a sequence of drills (practice-timer or sets×hold/reps) ---------------- */
 function renderSkill() {
-  const b = block(); const item = b.items[0];
-  if (item.minutes) {
-    const total = item.minutes * 60;
-    shell(`<div class="now-ex"><div class="label">Skill · practice fresh</div><div class="name">${item.name}</div></div>
-      <div class="timer-wrap">${timerSvg('buffer')}</div>
+  const b = block(); const item = b.items[S.ii];
+  if (!item) return completeBlock();
+  if (S.sub === 'rest') return renderRest(item);
+  const n = b.items.length;
+  const drillList = b.items.map((it, i) => `<div class="ci ${i === S.ii ? 'active' : ''}"><span class="nm">${it.name}</span><span class="tg">${it.minutes ? it.minutes + ' min' : (it.sets || 1) + '×' + (it.measure === 'hold' ? (it.hold || 20) + 's' : (it.reps || 5))}</span></div>`).join('');
+  const head = `<div class="now-ex"><div class="label">Skill ${S.ii + 1}/${n}${item.minutes ? ' · practice' : ` · set ${S.si + 1}/${item.sets || 3}`}</div><div class="name">${item.name}</div></div>`;
+
+  if (item.minutes) {                         // freeform practice block for this drill
+    shell(`${head}<div class="timer-wrap">${timerSvg('buffer')}</div><div class="circuit-list">${drillList}</div>
       <div class="actionbar"><button class="btn" id="doneSkill">Done ▸</button></div>`);
-    beginStep(total, 'work'); say(`${item.name}. Practice.`);
-    onStepDone = () => completeBlock();
-    document.getElementById('doneSkill').addEventListener('click', () => { R.clearStep(S); onStepDone = null; completeBlock(); });
-  } else { renderSets(); }   // sets×hold skill (e.g. front lever holds) handled by sets player
+    beginStep(item.minutes * 60, 'work'); say(`${item.name}.`);
+    const adv = () => { R.clearStep(S); onStepDone = null; afterSkillItem(); };
+    onStepDone = adv;
+    document.getElementById('doneSkill').addEventListener('click', adv);
+  } else if (item.measure === 'hold') {        // timed-hold drill (e.g. wall handstand / front lever tuck)
+    shell(`${head}<div class="timer-wrap">${timerSvg('buffer')}</div><div class="circuit-list">${drillList}</div>
+      <div class="actionbar"><button class="btn ghost" id="skip">Skip ▸</button></div>`);
+    beginStep(item.hold || 20, 'work'); say(`${item.name}. Hold.`);
+    const adv = () => { capture(item.hold || 20); afterSkillSet(item); };
+    onStepDone = adv;
+    document.getElementById('skip').addEventListener('click', () => { R.clearStep(S); onStepDone = null; adv(); });
+  } else {                                      // reps drill (e.g. negatives)
+    curVal = item.reps || 0;
+    shell(`${head}<div class="target">${bigEditable(curVal, UNIT[item.measure])}</div><div class="circuit-list">${drillList}</div>
+      <div class="actionbar"><button class="btn lg" id="done">Set done ✓</button></div>`);
+    wireBig();
+    document.getElementById('done').addEventListener('click', () => { buzz(40); capture(curVal); afterSkillSet(item); });
+  }
+}
+function afterSkillSet(item) {
+  const total = item.sets || 3;
+  if (S.si < total - 1) { S.si += 1; S.sub = 'rest'; R.save(S); return renderRest(item); }
+  afterSkillItem();
+}
+function afterSkillItem() {
+  S.si = 0; S.sub = 'work';
+  if (S.ii < block().items.length - 1) { S.ii += 1; R.save(S); renderSkill(); }
+  else completeBlock();
 }
 
 /* ---------------- CIRCUIT (rounds; hold items auto-TUT; log during inter-round rest) ---------------- */
@@ -472,8 +516,30 @@ function renderRoundRest() {
 /* ---------------- AMRAP (count-up window; tap rounds) ---------------- */
 function renderAmrap() {
   const b = block(); const mins = b.minutes || 5;
-  if (S.stepDur == null) { beginStep(mins * 60, 'work'); say(`As many rounds as possible. ${mins} minutes. Go.`); }
-  onStepDone = () => { captureRounds(S.amrapRounds); completeBlock(); };
+  const single = b.items.length === 1;          // single-exercise max-out → log reps, not rounds
+  if (S.stepDur == null) { beginStep(mins * 60, 'work'); say(single ? `Max reps. ${mins} minutes. Go.` : `As many rounds as possible. ${mins} minutes. Go.`); }
+  const finish = () => {
+    R.clearStep(S); onStepDone = null;
+    if (single) { S.captured[b.id][0].sets = [{ value: curVal }]; R.save(S); }
+    else captureRounds(S.amrapRounds);
+    completeBlock();
+  };
+  onStepDone = finish;
+
+  if (single) {
+    const it = b.items[0];
+    if (S.amrapReps == null) S.amrapReps = 0;
+    curVal = S.amrapReps;
+    shell(`<div class="now-ex"><div class="label">Max reps — ${mins} min</div><div class="name">${it.name}</div></div>
+      <div class="timer-wrap">${timerSvg('buffer')}</div>
+      <div class="target">${bigEditable(curVal, `${UNIT[it.measure] || 'reps'} · tap to log your total`)}</div>
+      <div class="actionbar"><button class="btn lg" id="endAmrap">Done ▸</button></div>`);
+    wireBig();
+    document.getElementById('bigVal')?.addEventListener('input', () => { S.amrapReps = curVal; R.save(S); });
+    document.getElementById('endAmrap').addEventListener('click', () => { S.amrapReps = curVal; finish(); });
+    return;
+  }
+
   if (!S.amrapRounds) S.amrapRounds = 0;
   const list = b.items.map(it => `<div class="ci"><span class="nm">${it.name}</span><span class="tg">${it.measure === 'hold' ? it.hold + 's' : (it.reps ?? it.target ?? 'max') + (it.reps ? ' reps' : '')}</span></div>`).join('');
   shell(`<div class="now-ex"><div class="label">AMRAP — ${mins} min</div><div class="name">As many rounds as possible</div></div>
@@ -483,7 +549,7 @@ function renderAmrap() {
     <div class="actionbar"><div class="btn-row"><button class="btn secondary" id="rdMinus">−</button><button class="btn" id="rdPlus">+ Round</button><button class="btn ghost" id="endAmrap">End ▸</button></div></div>`);
   document.getElementById('rdPlus').addEventListener('click', () => { S.amrapRounds++; R.save(S); document.getElementById('amrapN').textContent = S.amrapRounds; buzz(30); });
   document.getElementById('rdMinus').addEventListener('click', () => { S.amrapRounds = Math.max(0, S.amrapRounds - 1); R.save(S); document.getElementById('amrapN').textContent = S.amrapRounds; });
-  document.getElementById('endAmrap').addEventListener('click', () => { R.clearStep(S); onStepDone = null; captureRounds(S.amrapRounds); completeBlock(); });
+  document.getElementById('endAmrap').addEventListener('click', finish);
 }
 
 /* ---------------- INTERVAL (tabata / emom): work/rest cycling items ---------------- */
@@ -531,7 +597,7 @@ function renderBenchmark() {
 function renderLog() {
   const b = block(); const entries = S.captured[b.id];
   // grouped: exercise name once, its sets underneath (no repeated names)
-  const word = b.format === 'circuit' ? 'Round' : 'Set';
+  const word = (b.format === 'circuit' || entries.some(e => e.rounds)) ? 'Round' : 'Set';
   const groups = entries.map((e, ei) => {
     const sets = e.sets.length ? e.sets : [{ value: null }];
     const rows = sets.map((st, si) => {

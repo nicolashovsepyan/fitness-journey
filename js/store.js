@@ -95,10 +95,10 @@ export const store = {
     const newPRs = [];
 
     for (const block of session.blocks) {
-      // AMRAP / interval blocks log rounds, not a per-exercise best — keep them in history but out of PRs.
-      const isRounds = ['amrap', 'tabata', 'emom'].includes(block.format);
       for (const entry of block.entries) {
-        if (isRounds || entry.rounds) continue;
+        // rounds-based logs (circuit-AMRAP / intervals) aren't a per-exercise best — keep in history, skip PRs.
+        // A single-exercise max-out (e.g. Push-Up AMRAP) logs reps and CAN set a PR.
+        if (entry.rounds) continue;
         // entry: { exId, name, measure, unit, load, sets:[{value, side, weight}] }
         const sets = (entry.sets || []).filter(x => x.value != null && x.value !== '');
         const last = s.lastValues[entry.exId] || {};
