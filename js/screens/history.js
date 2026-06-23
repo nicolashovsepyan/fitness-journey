@@ -75,8 +75,9 @@ export function renderHistory(host, { onBack }) {
         const ents = (b.entries || []).filter(e => (e.sets || []).some(x => x.value != null));
         if (!ents.length) return '';
         const bt = b.seconds ? `<span class="blktime">${fmtDur(b.seconds)}</span>` : '';
+        const isRounds = ['amrap', 'tabata', 'emom'].includes(b.format) || ents.some(e => e.rounds);
         return `<div class="blkhead"><span class="bh-role">${b.type || ''}</span><span class="bh-name">${b.name || ''}</span>${bt}</div>` +
-          ents.map(e => `<div class="hist-ex"><div class="en">${e.name}</div><div class="es">${setStr(e.sets, e.measure)}</div></div>`).join('');
+          ents.map(e => `<div class="hist-ex"><div class="en">${e.name}</div><div class="es">${isRounds ? `${e.sets[0]?.value ?? '–'} <span class="u">rounds</span>` : setStr(e.sets, e.measure)}</div></div>`).join('');
       }).join('')}</div>` : '';
       return `<div class="hist-card"><div class="htop" data-key="s${i}">
           <div><div class="hname">${s.name}</div><div class="hmeta">${exCount} exercises · ⏱ ${fmtDur(s.seconds)} · ${s.duration || ''} min plan ${deltaBadge}</div></div>

@@ -73,7 +73,7 @@ function tone(freq, ms, when = 0, vol = 0.5) {
   osc.connect(gain).connect(actx.destination);
   osc.start(t0); osc.stop(t0 + ms / 1000 + 0.02);
 }
-const VOL = 0.5;                 // standard cue volume (3-2-1 ticks, etc.)
+const VOL = 0.7;                 // standard cue volume (louder, to cut through music)
 const VOL_END = VOL * 1.15;      // the final beep pops 15% louder than the others
 export function beep(kind = 'tick') {
   initAudio();

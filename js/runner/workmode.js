@@ -21,6 +21,11 @@ const numAt = id => { const e = document.getElementById(id); return e && e.value
 /* start a timed step, tagged 'work' or 'rest' (work efforts get a halfway cue) */
 function beginStep(sec, kind = 'rest') { curStepKind = kind; saidHalf = false; halfStepKey = null; R.beginStep(S, sec); }
 
+/* re-wake audio whenever the app returns to foreground — music/Bluetooth can suspend it */
+if (typeof document !== 'undefined') {
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && S && !S.done) initAudio(); });
+}
+
 /* ---------------- lifecycle ---------------- */
 export function startWorkout(plan, callbacks = {}) {
   S = R.start(plan); cb = callbacks; host = document.getElementById('app');
@@ -123,13 +128,6 @@ function sectionNext() {
   const exList = (next.items && next.items.length ? next.items.map(it => it.name) : [next.name]).slice(0, 6);
   const remaining = S.plan.blocks.slice(S.bi + 1);
   const rest = 60;
-  // force a countdown only when the next exercise is time-based (a hold). For reps → flexible count-up.
-  const nextTimed = (next.items && next.items[0] && next.items[0].measure === 'hold') || ['skill', 'amrap', 'tabata', 'emom'].includes(next.format);
-  const restBlock = nextTimed
-    ? `<div class="trans-rest"><div class="eyebrow">Rest</div><div class="timer-wrap">${timerSvg('rest')}</div>
-         <div class="btn-row tight"><button class="btn secondary" id="sub20">−20s</button><button class="btn secondary" id="add20">+20s</button></div></div>`
-    : `<div class="trans-rest"><div class="eyebrow">Rest as needed</div>
-         <div class="countup-wrap"><div class="countup" id="countUp">0:00</div><div class="countup-sub">start when ready</div></div></div>`;
   const pct = Math.round(((S.bi + 1) / S.plan.blocks.length) * 100);
   // "2 main blocks · 1 finisher to go"
   const work = remaining.filter(b => /work/i.test(b.role)).length;
@@ -149,7 +147,11 @@ function sectionNext() {
         <div class="right"><span class="sessclock" id="sessClock">${fmt(R.sessionElapsed(S))}</span><button class="x" id="exitBtn">✕</button></div>
       </div>
 
-      ${restBlock}
+      <div class="trans-rest">
+        <div class="eyebrow">Rest</div>
+        <div class="timer-wrap">${timerSvg('rest')}</div>
+        <div class="btn-row tight"><button class="btn secondary" id="sub20">−20s</button><button class="btn secondary" id="add20">+20s</button></div>
+      </div>
 
       <div class="hero-next" id="heroNext">
         <div class="hn-media"><div class="hn-play">▶</div><span class="hn-tag">${next.role} · up next</span></div>
@@ -167,15 +169,10 @@ function sectionNext() {
     </div>`;
   document.getElementById('exitBtn').addEventListener('click', confirmExit);
   document.getElementById('backBtn').addEventListener('click', backBlock);
-  const begin = () => { countUpStart = null; R.clearStep(S); onStepDone = null; enterBlock(S.bi + 1, { skipReady: true }); };
-  say(`Rest. Next, ${next.name}.`);
-  if (nextTimed) {
-    beginStep(rest, 'rest'); onStepDone = begin;
-    document.getElementById('add20').addEventListener('click', () => { S.stepDur += 20; R.save(S); });
-    document.getElementById('sub20').addEventListener('click', () => { if (R.stepRemaining(S) > 25) { S.stepDur -= 20; R.save(S); } });
-  } else {
-    countUpStart = Date.now();   // flexible: count up, start when ready
-  }
+  const begin = () => { R.clearStep(S); onStepDone = null; enterBlock(S.bi + 1, { skipReady: true }); };
+  beginStep(rest, 'rest'); say(`Rest. Next, ${next.name}.`); onStepDone = begin;
+  document.getElementById('add20').addEventListener('click', () => { S.stepDur += 20; R.save(S); });
+  document.getElementById('sub20').addEventListener('click', () => { if (R.stepRemaining(S) > 25) { S.stepDur -= 20; R.save(S); } });
   document.getElementById('goNext').addEventListener('click', begin);
   document.getElementById('heroNext').addEventListener('click', () => openDemo(firstItem));
 }
@@ -334,6 +331,12 @@ function renderSets() {
     });
   }
 }
+/* AMRAP / interval blocks log a rounds-completed count so they appear in history */
+function captureRounds(n) {
+  const arr = S.captured[block().id] || [];
+  arr.forEach(e => { e.sets = [{ value: Number(n) || 0 }]; e.rounds = true; });
+  R.save(S);
+}
 function capture(val, weight, side) {
   const rec = { value: val };
   if (weight != null && !Number.isNaN(weight)) rec.weight = weight;
@@ -363,19 +366,6 @@ function renderRest(prevItem) {
       <div class="rc next"><span class="k">▸ up next</span><span class="v">${up.name} · ${setLbl}</span></div>
     </div>`;
   const suggested = Number(prevItem.rest) || (isYates ? 120 : 60);
-
-  if (up.measure !== 'hold') {
-    // reps coming up → flexible: count UP, you start when ready (no forced countdown)
-    countUpStart = Date.now();
-    shell(`<div class="now-ex"><div class="label">Rest</div><div class="name">Rest as needed</div></div>
-      <div class="countup-wrap"><div class="countup" id="countUp">0:00</div><div class="countup-sub">suggested ~${suggested}s · start when ready</div></div>
-      ${ctx}
-      <div class="actionbar"><button class="btn lg" id="goSet">Start set ▸</button></div>`);
-    document.getElementById('goSet').addEventListener('click', () => { countUpStart = null; S.sub = 'work'; R.save(S); renderSets(); });
-    return;
-  }
-  // a timed hold is coming up → keep the countdown so you're ready to follow it
-  countUpStart = null;
   if (suggested <= 0) { S.sub = 'work'; R.save(S); return renderSets(); }
   shell(`<div class="now-ex"><div class="label">Rest</div><div class="name">Recover</div></div>
     <div class="timer-wrap">${timerSvg('rest')}</div>
@@ -438,15 +428,21 @@ function renderBuffer() {
   shell(`<div class="now-ex"><div class="label">Get ready</div><div class="name">${next.name}</div></div>
     <div class="timer-wrap">${timerSvg('buffer')}</div>
     <div class="actionbar"><button class="btn" id="go">Go now ▸</button></div>`);
-  const t = Number(b.transition ?? 8);
+  const t = Number(b.transition) > 0 ? Number(b.transition) : 8;   // 8s default set-up before a hold
   beginStep(t, 'rest'); say(`Next. ${next.name}.`);
   onStepDone = () => { S.sub = 'work'; R.save(S); renderCircuit(); };
   document.getElementById('go').addEventListener('click', () => { R.clearStep(S); onStepDone = null; S.sub = 'work'; R.save(S); renderCircuit(); });
 }
 function afterCircuitItem() {
   const b = block();
-  const t = b.transition ?? 8;            // default 8s between circuit exercises (incl. finisher)
-  if (S.ci < b.items.length - 1) { S.ci += 1; S.sub = (t > 0 ? 'buffer' : 'work'); R.save(S); return t > 0 ? renderBuffer() : renderCircuit(); }
+  if (S.ci < b.items.length - 1) {
+    S.ci += 1;
+    const nextItem = b.items[S.ci];
+    // 8s set-up buffer ONLY before a hold (time to get into position). Reps → go straight in.
+    const useBuffer = !!(nextItem && nextItem.measure === 'hold');
+    S.sub = useBuffer ? 'buffer' : 'work'; R.save(S);
+    return useBuffer ? renderBuffer() : renderCircuit();
+  }
   endRound();
 }
 function endRound() {
@@ -477,7 +473,7 @@ function renderRoundRest() {
 function renderAmrap() {
   const b = block(); const mins = b.minutes || 5;
   if (S.stepDur == null) { beginStep(mins * 60, 'work'); say(`As many rounds as possible. ${mins} minutes. Go.`); }
-  onStepDone = () => completeBlock();
+  onStepDone = () => { captureRounds(S.amrapRounds); completeBlock(); };
   if (!S.amrapRounds) S.amrapRounds = 0;
   const list = b.items.map(it => `<div class="ci"><span class="nm">${it.name}</span><span class="tg">${it.measure === 'hold' ? it.hold + 's' : (it.reps ?? it.target ?? 'max') + (it.reps ? ' reps' : '')}</span></div>`).join('');
   shell(`<div class="now-ex"><div class="label">AMRAP — ${mins} min</div><div class="name">As many rounds as possible</div></div>
@@ -487,7 +483,7 @@ function renderAmrap() {
     <div class="actionbar"><div class="btn-row"><button class="btn secondary" id="rdMinus">−</button><button class="btn" id="rdPlus">+ Round</button><button class="btn ghost" id="endAmrap">End ▸</button></div></div>`);
   document.getElementById('rdPlus').addEventListener('click', () => { S.amrapRounds++; R.save(S); document.getElementById('amrapN').textContent = S.amrapRounds; buzz(30); });
   document.getElementById('rdMinus').addEventListener('click', () => { S.amrapRounds = Math.max(0, S.amrapRounds - 1); R.save(S); document.getElementById('amrapN').textContent = S.amrapRounds; });
-  document.getElementById('endAmrap').addEventListener('click', () => { R.clearStep(S); onStepDone = null; completeBlock(); });
+  document.getElementById('endAmrap').addEventListener('click', () => { R.clearStep(S); onStepDone = null; captureRounds(S.amrapRounds); completeBlock(); });
 }
 
 /* ---------------- INTERVAL (tabata / emom): work/rest cycling items ---------------- */
@@ -498,7 +494,7 @@ function renderInterval() {
   const rounds = b.rounds || 8;
   if (S.iv == null) { S.iv = 0; S.ivPhase = 'work'; R.save(S); }   // iv = interval index across rounds×items
   const totalIv = rounds * b.items.length;
-  if (S.iv >= totalIv) return completeBlock();
+  if (S.iv >= totalIv) { captureRounds(rounds); return completeBlock(); }
   const item = b.items[S.iv % b.items.length];
   const roundN = Math.floor(S.iv / b.items.length) + 1;
   const phaseWork = S.ivPhase === 'work';
@@ -591,7 +587,7 @@ function finishSession() {
   const elapsed = R.sessionElapsed(S);
   const session = {
     date: new Date().toISOString(), name: S.plan.name, duration: S.plan.duration, seconds: elapsed,
-    blocks: S.plan.blocks.map(b => ({ id: b.id, type: b.role, name: b.name, seconds: S.blockTimes[b.id] || 0, entries: S.captured[b.id] || [] })),
+    blocks: S.plan.blocks.map(b => ({ id: b.id, type: b.role, name: b.name, format: b.format, seconds: S.blockTimes[b.id] || 0, entries: S.captured[b.id] || [] })),
   };
   const { prs } = store.saveSession(session);
   R.clear();
