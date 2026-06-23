@@ -562,3 +562,33 @@ html, body { touch-action: manipulation; }      /* kill double-tap-to-zoom (keep
 .ft-val { font-size:19px; font-weight:700; }
 .ft-val .w { font-size:27px; font-weight:800; color:var(--accent); font-family:var(--tnum); margin-right:1px; }
 .ft-warm { color:var(--muted); font-size:12px; margin-top:7px; }
+
+/* ============================================================
+   Block-progress checklist · pause · button fit (feedback pass 13)
+   ============================================================ */
+.bp-head { text-align:center; font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin:10px 0 8px; }
+.blockprog { display:flex; flex-direction:column; gap:8px; margin-bottom:6px; }
+.bp-row { display:flex; align-items:center; justify-content:space-between; gap:12px; background:var(--box); border:1px solid var(--line); border-radius:12px; padding:11px 14px; }
+.bp-row.cur { border-color:var(--accent); }
+.bp-row.fin { opacity:.55; }
+.bp-name { font-size:15px; font-weight:600; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.bp-dots { display:flex; gap:6px; flex:0 0 auto; }
+.setdot { width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; font-family:var(--tnum);
+  background:var(--box-2,#23232c); color:var(--muted); border:1px solid var(--line); }
+.setdot.done { background:var(--accent); color:#15150f; border-color:var(--accent); }
+.setdot.now { border-color:var(--accent); color:var(--accent); box-shadow:0 0 0 2px rgba(200,255,77,.18); }
+
+/* rest/transition buttons: equal width, never overflow the screen */
+.btn-row { display:flex; gap:8px; }
+.btn-row .btn { flex:1 1 0; min-width:0; padding-left:10px; padding-right:10px; }
+.btn-row.tight .btn { flex:1 1 0; }
+
+/* pause */
+.run-head .x.pause { font-size:17px; opacity:.85; }
+.screen.run.paused .timer .fill { opacity:.35; }
+.screen.run.paused::after { content:'❚❚ PAUSED'; position:fixed; left:50%; top:64px; transform:translateX(-50%);
+  background:var(--accent); color:#15150f; font-weight:800; font-size:11px; letter-spacing:.08em; padding:4px 12px; border-radius:99px; z-index:30; }
+
+/* transition what's-left prescription line */
+.lc-bn { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
+.lc-role { flex:0 0 auto; text-align:right; max-width:55%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }

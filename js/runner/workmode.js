@@ -177,7 +177,7 @@ function sectionNext() {
         <div class="lc-top"><span class="lc-summary">${summary}</span><span class="lc-pct">${pct}%</span></div>
         <div class="lc-bar"><div class="lc-fill" style="width:${pct}%"></div></div>
         <div class="lc-msg">${motiv}</div>
-        <div class="lc-list">${remaining.map((bl, i) => `<div class="lc-row ${i === 0 ? 'up' : ''}"><span>${bl.name}</span><span class="lc-role">${bl.role}</span></div>`).join('')}</div>
+        <div class="lc-list">${remaining.map((bl, i) => `<div class="lc-row ${i === 0 ? 'up' : ''}"><span class="lc-bn">${bl.name}</span><span class="lc-role">${nextRx(bl)}</span></div>`).join('')}</div>
       </div>
 
       <div class="actionbar"><button class="btn lg" id="goNext">Start ${next.name} ▸</button></div>
@@ -219,7 +219,7 @@ function shell(inner, { progress = true } = {}) {
       <div class="run-head">
         <button class="x back" id="backBtn" ${S.bi <= 0 ? 'disabled' : ''}>‹</button>
         <div class="blk">${b.role} · ${b.name}</div>
-        <div class="right"><span class="sessclock" id="sessClock">${fmt(R.sessionElapsed(S))}</span><button class="x" id="exitBtn">✕</button></div>
+        <div class="right"><button class="x pause" id="pauseBtn">${S.pausedAt ? '▶' : '⏸'}</button><span class="sessclock" id="sessClock">${fmt(R.sessionElapsed(S))}</span><button class="x" id="exitBtn">✕</button></div>
       </div>
       <div class="wprog-row">
         <div class="wprog"><div class="wprog-fill" style="width:${pct}%"></div><span class="wprog-flag${pct >= 100 ? ' won' : ''}">🏁</span></div>
@@ -230,7 +230,17 @@ function shell(inner, { progress = true } = {}) {
     </div>`;
   document.getElementById('exitBtn').addEventListener('click', confirmExit);
   document.getElementById('backBtn')?.addEventListener('click', backBlock);
+  document.getElementById('pauseBtn')?.addEventListener('click', togglePause);
+  if (S.pausedAt) host.querySelector('.screen.run')?.classList.add('paused');
   const now = host.querySelector('.bchip.now'); if (now) now.scrollIntoView({ inline: 'center', block: 'nearest' });
+}
+/* pause/resume — freezes the session clock + active step (timing layer already excludes paused time) */
+function togglePause() {
+  if (S.pausedAt) R.resume(S); else R.pause(S);
+  const paused = !!S.pausedAt;
+  const pb = document.getElementById('pauseBtn'); if (pb) pb.textContent = paused ? '▶' : '⏸';
+  host.querySelector('.screen.run')?.classList.toggle('paused', paused);
+  say(paused ? 'Paused.' : 'Back to it.');
 }
 /* overall workout completion (0–100), climbs with the clock */
 function overallPct() {
@@ -390,27 +400,34 @@ function afterSet() {
   if (S.ii < b.items.length - 1) { S.ii += 1; S.si = 0; S.sub = 'rest'; R.save(S); return renderRest(item); }
   completeBlock();
 }
+/* the whole current block as a checklist — done ✓ / now / left, with set dots */
+function blockProgress() {
+  const b = block();
+  const rows = b.items.map((it, ii) => {
+    const total = b.format === 'yates' ? (it.warmups || 0) + 1 : (it.sets || 1);
+    const perSet = (it.laterality === 'unilateral' || it.perSide) ? 2 : 1;
+    const logged = (S.captured[b.id]?.[ii]?.sets || []).filter(s => s.value != null).length;
+    const done = Math.floor(logged / perSet);
+    const cur = ii === S.ii;
+    const dots = Array.from({ length: total }, (_, si) => {
+      const cls = si < done ? 'done' : (cur && si === S.si ? 'now' : 'todo');
+      const yatesFail = b.format === 'yates' && si === total - 1;
+      return `<span class="setdot ${cls}">${si < done ? '✓' : (yatesFail ? '★' : si + 1)}</span>`;
+    }).join('');
+    const allDone = done >= total;
+    return `<div class="bp-row ${cur ? 'cur' : ''} ${allDone ? 'fin' : ''}"><span class="bp-name">${it.name}</span><span class="bp-dots">${dots}</span></div>`;
+  }).join('');
+  return `<div class="bp-head">This block — ✓ done · ● now · left</div><div class="blockprog">${rows}</div>`;
+}
 function renderRest(prevItem) {
   const b = block();
-  const up = b.items[S.ii] || prevItem;
   const isYates = b.format === 'yates';
-  const ws = isYates ? (up.warmups || 0) : 0;
-  const totalSets = isYates ? ws + 1 : (up.sets || 1);
-  const failing = isYates && S.si === totalSets - 1;
-  const setLbl = isYates ? (failing ? 'all-out set' : `warm-up ${S.si + 1} of ${ws}`) : `set ${S.si + 1} of ${totalSets}`;
-  const prevEntry = (S.captured[b.id] || []).find(e => e.name === prevItem.name);
-  const lastDone = prevEntry?.sets.at(-1);
-  const justDid = lastDone ? `${lastDone.side ? lastDone.side + ' ' : ''}${lastDone.value}${lastDone.weight ? ` @${lastDone.weight}lb` : ''} ${UNIT[prevItem.measure]}` : '';
-  const ctx = `<div class="restctx">
-      ${justDid ? `<div class="rc done"><span class="k">✓ just did</span><span class="v">${prevItem.name} · ${justDid}</span></div>` : ''}
-      <div class="rc next"><span class="k">▸ up next</span><span class="v">${up.name} · ${setLbl}</span></div>
-    </div>`;
   const suggested = Number(prevItem.rest) || (isYates ? 120 : 60);
   const resume = () => block().format === 'skill' ? renderSkill() : renderSets();
   if (suggested <= 0) { S.sub = 'work'; R.save(S); return resume(); }
   shell(`<div class="now-ex"><div class="label">Rest</div><div class="name">Recover</div></div>
     <div class="timer-wrap">${timerSvg('rest')}</div>
-    ${ctx}
+    ${blockProgress()}
     <div class="actionbar"><div class="btn-row">
       <button class="btn secondary" id="sub20">−20s</button><button class="btn secondary" id="add20">+20s</button>
       <button class="btn" id="skip">Skip ▸</button></div></div>`);
@@ -526,7 +543,9 @@ function endRound() {
 function renderRoundRest() {
   const b = block(); const rest = Number(b.roundRest) || 30;
   const rows = b.items.map((it, i) => logRow(it, `rr_${i}`, S.captured[b.id][i].sets.at(-1)?.value)).join('');
-  shell(`<div class="center"><div class="eyebrow">Round ${S.round} done · rest</div></div>
+  const roundDots = Array.from({ length: b.rounds || 1 }, (_, i) => `<div class="r ${i + 1 <= S.round ? 'done' : i + 1 === S.round + 1 ? 'now' : ''}">${i + 1 <= S.round ? '✓' : i + 1}</div>`).join('');
+  shell(`<div class="center"><div class="eyebrow">Round ${S.round} of ${b.rounds} done · rest</div></div>
+    <div class="rounds">${roundDots}</div>
     <div class="timer-wrap" style="margin:6px 0;">${timerSvg('rest')}</div>
     <div class="card logcard">${rows}</div>
     <div class="actionbar"><button class="btn lg" id="nextRound">Start round ${S.round + 1} ▸</button></div>`, { progress: false });
