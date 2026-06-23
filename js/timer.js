@@ -12,11 +12,26 @@ let voiceOn = true;
 export function setVoice(on) { voiceOn = on; }
 export function isVoiceOn() { return voiceOn; }
 
+/* pick the most natural-sounding English voice the device offers */
+let preferredVoice = null;
+function pickVoice() {
+  try {
+    const vs = speechSynthesis.getVoices(); if (!vs.length) return null;
+    const want = ['Samantha', 'Ava', 'Allison', 'Serena', 'Nicky', 'Aaron', 'Daniel',
+      'Google US English', 'Microsoft Aria', 'Microsoft Jenny', 'Microsoft Guy'];
+    for (const name of want) { const v = vs.find(x => x.name.includes(name) && /en/i.test(x.lang)); if (v) return v; }
+    return vs.find(x => /en[-_]US/i.test(x.lang)) || vs.find(x => /^en/i.test(x.lang)) || vs[0];
+  } catch (e) { return null; }
+}
+try { speechSynthesis.onvoiceschanged = () => { preferredVoice = pickVoice(); }; } catch (e) {}
+
 export function say(text) {
   if (!voiceOn) return;
   try {
+    if (!preferredVoice) preferredVoice = pickVoice();
     const u = new SpeechSynthesisUtterance(text);
-    u.rate = 1.02; u.pitch = 1.0; u.volume = 1.0;
+    if (preferredVoice) u.voice = preferredVoice;
+    u.rate = 0.94; u.pitch = 1.02; u.volume = 1.0;   // slightly slower + warmer = less robotic
     speechSynthesis.cancel();   // never let lines pile up
     speechSynthesis.speak(u);
   } catch (e) { /* silent fallback */ }
@@ -29,7 +44,11 @@ export function initAudio() {
   try {
     actx = actx || new (window.AudioContext || window.webkitAudioContext)();
     if (actx.state === 'suspended') actx.resume();
+    // play a 1-sample silent buffer — the reliable iOS unlock so later beeps actually fire
+    const b = actx.createBuffer(1, 1, 22050);
+    const src = actx.createBufferSource(); src.buffer = b; src.connect(actx.destination); src.start(0);
   } catch (e) {}
+  try { if (!preferredVoice) preferredVoice = pickVoice(); } catch (e) {}   // warm up the voice list
 }
 function tone(freq, ms, when = 0, vol = 0.5) {
   if (!actx) return;

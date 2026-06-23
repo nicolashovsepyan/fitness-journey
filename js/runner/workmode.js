@@ -15,7 +15,10 @@ const UNIT = { reps: 'reps', hold: 'sec', cals: 'cals' };
 const WUNIT = 'lb';                       // weight unit (Nicolas trains in pounds)
 let S = null, host = null, cb = {}, ticker = null, onStepDone = null, curVal = 0, roundBuf = {};
 let lastSec = null;                       // last whole-second of the active step (for once-per-second beeps)
+let curStepKind = 'rest', saidHalf = false, halfStepKey = null;   // halfway-cue tracking
 const numAt = id => { const e = document.getElementById(id); return e && e.value !== '' ? Number(e.value) : null; };
+/* start a timed step, tagged 'work' or 'rest' (work efforts get a halfway cue) */
+function beginStep(sec, kind = 'rest') { curStepKind = kind; saidHalf = false; halfStepKey = null; R.beginStep(S, sec); }
 
 /* ---------------- lifecycle ---------------- */
 export function startWorkout(plan, callbacks = {}) {
@@ -43,8 +46,13 @@ function tick() {
   const rem = R.stepRemaining(S);
   if (rem == null) { lastSec = null; return; }
   updateTimer(rem, S.stepDur);
+  if (S.stepStartedAt !== halfStepKey) { halfStepKey = S.stepStartedAt; saidHalf = false; }
   if (rem !== lastSec) {                       // a whole second ticked over
     lastSec = rem;
+    // halfway cue — only for a WORK effort of 1 minute or more
+    if (!saidHalf && curStepKind === 'work' && S.stepDur >= 60 && rem <= Math.round(S.stepDur / 2) && rem > 0) {
+      saidHalf = true; say('Halfway there.');
+    }
     if (rem <= 3 && rem > 0) { beep('count'); buzz(20); }   // 3 · 2 · 1 audible countdown
   }
   if (rem <= 0 && onStepDone) {
@@ -76,7 +84,7 @@ function renderGetReady() {
     <div class="timer-wrap">${timerSvg('buffer')}</div>
     <div class="actionbar"><button class="btn lg" id="go">I'm ready ▸</button></div>`);
   const begin = () => { R.clearStep(S); onStepDone = null; renderActive(); };
-  R.beginStep(S, 10); onStepDone = begin;
+  beginStep(10, 'rest'); onStepDone = begin;
   document.getElementById('go').addEventListener('click', begin);
 }
 function buildEntries(b) {
@@ -154,7 +162,7 @@ function sectionNext() {
   document.getElementById('exitBtn').addEventListener('click', confirmExit);
   document.getElementById('backBtn').addEventListener('click', backBlock);
   const begin = () => { R.clearStep(S); onStepDone = null; enterBlock(S.bi + 1, { skipReady: true }); };
-  R.beginStep(S, rest); say(`Rest. Next, ${next.name}.`); onStepDone = begin;
+  beginStep(rest, 'rest'); say(`Rest. Next, ${next.name}.`); onStepDone = begin;
   document.getElementById('goNext').addEventListener('click', begin);
   document.getElementById('add20').addEventListener('click', () => { S.stepDur += 20; R.save(S); });
   document.getElementById('sub20').addEventListener('click', () => { if (R.stepRemaining(S) > 25) { S.stepDur -= 20; R.save(S); } });
@@ -281,7 +289,7 @@ function renderSets() {
       <div class="timer-wrap">${timerSvg('buffer')}</div>
       <div class="actionbar"><button class="btn ghost" id="skip">Skip ▸</button></div>`);
     document.getElementById('skip').addEventListener('click', () => { R.clearStep(S); onStepDone = null; capture(target); afterSet(); });
-    R.beginStep(S, target); say(`${item.name}. Hold.`); onStepDone = () => { capture(target); afterSet(); };
+    beginStep(target, 'work'); say(`${item.name}. Hold it.`); onStepDone = () => { capture(target); afterSet(); };
   } else {                                              // reps set → tap-to-type, weight + R/L
     const weighted = item.load === 'weighted';
     const uni = item.laterality === 'unilateral' || item.perSide;
@@ -345,7 +353,7 @@ function renderRest(prevItem) {
     <div class="actionbar"><div class="btn-row">
       <button class="btn secondary" id="sub20">−20s</button><button class="btn secondary" id="add20">+20s</button>
       <button class="btn" id="skip">Skip ▸</button></div></div>`);
-  R.beginStep(S, rest); say(`Rest. ${rest} seconds.`);
+  beginStep(rest, 'rest'); say(`Rest. ${rest} seconds.`);
   onStepDone = () => { S.sub = 'work'; R.save(S); renderSets(); };
   document.getElementById('add20').addEventListener('click', () => { S.stepDur += 20; R.save(S); });
   document.getElementById('sub20').addEventListener('click', () => { if (R.stepRemaining(S) > 25) { S.stepDur -= 20; R.save(S); } });
@@ -360,7 +368,7 @@ function renderSkill() {
     shell(`<div class="now-ex"><div class="label">Skill · practice fresh</div><div class="name">${item.name}</div></div>
       <div class="timer-wrap">${timerSvg('buffer')}</div>
       <div class="actionbar"><button class="btn" id="doneSkill">Done ▸</button></div>`);
-    R.beginStep(S, total); say(`${item.name}. Practice.`);
+    beginStep(total, 'work'); say(`${item.name}. Practice.`);
     onStepDone = () => completeBlock();
     document.getElementById('doneSkill').addEventListener('click', () => { R.clearStep(S); onStepDone = null; completeBlock(); });
   } else { renderSets(); }   // sets×hold skill (e.g. front lever holds) handled by sets player
@@ -379,7 +387,7 @@ function renderCircuit() {
     shell(`<div class="rounds">${dots}</div><div class="now-ex"><div class="label">Round ${S.round} / ${b.rounds}</div><div class="name">${item.name}${item.side ? ' ' + item.side : ''}</div></div>
       <div class="timer-wrap">${timerSvg('buffer')}</div><div class="circuit-list">${list}</div>
       <div class="actionbar"><button class="btn ghost" id="skip">Skip ▸</button></div>`);
-    R.beginStep(S, item.hold || 30); say(`${item.name}. Go.`);
+    beginStep(item.hold || 30, 'work'); say(`${item.name}. Go.`);
     const adv = () => { roundBuf[S.ci] = item.hold; afterCircuitItem(); };
     onStepDone = adv;
     document.getElementById('skip').addEventListener('click', () => { R.clearStep(S); onStepDone = null; adv(); });
@@ -401,7 +409,7 @@ function renderBuffer() {
     <div class="timer-wrap">${timerSvg('buffer')}</div>
     <div class="actionbar"><button class="btn" id="go">Go now ▸</button></div>`);
   const t = Number(b.transition ?? 8);
-  R.beginStep(S, t); say(`Next. ${next.name}.`);
+  beginStep(t, 'rest'); say(`Next. ${next.name}.`);
   onStepDone = () => { S.sub = 'work'; R.save(S); renderCircuit(); };
   document.getElementById('go').addEventListener('click', () => { R.clearStep(S); onStepDone = null; S.sub = 'work'; R.save(S); renderCircuit(); });
 }
@@ -431,14 +439,14 @@ function renderRoundRest() {
     b.items.forEach((it, i) => { const v = readInput(`rr_${i}`); if (v != null) S.captured[b.id][i].sets[S.captured[b.id][i].sets.length - 1].value = v; });
     R.clearStep(S); onStepDone = null; S.round += 1; S.ci = 0; roundBuf = {}; S.sub = 'work'; R.save(S); renderCircuit();
   };
-  R.beginStep(S, rest); onStepDone = proceed;
+  beginStep(rest, 'rest'); onStepDone = proceed;
   document.getElementById('nextRound').addEventListener('click', proceed);
 }
 
 /* ---------------- AMRAP (count-up window; tap rounds) ---------------- */
 function renderAmrap() {
   const b = block(); const mins = b.minutes || 5;
-  if (S.stepDur == null) { R.beginStep(S, mins * 60); say(`A.M.R.A.P. ${mins} minutes. Go.`); }
+  if (S.stepDur == null) { beginStep(mins * 60, 'work'); say(`As many rounds as possible. ${mins} minutes. Go.`); }
   onStepDone = () => completeBlock();
   if (!S.amrapRounds) S.amrapRounds = 0;
   const list = b.items.map(it => `<div class="ci"><span class="nm">${it.name}</span><span class="tg">${it.measure === 'hold' ? it.hold + 's' : (it.reps ?? it.target ?? 'max') + (it.reps ? ' reps' : '')}</span></div>`).join('');
@@ -470,7 +478,7 @@ function renderInterval() {
     <div class="actionbar"><button class="btn ghost" id="skip">Skip ▸</button></div>`);
   const dur = phaseWork ? work : rest;
   if (dur <= 0) return nextInterval();
-  R.beginStep(S, dur); if (phaseWork) say(item.name);
+  beginStep(dur, phaseWork ? 'work' : 'rest'); if (phaseWork) say(item.name);
   onStepDone = nextInterval;
   document.getElementById('skip').addEventListener('click', () => { R.clearStep(S); onStepDone = null; nextInterval(); });
 }

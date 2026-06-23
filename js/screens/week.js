@@ -40,9 +40,17 @@ export function renderWeek(host, { onOpenDay, onOpenHistory }) {
         </div>
       </div>
 
-      <div class="progress-pct"><span>${done} of ${total} done</span><span>${pct}%</span></div>
-      <div class="progress-bar"><div class="fill" style="width:${pct}%"></div></div>
-      <div class="prog-msg">${pct === 100 ? '🔥 Week complete — animal.' : done === 0 ? 'Fresh week. Go get day 1.' : `${total - done} to go. Keep the streak.`}</div>
+      <div class="prog-card">
+        <div class="prog-top">
+          <div class="prog-big">${pct}<span class="pc">%</span></div>
+          <div class="prog-sub"><div class="prog-count">${done} / ${total} workouts</div><div class="prog-week">this week</div></div>
+        </div>
+        <div class="prog-track">
+          <div class="prog-fill" style="width:${pct}%"></div>
+          <div class="prog-reward ${pct === 100 ? 'won' : ''}" title="Week complete">🏆</div>
+        </div>
+        <div class="prog-msg">${pct === 100 ? '🔥 Week complete — you earned it.' : done === 0 ? 'Fresh week. Day 1 is waiting.' : pct >= 60 ? `Strong week. ${total - done} to lock it in.` : `${total - done} to go — keep the streak alive.`}</div>
+      </div>
 
       ${PROGRAM.week.map(d => {
         const s = SESSIONS[d.sessionId];

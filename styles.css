@@ -273,7 +273,7 @@ body {
 .bnote { color:var(--faint); font-size:12px; margin-top:8px; }
 
 /* home/week — logo, progress, image day-cards */
-.logo-img { display:block; height:54px; margin:6px auto 20px; opacity:0.97; object-fit:contain; }
+.logo-img { display:block; height:108px; margin:10px auto 22px; opacity:0.97; object-fit:contain; max-width:94%; }
 /* day sections — color-coded name + line to the time */
 .sec-head { display:flex; align-items:center; gap:12px; margin:24px 2px 12px; }
 .sec-name { font-size:14px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--sc, var(--text)); }
@@ -509,3 +509,22 @@ html, body { touch-action: manipulation; }      /* kill double-tap-to-zoom (keep
 .ss-row .ss-badge { font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.05em;
   color:var(--muted); border:1px solid var(--line); border-radius:6px; padding:1px 5px; margin-left:6px; vertical-align:middle; }
 .ex-row.static { cursor:default; }
+
+/* ============================================================
+   Week progress — motivating % + reward at the finish line (pass 9)
+   ============================================================ */
+.prog-card { background:var(--box); border:1px solid var(--line); border-radius:18px; padding:16px 18px; margin-bottom:18px; }
+.prog-top { display:flex; align-items:center; gap:14px; margin-bottom:12px; }
+.prog-big { font-size:48px; font-weight:800; line-height:1; font-family:var(--tnum); color:var(--accent); letter-spacing:-0.03em; }
+.prog-big .pc { font-size:22px; margin-left:1px; }
+.prog-sub .prog-count { font-size:16px; font-weight:700; }
+.prog-sub .prog-week { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.09em; margin-top:2px; }
+.prog-track { position:relative; height:14px; border-radius:99px; background:var(--box-2,#23232c); margin:6px 6px 14px 0; }
+.prog-fill { height:100%; border-radius:99px; background:linear-gradient(90deg,#6aa9ff,var(--accent)); transition:width .6s cubic-bezier(.4,0,.2,1); min-width:6px; }
+.prog-reward { position:absolute; right:-8px; top:50%; transform:translateY(-50%); width:34px; height:34px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; font-size:18px; background:var(--box); border:2px solid var(--line);
+  filter:grayscale(1); opacity:.5; transition:all .4s ease; }
+.prog-reward.won { filter:none; opacity:1; border-color:var(--accent);
+  box-shadow:0 0 0 4px rgba(200,255,77,.18), 0 0 22px rgba(200,255,77,.5); animation:rewardPop .6s ease; }
+@keyframes rewardPop { 0%{transform:translateY(-50%) scale(.5)} 60%{transform:translateY(-50%) scale(1.25)} 100%{transform:translateY(-50%) scale(1)} }
+.prog-card .prog-msg { color:var(--muted); font-size:13px; margin:0; }
