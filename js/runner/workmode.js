@@ -296,6 +296,29 @@ function wireBig() {
 }
 
 /* ---------------- SETS (straight / tempo / isometric / yates / rest_pause) ---------------- */
+/* "beat last time" target on a top set — big & glanceable (weight pops, plain wording) */
+function failureTarget(item) {
+  const pr = item.exId ? store.getPR(item.exId) : null;
+  let beat = '';
+  if (pr) {
+    if (pr.weight != null) {
+      beat = (pr.l != null || pr.r != null)
+        ? `<span class="w">${pr.weight}</span> lb · L${pr.l ?? '–'} R${pr.r ?? '–'}`
+        : `<span class="w">${pr.weight}</span> lb · ${pr.value} reps`;
+    } else {
+      beat = `<span class="w">${pr.value}</span> ${pr.unit === 'sec' ? 'sec hold' : pr.unit}`;
+    }
+  }
+  // warm-ups done this session → a small ramp line
+  const sets = (S.captured[block().id]?.[S.ii]?.sets || []).filter(s => s.value != null);
+  const weights = [...new Set(sets.map(s => Number(s.weight)).filter(w => w > 0))];
+  const warm = weights.length ? `${weights.join(' → ')} lb` : (sets.length ? [...new Set(sets.map(s => s.value))].join(' · ') : '');
+  if (!beat && !warm) return '';
+  return `<div class="failure-target">
+    ${beat ? `<div class="ft-beat"><span class="ft-lbl">🎯 beat last time</span><span class="ft-val">${beat}</span></div>` : `<div class="ft-beat first"><span class="ft-lbl">first time — set the bar 💪</span></div>`}
+    ${warm ? `<div class="ft-warm">warm-ups today · ${warm}</div>` : ''}
+  </div>`;
+}
 function renderSets() {
   countUpStart = null;
   const b = block();
@@ -332,7 +355,9 @@ function renderSets() {
            <div class="side-col"><div class="lbl">Right</div><input class="big-input" id="valR" type="number" inputmode="numeric" value="${base}" onfocus="this.select()"/></div>
          </div><div class="center unit">${unit} · per side</div>`
       : `<div class="target">${bigEditable(base, `${unit} · tap to type`)}</div>`;
+    const showTarget = failureSet || (!isYates && weighted && setNo === 1);   // top set → show what to beat
     shell(`<div class="now-ex"><div class="label">${label}</div><div class="name">${item.name}</div>${item.tempo ? `<div class="side">tempo ${item.tempo}</div>` : ''}</div>
+      ${showTarget ? failureTarget(item) : ''}
       ${inputArea}${wField}
       <div class="actionbar"><button class="btn lg" id="done">${failureSet ? 'Failure set done ✓' : 'Set done ✓'}</button></div>`);
     if (!uni) wireBig();

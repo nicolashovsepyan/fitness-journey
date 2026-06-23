@@ -552,3 +552,13 @@ html, body { touch-action: manipulation; }      /* kill double-tap-to-zoom (keep
 
 /* up-next prescription line on the transition hero (pass 11) */
 .hn-rx { color:var(--accent); font-size:13px; font-weight:700; margin-top:5px; }
+
+/* "beat last time" target on the all-out set (pass 12) — glanceable, weight pops */
+.failure-target { text-align:center; margin:2px 0 14px; }
+.ft-beat { display:inline-flex; align-items:center; gap:10px; background:var(--box); border:1px solid var(--accent); border-radius:14px; padding:9px 18px; }
+.ft-beat.first { border-color:var(--line); }
+.ft-lbl { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--accent); font-weight:800; }
+.ft-beat.first .ft-lbl { color:var(--muted); }
+.ft-val { font-size:19px; font-weight:700; }
+.ft-val .w { font-size:27px; font-weight:800; color:var(--accent); font-family:var(--tnum); margin-right:1px; }
+.ft-warm { color:var(--muted); font-size:12px; margin-top:7px; }
