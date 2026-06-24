@@ -607,3 +607,13 @@ html, body { touch-action: manipulation; }      /* kill double-tap-to-zoom (keep
 .ft-beat.first { border-color:var(--line); }
 .ft-beat.first .ft-lbl { color:var(--muted); }
 .ft-val .w { color:var(--warn); }
+
+/* ============================================================
+   Demo button · efficiency callouts · filler swap (pass 15)
+   ============================================================ */
+.demo-btn { display:inline-flex; align-items:center; gap:5px; margin-top:10px; background:var(--box-2,#23232c); color:var(--muted);
+  border:1px solid var(--line); border-radius:99px; font-size:12px; font-weight:700; padding:6px 13px; cursor:pointer; }
+.demo-btn.has { color:var(--accent); border-color:var(--accent); }
+.eff-row { display:flex; align-items:flex-start; gap:9px; text-align:left; padding:7px 0; font-size:14px; line-height:1.4; }
+.eff-row .eff-ico { flex:0 0 auto; }
+.ss-row .swap { flex:0 0 auto; }

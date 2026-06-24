@@ -73,7 +73,7 @@ function scaleForDuration(session, duration) {
 const TIER = { 'Joint Prep': 0, Primer: 1, Work: 2, Finisher: 3, Benchmark: 4, Mobility: 5 };
 const oidx = (arr, v) => { const i = (arr || []).indexOf(v); return i < 0 ? 1e6 : i; };
 
-export function resolveSession(sessionId, { duration = 30, sessionIndex = 0, swaps = {}, removed = [], order = {}, added = {} } = {}) {
+export function resolveSession(sessionId, { duration = 30, sessionIndex = 0, swaps = {}, removed = [], order = {}, added = {}, fillerSwaps = {} } = {}) {
   const s = SESSIONS[sessionId];
   if (!s) throw new Error(`Unknown session '${sessionId}'`);
 
@@ -95,7 +95,16 @@ export function resolveSession(sessionId, { duration = 30, sessionIndex = 0, swa
       anchor: !!b.anchor, rounds: b.rounds, work: b.work, rest: b.rest,
       transition: b.transition, roundRest: b.roundRest, minutes: b.minutes, items,
     };
-    if (b.filler && block.items.length) block.filler = pickFiller(b, sessionIndex, fillerIndex++);
+    if (b.filler && block.items.length) {
+      let f = pickFiller(b, sessionIndex, fillerIndex++);
+      const swapTo = fillerSwaps[b.name];               // user swapped the secondary/superset move
+      if (swapTo && EXERCISES[swapTo]) {
+        const m = EXERCISES[swapTo];
+        const rx = m.measure === 'hold' ? { hold: f.hold || 20 } : { reps: f.reps || (f.type === 'core' ? 12 : 10) };
+        f = { type: f.type, exId: swapTo, name: m.name, measure: m.measure, swapped: true, ...rx };
+      }
+      block.filler = f;
+    }
     return block;
   }).filter(block => block.items.length > 0 || block.format === 'jointprep');
 

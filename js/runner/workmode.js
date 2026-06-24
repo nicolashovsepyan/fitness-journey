@@ -32,6 +32,17 @@ if (typeof document !== 'undefined') {
     if (R.isStepPaused(S)) R.resumeStep(S); else { R.pauseStep(S); buzz(20); }
     reflectPause();
   });
+  // tap the demo button to watch the movement
+  document.addEventListener('click', e => {
+    const db = e.target.closest('.demo-btn[data-ex]'); if (!db) return;
+    openDemo({ exId: db.dataset.ex, name: EXERCISES[db.dataset.ex]?.name || '' });
+  });
+}
+/* small "watch the move" button for the active exercise (real clip if wired, else "coming soon") */
+function demoBtnHtml(item) {
+  if (!item || !item.exId) return '';
+  const has = !!(item.demoUrl || EXERCISES[item.exId]?.demoUrl);
+  return `<button class="demo-btn ${has ? 'has' : ''}" data-ex="${item.exId}">▶ ${has ? 'watch the move' : 'demo'}</button>`;
 }
 
 /* ---------------- lifecycle ---------------- */
@@ -355,7 +366,7 @@ function renderSets() {
 
   if (item.measure === 'hold') {                       // isometric / hold set → auto countdown
     const target = item.hold || 30;
-    shell(`<div class="now-ex"><div class="label">${label}</div><div class="name">${item.name}</div></div>
+    shell(`<div class="now-ex"><div class="label">${label}</div><div class="name">${item.name}</div>${demoBtnHtml(item)}</div>
       <div class="timer-wrap">${timerSvg('buffer')}</div>
       <div class="actionbar"><button class="btn ghost" id="skip">Skip ▸</button></div>`);
     document.getElementById('skip').addEventListener('click', () => { R.clearStep(S); onStepDone = null; capture(target); afterSet(); });
@@ -375,7 +386,7 @@ function renderSets() {
          </div><div class="center unit">${unit} · per side</div>`
       : `<div class="target">${bigEditable(base, `${unit} · tap to type`)}</div>`;
     const showTarget = failureSet || (!isYates && weighted && setNo === 1);   // top set → show what to beat
-    shell(`<div class="now-ex"><div class="label">${label}</div><div class="name">${item.name}</div>${item.tempo ? `<div class="side">tempo ${item.tempo}</div>` : ''}</div>
+    shell(`<div class="now-ex"><div class="label">${label}</div><div class="name">${item.name}</div>${item.tempo ? `<div class="side">tempo ${item.tempo}</div>` : ''}${demoBtnHtml(item)}</div>
       ${showTarget ? failureTarget(item) : ''}
       ${inputArea}${wField}
       <div class="actionbar"><button class="btn lg" id="done">${failureSet ? 'Failure set done ✓' : 'Set done ✓'}</button></div>`);
@@ -454,7 +465,7 @@ function renderSkill() {
   if (S.sub === 'rest') return renderRest(item);
   const n = b.items.length;
   const drillList = b.items.map((it, i) => `<div class="ci ${i === S.ii ? 'active' : ''}"><span class="nm">${it.name}</span><span class="tg">${it.minutes ? it.minutes + ' min' : (it.sets || 1) + '×' + (it.measure === 'hold' ? (it.hold || 20) + 's' : (it.reps || 5))}</span></div>`).join('');
-  const head = `<div class="now-ex"><div class="label">Skill ${S.ii + 1}/${n}${item.minutes ? ' · practice' : ` · set ${S.si + 1}/${item.sets || 3}`}</div><div class="name">${item.name}</div></div>`;
+  const head = `<div class="now-ex"><div class="label">Skill ${S.ii + 1}/${n}${item.minutes ? ' · practice' : ` · set ${S.si + 1}/${item.sets || 3}`}</div><div class="name">${item.name}</div>${demoBtnHtml(item)}</div>`;
 
   if (item.minutes) {                         // freeform practice block for this drill
     shell(`${head}<div class="timer-wrap">${timerSvg('buffer')}</div><div class="circuit-list">${drillList}</div>
@@ -501,7 +512,7 @@ function renderCircuit() {
   const uniNote = (item.laterality === 'unilateral' || item.perSide) && !item.side ? ' · per side' : '';
 
   if (item.measure === 'hold') {
-    shell(`<div class="rounds">${dots}</div><div class="now-ex"><div class="label">Round ${S.round} / ${b.rounds}</div><div class="name">${item.name}${item.side ? ' ' + item.side : ''}</div></div>
+    shell(`<div class="rounds">${dots}</div><div class="now-ex"><div class="label">Round ${S.round} / ${b.rounds}</div><div class="name">${item.name}${item.side ? ' ' + item.side : ''}</div>${demoBtnHtml(item)}</div>
       <div class="timer-wrap">${timerSvg('buffer')}</div><div class="circuit-list">${list}</div>
       <div class="actionbar"><button class="btn ghost" id="skip">Skip ▸</button></div>`);
     beginStep(item.hold || 30, 'work'); say(`${item.name}. Go.`);
@@ -510,7 +521,7 @@ function renderCircuit() {
     document.getElementById('skip').addEventListener('click', () => { R.clearStep(S); onStepDone = null; adv(); });
   } else {
     curVal = Number(roundBuf[S.ci] ?? item.reps ?? item.target) || 0;
-    shell(`<div class="rounds">${dots}</div><div class="now-ex"><div class="label">Round ${S.round} / ${b.rounds}</div><div class="name">${item.name}</div></div>
+    shell(`<div class="rounds">${dots}</div><div class="now-ex"><div class="label">Round ${S.round} / ${b.rounds}</div><div class="name">${item.name}</div>${demoBtnHtml(item)}</div>
       <div class="target">${bigEditable(curVal, unit + uniNote)}</div><div class="circuit-list">${list}</div>
       <div class="actionbar"><div class="btn-row">
         <button class="btn ghost" id="skipEx">Skip</button>
@@ -703,6 +714,33 @@ document.addEventListener('click', e => {
 });
 
 /* ---------------- finish ---------------- */
+/* meaningful, motivating pace bits — this session vs your history of the same workout */
+function efficiencyCallouts(session) {
+  let all = []; try { all = store.all.sessions; } catch (e) {}
+  const prev = all.slice(0, -1).filter(s => s.name === session.name && s.seconds);   // prior runs of THIS workout
+  const clean = n => (n || '').replace(/[—·].*$/, '').trim();
+  const out = [];
+  if (!prev.length) {
+    if (session.seconds > 0) out.push({ icon: '📌', text: `Baseline set — ${fmt(session.seconds)} for ${session.name}. Beat it next time.` });
+    return out;
+  }
+  const bestPrev = Math.min(...prev.map(s => s.seconds));
+  if (session.seconds > 0 && session.seconds <= bestPrev) {
+    out.push({ icon: '🏆', text: `Most efficient ${session.name} yet — ${fmt(session.seconds)} (was ${fmt(bestPrev)}). Tight work.` });
+  }
+  // biggest single-block speed-up vs its own best
+  let bestImp = null;
+  (session.blocks || []).forEach(b => {
+    if (!b.seconds) return;
+    const pts = prev.flatMap(s => (s.blocks || []).filter(x => x.name === b.name && x.seconds).map(x => x.seconds));
+    if (!pts.length) return;
+    const bp = Math.min(...pts);
+    if (b.seconds < bp && (!bestImp || bp - b.seconds > bestImp.imp)) bestImp = { name: clean(b.name), t: b.seconds, imp: bp - b.seconds };
+  });
+  if (bestImp) out.push({ icon: '⚡', text: `Fastest ${bestImp.name} block yet — ${fmt(bestImp.t)}.` });
+  if (!out.length && session.seconds > 0) out.push({ icon: '⏱', text: `${fmt(session.seconds)} today · best is ${fmt(bestPrev)}. Chase it next time.` });
+  return out.slice(0, 2);
+}
 function finishSession() {
   stopTicker(); releaseAwake();
   const elapsed = R.sessionElapsed(S);
@@ -711,17 +749,21 @@ function finishSession() {
     blocks: S.plan.blocks.map(b => ({ id: b.id, type: b.role, name: b.name, format: b.format, seconds: S.blockTimes[b.id] || 0, entries: S.captured[b.id] || [] })),
   };
   const { prs } = store.saveSession(session);
+  const effs = efficiencyCallouts(session);
   R.clear();
   const prText = p => p.weight != null
     ? ((p.l != null || p.r != null) ? `${p.weight}lb · L${p.l ?? '–'} · R${p.r ?? '–'}` : `${p.weight}lb × ${p.value}`)
     : `${p.value} ${p.unit}`;
-  if (prs.length) say(`New record. ${prText(prs[0])}.`); else say('Workout complete. Strong work.');
+  if (prs.length) say(`New record. ${prText(prs[0])}.`);
+  else if (effs[0]?.icon === '🏆') say('Most efficient session yet. Great work.');
+  else say('Workout complete. Strong work.');
   const prHtml = prs.length ? `<div class="card"><div class="eyebrow">New PRs</div>${prs.map(p => `<div class="row" style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);"><span>${p.name}</span><span class="pr-flash">${prText(p)}</span></div>`).join('')}</div>` : '';
+  const effHtml = effs.length ? `<div class="card"><div class="eyebrow">Pace</div>${effs.map(e => `<div class="eff-row"><span class="eff-ico">${e.icon}</span><span>${e.text}</span></div>`).join('')}</div>` : '';
   host.innerHTML = `<div class="screen fade-in center">
     <div class="big-emoji">${prs.length ? '🏆' : '✅'}</div>
     <h1 style="font-size:28px;">${prs.length ? 'New records!' : 'Done.'}</h1>
     <p class="muted">${S.plan.name} · ${fmt(elapsed)} · ${S.plan.duration} min plan</p>
-    <div style="height:16px;"></div>${prHtml}
+    <div style="height:16px;"></div>${prHtml}${effHtml}
     <div class="actionbar"><button class="btn lg" id="home">Back to week</button></div></div>`;
   document.getElementById('home').addEventListener('click', () => cb.onFinish?.());
 }

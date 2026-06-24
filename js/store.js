@@ -15,6 +15,7 @@ const DEFAULT = {
   removed: {},        // { sessionId: [originalExId] } — removed exercises
   order: {},          // { sessionId: { blocks:[blockName], items:{blockName:[exId]} } } — reorder
   added: {},          // { sessionId: { blockName: [ {ex, ...prescription} ] } } — added exercises
+  fillerSwaps: {},    // { sessionId: { blockName: newExId } } — swap the rest-superset filler
 };
 
 function read() {
@@ -53,6 +54,14 @@ export const store = {
   resetDay(sessionId) {
     const s = read();
     delete s.swaps[sessionId]; delete s.removed[sessionId]; delete s.order[sessionId]; delete s.added[sessionId];
+    if (s.fillerSwaps) delete s.fillerSwaps[sessionId];
+    write(s);
+  },
+
+  getFillerSwaps(sessionId) { return read().fillerSwaps?.[sessionId] || {}; },
+  setFillerSwap(sessionId, blockName, toEx) {
+    const s = read(); s.fillerSwaps = s.fillerSwaps || {}; s.fillerSwaps[sessionId] = s.fillerSwaps[sessionId] || {};
+    if (toEx) s.fillerSwaps[sessionId][blockName] = toEx; else delete s.fillerSwaps[sessionId][blockName];
     write(s);
   },
 

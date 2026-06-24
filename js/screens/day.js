@@ -27,6 +27,7 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
     duration: dur, sessionIndex,
     swaps: store.getSwaps(sessionId), removed: store.getRemoved(sessionId),
     order: store.getOrder(sessionId), added: store.getAdded(sessionId),
+    fillerSwaps: store.getFillerSwaps(sessionId),
   });
 
   function draw() {
@@ -73,6 +74,7 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
       const cue = el.parentElement.querySelector('.cue'); if (cue) cue.style.display = cue.style.display === 'block' ? 'none' : 'block';
     }));
     host.querySelectorAll('.swap[data-from]').forEach(el => el.addEventListener('click', () => openSwap(el.dataset.from, el.dataset.block, rp)));
+    host.querySelectorAll('.swap[data-filler]').forEach(el => el.addEventListener('click', () => openFillerSwap(el.dataset.block, el.dataset.filler, rp)));
     host.querySelectorAll('.add-ex[data-block]').forEach(el => el.addEventListener('click', () => openAdd(el.dataset.block, el.dataset.bid, rp)));
     host.querySelectorAll('.ex-remove[data-from]').forEach(el => el.addEventListener('click', () => {
       if (el.dataset.added) store.removeAdded(sessionId, el.dataset.bn, el.dataset.from);
@@ -99,14 +101,14 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
           <span class="fmt-chip ${b.anchor ? 'anchor' : ''}">${FORMATS[b.format]?.short || b.format}</span>
         </div>
         <div class="ex-list" data-block="${b.name}">${b.items.map(it => exRow(it, b)).join('')}</div>
-        ${b.filler ? fillerRow(b.filler) : ''}
+        ${b.filler ? fillerRow(b.filler, b) : ''}
         ${b.format !== 'jointprep' ? `<button class="add-ex" data-block="${b.name}" data-bid="${b.id}">+ Add exercise</button>` : ''}
         ${b.note ? `<div class="bnote">${b.note}</div>` : ''}
       </div>`;
   }
 
   /* the rest-filler shown as a SECONDARY exercise supersetted with the anchor (not a separate section) */
-  function fillerRow(f) {
+  function fillerRow(f, b) {
     const cue = EXERCISES[f.exId]?.cues || '';
     const rx = f.reps ? `${f.reps} reps` : `${f.hold || 20}s`;
     return `
@@ -116,10 +118,11 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
           <div class="ex-inner">
             <div class="demo" data-cue="1" title="info">ⓘ</div>
             <div class="exmeta">
-              <div class="exname">${f.name} <span class="ss-badge">secondary</span></div>
+              <div class="exname">${f.name} <span class="ss-badge">secondary</span>${f.swapped ? '<span class="swapped">swapped</span>' : ''}</div>
               <div class="exrx">${rx} · in the rest — light, just enough</div>
               <div class="cue" style="display:none; color:var(--faint); font-size:12px; margin-top:3px;">${cue}</div>
             </div>
+            <button class="swap" data-filler="${f.exId}" data-block="${b.name}" title="Swap secondary">⇄</button>
           </div>
         </div>
       </div>`;
@@ -227,6 +230,34 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
     ov.querySelectorAll('.swap-opt[data-id]').forEach(el => el.addEventListener('click', () => {
       const id = el.dataset.id;
       store.setSwap(sessionId, fromEx, id === '__revert' ? null : id);
+      ov.remove(); draw();
+    }));
+  }
+
+  function openFillerSwap(blockName, fromEx, rp) {
+    const used = rp.blocks.flatMap(b => b.items.map(i => i.exId)).concat(rp.blocks.map(b => b.filler?.exId).filter(Boolean)).filter(x => x !== fromEx);
+    const alts = alternatives(fromEx, { constraint: rp.constraint }, used);
+    const origName = EXERCISES[fromEx]?.name || fromEx;
+    let dividerInserted = false;
+    const rows = alts.map(a => {
+      let pre = '';
+      if (!a.recommended && !dividerInserted) { dividerInserted = true; pre = '<div class="swap-divider">More from your library</div>'; }
+      return pre + `<div class="swap-opt" data-id="${a.id}"><span>${a.name}</span><span class="muted">${a.pattern}</span></div>`;
+    }).join('');
+    const ov = document.createElement('div'); ov.className = 'overlay';
+    ov.innerHTML = `
+      <div class="overlay-card scroll">
+        <div class="eyebrow">Swap secondary (superset)</div>
+        <h2 style="margin:6px 0 12px;">${origName}</h2>
+        ${alts.length ? rows : '<div class="muted" style="padding:8px 0;">No alternatives.</div>'}
+        <div class="swap-opt revert" data-id="__revert"><span>↩ Auto-pick (rotating)</span></div>
+        <button class="btn ghost" id="fsCancel" style="margin-top:12px;">Cancel</button>
+      </div>`;
+    host.appendChild(ov);
+    ov.querySelector('#fsCancel').addEventListener('click', () => ov.remove());
+    ov.querySelectorAll('.swap-opt[data-id]').forEach(el => el.addEventListener('click', () => {
+      const id = el.dataset.id;
+      store.setFillerSwap(sessionId, blockName, id === '__revert' ? null : id);
       ov.remove(); draw();
     }));
   }
