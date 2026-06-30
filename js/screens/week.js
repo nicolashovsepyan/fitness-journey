@@ -15,18 +15,29 @@ const DAY_IMG = {
   full_body_engine: 'images/day-cond.png',
 };
 
-function doneThisWeek(s) {
+/* Monday-anchored week (resets every Monday morning). offsetWeeks: 0 = this week, 1 = last week. */
+function weekStartMs(offsetWeeks = 0) {
+  const d = new Date(); d.setHours(0, 0, 0, 0);
+  const dow = (d.getDay() + 6) % 7;            // 0 = Monday
+  d.setDate(d.getDate() - dow - offsetWeeks * 7);
+  return d.getTime();
+}
+function sessionInRange(s, startMs, endMs) {
   try {
-    const wk = Date.now() - 7 * 864e5;
-    return store.all.sessions.some(l =>
-      new Date(l.date).getTime() > wk && (l.sessionId === s.id || l.name === s.name));
+    return store.all.sessions.some(l => {
+      const t = new Date(l.date).getTime();
+      return t >= startMs && t < endMs && (l.sessionId === s.id || l.name === s.name);
+    });
   } catch (e) { return false; }
 }
+function doneThisWeek(s) { return sessionInRange(s, weekStartMs(0), Date.now() + 1000); }
 
 export function renderWeek(host, { onOpenDay, onOpenHistory }) {
   const total = PROGRAM.week.length;
   const done = PROGRAM.week.filter(d => doneThisWeek(SESSIONS[d.sessionId])).length;
   const pct = Math.round((done / total) * 100);
+  const thisWk = weekStartMs(0), lastWk = weekStartMs(1);
+  const lastWeekDone = PROGRAM.week.filter(d => sessionInRange(SESSIONS[d.sessionId], lastWk, thisWk)).length;
 
   host.innerHTML = `
     <div class="screen fade-in">
@@ -50,6 +61,7 @@ export function renderWeek(host, { onOpenDay, onOpenHistory }) {
           <div class="prog-reward ${pct === 100 ? 'won' : ''}" title="Week complete">🏆</div>
         </div>
         <div class="prog-msg">${pct === 100 ? '🔥 Week complete — you earned it.' : done === 0 ? 'Fresh week. Day 1 is waiting.' : pct >= 60 ? `Strong week. ${total - done} to lock it in.` : `${total - done} to go — keep the streak alive.`}</div>
+        ${lastWeekDone ? `<div class="prog-last">Last week · ${lastWeekDone} / ${total} done</div>` : ''}
       </div>
 
       ${PROGRAM.week.map(d => {
@@ -61,8 +73,8 @@ export function renderWeek(host, { onOpenDay, onOpenHistory }) {
           <div class="week-day img ${dn ? 'done' : ''}" data-day="${d.sessionId}" style="--img:url('${DAY_IMG[d.sessionId] || ''}')">
             <div class="content">
               <div class="dnum">${dn ? '✓' : d.day}</div>
-              <div class="winfo"><div class="wname">${s.name}</div><div class="wsub">${sub}</div></div>
-              <div class="wstat">${dn ? '✓' : '›'}</div>
+              <div class="winfo"><div class="wname">${s.name}</div><div class="wsub">${dn ? 'done this week' : sub}</div></div>
+              <div class="wstat">›</div>
             </div>
           </div>`;
       }).join('')}

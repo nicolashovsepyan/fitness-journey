@@ -326,6 +326,24 @@ function wireBig() {
 }
 
 /* ---------------- SETS (straight / tempo / isometric / yates / rest_pause) ---------------- */
+/* last session's FULL sequence for this lift (warm-ups → work) so you can replicate + push */
+function lastTimeLine(item) {
+  if (!item || !item.exId) return '';
+  const seq = store.getLastSets(item.exId);
+  if (!seq || !seq.sets.length) return '';
+  const uni = item.laterality === 'unilateral' || item.perSide;
+  const parts = [];
+  if (uni) {
+    for (let i = 0; i < seq.sets.length; i += 2) {
+      const a = seq.sets[i], b = seq.sets[i + 1];
+      const w = a?.weight ?? b?.weight;
+      parts.push(`${a ? `${a.side || 'L'}${a.value}` : ''}${b ? ` ${b.side || 'R'}${b.value}` : ''}${w ? ` @${w}` : ''}`.trim());
+    }
+  } else {
+    for (const s of seq.sets) parts.push(`${s.value}${s.weight ? `@${s.weight}` : ''}`);
+  }
+  return `<div class="lasttime"><span class="lt-lbl">last time</span> ${parts.join(' · ')}</div>`;
+}
 /* "beat last time" target on a top set — big & glanceable (weight pops, plain wording) */
 function failureTarget(item) {
   const pr = item.exId ? store.getPR(item.exId) : null;
@@ -367,6 +385,7 @@ function renderSets() {
   if (item.measure === 'hold') {                       // isometric / hold set → auto countdown
     const target = item.hold || 30;
     shell(`<div class="now-ex"><div class="label">${label}</div><div class="name">${item.name}</div>${demoBtnHtml(item)}</div>
+      ${lastTimeLine(item)}
       <div class="timer-wrap">${timerSvg('buffer')}</div>
       <div class="actionbar"><button class="btn ghost" id="skip">Skip ▸</button></div>`);
     document.getElementById('skip').addEventListener('click', () => { R.clearStep(S); onStepDone = null; capture(target); afterSet(); });
@@ -387,6 +406,7 @@ function renderSets() {
       : `<div class="target">${bigEditable(base, `${unit} · tap to type`)}</div>`;
     const showTarget = failureSet || (!isYates && weighted && setNo === 1);   // top set → show what to beat
     shell(`<div class="now-ex"><div class="label">${label}</div><div class="name">${item.name}</div>${item.tempo ? `<div class="side">tempo ${item.tempo}</div>` : ''}${demoBtnHtml(item)}</div>
+      ${lastTimeLine(item)}
       ${showTarget ? failureTarget(item) : ''}
       ${inputArea}${wField}
       <div class="actionbar"><button class="btn lg" id="done">${failureSet ? 'Failure set done ✓' : 'Set done ✓'}</button></div>`);

@@ -617,3 +617,8 @@ html, body { touch-action: manipulation; }      /* kill double-tap-to-zoom (keep
 .eff-row { display:flex; align-items:flex-start; gap:9px; text-align:left; padding:7px 0; font-size:14px; line-height:1.4; }
 .eff-row .eff-ico { flex:0 0 auto; }
 .ss-row .swap { flex:0 0 auto; }
+
+/* last-time sequence + week comparison (pass 16) */
+.lasttime { text-align:center; color:var(--muted); font-size:13px; margin:2px 0 10px; }
+.lasttime .lt-lbl { color:var(--faint); text-transform:uppercase; letter-spacing:.05em; font-size:10px; font-weight:800; margin-right:5px; }
+.prog-last { color:var(--muted); font-size:12px; margin-top:9px; padding-top:9px; border-top:1px solid var(--line); }

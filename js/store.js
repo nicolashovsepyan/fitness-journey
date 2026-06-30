@@ -94,6 +94,22 @@ export const store = {
   },
 
   getLast(exId) { return read().lastValues[exId] || null; },
+
+  /* the full set sequence (warm-ups → work) from the most recent prior session with this exercise */
+  getLastSets(exId) {
+    const sessions = read().sessions;
+    for (let i = sessions.length - 1; i >= 0; i--) {
+      for (const b of (sessions[i].blocks || [])) {
+        for (const e of (b.entries || [])) {
+          if (e.exId === exId) {
+            const sets = (e.sets || []).filter(s => s.value != null && s.value !== '');
+            if (sets.length) return { date: sessions[i].date, sets };
+          }
+        }
+      }
+    }
+    return null;
+  },
   getPR(exId) { return read().prs[exId] || null; },
   prCount() { return Object.keys(read().prs).length; },
   sessionCount() { return read().sessions.length; },
