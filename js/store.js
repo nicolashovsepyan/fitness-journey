@@ -111,6 +111,8 @@ export const store = {
     return null;
   },
   getPR(exId) { return read().prs[exId] || null; },
+  setPR(exId, rec) { const s = read(); if (rec) s.prs[exId] = rec; else delete s.prs[exId]; write(s); },
+  clearPR(exId) { const s = read(); delete s.prs[exId]; write(s); },
   prCount() { return Object.keys(read().prs).length; },
   sessionCount() { return read().sessions.length; },
 

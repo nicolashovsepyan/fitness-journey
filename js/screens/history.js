@@ -60,6 +60,44 @@ export function renderHistory(host, { onBack }) {
     host.querySelectorAll('[data-key]').forEach(el => el.addEventListener('click', () => {
       const k = el.dataset.key; open.has(k) ? open.delete(k) : open.add(k); draw();
     }));
+    host.querySelectorAll('[data-clear]').forEach(el => el.addEventListener('click', e => {
+      e.stopPropagation();
+      if (confirm(`Clear your ${exName(el.dataset.clear)} record?`)) { store.clearPR(el.dataset.clear); draw(); }
+    }));
+    host.querySelectorAll('[data-fix]').forEach(el => el.addEventListener('click', e => { e.stopPropagation(); openRecordEditor(el.dataset.fix); }));
+  }
+
+  /* fix a wrong record (e.g. 45 lb × 45 reps → 45 lb × 2 reps) */
+  function openRecordEditor(id) {
+    const p = store.getPR(id) || {};
+    const ex = EXERCISES[id] || {};
+    const weighted = p.weight != null || ex.load === 'weighted';
+    const uni = p.l != null || p.r != null || ex.laterality === 'unilateral';
+    const repLbl = (p.unit === 'sec' || ex.measure === 'hold') ? 'Seconds' : 'Reps';
+    const ov = document.createElement('div'); ov.className = 'overlay';
+    ov.innerHTML = `
+      <div class="overlay-card">
+        <div class="eyebrow">Fix record</div>
+        <h2 style="margin:6px 0 14px;">${exName(id)}</h2>
+        ${weighted ? `<div class="rec-field"><label>Weight (lb)</label><input id="rWeight" type="number" inputmode="decimal" value="${p.weight ?? ''}" onfocus="this.select()"></div>` : ''}
+        ${uni
+          ? `<div class="rec-field"><label>Left ${repLbl.toLowerCase()}</label><input id="rL" type="number" inputmode="numeric" value="${p.l ?? p.value ?? ''}" onfocus="this.select()"></div>
+             <div class="rec-field"><label>Right ${repLbl.toLowerCase()}</label><input id="rR" type="number" inputmode="numeric" value="${p.r ?? p.value ?? ''}" onfocus="this.select()"></div>`
+          : `<div class="rec-field"><label>${repLbl}</label><input id="rV" type="number" inputmode="numeric" value="${p.value ?? ''}" onfocus="this.select()"></div>`}
+        <button class="btn" id="recSave" style="margin-top:16px;">Save</button>
+        <button class="btn ghost" id="recCancel" style="margin-top:8px;">Cancel</button>
+      </div>`;
+    document.body.appendChild(ov);
+    const num = i => { const e = ov.querySelector('#' + i); return e && e.value !== '' ? Number(e.value) : null; };
+    ov.querySelector('#recSave').addEventListener('click', () => {
+      const rec = { unit: p.unit || (ex.measure === 'hold' ? 'sec' : 'reps'), date: p.date || new Date().toISOString() };
+      const w = num('rWeight'); if (w != null) rec.weight = w;
+      if (uni) { const l = num('rL'), r = num('rR'); rec.l = l; rec.r = r; rec.value = Math.max(l || 0, r || 0); }
+      else { rec.value = num('rV') ?? 0; }
+      store.setPR(id, rec); ov.remove(); draw();
+    });
+    ov.querySelector('#recCancel').addEventListener('click', () => ov.remove());
+    ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
   }
 
   function sessionsHtml(sessions) {
@@ -92,7 +130,9 @@ export function renderHistory(host, { onBack }) {
     return ids.map(id => {
       const p = prs[id];
       const isOpen = open.has('p' + id);
-      const body = isOpen ? `<div class="hist-body">${exHistory(id, sessions)}</div>` : '';
+      const body = isOpen ? `<div class="hist-body">${exHistory(id, sessions)}
+        <div class="rec-actions"><button class="rec-btn" data-fix="${id}">✏️ Fix record</button><button class="rec-btn danger" data-clear="${id}">✕ Clear</button></div>
+      </div>` : '';
       return `<div class="hist-card"><div class="htop" data-key="p${id}">
           <div><div class="pn">${exName(id)}</div><div class="pd">best · ${fmtDate(p.date)}</div></div>
           <div class="pv">${fmtPR(p)}</div></div>${body}</div>`;

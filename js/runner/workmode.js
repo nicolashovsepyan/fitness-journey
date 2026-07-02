@@ -9,6 +9,7 @@
 import * as R from './runstate.js';
 import { store } from '../store.js';
 import { EXERCISES } from '../data/exercises.js';
+import { alternatives } from '../core/resolve.js';
 import { say, beep, buzz, fmt, initAudio, keepAwake, releaseAwake } from '../timer.js';
 
 const UNIT = { reps: 'reps', hold: 'sec', cals: 'cals' };
@@ -37,12 +38,60 @@ if (typeof document !== 'undefined') {
     const db = e.target.closest('.demo-btn[data-ex]'); if (!db) return;
     openDemo({ exId: db.dataset.ex, name: EXERCISES[db.dataset.ex]?.name || '' });
   });
+  // tap the swap button to change the current exercise mid-workout (also saves it for next week)
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.swap-btn[data-swapex]')) return;
+    openWorkoutSwap();
+  });
 }
 /* small "watch the move" button for the active exercise (real clip if wired, else "coming soon") */
 function demoBtnHtml(item) {
   if (!item || !item.exId) return '';
   const has = !!(item.demoUrl || EXERCISES[item.exId]?.demoUrl);
   return `<button class="demo-btn ${has ? 'has' : ''}" data-ex="${item.exId}">▶ ${has ? 'watch the move' : 'demo'}</button>`;
+}
+/* swap the current exercise (button on the exercise screen) */
+function swapBtnHtml(item) {
+  if (!item || !item.exId) return '';
+  return `<button class="swap-btn" data-swapex="${item.exId}">⇄ swap</button>`;
+}
+const curIdx = () => (block().format === 'circuit' ? S.ci : S.ii);
+function openWorkoutSwap() {
+  const b = block(); const item = b.items[curIdx()]; if (!item) return;
+  const from = item.swappedFrom || item.exId;
+  const used = b.items.map(i => i.exId).filter(x => x !== item.exId);
+  const alts = alternatives(from, { constraint: S.plan.constraint }, used);
+  let dividerInserted = false;
+  const rows = alts.map(a => {
+    let pre = '';
+    if (!a.recommended && !dividerInserted) { dividerInserted = true; pre = '<div class="swap-divider">More from your library</div>'; }
+    return pre + `<div class="swap-opt ${a.id === item.exId ? 'cur' : ''}" data-id="${a.id}"><span>${a.name}</span><span class="muted">${a.id === item.exId ? 'current' : a.pattern}</span></div>`;
+  }).join('');
+  const ov = document.createElement('div'); ov.className = 'overlay';
+  ov.innerHTML = `
+    <div class="overlay-card scroll">
+      <div class="eyebrow">Swap exercise · saved for next week too</div>
+      <h2 style="margin:6px 0 12px;">${item.name}</h2>
+      ${alts.length ? rows : '<div class="muted" style="padding:8px 0;">No alternatives.</div>'}
+      ${item.exId !== from ? `<div class="swap-opt revert" data-id="__revert"><span>↩ Back to ${EXERCISES[from]?.name || from}</span></div>` : ''}
+      <button class="btn ghost" id="wswapCancel" style="margin-top:12px;">Cancel</button>
+    </div>`;
+  host.appendChild(ov);
+  ov.querySelector('#wswapCancel').addEventListener('click', () => ov.remove());
+  ov.querySelectorAll('.swap-opt[data-id]').forEach(el => el.addEventListener('click', () => {
+    swapCurrentExercise(el.dataset.id === '__revert' ? from : el.dataset.id, from);
+    ov.remove();
+  }));
+}
+function swapCurrentExercise(newId, from) {
+  const b = block(); const i = curIdx(); const item = b.items[i]; if (!item || !EXERCISES[newId]) return;
+  const m = EXERCISES[newId];
+  Object.assign(item, { exId: newId, name: m.name, measure: m.measure, load: m.load, laterality: m.laterality, swappedFrom: newId === from ? null : from });
+  const cap = S.captured[b.id]?.[i];
+  if (cap) { cap.exId = newId; cap.name = m.name; cap.measure = m.measure; cap.unit = UNIT[m.measure]; cap.load = m.load; }
+  try { if (S.plan.sessionId) store.setSwap(S.plan.sessionId, from, newId === from ? null : newId); } catch (e) {}
+  R.save(S); buzz(30); say(m.name);
+  renderActive();
 }
 
 /* ---------------- lifecycle ---------------- */
@@ -384,7 +433,7 @@ function renderSets() {
 
   if (item.measure === 'hold') {                       // isometric / hold set → auto countdown
     const target = item.hold || 30;
-    shell(`<div class="now-ex"><div class="label">${label}</div><div class="name">${item.name}</div>${demoBtnHtml(item)}</div>
+    shell(`<div class="now-ex"><div class="label">${label}</div><div class="name">${item.name}</div>${demoBtnHtml(item)}${swapBtnHtml(item)}</div>
       ${lastTimeLine(item)}
       <div class="timer-wrap">${timerSvg('buffer')}</div>
       <div class="actionbar"><button class="btn ghost" id="skip">Skip ▸</button></div>`);
@@ -405,7 +454,7 @@ function renderSets() {
          </div><div class="center unit">${unit} · per side</div>`
       : `<div class="target">${bigEditable(base, `${unit} · tap to type`)}</div>`;
     const showTarget = failureSet || (!isYates && weighted && setNo === 1);   // top set → show what to beat
-    shell(`<div class="now-ex"><div class="label">${label}</div><div class="name">${item.name}</div>${item.tempo ? `<div class="side">tempo ${item.tempo}</div>` : ''}${demoBtnHtml(item)}</div>
+    shell(`<div class="now-ex"><div class="label">${label}</div><div class="name">${item.name}</div>${item.tempo ? `<div class="side">tempo ${item.tempo}</div>` : ''}${demoBtnHtml(item)}${swapBtnHtml(item)}</div>
       ${lastTimeLine(item)}
       ${showTarget ? failureTarget(item) : ''}
       ${inputArea}${wField}
@@ -485,7 +534,7 @@ function renderSkill() {
   if (S.sub === 'rest') return renderRest(item);
   const n = b.items.length;
   const drillList = b.items.map((it, i) => `<div class="ci ${i === S.ii ? 'active' : ''}"><span class="nm">${it.name}</span><span class="tg">${it.minutes ? it.minutes + ' min' : (it.sets || 1) + '×' + (it.measure === 'hold' ? (it.hold || 20) + 's' : (it.reps || 5))}</span></div>`).join('');
-  const head = `<div class="now-ex"><div class="label">Skill ${S.ii + 1}/${n}${item.minutes ? ' · practice' : ` · set ${S.si + 1}/${item.sets || 3}`}</div><div class="name">${item.name}</div>${demoBtnHtml(item)}</div>`;
+  const head = `<div class="now-ex"><div class="label">Skill ${S.ii + 1}/${n}${item.minutes ? ' · practice' : ` · set ${S.si + 1}/${item.sets || 3}`}</div><div class="name">${item.name}</div>${demoBtnHtml(item)}${swapBtnHtml(item)}</div>`;
 
   if (item.minutes) {                         // freeform practice block for this drill
     shell(`${head}<div class="timer-wrap">${timerSvg('buffer')}</div><div class="circuit-list">${drillList}</div>
@@ -532,7 +581,7 @@ function renderCircuit() {
   const uniNote = (item.laterality === 'unilateral' || item.perSide) && !item.side ? ' · per side' : '';
 
   if (item.measure === 'hold') {
-    shell(`<div class="rounds">${dots}</div><div class="now-ex"><div class="label">Round ${S.round} / ${b.rounds}</div><div class="name">${item.name}${item.side ? ' ' + item.side : ''}</div>${demoBtnHtml(item)}</div>
+    shell(`<div class="rounds">${dots}</div><div class="now-ex"><div class="label">Round ${S.round} / ${b.rounds}</div><div class="name">${item.name}${item.side ? ' ' + item.side : ''}</div>${demoBtnHtml(item)}${swapBtnHtml(item)}</div>
       <div class="timer-wrap">${timerSvg('buffer')}</div><div class="circuit-list">${list}</div>
       <div class="actionbar"><button class="btn ghost" id="skip">Skip ▸</button></div>`);
     beginStep(item.hold || 30, 'work'); say(`${item.name}. Go.`);
@@ -541,7 +590,7 @@ function renderCircuit() {
     document.getElementById('skip').addEventListener('click', () => { R.clearStep(S); onStepDone = null; adv(); });
   } else {
     curVal = Number(roundBuf[S.ci] ?? item.reps ?? item.target) || 0;
-    shell(`<div class="rounds">${dots}</div><div class="now-ex"><div class="label">Round ${S.round} / ${b.rounds}</div><div class="name">${item.name}</div>${demoBtnHtml(item)}</div>
+    shell(`<div class="rounds">${dots}</div><div class="now-ex"><div class="label">Round ${S.round} / ${b.rounds}</div><div class="name">${item.name}</div>${demoBtnHtml(item)}${swapBtnHtml(item)}</div>
       <div class="target">${bigEditable(curVal, unit + uniNote)}</div><div class="circuit-list">${list}</div>
       <div class="actionbar"><div class="btn-row">
         <button class="btn ghost" id="skipEx">Skip</button>
