@@ -242,7 +242,7 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
     const rows = alts.map(a => {
       let pre = '';
       if (!a.recommended && !dividerInserted) { dividerInserted = true; pre = '<div class="swap-divider">More from your library</div>'; }
-      return pre + `<div class="swap-opt" data-id="${a.id}"><span>${a.name}</span><span class="muted">${a.pattern}</span></div>`;
+      return pre + `<div class="swap-opt" data-id="${a.id}"><span>${a.name}</span><span class="muted">${a.pattern}${a.level ? ` · L${a.level}` : ""}</span></div>`;
     }).join('');
     const ov = document.createElement('div'); ov.className = 'overlay';
     ov.innerHTML = `
@@ -282,7 +282,7 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
       <div class="overlay-card scroll">
         <div class="eyebrow">Add to ${blockName}</div>
         <h2 style="margin:6px 0 12px;">Add exercise</h2>
-        ${list.length ? list.map(a => `<div class="swap-opt" data-id="${a.id}"><span>${a.name}</span><span class="muted">${a.pattern}</span></div>`).join('') : '<div class="muted" style="padding:8px 0;">Nothing to add.</div>'}
+        ${list.length ? list.map(a => `<div class="swap-opt" data-id="${a.id}"><span>${a.name}</span><span class="muted">${a.pattern}${a.level ? ` · L${a.level}` : ""}</span></div>`).join('') : '<div class="muted" style="padding:8px 0;">Nothing to add.</div>'}
         <button class="btn ghost" id="addCancel" style="margin-top:12px;">Cancel</button>
       </div>`;
     host.appendChild(ov);

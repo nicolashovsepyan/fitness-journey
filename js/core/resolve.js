@@ -8,7 +8,11 @@
    ============================================================ */
 import { EXERCISES } from '../data/exercises.js';
 import { SESSIONS } from '../data/sessions.js';
-import { FILLERS, ANTAGONIST } from '../data/program.js';
+import { FILLERS, ANTAGONIST, PROFILE } from '../data/program.js';
+
+/* group related patterns so a swap can widen sensibly (a quad → other lower-body) */
+const FAMILY = { quad: 'lower', glute: 'lower', hamstring: 'lower', calf: 'lower', shin: 'lower', push: 'push', pull: 'pull', core: 'core', skill: 'skill', conditioning: 'cond', mobility: 'mob', full: 'full' };
+const canDoWith = (m, have) => (m.equipment || ['bw']).every(e => e === 'bw' || have.includes(e));
 
 const UNIT = { reps: 'reps', hold: 'sec', cals: 'cals' };
 
@@ -176,25 +180,34 @@ export function blockMinutes(b) {
 }
 
 /* addable exercises of a given measure (for "+ Add exercise"), forearm-aware */
-export function libraryFor(measure, { constraint } = {}, exclude = []) {
-  let list = Object.entries(EXERCISES).filter(([id, m]) => m.measure === measure && !exclude.includes(id));
+export function libraryFor(measure, { constraint, equipment } = {}, exclude = []) {
+  const have = equipment || PROFILE.equipment;
+  let list = Object.entries(EXERCISES).filter(([id, m]) => m.measure === measure && !exclude.includes(id) && canDoWith(m, have));
   if (constraint && /supinated|neutral/.test(constraint)) list = list.filter(([, m]) => m.grip !== 'pronated');
-  return list.map(([id, m]) => ({ id, name: m.name, pattern: m.pattern }))
-    .sort((a, b) => a.pattern.localeCompare(b.pattern) || a.name.localeCompare(b.name));
+  return list.map(([id, m]) => ({ id, name: m.name, pattern: m.pattern, level: m.level }))
+    .sort((a, b) => a.pattern.localeCompare(b.pattern) || (a.level || 5) - (b.level || 5) || a.name.localeCompare(b.name));
 }
 
 /* swap candidates from the FULL library: any exercise of the same measure
    (so the prescription stays valid), minus what's already in the day,
    respecting the forearm grip constraint. Same-pattern ones are flagged
    `recommended` and sorted first. */
-export function alternatives(exId, { constraint } = {}, exclude = []) {
+export function alternatives(exId, { constraint, equipment } = {}, exclude = []) {
   const cur = EXERCISES[exId];
   if (!cur) return [];
+  const have = equipment || PROFILE.equipment;        // only offer moves you can actually do
+  const fam = FAMILY[cur.pattern];
+  const lvl = cur.level || 5;
   let list = Object.entries(EXERCISES).filter(([id, m]) =>
-    id !== exId && !exclude.includes(id) && m.measure === cur.measure && (!!m.noPR === !!cur.noPR));
+    id !== exId && !exclude.includes(id) && m.measure === cur.measure && (!!m.noPR === !!cur.noPR) && canDoWith(m, have));
   if (constraint && /supinated|neutral/.test(constraint))
     list = list.filter(([, m]) => m.grip !== 'pronated');
   return list
-    .map(([id, m]) => ({ id, name: m.name, pattern: m.pattern, recommended: m.pattern === cur.pattern }))
-    .sort((a, b) => (b.recommended - a.recommended) || a.name.localeCompare(b.name));
+    .map(([id, m]) => ({
+      id, name: m.name, pattern: m.pattern, level: m.level,
+      samePat: m.pattern === cur.pattern, sameFam: FAMILY[m.pattern] === fam, dl: Math.abs((m.level || 5) - lvl),
+    }))
+    // same movement first, then same family (lower/push/pull…), then closest difficulty
+    .sort((a, b) => (b.samePat - a.samePat) || (b.sameFam - a.sameFam) || (a.dl - b.dl) || a.name.localeCompare(b.name))
+    .map(a => ({ id: a.id, name: a.name, pattern: a.pattern, level: a.level, recommended: a.samePat || a.sameFam }));
 }
