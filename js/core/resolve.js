@@ -13,6 +13,7 @@ import { FILLERS, ANTAGONIST, PROFILE } from '../data/program.js';
 /* group related patterns so a swap can widen sensibly (a quad → other lower-body) */
 const FAMILY = { quad: 'lower', glute: 'lower', hamstring: 'lower', calf: 'lower', shin: 'lower', push: 'push', pull: 'pull', core: 'core', skill: 'skill', conditioning: 'cond', mobility: 'mob', full: 'full' };
 const canDoWith = (m, have) => (m.equipment || ['bw']).every(e => e === 'bw' || have.includes(e));
+const famOf = m => new Set(m.families || (m.family ? [m.family] : []));   // progression track(s)
 
 const UNIT = { reps: 'reps', hold: 'sec', cals: 'cals' };
 
@@ -198,7 +199,7 @@ export function alternatives(exId, { constraint, equipment } = {}, exclude = [])
   const have = equipment || PROFILE.equipment;        // only offer moves you can actually do
   const fam = FAMILY[cur.pattern];
   const diff = cur.diff || 5;                          // numeric 1-10 for difficulty distance
-  const sameFamily = cur.family || null;
+  const curFams = famOf(cur);
   let list = Object.entries(EXERCISES).filter(([id, m]) =>
     id !== exId && !exclude.includes(id) && m.measure === cur.measure && (!!m.noPR === !!cur.noPR) && canDoWith(m, have));
   if (constraint && /supinated|neutral/.test(constraint))
@@ -206,7 +207,7 @@ export function alternatives(exId, { constraint, equipment } = {}, exclude = [])
   return list
     .map(([id, m]) => ({
       id, name: m.name, pattern: m.pattern, diff: m.diff, level: m.level,
-      sameTrack: !!(sameFamily && m.family === sameFamily),
+      sameTrack: curFams.size > 0 && [...famOf(m)].some(f => curFams.has(f)),
       samePat: m.pattern === cur.pattern, sameFam: FAMILY[m.pattern] === fam, dl: Math.abs((m.diff || 5) - diff),
     }))
     // same track (progression family) first → same movement pattern → same family → closest difficulty
