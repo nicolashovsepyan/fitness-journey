@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache"><title>Fitness Journey — Exercise Library</title>
+<style>
+  :root{--bg:#0e0e12;--card:#1b1b22;--card2:#24242e;--line:#2c2c37;--tx:#f4f4f6;--mut:#9a9aa6;--faint:#5f5f6b;
+    --lime:#c8ff4d;--amber:#ffb84d;--teal:#4dd9a5;--beg:#63b34d;--int:#ffb84d;--adv:#ff6b6b;--tnum:"SF Mono",ui-monospace,monospace;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;padding:0 0 60px}
+  header{position:sticky;top:0;z-index:10;background:rgba(14,14,18,.97);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:14px 16px}
+  h1{margin:0;font-size:19px;font-weight:700;letter-spacing:-.02em}
+  h1 b{color:var(--lime)}
+  .sub{color:var(--mut);font-size:12px;margin-top:2px}
+  .controls{display:flex;flex-direction:column;gap:8px;margin-top:11px}
+  #q{width:100%;background:var(--card2);border:1px solid var(--line);color:var(--tx);border-radius:10px;padding:9px 12px;font-size:14px}
+  .chips{display:flex;gap:6px;flex-wrap:wrap}
+  .chip{background:var(--card2);border:1px solid var(--line);color:var(--mut);font-size:12px;font-weight:600;padding:5px 11px;border-radius:99px;cursor:pointer;white-space:nowrap}
+  .chip.on{background:var(--lime);color:#15150f;border-color:var(--lime)}
+  .wrap{max-width:760px;margin:0 auto;padding:14px 16px}
+  .patgrp{margin-bottom:20px}
+  .pathead{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--lime);margin:14px 2px 8px;display:flex;justify-content:space-between}
+  .pathead .n{color:var(--faint);font-weight:600}
+  .track{margin:0 0 10px}
+  .trackhead{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mut);margin:8px 2px 6px}
+  .ex{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 13px;margin-bottom:6px}
+  .ex.main{border-color:rgba(200,255,77,.4)}
+  .exrow{display:flex;align-items:center;gap:9px}
+  .dbadge{flex:0 0 auto;width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--tnum);font-weight:800;font-size:13px;color:#15150f}
+  .exname{flex:1;min-width:0;font-size:15px;font-weight:600}
+  .exname .star{color:var(--lime);font-size:12px;margin-left:5px}
+  .tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+  .tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;text-transform:uppercase;letter-spacing:.03em;background:var(--card2);color:var(--mut);border:1px solid var(--line)}
+  .tag.grip-safe{color:var(--teal);border-color:rgba(77,217,165,.3)}
+  .tag.lvl{color:#15150f}
+  .tag.meth{color:var(--amber);border-color:rgba(255,184,77,.25)}
+  .chain{color:var(--faint);font-size:11px;margin-top:6px}
+  .chain b{color:var(--mut)}
+  .cues{color:var(--mut);font-size:12px;margin-top:6px;line-height:1.45}
+  .empty{color:var(--mut);text-align:center;padding:40px}
+</style></head>
+<body>
+<header>
+  <h1><b>Fitness</b>Journey — Library</h1>
+  <div class="sub" id="count">loading…</div>
+  <div class="controls">
+    <input id="q" placeholder="Search exercises, tracks, cues…" autocomplete="off">
+    <div class="chips" id="patchips"></div>
+    <div class="chips" id="lvlchips"></div>
+  </div>
+</header>
+<div class="wrap" id="out"></div>
+<script type="module">
+import { EXERCISES } from './js/data/exercises.js';
+const LVLC={beg:'#63b34d',int:'#ffb84d',adv:'#ff6b6b'};
+const PATGRP={quad:'Legs',hinge:'Legs',glute:'Legs',hamstring:'Legs',calf:'Legs',shin:'Legs',push:'Push',pull:'Pull',core:'Core',skill:'Skill',conditioning:'Conditioning',full:'Full body',mobility:'Mobility'};
+const PATORDER=['Push','Pull','Legs','Core','Skill','Conditioning','Full body','Mobility'];
+const CURATED={Push:1,Pull:1,Core:1};
+const list=Object.entries(EXERCISES).map(([id,e])=>({id,...e,grp:PATGRP[e.pattern]||e.pattern,fams:e.families||(e.family?[e.family]:['—'])}));
+document.getElementById('count').textContent=list.length+' exercises · Push/Pull/Core curated · Legs provisional';
+let fPat='All', fLvl='All', fQ='';
+const pats=['All',...PATORDER.filter(p=>list.some(x=>x.grp===p))];
+const lvls=['All','beg','int','adv'];
+function chips(el,arr,cur,cb){el.innerHTML=arr.map(a=>`<span class="chip ${a===cur?'on':''}" data-v="${a}">${a}</span>`).join('');el.querySelectorAll('.chip').forEach(c=>c.onclick=()=>cb(c.dataset.v));}
+chips(document.getElementById('patchips'),pats,fPat,v=>{fPat=v;render();});
+chips(document.getElementById('lvlchips'),lvls,fLvl,v=>{fLvl=v;render();});
+document.getElementById('q').oninput=e=>{fQ=e.target.value.toLowerCase();render();};
+function render(){
+  chips(document.getElementById('patchips'),pats,fPat,v=>{fPat=v;render();});
+  chips(document.getElementById('lvlchips'),lvls,fLvl,v=>{fLvl=v;render();});
+  let f=list.filter(x=>(fPat==='All'||x.grp===fPat)&&(fLvl==='All'||x.level===fLvl));
+  if(fQ)f=f.filter(x=>(x.name+' '+x.fams.join(' ')+' '+(x.cues||'')).toLowerCase().includes(fQ));
+  const grps=PATORDER.filter(p=>f.some(x=>x.grp===p));
+  document.getElementById('out').innerHTML=grps.length?grps.map(g=>{
+    const items=f.filter(x=>x.grp===g);
+    const tracks=[...new Set(items.flatMap(x=>x.fams))].sort();
+    return `<div class="patgrp"><div class="pathead"><span>${g}${CURATED[g]?' ✦':''}</span><span class="n">${items.length}</span></div>`+
+      tracks.map(tr=>{
+        const ti=items.filter(x=>x.fams.includes(tr)).sort((a,b)=>(a.diff||5)-(b.diff||5));
+        if(!ti.length)return'';
+        return `<div class="track"><div class="trackhead">${tr}</div>`+ti.map(exCard).join('')+`</div>`;
+      }).join('')+`</div>`;
+  }).join(''):`<div class="empty">No matches.</div>`;
+}
+function exCard(x){
+  const lc=LVLC[x.level]||'#888';
+  const gripSafe=x.grip==='supinated'||x.grip==='neutral';
+  return `<div class="ex ${x.main?'main':''}">
+    <div class="exrow">
+      <div class="dbadge" style="background:${lc}">${x.diff||'?'}</div>
+      <div class="exname">${x.name}${x.main?'<span class="star">✦</span>':''}</div>
+    </div>
+    <div class="tags">
+      ${x.level?`<span class="tag lvl" style="background:${lc}">${x.level}</span>`:''}
+      ${x.grip?`<span class="tag ${gripSafe?'grip-safe':''}">${x.grip}${gripSafe?' ✓':''}</span>`:''}
+      <span class="tag">${(x.equipment||['bw']).join(' · ')}</span>
+      ${(x.methods||[]).map(m=>`<span class="tag meth">${m}</span>`).join('')}
+    </div>
+    ${(x.easier||x.harder)?`<div class="chain">${x.easier?'<b>'+(EXERCISES[x.easier]?.name||x.easier)+'</b> ← ':''}${x.name}${x.harder?' → <b>'+(EXERCISES[x.harder]?.name||x.harder)+'</b>':''}</div>`:''}
+    ${x.cues?`<div class="cues">${x.cues}</div>`:''}
+  </div>`;
+}
+render();
+</script>
+</body></html>
