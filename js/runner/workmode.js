@@ -65,7 +65,7 @@ function openWorkoutSwap() {
   const rows = alts.map(a => {
     let pre = '';
     if (!a.recommended && !dividerInserted) { dividerInserted = true; pre = '<div class="swap-divider">More from your library</div>'; }
-    return pre + `<div class="swap-opt ${a.id === item.exId ? 'cur' : ''}" data-id="${a.id}"><span>${a.name}</span><span class="muted">${a.id === item.exId ? 'current' : `${a.pattern}${a.level ? ` · L${a.level}` : ''}`}</span></div>`;
+    return pre + `<div class="swap-opt ${a.id === item.exId ? 'cur' : ''}" data-id="${a.id}"><span>${a.name}</span><span class="muted">${a.id === item.exId ? 'current' : `${a.pattern}${a.diff ? ` · d${a.diff}` : ''}`}</span></div>`;
   }).join('');
   const ov = document.createElement('div'); ov.className = 'overlay';
   ov.innerHTML = `

@@ -197,17 +197,19 @@ export function alternatives(exId, { constraint, equipment } = {}, exclude = [])
   if (!cur) return [];
   const have = equipment || PROFILE.equipment;        // only offer moves you can actually do
   const fam = FAMILY[cur.pattern];
-  const lvl = cur.level || 5;
+  const diff = cur.diff || 5;                          // numeric 1-10 for difficulty distance
+  const sameFamily = cur.family || null;
   let list = Object.entries(EXERCISES).filter(([id, m]) =>
     id !== exId && !exclude.includes(id) && m.measure === cur.measure && (!!m.noPR === !!cur.noPR) && canDoWith(m, have));
   if (constraint && /supinated|neutral/.test(constraint))
     list = list.filter(([, m]) => m.grip !== 'pronated');
   return list
     .map(([id, m]) => ({
-      id, name: m.name, pattern: m.pattern, level: m.level,
-      samePat: m.pattern === cur.pattern, sameFam: FAMILY[m.pattern] === fam, dl: Math.abs((m.level || 5) - lvl),
+      id, name: m.name, pattern: m.pattern, diff: m.diff, level: m.level,
+      sameTrack: !!(sameFamily && m.family === sameFamily),
+      samePat: m.pattern === cur.pattern, sameFam: FAMILY[m.pattern] === fam, dl: Math.abs((m.diff || 5) - diff),
     }))
-    // same movement first, then same family (lower/push/pull…), then closest difficulty
-    .sort((a, b) => (b.samePat - a.samePat) || (b.sameFam - a.sameFam) || (a.dl - b.dl) || a.name.localeCompare(b.name))
-    .map(a => ({ id: a.id, name: a.name, pattern: a.pattern, level: a.level, recommended: a.samePat || a.sameFam }));
+    // same track (progression family) first → same movement pattern → same family → closest difficulty
+    .sort((a, b) => (b.sameTrack - a.sameTrack) || (b.samePat - a.samePat) || (b.sameFam - a.sameFam) || (a.dl - b.dl) || a.name.localeCompare(b.name))
+    .map(a => ({ id: a.id, name: a.name, pattern: a.pattern, diff: a.diff, level: a.level, recommended: a.samePat || a.sameFam }));
 }
