@@ -69,7 +69,19 @@ const STYLE = `
 .lib .tag.meth{color:var(--warn);border-color:rgba(255,184,77,.25)}
 .lib .chain{color:var(--faint);font-size:11px;margin-top:6px}.lib .chain b{color:var(--lm)}
 .lib .cues{color:var(--lm);font-size:12px;margin-top:6px;line-height:1.45}
-.lib .empty{color:var(--lm);text-align:center;padding:40px}`;
+.lib .empty{color:var(--lm);text-align:center;padding:40px}
+.lib .ex[data-card]{cursor:pointer}
+.lib .exn .chev{color:var(--faint);font-size:15px;margin-left:6px;display:inline-block;transition:transform .15s}
+.lib .ex.open .exn .chev{transform:rotate(90deg);color:var(--accent)}
+.lib .exdetail{display:none}
+.lib .ex.open .exdetail{display:block}
+.lib .vid.pick{color:var(--accent);border-color:rgba(200,255,77,.45);background:rgba(200,255,77,.08)}
+/* picker overlay */
+.lib-picker .picker-card{max-width:520px;width:100%;max-height:86vh;display:flex;flex-direction:column;padding:0;overflow:hidden}
+.lib-picker .picker-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;border-bottom:1px solid var(--line)}
+.lib-picker .pk-x{background:none;border:none;color:var(--mut);font-size:20px;cursor:pointer}
+.lib-picker #pkBody{overflow-y:auto;padding:0 16px 16px}
+.lib-picker .lib .lbar{top:0}`;
 
 function buildList() {
   return Object.entries(EXERCISES).map(([id, e]) => {
@@ -78,7 +90,29 @@ function buildList() {
   });
 }
 
-export function renderLibrary(host, { onPick } = {}) {
+/* map an exercise id to the picker's opening section + track, so Swap/Add open
+   pre-filtered to the relevant place (leg day → Legs → Quads) but still browsable. */
+export function pickerInitialFor(exId) {
+  const e = EXERCISES[exId]; if (!e) return {};
+  const grp = PATGRP[e.pattern] || e.pattern;
+  const track = canon((e.families || (e.family ? [e.family] : []))[0] || '');
+  return { group: grp, track };
+}
+/* open the full library as a modal picker (used by Swap + Add everywhere) */
+export function openLibraryPicker({ title = 'Choose exercise', initial, onPick } = {}) {
+  const ov = document.createElement('div'); ov.className = 'overlay lib-picker';
+  ov.innerHTML = `<div class="overlay-card scroll picker-card">
+      <div class="picker-head"><div class="eyebrow">${title}</div><button class="x pk-x" id="pkClose">✕</button></div>
+      <div id="pkBody"></div>
+    </div>`;
+  document.body.appendChild(ov);
+  const close = () => ov.remove();
+  ov.querySelector('#pkClose').addEventListener('click', close);
+  ov.addEventListener('click', e => { if (e.target === ov) close(); });
+  renderLibrary(ov.querySelector('#pkBody'), { initial, onPick: id => { close(); onPick?.(id); } });
+  return ov;
+}
+export function renderLibrary(host, { onPick, initial } = {}) {
   if (!document.getElementById('lib-style')) {
     const s = document.createElement('style'); s.id = 'lib-style'; s.textContent = STYLE; document.head.appendChild(s);
   }
@@ -108,17 +142,23 @@ export function renderLibrary(host, { onPick } = {}) {
       <div id="lOut"></div>
     </div>`;
 
-  const F = { grp:'', track:'', work:'', lvl:'', q:'' };
+  const F = { grp: initial?.group || '', track: initial?.track || '', work:'', lvl:'', q:'' };
   const $ = id => host.querySelector(id);
   const out = $('#lOut');
+  // reflect a pre-filter (Swap/Add opens on the relevant section/track)
+  if (F.grp) $('#lGroup').value = F.grp;
+  if (F.track) $('#lTrack').value = F.track;
 
   function exCard(x) {
     const lc = LVLC[x.level] || '#888';
     const gs = x.grip === 'supinated' || x.grip === 'neutral';
-    const pickBtn = onPick ? `<a class="vid" data-pick="${x.id}" style="color:var(--accent);border-color:rgba(200,255,77,.4)">＋ pick</a>` : '';
-    return `<div class="ex ${x.main ? 'main' : ''}">
+    const pickBtn = onPick ? `<a class="vid pick" data-pick="${x.id}">＋ pick</a>` : '';
+    const chain = (x.easier || x.harder) ? `<div class="chain">${x.easier ? `<b>${(EXERCISES[x.easier]||{}).name || x.easier}</b> ← ` : ''}${x.name}${x.harder ? ` → <b>${(EXERCISES[x.harder]||{}).name || x.harder}</b>` : ''}</div>` : '';
+    const cues = x.cues ? `<div class="cues">${x.cues}</div>` : '';
+    const detail = chain + cues;
+    return `<div class="ex ${x.main ? 'main' : ''}" ${detail ? 'data-card' : ''}>
       <div class="exrow"><div class="db" style="background:${lc}">${x.diff || '?'}</div>
-        <div class="exn">${x.name}${x.main ? '<span class="star">✦</span>' : ''}</div>
+        <div class="exn">${x.name}${x.main ? '<span class="star">✦</span>' : ''}${detail ? '<span class="chev">›</span>' : ''}</div>
         ${pickBtn}<a class="vid" href="${vidUrl(x)}" target="_blank" rel="noopener">▶ ${x.demoUrl ? 'video' : 'find'}</a></div>
       <div class="tags">
         ${x.level ? `<span class="tag lvl" style="background:${lc}">${x.level}</span>` : ''}
@@ -126,8 +166,7 @@ export function renderLibrary(host, { onPick } = {}) {
         <span class="tag">${(x.equipment || ['bw']).join(' · ')}</span>
         ${methodsOf(x).map(m => `<span class="tag meth">${m}</span>`).join('')}
       </div>
-      ${(x.easier || x.harder) ? `<div class="chain">${x.easier ? `<b>${(EXERCISES[x.easier]||{}).name || x.easier}</b> ← ` : ''}${x.name}${x.harder ? ` → <b>${(EXERCISES[x.harder]||{}).name || x.harder}</b>` : ''}</div>` : ''}
-      ${x.cues ? `<div class="cues">${x.cues}</div>` : ''}
+      ${detail ? `<div class="exdetail">${detail}</div>` : ''}
     </div>`;
   }
 
@@ -159,7 +198,12 @@ export function renderLibrary(host, { onPick } = {}) {
     }).join('') : '<div class="empty">No exercises match these filters.</div>';
 
     if (onPick) out.querySelectorAll('[data-pick]').forEach(el =>
-      el.addEventListener('click', () => onPick(el.dataset.pick)));
+      el.addEventListener('click', e => { e.stopPropagation(); onPick(el.dataset.pick); }));
+    // tap a card to expand/collapse its cues (keeps the list scannable)
+    out.querySelectorAll('[data-card]').forEach(card => card.addEventListener('click', e => {
+      if (e.target.closest('a, button, [data-pick]')) return;   // don't toggle on pick/find/video
+      card.classList.toggle('open');
+    }));
   }
 
   $('#lq').addEventListener('input', e => { F.q = e.target.value.toLowerCase(); render(); });

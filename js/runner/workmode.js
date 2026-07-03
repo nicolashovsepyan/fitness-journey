@@ -10,6 +10,7 @@ import * as R from './runstate.js';
 import { store } from '../store.js';
 import { EXERCISES } from '../data/exercises.js';
 import { alternatives } from '../core/resolve.js';
+import { openLibraryPicker, pickerInitialFor } from '../screens/library.js';
 import { say, beep, buzz, fmt, initAudio, keepAwake, releaseAwake, stopKeepAlive } from '../timer.js';
 
 const UNIT = { reps: 'reps', hold: 'sec', cals: 'cals' };
@@ -59,29 +60,9 @@ const curIdx = () => (block().format === 'circuit' ? S.ci : S.ii);
 function openWorkoutSwap() {
   const b = block(); const item = b.items[curIdx()]; if (!item) return;
   const from = item.swappedFrom || item.exId;
-  const used = b.items.map(i => i.exId).filter(x => x !== item.exId);
-  const alts = alternatives(from, { constraint: S.plan.constraint }, used);
-  let dividerInserted = false;
-  const rows = alts.map(a => {
-    let pre = '';
-    if (!a.recommended && !dividerInserted) { dividerInserted = true; pre = '<div class="swap-divider">More from your library</div>'; }
-    return pre + `<div class="swap-opt ${a.id === item.exId ? 'cur' : ''}" data-id="${a.id}"><span>${a.name}</span><span class="muted">${a.id === item.exId ? 'current' : `${a.pattern}${a.diff ? ` · d${a.diff}` : ''}`}</span></div>`;
-  }).join('');
-  const ov = document.createElement('div'); ov.className = 'overlay';
-  ov.innerHTML = `
-    <div class="overlay-card scroll">
-      <div class="eyebrow">Swap exercise · saved for next week too</div>
-      <h2 style="margin:6px 0 12px;">${item.name}</h2>
-      ${alts.length ? rows : '<div class="muted" style="padding:8px 0;">No alternatives.</div>'}
-      ${item.exId !== from ? `<div class="swap-opt revert" data-id="__revert"><span>↩ Back to ${EXERCISES[from]?.name || from}</span></div>` : ''}
-      <button class="btn ghost" id="wswapCancel" style="margin-top:12px;">Cancel</button>
-    </div>`;
-  host.appendChild(ov);
-  ov.querySelector('#wswapCancel').addEventListener('click', () => ov.remove());
-  ov.querySelectorAll('.swap-opt[data-id]').forEach(el => el.addEventListener('click', () => {
-    swapCurrentExercise(el.dataset.id === '__revert' ? from : el.dataset.id, from);
-    ov.remove();
-  }));
+  // full library picker — search, browse by section/track, difficulty, play, expand
+  openLibraryPicker({ title: 'Swap · ' + item.name, initial: pickerInitialFor(from),
+    onPick: id => swapCurrentExercise(id, from) });
 }
 function swapCurrentExercise(newId, from) {
   const b = block(); const i = curIdx(); const item = b.items[i]; if (!item || !EXERCISES[newId]) return;
@@ -114,22 +95,13 @@ function changeFormat(b, fmt) {
 }
 function openAddExercise() {
   const b = block(); const ref = b.items[curIdx()] || b.items[0];
-  const used = b.items.map(x => x.exId);
-  const alts = alternatives(ref?.exId, { constraint: S.plan.constraint }, used);
-  const ov = document.createElement('div'); ov.className = 'overlay';
-  ov.innerHTML = `<div class="overlay-card scroll"><div class="eyebrow">Add exercise to block</div>
-    <h2 style="margin:6px 0 12px;">${b.name}</h2>
-    ${alts.map(a => `<div class="swap-opt" data-id="${a.id}"><span>${a.name}</span><span class="muted">${a.pattern}${a.diff ? ` · d${a.diff}` : ''}</span></div>`).join('') || '<div class="muted">No options.</div>'}
-    <button class="btn ghost" id="addCancel" style="margin-top:12px;">Cancel</button></div>`;
-  host.appendChild(ov);
-  ov.querySelector('#addCancel').addEventListener('click', () => ov.remove());
-  ov.querySelectorAll('.swap-opt[data-id]').forEach(el => el.addEventListener('click', () => {
-    const m = EXERCISES[el.dataset.id]; if (!m) return;
-    const it = { exId: el.dataset.id, name: m.name, measure: m.measure, load: m.load, laterality: m.laterality };
+  openLibraryPicker({ title: 'Add to ' + b.name, initial: pickerInitialFor(ref?.exId), onPick: id => {
+    const m = EXERCISES[id]; if (!m) return;
+    const it = { exId: id, name: m.name, measure: m.measure, load: m.load, laterality: m.laterality };
     if (m.measure === 'hold') it.hold = 30; else it.reps = ref?.reps ?? 10;
     if (!CIRCUITY.includes(b.format)) it.sets = ref?.sets ?? 3;
-    b.items.push(it); ov.remove(); restartBlock();
-  }));
+    b.items.push(it); restartBlock();
+  } });
 }
 function openWorkoutEdit() {
   const b = block(); if (!b.items || !b.items.length) return;
