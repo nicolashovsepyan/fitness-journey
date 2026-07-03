@@ -113,9 +113,16 @@ export function renderHistory(host, { onBack }) {
         const ents = (b.entries || []).filter(e => (e.sets || []).some(x => x.value != null));
         if (!ents.length) return '';
         const bt = b.seconds ? `<span class="blktime">${fmtDur(b.seconds)}</span>` : '';
-        const isRounds = ['amrap', 'tabata', 'emom'].includes(b.format) || ents.some(e => e.rounds);
+        const roundsDisp = e => {
+          const sets = (e.sets || []).filter(x => x.value != null && x.value !== '');
+          if (sets.length > 1) {   // per-round reps captured (Tabata / EMOM / circuit)
+            const total = sets.reduce((n, x) => n + (Number(x.value) || 0), 0);
+            return `${sets.length} <span class="u">rounds</span> · ${total} <span class="u">${unitFor(e.measure)}</span>`;
+          }
+          return `${sets[0]?.value ?? '–'} <span class="u">rounds</span>`;   // AMRAP round-count
+        };
         return `<div class="blkhead"><span class="bh-role">${b.type || ''}</span><span class="bh-name">${b.name || ''}</span>${bt}</div>` +
-          ents.map(e => `<div class="hist-ex"><div class="en">${e.name}</div><div class="es">${isRounds ? `${e.sets[0]?.value ?? '–'} <span class="u">rounds</span>` : setStr(e.sets, e.measure)}</div></div>`).join('');
+          ents.map(e => `<div class="hist-ex"><div class="en">${e.name}</div><div class="es">${e.rounds ? roundsDisp(e) : setStr(e.sets, e.measure)}</div></div>`).join('');
       }).join('')}</div>` : '';
       return `<div class="hist-card"><div class="htop" data-key="s${i}">
           <div><div class="hname">${s.name}</div><div class="hmeta">${exCount} exercises · ⏱ ${fmtDur(s.seconds)} · ${s.duration || ''} min plan ${deltaBadge}</div></div>
