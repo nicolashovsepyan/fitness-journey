@@ -55,7 +55,28 @@ export const store = {
     const s = read();
     delete s.swaps[sessionId]; delete s.removed[sessionId]; delete s.order[sessionId]; delete s.added[sessionId];
     if (s.fillerSwaps) delete s.fillerSwaps[sessionId];
+    if (s.removedBlocks) delete s.removedBlocks[sessionId];
+    if (s.addedBlocks) delete s.addedBlocks[sessionId];
     write(s);
+  },
+
+  /* ---- whole-block add / remove (a block = a named group of exercises) ---- */
+  getRemovedBlocks(sessionId) { return read().removedBlocks?.[sessionId] || []; },
+  setBlockRemoved(sessionId, blockName, on) {
+    const s = read(); s.removedBlocks = s.removedBlocks || {};
+    const list = new Set(s.removedBlocks[sessionId] || []);
+    if (on) list.add(blockName); else list.delete(blockName);
+    s.removedBlocks[sessionId] = [...list]; write(s);
+  },
+  getAddedBlocks(sessionId) { return read().addedBlocks?.[sessionId] || []; },
+  addBlock(sessionId, block) {
+    const s = read(); s.addedBlocks = s.addedBlocks || {};
+    s.addedBlocks[sessionId] = s.addedBlocks[sessionId] || [];
+    s.addedBlocks[sessionId].push(block); write(s);
+  },
+  removeAddedBlock(sessionId, blockName) {
+    const s = read(); const list = s.addedBlocks?.[sessionId]; if (!list) return;
+    s.addedBlocks[sessionId] = list.filter(b => b.name !== blockName); write(s);
   },
 
   getFillerSwaps(sessionId) { return read().fillerSwaps?.[sessionId] || {}; },

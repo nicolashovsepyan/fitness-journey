@@ -29,10 +29,18 @@ if (typeof document !== 'undefined') {
   // tap the timer circle to pause/resume that countdown (not the session clock)
   document.addEventListener('click', e => {
     if (!S || S.done) return;
+    if (e.target.closest('.timer-reset')) return;          // reset handled separately
     if (!e.target.closest('.timer-wrap')) return;
     if (S.stepDur == null || S.stepStartedAt == null) return;
     if (R.isStepPaused(S)) R.resumeStep(S); else { R.pauseStep(S); buzz(20); }
     reflectPause();
+  });
+  // restart the current countdown from full (if it started before you were ready)
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.timer-reset')) return;
+    e.stopPropagation();
+    if (!S || S.stepDur == null) return;
+    S.stepPausedAt = null; R.beginStep(S, S.stepDur); buzz(30); reflectPause();
   });
   // tap the demo button to watch the movement
   document.addEventListener('click', e => {
@@ -119,6 +127,8 @@ function openWorkoutEdit() {
       <h2 style="margin:6px 0 14px;">${b.name}</h2>
       <div class="ed-row"><span class="ed-l">Exercise</span>
         <div class="ed-c"><span class="ed-cur">${item.name || '—'}</span><button class="ed-mini" id="edSwap">⇄ swap</button></div></div>
+      ${b.items.length > 1 ? `<div class="ed-row"><span class="ed-l">Move</span>
+        <div class="ed-c"><button class="ed-mini" id="edUp" ${i <= 0 ? 'disabled' : ''}>↑ up</button><button class="ed-mini" id="edDown" ${i >= b.items.length - 1 ? 'disabled' : ''}>↓ down</button></div></div>` : ''}
       <div class="ed-row"><span class="ed-l">${isHold ? 'Hold · sec' : 'Target reps'}</span>
         <div class="ed-step"><button data-ed="tgt" data-d="-${isHold ? 5 : 1}">−</button><input id="edTgt" type="number" inputmode="numeric" value="${targetVal}"/><button data-ed="tgt" data-d="${isHold ? 5 : 1}">+</button></div></div>
       <div class="ed-row"><span class="ed-l">${countLabel}</span>
@@ -149,6 +159,13 @@ function openWorkoutEdit() {
     R.save(S);
   };
   ov.querySelector('#edSwap').addEventListener('click', () => { close(); openWorkoutSwap(); });
+  const move = dir => {
+    const j = i + dir; if (j < 0 || j >= b.items.length) return;
+    [b.items[i], b.items[j]] = [b.items[j], b.items[i]];   // swap positions
+    close(); restartBlock();
+  };
+  ov.querySelector('#edUp')?.addEventListener('click', () => move(-1));
+  ov.querySelector('#edDown')?.addEventListener('click', () => move(1));
   ov.querySelector('#edFail').addEventListener('click', e => { item.toFailure = !item.toFailure; e.target.classList.toggle('on', item.toFailure); e.target.textContent = item.toFailure ? 'On' : 'Off'; });
   ov.querySelector('#edDrop').addEventListener('click', e => { item.dropSet = !item.dropSet; e.target.classList.toggle('on', item.dropSet); e.target.textContent = item.dropSet ? 'On' : 'Off'; });
   ov.querySelector('#edAdd').addEventListener('click', () => { applySimple(); close(); openAddExercise(); });
@@ -215,6 +232,8 @@ function enterBlock(i, opts = {}) {
   roundBuf = {}; onStepDone = null;
   const b = block();
   if (!S.captured[b.id]) buildEntries(b);
+  // circuits get an 8s set-up before the FIRST exercise (every entry, incl. block transitions)
+  if (!resuming && b.format === 'circuit') { S.sub = 'buffer'; R.save(S); beep('go'); say(b.name); return renderActive(); }
   if (resuming || skipReady) { beep('go'); say(b.name); return renderActive(); }
   renderGetReady();
 }
@@ -418,7 +437,8 @@ function timerSvg(cls) {
   const r = 110, c = 2 * Math.PI * r;
   return `<div class="timer ${cls}"><svg viewBox="0 0 240 240"><circle class="track" cx="120" cy="120" r="${r}"></circle>
     <circle class="fill" id="timerFill" cx="120" cy="120" r="${r}" stroke-dasharray="${c}" stroke-dashoffset="0"></circle></svg>
-    <div class="read"><div class="t" id="timerText">0:00</div><div class="cap" id="timerCap"></div></div></div>`;
+    <div class="read"><div class="t" id="timerText">0:00</div><div class="cap" id="timerCap"></div>
+      <button class="timer-reset" id="timerReset" title="Restart timer">↺ reset</button></div></div>`;
 }
 function updateTimer(rem, total) {
   const r = 110, c = 2 * Math.PI * r;
@@ -698,11 +718,8 @@ function afterCircuitItem() {
   const b = block();
   if (S.ci < b.items.length - 1) {
     S.ci += 1;
-    const nextItem = b.items[S.ci];
-    // 8s set-up buffer ONLY before a hold (time to get into position). Reps → go straight in.
-    const useBuffer = !!(nextItem && nextItem.measure === 'hold');
-    S.sub = useBuffer ? 'buffer' : 'work'; R.save(S);
-    return useBuffer ? renderBuffer() : renderCircuit();
+    S.sub = 'buffer'; R.save(S);          // 8s set-up before EVERY next exercise (time to get into position)
+    return renderBuffer();
   }
   endRound();
 }
@@ -712,7 +729,7 @@ function endRound() {
   R.save(S); buzz(60); say(`Round ${S.round} done.`);
   if (S.round < (b.rounds || 1)) {
     if ((b.roundRest ?? 30) > 0) { S.sub = 'roundrest'; R.save(S); renderRoundRest(); }
-    else { S.round += 1; S.ci = 0; roundBuf = {}; S.sub = 'work'; R.save(S); renderCircuit(); }
+    else { S.round += 1; S.ci = 0; roundBuf = {}; S.sub = 'buffer'; R.save(S); renderCircuit(); }   // 8s set-up into the next round
   } else completeBlock();          // last round → editable log (every round adjustable)
 }
 function renderRoundRest() {
@@ -726,7 +743,7 @@ function renderRoundRest() {
     <div class="actionbar"><button class="btn lg" id="nextRound">Start round ${S.round + 1} ▸</button></div>`, { progress: false, edit: false });
   const proceed = () => {
     b.items.forEach((it, i) => { const v = readInput(`rr_${i}`); if (v != null) S.captured[b.id][i].sets[S.captured[b.id][i].sets.length - 1].value = v; });
-    R.clearStep(S); onStepDone = null; S.round += 1; S.ci = 0; roundBuf = {}; S.sub = 'work'; R.save(S); renderCircuit();
+    R.clearStep(S); onStepDone = null; S.round += 1; S.ci = 0; roundBuf = {}; S.sub = 'buffer'; R.save(S); renderCircuit();
   };
   beginStep(rest, 'rest'); onStepDone = proceed;
   document.getElementById('nextRound').addEventListener('click', proceed);

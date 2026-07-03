@@ -29,13 +29,19 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
     swaps: store.getSwaps(sessionId), removed: store.getRemoved(sessionId),
     order: store.getOrder(sessionId), added: store.getAdded(sessionId),
     fillerSwaps: store.getFillerSwaps(sessionId),
+    removedBlocks: store.getRemovedBlocks(sessionId), addedBlocks: store.getAddedBlocks(sessionId),
   });
+  const LVLC = { beg: '#63b34d', int: '#ffb84d', adv: '#ff6b6b' };
+  const diffBadge = exId => { const e = EXERCISES[exId] || {}; return e.diff ? `<span class="rowdiff" style="background:${LVLC[e.level] || '#7a7a86'}">${e.diff}</span>` : ''; };
+  const playBtn = exId => { const e = EXERCISES[exId] || {}; const url = e.demoUrl ? e.demoUrl.replace('/embed/', '/watch?v=') : 'https://www.youtube.com/results?search_query=' + encodeURIComponent((e.name || '') + ' calisthenics'); return `<a class="rowplay" href="${url}" target="_blank" rel="noopener" title="Watch">▶</a>`; };
 
   function draw() {
     const rp = plan();
     const tags = [rp.category && rp.category.replace('_', ' '), rp.coreDominant ? 'core-dominant' : null, rp.variant].filter(Boolean);
     const total = rp.blocks.reduce((t, b) => t + blockMinutes(b), 0);
-    const edited = Object.keys(store.getSwaps(sessionId)).length || store.getRemoved(sessionId).length || Object.keys(store.getOrder(sessionId)).length;
+    const edited = Object.keys(store.getSwaps(sessionId)).length || store.getRemoved(sessionId).length
+      || Object.keys(store.getOrder(sessionId)).length || Object.keys(store.getFillerSwaps(sessionId)).length
+      || store.getRemovedBlocks(sessionId).length || store.getAddedBlocks(sessionId).length;
 
     let html = '', lastRole = null, group = [];
     const flush = () => {
@@ -62,8 +68,9 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
           ${DURATIONS.map(d => `<div class="dur ${dur === d ? 'on' : ''}" data-d="${d}"><div class="m">${d}</div><div class="x">${DUR_LABEL[d]}</div></div>`).join('')}
         </div>
         ${rp.scalingNote ? `<div class="scaling-note">@${dur}min · ${rp.scalingNote}</div>` : ''}
-        <div class="edit-hint">⇄ swap · ⋮⋮ drag to reorder · swipe left to remove${edited ? ` · <a id="resetEdits">reset edits</a>` : ''}</div>
+        <div class="edit-hint">⇄ swap · ⋮⋮ drag to reorder · ✕ remove${edited ? ` · <a id="resetEdits">reset edits</a>` : ''}</div>
         ${html}
+        <button class="add-block" id="addBlock">+ Add a block</button>
         <div class="actionbar"><button class="btn lg" id="start">Start workout ▸</button></div>
       </div>`;
 
@@ -77,12 +84,26 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
     host.querySelectorAll('.swap[data-from]').forEach(el => el.addEventListener('click', () => openSwap(el.dataset.from, el.dataset.block, rp)));
     host.querySelectorAll('.swap[data-filler]').forEach(el => el.addEventListener('click', () => openFillerSwap(el.dataset.block, el.dataset.filler, rp)));
     host.querySelectorAll('.add-ex[data-block]').forEach(el => el.addEventListener('click', () => openAdd(el.dataset.block, el.dataset.bid, rp)));
-    host.querySelectorAll('.ex-remove[data-from]').forEach(el => el.addEventListener('click', () => {
-      if (el.dataset.added) store.removeAdded(sessionId, el.dataset.bn, el.dataset.from);
-      else store.setRemoved(sessionId, el.dataset.from, true);
+    host.querySelectorAll('.row-x[data-remove]').forEach(el => el.addEventListener('click', e => {
+      e.stopPropagation();
+      if (el.dataset.added) store.removeAdded(sessionId, el.dataset.bn, el.dataset.remove);
+      else store.setRemoved(sessionId, el.dataset.remove, true);
       draw();
     }));
-    host.querySelectorAll('.ex-row').forEach(wireSwipe);
+    host.querySelectorAll('.filler-x[data-block]').forEach(el => el.addEventListener('click', e => {
+      e.stopPropagation(); store.setFillerSwap(sessionId, el.dataset.block, '__none'); draw();   // remove the secondary
+    }));
+    host.querySelectorAll('.block-x[data-block]').forEach(el => el.addEventListener('click', e => {
+      e.stopPropagation();
+      if (el.dataset.added) store.removeAddedBlock(sessionId, el.dataset.block);
+      else store.setBlockRemoved(sessionId, el.dataset.block, true);
+      draw();
+    }));
+    host.querySelector('#addBlock')?.addEventListener('click', () => openAddBlock(rp));
+    // tap a row (not a control) to expand its cue
+    host.querySelectorAll('.ex-row .exmeta').forEach(el => el.addEventListener('click', () => {
+      const cue = el.querySelector('.cue'); if (cue) cue.style.display = cue.style.display === 'block' ? 'none' : 'block';
+    }));
 
     // drag-to-reorder: items within each block, blocks within each section
     host.querySelectorAll('.ex-list').forEach(list => makeSortable(list, ids => { store.setItemOrder(sessionId, list.dataset.block, ids); }));
@@ -99,7 +120,8 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
         <div class="bhead">
           <div class="bleft"><button class="drag-handle" data-drag title="Move block">⋮⋮</button>
             <div><div class="bname">${b.name} ${b.anchor ? '<span class="anchor-dot">●</span>' : ''}</div><div class="bmeta">~${blockMinutes(b)} min${tag ? ` · ${tag}` : ''}</div></div></div>
-          <span class="fmt-chip ${b.anchor ? 'anchor' : ''}">${FORMATS[b.format]?.short || b.format}</span>
+          <div class="bright"><span class="fmt-chip ${b.anchor ? 'anchor' : ''}">${FORMATS[b.format]?.short || b.format}</span>
+            <button class="block-x" data-block="${b.name}" data-added="${b.addedBlock ? '1' : ''}" title="Remove block">✕</button></div>
         </div>
         <div class="ex-list" data-block="${b.name}">${b.items.map(it => exRow(it, b)).join('')}</div>
         ${b.filler ? fillerRow(b.filler, b) : ''}
@@ -117,13 +139,15 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
         <span class="ss-link">+ superset</span>
         <div class="ex-row static ss-row">
           <div class="ex-inner">
-            <div class="demo" data-cue="1" title="info">ⓘ</div>
+            ${diffBadge(f.exId)}
             <div class="exmeta">
               <div class="exname">${f.name} <span class="ss-badge">secondary</span>${f.swapped ? '<span class="swapped">swapped</span>' : ''}</div>
               <div class="exrx">${rx} · in the rest — light, just enough</div>
               <div class="cue" style="display:none; color:var(--faint); font-size:12px; margin-top:3px;">${cue}</div>
             </div>
+            ${playBtn(f.exId)}
             <button class="swap" data-filler="${f.exId}" data-block="${b.name}" title="Swap secondary">⇄</button>
+            <button class="row-x filler-x" data-block="${b.name}" title="Remove secondary">✕</button>
           </div>
         </div>
       </div>`;
@@ -136,15 +160,16 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
       <div class="ex-row" data-sortable-item data-id="${from}">
         <div class="ex-inner">
           <button class="drag-handle sm" data-drag title="Move">⋮⋮</button>
-          <div class="demo" data-cue="1" title="info">ⓘ</div>
+          ${diffBadge(it.exId)}
           <div class="exmeta">
             <div class="exname">${it.name} ${it.swappedFrom ? '<span class="swapped">swapped</span>' : ''}${it.added ? '<span class="swapped">added</span>' : ''}</div>
             <div class="exrx">${describeItem(b, it)}</div>
             <div class="cue" style="display:none; color:var(--faint); font-size:12px; margin-top:3px;">${cue}</div>
           </div>
+          ${playBtn(it.exId)}
           <button class="swap" data-from="${from}" data-block="${b.id}" title="Swap exercise">⇄</button>
+          <button class="row-x" data-remove="${from}" data-bn="${b.name}" data-added="${it.added ? '1' : ''}" title="Remove">✕</button>
         </div>
-        <button class="ex-remove" data-from="${from}" data-bn="${b.name}" data-added="${it.added ? '1' : ''}">Remove</button>
       </div>`;
   }
 
@@ -226,6 +251,18 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
       if (measure === 'hold') { if (p.hold == null) p.hold = 30; delete p.reps; }
       if (p.rest == null && p.sets) p.rest = 60;
       store.addItem(sessionId, blockName, { ex: id, ...p });
+      draw();
+    } });
+  }
+
+  function openAddBlock(rp) {
+    openLibraryPicker({ title: 'Add a block', onPick: id => {
+      const m = EXERCISES[id]; if (!m) return;
+      const isHold = m.measure === 'hold';
+      const item = isHold ? { ex: id, sets: 3, hold: 30, rest: 60 } : { ex: id, sets: 3, reps: 10, rest: 90 };
+      const existing = new Set(rp.blocks.map(b => b.name));
+      let name = m.name, n = 2; while (existing.has(name)) name = `${m.name} ${n++}`;
+      store.addBlock(sessionId, { name, role: 'Work', format: isHold ? 'isometric' : 'straight', items: [item] });
       draw();
     } });
   }

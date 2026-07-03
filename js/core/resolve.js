@@ -78,12 +78,14 @@ function scaleForDuration(session, duration) {
 const TIER = { 'Joint Prep': 0, Primer: 1, Work: 2, Finisher: 3, Benchmark: 4, Mobility: 5 };
 const oidx = (arr, v) => { const i = (arr || []).indexOf(v); return i < 0 ? 1e6 : i; };
 
-export function resolveSession(sessionId, { duration = 30, sessionIndex = 0, swaps = {}, removed = [], order = {}, added = {}, fillerSwaps = {} } = {}) {
+export function resolveSession(sessionId, { duration = 30, sessionIndex = 0, swaps = {}, removed = [], order = {}, added = {}, fillerSwaps = {}, removedBlocks = [], addedBlocks = [] } = {}) {
   const s = SESSIONS[sessionId];
   if (!s) throw new Error(`Unknown session '${sessionId}'`);
 
   let fillerIndex = 0;
-  const blocks = scaleForDuration(s, duration).map((b, i) => {
+  const blocks = scaleForDuration(s, duration)
+    .filter(b => !removedBlocks.includes(b.name))          // drop whole blocks the user removed
+    .map((b, i) => {
     let items = b.items
       .filter(it => !removed.includes(it.ex))            // drop removed exercises (by original id)
       .map(it => {
@@ -100,18 +102,27 @@ export function resolveSession(sessionId, { duration = 30, sessionIndex = 0, swa
       anchor: !!b.anchor, rounds: b.rounds, work: b.work, rest: b.rest,
       transition: b.transition, roundRest: b.roundRest, minutes: b.minutes, items,
     };
-    if (b.filler && block.items.length) {
+    const fillerState = fillerSwaps[b.name];
+    if (b.filler && block.items.length && fillerState !== '__none') {   // '__none' = user removed the secondary
       let f = pickFiller(b, sessionIndex, fillerIndex++);
-      const swapTo = fillerSwaps[b.name];               // user swapped the secondary/superset move
-      if (swapTo && EXERCISES[swapTo]) {
-        const m = EXERCISES[swapTo];
+      if (fillerState && EXERCISES[fillerState]) {      // user swapped the secondary/superset move
+        const m = EXERCISES[fillerState];
         const rx = m.measure === 'hold' ? { hold: f.hold || 20 } : { reps: f.reps || (f.type === 'core' ? 12 : 10) };
-        f = { type: f.type, exId: swapTo, name: m.name, measure: m.measure, swapped: true, ...rx };
+        f = { type: f.type, exId: fillerState, name: m.name, measure: m.measure, swapped: true, ...rx };
       }
       block.filler = f;
     }
     return block;
   }).filter(block => block.items.length > 0 || block.format === 'jointprep');
+
+  // append user-added blocks (each already has resolved item ids)
+  addedBlocks.forEach((ab, i) => {
+    const items = (ab.items || []).map(it => ({ ...meta(it.ex), ...it, exId: it.ex, added: true }));
+    if (!items.length) return;
+    blocks.push({ id: ab.id || `ab${i}`, role: ab.role || 'Work', type: ab.role || 'Work',
+      name: ab.name, format: ab.format || 'straight', note: ab.note || '', anchor: false,
+      rounds: ab.rounds, transition: ab.transition, roundRest: ab.roundRest, items, addedBlock: true });
+  });
 
   // saved block order — within each role section (sections stay grouped)
   blocks.sort((a, b) => ((TIER[a.role] ?? 9) - (TIER[b.role] ?? 9)) || (oidx(order.blocks, a.name) - oidx(order.blocks, b.name)));
