@@ -121,8 +121,9 @@ export function renderHistory(host, { onBack }) {
           }
           return `${sets[0]?.value ?? '–'} <span class="u">rounds</span>`;   // AMRAP round-count
         };
-        return `<div class="blkhead"><span class="bh-role">${b.type || ''}</span><span class="bh-name">${b.name || ''}</span>${bt}</div>` +
-          ents.map(e => `<div class="hist-ex"><div class="en">${e.name}</div><div class="es">${e.rounds ? roundsDisp(e) : setStr(e.sets, e.measure)}</div></div>`).join('');
+        const rpeDot = r => r ? `<span class="rpe-dot ${r}" title="${r}"></span>` : '';
+        return `<div class="blkhead"><span class="bh-role">${b.type || ''}</span><span class="bh-name">${b.name || ''}</span>${rpeDot(b.rpe)}${bt}</div>` +
+          ents.map(e => `<div class="hist-ex"><div class="en">${rpeDot(e.rpe)}${e.name}</div><div class="es">${e.rounds ? roundsDisp(e) : setStr(e.sets, e.measure)}</div></div>`).join('');
       }).join('')}</div>` : '';
       return `<div class="hist-card"><div class="htop" data-key="s${i}">
           <div><div class="hname">${s.name}</div><div class="hmeta">${exCount} exercises · ⏱ ${fmtDur(s.seconds)} · ${s.duration || ''} min plan ${deltaBadge}</div></div>

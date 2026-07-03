@@ -841,6 +841,12 @@ function renderBenchmark() {
 }
 
 /* ---------------- log card + summary ---------------- */
+/* effort grade (RPE) chips — one tap, feeds next-week progression */
+const RPE = [['soft', 'Soft'], ['right', 'Right'], ['hard', 'Hard']];
+function rpeChips(cur, key) {
+  return `<div class="rpe" data-rpekey="${key}">${RPE.map(([v, l]) =>
+    `<button class="rpe-chip ${v} ${cur === v ? 'on' : ''}" data-rpe="${v}">${l}</button>`).join('')}</div>`;
+}
 function renderLog() {
   const b = block(); const entries = S.captured[b.id];
   // grouped: exercise name once, its sets underneath (no repeated names)
@@ -851,12 +857,22 @@ function renderLog() {
       const lbl = st.side ? st.side : (sets.length > 1 ? `${word} ${si + 1}` : word);
       return `<div class="logset"><span class="sn">${lbl}</span>${cellInputs({ measure: e.measure, load: e.load }, `b${ei}_${si}`, st.value, st.weight, e.exId)}</div>`;
     }).join('');
-    return `<div class="loggroup"><div class="gname">${e.name}</div>${rows}</div>`;
+    return `<div class="loggroup"><div class="gname">${e.name}</div>${rows}
+      <div class="rpe-line"><span class="rpe-l">Effort</span>${rpeChips(e.rpe, 'e' + ei)}</div></div>`;
   }).join('');
   shell(`<div class="center"><div class="eyebrow">${b.role}</div><h2 style="font-size:22px;margin:8px 0 4px;">Log — ${b.name}</h2>
-      <p class="muted" style="margin:0 0 14px;">Tweak then confirm.</p></div>
+      <p class="muted" style="margin:0 0 14px;">Tweak, grade the effort, confirm.</p></div>
     <div class="card logcard">${groups}</div>
+    <div class="rpe-block"><span class="rpe-bl">How hard was this block?</span>${rpeChips((S.blockRpe || {})[b.id], 'blk')}</div>
     <div class="actionbar"><button class="btn lg" id="confirm">${isLastBlock() ? 'Finish workout ✓' : 'Confirm ▸'}</button></div>`, { progress: false, edit: false });
+  host.querySelectorAll('.rpe').forEach(g => g.addEventListener('click', ev => {
+    const chip = ev.target.closest('.rpe-chip'); if (!chip) return;
+    g.querySelectorAll('.rpe-chip').forEach(c => c.classList.toggle('on', c === chip));
+    const key = g.dataset.rpekey, val = chip.dataset.rpe;
+    if (key === 'blk') { S.blockRpe = S.blockRpe || {}; S.blockRpe[b.id] = val; }
+    else { entries[+key.slice(1)].rpe = val; }
+    buzz(15); R.save(S);
+  }));
   document.getElementById('confirm').addEventListener('click', () => {
     entries.forEach((e, ei) => {
       const sets = e.sets.length ? e.sets : [{}];
@@ -927,7 +943,7 @@ function finishSession() {
   const elapsed = R.sessionElapsed(S);
   const session = {
     date: new Date().toISOString(), name: S.plan.name, duration: S.plan.duration, seconds: elapsed,
-    blocks: S.plan.blocks.map(b => ({ id: b.id, type: b.role, name: b.name, format: b.format, seconds: S.blockTimes[b.id] || 0, entries: S.captured[b.id] || [] })),
+    blocks: S.plan.blocks.map(b => ({ id: b.id, type: b.role, name: b.name, format: b.format, seconds: S.blockTimes[b.id] || 0, rpe: (S.blockRpe || {})[b.id] || null, entries: S.captured[b.id] || [] })),
   };
   const { prs } = store.saveSession(session);
   const effs = efficiencyCallouts(session);

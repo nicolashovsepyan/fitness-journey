@@ -110,6 +110,16 @@ export const store = {
     }
     return null;
   },
+  /* most recent effort grade (soft|right|hard) for an exercise — the signal the
+     progression engine uses next week: soft → push, right → small bump, hard → hold/deload */
+  getLastIntensity(exId) {
+    const sessions = read().sessions;
+    for (let i = sessions.length - 1; i >= 0; i--)
+      for (const b of (sessions[i].blocks || []))
+        for (const e of (b.entries || []))
+          if (e.exId === exId && e.rpe) return e.rpe;
+    return null;
+  },
   getPR(exId) { return read().prs[exId] || null; },
   setPR(exId, rec) { const s = read(); if (rec) s.prs[exId] = rec; else delete s.prs[exId]; write(s); },
   clearPR(exId) { const s = read(); delete s.prs[exId]; write(s); },
