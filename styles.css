@@ -334,8 +334,8 @@ body.dragging { overflow: hidden; touch-action: none; }           /* no scroll-j
 .gear { width:40px; height:40px; border-radius:12px; background:var(--box-2); border:1px solid var(--line); color:var(--text); font-size:17px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; }
 .gear:active, .gear.on { background:var(--accent); color:#14140a; border-color:var(--accent); }
 
-.add-ex { width:100%; margin-top:10px; background:transparent; border:1px dashed var(--line); color:var(--muted); font-size:13px; font-weight:600; padding:10px; border-radius:var(--radius-sm); cursor:pointer; }
-.add-ex:active { background:var(--box-2); color:var(--accent); border-color:var(--accent); }
+.add-ex { width:100%; margin-top:10px; background:var(--accent-dim); border:1px solid #3a4422; color:var(--accent); font-size:13.5px; font-weight:700; padding:11px; border-radius:var(--radius-sm); cursor:pointer; }
+.add-ex:active { background:var(--accent); color:#14140a; border-color:var(--accent); }
 
 .sessclock { font-family:var(--tnum); color:var(--accent); font-size:13px; font-weight:600; margin-left:8px; }
 

@@ -80,7 +80,9 @@ const STYLE = `
 .lib-picker .picker-card{max-width:520px;width:100%;max-height:86vh;display:flex;flex-direction:column;padding:0;overflow:hidden}
 .lib-picker .picker-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;border-bottom:1px solid var(--line)}
 .lib-picker .pk-x{background:none;border:none;color:var(--mut);font-size:20px;cursor:pointer}
-.lib-picker #pkBody{overflow-y:auto;padding:0 16px 16px}
+.lib-picker #pkBody{overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;padding:0 16px 16px}
+.lib .ex{width:100%}
+.lib .exn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lib-picker .lib .lbar{top:0}`;
 
 function buildList() {
@@ -155,18 +157,18 @@ export function renderLibrary(host, { onPick, initial } = {}) {
     const pickBtn = onPick ? `<a class="vid pick" data-pick="${x.id}">＋ pick</a>` : '';
     const chain = (x.easier || x.harder) ? `<div class="chain">${x.easier ? `<b>${(EXERCISES[x.easier]||{}).name || x.easier}</b> ← ` : ''}${x.name}${x.harder ? ` → <b>${(EXERCISES[x.harder]||{}).name || x.harder}</b>` : ''}</div>` : '';
     const cues = x.cues ? `<div class="cues">${x.cues}</div>` : '';
-    const detail = chain + cues;
-    return `<div class="ex ${x.main ? 'main' : ''}" ${detail ? 'data-card' : ''}>
-      <div class="exrow"><div class="db" style="background:${lc}">${x.diff || '?'}</div>
-        <div class="exn">${x.name}${x.main ? '<span class="star">✦</span>' : ''}${detail ? '<span class="chev">›</span>' : ''}</div>
-        ${pickBtn}<a class="vid" href="${vidUrl(x)}" target="_blank" rel="noopener">▶ ${x.demoUrl ? 'video' : 'find'}</a></div>
-      <div class="tags">
+    // everything except the clean first row lives in the tap-to-expand detail
+    const tags = `<div class="tags">
         ${x.level ? `<span class="tag lvl" style="background:${lc}">${x.level}</span>` : ''}
         ${x.grip ? `<span class="tag ${gs ? 'gs' : ''}">${x.grip}${gs ? ' ✓' : ''}</span>` : ''}
         <span class="tag">${(x.equipment || ['bw']).join(' · ')}</span>
         ${methodsOf(x).map(m => `<span class="tag meth">${m}</span>`).join('')}
-      </div>
-      ${detail ? `<div class="exdetail">${detail}</div>` : ''}
+      </div>`;
+    return `<div class="ex ${x.main ? 'main' : ''}" data-card>
+      <div class="exrow"><div class="db" style="background:${lc}">${x.diff || '?'}</div>
+        <div class="exn">${x.name}${x.main ? '<span class="star">✦</span>' : ''}<span class="chev">›</span></div>
+        ${pickBtn}<a class="vid" href="${vidUrl(x)}" target="_blank" rel="noopener">▶ ${x.demoUrl ? 'video' : 'find'}</a></div>
+      <div class="exdetail">${tags}${chain}${cues}</div>
     </div>`;
   }
 

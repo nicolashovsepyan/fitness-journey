@@ -125,7 +125,7 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
         </div>
         <div class="ex-list" data-block="${b.name}">${b.items.map(it => exRow(it, b)).join('')}</div>
         ${b.filler ? fillerRow(b.filler, b) : ''}
-        ${b.format !== 'jointprep' ? `<button class="add-ex" data-block="${b.name}" data-bid="${b.id}">+ Add exercise</button>` : ''}
+        ${b.format !== 'jointprep' ? `<button class="add-ex" data-block="${b.name}" data-bid="${b.id}">＋ Add exercise to this block</button>` : ''}
         ${b.note ? `<div class="bnote">${b.note}</div>` : ''}
       </div>`;
   }
