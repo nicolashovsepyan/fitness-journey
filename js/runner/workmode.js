@@ -418,12 +418,15 @@ function blockStrip() {
   }).join('');
 }
 /* step back to the previous block (clears its log so it's re-done cleanly) */
+/* Back = REVIEW the previous block's log (never wipe what was entered). */
 function backBlock() {
   if (S.bi <= 0) return;
-  const prev = S.plan.blocks[S.bi - 1];
-  (S.captured[prev.id] || []).forEach(e => e.sets = []);
   R.clearStep(S); onStepDone = null; roundBuf = {};
-  enterBlock(S.bi - 1);
+  S.bi -= 1; R.save(S);
+  const b = block();
+  if (!S.captured[b.id]) buildEntries(b);
+  if (!b.items || !b.items.length || b.format === 'jointprep') return enterBlock(S.bi);
+  renderLog();          // editable log for the block you stepped back to; Confirm returns forward
 }
 function shellPlain(inner) {
   host.innerHTML = `<div class="screen fade-in center">
@@ -797,12 +800,17 @@ function renderInterval() {
   if (S.iv == null) { S.iv = 0; S.ivPhase = 'work'; R.save(S); }   // iv = interval index across rounds×items
   const totalIv = rounds * b.items.length;
   if (S.iv >= totalIv) { captureIntervals(); return completeBlock(); }
-  const item = b.items[S.iv % b.items.length];
+  const idxInRound = S.iv % b.items.length;
+  const item = b.items[idxInRound];
   const roundN = Math.floor(S.iv / b.items.length) + 1;
   const phaseWork = S.ivPhase === 'work';
-  shell(`<div class="now-ex"><div class="label">${b.format === 'emom' ? 'EMOM' : 'Tabata'} · round ${roundN}/${rounds}</div>
-      <div class="name">${phaseWork ? item.name : 'Rest'}</div></div>
+  const nextItem = b.items[(idxInRound + 1) % b.items.length];
+  // the full sequence so you always see what's coming — current one highlighted
+  const seq = b.items.map((it, i) => `<div class="ci ${i === idxInRound ? 'active' : (i < idxInRound ? 'done' : '')}"><span class="nm">${it.name}</span><span class="tg">${it.measure === 'hold' ? (it.hold || work) + 's' : (it.reps ?? it.target ?? '') + (it.reps ? ' reps' : '')}</span></div>`).join('');
+  shell(`<div class="now-ex"><div class="label">${b.format === 'emom' ? 'EMOM' : 'Tabata'} · round ${roundN}/${rounds} · ${idxInRound + 1}/${b.items.length}</div>
+      <div class="name">${phaseWork ? item.name : 'Rest'}</div>${phaseWork ? '' : `<div class="side">next · ${nextItem.name}</div>`}</div>
     <div class="timer-wrap">${timerSvg(phaseWork ? 'buffer' : 'rest')}</div>
+    <div class="circuit-list">${seq}</div>
     <div class="actionbar"><button class="btn ghost" id="skip">Skip ▸</button></div>`);
   const dur = phaseWork ? work : rest;
   if (dur <= 0) return nextInterval();
@@ -844,7 +852,7 @@ function renderLog() {
     const sets = e.sets.length ? e.sets : [{ value: null }];
     const rows = sets.map((st, si) => {
       const lbl = st.side ? st.side : (sets.length > 1 ? `${word} ${si + 1}` : word);
-      return `<div class="logset"><span class="sn">${lbl}</span>${cellInputs({ measure: e.measure, load: e.load }, `b${ei}_${si}`, st.value, st.weight, e.exId)}</div>`;
+      return `<div class="logset"><span class="sn">${lbl}</span>${logCell(e, `b${ei}_${si}`, st)}</div>`;
     }).join('');
     return `<div class="loggroup"><div class="gname">${e.name}</div>${rows}
       <div class="rpe-line"><span class="rpe-l">Effort</span>${rpeChips(e.rpe, 'e' + ei)}</div></div>`;
@@ -865,11 +873,26 @@ function renderLog() {
   document.getElementById('confirm').addEventListener('click', () => {
     entries.forEach((e, ei) => {
       const sets = e.sets.length ? e.sets : [{}];
-      sets.forEach((st, si) => { st.value = readInput(`b${ei}_${si}`); const w = document.getElementById(`w_b${ei}_${si}`); if (w && w.value !== '') st.weight = Number(w.value); });
+      sets.forEach((st, si) => readLogCell(e, `b${ei}_${si}`, st));
       e.sets = sets;
     });
     R.save(S); sectionNext();
   });
+}
+/* unified log cell — reps + hold(sec) + weight, all optional, on EVERY exercise.
+   st.value stays as the primary measure (reps→reps, hold→sec) for PRs/history. */
+function logCell(e, key, st) {
+  const reps = st.reps ?? (e.measure !== 'hold' ? st.value : null);
+  const sec  = st.sec  ?? (e.measure === 'hold' ? st.value : null);
+  const wt   = st.weight ?? (e.exId ? (store.getLast(e.exId)?.weight ?? null) : null);
+  const fld = (id, v, u, mode) => `<div class="lf"><input id="${id}_${key}" type="number" inputmode="${mode}" value="${v ?? ''}" placeholder="–" onfocus="this.select()"><span class="u">${u}</span></div>`;
+  return `<div class="logcell">${fld('r', reps, 'reps', 'numeric')}${fld('s', sec, 'sec', 'numeric')}${fld('w', wt, WUNIT, 'decimal')}</div>`;
+}
+function readLogCell(e, key, st) {
+  const num = id => { const el = document.getElementById(`${id}_${key}`); return el && el.value !== '' ? Number(el.value) : null; };
+  const reps = num('r'), sec = num('s'), wt = num('w');
+  st.reps = reps; st.sec = sec; if (wt != null) st.weight = wt;
+  st.value = e.measure === 'hold' ? (sec ?? reps) : (reps ?? sec);   // primary for PR/history
 }
 function renderSummary() {
   const b = block();
