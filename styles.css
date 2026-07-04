@@ -761,3 +761,10 @@ html, body { overflow-x: hidden; max-width: 100%; }
 .timer-reset { margin-top:8px; background:var(--box-2); border:1px solid var(--line); color:var(--muted); font-size:12px; font-weight:700; padding:5px 12px; border-radius:999px; cursor:pointer; font-family:var(--font); }
 .timer-reset:active { background:var(--accent); color:#14140a; }
 .timer .read { display:flex; flex-direction:column; align-items:center; }
+
+/* two-line day-builder row: name + play + swap on top, prescription below · swipe-left to remove */
+.ex-row .exrow1 { display:flex; align-items:center; gap:8px; }
+.ex-row .exrow1 .exname { flex:1; min-width:0; }
+.ex-row .exrow1 .rowplay, .ex-row .exrow1 .swap { flex:0 0 auto; }
+.ex-swipe-bg { position:absolute; inset:4px 0; z-index:0; display:flex; align-items:center; justify-content:flex-end; padding-right:14px; background:var(--danger); color:#fff; font-weight:800; font-size:12px; letter-spacing:.04em; text-transform:uppercase; border-radius:8px; }
+.ex-row.will-remove .ex-swipe-bg { background:#ff3b3b; }

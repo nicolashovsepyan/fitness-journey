@@ -82,7 +82,12 @@ const STYLE = `
 .lib-picker .pk-x{background:none;border:none;color:var(--mut);font-size:20px;cursor:pointer}
 .lib-picker #pkBody{overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;padding:0 16px 16px}
 .lib .ex{width:100%}
-.lib .exn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lib .exn{line-height:1.2;word-break:break-word}
+.lib .exrow{gap:8px}
+.lib .db{width:26px;height:26px;font-size:12px}
+.lib .vid{padding:6px 9px;flex:0 0 auto}
+.lib .vid.pick{padding:6px 11px}
+.lib .vid.play{padding:6px 8px;font-size:13px}
 .lib-picker .lib .lbar{top:0}`;
 
 function buildList() {
@@ -154,7 +159,7 @@ export function renderLibrary(host, { onPick, initial } = {}) {
   function exCard(x) {
     const lc = LVLC[x.level] || '#888';
     const gs = x.grip === 'supinated' || x.grip === 'neutral';
-    const pickBtn = onPick ? `<a class="vid pick" data-pick="${x.id}">＋ pick</a>` : '';
+    const pickBtn = onPick ? `<a class="vid pick" data-pick="${x.id}">add</a>` : '';
     const chain = (x.easier || x.harder) ? `<div class="chain">${x.easier ? `<b>${(EXERCISES[x.easier]||{}).name || x.easier}</b> ← ` : ''}${x.name}${x.harder ? ` → <b>${(EXERCISES[x.harder]||{}).name || x.harder}</b>` : ''}</div>` : '';
     const cues = x.cues ? `<div class="cues">${x.cues}</div>` : '';
     // everything except the clean first row lives in the tap-to-expand detail
@@ -167,7 +172,7 @@ export function renderLibrary(host, { onPick, initial } = {}) {
     return `<div class="ex ${x.main ? 'main' : ''}" data-card>
       <div class="exrow"><div class="db" style="background:${lc}">${x.diff || '?'}</div>
         <div class="exn">${x.name}${x.main ? '<span class="star">✦</span>' : ''}<span class="chev">›</span></div>
-        ${pickBtn}<a class="vid" href="${vidUrl(x)}" target="_blank" rel="noopener">▶ ${x.demoUrl ? 'video' : 'find'}</a></div>
+        ${pickBtn}<a class="vid play" href="${vidUrl(x)}" target="_blank" rel="noopener" title="Watch">▶</a></div>
       <div class="exdetail">${tags}${chain}${cues}</div>
     </div>`;
   }

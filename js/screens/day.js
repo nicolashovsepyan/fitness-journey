@@ -68,7 +68,7 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
           ${DURATIONS.map(d => `<div class="dur ${dur === d ? 'on' : ''}" data-d="${d}"><div class="m">${d}</div><div class="x">${DUR_LABEL[d]}</div></div>`).join('')}
         </div>
         ${rp.scalingNote ? `<div class="scaling-note">@${dur}min · ${rp.scalingNote}</div>` : ''}
-        <div class="edit-hint">⇄ swap · ⋮⋮ drag to reorder · ✕ remove${edited ? ` · <a id="resetEdits">reset edits</a>` : ''}</div>
+        <div class="edit-hint">⇄ swap · ⋮⋮ drag to reorder · swipe ← to remove${edited ? ` · <a id="resetEdits">reset edits</a>` : ''}</div>
         ${html}
         <button class="add-block" id="addBlock">+ Add a block</button>
         <div class="actionbar"><button class="btn lg" id="start">Start workout ▸</button></div>
@@ -84,12 +84,7 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
     host.querySelectorAll('.swap[data-from]').forEach(el => el.addEventListener('click', () => openSwap(el.dataset.from, el.dataset.block, rp)));
     host.querySelectorAll('.swap[data-filler]').forEach(el => el.addEventListener('click', () => openFillerSwap(el.dataset.block, el.dataset.filler, rp)));
     host.querySelectorAll('.add-ex[data-block]').forEach(el => el.addEventListener('click', () => openAdd(el.dataset.block, el.dataset.bid, rp)));
-    host.querySelectorAll('.row-x[data-remove]').forEach(el => el.addEventListener('click', e => {
-      e.stopPropagation();
-      if (el.dataset.added) store.removeAdded(sessionId, el.dataset.bn, el.dataset.remove);
-      else store.setRemoved(sessionId, el.dataset.remove, true);
-      draw();
-    }));
+    host.querySelectorAll('.ex-row[data-remove]').forEach(wireSwipe);   // swipe left to remove
     host.querySelectorAll('.filler-x[data-block]').forEach(el => el.addEventListener('click', e => {
       e.stopPropagation(); store.setFillerSwap(sessionId, el.dataset.block, '__none'); draw();   // remove the secondary
     }));
@@ -157,18 +152,20 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
     const cue = EXERCISES[it.exId]?.cues || '';
     const from = it.swappedFrom || it.exId;
     return `
-      <div class="ex-row" data-sortable-item data-id="${from}">
+      <div class="ex-row" data-sortable-item data-id="${from}" data-remove="${from}" data-bn="${b.name}" data-added="${it.added ? '1' : ''}">
+        <div class="ex-swipe-bg">← remove</div>
         <div class="ex-inner">
           <button class="drag-handle sm" data-drag title="Move">⋮⋮</button>
           ${diffBadge(it.exId)}
           <div class="exmeta">
-            <div class="exname">${it.name} ${it.swappedFrom ? '<span class="swapped">swapped</span>' : ''}${it.added ? '<span class="swapped">added</span>' : ''}</div>
+            <div class="exrow1">
+              <div class="exname">${it.name} ${it.swappedFrom ? '<span class="swapped">swapped</span>' : ''}${it.added ? '<span class="swapped">added</span>' : ''}</div>
+              ${playBtn(it.exId)}
+              <button class="swap" data-from="${from}" data-block="${b.id}" title="Swap exercise">⇄</button>
+            </div>
             <div class="exrx">${describeItem(b, it)}</div>
             <div class="cue" style="display:none; color:var(--faint); font-size:12px; margin-top:3px;">${cue}</div>
           </div>
-          ${playBtn(it.exId)}
-          <button class="swap" data-from="${from}" data-block="${b.id}" title="Swap exercise">⇄</button>
-          <button class="row-x" data-remove="${from}" data-bn="${b.name}" data-added="${it.added ? '1' : ''}" title="Remove">✕</button>
         </div>
       </div>`;
   }
@@ -203,28 +200,36 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
     });
   }
 
-  /* swipe-left to reveal Remove (touch); ignores touches that begin on a control */
+  function doRemoveRow(row) {
+    const id = row.dataset.remove; if (!id) return;
+    if (row.dataset.added) store.removeAdded(sessionId, row.dataset.bn, id);
+    else store.setRemoved(sessionId, id, true);
+    draw();
+  }
+  /* swipe LEFT past a threshold to remove (works on touch + mouse via pointer events) */
   function wireSwipe(row) {
-    const inner = row.querySelector('.ex-inner');
-    if (!inner) return;
+    const inner = row.querySelector('.ex-inner'); if (!inner) return;
     let x0 = null, dx = 0;
-    inner.addEventListener('touchstart', e => {
-      if (e.target.closest('[data-drag],.swap,.demo')) { x0 = null; return; }
-      x0 = e.touches[0].clientX;
-    }, { passive: true });
-    inner.addEventListener('touchmove', e => {
-      if (x0 == null) return;
-      dx = Math.max(-92, Math.min(0, e.touches[0].clientX - x0));
-      inner.style.transform = `translateX(${dx}px)`;
-    }, { passive: true });
-    inner.addEventListener('touchend', () => {
-      if (x0 == null) return;
-      const open = dx < -46;
-      inner.style.transition = 'transform .18s ease';
-      inner.style.transform = open ? 'translateX(-92px)' : 'translateX(0)';
-      setTimeout(() => { inner.style.transition = ''; }, 200);
-      x0 = null; dx = 0;
+    inner.addEventListener('pointerdown', e => {
+      if (e.target.closest('[data-drag], .swap, .rowplay, a, button')) return;   // let controls work
+      x0 = e.clientX; dx = 0; inner.style.transition = '';
     });
+    inner.addEventListener('pointermove', e => {
+      if (x0 == null) return;
+      dx = Math.min(0, e.clientX - x0);
+      inner.style.transform = `translateX(${dx}px)`;
+      row.classList.toggle('will-remove', dx < -90);
+    });
+    const finish = () => {
+      if (x0 == null) return;
+      const commit = dx < -90; x0 = null;
+      inner.style.transition = 'transform .18s ease';
+      if (commit) { inner.style.transform = 'translateX(-110%)'; setTimeout(() => doRemoveRow(row), 150); }
+      else { inner.style.transform = 'translateX(0)'; row.classList.remove('will-remove'); }
+    };
+    inner.addEventListener('pointerup', finish);
+    inner.addEventListener('pointercancel', finish);
+    inner.addEventListener('pointerleave', finish);
   }
 
   function openSwap(fromEx, blockId, rp) {
