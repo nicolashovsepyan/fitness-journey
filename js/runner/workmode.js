@@ -759,8 +759,8 @@ function renderAmrap() {
   if (S.stepDur == null) { beginStep(mins * 60, 'work'); say(single ? `Max reps. ${mins} minutes. Go.` : `As many rounds as possible. ${mins} minutes. Go.`); }
   const finish = () => {
     R.clearStep(S); onStepDone = null;
-    if (single) { S.captured[b.id][0].sets = [{ value: curVal }]; R.save(S); }
-    else captureRounds(S.amrapRounds);
+    if (single) { S.captured[b.id][0].sets = [{ value: curVal, reps: curVal }]; R.save(S); }
+    // multi: each round's actual reps were logged live via "Log round"
     completeBlock();
   };
   onStepDone = finish;
@@ -779,15 +779,39 @@ function renderAmrap() {
     return;
   }
 
-  if (!S.amrapRounds) S.amrapRounds = 0;
-  const list = b.items.map(it => `<div class="ci"><span class="nm">${it.name}</span><span class="tg">${it.measure === 'hold' ? it.hold + 's' : (it.reps ?? it.target ?? 'max') + (it.reps ? ' reps' : '')}</span></div>`).join('');
+  // MULTI-exercise AMRAP — log the ACTUAL reps/hold you did EACH round (they vary), not just a counter.
+  const stepOf = it => it.measure === 'hold' ? 5 : 1;
+  if (!roundBuf || !Object.keys(roundBuf).length) {
+    roundBuf = {}; b.items.forEach((it, i) => { roundBuf[i] = it.measure === 'hold' ? (it.hold ?? 20) : (it.reps ?? it.target ?? 0); });
+  }
+  const roundsDone = (S.captured[b.id][0]?.sets || []).length;
+  const list = b.items.map((it, i) => `<div class="ci amrap-row">
+      <span class="nm">${it.name}</span>
+      <div class="amrap-step"><button data-amrap="-1" data-i="${i}">−</button><span class="av" id="av_${i}">${roundBuf[i]}</span><button data-amrap="1" data-i="${i}">+</button><span class="u">${it.measure === 'hold' ? 's' : 'reps'}</span></div>
+    </div>`).join('');
   shell(`<div class="now-ex"><div class="label">AMRAP — ${mins} min</div><div class="name">As many rounds as possible</div></div>
     <div class="timer-wrap">${timerSvg('buffer')}</div>
-    <div class="center" style="margin:4px 0 12px;"><span class="eyebrow">Rounds</span> <span class="big" style="font-size:40px;" id="amrapN">${S.amrapRounds}</span></div>
+    <div class="center" style="margin:2px 0 8px;"><span class="eyebrow">Rounds logged</span> <span class="big" style="font-size:38px;" id="amrapN">${roundsDone}</span></div>
+    <p class="muted" style="text-align:center;margin:0 0 10px;font-size:12px;">Set your reps for the round, then tap Log round.</p>
     <div class="circuit-list">${list}</div>
-    <div class="actionbar"><div class="btn-row"><button class="btn secondary" id="rdMinus">−</button><button class="btn" id="rdPlus">+ Round</button><button class="btn ghost" id="endAmrap">End ▸</button></div></div>`);
-  document.getElementById('rdPlus').addEventListener('click', () => { S.amrapRounds++; R.save(S); document.getElementById('amrapN').textContent = S.amrapRounds; buzz(30); });
-  document.getElementById('rdMinus').addEventListener('click', () => { S.amrapRounds = Math.max(0, S.amrapRounds - 1); R.save(S); document.getElementById('amrapN').textContent = S.amrapRounds; });
+    <div class="actionbar"><div class="btn-row"><button class="btn secondary" id="undoRound">↺ undo</button><button class="btn" id="logRound">Log round ✓</button><button class="btn ghost" id="endAmrap">End ▸</button></div></div>`);
+  host.querySelectorAll('[data-amrap]').forEach(btn => btn.addEventListener('click', () => {
+    const i = +btn.dataset.i;
+    roundBuf[i] = Math.max(0, (Number(roundBuf[i]) || 0) + Number(btn.dataset.amrap) * stepOf(b.items[i]));
+    document.getElementById('av_' + i).textContent = roundBuf[i];
+  }));
+  document.getElementById('logRound').addEventListener('click', () => {
+    b.items.forEach((it, i) => {
+      const v = Number(roundBuf[i]) || 0;
+      S.captured[b.id][i].sets.push(it.measure === 'hold' ? { value: v, sec: v } : { value: v, reps: v });
+      S.captured[b.id][i].rounds = true;
+    });
+    S.amrapRounds = (S.amrapRounds || 0) + 1; buzz(45); say(`Round ${S.amrapRounds}.`); R.save(S); renderAmrap();
+  });
+  document.getElementById('undoRound').addEventListener('click', () => {
+    b.items.forEach((it, i) => (S.captured[b.id][i].sets || []).pop());
+    S.amrapRounds = Math.max(0, (S.amrapRounds || 0) - 1); R.save(S); renderAmrap();
+  });
   document.getElementById('endAmrap').addEventListener('click', finish);
 }
 
