@@ -260,16 +260,65 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
     } });
   }
 
+  /* full block builder: type · method · exercises · prescription → a runner-ready block */
   function openAddBlock(rp) {
-    openLibraryPicker({ title: 'Add a block', onPick: id => {
-      const m = EXERCISES[id]; if (!m) return;
-      const isHold = m.measure === 'hold';
-      const item = isHold ? { ex: id, sets: 3, hold: 30, rest: 60 } : { ex: id, sets: 3, reps: 10, rest: 90 };
-      const existing = new Set(rp.blocks.map(b => b.name));
-      let name = m.name, n = 2; while (existing.has(name)) name = `${m.name} ${n++}`;
-      store.addBlock(sessionId, { name, role: 'Work', format: isHold ? 'isometric' : 'straight', items: [item] });
-      draw();
-    } });
+    const st = { role: 'Work', format: 'straight', items: [], sets: 3, reps: 10, hold: 30, rest: 90, roundRest: 30, rounds: 3, minutes: 5, work: 20, restSec: 10 };
+    const ROLES = ['Primer', 'Work', 'Finisher'];
+    const METHODS = [['straight', 'Straight'], ['superset', 'Superset'], ['circuit', 'Circuit'], ['amrap', 'AMRAP'], ['tabata', 'Tabata'], ['emom', 'EMOM']];
+    const FIELDS = { sets: ['Sets', 1], rounds: ['Rounds', 1], minutes: ['Minutes', 1], reps: ['Reps', 1], hold: ['Hold · s', 5], rest: ['Rest · s', 15], roundRest: ['Round rest · s', 15], work: ['Work · s', 5], restSec: ['Rest · s', 5] };
+    const METHOD_FIELDS = { straight: ['sets', 'rest'], superset: ['sets', 'rest'], circuit: ['rounds', 'roundRest'], amrap: ['minutes'], tabata: ['rounds', 'work', 'restSec'], emom: ['rounds'] };
+    const hasReps = () => !st.items.length || st.items.some(id => EXERCISES[id]?.measure !== 'hold');
+    const hasHold = () => st.items.some(id => EXERCISES[id]?.measure === 'hold');
+    const label = () => METHODS.find(m => m[0] === st.format)[1];
+    const autoName = () => { const first = st.items[0] ? EXERCISES[st.items[0]].name : ''; return first ? `${first}${st.items.length > 1 ? ' +' + (st.items.length - 1) : ''} · ${label()}` : `${st.role} · ${label()}`; };
+    function fieldsFor() {
+      const f = METHOD_FIELDS[st.format].slice();
+      if (st.format !== 'tabata') { const ins = []; if (hasReps()) ins.push('reps'); if (hasHold()) ins.push('hold'); f.splice(1, 0, ...ins); }
+      return f;
+    }
+    function buildBlock() {
+      const fmt = st.format === 'superset' ? 'circuit' : st.format;
+      const items = st.items.map(id => {
+        const m = EXERCISES[id]; const isHold = m.measure === 'hold'; const it = { ex: id };
+        if (['straight', 'superset'].includes(st.format)) { it.sets = st.sets; if (isHold) it.hold = st.hold; else it.reps = st.reps; it.rest = st.rest; }
+        else { if (isHold) it.hold = st.hold; else it.reps = st.reps; }
+        return it;
+      });
+      let name = autoName(); const existing = new Set(rp.blocks.map(b => b.name)); let n = 2; while (existing.has(name)) name = `${autoName()} ${n++}`;
+      const block = { name, role: st.role, format: fmt, items };
+      if (st.format === 'superset') { block.rounds = st.sets; block.roundRest = st.rest; block.transition = 8; }
+      if (st.format === 'circuit') { block.rounds = st.rounds; block.roundRest = st.roundRest; block.transition = 8; }
+      if (st.format === 'amrap') block.minutes = st.minutes;
+      if (st.format === 'tabata' || st.format === 'emom') { block.rounds = st.rounds; block.work = st.work; block.rest = st.restSec; }
+      return block;
+    }
+    const ov = document.createElement('div'); ov.className = 'overlay'; host.appendChild(ov);
+    const close = () => ov.remove();
+    function render() {
+      ov.innerHTML = `<div class="overlay-card scroll bb-card">
+        <div class="picker-head"><div class="eyebrow">New block</div><button class="x pk-x" id="bbClose">✕</button></div>
+        <div class="bb-body">
+          <div class="bb-l">Type</div>
+          <div class="segrow">${ROLES.map(r => `<button class="seg ${st.role === r ? 'on' : ''}" data-role="${r}">${r}</button>`).join('')}</div>
+          <div class="bb-l">Method</div>
+          <div class="chipwrap">${METHODS.map(([v, l]) => `<button class="bchip ${st.format === v ? 'on' : ''}" data-fmt="${v}">${l}</button>`).join('')}</div>
+          <div class="bb-l">Exercises <span class="muted">· ${st.items.length}</span></div>
+          <div class="bb-exlist">${st.items.map((id, i) => `<div class="bb-ex"><span class="bb-exn">${EXERCISES[id]?.name || id}</span><button class="bb-exx" data-rmex="${i}">✕</button></div>`).join('') || '<div class="muted" style="padding:6px 2px;font-size:13px;">Nothing added yet.</div>'}</div>
+          <button class="add-ex" id="bbAddEx">＋ Add exercise</button>
+          <div class="bb-l">Prescription</div>
+          ${fieldsFor().map(k => { const [lbl, step] = FIELDS[k]; return `<div class="brow"><span class="blabel">${lbl}</span><div class="ed-step"><button data-fld="${k}" data-d="-${step}">−</button><input data-fldin="${k}" type="number" inputmode="numeric" value="${st[k]}"><button data-fld="${k}" data-d="${step}">+</button></div></div>`; }).join('')}
+          <button class="btn" id="bbCreate" style="margin-top:16px;" ${st.items.length ? '' : 'disabled'}>Create block ▸</button>
+        </div></div>`;
+      ov.querySelector('#bbClose').addEventListener('click', close);
+      ov.querySelectorAll('[data-role]').forEach(b => b.addEventListener('click', () => { st.role = b.dataset.role; render(); }));
+      ov.querySelectorAll('[data-fmt]').forEach(b => b.addEventListener('click', () => { st.format = b.dataset.fmt; render(); }));
+      ov.querySelectorAll('[data-rmex]').forEach(b => b.addEventListener('click', () => { st.items.splice(+b.dataset.rmex, 1); render(); }));
+      ov.querySelector('#bbAddEx').addEventListener('click', () => openLibraryPicker({ title: 'Add exercise', onPick: id => { st.items.push(id); render(); } }));
+      ov.querySelectorAll('[data-fld]').forEach(b => b.addEventListener('click', () => { const k = b.dataset.fld; st[k] = Math.max(0, (Number(st[k]) || 0) + Number(b.dataset.d)); ov.querySelector(`[data-fldin="${k}"]`).value = st[k]; }));
+      ov.querySelectorAll('[data-fldin]').forEach(inp => inp.addEventListener('change', () => { st[inp.dataset.fldin] = Math.max(0, Number(inp.value) || 0); }));
+      ov.querySelector('#bbCreate').addEventListener('click', () => { if (!st.items.length) return; store.addBlock(sessionId, buildBlock()); close(); draw(); });
+    }
+    render();
   }
 
   draw();
