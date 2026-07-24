@@ -1,71 +1,86 @@
 /* ============================================================
-   APP — router. Three pillars (Week · Program · Progress) via a
-   bottom tab bar, plus Day → Work Mode drill-in. Resumes an
-   in-progress workout if one was left running.
+   APP — router. Two UIs over one engine:
+     'pro'      → Week → Day → Work Mode (Nicolas)
+     'beginner' → Home (habits) → Day → Work Mode → Weekly summary
+   The active user picks which. Work Mode is shared by both.
+   Resumes an in-progress workout if one was left running.
    ============================================================ */
 import { renderWeek } from './screens/week.js';
 import { renderDay } from './screens/day.js';
 import { renderHistory } from './screens/history.js';
-import { renderProgram } from './screens/program.js';
+import { renderBHome } from './screens/b-home.js';
+import { renderBDay } from './screens/b-day.js';
+import { renderBSummary } from './screens/b-summary.js';
 import { startWorkout, resumeWorkout } from './runner/workmode.js';
 import * as R from './runner/runstate.js';
+import { isBeginner } from './users.js';
 
 const app = document.getElementById('app');
-let view = { name: 'week', sessionId: null, sub: 'build' };
+let view = { name: 'home', sessionId: null };
 
-function go(name, sessionId) { view = { ...view, name, sessionId }; render(); }
-function setSub(sub) { view = { ...view, sub }; render(); }
+function go(name, sessionId) { view = { name, sessionId }; render(); }
 
-const runCb = { onExit: () => go('week'), onFinish: () => go('week') };
-
-const TABS = [
-  { name: 'week',    label: 'This Week', icon: '📅' },
-  { name: 'program', label: 'Program',   icon: '🧩' },
-  { name: 'history', label: 'Progress',  icon: '📊' },
-];
-const TAB_NAMES = new Set(TABS.map(t => t.name));
+const runCb = { onExit: () => go('home'), onFinish: () => go('home') };
 
 function render() {
-  if (view.name === 'day') { renderDay(app, view.sessionId, { onBack: () => go(prevTab()), onStart: rp => startWorkout(rp, runCb) }); showNav(false); return; }
-  if (view.name === 'history') renderHistory(app, { onBack: () => go('week') });
-  else if (view.name === 'program') renderProgram(app, { sub: view.sub, onOpenDay: id => go('day', id), setSub });
-  else renderWeek(app, { onOpenDay: id => go('day', id), onOpenHistory: () => go('history') });
-  showNav(true);
+  if (isBeginner()) return renderBeginner();
+  return renderPro();
+}
+
+function renderBeginner() {
+  if (view.name === 'day') {
+    return renderBDay(app, view.sessionId, {
+      onBack: () => go('home'),
+      onStart: rp => startWorkout(rp, runCb),
+    });
+  }
+  if (view.name === 'summary') return renderBSummary(app, { onBack: () => go('home') });
+  renderBHome(app, { onOpenDay: id => go('day', id), onOpenSummary: () => go('summary') });
   if (R.isActive()) injectResume();
 }
 
-/* remember which tab we came from so Day → back returns there */
-let lastTab = 'week';
-function prevTab() { return lastTab; }
-
-/* ---- bottom tab bar ---- */
-let navEl = null;
-function buildNav() {
-  navEl = document.createElement('nav'); navEl.className = 'tabbar';
-  navEl.innerHTML = TABS.map(t =>
-    `<button class="tab" data-tab="${t.name}"><span class="ti">${t.icon}</span><span class="tl">${t.label}</span></button>`).join('');
-  document.body.appendChild(navEl);
-  navEl.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => go(b.dataset.tab)));
-}
-function showNav(on) {
-  if (!navEl) buildNav();
-  navEl.style.display = on ? 'flex' : 'none';
-  if (on && TAB_NAMES.has(view.name)) lastTab = view.name;
-  navEl.querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.dataset.tab === view.name));
+function renderPro() {
+  if (view.name === 'day') return renderDay(app, view.sessionId, { onBack: () => go('home'), onStart: rp => startWorkout(rp, runCb) });
+  if (view.name === 'history') return renderHistory(app, { onBack: () => go('home') });
+  renderWeek(app, { onOpenDay: (id) => go('day', id), onOpenHistory: () => go('history') });
+  if (R.isActive()) injectResume();    // a workout was left in progress
 }
 
 function injectResume() {
   const st = R.load(); if (!st) return;
   const screen = app.querySelector('.screen'); if (!screen) return;
-  if (screen.querySelector('.callout.resume')) return;
   const bar = document.createElement('div');
-  bar.className = 'callout resume'; bar.style.cssText = 'cursor:pointer;margin-top:8px;';
+  bar.className = 'callout'; bar.style.cssText = 'cursor:pointer;margin-top:8px;';
   bar.innerHTML = `<span class="ico">⏱</span><span class="txt">Workout in progress — <b>${st.plan?.name || ''}</b>. Tap to resume.</span>`;
   bar.addEventListener('click', () => resumeWorkout(runCb));
   screen.insertBefore(bar, screen.firstChild.nextSibling);
 }
 
 render();
+
+/* ---- offline shell ----
+   The service worker precaches the whole app, so once it has been opened
+   once it works with no signal — which is the point at a gym. When a new
+   version activates it messages us, and we offer a reload rather than
+   yanking the page out from under someone mid-set. */
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+  let seenController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('message', (e) => {
+    if (e.data?.type !== 'sw-updated') return;
+    if (!seenController) { seenController = true; return; }   // first ever install, nothing to update
+    showUpdateBar();
+  });
+}
+function showUpdateBar() {
+  if (document.getElementById('updBar') || R.isActive()) return;   // never interrupt a live workout
+  const bar = document.createElement('div');
+  bar.id = 'updBar'; bar.className = 'toast go';
+  bar.style.cursor = 'pointer';
+  bar.textContent = '↻ New version ready — tap to update';
+  bar.addEventListener('click', () => location.reload());
+  document.body.appendChild(bar);
+  setTimeout(() => bar.remove(), 12000);
 }

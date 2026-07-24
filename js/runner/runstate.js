@@ -8,7 +8,9 @@
 
    Pure logic, no DOM — unit-testable.
    ============================================================ */
-const KEY = 'fj.run';
+import { runKey } from '../users.js';
+
+const KEY = () => runKey();      // namespaced per active user
 
 /* begin a new run from a resolved RunPlan */
 export function start(plan) {
@@ -27,10 +29,10 @@ export function start(plan) {
 }
 
 export function load() {
-  try { const r = localStorage.getItem(KEY); return r ? JSON.parse(r) : null; } catch (e) { return null; }
+  try { const r = localStorage.getItem(KEY()); return r ? JSON.parse(r) : null; } catch (e) { return null; }
 }
-export function save(st) { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
-export function clear() { try { localStorage.removeItem(KEY); } catch (e) {} }
+export function save(st) { try { localStorage.setItem(KEY(), JSON.stringify(st)); } catch (e) {} }
+export function clear() { try { localStorage.removeItem(KEY()); } catch (e) {} }
 export function isActive() { const s = load(); return !!(s && !s.done); }
 
 /* ---- timestamp-based clocks (correct even after the tab was frozen) ---- */

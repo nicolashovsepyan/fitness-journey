@@ -6,6 +6,7 @@ import { PROGRAM } from '../data/program.js';
 import { SESSIONS } from '../data/sessions.js';
 import { store } from '../store.js';
 import { setVoice, isVoiceOn, listVoices, getVoiceName, setVoiceName, say, initAudio } from '../timer.js';
+import { USERS, activeUser, switchUser } from '../users.js';
 
 const DAY_IMG = {
   quads_knees: 'images/day-leg.png',
@@ -97,7 +98,12 @@ export function renderWeek(host, { onOpenDay, onOpenHistory }) {
           <div class="focus"><button id="voiceToggle" class="${isVoiceOn() ? 'on' : ''}">${isVoiceOn() ? 'On' : 'Off'}</button></div></div>
         <div class="goal-row"><span class="goal-name">Voice</span>
           <div class="voicepick"><select id="voiceSel" class="voicesel"></select><button id="voiceTest" class="vtest">Test</button></div></div>
-        <div class="goal-row"><span class="goal-name">Export my data</span>
+        <div class="goal-row"><span class="goal-name">Who's training</span></div>
+        <div class="choice-grid">
+          ${Object.values(USERS).map(u =>
+            `<button class="choice ${u.id === activeUser().id ? 'on' : ''}" data-user="${u.id}">${u.name}</button>`).join('')}
+        </div>
+        <div class="goal-row" style="margin-top:14px;"><span class="goal-name">Export my data</span>
           <div class="focus"><button id="exportBtn">Export</button></div></div>
         <button class="btn ghost" id="resetBtn" style="margin-top:14px;">Reset all data</button>
         <button class="btn" id="settingsClose" style="margin-top:8px;">Done</button>
@@ -120,6 +126,7 @@ export function renderWeek(host, { onOpenDay, onOpenHistory }) {
     // wake the audio session on the tap so speech routes to the loud speaker, not the earpiece
     sel.addEventListener('change', () => { setVoiceName(sel.value); initAudio(); say(testLine); });
     ov.querySelector('#voiceTest').addEventListener('click', () => { initAudio(); say(testLine); });
+    ov.querySelectorAll('[data-user]').forEach(el => el.addEventListener('click', () => switchUser(el.dataset.user)));
     ov.querySelector('#exportBtn').addEventListener('click', () => {
       const blob = new Blob([store.exportJSON()], { type: 'application/json' });
       const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'fitness-journey-backup.json'; a.click();

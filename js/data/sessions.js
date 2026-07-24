@@ -10,6 +10,7 @@
    perSide/toFailure/minutes/rounds…). Base values = 30-min Foundation;
    progression scales them later.
    ============================================================ */
+import { BEGINNER_SESSIONS } from './sessions-beginner.js';
 
 export const SESSIONS = {
 
@@ -174,5 +175,8 @@ export const SESSIONS = {
     },
   },
 };
+
+/* second user's beginner days — merged in so the resolver sees one library */
+Object.assign(SESSIONS, BEGINNER_SESSIONS);
 
 export const session = (id) => SESSIONS[id];

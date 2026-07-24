@@ -8,7 +8,8 @@
    ============================================================ */
 import { EXERCISES } from '../data/exercises.js';
 import { SESSIONS } from '../data/sessions.js';
-import { FILLERS, ANTAGONIST, PROFILE } from '../data/program.js';
+import { FILLERS, ANTAGONIST } from '../data/program.js';
+import { currentProfile } from '../users.js';
 
 /* group related patterns so a swap can widen sensibly (a quad → other lower-body) */
 const FAMILY = { quad: 'lower', glute: 'lower', hamstring: 'lower', calf: 'lower', shin: 'lower', push: 'push', pull: 'pull', core: 'core', skill: 'skill', conditioning: 'cond', mobility: 'mob', full: 'full' };
@@ -55,8 +56,11 @@ function mobilityBlock(session, duration) {
   };
 }
 
-/* REAL duration scaling — changes sets/rounds on the spot, adds mobility at 45/60 */
+/* REAL duration scaling — changes sets/rounds on the spot, adds mobility at 45/60.
+   A session marked `fixed` opts out entirely: it is the same every week by
+   design (the beginner program), so nothing may quietly rewrite its volume. */
 function scaleForDuration(session, duration) {
+  if (session.fixed) return session.blocks.map(b => ({ ...b, items: b.items.map(it => ({ ...it })) }));
   const dSets = { 20: -1, 30: 0, 45: 1, 60: 2 }[duration] ?? 0;
   const dRounds = { 20: -1, 30: 0, 45: 0, 60: 1 }[duration] ?? 0;
   const out = session.blocks.map(b => {
@@ -78,20 +82,22 @@ function scaleForDuration(session, duration) {
 const TIER = { 'Joint Prep': 0, Primer: 1, Work: 2, Finisher: 3, Benchmark: 4, Mobility: 5 };
 const oidx = (arr, v) => { const i = (arr || []).indexOf(v); return i < 0 ? 1e6 : i; };
 
-export function resolveSession(sessionId, { duration = 30, sessionIndex = 0, swaps = {}, removed = [], order = {}, added = {}, fillerSwaps = {}, removedBlocks = [], addedBlocks = [] } = {}) {
+export function resolveSession(sessionId, { duration = 30, sessionIndex = 0, swaps = {}, removed = [], order = {}, added = {}, fillerSwaps = {} } = {}) {
   const s = SESSIONS[sessionId];
   if (!s) throw new Error(`Unknown session '${sessionId}'`);
 
   let fillerIndex = 0;
-  const blocks = scaleForDuration(s, duration)
-    .filter(b => !removedBlocks.includes(b.name))          // drop whole blocks the user removed
-    .map((b, i) => {
+  const blocks = scaleForDuration(s, duration).map((b, i) => {
     let items = b.items
       .filter(it => !removed.includes(it.ex))            // drop removed exercises (by original id)
       .map(it => {
         const swapTo = swaps[it.ex];                     // apply a saved swap
         const useId = swapTo || it.ex;
-        return { ...meta(useId), ...it, exId: useId, swappedFrom: swapTo ? it.ex : null };
+        const r = { ...meta(useId), ...it, exId: useId, swappedFrom: swapTo ? it.ex : null };
+        // a session may override the library measure (e.g. Dead Bug held for 30s
+        // instead of counted in reps) — keep the display unit consistent with it
+        r.unit = UNIT[r.measure] || r.unit;
+        return r;
       });
     const add = (added[b.name] || []).map(ai => ({ ...meta(ai.ex), ...ai, exId: ai.ex, added: true }));
     items = items.concat(add);                            // append added exercises
@@ -101,28 +107,20 @@ export function resolveSession(sessionId, { duration = 30, sessionIndex = 0, swa
       id: b.id || `b${i}`, role: b.role, type: b.role, name: b.name, format: b.format, note: b.note || '',
       anchor: !!b.anchor, rounds: b.rounds, work: b.work, rest: b.rest,
       transition: b.transition, roundRest: b.roundRest, minutes: b.minutes, items,
+      zoned: !!b.zoned, fromWeek: b.fromWeek || 1,
     };
-    const fillerState = fillerSwaps[b.name];
-    if (b.filler && block.items.length && fillerState !== '__none') {   // '__none' = user removed the secondary
+    if (b.filler && block.items.length) {
       let f = pickFiller(b, sessionIndex, fillerIndex++);
-      if (fillerState && EXERCISES[fillerState]) {      // user swapped the secondary/superset move
-        const m = EXERCISES[fillerState];
+      const swapTo = fillerSwaps[b.name];               // user swapped the secondary/superset move
+      if (swapTo && EXERCISES[swapTo]) {
+        const m = EXERCISES[swapTo];
         const rx = m.measure === 'hold' ? { hold: f.hold || 20 } : { reps: f.reps || (f.type === 'core' ? 12 : 10) };
-        f = { type: f.type, exId: fillerState, name: m.name, measure: m.measure, swapped: true, ...rx };
+        f = { type: f.type, exId: swapTo, name: m.name, measure: m.measure, swapped: true, ...rx };
       }
       block.filler = f;
     }
     return block;
   }).filter(block => block.items.length > 0 || block.format === 'jointprep');
-
-  // append user-added blocks (each already has resolved item ids)
-  addedBlocks.forEach((ab, i) => {
-    const items = (ab.items || []).map(it => ({ ...meta(it.ex), ...it, exId: it.ex, added: true }));
-    if (!items.length) return;
-    blocks.push({ id: ab.id || `ab${i}`, role: ab.role || 'Work', type: ab.role || 'Work',
-      name: ab.name, format: ab.format || 'straight', note: ab.note || '', anchor: false,
-      rounds: ab.rounds, transition: ab.transition, roundRest: ab.roundRest, items, addedBlock: true });
-  });
 
   // saved block order — within each role section (sections stay grouped)
   blocks.sort((a, b) => ((TIER[a.role] ?? 9) - (TIER[b.role] ?? 9)) || (oidx(order.blocks, a.name) - oidx(order.blocks, b.name)));
@@ -132,6 +130,8 @@ export function resolveSession(sessionId, { duration = 30, sessionIndex = 0, swa
     duration, variant: s.variant || null, constraint: s.constraint || null,
     coreDominant: !!s.coreDominant, tags: s.tags || [],
     scalingNote: (s.scaling && s.scaling[duration]) || null,
+    fixed: !!s.fixed,
+    coachMode: !!s.coachMode,       // notes / knee flag / end-of-session feedback
     blocks,
   };
 }
@@ -139,10 +139,16 @@ export function resolveSession(sessionId, { duration = 30, sessionIndex = 0, swa
 /* a human-readable prescription string for one resolved item (for the Day view) */
 export function describeItem(block, it) {
   const u = it.unit;
+  const target = it.repsText || it.reps;      // '10-15' beats a bare 12
+  // superset — N rounds of the pair, rest only after the pair
+  if (block.format === 'superset') {
+    const tgt = it.measure === 'hold' ? `${it.hold}s` : `${target} ${u}`;
+    return `${block.rounds || 3} × ${tgt}`;
+  }
   // circuit / amrap / tabata / emom — single target or interval
   if (['circuit', 'amrap', 'emom'].includes(block.format)) {
     const extra = it.tempo ? ` · ${it.tempo}` : (it.note ? ` · ${it.note}` : '');
-    if (it.reps != null) return `${it.reps} ${u}${it.perSide ? ' / side' : ''}${extra}`;
+    if (it.reps != null) return `${target} ${u}${it.perSide ? ' / side' : ''}${extra}`;
     if (it.hold != null) return `${it.hold}s${it.perSide ? ' / side' : ''}${extra}`;
     if (it.target === 'MAX') return `${it.minutes ? it.minutes + ' min · ' : ''}max reps`;
     if (it.minutes) return `${it.minutes} min`;
@@ -182,6 +188,11 @@ export function blockMinutes(b) {
     const rt = b.items.reduce((s, it) => s + itemWorkSec(it) + (b.transition ?? 8), 0) + (b.roundRest ?? 0);
     return Math.max(1, Math.round((b.rounds || 1) * rt / 60));
   }
+  if (b.format === 'superset') {
+    // both moves back-to-back, then one rest — that pattern, N times
+    const rt = b.items.reduce((s, it) => s + itemWorkSec(it) + 8, 0) + (b.rest ?? 75);
+    return Math.max(1, Math.round((b.rounds || 3) * rt / 60));
+  }
   let sec = 0;
   for (const it of b.items) {
     const sets = it.sets || (b.format === 'yates' ? (it.warmups || 0) + 1 : 1);
@@ -193,8 +204,11 @@ export function blockMinutes(b) {
 
 /* addable exercises of a given measure (for "+ Add exercise"), forearm-aware */
 export function libraryFor(measure, { constraint, equipment } = {}, exclude = []) {
-  const have = equipment || PROFILE.equipment;
-  let list = Object.entries(EXERCISES).filter(([id, m]) => m.measure === measure && !exclude.includes(id) && canDoWith(m, have));
+  const prof = currentProfile();
+  const have = equipment || prof.equipment;
+  const gymOk = !!prof.gymLibrary;
+  let list = Object.entries(EXERCISES).filter(([id, m]) =>
+    m.measure === measure && !exclude.includes(id) && canDoWith(m, have) && (!m.gymOnly || gymOk));
   if (constraint && /supinated|neutral/.test(constraint)) list = list.filter(([, m]) => m.grip !== 'pronated');
   return list.map(([id, m]) => ({ id, name: m.name, pattern: m.pattern, level: m.level }))
     .sort((a, b) => a.pattern.localeCompare(b.pattern) || (a.level || 5) - (b.level || 5) || a.name.localeCompare(b.name));
@@ -207,12 +221,15 @@ export function libraryFor(measure, { constraint, equipment } = {}, exclude = []
 export function alternatives(exId, { constraint, equipment } = {}, exclude = []) {
   const cur = EXERCISES[exId];
   if (!cur) return [];
-  const have = equipment || PROFILE.equipment;        // only offer moves you can actually do
+  const prof = currentProfile();
+  const have = equipment || prof.equipment;        // only offer moves you can actually do
+  const gymOk = !!prof.gymLibrary;
   const fam = FAMILY[cur.pattern];
   const diff = cur.diff || 5;                          // numeric 1-10 for difficulty distance
   const curFams = famOf(cur);
   let list = Object.entries(EXERCISES).filter(([id, m]) =>
-    id !== exId && !exclude.includes(id) && m.measure === cur.measure && (!!m.noPR === !!cur.noPR) && canDoWith(m, have));
+    id !== exId && !exclude.includes(id) && m.measure === cur.measure && (!!m.noPR === !!cur.noPR)
+    && canDoWith(m, have) && (!m.gymOnly || gymOk));
   if (constraint && /supinated|neutral/.test(constraint))
     list = list.filter(([, m]) => m.grip !== 'pronated');
   return list

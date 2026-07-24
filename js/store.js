@@ -2,9 +2,13 @@
    STORE — the single source of truth for what you actually did.
    Local-first: lives on your device. One read/write API so no
    screen ever touches storage directly (prevents save bugs).
-   ============================================================ */
 
-const KEY = 'fj.v1';
+   MULTI-USER: the storage key is now resolved per active user
+   (fj.v1.<uid>) via users.js, so two people never share state.
+   ============================================================ */
+import { storeKey } from './users.js';
+
+const KEY = () => storeKey();
 
 const DEFAULT = {
   goals: null,        // overrides data.js GOALS focus when set
@@ -16,11 +20,20 @@ const DEFAULT = {
   order: {},          // { sessionId: { blocks:[blockName], items:{blockName:[exId]} } } — reorder
   added: {},          // { sessionId: { blockName: [ {ex, ...prescription} ] } } — added exercises
   fillerSwaps: {},    // { sessionId: { blockName: newExId } } — swap the rest-superset filler
+
+  /* ---- beginner / coaching layer ---- */
+  startDate: null,    // ISO date of the first app open — drives "which week am I in"
+  settings: {},       // { schedule:'mwf'|'tts', lastCoachSend:ISO }
+  habits: {},         // { 'YYYY-MM-DD': { walk:bool, no8pm:bool, protein:bool, sport:bool } }
+  checks: {},         // { 'YYYY-MM-DD|sessionId|exId': [bool,…] } — per-set checkboxes
+  notes: [],          // [{ date, sessionId, exId, name, text }]
+  flags: [],          // [{ date, sessionId, exId, name, text }] — KNEE flags
+  feedback: [],       // [{ date, sessionId, name, rating:'easy'|'right'|'hard', text }]
 };
 
 function read() {
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = localStorage.getItem(KEY());
     if (!raw) return structuredClone(DEFAULT);
     return { ...structuredClone(DEFAULT), ...JSON.parse(raw) };
   } catch (e) {
@@ -31,12 +44,18 @@ function read() {
 
 function write(state) {
   try {
-    localStorage.setItem(KEY, JSON.stringify(state));
+    localStorage.setItem(KEY(), JSON.stringify(state));
     return true;
   } catch (e) {
     console.error('store write failed', e);
     return false;
   }
+}
+
+/* local YYYY-MM-DD (never UTC — a 9pm workout must not land on tomorrow) */
+export function dayKey(d = new Date()) {
+  const x = new Date(d);
+  return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`;
 }
 
 export const store = {
@@ -55,28 +74,7 @@ export const store = {
     const s = read();
     delete s.swaps[sessionId]; delete s.removed[sessionId]; delete s.order[sessionId]; delete s.added[sessionId];
     if (s.fillerSwaps) delete s.fillerSwaps[sessionId];
-    if (s.removedBlocks) delete s.removedBlocks[sessionId];
-    if (s.addedBlocks) delete s.addedBlocks[sessionId];
     write(s);
-  },
-
-  /* ---- whole-block add / remove (a block = a named group of exercises) ---- */
-  getRemovedBlocks(sessionId) { return read().removedBlocks?.[sessionId] || []; },
-  setBlockRemoved(sessionId, blockName, on) {
-    const s = read(); s.removedBlocks = s.removedBlocks || {};
-    const list = new Set(s.removedBlocks[sessionId] || []);
-    if (on) list.add(blockName); else list.delete(blockName);
-    s.removedBlocks[sessionId] = [...list]; write(s);
-  },
-  getAddedBlocks(sessionId) { return read().addedBlocks?.[sessionId] || []; },
-  addBlock(sessionId, block) {
-    const s = read(); s.addedBlocks = s.addedBlocks || {};
-    s.addedBlocks[sessionId] = s.addedBlocks[sessionId] || [];
-    s.addedBlocks[sessionId].push(block); write(s);
-  },
-  removeAddedBlock(sessionId, blockName) {
-    const s = read(); const list = s.addedBlocks?.[sessionId]; if (!list) return;
-    s.addedBlocks[sessionId] = list.filter(b => b.name !== blockName); write(s);
   },
 
   getFillerSwaps(sessionId) { return read().fillerSwaps?.[sessionId] || {}; },
@@ -129,16 +127,6 @@ export const store = {
         }
       }
     }
-    return null;
-  },
-  /* most recent effort grade (soft|right|hard) for an exercise — the signal the
-     progression engine uses next week: soft → push, right → small bump, hard → hold/deload */
-  getLastIntensity(exId) {
-    const sessions = read().sessions;
-    for (let i = sessions.length - 1; i >= 0; i--)
-      for (const b of (sessions[i].blocks || []))
-        for (const e of (b.entries || []))
-          if (e.exId === exId && e.rpe) return e.rpe;
     return null;
   },
   getPR(exId) { return read().prs[exId] || null; },
@@ -204,6 +192,104 @@ export const store = {
     return { prs: newPRs };
   },
 
+  /* ==========================================================
+     BEGINNER / COACHING LAYER
+     Habits, per-set checkboxes, exercise notes, knee flags and
+     end-of-session feedback. All plain data — the weekly summary
+     and the "send to coach" report are built from these.
+     ========================================================== */
+
+  /* first-open date, so we can say which week of the program he's in */
+  startDate() {
+    const s = read();
+    if (s.startDate) return s.startDate;
+    s.startDate = dayKey(); write(s);
+    return s.startDate;
+  },
+  /* 1-based program week */
+  programWeek() {
+    const start = new Date(this.startDate() + 'T00:00:00');
+    const days = Math.floor((Date.now() - start.getTime()) / 86400000);
+    return Math.max(1, Math.floor(days / 7) + 1);
+  },
+
+  getSetting(k, fallback = null) { const v = read().settings?.[k]; return v === undefined ? fallback : v; },
+  setSetting(k, v) { const s = read(); s.settings = s.settings || {}; s.settings[k] = v; write(s); },
+
+  /* ---- daily habit checkboxes ---- */
+  getHabits(date = dayKey()) { return read().habits[date] || {}; },
+  toggleHabit(habitId, date = dayKey()) {
+    const s = read();
+    s.habits[date] = s.habits[date] || {};
+    s.habits[date][habitId] = !s.habits[date][habitId];
+    write(s);
+    return s.habits[date][habitId];
+  },
+  habitsBetween(startMs, endMs) {
+    const h = read().habits, out = {};
+    for (const [d, v] of Object.entries(h)) {
+      const t = new Date(d + 'T00:00:00').getTime();
+      if (t >= startMs && t < endMs) out[d] = v;
+    }
+    return out;
+  },
+
+  /* ---- per-set checkboxes on the day screen ---- */
+  getChecks(sessionId, exId, date = dayKey()) { return read().checks[`${date}|${sessionId}|${exId}`] || []; },
+  toggleCheck(sessionId, exId, setIndex, date = dayKey()) {
+    const s = read(); const k = `${date}|${sessionId}|${exId}`;
+    const arr = s.checks[k] || [];
+    arr[setIndex] = !arr[setIndex];
+    s.checks[k] = arr; write(s);
+    return arr;
+  },
+  clearChecks(sessionId, date = dayKey()) {
+    const s = read();
+    Object.keys(s.checks).forEach(k => { if (k.startsWith(`${date}|${sessionId}|`)) delete s.checks[k]; });
+    write(s);
+  },
+
+  /* ---- exercise notes ---- */
+  getNote(sessionId, exId, date = dayKey()) {
+    return read().notes.find(n => n.date === date && n.sessionId === sessionId && n.exId === exId)?.text || '';
+  },
+  setNote(sessionId, exId, name, text, date = dayKey()) {
+    const s = read();
+    const i = s.notes.findIndex(n => n.date === date && n.sessionId === sessionId && n.exId === exId);
+    if (!text || !text.trim()) { if (i >= 0) s.notes.splice(i, 1); }
+    else if (i >= 0) s.notes[i].text = text.trim();
+    else s.notes.push({ date, sessionId, exId, name, text: text.trim() });
+    write(s);
+  },
+  notesSince(ms) { return read().notes.filter(n => new Date(n.date + 'T00:00:00').getTime() >= ms); },
+
+  /* ---- knee flags ---- */
+  isFlagged(sessionId, exId, date = dayKey()) {
+    return read().flags.some(f => f.date === date && f.sessionId === sessionId && f.exId === exId);
+  },
+  toggleFlag(sessionId, exId, name, text = '', date = dayKey()) {
+    const s = read();
+    const i = s.flags.findIndex(f => f.date === date && f.sessionId === sessionId && f.exId === exId);
+    if (i >= 0) { s.flags.splice(i, 1); write(s); return false; }
+    s.flags.push({ date, sessionId, exId, name, text }); write(s); return true;
+  },
+  flagsSince(ms) { return read().flags.filter(f => new Date(f.date + 'T00:00:00').getTime() >= ms); },
+  /* every exercise ever flagged, most-flagged first — the standing watch list */
+  flagTally() {
+    const t = {};
+    read().flags.forEach(f => { t[f.exId] = t[f.exId] || { exId: f.exId, name: f.name, count: 0, last: f.date };
+      t[f.exId].count++; if (f.date > t[f.exId].last) t[f.exId].last = f.date; });
+    return Object.values(t).sort((a, b) => b.count - a.count);
+  },
+
+  /* ---- end-of-session feedback ---- */
+  addFeedback(rec) { const s = read(); s.feedback.push({ date: dayKey(), ...rec }); write(s); },
+  feedbackSince(ms) { return read().feedback.filter(f => new Date(f.date + 'T00:00:00').getTime() >= ms); },
+
+  sessionsSince(ms) {
+    return read().sessions.filter(s => new Date(s.date).getTime() >= ms);
+  },
+
   exportJSON() { return JSON.stringify(read(), null, 2); },
-  reset() { localStorage.removeItem(KEY); },
+  reset() { localStorage.removeItem(KEY()); },
 };

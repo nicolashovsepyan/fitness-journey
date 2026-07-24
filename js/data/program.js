@@ -47,6 +47,44 @@ export const FILLERS = {
 /* opposite-pattern map for the antagonist pick */
 export const ANTAGONIST = { push: 'pull', pull: 'push', upper: 'lower', lower: 'core', quad: 'core', hinge: 'core', glute: 'core' };
 
+/* ---- SECOND USER · beginner program ----
+   Three fixed gym days on non-consecutive days, plus one sport session
+   and daily walks tracked as habits (not as sessions). Deliberately the
+   SAME three workouts every week — nothing to memorise, nothing to choose. */
+export const BEGINNER_PROGRAM = {
+  id: 'beginner_return',
+  name: 'Come Back Strong',
+  phases: ['Show up'],
+  phaseWeeks: 52,
+  defaultDuration: 45,
+  fixed: true,                         // never rescaled by a duration picker
+  introWeeks: 2,                       // weeks 1-2 = warm-up + A and B pairs only
+  week: [
+    { day: 1, sessionId: 'b_upper_1' },
+    { day: 2, sessionId: 'b_upper_2' },
+    { day: 3, sessionId: 'b_full_3' },
+  ],
+  /* which weekdays the three sessions land on (0 = Sunday). He picks one. */
+  schedules: {
+    mwf: { label: 'Mon · Wed · Fri', days: [1, 3, 5] },
+    tts: { label: 'Tue · Thu · Sat', days: [2, 4, 6] },
+  },
+  defaultSchedule: 'mwf',
+  habits: [
+    { id: 'walk',    label: '20 min walk after a meal',    daily: true },
+    { id: 'no8pm',   label: 'No eating after 8pm',         daily: true },
+    { id: 'protein', label: 'First meal was high protein', daily: true },
+    { id: 'sport',   label: 'Sport session',               daily: false, note: 'weekly — tick it on the day you do it' },
+  ],
+  longWalk: 'One 1-hour walk on Saturday or Sunday',
+};
+
+/* All programs, by id. A user record points at one of these. */
+export const PROGRAMS = {
+  main: PROGRAM,
+  beginner_return: BEGINNER_PROGRAM,
+};
+
 /* You — drives defaults, equipment filtering, units, constraints */
 export const PROFILE = {
   units: 'lb',                         // kg ⇄ lb toggle, global
@@ -60,5 +98,21 @@ export const PROFILE = {
     { id: 'conditioning', name: 'Zone-5 conditioning',       focus: 'med'  },
     { id: 'skill',        name: 'Skills (handstand / front lever)', focus: 'high' },
     { id: 'mobility',     name: 'Mobility / into the stretch', focus: 'low' },
+  ],
+};
+
+/* Second user — full commercial gym, knee under rehab.
+   `gymLibrary: true` is what unlocks the machine/cable movements in
+   exercises-gym.js; without it they stay hidden, which is what keeps
+   the two libraries from bleeding into each other. */
+export const BEGINNER_PROFILE = {
+  units: 'lb',
+  gymLibrary: true,                    // unlocks the machine/cable movements
+  equipment: ['bw', 'db', 'bb', 'band', 'bench', 'rack', 'pullupbar', 'machine', 'cable', 'kb', 'mat'],
+  constraints: { knee: 'no running, no jumping, no deep knee flexion under load' },
+  goals: [
+    { id: 'habit',    name: 'Show up three times a week',   focus: 'high' },
+    { id: 'muscle',   name: 'Build muscle, armour the joints', focus: 'high' },
+    { id: 'fat_loss', name: 'Lose weight over time',        focus: 'med' },
   ],
 };

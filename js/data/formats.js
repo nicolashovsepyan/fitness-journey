@@ -27,6 +27,11 @@ export const FORMATS = {
     timed: false, track: 'reps+weight (failure set)',
     blurb: 'Warm-up ramp, then ONE all-out set to failure.',
   },
+  superset: {
+    name: 'Superset', short: 'Superset', kind: 'superset',
+    timed: true, track: 'reps+weight per round',
+    blurb: 'First move straight into the second with no rest, then rest and repeat.',
+  },
   rest_pause: {
     name: 'Rest-Pause', short: 'Rest-pause', kind: 'rest_pause',
     timed: false, track: 'reps+weight (clusters)',

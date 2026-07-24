@@ -7,7 +7,6 @@ import { resolveSession, describeItem, alternatives, blockMinutes, libraryFor } 
 import { FORMATS } from '../data/formats.js';
 import { EXERCISES } from '../data/exercises.js';
 import { store } from '../store.js';
-import { openLibraryPicker, pickerInitialFor } from './library.js';
 
 const DURATIONS = [20, 30, 45, 60];
 const DUR_LABEL = { 20: 'Quick', 30: 'Short', 45: 'Full', 60: 'Long' };
@@ -29,19 +28,13 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
     swaps: store.getSwaps(sessionId), removed: store.getRemoved(sessionId),
     order: store.getOrder(sessionId), added: store.getAdded(sessionId),
     fillerSwaps: store.getFillerSwaps(sessionId),
-    removedBlocks: store.getRemovedBlocks(sessionId), addedBlocks: store.getAddedBlocks(sessionId),
   });
-  const LVLC = { beg: '#63b34d', int: '#ffb84d', adv: '#ff6b6b' };
-  const diffBadge = exId => { const e = EXERCISES[exId] || {}; return e.diff ? `<span class="rowdiff" style="background:${LVLC[e.level] || '#7a7a86'}">${e.diff}</span>` : ''; };
-  const playBtn = exId => { const e = EXERCISES[exId] || {}; const url = e.demoUrl ? e.demoUrl.replace('/embed/', '/watch?v=') : 'https://www.youtube.com/results?search_query=' + encodeURIComponent((e.name || '') + ' calisthenics'); return `<a class="rowplay" href="${url}" target="_blank" rel="noopener" title="Watch">▶</a>`; };
 
   function draw() {
     const rp = plan();
     const tags = [rp.category && rp.category.replace('_', ' '), rp.coreDominant ? 'core-dominant' : null, rp.variant].filter(Boolean);
     const total = rp.blocks.reduce((t, b) => t + blockMinutes(b), 0);
-    const edited = Object.keys(store.getSwaps(sessionId)).length || store.getRemoved(sessionId).length
-      || Object.keys(store.getOrder(sessionId)).length || Object.keys(store.getFillerSwaps(sessionId)).length
-      || store.getRemovedBlocks(sessionId).length || store.getAddedBlocks(sessionId).length;
+    const edited = Object.keys(store.getSwaps(sessionId)).length || store.getRemoved(sessionId).length || Object.keys(store.getOrder(sessionId)).length;
 
     let html = '', lastRole = null, group = [];
     const flush = () => {
@@ -68,9 +61,8 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
           ${DURATIONS.map(d => `<div class="dur ${dur === d ? 'on' : ''}" data-d="${d}"><div class="m">${d}</div><div class="x">${DUR_LABEL[d]}</div></div>`).join('')}
         </div>
         ${rp.scalingNote ? `<div class="scaling-note">@${dur}min · ${rp.scalingNote}</div>` : ''}
-        <div class="edit-hint">⇄ swap · ⋮⋮ drag to reorder · swipe ← to remove${edited ? ` · <a id="resetEdits">reset edits</a>` : ''}</div>
+        <div class="edit-hint">⇄ swap · ⋮⋮ drag to reorder · swipe left to remove${edited ? ` · <a id="resetEdits">reset edits</a>` : ''}</div>
         ${html}
-        <button class="add-block" id="addBlock">+ Add a block</button>
         <div class="actionbar"><button class="btn lg" id="start">Start workout ▸</button></div>
       </div>`;
 
@@ -84,21 +76,12 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
     host.querySelectorAll('.swap[data-from]').forEach(el => el.addEventListener('click', () => openSwap(el.dataset.from, el.dataset.block, rp)));
     host.querySelectorAll('.swap[data-filler]').forEach(el => el.addEventListener('click', () => openFillerSwap(el.dataset.block, el.dataset.filler, rp)));
     host.querySelectorAll('.add-ex[data-block]').forEach(el => el.addEventListener('click', () => openAdd(el.dataset.block, el.dataset.bid, rp)));
-    host.querySelectorAll('.ex-row[data-remove]').forEach(wireSwipe);   // swipe left to remove
-    host.querySelectorAll('.filler-x[data-block]').forEach(el => el.addEventListener('click', e => {
-      e.stopPropagation(); store.setFillerSwap(sessionId, el.dataset.block, '__none'); draw();   // remove the secondary
-    }));
-    host.querySelectorAll('.block-x[data-block]').forEach(el => el.addEventListener('click', e => {
-      e.stopPropagation();
-      if (el.dataset.added) store.removeAddedBlock(sessionId, el.dataset.block);
-      else store.setBlockRemoved(sessionId, el.dataset.block, true);
+    host.querySelectorAll('.ex-remove[data-from]').forEach(el => el.addEventListener('click', () => {
+      if (el.dataset.added) store.removeAdded(sessionId, el.dataset.bn, el.dataset.from);
+      else store.setRemoved(sessionId, el.dataset.from, true);
       draw();
     }));
-    host.querySelector('#addBlock')?.addEventListener('click', () => openAddBlock(rp));
-    // tap a row (not a control) to expand its cue
-    host.querySelectorAll('.ex-row .exmeta').forEach(el => el.addEventListener('click', () => {
-      const cue = el.querySelector('.cue'); if (cue) cue.style.display = cue.style.display === 'block' ? 'none' : 'block';
-    }));
+    host.querySelectorAll('.ex-row').forEach(wireSwipe);
 
     // drag-to-reorder: items within each block, blocks within each section
     host.querySelectorAll('.ex-list').forEach(list => makeSortable(list, ids => { store.setItemOrder(sessionId, list.dataset.block, ids); }));
@@ -115,12 +98,11 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
         <div class="bhead">
           <div class="bleft"><button class="drag-handle" data-drag title="Move block">⋮⋮</button>
             <div><div class="bname">${b.name} ${b.anchor ? '<span class="anchor-dot">●</span>' : ''}</div><div class="bmeta">~${blockMinutes(b)} min${tag ? ` · ${tag}` : ''}</div></div></div>
-          <div class="bright"><span class="fmt-chip ${b.anchor ? 'anchor' : ''}">${FORMATS[b.format]?.short || b.format}</span>
-            <button class="block-x" data-block="${b.name}" data-added="${b.addedBlock ? '1' : ''}" title="Remove block">✕</button></div>
+          <span class="fmt-chip ${b.anchor ? 'anchor' : ''}">${FORMATS[b.format]?.short || b.format}</span>
         </div>
         <div class="ex-list" data-block="${b.name}">${b.items.map(it => exRow(it, b)).join('')}</div>
         ${b.filler ? fillerRow(b.filler, b) : ''}
-        ${b.format !== 'jointprep' ? `<button class="add-ex" data-block="${b.name}" data-bid="${b.id}">＋ Add exercise to this block</button>` : ''}
+        ${b.format !== 'jointprep' ? `<button class="add-ex" data-block="${b.name}" data-bid="${b.id}">+ Add exercise</button>` : ''}
         ${b.note ? `<div class="bnote">${b.note}</div>` : ''}
       </div>`;
   }
@@ -134,15 +116,13 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
         <span class="ss-link">+ superset</span>
         <div class="ex-row static ss-row">
           <div class="ex-inner">
-            ${diffBadge(f.exId)}
+            <div class="demo" data-cue="1" title="info">ⓘ</div>
             <div class="exmeta">
               <div class="exname">${f.name} <span class="ss-badge">secondary</span>${f.swapped ? '<span class="swapped">swapped</span>' : ''}</div>
               <div class="exrx">${rx} · in the rest — light, just enough</div>
               <div class="cue" style="display:none; color:var(--faint); font-size:12px; margin-top:3px;">${cue}</div>
             </div>
-            ${playBtn(f.exId)}
             <button class="swap" data-filler="${f.exId}" data-block="${b.name}" title="Swap secondary">⇄</button>
-            <button class="row-x filler-x" data-block="${b.name}" title="Remove secondary">✕</button>
           </div>
         </div>
       </div>`;
@@ -152,21 +132,18 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
     const cue = EXERCISES[it.exId]?.cues || '';
     const from = it.swappedFrom || it.exId;
     return `
-      <div class="ex-row" data-sortable-item data-id="${from}" data-remove="${from}" data-bn="${b.name}" data-added="${it.added ? '1' : ''}">
-        <div class="ex-swipe-bg">← remove</div>
+      <div class="ex-row" data-sortable-item data-id="${from}">
         <div class="ex-inner">
           <button class="drag-handle sm" data-drag title="Move">⋮⋮</button>
-          ${diffBadge(it.exId)}
+          <div class="demo" data-cue="1" title="info">ⓘ</div>
           <div class="exmeta">
-            <div class="exrow1">
-              <div class="exname">${it.name} ${it.swappedFrom ? '<span class="swapped">swapped</span>' : ''}${it.added ? '<span class="swapped">added</span>' : ''}</div>
-              ${playBtn(it.exId)}
-              <button class="swap" data-from="${from}" data-block="${b.id}" title="Swap exercise">⇄</button>
-            </div>
+            <div class="exname">${it.name} ${it.swappedFrom ? '<span class="swapped">swapped</span>' : ''}${it.added ? '<span class="swapped">added</span>' : ''}</div>
             <div class="exrx">${describeItem(b, it)}</div>
             <div class="cue" style="display:none; color:var(--faint); font-size:12px; margin-top:3px;">${cue}</div>
           </div>
+          <button class="swap" data-from="${from}" data-block="${b.id}" title="Swap exercise">⇄</button>
         </div>
+        <button class="ex-remove" data-from="${from}" data-bn="${b.name}" data-added="${it.added ? '1' : ''}">Remove</button>
       </div>`;
   }
 
@@ -200,125 +177,120 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
     });
   }
 
-  function doRemoveRow(row) {
-    const id = row.dataset.remove; if (!id) return;
-    if (row.dataset.added) store.removeAdded(sessionId, row.dataset.bn, id);
-    else store.setRemoved(sessionId, id, true);
-    draw();
-  }
-  /* swipe LEFT past a threshold to remove (works on touch + mouse via pointer events) */
+  /* swipe-left to reveal Remove (touch); ignores touches that begin on a control */
   function wireSwipe(row) {
-    const inner = row.querySelector('.ex-inner'); if (!inner) return;
+    const inner = row.querySelector('.ex-inner');
+    if (!inner) return;
     let x0 = null, dx = 0;
-    inner.addEventListener('pointerdown', e => {
-      if (e.target.closest('[data-drag], .swap, .rowplay, a, button')) return;   // let controls work
-      x0 = e.clientX; dx = 0; inner.style.transition = '';
-    });
-    inner.addEventListener('pointermove', e => {
+    inner.addEventListener('touchstart', e => {
+      if (e.target.closest('[data-drag],.swap,.demo')) { x0 = null; return; }
+      x0 = e.touches[0].clientX;
+    }, { passive: true });
+    inner.addEventListener('touchmove', e => {
       if (x0 == null) return;
-      dx = Math.min(0, e.clientX - x0);
+      dx = Math.max(-92, Math.min(0, e.touches[0].clientX - x0));
       inner.style.transform = `translateX(${dx}px)`;
-      row.classList.toggle('will-remove', dx < -90);
-    });
-    const finish = () => {
+    }, { passive: true });
+    inner.addEventListener('touchend', () => {
       if (x0 == null) return;
-      const commit = dx < -90; x0 = null;
+      const open = dx < -46;
       inner.style.transition = 'transform .18s ease';
-      if (commit) { inner.style.transform = 'translateX(-110%)'; setTimeout(() => doRemoveRow(row), 150); }
-      else { inner.style.transform = 'translateX(0)'; row.classList.remove('will-remove'); }
-    };
-    inner.addEventListener('pointerup', finish);
-    inner.addEventListener('pointercancel', finish);
-    inner.addEventListener('pointerleave', finish);
+      inner.style.transform = open ? 'translateX(-92px)' : 'translateX(0)';
+      setTimeout(() => { inner.style.transition = ''; }, 200);
+      x0 = null; dx = 0;
+    });
   }
 
   function openSwap(fromEx, blockId, rp) {
+    const block = rp.blocks.find(b => b.id === blockId);
+    const used = rp.blocks.flatMap(b => b.items.map(i => i.exId)).filter(x => x !== fromEx);
+    const alts = alternatives(fromEx, { constraint: rp.constraint }, used);
+    const current = block?.items.find(i => (i.swappedFrom || i.exId) === fromEx)?.exId;
     const origName = EXERCISES[fromEx]?.name || fromEx;
-    openLibraryPicker({ title: 'Swap · ' + origName, initial: pickerInitialFor(fromEx),
-      onPick: id => { store.setSwap(sessionId, fromEx, id === fromEx ? null : id); draw(); } });
+    let dividerInserted = false;
+
+    const rows = alts.map(a => {
+      let pre = '';
+      if (!a.recommended && !dividerInserted) { dividerInserted = true; pre = '<div class="swap-divider">More from your library</div>'; }
+      return pre + `<div class="swap-opt ${a.id === current ? 'cur' : ''}" data-id="${a.id}"><span>${a.name}</span>${a.id === current ? '<span class="muted">current</span>' : `<span class="muted">${a.pattern}</span>`}</div>`;
+    }).join('');
+
+    const ov = document.createElement('div');
+    ov.className = 'overlay';
+    ov.innerHTML = `
+      <div class="overlay-card scroll">
+        <div class="eyebrow">Swap exercise</div>
+        <h2 style="margin:6px 0 12px;">${origName}</h2>
+        ${alts.length ? rows : '<div class="muted" style="padding:8px 0;">No alternatives.</div>'}
+        ${current !== fromEx ? `<div class="swap-opt revert" data-id="__revert"><span>↩ Revert to ${origName}</span></div>` : ''}
+        <button class="btn ghost" id="swapCancel" style="margin-top:12px;">Cancel</button>
+      </div>`;
+    host.appendChild(ov);
+    ov.querySelector('#swapCancel').addEventListener('click', () => ov.remove());
+    ov.querySelectorAll('.swap-opt[data-id]').forEach(el => el.addEventListener('click', () => {
+      const id = el.dataset.id;
+      store.setSwap(sessionId, fromEx, id === '__revert' ? null : id);
+      ov.remove(); draw();
+    }));
   }
 
   function openFillerSwap(blockName, fromEx, rp) {
+    const used = rp.blocks.flatMap(b => b.items.map(i => i.exId)).concat(rp.blocks.map(b => b.filler?.exId).filter(Boolean)).filter(x => x !== fromEx);
+    const alts = alternatives(fromEx, { constraint: rp.constraint }, used);
     const origName = EXERCISES[fromEx]?.name || fromEx;
-    openLibraryPicker({ title: 'Swap secondary · ' + origName, initial: pickerInitialFor(fromEx),
-      onPick: id => { store.setFillerSwap(sessionId, blockName, id); draw(); } });
+    let dividerInserted = false;
+    const rows = alts.map(a => {
+      let pre = '';
+      if (!a.recommended && !dividerInserted) { dividerInserted = true; pre = '<div class="swap-divider">More from your library</div>'; }
+      return pre + `<div class="swap-opt" data-id="${a.id}"><span>${a.name}</span><span class="muted">${a.pattern}${a.diff ? ` · d${a.diff}` : ""}</span></div>`;
+    }).join('');
+    const ov = document.createElement('div'); ov.className = 'overlay';
+    ov.innerHTML = `
+      <div class="overlay-card scroll">
+        <div class="eyebrow">Swap secondary (superset)</div>
+        <h2 style="margin:6px 0 12px;">${origName}</h2>
+        ${alts.length ? rows : '<div class="muted" style="padding:8px 0;">No alternatives.</div>'}
+        <div class="swap-opt revert" data-id="__revert"><span>↩ Auto-pick (rotating)</span></div>
+        <button class="btn ghost" id="fsCancel" style="margin-top:12px;">Cancel</button>
+      </div>`;
+    host.appendChild(ov);
+    ov.querySelector('#fsCancel').addEventListener('click', () => ov.remove());
+    ov.querySelectorAll('.swap-opt[data-id]').forEach(el => el.addEventListener('click', () => {
+      const id = el.dataset.id;
+      store.setFillerSwap(sessionId, blockName, id === '__revert' ? null : id);
+      ov.remove(); draw();
+    }));
   }
 
   function openAdd(blockName, bid, rp) {
     const block = rp.blocks.find(b => b.id === bid);
+    const measure = block?.items[0]?.measure || 'reps';
+    const used = rp.blocks.flatMap(b => b.items.map(i => i.exId));
+    const list = libraryFor(measure, { constraint: rp.constraint }, used);
     const tmpl = block?.items[0] || {};
-    openLibraryPicker({ title: 'Add to ' + blockName, initial: pickerInitialFor(block?.items[0]?.exId), onPick: id => {
-      const m = EXERCISES[id]; const measure = m?.measure || tmpl.measure || 'reps';
+    const prescription = () => {
       const p = {};
       ['sets', 'reps', 'hold', 'rest', 'tempo', 'perSide'].forEach(k => { if (tmpl[k] != null) p[k] = tmpl[k]; });
       if (p.sets == null && ['straight', 'tempo', 'isometric'].includes(block?.format)) p.sets = 3;
       if (measure === 'reps' && p.reps == null) p.reps = 10;
-      if (measure === 'hold') { if (p.hold == null) p.hold = 30; delete p.reps; }
+      if (measure === 'hold' && p.hold == null) p.hold = 30;
       if (p.rest == null && p.sets) p.rest = 60;
-      store.addItem(sessionId, blockName, { ex: id, ...p });
-      draw();
-    } });
-  }
-
-  /* full block builder: type · method · exercises · prescription → a runner-ready block */
-  function openAddBlock(rp) {
-    const st = { role: 'Work', format: 'straight', items: [], sets: 3, reps: 10, hold: 30, rest: 90, roundRest: 30, rounds: 3, minutes: 5, work: 20, restSec: 10 };
-    const ROLES = ['Primer', 'Work', 'Finisher'];
-    const METHODS = [['straight', 'Straight'], ['superset', 'Superset'], ['circuit', 'Circuit'], ['amrap', 'AMRAP'], ['tabata', 'Tabata'], ['emom', 'EMOM']];
-    const FIELDS = { sets: ['Sets', 1], rounds: ['Rounds', 1], minutes: ['Minutes', 1], reps: ['Reps', 1], hold: ['Hold · s', 5], rest: ['Rest · s', 15], roundRest: ['Round rest · s', 15], work: ['Work · s', 5], restSec: ['Rest · s', 5] };
-    const METHOD_FIELDS = { straight: ['sets', 'rest'], superset: ['sets', 'rest'], circuit: ['rounds', 'roundRest'], amrap: ['minutes'], tabata: ['rounds', 'work', 'restSec'], emom: ['rounds'] };
-    const hasReps = () => !st.items.length || st.items.some(id => EXERCISES[id]?.measure !== 'hold');
-    const hasHold = () => st.items.some(id => EXERCISES[id]?.measure === 'hold');
-    const label = () => METHODS.find(m => m[0] === st.format)[1];
-    const autoName = () => { const first = st.items[0] ? EXERCISES[st.items[0]].name : ''; return first ? `${first}${st.items.length > 1 ? ' +' + (st.items.length - 1) : ''} · ${label()}` : `${st.role} · ${label()}`; };
-    function fieldsFor() {
-      const f = METHOD_FIELDS[st.format].slice();
-      if (st.format !== 'tabata') { const ins = []; if (hasReps()) ins.push('reps'); if (hasHold()) ins.push('hold'); f.splice(1, 0, ...ins); }
-      return f;
-    }
-    function buildBlock() {
-      const fmt = st.format === 'superset' ? 'circuit' : st.format;
-      const items = st.items.map(id => {
-        const m = EXERCISES[id]; const isHold = m.measure === 'hold'; const it = { ex: id };
-        if (['straight', 'superset'].includes(st.format)) { it.sets = st.sets; if (isHold) it.hold = st.hold; else it.reps = st.reps; it.rest = st.rest; }
-        else { if (isHold) it.hold = st.hold; else it.reps = st.reps; }
-        return it;
-      });
-      let name = autoName(); const existing = new Set(rp.blocks.map(b => b.name)); let n = 2; while (existing.has(name)) name = `${autoName()} ${n++}`;
-      const block = { name, role: st.role, format: fmt, items };
-      if (st.format === 'superset') { block.rounds = st.sets; block.roundRest = st.rest; block.transition = 8; }
-      if (st.format === 'circuit') { block.rounds = st.rounds; block.roundRest = st.roundRest; block.transition = 8; }
-      if (st.format === 'amrap') block.minutes = st.minutes;
-      if (st.format === 'tabata' || st.format === 'emom') { block.rounds = st.rounds; block.work = st.work; block.rest = st.restSec; }
-      return block;
-    }
-    const ov = document.createElement('div'); ov.className = 'overlay'; host.appendChild(ov);
-    const close = () => ov.remove();
-    function render() {
-      ov.innerHTML = `<div class="overlay-card scroll bb-card">
-        <div class="picker-head"><div class="eyebrow">New block</div><button class="x pk-x" id="bbClose">✕</button></div>
-        <div class="bb-body">
-          <div class="bb-l">Type</div>
-          <div class="segrow">${ROLES.map(r => `<button class="seg ${st.role === r ? 'on' : ''}" data-role="${r}">${r}</button>`).join('')}</div>
-          <div class="bb-l">Method</div>
-          <div class="chipwrap">${METHODS.map(([v, l]) => `<button class="bchip ${st.format === v ? 'on' : ''}" data-fmt="${v}">${l}</button>`).join('')}</div>
-          <div class="bb-l">Exercises <span class="muted">· ${st.items.length}</span></div>
-          <div class="bb-exlist">${st.items.map((id, i) => `<div class="bb-ex"><span class="bb-exn">${EXERCISES[id]?.name || id}</span><button class="bb-exx" data-rmex="${i}">✕</button></div>`).join('') || '<div class="muted" style="padding:6px 2px;font-size:13px;">Nothing added yet.</div>'}</div>
-          <button class="add-ex" id="bbAddEx">＋ Add exercise</button>
-          <div class="bb-l">Prescription</div>
-          ${fieldsFor().map(k => { const [lbl, step] = FIELDS[k]; return `<div class="brow"><span class="blabel">${lbl}</span><div class="ed-step"><button data-fld="${k}" data-d="-${step}">−</button><input data-fldin="${k}" type="number" inputmode="numeric" value="${st[k]}"><button data-fld="${k}" data-d="${step}">+</button></div></div>`; }).join('')}
-          <button class="btn" id="bbCreate" style="margin-top:16px;" ${st.items.length ? '' : 'disabled'}>Create block ▸</button>
-        </div></div>`;
-      ov.querySelector('#bbClose').addEventListener('click', close);
-      ov.querySelectorAll('[data-role]').forEach(b => b.addEventListener('click', () => { st.role = b.dataset.role; render(); }));
-      ov.querySelectorAll('[data-fmt]').forEach(b => b.addEventListener('click', () => { st.format = b.dataset.fmt; render(); }));
-      ov.querySelectorAll('[data-rmex]').forEach(b => b.addEventListener('click', () => { st.items.splice(+b.dataset.rmex, 1); render(); }));
-      ov.querySelector('#bbAddEx').addEventListener('click', () => openLibraryPicker({ title: 'Add exercise', onPick: id => { st.items.push(id); render(); } }));
-      ov.querySelectorAll('[data-fld]').forEach(b => b.addEventListener('click', () => { const k = b.dataset.fld; st[k] = Math.max(0, (Number(st[k]) || 0) + Number(b.dataset.d)); ov.querySelector(`[data-fldin="${k}"]`).value = st[k]; }));
-      ov.querySelectorAll('[data-fldin]').forEach(inp => inp.addEventListener('change', () => { st[inp.dataset.fldin] = Math.max(0, Number(inp.value) || 0); }));
-      ov.querySelector('#bbCreate').addEventListener('click', () => { if (!st.items.length) return; store.addBlock(sessionId, buildBlock()); close(); draw(); });
-    }
-    render();
+      return p;
+    };
+    const ov = document.createElement('div'); ov.className = 'overlay';
+    ov.innerHTML = `
+      <div class="overlay-card scroll">
+        <div class="eyebrow">Add to ${blockName}</div>
+        <h2 style="margin:6px 0 12px;">Add exercise</h2>
+        ${list.length ? list.map(a => `<div class="swap-opt" data-id="${a.id}"><span>${a.name}</span><span class="muted">${a.pattern}${a.diff ? ` · d${a.diff}` : ""}</span></div>`).join('') : '<div class="muted" style="padding:8px 0;">Nothing to add.</div>'}
+        <button class="btn ghost" id="addCancel" style="margin-top:12px;">Cancel</button>
+      </div>`;
+    host.appendChild(ov);
+    ov.querySelector('#addCancel').addEventListener('click', () => ov.remove());
+    ov.querySelectorAll('.swap-opt[data-id]').forEach(el => el.addEventListener('click', () => {
+      store.addItem(sessionId, blockName, { ex: el.dataset.id, ...prescription() });
+      ov.remove(); draw();
+    }));
   }
 
   draw();

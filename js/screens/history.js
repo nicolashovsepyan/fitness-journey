@@ -22,21 +22,15 @@ function fmtPR(p) {
 
 const unitFor = m => m === 'hold' ? 'sec' : m === 'cals' ? 'cals' : 'reps';
 
-/* turn a set list into "12 reps + 20s @25lb · …" — shows reps, hold, and weight together */
+/* turn a set list into "L 12 @25lb · R 11 @25lb  reps" (unit appended so it's never ambiguous) */
 function setStr(sets, measure) {
-  const has = v => v != null && v !== '';
-  const parts = (sets || []).filter(s => has(s.reps) || has(s.sec) || has(s.value)).map(s => {
-    const reps = has(s.reps) ? s.reps : (measure !== 'hold' ? s.value : null);
-    const sec  = has(s.sec)  ? s.sec  : (measure === 'hold' ? s.value : null);
-    const bits = [];
-    if (has(reps)) bits.push(`${reps} reps`);
-    if (has(sec))  bits.push(`${sec}s`);
-    let t = bits.join(' + ') || String(s.value ?? '');
+  const parts = (sets || []).filter(s => s.value != null && s.value !== '').map(s => {
+    let t = String(s.value);
     if (s.side) t = `${s.side} ${t}`;
-    if (has(s.weight)) t += ` @${s.weight}lb`;
+    if (s.weight != null && s.weight !== '') t += ` @${s.weight}lb`;
     return t;
   });
-  return parts.length ? parts.join(' · ') : '–';
+  return parts.length ? `${parts.join(' · ')} <span class="u">${unitFor(measure)}</span>` : '–';
 }
 
 export function renderHistory(host, { onBack }) {
@@ -119,17 +113,9 @@ export function renderHistory(host, { onBack }) {
         const ents = (b.entries || []).filter(e => (e.sets || []).some(x => x.value != null));
         if (!ents.length) return '';
         const bt = b.seconds ? `<span class="blktime">${fmtDur(b.seconds)}</span>` : '';
-        const roundsDisp = e => {
-          const sets = (e.sets || []).filter(x => x.value != null && x.value !== '');
-          if (sets.length > 1) {   // per-round reps captured (Tabata / EMOM / circuit)
-            const total = sets.reduce((n, x) => n + (Number(x.value) || 0), 0);
-            return `${sets.length} <span class="u">rounds</span> · ${total} <span class="u">${unitFor(e.measure)}</span>`;
-          }
-          return `${sets[0]?.value ?? '–'} <span class="u">rounds</span>`;   // AMRAP round-count
-        };
-        const rpeDot = r => r ? `<span class="rpe-dot ${r}" title="${r}"></span>` : '';
-        return `<div class="blkhead"><span class="bh-role">${b.type || ''}</span><span class="bh-name">${b.name || ''}</span>${rpeDot(b.rpe)}${bt}</div>` +
-          ents.map(e => `<div class="hist-ex"><div class="en">${rpeDot(e.rpe)}${e.name}</div><div class="es">${e.rounds ? roundsDisp(e) : setStr(e.sets, e.measure)}</div></div>`).join('');
+        const isRounds = ['amrap', 'tabata', 'emom'].includes(b.format) || ents.some(e => e.rounds);
+        return `<div class="blkhead"><span class="bh-role">${b.type || ''}</span><span class="bh-name">${b.name || ''}</span>${bt}</div>` +
+          ents.map(e => `<div class="hist-ex"><div class="en">${e.name}</div><div class="es">${isRounds ? `${e.sets[0]?.value ?? '–'} <span class="u">rounds</span>` : setStr(e.sets, e.measure)}</div></div>`).join('');
       }).join('')}</div>` : '';
       return `<div class="hist-card"><div class="htop" data-key="s${i}">
           <div><div class="hname">${s.name}</div><div class="hmeta">${exCount} exercises · ⏱ ${fmtDur(s.seconds)} · ${s.duration || ''} min plan ${deltaBadge}</div></div>

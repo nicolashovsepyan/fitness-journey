@@ -47,70 +47,40 @@ export function say(text) {
   } catch (e) { /* silent fallback */ }
 }
 
-/* ---- Web Audio beeps ----
-   Routed through a limiter so they punch through music without clipping, and
-   kept alive with an inaudible tone so a Bluetooth speaker never lets the audio
-   channel idle (idling clips the START of the next beep — the #1 BT bug). */
-let actx = null, master = null, keepNode = null;
-function ensureGraph() {
-  try {
-    if (!actx) {
-      actx = new (window.AudioContext || window.webkitAudioContext)();
-      const comp = actx.createDynamicsCompressor();   // limiter → even, loud, no clip
-      comp.threshold.value = -12; comp.knee.value = 6; comp.ratio.value = 14;
-      comp.attack.value = 0.002; comp.release.value = 0.14;
-      master = actx.createGain(); master.gain.value = 1.0;
-      master.connect(comp).connect(actx.destination);
-    }
-    if (actx.state === 'suspended') actx.resume();
-  } catch (e) {}
-  return actx;
-}
-/* a sub-audible continuous tone keeps the Bluetooth A2DP link open so every
-   beep plays instantly and in full, instead of the first-after-silence getting
-   clipped. Sits at 40 Hz / near-zero gain — mixes harmlessly under music. */
-function startKeepAlive() {
-  if (keepNode || !actx) return;
-  try {
-    const osc = actx.createOscillator(); const g = actx.createGain();
-    osc.type = 'sine'; osc.frequency.value = 40; g.gain.value = 0.0016;
-    osc.connect(g).connect(actx.destination); osc.start();
-    keepNode = { osc };
-  } catch (e) {}
-}
-export function stopKeepAlive() { try { keepNode?.osc.stop(); } catch (e) {} keepNode = null; }
-
+/* ---- Web Audio beeps (mix over music, don't interrupt it) ---- */
+let actx = null;
 export function initAudio() {
   // call on a user gesture (workout start) so iOS unlocks audio
   try {
-    ensureGraph();
-    const b = actx.createBuffer(1, 1, 22050);           // 1-sample silent buffer = reliable iOS unlock
-    const src = actx.createBufferSource(); src.buffer = b; src.connect(master); src.start(0);
-    startKeepAlive();
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === 'suspended') actx.resume();
+    // play a 1-sample silent buffer — the reliable iOS unlock so later beeps actually fire
+    const b = actx.createBuffer(1, 1, 22050);
+    const src = actx.createBufferSource(); src.buffer = b; src.connect(actx.destination); src.start(0);
   } catch (e) {}
   try { if (!preferredVoice) preferredVoice = pickVoice(); } catch (e) {}   // warm up the voice list
 }
 function tone(freq, ms, when = 0, vol = 0.5) {
-  const ac = ensureGraph(); if (!ac || !master) return;
-  const t0 = ac.currentTime + when + 0.02;              // small lookahead so a just-resumed ctx keeps the attack
-  const osc = ac.createOscillator();
-  const gain = ac.createGain();
-  osc.type = 'triangle';                                // brighter than sine → cuts through music + BT
-  osc.frequency.setValueAtTime(freq, t0);
+  if (!actx) return;
+  const t0 = actx.currentTime + when;
+  const osc = actx.createOscillator();
+  const gain = actx.createGain();
+  osc.type = 'sine';
+  osc.frequency.value = freq;
   gain.gain.setValueAtTime(0.0001, t0);
-  gain.gain.exponentialRampToValueAtTime(vol, t0 + 0.012);
+  gain.gain.exponentialRampToValueAtTime(vol, t0 + 0.01);
   gain.gain.exponentialRampToValueAtTime(0.0001, t0 + ms / 1000);
-  osc.connect(gain).connect(master);
-  osc.start(t0); osc.stop(t0 + ms / 1000 + 0.03);
+  osc.connect(gain).connect(actx.destination);
+  osc.start(t0); osc.stop(t0 + ms / 1000 + 0.02);
 }
-const VOL = 0.92;                // ~15% hotter than before, held clean by the limiter
-const VOL_END = 1.0;             // the final beep pops loudest
+const VOL = 0.7;                 // standard cue volume (louder, to cut through music)
+const VOL_END = VOL * 1.15;      // the final beep pops 15% louder than the others
 export function beep(kind = 'tick') {
-  ensureGraph();
-  if (kind === 'go')        { tone(880, 180, 0, 0.82); }                        // start
-  else if (kind === 'end')  { tone(680, 150, 0, VOL); tone(1050, 300, 0.14, VOL_END); } // finish: rising double, last louder
-  else if (kind === 'count'){ tone(820, 130, 0, VOL); }                         // 3-2-1 ticks — higher + longer to carry over music
-  else                      { tone(720, 110, 0, VOL); }
+  initAudio();
+  if (kind === 'go')        { tone(880, 160, 0, 0.55); }              // start
+  else if (kind === 'end')  { tone(700, 120, 0, VOL); tone(1040, 240, 0.13, VOL_END); } // finish: rising double, last beep louder
+  else if (kind === 'count'){ tone(740, 90, 0, VOL); }               // 3-2-1 ticks
+  else                      { tone(700, 80, 0, VOL); }
 }
 
 /* light haptic if supported */
