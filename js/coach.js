@@ -118,23 +118,40 @@ export function buildReport({ offsetWeeks = 0 } = {}) {
   return L.join('\n');
 }
 
-/* ---- delivery --------------------------------------------- */
+/* ---- delivery ----------------------------------------------
+   The report goes to Nicolas by email. It composes a message FROM the user's
+   own mail account TO the coach — so it works with no connection to Nicolas,
+   which was the requirement. Gmail web-compose first (most phones), then the
+   device mail app, then clipboard as a last resort. */
+const COACH_EMAIL = 'nicolashovsepyan@gmail.com';
+
 export async function sendReport(text, { title = 'Training report' } = {}) {
-  // 1. native share sheet — the one that can actually reach Nicolas from a phone
+  // the report can be long; email bodies get truncated by some clients, so we
+  // also copy the full thing to the clipboard as a safety net
+  try { await navigator.clipboard.writeText(text); } catch (e) {}
+
+  const su = encodeURIComponent(title);
+  const body = encodeURIComponent(text);
+
+  // 1. Gmail compose in a new tab — opens the user's own Gmail, addressed to Nicolas
+  try {
+    const gmail = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(COACH_EMAIL)}&su=${su}&body=${body}`;
+    const w = window.open(gmail, '_blank');
+    if (w) { markSent(); return 'gmail'; }
+  } catch (e) {}
+
+  // 2. device mail app (Apple Mail, Gmail app as default handler, etc.)
+  try {
+    location.href = `mailto:${COACH_EMAIL}?subject=${su}&body=${body}`;
+    markSent(); return 'mail';
+  } catch (e) {}
+
+  // 3. share sheet
   try {
     if (navigator.share) { await navigator.share({ title, text }); markSent(); return 'shared'; }
   } catch (e) { if (e && e.name === 'AbortError') return 'cancelled'; }
-  // 2. clipboard — paste straight into a Claude chat
-  try {
-    await navigator.clipboard.writeText(text);
-    markSent(); return 'copied';
-  } catch (e) {}
-  // 3. last resort: hand it to the mail client
-  try {
-    location.href = `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(text.slice(0, 1800))}`;
-    markSent(); return 'mail';
-  } catch (e) {}
-  return 'failed';
+
+  return 'copied';   // clipboard already has it
 }
 function markSent() { store.setSetting('lastCoachSend', new Date().toISOString()); }
 
@@ -143,9 +160,13 @@ function markSent() { store.setSetting('lastCoachSend', new Date().toISOString()
 export function weeklyPromptDue() {
   const today = new Date();
   if (today.getDay() !== 0 && today.getDay() !== 1) return false;   // Sunday or Monday
+  // nothing to report? don't nag. Needs at least one session, note or flag.
+  const wk = weekStartMs(today.getDay() === 0 ? 0 : 1);
+  const hasSomething = store.sessionsSince(wk).length || store.notesSince(wk).length || store.flagsSince(wk).length;
+  if (!hasSomething) return false;
   const last = store.getSetting('lastCoachSend');
   if (!last) return true;
-  return new Date(last).getTime() < weekStartMs(today.getDay() === 0 ? 0 : 1);
+  return new Date(last).getTime() < wk;
 }
 
 export function downloadReport(text) {

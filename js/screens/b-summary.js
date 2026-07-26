@@ -11,6 +11,7 @@ import {
   workoutsDone, habitCount, weekStreak, sessionsInWeek,
 } from '../beginner.js';
 import { buildReport, sendReport, downloadReport } from '../coach.js';
+import { activeUser } from '../users.js';
 
 const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
 const nameOf = id => EXERCISES[id]?.name || id;
@@ -109,12 +110,13 @@ export function renderBSummary(host, { onBack }) {
 
   async function doSend() {
     const text = buildReport({ offsetWeeks: offset });
-    const how = await sendReport(text, { title: `Training report — week ${store.programWeek()}` });
+    const who = (activeUser().name || 'Training').split(' ')[0];
+    const how = await sendReport(text, { title: `${who} — training report, week ${store.programWeek()}` });
     if (how === 'cancelled') return;
-    toast(how === 'shared' ? 'Sent ✓'
-      : how === 'copied' ? 'Copied ✓ — paste it into the chat with your coach'
-      : how === 'mail' ? 'Opening your mail app…'
-      : 'Could not send — use Preview and copy it by hand');
+    toast(how === 'gmail' ? 'Opening Gmail — just hit send ✓'
+      : how === 'mail' ? 'Opening your mail app — just hit send ✓'
+      : how === 'shared' ? 'Sent ✓'
+      : 'Copied ✓ — paste it into an email to your coach');
     draw();
   }
 

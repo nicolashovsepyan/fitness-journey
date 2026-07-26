@@ -58,6 +58,7 @@ export const BEGINNER_PROGRAM = {
   phaseWeeks: 52,
   defaultDuration: 45,
   fixed: true,                         // never rescaled by a duration picker
+  dropPrimer: true,                    // simplify: hide the warm-up for now (reversible — flip to false)
   introWeeks: 2,                       // weeks 1-2 = warm-up + A and B pairs only
   week: [
     { day: 1, sessionId: 'b_upper_1' },

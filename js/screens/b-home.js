@@ -9,7 +9,7 @@
 import { store, dayKey } from '../store.js';
 import { BEGINNER_SESSIONS } from '../data/sessions-beginner.js';
 import {
-  PROGRAM, HABITS, DAY_LABEL, weekDates, workoutsDone, habitCount,
+  PROGRAM, HABITS, DAY_LABEL, DAY_IMG, weekDates, workoutsDone, habitCount,
   weekStreak, didSessionThisWeek, todaysSession, nextTrainingDay,
   scheduleId, beginnerPlan,
 } from '../beginner.js';
@@ -48,8 +48,8 @@ export function renderBHome(host, { onOpenDay, onOpenSummary }) {
 
         ${week <= PROGRAM.introWeeks ? `
           <div class="callout soft"><span class="ico">🌱</span><span class="txt">
-            <b>Week ${week} of ${PROGRAM.introWeeks} — easing in.</b> Warm-up plus the A and B pairs only.
-            The rest gets added in week ${PROGRAM.introWeeks + 1}. Turning up three times is the whole job right now.
+            <b>Week ${week} of ${PROGRAM.introWeeks} — easing in.</b> Just the main pairs for now.
+            More gets added in week ${PROGRAM.introWeeks + 1}. Turning up three times is the whole job right now.
           </span></div>` : ''}
 
         ${weeklyPromptDue() ? `<div class="callout act" id="weeklyNudge"><span class="ico">📤</span><span class="txt">
@@ -57,18 +57,22 @@ export function renderBHome(host, { onOpenDay, onOpenSummary }) {
 
         <!-- TODAY -->
         ${today ? `
-          <div class="today-card ${todayDone ? 'done' : ''}" id="todayCard">
-            <div class="tc-tag">${todayDone ? '✓ Done today' : 'Today'}</div>
-            <div class="tc-name">${heroSession.name}</div>
-            <div class="tc-meta">${heroPlan.blocks.length} blocks · about ${heroMins} min</div>
-            <div class="tc-go">${todayDone ? 'Look at it again ›' : 'Start ›'}</div>
+          <div class="today-card img ${todayDone ? 'done' : ''}" id="todayCard" style="--img:url('${DAY_IMG[today.sessionId] || ''}')">
+            <div class="tc-inner">
+              <div class="tc-tag">${todayDone ? '✓ Done today' : "Today's workout"}</div>
+              <div class="tc-name">${heroSession.name}</div>
+              <div class="tc-meta">${heroPlan.blocks.length} block${heroPlan.blocks.length > 1 ? 's' : ''} · about ${heroMins} min</div>
+              <div class="tc-go">${todayDone ? 'Look at it again ›' : 'Start workout ›'}</div>
+            </div>
           </div>`
         : `
-          <div class="today-card rest">
-            <div class="tc-tag">Today</div>
-            <div class="tc-name">Rest day</div>
-            <div class="tc-meta">${next ? `Next up: ${BEGINNER_SESSIONS[next.sessionId].name}, ${next.inDays === 1 ? 'tomorrow' : DAY_LABEL[next.date.getDay()]}` : ''}</div>
-            <div class="tc-go soft">Still get your walk in ›</div>
+          <div class="today-card img rest" style="--img:url('${next ? (DAY_IMG[next.sessionId] || '') : ''}')">
+            <div class="tc-inner">
+              <div class="tc-tag">Today</div>
+              <div class="tc-name">Rest day</div>
+              <div class="tc-meta">${next ? `Next: ${BEGINNER_SESSIONS[next.sessionId].name}, ${next.inDays === 1 ? 'tomorrow' : DAY_LABEL[next.date.getDay()]}` : ''}</div>
+              <div class="tc-go soft">Still get your walk in ›</div>
+            </div>
           </div>`}
 
         <!-- HABITS -->
@@ -113,7 +117,7 @@ export function renderBHome(host, { onOpenDay, onOpenSummary }) {
           const dn = didSessionThisWeek(d.sessionId);
           const isToday = today && today.sessionId === d.sessionId;
           return `
-            <div class="week-day plain ${dn ? 'done' : ''} ${isToday ? 'today' : ''}" data-day="${d.sessionId}">
+            <div class="week-day img ${dn ? 'done' : ''} ${isToday ? 'today' : ''}" data-day="${d.sessionId}" style="--img:url('${DAY_IMG[d.sessionId] || ''}')">
               <div class="content">
                 <div class="dnum">${dn ? '✓' : i + 1}</div>
                 <div class="winfo"><div class="wname">${s.name}</div>

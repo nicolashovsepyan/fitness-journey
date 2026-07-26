@@ -63,7 +63,14 @@ render();
    once it works with no signal — which is the point at a gym. When a new
    version activates it messages us, and we offer a reload rather than
    yanking the page out from under someone mid-set. */
-if ('serviceWorker' in navigator) {
+// ?nosw disables the offline cache and tears down any existing one — a dev
+// escape hatch so code changes are never masked by a stale cached build.
+const NO_SW = new URLSearchParams(location.search).has('nosw');
+if (NO_SW && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
+  if (self.caches) caches.keys().then(ks => ks.forEach(k => caches.delete(k)));
+}
+if (!NO_SW && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   });

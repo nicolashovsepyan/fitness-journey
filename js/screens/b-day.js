@@ -13,7 +13,7 @@ import { blockMinutes } from '../core/resolve.js';
 import { EXERCISES } from '../data/exercises.js';
 import { BEGINNER_RULES, BEGINNER_RULES_FINE } from '../data/sessions-beginner.js';
 import { store } from '../store.js';
-import { beginnerPlan, PROGRAM } from '../beginner.js';
+import { beginnerPlan, PROGRAM, DAY_IMG } from '../beginner.js';
 
 const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 
@@ -52,8 +52,13 @@ export function renderBDay(host, sessionId, { onBack, onStart }) {
     host.innerHTML = `
       <div class="screen fade-in bgn">
         <div class="run-head"><div class="blk">${esc(plan.name)}</div><button class="x" id="back">✕</button></div>
-        <h1 style="margin:6px 0 2px;">${esc(plan.name)}</h1>
-        <div class="sub">About ${total} min · week ${plan.week}</div>
+
+        <div class="day-hero" style="--img:url('${DAY_IMG[sessionId] || ''}')">
+          <div class="dh-inner">
+            <h1>${esc(plan.name)}</h1>
+            <div class="dh-meta">About ${total} min · ${plan.blocks.length} block${plan.blocks.length > 1 ? 's' : ''} · week ${plan.week}</div>
+          </div>
+        </div>
 
         <div class="rules-card">
           <div class="rc-head">Every session</div>

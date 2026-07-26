@@ -803,3 +803,38 @@ html, body { touch-action: manipulation; }      /* kill double-tap-to-zoom (keep
   background:var(--box-2); border:1px solid var(--accent); color:var(--text); border-radius:99px;
   padding:11px 20px; font-size:13.5px; font-weight:700; opacity:0; transition:all .25s ease; max-width:88vw; text-align:center; }
 .toast.go { opacity:1; transform:translate(-50%,0); }
+
+/* tappable ▶ on every row of an in-workout exercise list (circuit / skill /
+   amrap / superset pair) — so any move can be checked, not just the active one */
+.circuit-list .ci, .pairstrip .pi { position: relative; }
+.ci-vid { flex:0 0 auto; width:30px; height:30px; margin-right:9px; border-radius:8px; cursor:pointer;
+  background:var(--box-2); border:1px solid var(--line); color:var(--muted); font-size:11px; line-height:1; }
+.ci-vid.has { background:var(--accent); border-color:var(--accent); color:#0d1524; }
+.pairstrip .pi .ci-vid { margin-right:0; margin-left:9px; }
+
+/* ---- beginner: image-forward cards (match Nicolas's original look) ---- */
+.today-card.img { padding:0; overflow:hidden; position:relative; min-height:150px; display:flex; align-items:flex-end; }
+.today-card.img::before { content:''; position:absolute; inset:0; background-image:var(--img);
+  background-size:cover; background-position:center 30%; opacity:0.6; }
+.today-card.img::after { content:''; position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(10,10,12,0.15) 0%, rgba(10,10,12,0.55) 55%, rgba(10,10,12,0.95) 100%); }
+.today-card.img .tc-inner { position:relative; z-index:2; padding:18px; width:100%; }
+.today-card.img .tc-name { font-size:28px; }
+.today-card.img.rest::before { opacity:0.28; }
+.bgn .week-day.img { border-left:3px solid var(--accent); }
+.bgn .week-day.img.today { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent); }
+.bgn .week-day.img::after { background:linear-gradient(90deg, var(--box) 30%, rgba(27,27,34,0.15) 100%); }
+
+/* ---- beginner day: hero banner + bigger play button ---- */
+.day-hero { position:relative; overflow:hidden; border-radius:var(--radius); min-height:132px;
+  display:flex; align-items:flex-end; margin:4px 0 14px; }
+.day-hero::before { content:''; position:absolute; inset:0; background-image:var(--img);
+  background-size:cover; background-position:center 28%; opacity:0.6; }
+.day-hero::after { content:''; position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(10,10,12,0.1) 0%, rgba(10,10,12,0.6) 60%, rgba(10,10,12,0.96) 100%); }
+.day-hero .dh-inner { position:relative; z-index:2; padding:16px; }
+.day-hero h1 { margin:0; font-size:26px; letter-spacing:-.02em; }
+.day-hero .dh-meta { color:var(--muted); font-size:13px; margin-top:3px; }
+/* make the per-exercise play button read as THE way to see the move */
+.bex .vid { width:40px; height:40px; font-size:15px; }
+.bex .vid.has { box-shadow:0 0 0 3px rgba(124,179,255,0.18); }

@@ -43,6 +43,7 @@ export function beginnerPlan(sessionId, { week = store.programWeek() } = {}) {
   plan.intro = intro;
   plan.hiddenBlocks = plan.blocks.filter(b => (b.fromWeek || 1) > week).map(b => b.name);
   plan.blocks = plan.blocks
+    .filter(b => !(PROGRAM.dropPrimer && b.role === 'Primer'))   // simplification: no warm-up for now
     .filter(b => (b.fromWeek || 1) <= week)
     .map(b => (intro && b.format === 'circuit' && b.role === 'Work' && b.rounds > 2)
       ? { ...b, rounds: 2, introTrimmed: true }
@@ -116,3 +117,16 @@ export function nextTrainingDay() {
 }
 
 export const DAY_LABEL = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+/* Nicolas's own moody hero images, mapped to the three days so the beginner
+   app looks like his original, not a spreadsheet. */
+export const DAY_IMG = {
+  b_upper_1: 'images/day-hyp.png',       // muscular torso — upper
+  b_upper_2: 'images/day-strength.png',  // belt + plates — upper/strength
+  b_full_3:  'images/day-cond.png',      // conditioning — full body
+};
+/* per-block hero: reuse the day image, plus a couple of accents for finishers */
+export function blockImg(sessionId, block) {
+  if (/finish/i.test(block.role)) return 'images/day-cond.png';
+  return DAY_IMG[sessionId] || 'images/day-hyp.png';
+}

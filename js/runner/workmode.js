@@ -121,6 +121,16 @@ function coachBtnsHtml(item) {
 function exActions(item) {
   return `<div class="ex-actions">${demoBtnHtml(item)}${swapBtnHtml(item)}${coachBtnsHtml(item)}</div>${cueLine(item)}`;
 }
+/* a compact ▶ for a row inside a multi-exercise LIST (circuit / skill / amrap /
+   the superset pair). Routes through the same demo handler as the big button,
+   so you can tap ANY move in the list mid-workout to see what it is — not only
+   the one that happens to be active. */
+function rowVid(it) {
+  if (!it || !it.exId) return '';
+  const a = v => String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+  const has = !!(it.demoUrl || EXERCISES[it.exId]?.demoUrl);
+  return `<button class="ci-vid demo-btn ${has ? 'has' : ''}" data-ex="${it.exId}" data-exname="${a(it.name)}" data-cue="${a(it.cue || EXERCISES[it.exId]?.cues)}" title="Watch it">▶</button>`;
+}
 
 /* which exercise is on screen right now, whatever the format */
 function curIdx() {
@@ -620,7 +630,7 @@ function renderSkill() {
   if (!item) return completeBlock();
   if (S.sub === 'rest') return renderRest(item);
   const n = b.items.length;
-  const drillList = b.items.map((it, i) => `<div class="ci ${i === S.ii ? 'active' : ''}"><span class="nm">${it.name}</span><span class="tg">${it.minutes ? it.minutes + ' min' : (it.sets || 1) + '×' + (it.measure === 'hold' ? (it.hold || 20) + 's' : (it.reps || 5))}</span></div>`).join('');
+  const drillList = b.items.map((it, i) => `<div class="ci ${i === S.ii ? 'active' : ''}">${rowVid(it)}<span class="nm">${it.name}</span><span class="tg">${it.minutes ? it.minutes + ' min' : (it.sets || 1) + '×' + (it.measure === 'hold' ? (it.hold || 20) + 's' : (it.reps || 5))}</span></div>`).join('');
   const head = `<div class="now-ex"><div class="label">Skill ${S.ii + 1}/${n}${item.minutes ? ' · practice' : ` · set ${S.si + 1}/${item.sets || 3}`}</div><div class="name">${item.name}</div></div>${exActions(item)}`;
 
   if (item.minutes) {                         // freeform practice block for this drill
@@ -666,7 +676,7 @@ function pairStrip(b) {
     const tgt = it.measure === 'hold' ? `${it.hold}s` : `${it.repsText || it.reps} ${UNIT[it.measure]}`;
     return `<div class="pi ${i === S.ci ? 'active' : ''} ${i < S.ci ? 'done' : ''}">
       <span class="pl">${it.pair || String.fromCharCode(65 + i)}</span>
-      <span class="nm">${it.name}</span><span class="tg">${tgt}</span></div>`;
+      <span class="nm">${it.name}</span><span class="tg">${tgt}</span>${rowVid(it)}</div>`;
   }).join('')}</div>`;
 }
 function renderSuperset() {
@@ -775,7 +785,7 @@ function renderCircuit() {
   const unit = UNIT[item.measure];
   const dots = Array.from({ length: b.rounds || 1 }, (_, i) => `<div class="r ${i + 1 < S.round ? 'done' : i + 1 === S.round ? 'now' : ''}">${i + 1}</div>`).join('');
   const ps = it => (it.laterality === 'unilateral' || it.perSide) && !it.side ? ' /side' : '';
-  const list = b.items.map((it, i) => `<div class="ci ${i === S.ci ? 'active' : ''}"><span class="nm">${it.name}${it.side ? ' ' + it.side : ''}</span><span class="tg">${it.measure === 'hold' ? it.hold + 's' : (it.reps ?? it.target) + ' ' + UNIT[it.measure] + ps(it)}</span></div>`).join('');
+  const list = b.items.map((it, i) => `<div class="ci ${i === S.ci ? 'active' : ''}">${rowVid(it)}<span class="nm">${it.name}${it.side ? ' ' + it.side : ''}</span><span class="tg">${it.measure === 'hold' ? it.hold + 's' : (it.reps ?? it.target) + ' ' + UNIT[it.measure] + ps(it)}</span></div>`).join('');
   const uniNote = (item.laterality === 'unilateral' || item.perSide) && !item.side ? ' · per side' : '';
 
   if (item.measure === 'hold') {
@@ -874,7 +884,7 @@ function renderAmrap() {
   }
 
   if (!S.amrapRounds) S.amrapRounds = 0;
-  const list = b.items.map(it => `<div class="ci"><span class="nm">${it.name}</span><span class="tg">${it.measure === 'hold' ? it.hold + 's' : (it.reps ?? it.target ?? 'max') + (it.reps ? ' reps' : '')}</span></div>`).join('');
+  const list = b.items.map(it => `<div class="ci">${rowVid(it)}<span class="nm">${it.name}</span><span class="tg">${it.measure === 'hold' ? it.hold + 's' : (it.reps ?? it.target ?? 'max') + (it.reps ? ' reps' : '')}</span></div>`).join('');
   shell(`<div class="now-ex"><div class="label">AMRAP — ${mins} min</div><div class="name">As many rounds as possible</div></div>${exActions(b.items[0])}
     <div class="timer-wrap">${timerSvg('buffer')}</div>
     <div class="center" style="margin:4px 0 12px;"><span class="eyebrow">Rounds</span> <span class="big" style="font-size:40px;" id="amrapN">${S.amrapRounds}</span></div>
