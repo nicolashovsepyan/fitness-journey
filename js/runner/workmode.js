@@ -608,7 +608,9 @@ function blockProgress() {
 function renderRest(prevItem) {
   const b = block();
   const isYates = b.format === 'yates';
-  const suggested = Number(prevItem.rest) || (isYates ? 120 : 60);
+  // rest:0 means NO rest (continuous) — only fall back to a default when rest is unset.
+  // `Number(0) || 60` would wrongly become 60, so test for null explicitly.
+  const suggested = prevItem.rest != null ? Number(prevItem.rest) : (isYates ? 120 : 60);
   const resume = () => block().format === 'skill' ? renderSkill() : renderSets();
   if (suggested <= 0) { S.sub = 'work'; R.save(S); return resume(); }
   shell(`<div class="now-ex"><div class="label">Rest</div><div class="name">Recover</div></div>
@@ -823,8 +825,10 @@ function afterCircuitItem() {
   if (S.ci < b.items.length - 1) {
     S.ci += 1;
     const nextItem = b.items[S.ci];
-    // 8s set-up buffer ONLY before a hold (time to get into position). Reps → go straight in.
-    const useBuffer = !!(nextItem && nextItem.measure === 'hold');
+    // Set-up buffer (never a rest). A block with transition>0 (the warm-up) gets
+    // the buffer before EVERY exercise so it flows continuously with just a short
+    // "get into position" countdown. Otherwise it appears only before a hold.
+    const useBuffer = Number(b.transition) > 0 || !!(nextItem && nextItem.measure === 'hold');
     S.sub = useBuffer ? 'buffer' : 'work'; R.save(S);
     return useBuffer ? renderBuffer() : renderCircuit();
   }

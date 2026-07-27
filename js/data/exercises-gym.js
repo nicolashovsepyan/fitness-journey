@@ -43,6 +43,16 @@ export const GYM_EXERCISES = {
     load: 'bw', laterality: 'bilateral', level: 'beg', diff: 1, noPR: true, demoUrl: null,
     cues: 'March on the spot, driving each knee up to hip height. Stay tall. No jumping, no impact — knee-friendly swap for mountain climbers.',
   },
+  hip_90_90: {
+    name: '90/90 Hip Switches', pattern: 'mobility', family: 'hip', equipment: ['bw'], measure: 'reps', workType: 'reps',
+    load: 'bw', laterality: 'bilateral', level: 'beg', diff: 1, noPR: true, demoUrl: null,
+    cues: 'Sit on the floor, both knees bent to about 90° — one shin in front of you, the other out to the side. Keep tall and rotate your hips to swap both legs to the other side. Slow and controlled. Opens the hips with zero stress on the knee.',
+  },
+  worlds_greatest_stretch: {
+    name: "World's Greatest Stretch", pattern: 'mobility', family: 'hip', equipment: ['bw'], measure: 'reps', workType: 'reps',
+    load: 'bw', laterality: 'unilateral', level: 'beg', diff: 1, noPR: true, demoUrl: null,
+    cues: 'Step one foot forward into a gentle lunge, both hands on the floor inside the front foot. Reach the inside arm up to the ceiling and turn your chest to follow it. Bring it back down, step back, switch sides. Opens hips, chest and back in one move.',
+  },
 
   /* ---------- PULL — machines & cables ---------- */
   lat_pulldown: {

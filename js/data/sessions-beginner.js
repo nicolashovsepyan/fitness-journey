@@ -22,22 +22,22 @@
 /* ---- Warm-up A (Days 1 and 2) ---- */
 const WARMUP_A = [
   {
-    role: 'Primer', format: 'straight', name: 'Warm-up A · Loosen up', note: 'Never rushed. This is the part that protects the joints.',
+    role: 'Primer', format: 'circuit', name: 'Warm-up A · Loosen up', note: 'Never rushed, but no stopping — flow straight through. This is the part that protects the joints.',
+    rounds: 1, transition: 8, roundRest: 0,
     items: [
-      { ex: 'arm_circles', sets: 1, reps: 20, rest: 0, note: '10 forward, 10 back — one arm at a time' },
-      { ex: 'down_dog_up_dog', sets: 1, reps: 5, rest: 0, note: '5 sec hold at each end', subs: ['down_dog_up_dog_bar'] },
-      { ex: 'deep_squat_thoracic', sets: 1, hold: 45, rest: 0, note: 'Sink only as deep as is pain-free · alternate arms' },
+      { ex: 'arm_circles', reps: 20, noPR: true, note: '10 forward, 10 back — one arm at a time' },
+      { ex: 'down_dog_up_dog', reps: 5, noPR: true, note: '5 sec hold at each end', subs: ['down_dog_up_dog_bar'] },
+      { ex: 'hip_90_90', reps: 8, noPR: true, note: 'Knee-friendly hip opener', subs: ['worlds_greatest_stretch', 'cat_cow'] },
     ],
   },
   {
-    role: 'Primer', format: 'circuit', name: 'Warm-up A · Circuit', note: '3 rounds, no rest inside a round',
-    rounds: 3, transition: 0, roundRest: 0,
+    role: 'Primer', format: 'circuit', name: 'Warm-up A · Circuit', note: '3 rounds, continuous — no rest inside a round',
+    rounds: 3, transition: 8, roundRest: 0,
     items: [
       { ex: 'pushup', reps: 4, repsText: '3-5', noPR: true,
         cue: 'Hands under your shoulders, body in one straight line. Chest to the floor, press back up. Do them on a bar or bench if the floor is too hard right now.', subs: ['incline_push_up', 'pushup_on_dumbbells', 'straight_bar_push_up'] },
       { ex: 'dead_hang', hold: 20, noPR: true, cue: 'Just hang from the bar with straight arms and let your shoulders stretch out. Feet can touch the floor if you need them to.' },
-      { ex: 'scap_pullup', reps: 5, name: 'Scap Pulls', noPR: true, cue: 'Hanging with straight arms, pull your shoulders down away from your ears without bending your elbows. Small movement. Then relax back into the hang.' },
-      { ex: 'banded_pullapart', reps: 12, repsText: '10-15', noPR: true, cue: 'Band in both hands, arms straight out in front. Pull it apart until your arms are wide, squeezing your shoulder blades together. Slow back.' },
+      { ex: 'banded_pullapart', reps: 12, repsText: '10-15', noPR: true, cue: 'Band in both hands, arms straight out in front. Pull it apart until your arms are wide, squeezing your shoulder blades together. Slow back. No band? Swap to the Superman.', subs: ['superman'] },
       { ex: 'mountain_climber', reps: 10, noPR: true, cue: 'Push-up position. Bring one knee toward your chest, then swap. Keep your hips low. Swap it for the standing march if this bothers the knee.', subs: ['high_knee_march'] },
     ],
   },
@@ -46,29 +46,29 @@ const WARMUP_A = [
 /* ---- Warm-up B (Day 3) ---- */
 const WARMUP_B = [
   {
-    role: 'Primer', format: 'straight', name: 'Warm-up B · Loosen up',
+    role: 'Primer', format: 'circuit', name: 'Warm-up B · Loosen up', note: 'Flow straight through, no stopping.',
+    rounds: 1, transition: 8, roundRest: 0,
     items: [
-      { ex: 'arm_circles', sets: 1, reps: 20, rest: 0, note: '10 forward, 10 back — one arm at a time' },
-      { ex: 'down_dog_up_dog', sets: 1, reps: 5, rest: 0, note: '5 sec hold at each end', subs: ['down_dog_up_dog_bar'] },
+      { ex: 'arm_circles', reps: 20, noPR: true, note: '10 forward, 10 back — one arm at a time' },
+      { ex: 'down_dog_up_dog', reps: 5, noPR: true, note: '5 sec hold at each end', subs: ['down_dog_up_dog_bar'] },
     ],
   },
   {
-    role: 'Primer', format: 'circuit', name: 'Warm-up B · Hips', note: '2 rounds',
-    rounds: 2, transition: 0, roundRest: 0,
+    role: 'Primer', format: 'circuit', name: 'Warm-up B · Hips', note: '2 rounds, continuous',
+    rounds: 2, transition: 8, roundRest: 0,
     items: [
-      { ex: 'deep_squat_thoracic', hold: 45, noPR: true, note: 'alternate arms' },
+      { ex: 'hip_90_90', reps: 8, noPR: true, note: 'Knee-friendly hip opener', subs: ['worlds_greatest_stretch', 'cat_cow'] },
       { ex: 'banded_sidewalk', name: 'Banded Side-Step March', hold: 60, noPR: true },
     ],
   },
   {
-    role: 'Primer', format: 'circuit', name: 'Warm-up B · Circuit', note: '2 rounds, no rest inside a round',
-    rounds: 2, transition: 0, roundRest: 0,
+    role: 'Primer', format: 'circuit', name: 'Warm-up B · Circuit', note: '2 rounds, continuous — no rest inside a round',
+    rounds: 2, transition: 8, roundRest: 0,
     items: [
       { ex: 'pushup', reps: 4, repsText: '3-5', noPR: true,
         cue: 'Hands under your shoulders, body in one straight line. Chest to the floor, press back up. Do them on a bar or bench if the floor is too hard right now.', subs: ['incline_push_up', 'pushup_on_dumbbells', 'straight_bar_push_up'] },
       { ex: 'dead_hang', hold: 20, noPR: true, cue: 'Just hang from the bar with straight arms and let your shoulders stretch out. Feet can touch the floor if you need them to.' },
-      { ex: 'scap_pullup', reps: 5, name: 'Scap Pulls', noPR: true, cue: 'Hanging with straight arms, pull your shoulders down away from your ears without bending your elbows. Small movement. Then relax back into the hang.' },
-      { ex: 'banded_pullapart', reps: 12, repsText: '10-15', noPR: true, cue: 'Band in both hands, arms straight out in front. Pull it apart until your arms are wide, squeezing your shoulder blades together. Slow back.' },
+      { ex: 'banded_pullapart', reps: 12, repsText: '10-15', noPR: true, cue: 'Band in both hands, arms straight out in front. Pull it apart until your arms are wide, squeezing your shoulder blades together. Slow back. No band? Swap to the Superman.', subs: ['superman'] },
       { ex: 'mountain_climber', reps: 10, noPR: true, cue: 'Push-up position. Bring one knee toward your chest, then swap. Keep your hips low. Swap it for the standing march if this bothers the knee.', subs: ['high_knee_march'] },
     ],
   },
@@ -123,8 +123,8 @@ export const BEGINNER_SESSIONS = {
       },
       {
         role: 'Finisher', format: 'circuit', name: 'Finisher · Kettlebell Swings',
-        note: '3 rounds of 12, rest 40 sec between rounds.', optional: true,
-        rounds: 3, transition: 0, roundRest: 40,
+        note: '3 rounds of 12, rest 20 sec between rounds.', optional: true,
+        rounds: 3, transition: 0, roundRest: 20,
         items: [{ ex: 'kb_swing', reps: 12, note: 'Snap the hips — the arms are just rope. Start 12-16 kg.' }],
       },
     ],
