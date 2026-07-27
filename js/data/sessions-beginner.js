@@ -85,7 +85,7 @@ export const BEGINNER_SESSIONS = {
       {
         role: 'Work', format: 'superset', name: 'A · Push-Ups + Lat Pulldown',
         note: 'A1 straight into A2 with no rest, then rest 75 sec, then go again.',
-        rounds: 3, rest: 75, anchor: true,
+        rounds: 3, rest: 75, anchor: true, optional: true,
         items: [
           { ex: 'straight_bar_push_up', pair: 'A1', reps: 12, repsText: '10-15', name: 'Straight Bar Push-Up', load: 'bw',
             note: 'Bar in the squat rack. Lower the bar one notch when 15 gets easy.',
@@ -97,7 +97,7 @@ export const BEGINNER_SESSIONS = {
       {
         role: 'Work', format: 'superset', name: 'B · Assisted Dip + Cable Row',
         note: 'B1 straight into B2 with no rest, then rest 75 sec.',
-        rounds: 3, rest: 75, anchor: true,
+        rounds: 3, rest: 75, anchor: true, optional: true,
         items: [
           { ex: 'assisted_dip', pair: 'B1', reps: 8, note: 'Take one plate off the assist when 8 feels easy.' },
           { ex: 'seated_cable_row', pair: 'B2', reps: 10 },
@@ -105,7 +105,7 @@ export const BEGINNER_SESSIONS = {
       },
       {
         role: 'Work', format: 'superset', name: 'C · Lateral Raise + Pushdown',
-        note: 'C1 into C2, no rest, then 75 sec.', fromWeek: 3,
+        note: 'C1 into C2, no rest, then 75 sec.', optional: true, extra: true,
         rounds: 3, rest: 75,
         items: [
           { ex: 'lateral_raise', pair: 'C1', reps: 12 },
@@ -114,7 +114,7 @@ export const BEGINNER_SESSIONS = {
       },
       {
         role: 'Work', format: 'superset', name: 'D · Chin-Up Hold + Curl',
-        note: 'D1 into D2, no rest, then 75 sec.', fromWeek: 3,
+        note: 'D1 into D2, no rest, then 75 sec.', optional: true, extra: true,
         rounds: 2, rest: 75,
         items: [
           { ex: 'assisted_chinup_top_hold', pair: 'D1', hold: 15 },
@@ -123,8 +123,8 @@ export const BEGINNER_SESSIONS = {
       },
       {
         role: 'Finisher', format: 'circuit', name: 'Finisher · Kettlebell Swings',
-        note: '5 rounds of 12, rest 40 sec between rounds.', fromWeek: 3,
-        rounds: 5, transition: 0, roundRest: 40,
+        note: '3 rounds of 12, rest 40 sec between rounds.', optional: true,
+        rounds: 3, transition: 0, roundRest: 40,
         items: [{ ex: 'kb_swing', reps: 12, note: 'Snap the hips — the arms are just rope. Start 12-16 kg.' }],
       },
     ],
@@ -139,7 +139,7 @@ export const BEGINNER_SESSIONS = {
       {
         role: 'Work', format: 'superset', name: 'A · Chest Press + Row',
         note: 'A1 into A2, no rest, then rest 75 sec.',
-        rounds: 3, rest: 75, anchor: true,
+        rounds: 3, rest: 75, anchor: true, optional: true,
         items: [
           { ex: 'chest_press_machine', pair: 'A1', reps: 10 },
           { ex: 'chest_supported_row', pair: 'A2', reps: 12 },
@@ -148,7 +148,7 @@ export const BEGINNER_SESSIONS = {
       {
         role: 'Work', format: 'superset', name: 'B · Shoulder Press + Face Pull',
         note: 'B1 into B2, no rest, then rest 75 sec.',
-        rounds: 3, rest: 75, anchor: true,
+        rounds: 3, rest: 75, anchor: true, optional: true,
         items: [
           { ex: 'shoulder_press_machine', pair: 'B1', reps: 10 },
           { ex: 'face_pull', pair: 'B2', reps: 15 },
@@ -156,7 +156,7 @@ export const BEGINNER_SESSIONS = {
       },
       {
         role: 'Work', format: 'superset', name: 'C · Back Extension + Dip Hold',
-        note: 'C1 into C2, no rest, then rest 75 sec.', fromWeek: 3,
+        note: 'C1 into C2, no rest, then rest 75 sec.', optional: true, extra: true,
         rounds: 3, rest: 75,
         items: [
           { ex: 'back_extension_45', pair: 'C1', reps: 12 },
@@ -165,7 +165,7 @@ export const BEGINNER_SESSIONS = {
       },
       {
         role: 'Finisher', format: 'circuit', name: 'Finisher · Core Circuit',
-        note: '30 sec each, no rest between exercises. 2 rounds, 45 sec between rounds.', fromWeek: 3,
+        note: '30 sec each, no rest between exercises. 2 rounds, 45 sec between rounds.', optional: true,
         rounds: 2, transition: 0, roundRest: 45,
         items: [
           { ex: 'dead_bug', measure: 'hold', hold: 30, cue: 'On your back, arms up, knees over hips. Lower one arm and the opposite leg slowly, then swap. Keep your low back pressed into the floor.' },
@@ -187,7 +187,7 @@ export const BEGINNER_SESSIONS = {
       {
         role: 'Work', format: 'circuit', name: 'Full Body Circuit',
         note: '6 stations, straight through. Rest 75 sec between rounds only. The abduction machine counts as one station — 12, flip the pads, 12.',
-        rounds: 4, transition: 0, roundRest: 75, anchor: true, zoned: true,
+        rounds: 4, transition: 0, roundRest: 75, anchor: true, zoned: true, optional: true,
         items: [
           { ex: 'db_rdl', zone: 'Zone 1 · dumbbells + floor', reps: 10 },
           { ex: 'pushup_on_dumbbells', zone: 'Zone 1 · dumbbells + floor', reps: 10, repsText: '8-12',
@@ -204,7 +204,7 @@ export const BEGINNER_SESSIONS = {
       },
       {
         role: 'Finisher', format: 'tabata', name: 'Finisher · Tuck Hollow Hold',
-        note: '20 sec on / 10 sec off, 6 rounds.', fromWeek: 3,
+        note: '20 sec on / 10 sec off, 6 rounds.', optional: true,
         work: 20, rest: 10, rounds: 6,
         items: [{ ex: 'bent_knee_hollow_hold', name: 'Tuck Hollow Hold',
           cue: 'On your back, knees bent and lifted, shoulders off the floor, low back pressed flat. If your back arches, put your heels down.',

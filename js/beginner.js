@@ -28,10 +28,14 @@ export function weekDates(offsetWeeks = 0) {
   return Array.from({ length: 7 }, (_, i) => dayKey(new Date(start + i * 86400000)));
 }
 
-/* ---- ramp-in ------------------------------------------------
-   Returns the plan he should actually see today: blocks scheduled
-   for a later week are dropped, and the Day 3 circuit runs 2 rounds
-   instead of 4 while he is still finding his feet.               */
+/* ---- the day's plan ----------------------------------------
+   Every block is SHOWN — nothing is hidden. Each one carries a `skipped`
+   flag so the day screen can offer a Do-it / Skip toggle. The default:
+     · the warm-up and the two main pairs are always on
+     · the "extra" pairs (C, D) default to skipped in the intro weeks, then
+       default on — but the user's explicit choice always wins
+     · finishers default on
+   The Day-3 circuit still runs a lighter 2 rounds during the intro weeks. */
 export function beginnerPlan(sessionId, { week = store.programWeek() } = {}) {
   const plan = resolveSession(sessionId, {
     duration: PROGRAM.defaultDuration,
@@ -41,14 +45,26 @@ export function beginnerPlan(sessionId, { week = store.programWeek() } = {}) {
   const intro = week <= PROGRAM.introWeeks;
   plan.week = week;
   plan.intro = intro;
-  plan.hiddenBlocks = plan.blocks.filter(b => (b.fromWeek || 1) > week).map(b => b.name);
-  plan.blocks = plan.blocks
-    .filter(b => !(PROGRAM.dropPrimer && b.role === 'Primer'))   // simplification: no warm-up for now
-    .filter(b => (b.fromWeek || 1) <= week)
-    .map(b => (intro && b.format === 'circuit' && b.role === 'Work' && b.rounds > 2)
+
+  plan.blocks = plan.blocks.map(b => {
+    const nb = (intro && b.format === 'circuit' && b.role === 'Work' && b.rounds > 2)
       ? { ...b, rounds: 2, introTrimmed: true }
-      : b);
+      : { ...b };
+    const isWarmup = b.role === 'Primer';
+    const defaultSkip = b.extra && intro;                 // extras rest until you're ready
+    const choice = store.getBlockSkip(sessionId, b.name); // explicit Do-it/Skip, if set
+    nb.skippable = !isWarmup && (!!b.optional || !!b.extra);
+    nb.skipped = nb.skippable ? (choice === undefined ? defaultSkip : choice) : false;
+    return nb;
+  });
+  plan.activeBlocks = plan.blocks.filter(b => !b.skipped);
   return plan;
+}
+
+/* the plan the RUNNER should play — skipped blocks removed */
+export function beginnerRunPlan(sessionId, opts) {
+  const plan = beginnerPlan(sessionId, opts);
+  return { ...plan, blocks: plan.blocks.filter(b => !b.skipped) };
 }
 
 /* ---- workouts ---------------------------------------------- */

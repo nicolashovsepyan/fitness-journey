@@ -108,6 +108,7 @@ export function resolveSession(sessionId, { duration = 30, sessionIndex = 0, swa
       anchor: !!b.anchor, rounds: b.rounds, work: b.work, rest: b.rest,
       transition: b.transition, roundRest: b.roundRest, minutes: b.minutes, items,
       zoned: !!b.zoned, fromWeek: b.fromWeek || 1,
+      optional: !!b.optional, extra: !!b.extra,
     };
     if (b.filler && block.items.length) {
       let f = pickFiller(b, sessionIndex, fillerIndex++);

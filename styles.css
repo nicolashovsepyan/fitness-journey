@@ -838,3 +838,15 @@ html, body { touch-action: manipulation; }      /* kill double-tap-to-zoom (keep
 /* make the per-exercise play button read as THE way to see the move */
 .bex .vid { width:40px; height:40px; font-size:15px; }
 .bex .vid.has { box-shadow:0 0 0 3px rgba(124,179,255,0.18); }
+
+/* ---- Do-it / Skip block toggle (beginner day) ---- */
+.blk-toggle { flex:0 0 auto; display:inline-flex; background:var(--box-2); border:1px solid var(--line);
+  border-radius:99px; overflow:hidden; }
+.blk-toggle .bt { border:none; background:transparent; color:var(--muted); font-family:inherit;
+  font-size:12px; font-weight:700; padding:6px 13px; cursor:pointer; }
+.blk-toggle .bt.on { background:var(--accent); color:#0d1524; }
+.blk-toggle .bt.on.skip { background:var(--faint); color:#fff; }
+.always-chip { flex:0 0 auto; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em;
+  color:var(--good); background:rgba(77,217,139,.12); border:1px solid rgba(77,217,139,.3); border-radius:99px; padding:4px 10px; }
+.block-card.bgn.skipped { opacity:.62; border-style:dashed; }
+.block-card.bgn.skipped .bname { color:var(--muted); }

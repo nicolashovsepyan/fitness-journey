@@ -13,7 +13,7 @@ import { blockMinutes } from '../core/resolve.js';
 import { EXERCISES } from '../data/exercises.js';
 import { BEGINNER_RULES, BEGINNER_RULES_FINE } from '../data/sessions-beginner.js';
 import { store } from '../store.js';
-import { beginnerPlan, PROGRAM, DAY_IMG } from '../beginner.js';
+import { beginnerPlan, beginnerRunPlan, PROGRAM, DAY_IMG } from '../beginner.js';
 
 const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 
@@ -47,7 +47,9 @@ function prescription(b, it) {
 export function renderBDay(host, sessionId, { onBack, onStart }) {
   function draw() {
     const plan = beginnerPlan(sessionId);
-    const total = plan.blocks.reduce((t, b) => t + blockMinutes(b), 0);
+    const active = plan.blocks.filter(b => !b.skipped);
+    const total = active.reduce((t, b) => t + blockMinutes(b), 0);
+    const anySkippable = plan.blocks.some(b => b.skippable);
 
     host.innerHTML = `
       <div class="screen fade-in bgn">
@@ -56,7 +58,7 @@ export function renderBDay(host, sessionId, { onBack, onStart }) {
         <div class="day-hero" style="--img:url('${DAY_IMG[sessionId] || ''}')">
           <div class="dh-inner">
             <h1>${esc(plan.name)}</h1>
-            <div class="dh-meta">About ${total} min · ${plan.blocks.length} block${plan.blocks.length > 1 ? 's' : ''} · week ${plan.week}</div>
+            <div class="dh-meta">About ${total} min · ${active.length} block${active.length > 1 ? 's' : ''} on · week ${plan.week}</div>
           </div>
         </div>
 
@@ -67,10 +69,8 @@ export function renderBDay(host, sessionId, { onBack, onStart }) {
             <ul>${BEGINNER_RULES_FINE.map(r => `<li>${esc(r)}</li>`).join('')}</ul></details>
         </div>
 
-        ${plan.intro ? `<div class="callout soft"><span class="ico">🌱</span><span class="txt">
-          <b>Week ${plan.week} — easing in.</b> ${plan.hiddenBlocks.length
-            ? `${plan.hiddenBlocks.length} block${plan.hiddenBlocks.length > 1 ? 's are' : ' is'} held back until week ${PROGRAM.introWeeks + 1}.`
-            : 'Shorter version of the session.'}</span></div>` : ''}
+        ${anySkippable ? `<div class="callout soft"><span class="ico">🌱</span><span class="txt">
+          <b>Do the warm-up, the two main pairs, and the finisher.</b> The extra pairs are here whenever you feel good — tap <b>Do it</b> to add one, or leave it on <b>Skip</b>.</span></div>` : ''}
 
         ${plan.blocks.map(blockCard).join('')}
 
@@ -79,7 +79,15 @@ export function renderBDay(host, sessionId, { onBack, onStart }) {
       </div>`;
 
     host.querySelector('#back').addEventListener('click', onBack);
-    host.querySelector('#start').addEventListener('click', () => onStart(beginnerPlan(sessionId)));
+    host.querySelector('#start').addEventListener('click', () => onStart(beginnerRunPlan(sessionId)));
+
+    // Do-it / Skip per block
+    host.querySelectorAll('[data-skip]').forEach(el => el.addEventListener('click', e => {
+      e.stopPropagation();
+      store.setBlockSkip(sessionId, el.dataset.skip, el.dataset.to === 'skip');
+      try { navigator.vibrate?.(20); } catch (err) {}
+      draw();
+    }));
 
     // per-set checkboxes
     host.querySelectorAll('[data-check]').forEach(el => el.addEventListener('click', e => {
@@ -116,6 +124,25 @@ export function renderBDay(host, sessionId, { onBack, onStart }) {
       : b.format === 'circuit' ? `${b.rounds || 1} rounds${b.roundRest ? ` · rest ${b.roundRest}s` : ' · no rest'}`
       : b.format === 'tabata' ? `${b.rounds}× ${b.work}s on / ${b.rest}s off` : '';
 
+    // Do-it / Skip toggle (skippable blocks only). Warm-up is always on.
+    const toggle = b.skippable ? `
+      <div class="blk-toggle" role="group">
+        <button class="bt ${!b.skipped ? 'on' : ''}" data-skip="${esc(b.name)}" data-to="do">Do it</button>
+        <button class="bt ${b.skipped ? 'on skip' : ''}" data-skip="${esc(b.name)}" data-to="skip">Skip</button>
+      </div>` : (b.role === 'Primer' ? `<span class="always-chip">always</span>` : '');
+
+    // a skipped block collapses to just its header + toggle
+    if (b.skipped) {
+      return `
+        <div class="block-card bgn skipped ${b.role === 'Finisher' ? 'finisher' : ''}">
+          <div class="bhead">
+            <div><div class="bname">${esc(b.name)}</div>
+              <div class="bmeta">skipped today${b.extra ? ' · extra pair' : ''}</div></div>
+            ${toggle}
+          </div>
+        </div>`;
+    }
+
     let body;
     if (isSuper) {
       body = `<div class="ss-block">${b.items.map(it => exRow(b, it, true)).join('<div class="ss-join">no rest ↓</div>')}</div>`;
@@ -141,7 +168,7 @@ export function renderBDay(host, sessionId, { onBack, onStart }) {
         <div class="bhead">
           <div><div class="bname">${esc(b.name)}</div>
             <div class="bmeta">~${blockMinutes(b)} min${tag ? ` · ${tag}` : ''}</div></div>
-          <span class="fmt-chip ${isSuper ? 'anchor' : ''}">${b.role}</span>
+          ${toggle || `<span class="fmt-chip ${isSuper ? 'anchor' : ''}">${b.role}</span>`}
         </div>
         ${body}
         ${b.note ? `<div class="bnote">${esc(b.note)}</div>` : ''}

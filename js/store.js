@@ -28,6 +28,7 @@ const DEFAULT = {
   checks: {},         // { 'YYYY-MM-DD|sessionId|exId': [bool,…] } — per-set checkboxes
   notes: [],          // [{ date, sessionId, exId, name, text }]
   flags: [],          // [{ date, sessionId, exId, name, text }] — KNEE flags
+  blockSkips: {},     // { sessionId: { blockName: true|false } } — Do-it/Skip per block (overrides the default)
   feedback: [],       // [{ date, sessionId, name, rating:'easy'|'right'|'hard', text }]
 };
 
@@ -280,6 +281,21 @@ export const store = {
     read().flags.forEach(f => { t[f.exId] = t[f.exId] || { exId: f.exId, name: f.name, count: 0, last: f.date };
       t[f.exId].count++; if (f.date > t[f.exId].last) t[f.exId].last = f.date; });
     return Object.values(t).sort((a, b) => b.count - a.count);
+  },
+
+  /* ---- Do-it / Skip per block (beginner) ----
+     Returns the user's explicit choice for a block, or undefined if they
+     haven't touched it (so the program's default applies). */
+  getBlockSkip(sessionId, blockName) {
+    const v = read().blockSkips?.[sessionId]?.[blockName];
+    return v === undefined ? undefined : !!v;
+  },
+  setBlockSkip(sessionId, blockName, skip) {
+    const s = read();
+    s.blockSkips = s.blockSkips || {};
+    s.blockSkips[sessionId] = s.blockSkips[sessionId] || {};
+    s.blockSkips[sessionId][blockName] = !!skip;
+    write(s);
   },
 
   /* ---- end-of-session feedback ---- */

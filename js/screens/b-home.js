@@ -32,7 +32,8 @@ export function renderBHome(host, { onOpenDay, onOpenSummary }) {
     const todayDone = today && didSessionThisWeek(today.sessionId);
     const heroSession = today ? BEGINNER_SESSIONS[today.sessionId] : null;
     const heroPlan = today ? beginnerPlan(today.sessionId, { week }) : null;
-    const heroMins = heroPlan ? heroPlan.blocks.reduce((t, b) => t + blockMinutes(b), 0) : 0;
+    const heroActive = heroPlan ? heroPlan.blocks.filter(b => !b.skipped) : [];
+    const heroMins = heroActive.reduce((t, b) => t + blockMinutes(b), 0);
 
     host.innerHTML = `
       <div class="screen fade-in bgn">
@@ -61,7 +62,7 @@ export function renderBHome(host, { onOpenDay, onOpenSummary }) {
             <div class="tc-inner">
               <div class="tc-tag">${todayDone ? '✓ Done today' : "Today's workout"}</div>
               <div class="tc-name">${heroSession.name}</div>
-              <div class="tc-meta">${heroPlan.blocks.length} block${heroPlan.blocks.length > 1 ? 's' : ''} · about ${heroMins} min</div>
+              <div class="tc-meta">${heroActive.length} block${heroActive.length > 1 ? 's' : ''} · about ${heroMins} min</div>
               <div class="tc-go">${todayDone ? 'Look at it again ›' : 'Start workout ›'}</div>
             </div>
           </div>`
