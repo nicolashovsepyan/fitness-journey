@@ -45,6 +45,9 @@ function prescription(b, it) {
 }
 
 export function renderBDay(host, sessionId, { onBack, onStart }) {
+  const openRows = new Set();       // which exercise explanations are expanded
+  const rowUid = (b, it) => `${b.id || b.name}|${rowKey(it)}`;
+
   function draw() {
     const plan = beginnerPlan(sessionId);
     const active = plan.blocks.filter(b => !b.skipped);
@@ -89,6 +92,13 @@ export function renderBDay(host, sessionId, { onBack, onStart }) {
       draw();
     }));
 
+    // expand / collapse an exercise's explanation drop-down
+    host.querySelectorAll('[data-expand]').forEach(el => el.addEventListener('click', e => {
+      if (e.target.closest('.vid')) return;          // play button has its own job
+      const uid = el.dataset.expand;
+      openRows.has(uid) ? openRows.delete(uid) : openRows.add(uid);
+      draw();
+    }));
     // per-set checkboxes
     host.querySelectorAll('[data-check]').forEach(el => el.addEventListener('click', e => {
       e.stopPropagation();
@@ -175,7 +185,11 @@ export function renderBDay(host, sessionId, { onBack, onStart }) {
       </div>`;
   }
 
-  /* ---- one exercise row ---- */
+  /* ---- one exercise row ----
+     Compact by default: play · [pair] name · reps · expand chevron.
+     The explanation, notes, set boxes and actions live in a drop-down so
+     the block reads as a clean scannable list. Same row is used for the
+     warm-up, the superset pairs and the finisher. */
   function exRow(b, it, paired = false) {
     const ex = EXERCISES[it.exId] || {};
     const cue = it.cue || ex.cues || '';
@@ -184,27 +198,36 @@ export function renderBDay(host, sessionId, { onBack, onStart }) {
     const checks = store.getChecks(sessionId, rowKey(it));
     const flagged = store.isFlagged(sessionId, it.exId);
     const hasNote = !!store.getNote(sessionId, it.exId);
+    const savedNote = store.getNote(sessionId, it.exId);
     const subs = (it.subs || []).filter(id => EXERCISES[id]);
     const nm = esc(it.name);
+    const uid = rowUid(b, it);
+    const open = openRows.has(uid);
 
     const boxes = Array.from({ length: n }, (_, i) =>
       `<button class="setbox ${checks[i] ? 'on' : ''}" data-check="${rowKey(it)}" data-i="${i}">${checks[i] ? '✓' : i + 1}</button>`).join('');
 
     return `
-      <div class="bex ${flagged ? 'flagged' : ''}">
-        <div class="bex-top">
-          ${paired && it.pair ? `<span class="pairtag">${esc(it.pair)}</span>` : ''}
-          <div class="bex-name">${nm}${it.swappedFrom ? '<span class="swapped">swapped</span>' : ''}</div>
+      <div class="bex ${flagged ? 'flagged' : ''} ${open ? 'open' : ''}">
+        <div class="bex-top" data-expand="${uid}">
           <button class="vid ${hasVid ? 'has' : ''}" data-video="${it.exId}" data-cue="${esc(cue)}" title="Watch it">▶</button>
+          ${paired && it.pair ? `<span class="pairtag">${esc(it.pair)}</span>` : ''}
+          <div class="bex-main">
+            <div class="bex-name">${nm}${it.swappedFrom ? '<span class="swapped">swapped</span>' : ''}${flagged ? '<span class="knee-dot" title="knee flagged">🦵</span>' : ''}${hasNote ? '<span class="note-dot" title="note saved">📝</span>' : ''}</div>
+            <div class="bex-rx">${prescription(b, it)}${it.side ? ` · ${it.side}` : ''}</div>
+          </div>
+          <button class="bex-chev" aria-label="Details">⌄</button>
         </div>
-        <div class="bex-rx">${prescription(b, it)}${it.side ? ` · ${it.side}` : ''}</div>
-        ${cue ? `<div class="bex-cue">${esc(cue)}</div>` : ''}
-        ${it.note ? `<div class="bex-note">${esc(it.note)}</div>` : ''}
-        <div class="setboxes">${boxes}</div>
-        <div class="bex-actions">
-          ${subs.length ? `<button class="mini" data-swap="${it.exId}" data-subs="${subs.join(',')}">⇄ swap</button>` : ''}
-          <button class="mini ${hasNote ? 'has' : ''}" data-note="${it.exId}" data-name="${nm}">📝 ${hasNote ? 'note' : 'note'}</button>
-          <button class="mini knee ${flagged ? 'on' : ''}" data-knee="${it.exId}" data-name="${nm}">🦵 ${flagged ? 'flagged' : 'knee'}</button>
+        <div class="bex-drop">
+          ${cue ? `<div class="bex-cue">${esc(cue)}</div>` : ''}
+          ${it.note ? `<div class="bex-note">${esc(it.note)}</div>` : ''}
+          ${savedNote ? `<div class="bex-yournote">📝 ${esc(savedNote)}</div>` : ''}
+          <div class="setboxes"><span class="sb-lbl">Sets</span>${boxes}</div>
+          <div class="bex-actions">
+            ${subs.length ? `<button class="mini" data-swap="${it.exId}" data-subs="${subs.join(',')}">⇄ swap</button>` : ''}
+            <button class="mini ${hasNote ? 'has' : ''}" data-note="${it.exId}" data-name="${nm}">📝 note</button>
+            <button class="mini knee ${flagged ? 'on' : ''}" data-knee="${it.exId}" data-name="${nm}">🦵 ${flagged ? 'flagged' : 'knee'}</button>
+          </div>
         </div>
       </div>`;
   }
