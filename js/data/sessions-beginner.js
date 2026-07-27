@@ -46,29 +46,25 @@ const WARMUP_A = [
 /* ---- Warm-up B (Day 3) ---- */
 const WARMUP_B = [
   {
-    role: 'Primer', format: 'circuit', name: 'Warm-up B · Loosen up', note: 'Flow straight through, no stopping.',
+    role: 'Primer', format: 'circuit', name: 'Warm-up B · Sequence 1', note: 'Flow straight through, no stopping.',
     rounds: 1, transition: 8, roundRest: 0,
     items: [
       { ex: 'arm_circles', reps: 20, noPR: true, note: '10 forward, 10 back — one arm at a time' },
       { ex: 'down_dog_up_dog', reps: 5, noPR: true, note: '5 sec hold at each end', subs: ['down_dog_up_dog_bar'] },
-    ],
-  },
-  {
-    role: 'Primer', format: 'circuit', name: 'Warm-up B · Hips', note: '2 rounds, continuous',
-    rounds: 2, transition: 8, roundRest: 0,
-    items: [
       { ex: 'hip_90_90', reps: 8, noPR: true, note: 'Knee-friendly hip opener', subs: ['worlds_greatest_stretch', 'cat_cow'] },
-      { ex: 'banded_sidewalk', name: 'Banded Side-Step March', hold: 60, noPR: true },
     ],
   },
   {
-    role: 'Primer', format: 'circuit', name: 'Warm-up B · Circuit', note: '2 rounds, continuous — no rest inside a round',
+    role: 'Primer', format: 'circuit', name: 'Warm-up B · Sequence 2', note: '2 rounds, continuous — no rest inside a round',
     rounds: 2, transition: 8, roundRest: 0,
     items: [
+      { ex: 'banded_sidewalk', name: 'Banded Side-Step March', hold: 60, noPR: true,
+        cue: 'Band around your legs, stay low in a quarter-squat, step sideways without letting your feet click together. 60 seconds, back and forth.' },
       { ex: 'pushup', reps: 4, repsText: '3-5', noPR: true,
         cue: 'Hands under your shoulders, body in one straight line. Chest to the floor, press back up. Do them on a bar or bench if the floor is too hard right now.', subs: ['incline_push_up', 'pushup_on_dumbbells', 'straight_bar_push_up'] },
       { ex: 'dead_hang', hold: 20, noPR: true, cue: 'Just hang from the bar with straight arms and let your shoulders stretch out. Feet can touch the floor if you need them to.' },
-      { ex: 'banded_pullapart', reps: 12, repsText: '10-15', noPR: true, cue: 'Band in both hands, arms straight out in front. Pull it apart until your arms are wide, squeezing your shoulder blades together. Slow back. No band? Swap to the Superman.', subs: ['superman'] },
+      { ex: 'superman', reps: 12, repsText: '10-15', noPR: true, name: 'Superman',
+        cue: 'Lie face down, arms stretched out in front, thumbs pointing up. Lift your arms, chest, and legs off the floor together, hold a second, lower with control. Hits the glutes, back and shoulders. Have a band? Swap to pull-aparts.', subs: ['banded_pullapart'] },
       { ex: 'mountain_climber', reps: 10, noPR: true, cue: 'Push-up position. Bring one knee toward your chest, then swap. Keep your hips low. Swap it for the standing march if this bothers the knee.', subs: ['high_knee_march'] },
     ],
   },
@@ -113,11 +109,12 @@ export const BEGINNER_SESSIONS = {
         ],
       },
       {
-        role: 'Work', format: 'superset', name: 'D · Chin-Up Hold + Curl',
+        role: 'Work', format: 'superset', name: 'D · Inverted Row + Curl',
         note: 'D1 into D2, no rest, then 75 sec.', optional: true, extra: true,
         rounds: 2, rest: 75,
         items: [
-          { ex: 'assisted_chinup_top_hold', pair: 'D1', hold: 15 },
+          { ex: 'australian_pullup', pair: 'D1', name: 'Inverted Row', reps: 10, repsText: '8-10',
+            cue: 'Set a bar in the rack at about hip height. Lie under it, grab it, body straight with heels on the floor. Pull your chest up to the bar, lower slowly. Walk your feet forward to make it harder.' },
           { ex: 'barbell_curl', pair: 'D2', reps: 12 },
         ],
       },
