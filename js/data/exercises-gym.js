@@ -92,6 +92,24 @@ export const GYM_EXERCISES = {
     cues: 'Palms facing you. Use the assist machine to get your chin above the bar, then just hold there. Chest up, shoulders down. Log the ASSIST weight: lower is stronger.',
   },
 
+  db_pullover: {
+    name: 'DB Pullover (on bench)', pattern: 'pull', families: ['lat'], equipment: ['db', 'bench'], measure: 'reps', workType: 'reps',
+    load: 'weighted', laterality: 'bilateral', level: 'beg', diff: 3,
+    methods: ['reps', 'weighted', 'tempo'], demoUrl: null,
+    cues: 'Lie back on the bench holding one dumbbell over your chest, elbows slightly bent and fixed. Lower the dumbbell back to about head level only — feel the stretch across your lats and ribs, not deep in the shoulder. Pull it back over your chest. Start light, 20-25 lb.',
+  },
+  db_shoulder_press: {
+    name: 'DB Shoulder Press', pattern: 'push', families: ['vertical-push'], equipment: ['db', 'bench'], measure: 'reps', workType: 'reps',
+    load: 'weighted', laterality: 'bilateral', level: 'beg', diff: 3, main: true,
+    methods: ['reps', 'weighted', 'tempo'], demoUrl: null,
+    cues: 'Sit tall, a dumbbell in each hand at shoulder height. Press straight overhead, ribs down so you do not arch your back. Lower back to ear height under control.',
+  },
+  farmers_carry: {
+    name: "Farmer's Carry (no straps)", pattern: 'conditioning', family: 'grip', equipment: ['db'], measure: 'hold', workType: 'hold',
+    load: 'weighted', laterality: 'bilateral', level: 'beg', diff: 3, noPR: true, demoUrl: null,
+    cues: 'A dumbbell in each hand, no straps — grip is the point. Walk tall, shoulders back, 30-40 m. Set them down when the round is done, not when your grip fails. If they slip early, go lighter. Start 40-50 lb per hand.',
+  },
+
   /* ---------- PUSH — machines & cables ---------- */
   chest_press_machine: {
     name: 'Chest Press Machine', pattern: 'push', families: ['horizontal-push'], equipment: ['machine'], measure: 'reps', workType: 'reps',
