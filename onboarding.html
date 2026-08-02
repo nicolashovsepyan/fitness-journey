@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Fitness Journey">
+<meta name="format-detection" content="telephone=no">
+<meta name="description" content="Fitness Journey — onboarding. Four minutes, no typing.">
+<meta name="theme-color" content="#F6F6F3">
+<title>Fitness Journey — Onboarding v2</title>
+<style>
+:root{
+  --bg:#F6F6F3;
+  --card:#FFFFFF;
+  --ink:#15171B;
+  --ink2:#4A5057;
+  --ink3:#8A9098;
+  --line:#E6E6E1;
+  --accent:#0F7A68;
+  --accent-soft:#E8F3F0;
+  --accent-2:#C9863A;
+  --shadow:0 1px 2px rgba(20,22,26,.04),0 8px 24px rgba(20,22,26,.06);
+  --shadow-lift:0 2px 6px rgba(20,22,26,.06),0 18px 44px rgba(15,122,104,.14);
+  --r:18px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+button,.opt,.choice,label,a{touch-action:manipulation}
+input[type=range]{touch-action:none}
+html{height:100%;-webkit-text-size-adjust:100%}
+body{
+  height:100%;
+  background:#EDEDE8;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Segoe UI",Roboto,sans-serif;
+  color:var(--ink);
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;overscroll-behavior:none;
+  -webkit-user-select:none;user-select:none;
+}
+.serif{font-family:"New York","Iowan Old Style",ui-serif,Georgia,serif;font-weight:400}
+
+/* ---------- device frame (desktop only) ---------- */
+#device{
+  width:min(100vw,402px);
+  height:min(874px, calc(100vh - 36px));
+  background:var(--bg);position:relative;overflow:hidden;
+  border-radius:44px;box-shadow:0 0 0 10px #17181C,0 30px 80px rgba(0,0,0,.35);
+}
+/* Real touch devices, or a genuinely narrow window: go full-bleed and use the
+   REAL visible viewport (100vh on mobile Safari includes the address bar). */
+@media (pointer:coarse), (max-width:560px){
+  body{align-items:stretch;background:var(--bg)}
+  #device{
+    width:100%;
+    height:100vh;
+    height:calc(var(--vh, 1vh) * 100);
+    height:100dvh;
+    max-height:none;border-radius:0;box-shadow:none;
+  }
+}
+/* Desktop: a small hint that this is a phone prototype */
+@media (pointer:fine) and (min-width:900px){
+  body::after{
+    content:"Phone prototype \2014 resize freely, it stays phone-shaped";
+    position:fixed;bottom:18px;left:50%;transform:translateX(-50%);
+    font-size:11.5px;color:#8A9098;letter-spacing:.02em;
+  }
+}
+/* ---------- chrome ---------- */
+#chrome{position:absolute;top:0;left:0;right:0;padding:calc(16px + env(safe-area-inset-top)) 20px 10px;z-index:20;background:linear-gradient(var(--bg) 62%,rgba(246,246,243,0))}
+#bars{display:flex;gap:4px;height:3px}
+.bar{flex:1;background:var(--line);border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);border-radius:2px;transition:width .55s cubic-bezier(.22,1,.36,1)}
+#chapline{display:flex;justify-content:space-between;align-items:center;margin-top:11px;height:16px}
+#chapname{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);font-weight:600;transition:opacity .3s}
+#back{font-size:12.5px;color:var(--ink3);cursor:pointer;padding:15px 12px;margin:-15px -12px;border:none;background:none;font-family:inherit;opacity:0;pointer-events:none;transition:opacity .3s}
+#back.on{opacity:1;pointer-events:auto}
+
+/* ---------- stage ---------- */
+#stage{position:absolute;top:0;right:0;bottom:0;left:0;padding:74px 20px 0;overflow:hidden}
+.screen{position:absolute;top:calc(74px + env(safe-area-inset-top));left:20px;right:20px;bottom:0;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;
+  padding-bottom:calc(126px + env(safe-area-inset-bottom))}
+.screen::-webkit-scrollbar{display:none}
+.enter{animation:enter .46s cubic-bezier(.22,1,.36,1) both}
+.exit{animation:exit .26s ease-in both}
+@keyframes enter{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes exit{from{opacity:1}to{opacity:0;transform:translateY(-10px)}}
+
+/* ---------- type ---------- */
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:650;margin-bottom:14px}
+h1.q{font-size:27px;line-height:1.2;letter-spacing:-.022em;font-weight:600;margin-bottom:10px}
+h1.q.big{font-size:33px}
+.sub{font-size:15px;line-height:1.5;color:var(--ink2);margin-bottom:22px}
+.sub.tight{margin-bottom:16px}
+.micro{font-size:12.5px;color:var(--ink3);line-height:1.5}
+
+/* ---------- options ---------- */
+.opts{display:flex;flex-direction:column;gap:9px}
+.opts>*+*{margin-top:0}
+@supports not (gap:1px){.opts>*+*{margin-top:9px}.week>*+*{margin-left:5px}.badges>*+*{margin-left:8px}}
+.opt{
+  background:var(--card);border:1.5px solid transparent;border-radius:15px;
+  padding:15px 16px;display:flex;align-items:center;gap:13px;cursor:pointer;
+  box-shadow:var(--shadow);transition:transform .16s cubic-bezier(.22,1,.36,1),border-color .16s,box-shadow .2s;
+  min-height:58px;text-align:left;font-family:inherit;width:100%;
+}
+.opt:active{transform:scale(.975)}
+.opt.on{border-color:var(--accent);box-shadow:var(--shadow-lift)}
+.opt .ico{font-size:21px;flex:none;width:26px;text-align:center;line-height:1}
+.opt .tx{flex:1;min-width:0}
+.opt .tx b{display:block;font-size:15.5px;font-weight:550;letter-spacing:-.01em;line-height:1.3;color:var(--ink)}
+.opt .tx small{display:block;font-size:12.5px;color:var(--ink3);margin-top:3px;line-height:1.4}
+.opt .tick{width:21px;height:21px;border-radius:50%;border:1.5px solid var(--line);flex:none;position:relative;transition:all .18s}
+.opt.on .tick{background:var(--accent);border-color:var(--accent)}
+.opt.on .tick:after{content:"";position:absolute;left:6.5px;top:3.5px;width:5px;height:9px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.opt.none{background:var(--accent-soft);box-shadow:none}
+.opt.none .tx b{color:var(--accent)}
+
+/* ---------- footer cta ---------- */
+#foot{position:absolute;left:0;right:0;bottom:0;padding:14px 20px calc(24px + env(safe-area-inset-bottom));
+  background:linear-gradient(rgba(246,246,243,0),var(--bg) 34%);z-index:15;pointer-events:none}
+#foot.on{pointer-events:auto}
+.cta{
+  width:100%;background:var(--ink);color:#fff;border:none;border-radius:16px;
+  padding:17px;font-size:16px;font-weight:600;font-family:inherit;cursor:pointer;letter-spacing:-.01em;
+  transition:transform .16s,opacity .25s,background .2s;opacity:0;transform:translateY(8px);
+}
+#foot.on .cta{opacity:1;transform:none}
+.cta:active{transform:scale(.98)}
+.cta[disabled]{background:#D9D9D4;color:#9A9A94;cursor:default}
+.cta.accent{background:var(--accent)}
+.cta.ghost{background:transparent;color:var(--ink3);border:1.5px solid var(--line2);font-weight:500}
+.cta.ghost:active{background:rgba(0,0,0,.02)}
+.skip{display:block;width:100%;text-align:center;margin-top:8px;font-size:13.5px;color:var(--ink3);background:none;border:none;font-family:inherit;cursor:pointer;padding:14px 6px;min-height:46px}
+
+/* ---------- hero ---------- */
+.hero{flex:1;display:flex;flex-direction:column;justify-content:center;text-align:left}
+.orb{width:74px;height:74px;border-radius:50%;margin-bottom:28px;
+  background:conic-gradient(from 140deg,var(--accent),#5FBFA9,var(--accent-2),var(--accent));
+  filter:blur(.4px);animation:spin 14s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero h1{font-size:38px;line-height:1.12;letter-spacing:-.028em;margin-bottom:16px;font-weight:600}
+.hero h1 em{font-style:italic;font-family:"New York",ui-serif,Georgia,serif;font-weight:400}
+.hero p{font-size:16px;line-height:1.55;color:var(--ink2);margin-bottom:12px}
+.badges{display:flex;gap:8px;margin-top:22px;flex-wrap:wrap}
+.badge{font-size:11.5px;color:var(--ink2);background:#fff;border:1px solid var(--line);padding:7px 12px;border-radius:99px}
+
+/* ---------- insight ---------- */
+.insight{flex:1;display:flex;flex-direction:column;justify-content:center}
+.ins-tag{display:inline-flex;align-items:center;gap:7px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--accent);font-weight:650;margin-bottom:20px}
+.ins-tag i{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.5)}}
+.ins-line{font-size:23px;line-height:1.35;letter-spacing:-.018em;font-weight:500;margin-bottom:16px;opacity:0}
+.ins-line.s{font-size:16px;font-weight:400;color:var(--ink2);line-height:1.55}
+.ins-num{font-size:56px;font-weight:600;letter-spacing:-.035em;color:var(--accent);line-height:1;margin-bottom:6px;opacity:0}
+.fadein{animation:fi .6s cubic-bezier(.22,1,.36,1) both}
+@keyframes fi{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ---------- slider ---------- */
+.slwrap{margin:24px 0 8px}
+.slval{font-size:64px;font-weight:600;letter-spacing:-.04em;line-height:1;color:var(--ink);text-align:center}
+.slcap{text-align:center;font-size:15px;color:var(--accent);margin-top:12px;font-weight:550;min-height:44px;line-height:1.4;padding:0 10px;transition:opacity .2s}
+input[type=range]{-webkit-appearance:none;width:100%;height:44px;background:none;margin-top:22px}
+input[type=range]::-webkit-slider-runnable-track{height:6px;background:var(--line);border-radius:99px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:32px;height:32px;border-radius:50%;background:#fff;
+  box-shadow:0 2px 10px rgba(0,0,0,.18),0 0 0 1.5px var(--accent) inset;margin-top:-13px;cursor:pointer}
+.slends{display:flex;justify-content:space-between;font-size:12px;color:var(--ink3);margin-top:2px}
+
+/* ---------- body map ---------- */
+.bodywrap{display:flex;justify-content:center;margin:6px 0 4px}
+svg.body{width:212px;height:auto}
+svg.body .part{fill:#DFE3E2;transition:fill .2s;pointer-events:none}
+svg.body .hit{cursor:pointer}
+svg.body .part:active{fill:#C6CFCC}
+svg.body .part.on{fill:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:14px}
+.chip{font-size:12.5px;background:var(--accent-soft);color:var(--accent);padding:7px 13px;border-radius:99px;font-weight:550}
+
+/* ---------- loader ---------- */
+.load{flex:1;display:flex;flex-direction:column;justify-content:center}
+.ring{width:60px;height:60px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--accent);animation:spin 1s linear infinite;margin-bottom:30px}
+.lline{display:flex;gap:11px;align-items:flex-start;font-size:14.5px;color:var(--ink3);margin-bottom:15px;opacity:0;line-height:1.45}
+.lline.on{opacity:1;color:var(--ink2);transition:opacity .4s}
+.lline .dot{width:16px;height:16px;flex:none;border-radius:50%;border:1.5px solid var(--line);margin-top:1px;position:relative;transition:all .3s}
+.lline.done .dot{background:var(--accent);border-color:var(--accent)}
+.lline.done .dot:after{content:"";position:absolute;left:4.5px;top:2px;width:4px;height:7.5px;border:solid #fff;border-width:0 1.8px 1.8px 0;transform:rotate(45deg)}
+.lline.done{color:var(--ink)}
+
+/* ---------- reveal ---------- */
+.week{display:flex;gap:5px;margin:6px 0 22px}
+.day{flex:1;background:var(--card);border-radius:12px;padding:11px 4px;text-align:center;box-shadow:var(--shadow);border:1.5px solid transparent}
+.day.train{border-color:var(--accent);background:var(--accent-soft)}
+.day .d{font-size:10px;letter-spacing:.06em;color:var(--ink3);text-transform:uppercase;font-weight:600}
+.day .m{font-size:17px;margin-top:6px;line-height:1}
+.pred{background:var(--card);border-radius:15px;padding:15px 16px;box-shadow:var(--shadow);margin-bottom:9px;display:flex;gap:12px;align-items:flex-start}
+.pred .pd{font-size:11px;font-weight:700;color:var(--accent);letter-spacing:.06em;text-transform:uppercase;flex:none;width:38px;padding-top:2px}
+.pred .pt{font-size:14px;line-height:1.5;color:var(--ink2)}
+.pred .pt b{color:var(--ink);font-weight:600}
+.patcard{background:linear-gradient(160deg,#16302B,#0F7A68);border-radius:19px;padding:24px 22px;color:#fff;margin:20px 0 14px;box-shadow:0 16px 40px rgba(15,122,104,.28)}
+.patcard .pl{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;opacity:.7;margin-bottom:10px;font-weight:650}
+.patcard .pn{font-size:26px;line-height:1.2;letter-spacing:-.02em;font-weight:600;margin-bottom:12px}
+.patcard .pb{font-size:14px;line-height:1.55;opacity:.88}
+.notme{display:block;width:100%;text-align:center;font-size:13px;color:var(--ink3);background:none;border:none;font-family:inherit;padding:14px 8px;min-height:46px;cursor:pointer;margin-bottom:14px}
+.later{background:var(--card);border-radius:15px;padding:16px;box-shadow:var(--shadow);margin-bottom:20px}
+.later h4{font-size:14px;font-weight:600;margin-bottom:12px}
+.later .li{display:flex;gap:10px;font-size:13px;color:var(--ink2);margin-bottom:9px;line-height:1.45}
+.later .li:last-child{margin-bottom:0}
+.later .li>span:first-child{color:var(--accent);font-weight:650;flex:none;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;width:56px;padding-top:2px}
+.later .li>span:last-child{flex:1}
+
+/* ---------- toast / empathy ---------- */
+#toast{position:absolute;left:20px;right:20px;bottom:110px;background:var(--ink);color:#fff;border-radius:14px;
+  padding:14px 16px;font-size:13.5px;line-height:1.45;z-index:30;opacity:0;transform:translateY(12px);
+  transition:all .4s cubic-bezier(.22,1,.36,1);pointer-events:none;box-shadow:0 12px 30px rgba(0,0,0,.22)}
+#toast.on{opacity:1;transform:none}
+
+/* ---------- dev index ---------- */
+#dev{position:absolute;bottom:10px;left:10px;z-index:60;font-size:9.5px;color:var(--ink3);background:rgba(255,255,255,.75);
+  border:1px solid var(--line);border-radius:99px;padding:4px 9px;cursor:pointer;font-family:inherit;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);opacity:.5}
+#dev:hover{opacity:1}
+#idx{position:absolute;top:0;right:0;bottom:0;left:0;background:rgba(246,246,243,.985);z-index:59;padding:56px 18px 18px;overflow-y:auto;display:none;-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}
+#idx.on{display:block}
+#idx h5{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin:16px 0 8px;font-weight:650}
+#idx h5:first-child{margin-top:0}
+#idx button{display:block;width:100%;text-align:left;background:#fff;border:1px solid var(--line);border-radius:11px;
+  padding:11px 13px;font-size:13.5px;font-family:inherit;margin-bottom:6px;cursor:pointer;color:var(--ink)}
+#idx button b{color:var(--ink3);font-weight:600;font-size:11px;margin-right:8px}
+
+/* ---------- compact phones (SE, and any short window) ---------- */
+@media(max-height:700px){
+  h1.q{font-size:23px}
+  h1.q.big{font-size:28px}
+  .sub{font-size:14px;margin-bottom:16px}
+  .hero h1{font-size:31px}
+  .hero p{font-size:15px;margin-bottom:9px}
+  .orb{width:56px;height:56px;margin-bottom:18px}
+  .opt{min-height:52px;padding:12px 14px}
+  .opt .tx b{font-size:14.5px}
+  .slval{font-size:46px}
+  .slwrap{margin:12px 0 4px}
+  input[type=range]{margin-top:12px}
+  .slcap{font-size:14px;min-height:38px;margin-top:8px}
+  .ins-num{font-size:44px}
+  .ins-line{font-size:20px}
+  .ins-line.s{font-size:15px}
+  .eyebrow{margin-bottom:10px}
+  svg.body{width:168px}
+  .badges{margin-top:16px}
+}
+@media(max-height:600px){
+  h1.q{font-size:21px}
+  .hero h1{font-size:27px}
+  .slval{font-size:40px}
+  svg.body{width:144px}
+  .opt .tx small{display:none}
+}
+
+/* ---------- chapter interstitial ---------- */
+.chapwrap{flex:1;display:flex;flex-direction:column;justify-content:center}
+.chapnum{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:650;margin-bottom:18px}
+.chaptitle{font-size:44px;line-height:1.08;letter-spacing:-.03em;margin-bottom:16px;font-weight:400}
+.chapsub{font-size:16px;line-height:1.55;color:var(--ink2);max-width:300px}
+.chapdots{display:flex;gap:7px;margin-top:34px}
+.cd{width:22px;height:4px;border-radius:2px;background:var(--line)}
+.cd.done{background:var(--accent);opacity:.42}
+.cd.now{background:var(--accent);width:40px}
+/* ---------- text + number inputs ---------- */
+.tin{width:100%;background:var(--card);border:1.5px solid var(--line);border-radius:14px;
+  padding:16px 16px;font-family:inherit;font-size:17px;color:var(--ink);box-shadow:var(--shadow);}
+.tin:focus{outline:none;border-color:var(--accent)}
+.tin::placeholder{color:var(--ink3)}
+.tin.sm{padding:15px 14px;font-size:15px;min-height:48px}
+.nrow{margin-bottom:12px}
+.nrow label{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin-bottom:6px}
+.slu{font-size:20px;font-weight:500;color:var(--ink3);letter-spacing:0}
+/* ---------- log card ---------- */
+.logcard{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:6px 16px;
+  box-shadow:var(--shadow);margin:20px 0 16px}
+.lgrow{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.lgrow:last-child{border-bottom:none}
+.lgrow span{color:var(--ink3)}
+.lgrow b{font-weight:600;color:var(--ink)}
+@media(max-height:700px){ .chaptitle{font-size:36px} .chapsub{font-size:15px} .tin{padding:13px 14px;font-size:16px} }
+
+/* ---------- icon system ---------- */
+.ico{width:26px;height:26px;display:flex;align-items:center;justify-content:center;color:var(--accent);flex:none;opacity:.85}
+.ico svg{width:23px;height:23px}
+.opt.on .ico{opacity:1}
+.opt.none .ico{color:var(--accent)}
+/* ---------- chapter auto-advance ---------- */
+.chaptime{height:2px;background:var(--line);border-radius:2px;margin-top:30px;overflow:hidden;max-width:240px}
+.chaptime i{display:block;height:100%;width:0;background:var(--accent);animation:fill 1.5s linear forwards}
+@keyframes fill{to{width:100%}}
+.chapskip{margin-top:18px;font-size:12.5px;color:var(--ink3)}
+/* ---------- feelings grid (merged love / never) ---------- */
+.frow{display:flex;align-items:center;gap:9px;background:var(--card);border-radius:13px;
+  padding:8px 10px 8px 13px;box-shadow:var(--shadow);margin-bottom:7px;min-height:52px}
+.fname{flex:1;font-size:14.5px;font-weight:500;line-height:1.25}
+.fbtn{width:44px;height:44px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg2);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink3);flex:none;transition:all .15s}
+.fbtn svg{width:17px;height:17px}
+.fbtn.on.love{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.fbtn.on.never{border-color:var(--red);background:rgba(224,112,95,.09);color:var(--red)}
+.flegend{display:flex;justify-content:flex-end;gap:16px;font-size:11px;color:var(--ink3);margin-bottom:8px;padding-right:4px}
+/* ---------- build / today ---------- */
+.todo{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 17px;box-shadow:var(--shadow);margin:14px 0}
+.todo h4{font-size:15px;font-weight:600;margin-bottom:6px}
+.todo p{font-size:13.5px;color:var(--ink2);line-height:1.5}
+.eta{display:inline-flex;align-items:center;gap:7px;background:var(--accent-soft);color:var(--accent);
+  font-size:12px;font-weight:600;padding:7px 13px;border-radius:99px;margin-bottom:16px}
+.avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(140deg,#16302B,#0F7A68);
+  display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:15px;flex:none}
+.byline{display:flex;gap:12px;align-items:center;margin:16px 0 4px}
+.byline div{font-size:13px;line-height:1.4;color:var(--ink2)}
+.byline b{display:block;color:var(--ink);font-size:14px}
+</style>
+</head>
+<body>
+<div id="device">
+  <button id="dev">screens</button>
+  <div id="idx"></div>
+
+  <div id="chrome">
+    <div id="bars"></div>
+    <div id="chapline"><span id="chapname"></span><button id="back">Back</button></div>
+  </div>
+
+  <div id="stage"></div>
+  <div id="foot"></div>
+  <div id="toast"></div>
+</div>
+
+<script>
+/* ============================================================
+   FITNESS JOURNEY — ONBOARDING v2
+   A conversation, not a form. 22 screens, ~38 taps, zero typing.
+   Chapters use endowed progress: chapter 1 lands pre-filled.
+   ============================================================ */
+
+/* ============================================================
+   ICON SYSTEM — monochrome, single stroke weight, 24×24.
+   Abstract geometry rather than illustration: renders identically
+   on every device, scales cleanly, and reads as one system.
+   ============================================================ */
+const ICONS = {
+  /* horizon */
+  floor:   'M3 20h18M12 16V5M8 9l4-4 4 4',
+  child:   'M9 7a2 2 0 104 0 2 2 0 10-4 0M11 9v5M8 12h6M9 19l2-5M13 19l-2-5M18 20v-6',
+  mountain:'M2 19l6-11 4 6 3-4 7 9z',
+  barbell: 'M4 9v6M7 7v10M17 7v10M20 9v6M7 12h10',
+  racket:  'M9 9a5 5 0 117 7 5 5 0 01-7-7M9.5 15.5L4 21',
+  leaf:    'M4 20C4 11 11 4 20 4c0 9-7 16-16 16zM4 20l8-8',
+  bag:     'M6 8h12l-1 12H7zM9 8V6a3 3 0 016 0v2',
+  house:   'M3 11l9-7 9 7v8a1 1 0 01-1 1H4a1 1 0 01-1-1z',
+  stairs:  'M3 20h5v-5h5v-5h5V5',
+  plane:   'M2 13l20-7-7 20-3-8z',
+  spark:   'M12 3v6M12 15v6M3 12h6M15 12h6M6 6l3 3M15 15l3 3M18 6l-3 3M9 15l-3 3',
+  /* focus */
+  arrowUp: 'M12 20V5M6 11l6-6 6 6',
+  flame:   'M12 21c-4 0-6-3-6-6 0-4 6-4 5-12 5 3 7 6 7 12 0 3-2 6-6 6z',
+  brick:   'M3 8h18v8H3zM3 12h18M9 8v4M15 12v4',
+  plus:    'M12 6v12M6 12h12M4 4h16v16H4z',
+  bolt:    'M13 3L5 14h6l-1 7 8-11h-6z',
+  lungs:   'M12 4v9M8 21c-3 0-4-2-4-5s2-7 4-7 2 3 2 5-1 7-2 7zM16 21c3 0 4-2 4-5s-2-7-4-7-2 3-2 5 1 7 2 7z',
+  /* capability */
+  down:    'M12 4v14M6 12l6 6 6-6',
+  bar:     'M4 6h16M9 6v5a3 3 0 006 0V6',
+  squatI:  'M12 4a2 2 0 100 4 2 2 0 100-4M12 8v5l-4 6M12 13l4 6M7 13h10',
+  weight:  'M6 10h12l-1 9H7zM9 10V8a3 3 0 016 0v2',
+  run:     'M14 4a2 2 0 100 4 2 2 0 100-4M13 9l-4 3 2 4-2 4M13 9l4 2 1 4M9 12l-4 1',
+  balance: 'M12 3v18M5 8h14M8 21h8M12 12l-4 4M12 12l4 4',
+  wave:    'M3 12c3-5 6 5 9 0s6 5 9 0',
+  /* patterns */
+  pSquat:  'M6 4v6a6 6 0 0012 0V4M4 20h16',
+  pHinge:  'M4 6v6a4 4 0 004 4h12M20 16l-3-3M20 16l-3 3',
+  pPush:   'M20 4v16M4 12h12M12 8l4 4-4 4',
+  pPull:   'M4 4v16M20 12H8M12 8l-4 4 4 4',
+  pOhp:    'M4 20h16M12 18V8M8 12l4-4 4 4M6 4h12',
+  pVpull:  'M4 4h16M12 6v12M8 14l4 4 4-4',
+  pCarry:  'M12 3a2 2 0 100 4 2 2 0 100-4M12 7v8M4 9h4v9H4zM16 9h4v9h-4zM12 15l-3 5M12 15l3 5',
+  pOly:    'M12 21V9M6 4l6 5 6-5M4 12h4M16 12h4',
+  seed:    'M12 21V9a5 5 0 015-5 5 5 0 01-5 5 5 5 0 00-5-5 5 5 0 015 5',
+  /* week & life */
+  sunrise: 'M12 3v4M5 10l2 2M19 10l-2 2M3 18h18M7 18a5 5 0 0110 0M9 21h6',
+  clock:   'M12 3a9 9 0 100 18 9 9 0 100-18M12 7v5l3 3',
+  door:    'M5 3h11v18H5zM13 12h.01M16 21h3V3h-3',
+  moon:    'M20 14a8 8 0 11-9-11 7 7 0 009 11z',
+  dice:    'M4 4h16v16H4zM9 9h.01M15 15h.01M12 12h.01',
+  gymBld:  'M4 21V6l7-3 7 3v15M9 21v-5h6v5M8 10h.01M12 10h.01M16 10h.01',
+  dumbbell:'M3 10v4M6 8v8M18 8v8M21 10v4M6 12h12',
+  bed:     'M3 18v-7h18v7M3 18v2M21 18v2M6 11V8h6v3',
+  tree:    'M12 21v-6M12 15a5 5 0 100-10 5 5 0 100 10M7 12h10',
+  /* honest */
+  compass: 'M12 3a9 9 0 100 18 9 9 0 100-18M15 9l-2 4-4 2 2-4z',
+  heart:   'M12 20s-7-4.5-7-9a4 4 0 017-2.5A4 4 0 0119 11c0 4.5-7 9-7 9z',
+  cloud:   'M7 18a4 4 0 010-8 5 5 0 019.5-1A3.5 3.5 0 0117 18z',
+  calendar:'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',
+  hourglass:'M7 3h10M7 21h10M7 3c0 5 5 6 5 9s-5 4-5 9M17 3c0 5-5 6-5 9s5 4 5 9',
+  chart:   'M4 20h16M7 17v-4M12 17V8M17 17v-7',
+  burst:   'M12 4l2 5 5 1-4 4 1 5-4-3-4 3 1-5-4-4 5-1z',
+  cross:   'M7 7l10 10M17 7L7 17',
+  question:'M9 9a3 3 0 116 0c0 2-3 2-3 4M12 18h.01M12 3a9 9 0 100 18 9 9 0 100-18',
+  luggage: 'M6 8h12v13H6zM9 8V5h6v3M9 21v1M15 21v1',
+  megaphone:'M4 10v4h4l7 4V6l-7 4zM18 9a4 4 0 010 6',
+  handshake:'M3 12l4-4 5 3 5-3 4 4-5 6-4-3-4 3z',
+  hush:    'M12 3a9 9 0 100 18 9 9 0 100-18M8 12h8',
+  refresh: 'M20 12a8 8 0 11-3-6M20 4v5h-5',
+  /* misc */
+  check:   'M4 12l5 5L20 6',
+  shield:  'M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z',
+  fire2:   'M12 21c-4 0-6-3-6-6 0-4 6-4 5-12 5 3 7 6 7 12 0 3-2 6-6 6z',
+  eye:     'M2 12s4-6 10-6 10 6 10 6-4 6-10 6-10-6-10-6M12 10a2 2 0 100 4 2 2 0 100-4',
+  book:    'M4 4h7a2 2 0 012 2v14a2 2 0 00-2-2H4zM20 4h-7a2 2 0 00-2 2v14a2 2 0 012-2h7z',
+  headphone:'M4 14v-2a8 8 0 0116 0v2M4 14a2 2 0 002 2h1v-5H6a2 2 0 00-2 2M20 14a2 2 0 01-2 2h-1v-5h1a2 2 0 012 2',
+  people:  'M9 8a3 3 0 100-6 3 3 0 000 6M3 20v-2a4 4 0 014-4h4a4 4 0 014 4v2M17 4a3 3 0 010 6M21 20v-2a4 4 0 00-3-3.8',
+  target:  'M12 3a9 9 0 100 18 9 9 0 100-18M12 8a4 4 0 100 8 4 4 0 100-8M12 11.5a.5.5 0 100 1 .5.5 0 100-1',
+  mirror:  'M8 3h8v14H8zM12 17v4M9 21h6',
+  gear:    'M12 9a3 3 0 100 6 3 3 0 100-6M12 3v2M12 19v2M5 12H3M21 12h-2M6 6l1.5 1.5M16.5 16.5L18 18M18 6l-1.5 1.5M7.5 16.5L6 18'
+};
+function ico(n){
+  const d = ICONS[n];
+  if(!d) return '<span class="ico"></span>';
+  return '<span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" '+
+         'stroke-linecap="round" stroke-linejoin="round">'+
+         d.split('M').filter(Boolean).map(p=>'<path d="M'+p+'"/>').join('')+'</svg></span>';
+}
+const CHAPTERS = ['Start','You','The Horizon','The Truth','Your Training','Your Week','The Honest Part','Safety','Your Log'];
+const A = {};
+let i = 0, hist = [];
+const haptic = ms => { try{ navigator.vibrate && navigator.vibrate(ms); }catch(e){} };
+
+function lockVH(){
+  const h = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+  document.documentElement.style.setProperty('--vh', (h/100) + 'px');
+}
+lockVH();
+window.addEventListener('resize', lockVH);
+window.addEventListener('orientationchange', ()=>setTimeout(lockVH,220));
+if(window.visualViewport) window.visualViewport.addEventListener('resize', lockVH);
+document.addEventListener('touchmove', e=>{
+  const t=e.target;
+  const ok = t && typeof t.closest==='function' && t.closest('.screen, input, #idx, .body');
+  if(!ok) e.preventDefault();
+}, {passive:false});
+
+/* ---------------- age-adaptive horizon ---------------- */
+function horizonAge(a){ return a<30?55 : a<40?65 : a<50?70 : a<60?80 : a<70?85 : 90; }
+function horizonBand(a){ return a<35?'young' : a<50?'mid' : a<65?'later' : 'senior'; }
+const HORIZONS = {
+  young:[
+    {v:'sport',    ic:'racket',   t:'Still play my sport'},
+    {v:'heavy',    ic:'barbell',  t:'Still lift heavy'},
+    {v:'strongold',ic:'flame',    t:'Be the strong one at 55'},
+    {v:'nopain',   ic:'leaf',     t:'Not have the back my desk is building'},
+    {v:'kids',     ic:'child',    t:'Keep up with kids I don\'t have yet'},
+    {v:'anything', ic:'mountain', t:'Say yes to anything, unprepared'}
+  ],
+  mid:[
+    {v:'heavy',  ic:'barbell',  t:'Still lift heavy'},
+    {v:'kids',   ic:'child',    t:'Keep up with my kids'},
+    {v:'hike',   ic:'mountain', t:'Say yes to any hike'},
+    {v:'sport',  ic:'racket',   t:'Still play my sport'},
+    {v:'nopain', ic:'leaf',     t:'A day without pain'},
+    {v:'floor',  ic:'floor',    t:'Get off the floor unaided'}
+  ],
+  later:[
+    {v:'floor',  ic:'floor',    t:'Get off the floor unaided'},
+    {v:'grand',  ic:'child',    t:'Pick a grandchild up'},
+    {v:'carry',  ic:'bag',      t:'Carry my bags upstairs'},
+    {v:'hike',   ic:'mountain', t:'Walk anywhere I want'},
+    {v:'heavy',  ic:'barbell',  t:'Still lift heavy'},
+    {v:'nopain', ic:'leaf',     t:'A day without pain'}
+  ],
+  senior:[
+    {v:'floor',  ic:'floor',   t:'Get off the floor unaided'},
+    {v:'indep',  ic:'house',   t:'Stay in my own home'},
+    {v:'stairs', ic:'stairs',  t:'Stairs without the rail'},
+    {v:'carry',  ic:'bag',     t:'Carry my own groceries'},
+    {v:'grand',  ic:'child',   t:'Get on the floor with grandchildren'},
+    {v:'travel', ic:'plane',   t:'Still travel properly'}
+  ]
+};
+const H_LABEL = { sport:'still playing your sport', heavy:'still lifting heavy',
+  strongold:'being the strong one at 55', nopain:'a day without pain', kids:'keeping up with your kids',
+  anything:'saying yes to anything', hike:'walking anywhere you want', floor:'getting off the floor unaided',
+  grand:'picking a grandchild up', carry:'carrying your own bags', indep:'staying in your own home',
+  stairs:'stairs without the rail', travel:'still travelling properly' };
+const FOCUS_LABEL = { strong:'get stronger', lean:'lean out', muscle:'build muscle',
+  pain:'move without pain', energy:'stop feeling tired', wind:'get your wind back' };
+
+/* ---------------- FLOW  (35 screens · 27 taps) ---------------- */
+const FLOW = [
+
+{ ch:0, type:'hero', greet:true,
+  h:'Before we build anything,<br>let me <em>understand you</em>.',
+  p:['Eight short sections. About four minutes.',
+     'Everything you tell me becomes <b>entry one of your Log</b> — dated, kept, yours to look back on.'],
+  badges:['8 sections','~4 minutes','Nothing gets thrown away'],
+  cta:'Begin' },
+
+/* 1 · YOU */
+{ ch:1, type:'chapter', n:1, title:'You', sub:'Three things, so every question after this is the right one to ask you.' },
+{ ch:1, type:'text', key:'name', eyebrow:'First things first',
+  h:'What should I call you?', sub:'First name. It goes on the front of your Log.',
+  placeholder:'Your first name', cta:'Continue' },
+{ ch:1, type:'slider', key:'age', eyebrow:'So I ask the right questions',
+  h:'How old are you?', sub:'This changes the standards I measure you against — and the question I ask next.',
+  min:16, max:85, def:38, unit:'',
+  dyncap:n=>{const t=horizonAge(n);
+    if(n<30) return 'What you build now, you keep for decades. Next question: what you want at '+t+'.';
+    if(n<45) return 'The decade where it compounds or slips. Next question: what you want at '+t+'.';
+    if(n<60) return 'Strength becomes the priority now, not the bonus. Next: what you want at '+t+'.';
+    if(n<70) return 'This is where training stops being optional. Next: what you want at '+t+'.';
+    return 'Strength, balance, independence — in that order. Next: what you want at '+t+'.';},
+  cta:'That\'s me' },
+{ ch:1, type:'single', key:'sex', eyebrow:'One more',
+  h:'Sex at birth?',
+  sub:'Every strength benchmark I\'ll use is different. The wrong one gives you a wrong answer.',
+  opts:[{v:'m',ic:null,t:'Male'},{v:'f',ic:null,t:'Female'},
+        {v:'na',ic:null,t:'Rather not say',s:'I\'ll use general standards and say when they\'re approximate'}]},
+
+/* 2 · THE HORIZON */
+{ ch:2, type:'chapter', n:2, title:'The Horizon', sub:'We start at the end and work backwards.' },
+{ ch:2, type:'multi', key:'horizon', max:3, dynamic:'horizon',
+  eyebrow:'Start at the end', h:'', sub:'Up to three. Every exercise I give you has to earn its place against these.',
+  cta:'Continue', opts:[] },
+{ ch:2, type:'single', key:'focus', eyebrow:'Now the near term',
+  h:'And in the next ninety days?', sub:'One only. You\'ll get the others — just not first.',
+  opts:[{v:'strong',ic:'arrowUp',t:'Get measurably stronger'},
+        {v:'lean',  ic:'flame',  t:'Lean out'},
+        {v:'muscle',ic:'brick',  t:'Build visible muscle'},
+        {v:'pain',  ic:'leaf',   t:'Move without pain'},
+        {v:'energy',ic:'bolt',   t:'Stop feeling tired'},
+        {v:'wind',  ic:'lungs',  t:'Get my wind back'}]},
+{ ch:2, type:'insight', id:'ins1' },
+
+/* 3 · THE TRUTH */
+{ ch:3, type:'chapter', n:3, title:'The Truth', sub:'Where you actually are today.' },
+{ ch:3, type:'permission', eyebrow:'The honest shortcut',
+  h:'Let me read your last year instead of asking.',
+  sub:'Steps, sleep, workouts, resting heart rate, weight if you track it. Replaces nine questions.',
+  cta:'Connect Apple Health', skip:'I\'d rather tell you myself' },
+{ ch:3, type:'single', key:'activity', onlyIfSkipped:true, eyebrow:'Fair enough',
+  h:'Roughly where are you now?', sub:'No wrong answer. The truth is more useful than the good version.',
+  opts:[{v:'none', ic:'bed',    t:'Nothing structured'},
+        {v:'light',ic:'tree',   t:'Active, but not training'},
+        {v:'onoff',ic:'refresh',t:'On and off'},
+        {v:'reg',  ic:'calendar',t:'Training 2–3× a week'},
+        {v:'hard', ic:'flame',  t:'Training hard, 4×+'}]},
+{ ch:3, type:'multi', key:'capability', eyebrow:'One quick calibration',
+  h:'Which of these are true today?',
+  sub:'Five seconds here beats "how many years have you trained".',
+  cta:'Continue',
+  opts:[{v:'pushup', ic:'down',   t:'Full push-up'},
+        {v:'hang',   ic:'bar',    t:'30-second dead hang'},
+        {v:'squat',  ic:'squatI', t:'Deep squat, heels flat'},
+        {v:'bwsquat',ic:'weight', t:'Squatted my bodyweight'},
+        {v:'run5k',  ic:'run',    t:'5k without stopping'},
+        {v:'onefoot',ic:'balance',t:'30 seconds on one foot'},
+        {v:'none',   ic:'seed',   t:'None of these yet', none:true}]},
+{ ch:3, type:'insight', id:'ins2' },
+
+/* 4 · YOUR TRAINING */
+{ ch:4, type:'chapter', n:4, title:'Your Training', sub:'What goes in your program — and what I\'m not allowed to give you yet.' },
+{ ch:4, type:'multi', key:'patterns', eyebrow:'Movement history',
+  h:'Which have you trained regularly?',
+  sub:'Weeks in a row, not once at an induction. Anything blank, I teach before I load.',
+  cta:'Continue',
+  opts:[{v:'squat',ic:'pSquat',t:'Squat'},
+        {v:'hinge',ic:'pHinge',t:'Hinge or deadlift'},
+        {v:'push', ic:'pPush', t:'Press or push-up'},
+        {v:'pull', ic:'pPull', t:'Row or pull-up'},
+        {v:'carry',ic:'pCarry',t:'Loaded carries'},
+        {v:'oly',  ic:'pOly',  t:'Olympic lifts'},
+        {v:'none', ic:'seed',  t:'None of these', none:true}]},
+{ ch:4, type:'single', key:'knownumbers', eyebrow:'Loads',
+  h:'Do you know your numbers?',
+  sub:'If you do, I can set starting loads today instead of finding them over two weeks.',
+  opts:[{v:'yes',ic:'book',t:'Yes — let me enter them',s:'About a minute'},
+        {v:'no', ic:'target',t:'No — find them in session one',s:'Honestly the better data'}]},
+{ ch:4, type:'numbers', key:'lifts', onlyIfNumbers:true, eyebrow:'Best set, last 3 months',
+  h:'Weight × reps.', sub:'Not a one-rep max. A hard set of five tells me more.',
+  fields:[['Squat','225 × 5'],['Press or bench','155 × 8'],['Deadlift or hinge','275 × 5'],['Row or pull-up','bodyweight × 6']],
+  cta:'Save to my Log', skip:'Skip — find them in session one' },
+{ ch:4, type:'feelings', key:'feelings', eyebrow:'Adherence, not preference',
+  h:'How do you feel about these?',
+  sub:'Enjoyment is the strongest predictor of still training in a year. Skip any you don\'t care about.',
+  items:[['heavy','Lifting heavy'],['sweat','Getting out of breath'],['skill','Learning technique'],
+         ['quiet','Training alone'],['running','Running'],['burpees','Burpees and circuits']],
+  cta:'Continue' },
+
+/* 5 · YOUR WEEK */
+{ ch:5, type:'chapter', n:5, title:'Your Week', sub:'The constraints that decide whether the plan is real or fiction.' },
+{ ch:5, type:'single', key:'when', eyebrow:'Reality check',
+  h:'When does training actually happen?', sub:'Not when you\'d like. When it realistically does.',
+  opts:[{v:'early',  ic:'sunrise', t:'Before anyone else is up'},
+        {v:'lunch',  ic:'clock',   t:'The gap in the middle'},
+        {v:'after',  ic:'door',    t:'Straight after work',s:'Highest-adherence slot there is'},
+        {v:'evening',ic:'moon',    t:'Late, once it\'s quiet'},
+        {v:'flex',   ic:'dice',    t:'Whenever the day allows'}]},
+{ ch:5, type:'slider', key:'days', eyebrow:'Be conservative',
+  h:'How many days can you protect?', sub:'Not your best week. An average one.',
+  min:1, max:6, def:3, unit:'days',
+  caps:{1:'One is a real answer. We\'ll make it the best hour of your week.',
+        2:'Two is enough. Genuinely — most of the benefit lives here.',
+        3:'The sweet spot. Enough stimulus, enough recovery, enough life.',
+        4:'Strong. This is where progress starts to compound.',
+        5:'Ambitious. I\'ll hold you to it, and build in the rest days.',
+        6:'Six is a commitment. If that slips, tell me now.'},
+  cta:'That\'s realistic' },
+{ ch:5, type:'multi', key:'where', eyebrow:'Where it happens',
+  h:'What do you have access to?', sub:'Tick everything. Specific kit comes later, when a session needs it.',
+  cta:'Continue',
+  opts:[{v:'gym',     ic:'gymBld',  t:'A full gym'},
+        {v:'homekit', ic:'dumbbell',t:'Home, some equipment'},
+        {v:'homenone',ic:'house',   t:'Home, nothing'},
+        {v:'outdoor', ic:'tree',    t:'Outdoors'},
+        {v:'hotel',   ic:'plane',   t:'Hotel gyms, often'}]},
+{ ch:5, type:'single', key:'length', eyebrow:'Time',
+  h:'How long have you got?', sub:'Twenty minutes consistently beats sixty occasionally. Literally.',
+  opts:[{v:'20',ic:'bolt', t:'20 minutes'},
+        {v:'35',ic:'clock',t:'30–40 minutes'},
+        {v:'55',ic:'clock',t:'45–60 minutes'},
+        {v:'75',ic:'hourglass',t:'An hour or more'}]},
+
+/* 6 · THE HONEST PART */
+{ ch:6, type:'chapter', n:6, title:'The Honest Part', sub:'Four questions about you rather than your training.' },
+{ ch:6, type:'single', key:'why', eyebrow:'The honest part',
+  h:'I want to train because…', sub:'The strongest predictor of whether you\'re still here in a year. Pick the truest, not the best-sounding.',
+  opts:[{v:'identified', ic:'compass',t:'…I like who I am when I do'},
+        {v:'intrinsic',  ic:'heart',  t:'…I genuinely enjoy it'},
+        {v:'introjected',ic:'cloud',  t:'…I hate how I feel when I don\'t'},
+        {v:'external',   ic:'calendar',t:'…something\'s coming'}]},
+{ ch:6, type:'multi', key:'blockers', eyebrow:'Pattern recognition',
+  h:'What has stopped you before?', sub:'Every plan fails the same way twice. Tell me yours and I design around it.',
+  cta:'Continue',
+  opts:[{v:'time',   ic:'hourglass',t:'Time disappears'},
+        {v:'week3',  ic:'chart',    t:'Motivation dies at week three'},
+        {v:'toohard',ic:'burst',    t:'I start too hard and burn out'},
+        {v:'injury', ic:'cross',    t:'Something started hurting'},
+        {v:'lost',   ic:'question', t:'Didn\'t know if it was working'},
+        {v:'travel', ic:'luggage',  t:'Travel breaks the rhythm'},
+        {v:'life',   ic:'house',    t:'Life gets busy, it goes first'},
+        {v:'never',  ic:'seed',     t:'Never really started', none:true}]},
+{ ch:6, type:'single', key:'fallback', eyebrow:'How I should handle you',
+  h:'You\'ll miss a week. What do you want from me?',
+  sub:'Honestly, not aspirationally. This prevents most coach–athlete friction.',
+  opts:[{v:'direct', ic:'megaphone', t:'Call it out. Directly.'},
+        {v:'gentle', ic:'handshake', t:'Check in gently'},
+        {v:'silence',ic:'hush',      t:'Say nothing',s:'I\'ll come back on my own'},
+        {v:'reset',  ic:'refresh',   t:'Just rebuild the week'}]},
+{ ch:6, type:'slider', key:'confidence', eyebrow:'Last honest question',
+  h:'How confident are you that this time is different?', sub:'',
+  min:1, max:10, def:6, unit:'',
+  caps:{1:'Thank you. A 1 that\'s true beats a 10 that isn\'t.',
+        2:'Thank you. A 2 that\'s true beats a 10 that isn\'t.',
+        3:'Good. I\'d rather build for a 3 and surprise you than lose you in March.',
+        4:'Good. I\'d rather build for a 4 and surprise you than lose you in March.',
+        5:'Honest — and the most common answer here.',
+        6:'Honest — and the most common answer here.',
+        7:'Enough belief to start, enough doubt to stay careful. Good combination.',
+        8:'Confident. My job is making sure week three doesn\'t take that away.',
+        9:'High. I\'ll take it — and build the guardrails anyway.',
+        10:'Ten. The tens are usually the ones I have to slow down.'},
+  cta:'Continue' },
+
+/* 7 · SAFETY */
+{ ch:7, type:'chapter', n:7, title:'Safety', sub:'Two screens. Most people tap twice.' },
+{ ch:7, type:'multi', key:'parq', noneFirst:true, eyebrow:'One practical thing',
+  h:'Anything here apply to you?', sub:'So I don\'t give you something that\'s wrong for you.',
+  cta:'Continue',
+  opts:[{v:'none',   ic:'check', t:'None of these apply to me', none:true},
+        {v:'heart',  t:'Heart condition or high blood pressure'},
+        {v:'chest',  t:'Chest pain at rest or during activity'},
+        {v:'dizzy',  t:'Dizziness or fainting in the last year'},
+        {v:'chronic',t:'Another diagnosed chronic condition'},
+        {v:'meds',   t:'Prescribed medication for a chronic condition'},
+        {v:'joint',  t:'A bone or joint problem that could worsen'},
+        {v:'super',  t:'Told to exercise only under supervision'},
+        {v:'preg',   t:'Pregnant or recently postpartum'}]},
+{ ch:7, type:'body', key:'pain', eyebrow:'Almost done',
+  h:'Anything hurting right now?', sub:'Tap where. I\'ll ask for detail only on the day it matters.' },
+
+/* 8 · YOUR LOG */
+{ ch:8, type:'loader' },
+{ ch:8, type:'reveal' },
+{ ch:8, type:'patternscreen' },
+{ ch:8, type:'building' },
+{ ch:8, type:'single', key:'checkin', eyebrow:'One last thing',
+  h:'Pick the day we talk.', sub:'Sixty seconds a week. Every check-in becomes another entry.',
+  opts:[{v:'sun',ic:'sunrise',t:'Sunday evening',s:'Before the week starts'},
+        {v:'mon',ic:'bolt',   t:'Monday morning'},
+        {v:'fri',ic:'moon',   t:'Friday afternoon'},
+        {v:'wed',ic:'balance',t:'Wednesday'}]},
+{ ch:8, type:'entry' }
+];
+
+/* ---------------- insight engine ---------------- */
+function insight1(){
+  const h=A.horizon||[], f=A.focus, age=A.age||38;
+  const first = H_LABEL[h[0]]||'staying capable';
+  let head, body;
+  if(f==='lean' && (h.includes('heavy')||h.includes('sport'))){
+    head='Those two pull against each other.';
+    body='Leaning out and getting strong compete for the same recovery. Most apps ignore that. We build strength first and let leanness follow — that order works, the other one doesn\'t.';
+  } else if(h.includes('floor') && age>=50){
+    head='You picked the one that actually predicts things.';
+    body='Getting off the floor unaided is one of the better predictors of independent old age — and it stays trainable at any age.';
+  } else if(h.includes('strongold')||(h.includes('heavy')&&age<35)){
+    head='You\'re thinking about this earlier than most.';
+    body='Muscle and bone built now is the account you draw down from later. Almost nobody makes that deposit on purpose.';
+  } else if(f==='energy'||f==='wind'){
+    head='Those two are usually the same problem.';
+    body='Tired and out of breath almost always trace back to an aerobic base nobody built. Least glamorous fix in fitness, and the fastest.';
+  } else {
+    head='Good. That\'s specific enough to build on.';
+    body='Most people answer this with a number on a scale. You gave me something testable — so I can tell whether this is working.';
+  }
+  return {tag:'Entry 001 · first thing I\'ve learned', num:null,
+    lines:[head, body, '<b>'+first[0].toUpperCase()+first.slice(1)+'</b> is now what every exercise has to earn its place against.']};
+}
+function insight2(){
+  const cap=A.capability||[];
+  if(A.healthConnected) return {tag:'What your data says', num:'6,412', numcap:'steps a day, last 30 days',
+    lines:['That\'s your baseline, not a judgement — and the most useful number you\'ve given me.',
+      'I can also see <b>no logged strength work in 90 days</b>. That\'s the gap.',
+      'Your first four weeks will feel almost too easy. On purpose.']};
+  const n=cap.filter(c=>c!=='none').length;
+  if(n===0) return {tag:'Noted', num:'0', numcap:'of six — and that\'s fine',
+    lines:['You told the truth on a question most people fudge. That matters more than the answer.',
+      'Everything is a starting point. The first eight weeks will move faster than any eight weeks ahead of you.']};
+  if(cap.includes('hang')&&cap.includes('bwsquat')&&!cap.includes('squat'))
+    return {tag:'Interesting', num:n+'', numcap:'of six',
+      lines:['A dead hang plus a bodyweight squat puts you ahead of most people who call themselves fit.',
+        'But not <b>deep squat, heels flat</b>. Strong and stiff is a real profile — and the one that gets injured. Ankle first.']};
+  return {tag:'Calibrated', num:n+'', numcap:'of six',
+    lines:['That gives me a starting load I\'d otherwise guess at for two weeks.',
+      'The gaps aren\'t weaknesses. They\'re your first four weeks, already written.']};
+}
+function pattern(){
+  const b=A.blockers||[], c=A.confidence||6, w=A.why;
+  if(b.includes('toohard')||b.includes('week3'))
+    return {n:'The Fast Starter', b:'You don\'t have a motivation problem — you have a pacing problem. You go too hard in week one and week three collects the bill. Your first fortnight will feel conservative. If you think "is this it?", that\'s the plan working.'};
+  if(b.includes('life')||b.includes('time'))
+    return {n:'First Thing Dropped', b:'Training sits at the bottom of your list, so it goes first when the list gets long. The fix isn\'t discipline — it\'s making the session small enough that dropping it stops being a decision.'};
+  if(b.includes('lost'))
+    return {n:'Needs to See the Map', b:'You stopped because you couldn\'t tell if it was working. You\'ll get the reason for every session before it, and a measure of whether it worked after. No black boxes.'};
+  if(c<=4)
+    return {n:'Cautious, and Correct to Be', b:'You\'ve been let down by a plan before, so you\'re not spending belief you don\'t have. Good. The first four weeks are built to be almost impossible to fail — you need evidence more than intensity.'};
+  if(w==='external')
+    return {n:'Deadline-Driven', b:'Something is pulling you forward, which works right up until the day it passes. Over ninety days my job is to build a reason that outlives the date. Watch for it around week six.'};
+  return {n:'Quietly Consistent', b:'Nothing here suggests drama. You\'re building a habit, not chasing a transformation — and that profile outperforms almost everyone over two years. Your risk isn\'t quitting, it\'s plateauing politely.'};
+}
+/* ---------------- RENDER ---------------- */
+const stage=document.getElementById('stage'), foot=document.getElementById('foot'),
+      bars=document.getElementById('bars'), chapname=document.getElementById('chapname'),
+      backBtn=document.getElementById('back'), toastEl=document.getElementById('toast');
+CHAPTERS.forEach(()=>{const d=document.createElement('div');d.className='bar';d.innerHTML='<i></i>';bars.appendChild(d);});
+let autoT=null;
+
+function progress(){
+  const cur=FLOW[i].ch, els=bars.querySelectorAll('.bar i');
+  CHAPTERS.forEach((_,c)=>{
+    if(c<cur) els[c].style.width='100%';
+    else if(c===cur){ const inCh=FLOW.filter(s=>s.ch===c), pos=inCh.indexOf(FLOW[i]);
+      els[c].style.width=Math.max(24,(pos/inCh.length)*100+24)+'%'; }
+    else els[c].style.width='0%';
+  });
+  chapname.textContent = cur===0?'':CHAPTERS[cur];
+  backBtn.classList.toggle('on', hist.length>0 && !['loader','entry','chapter'].includes(FLOW[i].type));
+}
+function toast(m,ms){toastEl.innerHTML=m;toastEl.classList.add('on');setTimeout(()=>toastEl.classList.remove('on'),ms||3400);}
+
+function go(n,back){
+  if(autoT){clearTimeout(autoT);autoT=null;}
+  const old=stage.querySelector('.screen');
+  if(old){old.classList.add('exit');setTimeout(()=>old.remove(),260);}
+  if(!back && FLOW[i] && n!==i) hist.push(i);
+  i=n;
+  while(FLOW[i] && ((FLOW[i].onlyIfSkipped && A.healthConnected) ||
+                    (FLOW[i].onlyIfNumbers && A.knownumbers!=='yes'))) i++;
+  foot.innerHTML=''; foot.classList.remove('on');
+  setTimeout(()=>{render();progress();}, back?0:60);
+}
+const next=()=>go(i+1);
+backBtn.onclick=()=>{ if(hist.length) go(hist.pop(),true); };
+function el(h){const d=document.createElement('div');d.className='screen enter';d.innerHTML=h;stage.appendChild(d);return d;}
+function setFoot(h){foot.innerHTML=h;requestAnimationFrame(()=>foot.classList.add('on'));}
+
+function render(){const s=FLOW[i];if(!s)return;
+  ({hero,chapter,text,single,multi,slider,body,permission,insight,numbers,feelings,
+    loader,reveal,patternscreen,building,entry}[s.type])(s);}
+
+/* hero */
+function hero(s){
+  let g=''; if(s.greet){const h=new Date().getHours(); g=h<12?'Good morning.':h<18?'Good afternoon.':'Good evening.';}
+  el(`<div class="hero"><div class="orb"></div>${g?`<div class="eyebrow">${g}</div>`:''}
+    <h1>${s.h}</h1>${s.p.map(t=>`<p>${t}</p>`).join('')}
+    <div class="badges">${s.badges.map(b=>`<span class="badge">${b}</span>`).join('')}</div></div>`);
+  setFoot(`<button class="cta accent">${s.cta}</button>`);
+  foot.querySelector('.cta').onclick=()=>{haptic(18);next();};
+}
+
+/* chapter — auto-advances, costs zero taps */
+function chapter(s){
+  const d=el(`<div class="chapwrap">
+    <div class="chapnum">Part ${s.n} of 8</div>
+    <h1 class="chaptitle serif">${s.title}</h1>
+    <p class="chapsub">${s.sub}</p>
+    <div class="chapdots">${CHAPTERS.slice(1).map((c,k)=>
+      `<span class="cd${k+1<s.n?' done':''}${k+1===s.n?' now':''}"></span>`).join('')}</div>
+    <div class="chaptime"><i></i></div>
+    <div class="chapskip">Starting…</div></div>`);
+  haptic(400);
+  autoT=setTimeout(next,1500);
+  d.onclick=()=>{ if(autoT){clearTimeout(autoT);autoT=null;next();} };
+}
+
+/* text */
+function text(s){
+  const d=el(`<div class="eyebrow">${s.eyebrow}</div><h1 class="q">${s.h}</h1>
+    <p class="sub">${s.sub}</p><input class="tin" id="tin" type="text" placeholder="${s.placeholder}">`);
+  const inp=d.querySelector('#tin');
+  setFoot(`<button class="cta accent">${s.cta}</button>`);
+  const cta=foot.querySelector('.cta');
+  setTimeout(()=>{try{inp.focus()}catch(e){}},380);
+  cta.onclick=()=>{haptic(14); A[s.key]=inp.value.trim()||'friend'; inp.blur();
+    if(inp.value.trim()) toast('Good to meet you, '+A[s.key]+'.',2000);
+    setTimeout(next,600);};
+  inp.onkeydown=e=>{if(e.key==='Enter')cta.click();};
+}
+
+/* numbers */
+function numbers(s){
+  const d=el(`<div class="eyebrow">${s.eyebrow}</div><h1 class="q">${s.h}</h1><p class="sub">${s.sub}</p>
+    ${s.fields.map(f=>`<div class="nrow"><label>${f[0]}</label>
+      <input class="tin sm" data-l="${f[0]}" type="text" inputmode="numeric" placeholder="${f[1]}"></div>`).join('')}`);
+  setFoot(`<button class="cta accent">${s.cta}</button><button class="skip">${s.skip}</button>`);
+  foot.querySelector('.cta').onclick=()=>{haptic(400);
+    const o={}; d.querySelectorAll('.tin').forEach(x=>{if(x.value.trim())o[x.dataset.l]=x.value.trim();});
+    A[s.key]=o; toast(Object.keys(o).length?'Saved to your Log.':'No problem — session one will find them.',2400);
+    setTimeout(next,700);};
+  foot.querySelector('.skip').onclick=()=>{haptic(14);A[s.key]=null;A.calibrate=true;next();};
+}
+
+/* single — auto-advance */
+function single(s){
+  const d=el(`<div class="eyebrow">${s.eyebrow||''}</div><h1 class="q">${s.h}</h1>
+    ${s.sub?`<p class="sub">${s.sub}</p>`:''}
+    <div class="opts">${s.opts.map(o=>`<button class="opt" data-v="${o.v}">
+      ${o.ic?ico(o.ic):''}<span class="tx"><b>${o.t}</b>${o.s?`<small>${o.s}</small>`:''}</span></button>`).join('')}</div>`);
+  d.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{haptic(14);
+    d.querySelectorAll('.opt').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); A[s.key]=b.dataset.v; empathy(s.key,b.dataset.v); setTimeout(next,360);});
+}
+
+/* multi — CTA is never dead */
+function multi(s){
+  let opts=s.opts, head=s.h;
+  if(s.dynamic==='horizon'){const a=A.age||38; opts=HORIZONS[horizonBand(a)];
+    head='At '+horizonAge(a)+', what do you want to still be able to do?';}
+  const d=el(`<div class="eyebrow">${s.eyebrow||''}</div><h1 class="q">${head}</h1>
+    ${s.sub?`<p class="sub">${s.sub}</p>`:''}
+    <div class="opts">${opts.map(o=>`<button class="opt${o.none?' none':''}" data-v="${o.v}" data-none="${!!o.none}">
+      ${o.ic?ico(o.ic):'<span class="ico"></span>'}<span class="tx"><b>${o.t}</b>${o.s?`<small>${o.s}</small>`:''}</span>
+      <span class="tick"></span></button>`).join('')}</div>`);
+  const sel=new Set();
+  setFoot(`<button class="cta ghost">Skip for now</button>`);
+  const cta=foot.querySelector('.cta');
+  const sync=()=>{ const n=sel.size;
+    cta.classList.toggle('accent', n>0); cta.classList.toggle('ghost', n===0);
+    cta.textContent = n? s.cta+' · '+n : (s.skipLabel||'Skip for now'); };
+  d.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+    const v=b.dataset.v, isNone=b.dataset.none==='true'; haptic(14);
+    if(isNone){sel.clear();d.querySelectorAll('.opt').forEach(x=>x.classList.remove('on'));sel.add(v);b.classList.add('on');
+      sync(); setTimeout(next,420); return;}
+    d.querySelectorAll('.opt[data-none="true"]').forEach(x=>{x.classList.remove('on');sel.delete(x.dataset.v);});
+    if(sel.has(v)){sel.delete(v);b.classList.remove('on');}
+    else{ if(s.max&&sel.size>=s.max){toast('Three is the limit — it forces a real choice.',2200);return;}
+      sel.add(v);b.classList.add('on'); }
+    sync();
+  });
+  cta.onclick=()=>{haptic(14);A[s.key]=[...sel];next();};
+  sync();
+}
+
+/* feelings — merges "what you love" and "what you'd never do" into one screen */
+function feelings(s){
+  const YES='M4 12l5 5L20 6', NO='M7 7l10 10M17 7L7 17';
+  const svg=d=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">'+
+    d.split('M').filter(Boolean).map(p=>'<path d="M'+p+'"/>').join('')+'</svg>';
+  const d=el(`<div class="eyebrow">${s.eyebrow}</div><h1 class="q">${s.h}</h1><p class="sub tight">${s.sub}</p>
+    <div class="flegend"><span>love it</span><span>never</span></div>
+    ${s.items.map(it=>`<div class="frow" data-k="${it[0]}">
+      <span class="fname">${it[1]}</span>
+      <button class="fbtn love" data-m="love">${svg(YES)}</button>
+      <button class="fbtn never" data-m="never">${svg(NO)}</button></div>`).join('')}`);
+  const state={};
+  d.querySelectorAll('.frow').forEach(row=>{
+    row.querySelectorAll('.fbtn').forEach(btn=>btn.onclick=()=>{
+      haptic(12); const k=row.dataset.k, m=btn.dataset.m;
+      if(state[k]===m){delete state[k]; btn.classList.remove('on');}
+      else{ state[k]=m; row.querySelectorAll('.fbtn').forEach(x=>x.classList.remove('on')); btn.classList.add('on'); }
+      sync();
+    });
+  });
+  setFoot(`<button class="cta ghost">Skip for now</button>`);
+  const cta=foot.querySelector('.cta');
+  const sync=()=>{const n=Object.keys(state).length;
+    cta.classList.toggle('accent',n>0); cta.classList.toggle('ghost',n===0);
+    cta.textContent=n?s.cta+' · '+n:'Skip for now';};
+  cta.onclick=()=>{haptic(14);A[s.key]=state;next();};
+  sync();
+}
+
+/* slider */
+function slider(s){
+  const cap=n=>s.dyncap?s.dyncap(n):s.caps[n];
+  const d=el(`<div class="eyebrow">${s.eyebrow||''}</div><h1 class="q">${s.h}</h1>
+    ${s.sub?`<p class="sub tight">${s.sub}</p>`:''}
+    <div class="slwrap"><div class="slval" id="sv">${s.def}${s.unit?`<span class="slu"> ${s.unit}</span>`:''}</div>
+      <input type="range" min="${s.min}" max="${s.max}" value="${s.def}" step="1" id="sr">
+      <div class="slends"><span>${s.min}</span><span>${s.max}</span></div>
+      <div class="slcap" id="sc">${cap(s.def)}</div></div>`);
+  const r=d.querySelector('#sr'),v=d.querySelector('#sv'),c=d.querySelector('#sc');let last=s.def;
+  r.oninput=()=>{const n=+r.value; v.innerHTML=n+(s.unit?`<span class="slu"> ${s.unit}</span>`:'');
+    if(n!==last){haptic(8);last=n;c.style.opacity=0;setTimeout(()=>{c.textContent=cap(n);c.style.opacity=1;},110);}};
+  setFoot(`<button class="cta accent">${s.cta}</button>`);
+  foot.querySelector('.cta').onclick=()=>{haptic(14);A[s.key]=+r.value;next();};
+}
+
+/* body map — hit areas enlarged to 44pt minimum */
+function body(s){
+  const P=[['neck','Neck',94,42,24,16],['shoulderL','Left shoulder',44,58,24,26],['shoulderR','Right shoulder',144,58,24,26],
+    ['upper','Upper back or chest',78,66,56,38],['lowback','Lower back',78,106,56,32],
+    ['elbowL','Left elbow or wrist',44,92,24,34],['elbowR','Right elbow or wrist',144,92,24,34],
+    ['hip','Hip or groin',78,140,56,28],['kneeL','Left knee',79,220,26,28],['kneeR','Right knee',107,220,26,28],
+    ['ankleL','Left ankle or foot',79,274,26,28],['ankleR','Right ankle or foot',107,274,26,28]];
+  const d=el(`<div class="eyebrow">${s.eyebrow}</div><h1 class="q">${s.h}</h1><p class="sub tight">${s.sub}</p>
+    <div class="bodywrap"><svg class="body" viewBox="0 0 212 316">
+      <circle cx="106" cy="24" r="18" fill="#EDEFEE"/>
+      <rect x="74" y="58" width="64" height="84" rx="16" fill="#EDEFEE"/>
+      <rect x="76" y="138" width="60" height="30" rx="12" fill="#EDEFEE"/>
+      <rect x="44" y="58" width="24" height="76" rx="12" fill="#EDEFEE"/>
+      <rect x="144" y="58" width="24" height="76" rx="12" fill="#EDEFEE"/>
+      <rect x="78" y="164" width="27" height="140" rx="13" fill="#EDEFEE"/>
+      <rect x="107" y="164" width="27" height="140" rx="13" fill="#EDEFEE"/>
+      ${P.map(p=>`<rect class="part" data-k="${p[0]}" x="${p[2]}" y="${p[3]}" width="${p[4]}" height="${p[5]}" rx="8"/>`).join('')}
+      ${P.map(p=>{const w=Math.max(46,p[4]),h=Math.max(46,p[5]);
+        return `<rect class="hit" data-k="${p[0]}" x="${p[2]-(w-p[4])/2}" y="${p[3]-(h-p[5])/2}" width="${w}" height="${h}" fill="transparent"/>`;}).join('')}
+    </svg></div>
+    <p class="micro" style="text-align:center">Front or back — I'll ask which only if it matters.</p>
+    <div class="chips" id="chips"></div>`);
+  const sel=new Set(),chips=d.querySelector('#chips');
+  const sync=()=>{chips.innerHTML=[...sel].map(k=>`<span class="chip">${P.find(p=>p[0]===k)[1]}</span>`).join('');
+    cta.textContent=sel.size?'Continue · '+sel.size:'Nothing hurts';};
+  d.querySelectorAll('.hit').forEach(hit=>hit.onclick=()=>{haptic(14);const k=hit.dataset.k;
+    const vis=d.querySelector('.part[data-k="'+k+'"]');
+    if(sel.has(k)){sel.delete(k);vis.classList.remove('on');}else{sel.add(k);vis.classList.add('on');}sync();});
+  setFoot(`<button class="cta accent">Nothing hurts</button>`);
+  const cta=foot.querySelector('.cta');
+  cta.onclick=()=>{haptic(14);A.pain=[...sel];
+    if(sel.size)toast('Logged. I won\'t ask you to describe it now.',2600);
+    setTimeout(next,sel.size?800:0);};
+  sync();
+}
+
+/* health permission */
+function permission(s){
+  el(`<div class="eyebrow">${s.eyebrow}</div><h1 class="q">${s.h}</h1><p class="sub">${s.sub}</p>
+    <div class="opts" style="pointer-events:none">
+      ${[['run','Steps & daily movement'],['bed','Sleep duration'],['heart','Resting heart rate & HRV'],
+         ['chart','Workout history'],['balance','Weight, if you track it']]
+        .map(x=>`<div class="opt" style="box-shadow:none">${ico(x[0])}<span class="tx"><b style="font-weight:500;font-size:14.5px">${x[1]}</b></span></div>`).join('')}
+    </div>
+    <p class="micro" style="margin-top:14px">Disconnect any time. I never write to Health, and never use it for anything but coaching you.</p>`);
+  setFoot(`<button class="cta accent">${s.cta}</button><button class="skip">${s.skip}</button>`);
+  foot.querySelector('.cta').onclick=()=>{haptic(400);A.healthConnected=true;
+    toast('Connected. That saved you nine questions.',2400);setTimeout(next,650);};
+  foot.querySelector('.skip').onclick=()=>{haptic(14);A.healthConnected=false;next();};
+}
+
+/* insight */
+function insight(s){
+  const data=s.id==='ins1'?insight1():insight2();
+  const d=el(`<div class="insight"><div class="ins-tag"><i></i>${data.tag}</div>
+    ${data.num?`<div class="ins-num">${data.num}</div><div class="ins-line s" style="margin-bottom:20px">${data.numcap}</div>`:''}
+    ${data.lines.map((l,k)=>`<div class="ins-line${k>0?' s':''}">${l}</div>`).join('')}</div>`);
+  const items=[...d.querySelectorAll('.ins-num,.ins-line')];
+  items.forEach((n,k)=>setTimeout(()=>n.classList.add('fadein'),150+k*360));
+  setTimeout(()=>{setFoot(`<button class="cta accent">Keep going</button>`);
+    foot.querySelector('.cta').onclick=()=>{haptic(14);next();};},150+items.length*360);
+}
+
+/* loader */
+function loader(){
+  const steps=A.healthConnected?[
+    'Reading 312 days of your activity…',
+    'Mapping 6,412 steps a day to a starting volume…',
+    'Balancing "'+(FOCUS_LABEL[A.focus]||'your goal')+'" against '+(A.days||3)+' days…',
+    'Locking movements you haven\'t earned the right to load…']
+    :['Turning '+((A.capability||[]).filter(c=>c!=='none').length)+' markers into a starting load…',
+    'Balancing "'+(FOCUS_LABEL[A.focus]||'your goal')+'" against '+(A.days||3)+' days…',
+    'Checking '+((A.blockers||[]).length)+' things that stopped you before…',
+    'Locking movements you haven\'t earned the right to load…'];
+  const d=el(`<div class="load"><div class="ring"></div>
+    <h1 class="q" style="margin-bottom:24px">Reading everything you told me${A.name?', '+A.name:''}.</h1>
+    ${steps.map(t=>`<div class="lline"><span class="dot"></span><span>${t}</span></div>`).join('')}</div>`);
+  const L=[...d.querySelectorAll('.lline')];let k=0;
+  const tick=()=>{ if(k>0)L[k-1].classList.add('done');
+    if(k<L.length){L[k].classList.add('on');k++;setTimeout(tick,1500);}
+    else setTimeout(()=>{
+      d.innerHTML=`<div class="load"><div class="eyebrow">One decision left</div>
+        <h1 class="q">And it's yours.</h1><p class="sub">It changes how I write every session for four weeks.</p>
+        <div class="opts">
+          <button class="opt" data-v="push">${ico('flame')}<span class="tx"><b>Push me</b><small>Finish knowing I worked</small></span></button>
+          <button class="opt" data-v="protect">${ico('shield')}<span class="tx"><b>Protect me</b><small>Finish knowing I'll come back</small></span></button>
+        </div></div>`;
+      d.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{haptic(400);A.intensity=b.dataset.v;
+        b.classList.add('on');setTimeout(next,400);});
+    },800); };
+  setTimeout(tick,400);
+}
+
+/* reveal — the prediction only */
+function reveal(){
+  const days=A.days||3;
+  const map={1:[0,0,1,0,0,0,0],2:[1,0,0,0,1,0,0],3:[1,0,1,0,0,1,0],4:[1,1,0,1,0,1,0],5:[1,1,0,1,1,1,0],6:[1,1,1,1,1,1,0]}[days];
+  const nm=['M','T','W','T','F','S','S'];
+  const t={early:'6:15am',lunch:'12:30pm',after:'5:45pm',evening:'8:30pm',flex:'when you can'}[A.when]||'5:45pm';
+  const len=({'20':'22','35':'35','55':'50','75':'60'})[A.length]||'35';
+  el(`<div class="eyebrow">Your next seven days</div>
+    <h1 class="q big">Not a plan.<br>A prediction.</h1>
+    <p class="sub">Check me on it. If I'm wrong, that's information I want.</p>
+    <div class="week">${nm.map((n,k)=>`<div class="day${map[k]?' train':''}"><div class="d">${n}</div><div class="m">${map[k]?'●':'·'}</div></div>`).join('')}</div>
+    <div class="pred"><span class="pd">Mon</span><span class="pt">Session one, <b>${t}</b>, ${len} min. You'll finish thinking it was too easy. <b>That's the plan.</b></span></div>
+    <div class="pred"><span class="pd">Tue</span><span class="pt">Legs sore in a way that surprises you. Peaks tomorrow, then goes.</span></div>
+    <div class="pred"><span class="pd">Thu</span><span class="pt">Session two feels easier. That's your nervous system, not fitness. Fitness starts week three.</span></div>
+    <div class="pred"><span class="pd">Sun</span><span class="pt">The one that matters. <b>You'll want to skip it.</b> Do it anyway and your odds of being here in six months roughly double.</span></div>`);
+  setFoot(`<button class="cta accent">Go on</button>`);
+  foot.querySelector('.cta').onclick=()=>{haptic(400);next();};
+}
+
+/* pattern + roadmap — split off the reveal */
+function patternscreen(){
+  const p=pattern();
+  const gate=(A.patterns||[]).includes('squat')?'':
+    `<div class="pred"><span class="pd">Note</span><span class="pt">You haven't trained a <b>squat pattern</b> regularly, so I'm not loading one yet. You'll earn it — unassisted, then eccentric, then loaded.</span></div>`;
+  el(`<div class="eyebrow">What I already think I know</div>
+    <div class="patcard"><div class="pl">Your pattern</div><div class="pn">${p.n}</div><div class="pb">${p.b}</div></div>
+    <button class="notme" id="notme">That's not me →</button>
+    ${gate}
+    <div class="later"><h4>And what I don't know yet.</h4>
+      <div class="li"><span>Day 3</span><span>Whether session one was the right load. One tap.</span></div>
+      <div class="li"><span>Week 2</span><span>What time you <em>really</em> train — from your logs.</span></div>
+      <div class="li"><span>Week 4</span><span>How much you recover from. Solved, never asked.</span></div>
+      <div class="li"><span>Month 2</span><span>Sleep, stress, food — once I've earned the right to ask.</span></div>
+      <div class="li"><span>Ongoing</span><span>Which exercises you quietly avoid.</span></div></div>`);
+  document.getElementById('notme').onclick=()=>{haptic(14);
+    toast('Good. Tell me what I got wrong and I rebuild it — the model changes, not just the label.',3600);};
+  setFoot(`<button class="cta accent">This is right</button>`);
+  foot.querySelector('.cta').onclick=()=>{haptic(400);next();};
+}
+
+/* building — the honest 24h handoff, with something to do today */
+function building(){
+  const d=new Date(); d.setDate(d.getDate()+1);
+  const when = d.toLocaleDateString('en-GB',{weekday:'long'})+' morning';
+  el(`<div class="eyebrow">What happens next</div>
+    <h1 class="q">Your program is being written.</h1>
+    <div class="eta">${ico('clock')} Ready ${when}</div>
+    <p class="sub">Not generated and forgotten. Built from your answers, then <b>read line by line by a human coach</b> before it reaches you. That's why it takes a day and not a second.</p>
+    <div class="byline"><div class="avatar">N</div>
+      <div><b>Nico</b>Reviews and adjusts every program before it ships</div></div>
+    <div class="todo"><h4>One thing before then</h4>
+      <p>A ten-minute movement baseline — five patterns, filmed on your phone. It's the difference between a program built for someone like you and one built for <em>you</em>.</p></div>
+    <p class="micro">You'll get a notification the moment it's ready. Nothing you've entered can be lost.</p>`);
+  setFoot(`<button class="cta accent">Do the baseline now</button><button class="skip">I'll do it tomorrow</button>`);
+  foot.querySelector('.cta').onclick=()=>{haptic(400);A.baseline='now';next();};
+  foot.querySelector('.skip').onclick=()=>{haptic(14);A.baseline='later';next();};
+}
+
+/* entry 001 */
+function entry(){
+  const dt=new Date(), ds=dt.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  const nPat=(A.patterns||[]).filter(p=>p!=='none').length;
+  el(`<div class="hero" style="justify-content:flex-start;padding-top:6px">
+    <div class="orb" style="width:50px;height:50px;margin-bottom:16px"></div>
+    <div class="eyebrow">${A.name?A.name+"'s Log":'Your Log'} &middot; Entry 001</div>
+    <h1 style="font-size:30px">It starts<br><em>here</em>.</h1>
+    <p style="font-size:15px">Everything you told me is now the first entry — dated, kept, yours to look back on.</p>
+    <div class="logcard">
+      <div class="lgrow"><span>Opened</span><b>${ds}</b></div>
+      <div class="lgrow"><span>Horizon</span><b>Age ${horizonAge(A.age||38)}</b></div>
+      <div class="lgrow"><span>Baseline</span><b>${((A.capability||[]).filter(c=>c!=='none').length)} of 6 markers</b></div>
+      <div class="lgrow"><span>Patterns trained</span><b>${nPat} of 6</b></div>
+      <div class="lgrow"><span>Movements to earn</span><b>${6-nPat}</b></div>
+      <div class="lgrow"><span>Check-in</span><b>${({sun:'Sundays',mon:'Mondays',fri:'Fridays',wed:'Wednesdays'})[A.checkin]||'Sundays'}</b></div>
+    </div>
+    <p class="micro">Nothing gets overwritten. When something changes it becomes a new entry with a new date — so a year from now you can scroll back and see exactly who you were today.</p></div>`);
+  setFoot(`<button class="cta accent">Open my Log</button>`);
+  foot.querySelector('.cta').onclick=()=>{haptic(400);toast('This is where the app opens. End of prototype.',4000);};
+}
+
+/* selective empathy */
+function empathy(k,v){
+  const m={'why:introjected':'That takes something to admit. It\'s the most common answer here — and the one I most want to change.',
+   'why:external':'Deadlines work. I\'ll use it, and quietly build something that outlasts it.',
+   'fallback:silence':'Understood. I\'ll hold that line even when I think you\'re wrong.',
+   'when:flex':'Honest. It\'s also the biggest predictor of missed sessions — so we fix it, not pretend.',
+   'knownumbers:no':'Good call. Numbers you measure beat numbers you remember.',
+   'sex:na':'No problem. I\'ll use general standards and say when a benchmark is approximate.'}[k+':'+v];
+  if(m) setTimeout(()=>toast(m,3400),400);
+}
+
+/* dev index */
+const idx=document.getElementById('idx');
+document.getElementById('dev').onclick=()=>{
+  if(!idx.innerHTML){let h='',last=-1;
+    FLOW.forEach((s,k)=>{ if(s.ch!==last){h+=`<h5>${CHAPTERS[s.ch]}</h5>`;last=s.ch;}
+      const l=s.title||(s.h?s.h.replace(/<[^>]+>/g,' ').slice(0,48):s.type);
+      h+=`<button data-k="${k}"><b>${String(k).padStart(2,'0')}</b>${l}</button>`;});
+    idx.innerHTML=h;
+    idx.querySelectorAll('button').forEach(b=>b.onclick=()=>{idx.classList.remove('on');go(+b.dataset.k);});}
+  idx.classList.toggle('on');
+};
+render();progress();
+</script>
+</body>
+</html>
