@@ -789,16 +789,33 @@ function progress(){
 }
 function toast(m,ms){toastEl.innerHTML=m;toastEl.classList.add('on');setTimeout(()=>toastEl.classList.remove('on'),ms||3400);}
 
+let busy=false, pending=[];
+/* Every deferred advance goes through later(), so a screen change can cancel
+   timers queued by the screen it replaces. */
+function later(fn,ms){const t=setTimeout(fn,ms);pending.push(t);return t;}
+function clearPending(){pending.forEach(clearTimeout);pending=[];}
+
 function go(n,back){
+  /* Re-entrancy guard. Two go() calls inside the 60ms render window both read
+     querySelector('.screen') before either new screen existed, so neither got
+     .exit and both stayed in the DOM. That is the screen-stacking bug. */
+  if(busy) return;
+  busy=true;
   if(autoT){clearTimeout(autoT);autoT=null;}
-  const old=stage.querySelector('.screen');
-  if(old){old.classList.add('exit');setTimeout(()=>old.remove(),260);}
+  clearPending();
+  const olds=[].slice.call(stage.querySelectorAll('.screen'));
+  olds.forEach(function(el){el.style.pointerEvents='none';el.classList.add('exit');});
+  setTimeout(function(){olds.forEach(function(el){el.remove();});},260);
   if(!back && FLOW[i] && n!==i) hist.push(i);
   i=n;
   while(FLOW[i] && ((FLOW[i].onlyIfSkipped && A.healthConnected) ||
                     (FLOW[i].onlyIfNumbers && A.knownumbers!=='yes'))) i++;
   foot.innerHTML=''; foot.classList.remove('on');
-  setTimeout(()=>{render();progress();}, back?0:60);
+  setTimeout(function(){
+    stage.querySelectorAll('.screen').forEach(function(el){el.remove();});
+    render(); progress();
+  }, back?0:60);
+  setTimeout(function(){busy=false;},320);
 }
 const next=()=>go(i+1);
 backBtn.onclick=()=>{ if(hist.length) go(hist.pop(),true); };
@@ -844,7 +861,7 @@ function text(s){
   setTimeout(()=>{try{inp.focus()}catch(e){}},380);
   cta.onclick=()=>{haptic(14); A[s.key]=inp.value.trim()||'friend'; inp.blur();
     if(inp.value.trim()) toast('Good to meet you, '+A[s.key]+'.',2000);
-    setTimeout(next,600);};
+    later(next,600);};
   inp.onkeydown=e=>{if(e.key==='Enter')cta.click();};
 }
 
@@ -857,7 +874,7 @@ function numbers(s){
   foot.querySelector('.cta').onclick=()=>{haptic(400);
     const o={}; d.querySelectorAll('.tin').forEach(x=>{if(x.value.trim())o[x.dataset.l]=x.value.trim();});
     A[s.key]=o; toast(Object.keys(o).length?'Saved to your Log.':'No problem — session one will find them.',2400);
-    setTimeout(next,700);};
+    later(next,700);};
   foot.querySelector('.skip').onclick=()=>{haptic(14);A[s.key]=null;A.calibrate=true;next();};
 }
 
@@ -869,7 +886,7 @@ function single(s){
       ${o.ic?ico(o.ic):''}<span class="tx"><b>${o.t}</b>${o.s?`<small>${o.s}</small>`:''}</span></button>`).join('')}</div>`);
   d.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{haptic(14);
     d.querySelectorAll('.opt').forEach(x=>x.classList.remove('on'));
-    b.classList.add('on'); A[s.key]=b.dataset.v; empathy(s.key,b.dataset.v); setTimeout(next,360);});
+    b.classList.add('on'); A[s.key]=b.dataset.v; empathy(s.key,b.dataset.v); later(next,360);});
 }
 
 /* multi — CTA is never dead */
@@ -891,7 +908,7 @@ function multi(s){
   d.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
     const v=b.dataset.v, isNone=b.dataset.none==='true'; haptic(14);
     if(isNone){sel.clear();d.querySelectorAll('.opt').forEach(x=>x.classList.remove('on'));sel.add(v);b.classList.add('on');
-      sync(); setTimeout(next,420); return;}
+      sync(); later(next,420); return;}
     d.querySelectorAll('.opt[data-none="true"]').forEach(x=>{x.classList.remove('on');sel.delete(x.dataset.v);});
     if(sel.has(v)){sel.delete(v);b.classList.remove('on');}
     else{ if(s.max&&sel.size>=s.max){toast('Three is the limit — it forces a real choice.',2200);return;}
@@ -994,7 +1011,7 @@ function permission(s){
     <p class="micro" style="margin-top:14px">Disconnect any time. I never write to Health, and never use it for anything but coaching you.</p>`);
   setFoot(`<button class="cta accent">${s.cta}</button><button class="skip">${s.skip}</button>`);
   foot.querySelector('.cta').onclick=()=>{haptic(400);A.healthConnected=true;
-    toast('Connected. That saved you nine questions.',2400);setTimeout(next,650);};
+    toast('Connected. That saved you nine questions.',2400);later(next,650);};
   foot.querySelector('.skip').onclick=()=>{haptic(14);A.healthConnected=false;next();};
 }
 
@@ -1035,7 +1052,7 @@ function loader(){
           <button class="opt" data-v="protect">${ico('shield')}<span class="tx"><b>Protect me</b><small>Finish knowing I'll come back</small></span></button>
         </div></div>`;
       d.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{haptic(400);A.intensity=b.dataset.v;
-        b.classList.add('on');setTimeout(next,400);});
+        b.classList.add('on');later(next,400);});
     },800); };
   setTimeout(tick,400);
 }
