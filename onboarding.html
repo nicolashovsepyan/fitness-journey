@@ -96,7 +96,7 @@ body{
 #stage{position:absolute;top:0;right:0;bottom:0;left:0;padding:74px 20px 0;overflow:hidden}
 .screen{position:absolute;top:calc(74px + env(safe-area-inset-top));left:20px;right:20px;bottom:0;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;
   -webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;
-  padding-bottom:calc(126px + env(safe-area-inset-bottom))}
+  padding-bottom:var(--footpad, 150px)}
 .screen::-webkit-scrollbar{display:none}
 .enter{animation:enter .46s cubic-bezier(.22,1,.36,1) both}
 .exit{animation:exit .26s ease-in both}
@@ -290,6 +290,10 @@ svg.body .part.on{fill:var(--accent)}
 .tin.sm{padding:15px 14px;font-size:15px;min-height:48px}
 .nrow{margin-bottom:12px}
 .nrow label{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin-bottom:6px}
+.npair{display:flex;align-items:center;gap:9px}
+.npair .tin{flex:1;text-align:center;-moz-appearance:textfield}
+.npair .tin::-webkit-outer-spin-button,.npair .tin::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.nx{color:var(--ink3);font-size:15px;flex:none}
 .slu{font-size:20px;font-weight:500;color:var(--ink3);letter-spacing:0}
 /* ---------- log card ---------- */
 .logcard{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:6px 16px;
@@ -598,7 +602,8 @@ const FLOW = [
         {v:'no', ic:'target',t:'No — find them in session one',s:'Honestly the better data'}]},
 { ch:4, type:'numbers', key:'lifts', onlyIfNumbers:true, eyebrow:'Best set, last 3 months',
   h:'Weight × reps.', sub:'Not a one-rep max. A hard set of five tells me more.',
-  fields:[['Squat','225 × 5'],['Press or bench','155 × 8'],['Deadlift or hinge','275 × 5'],['Row or pull-up','bodyweight × 6']],
+  fields:[['Squat','weight','reps'],['Press or bench','weight','reps'],
+          ['Deadlift or hinge','weight','reps'],['Row or pull-up','weight','reps']],
   cta:'Save to my Log', skip:'Skip — find them in session one' },
 { ch:4, type:'feelings', key:'feelings', eyebrow:'Adherence, not preference',
   h:'How do you feel about these?',
@@ -818,9 +823,29 @@ function go(n,back){
   setTimeout(function(){busy=false;},320);
 }
 const next=()=>go(i+1);
-backBtn.onclick=()=>{ if(hist.length) go(hist.pop(),true); };
+backBtn.onclick=function(){
+  /* Chapter cards auto-advance, so stepping back onto one threw you straight
+     forward again — back appeared dead. Skip them when going backwards. */
+  var t=null;
+  while(hist.length){ t=hist.pop(); if(!FLOW[t] || FLOW[t].type!=='chapter') break; t=null; }
+  if(t!==null) go(t,true);
+};
 function el(h){const d=document.createElement('div');d.className='screen enter';d.innerHTML=h;stage.appendChild(d);return d;}
-function setFoot(h){foot.innerHTML=h;requestAnimationFrame(()=>foot.classList.add('on'));}
+function setFoot(h){
+  foot.innerHTML=h;
+  requestAnimationFrame(function(){
+    foot.classList.add('on');
+    syncFootPad();
+  });
+}
+/* the button bar is taller when it carries a skip link — measure it rather
+   than guess, or the last option on a long screen sits under it unreachable */
+function syncFootPad(){
+  requestAnimationFrame(function(){
+    var h = foot.offsetHeight || 0;
+    document.documentElement.style.setProperty('--footpad', (h + 28) + 'px');
+  });
+}
 
 function render(){const s=FLOW[i];if(!s)return;
   ({hero,chapter,text,single,multi,slider,body,permission,insight,numbers,feelings,
@@ -869,10 +894,20 @@ function text(s){
 function numbers(s){
   const d=el(`<div class="eyebrow">${s.eyebrow}</div><h1 class="q">${s.h}</h1><p class="sub">${s.sub}</p>
     ${s.fields.map(f=>`<div class="nrow"><label>${f[0]}</label>
-      <input class="tin sm" data-l="${f[0]}" type="text" inputmode="numeric" placeholder="${f[1]}"></div>`).join('')}`);
+      <div class="npair">
+        <input class="tin sm" data-l="${f[0]}" data-p="w" type="number" inputmode="numeric" placeholder="${f[1]}">
+        <span class="nx">&times;</span>
+        <input class="tin sm" data-l="${f[0]}" data-p="r" type="number" inputmode="numeric" placeholder="${f[2]}">
+      </div></div>`).join('')}`);
   setFoot(`<button class="cta accent">${s.cta}</button><button class="skip">${s.skip}</button>`);
   foot.querySelector('.cta').onclick=()=>{haptic(400);
-    const o={}; d.querySelectorAll('.tin').forEach(x=>{if(x.value.trim())o[x.dataset.l]=x.value.trim();});
+    const o={};
+    d.querySelectorAll('.nrow').forEach(function(row){
+      const w=row.querySelector('[data-p="w"]').value.trim();
+      const r=row.querySelector('[data-p="r"]').value.trim();
+      const name=row.querySelector('[data-p="w"]').dataset.l;
+      if(w||r) o[name]=(w||'?')+' x '+(r||'?');
+    });
     A[s.key]=o; toast(Object.keys(o).length?'Saved to your Log.':'No problem — session one will find them.',2400);
     later(next,700);};
   foot.querySelector('.skip').onclick=()=>{haptic(14);A[s.key]=null;A.calibrate=true;next();};
