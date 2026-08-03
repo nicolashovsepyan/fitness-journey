@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#171A1E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Fitness Journey — screen preview</title>
+<style>
+:root{--bg:#171A1E;--bg2:#1E232A;--card:#212630;--line:#2F3640;--line2:#3B434E;
+ --ink:#ECEFF3;--ink2:#A9B2BC;--ink3:#858E99;--accent:#3ECBA8;--accent-soft:rgba(62,203,168,.13);
+ --red:#F0857A;--shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.28);}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+button{touch-action:manipulation}
+html{height:100%}
+body{height:100%;background:#0B0D0F;color:var(--ink);overflow:hidden;
+ font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Segoe UI",Roboto,sans-serif;
+ display:flex;align-items:center;justify-content:center;-webkit-user-select:none;user-select:none}
+.serif{font-family:"New York","Iowan Old Style",ui-serif,Georgia,serif;font-weight:400}
+#device{width:min(100vw,402px);height:min(874px,calc(100vh - 36px));background:var(--bg);
+ position:relative;overflow:hidden;border-radius:44px;box-shadow:0 0 0 10px #05070A,0 30px 80px rgba(0,0,0,.6)}
+@media (pointer:coarse),(max-width:560px){body{align-items:stretch;background:var(--bg)}
+ #device{width:100%;height:100vh;height:100dvh;max-height:none;border-radius:0;box-shadow:none}}
+#tag{position:absolute;top:calc(10px + env(safe-area-inset-top));left:0;right:0;text-align:center;
+ font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:#5B646E;z-index:30}
+#stage{position:absolute;top:0;right:0;bottom:0;left:0;padding:52px 20px 0;overflow:hidden}
+.screen{position:absolute;top:calc(52px + env(safe-area-inset-top));left:20px;right:20px;bottom:0;
+ display:flex;flex-direction:column;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;
+ padding-bottom:150px;animation:enter .4s cubic-bezier(.22,1,.36,1) both}
+.screen::-webkit-scrollbar{display:none}
+@keyframes enter{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:650;margin-bottom:12px}
+h1.q{font-size:26px;line-height:1.2;letter-spacing:-.022em;font-weight:600;margin-bottom:8px}
+.sub{font-size:14.5px;line-height:1.5;color:var(--ink2);margin-bottom:20px}
+.ctr{text-align:center}
+.opts{display:flex;flex-direction:column;gap:9px}
+.opt{background:var(--card);border:1.5px solid var(--line);border-radius:15px;padding:14px 16px;
+ display:flex;align-items:center;gap:12px;cursor:pointer;box-shadow:var(--shadow);width:100%;text-align:left;
+ min-height:56px;font-family:inherit;transition:all .15s}
+.opt:active{transform:scale(.975)}
+.opt.on{border-color:var(--accent);background:var(--accent-soft)}
+.opt b{font-size:15.5px;font-weight:550;color:var(--ink);display:block}
+.opt small{font-size:12.5px;color:var(--ink3);display:block;margin-top:2px}
+.ico{width:26px;height:26px;color:var(--accent);flex:none;opacity:.9}
+.ico svg{width:23px;height:23px}
+/* bands */
+.brow{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 13px;
+ margin-bottom:9px;box-shadow:var(--shadow)}
+.bname{font-size:14.5px;font-weight:600;margin-bottom:2px}
+.bhint{font-size:11.5px;color:var(--ink3);margin-bottom:9px}
+.bands{display:flex;gap:6px}
+.band{flex:1;min-height:44px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg2);
+ color:var(--ink2);font-size:12.5px;font-family:inherit;cursor:pointer;display:flex;align-items:center;
+ justify-content:center;transition:all .15s;padding:0 2px}
+.band.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:650}
+/* hero */
+.hero{flex:1;display:flex;flex-direction:column;justify-content:center;text-align:center}
+.logo{width:74%;max-width:280px;margin:0 auto 34px;display:block}
+.hero h1{font-size:33px;line-height:1.14;letter-spacing:-.028em;font-weight:600;margin-bottom:18px}
+.hero h1 em{font-style:italic;font-family:"New York",ui-serif,Georgia,serif;font-weight:400}
+.hero p{font-size:15.5px;line-height:1.55;color:var(--ink2);margin-bottom:10px}
+.badges{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-top:24px}
+.badge{font-size:11.5px;color:var(--ink2);background:var(--card);border:1px solid var(--line);padding:7px 12px;border-radius:99px}
+/* profile completeness */
+.pcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow);margin-bottom:14px}
+.pct{font-size:44px;font-weight:600;letter-spacing:-.03em;color:var(--accent);line-height:1}
+.pbar{height:7px;background:var(--bg2);border-radius:99px;overflow:hidden;margin:14px 0 12px}
+.pbar i{display:block;height:100%;width:76%;background:var(--accent);border-radius:99px}
+.plist{font-size:13px;color:var(--ink2);line-height:1.9}
+.plist s{color:var(--ink3);opacity:.7}
+/* footer */
+#foot{position:absolute;left:0;right:0;bottom:0;padding:14px 20px calc(20px + env(safe-area-inset-bottom));
+ background:linear-gradient(rgba(23,26,30,0),var(--bg) 34%);z-index:20}
+.cta{width:100%;background:var(--accent);color:#0C1512;border:none;border-radius:16px;padding:17px;
+ font-size:16px;font-weight:600;font-family:inherit;cursor:pointer}
+.cta:active{transform:scale(.98)}
+.nav{display:flex;gap:8px;margin-top:10px}
+.nav button{flex:1;background:transparent;border:1px solid var(--line2);color:var(--ink3);
+ border-radius:12px;padding:12px;font-family:inherit;font-size:13px;cursor:pointer;min-height:46px}
+.note{background:var(--bg2);border-left:2px solid var(--accent);padding:11px 14px;border-radius:0 8px 8px 0;
+ font-size:12.5px;color:var(--ink2);line-height:1.5;margin-top:16px}
+</style>
+</head>
+<body>
+<div id="device">
+  <div id="tag">Preview &middot; <span id="pos"></span></div>
+  <div id="stage"></div>
+  <div id="foot"></div>
+</div>
+<script>
+const ICONS={
+ watch:'M9 3h6v3M9 18v3h6v-3M12 8v4l3 2M12 4a8 8 0 100 16 8 8 0 100-16',
+ ring:'M12 4a8 8 0 100 16 8 8 0 100-16M12 8a4 4 0 100 8 4 4 0 100-8',
+ none:'M5 5l14 14M12 4a8 8 0 100 16 8 8 0 100-16',
+ moon:'M20 14a8 8 0 11-9-11 7 7 0 009 11z',
+ bolt:'M13 3L5 14h6l-1 7 8-11h-6z',
+ run:'M14 4a2 2 0 100 4 2 2 0 100-4M13 9l-4 3 2 4-2 4M13 9l4 2 1 4M9 12l-4 1',
+ heart:'M12 20s-7-4.5-7-9a4 4 0 017-2.5A4 4 0 0119 11c0 4.5-7 9-7 9z',
+ shrug:'M8 9h.01M16 9h.01M8 15c1.5 1 6.5 1 8 0',
+ stetho:'M6 3v6a4 4 0 008 0V3M10 17a3 3 0 106 0v-4M19 11a2 2 0 100 4 2 2 0 100-4',
+ child:'M9 7a2 2 0 104 0 2 2 0 10-4 0M11 9v5M8 12h6M9 19l2-5M13 19l-2-5',
+ cloud:'M7 18a4 4 0 010-8 5 5 0 019.5-1A3.5 3.5 0 0117 18z',
+ barbell:'M4 9v6M7 7v10M17 7v10M20 9v6M7 12h10',
+ calendar:'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4'};
+const ico=n=>{const d=ICONS[n];if(!d)return'<span class="ico"></span>';
+ return '<span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+
+ d.split('M').filter(Boolean).map(p=>'<path d="M'+p+'"/>').join('')+'</svg></span>';};
+
+const BANDS=[
+ ['Push-ups','full, chest to floor',['0','1–5','6–15','16–30','30+']],
+ ['Dead hang','from a bar',['0','<10s','10–30s','30–60s','60s+']],
+ ['Squat','how deep, how loaded',['can’t','bodyweight','+ some load','+ heavy']],
+ ['Running','without stopping',['<1k','1–3k','3–5k','5k+']],
+ ['One-foot balance','eyes open',['<10s','10–30s','30s+']]
+];
+
+const S=[
+{id:'00 · opening', build:()=>`
+  <div class="hero">
+    <img class="logo" src="images/logo-onboarding.png" alt="Fitness Journey">
+    <h1>This one<br><em>doesn’t end.</em></h1>
+    <p>Every answer, every session, every number — kept, dated, yours.</p>
+    <p>A record of who you’re becoming.</p>
+    <div class="badges"><span class="badge">8 sections</span><span class="badge">4 minutes</span><span class="badge">No typing</span></div>
+  </div>`, cta:'Take the first step'},
+
+{id:'capability · bands', build:()=>`
+  <div class="eyebrow">Where you are now</div>
+  <h1 class="q">What can you do today?</h1>
+  <p class="sub">Rough is fine. Honest is better.</p>
+  ${BANDS.map((b,i)=>`<div class="brow"><div class="bname">${b[0]}</div><div class="bhint">${b[1]}</div>
+    <div class="bands">${b[2].map((v,j)=>`<button class="band" data-r="${i}" data-b="${j}">${v}</button>`).join('')}</div></div>`).join('')}
+  <div class="note">Five taps. Strong-where and weak-where get worked out from this — you never have to answer that separately.</div>`},
+
+{id:'tracker', build:()=>`
+  <div class="eyebrow ctr">Where you are now</div>
+  <h1 class="q ctr">Do you wear anything?</h1>
+  <p class="sub ctr">I’m not here to replace it.</p>
+  <div class="opts">
+    ${[['watch','Apple Watch'],['ring','Whoop'],['ring','Oura'],['watch','Garmin'],['ring','Something else'],['none','Nothing']]
+      .map(o=>`<button class="opt" data-one>${ico(o[0])}<span><b>${o[1]}</b></span></button>`).join('')}
+  </div>`},
+
+{id:'tracker · follow-up', build:()=>`
+  <div class="eyebrow ctr">Where you are now</div>
+  <h1 class="q ctr">Which number do you actually look at?</h1>
+  <p class="sub ctr">Be honest.</p>
+  <div class="opts">
+    ${[['moon','Sleep score'],['heart','Recovery / readiness'],['run','Steps'],['bolt','Calories'],
+       ['shrug','I open it and forget','This is the most common answer']]
+      .map(o=>`<button class="opt" data-one>${ico(o[0])}<span><b>${o[1]}</b>${o[2]?`<small>${o[2]}</small>`:''}</span></button>`).join('')}
+  </div>
+  <div class="note">This tells us what you care about and where you’re misreading your own data. A tracker says recovery is 34%. It doesn’t tell you what to do about it — that gap is the whole product.</div>`},
+
+{id:'driver', build:()=>`
+  <div class="eyebrow ctr">What gets in the way</div>
+  <h1 class="q ctr">What’s really driving this?</h1>
+  <p class="sub ctr">Pick the truest one, not the best-sounding one.</p>
+  <div class="opts">
+    ${[['stetho','My doctor told me to'],['child','I want to keep up with my kids'],
+       ['cloud','I don’t like how I feel right now'],['barbell','I want to be strong again'],
+       ['heart','I actually miss training'],['calendar','Something’s coming up']]
+      .map(o=>`<button class="opt" data-one>${ico(o[0])}<span><b>${o[1]}</b></span></button>`).join('')}
+  </div>
+  <div class="note">Your words. Each one quietly encodes a motivation type that changes how we coach — without ever saying the word “motivation”.</div>`},
+
+{id:'profile · 76%', build:()=>`
+  <div class="eyebrow">Your Log</div>
+  <h1 class="q">Your profile</h1>
+  <p class="sub">Enough to build on. Not everything yet.</p>
+  <div class="pcard">
+    <div class="pct">76%</div>
+    <div class="pbar"><i></i></div>
+    <div class="plist">
+      <s>✓ Goals and horizon</s><br>
+      <s>✓ What you can do</s><br>
+      <s>✓ Your week</s><br>
+      <s>✓ Health check</s><br>
+      · 14 more movements to rate<br>
+      · Sleep &amp; recovery<br>
+      · Nutrition
+    </div>
+  </div>
+  <div class="note">The essentials go in during onboarding. The rest fills in over time — each addition makes the next program sharper, and the bar gives a reason to come back.</div>`, cta:'Rate 14 movements · 1 min'},
+
+{id:'closing', build:()=>`
+  <div class="hero">
+    <img class="logo" src="images/logo-onboarding.png" alt="Fitness Journey" style="width:56%;margin-bottom:26px">
+    <div class="eyebrow" style="text-align:center">Nico’s Log · Entry 001</div>
+    <h1>That’s the<br><em>first rep.</em></h1>
+    <p>It counts, and it’s logged. Everything from here is just the next one.</p>
+    <div class="badges"><span class="badge">Program ready Monday</span><span class="badge">Reviewed by a human</span></div>
+  </div>`, cta:'Open my Log'}
+];
+
+let i=0;
+const stage=document.getElementById('stage'), foot=document.getElementById('foot'), pos=document.getElementById('pos');
+function render(){
+  const s=S[i];
+  stage.innerHTML=`<div class="screen">${s.build()}</div>`;
+  pos.textContent=(i+1)+' of '+S.length+' · '+s.id;
+  foot.innerHTML=`<button class="cta">${s.cta||'Continue'}</button>
+    <div class="nav"><button id="pv">← Back</button><button id="nx">Next screen →</button></div>`;
+  foot.querySelector('.cta').onclick=()=>go(1);
+  document.getElementById('pv').onclick=()=>go(-1);
+  document.getElementById('nx').onclick=()=>go(1);
+  stage.querySelectorAll('.band').forEach(b=>b.onclick=()=>{
+    stage.querySelectorAll(`.band[data-r="${b.dataset.r}"]`).forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); try{navigator.vibrate&&navigator.vibrate(12)}catch(e){}});
+  stage.querySelectorAll('.opt[data-one]').forEach(o=>o.onclick=()=>{
+    stage.querySelectorAll('.opt').forEach(x=>x.classList.remove('on'));
+    o.classList.add('on'); try{navigator.vibrate&&navigator.vibrate(12)}catch(e){}});
+}
+function go(d){ i=(i+d+S.length)%S.length; render(); }
+render();
+</script>
+</body>
+</html>
