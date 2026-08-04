@@ -17,7 +17,7 @@ import { blockMinutes } from '../core/resolve.js';
 import { USERS, activeUser, switchUser } from '../users.js';
 import { weeklyPromptDue } from '../coach.js';
 
-export function renderBHome(host, { onOpenDay, onOpenSummary }) {
+export function renderBHome(host, { onOpenDay, onOpenSummary, onOpenHistory }) {
   function draw() {
     const week = store.programWeek();
     const today = todaysSession();
@@ -42,6 +42,7 @@ export function renderBHome(host, { onOpenDay, onOpenSummary }) {
           <div><h1 style="margin:0;">Hi, ${activeUser().name.split(' ')[0]}</h1>
             <div class="sub">${PROGRAM.name} · week ${week}</div></div>
           <div style="display:flex;gap:8px;align-items:center;">
+            <button class="gear" id="historyBtn" title="My history">📈</button>
             <button class="gear" id="summaryBtn" title="My week">📊</button>
             <button class="gear" id="settingsBtn" title="Settings">⚙</button>
           </div>
@@ -141,6 +142,7 @@ export function renderBHome(host, { onOpenDay, onOpenSummary }) {
       el.addEventListener('click', () => onOpenDay(el.dataset.day)));
     host.querySelector('#todayCard')?.addEventListener('click', () => onOpenDay(today.sessionId));
     host.querySelector('#summaryBtn').addEventListener('click', () => onOpenSummary());
+    host.querySelector('#historyBtn').addEventListener('click', () => onOpenHistory());
     host.querySelector('#weeklyNudge')?.addEventListener('click', () => onOpenSummary());
     host.querySelector('#settingsBtn').addEventListener('click', openSettings);
   }

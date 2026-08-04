@@ -11,6 +11,7 @@ import { renderHistory } from './screens/history.js';
 import { renderBHome } from './screens/b-home.js';
 import { renderBDay } from './screens/b-day.js';
 import { renderBSummary } from './screens/b-summary.js';
+import { renderBHistory } from './screens/b-history.js';
 import { startWorkout, resumeWorkout } from './runner/workmode.js';
 import * as R from './runner/runstate.js';
 import { isBeginner } from './users.js';
@@ -27,6 +28,41 @@ function render() {
   return renderPro();
 }
 
+/* ---- never lose a workout ----------------------------------
+   A phone will freeze or discard a backgrounded tab whenever it feels like
+   it (iOS is aggressive about this). The run state is timestamp-based and
+   lives in localStorage, so it always survives — the bug was that we came
+   back to the HOME screen with a "tap to resume" bar, which reads as "the
+   app restarted and lost my workout".
+   Now: if a workout is running, we go straight back into it. The only way
+   out is the user ending it. */
+function bootIntoActiveRun() {
+  if (!R.isActive()) return false;
+  return resumeWorkout(runCb);
+}
+
+/* Re-assert on every return to the foreground. If the page was merely frozen
+   the runner is still mounted and does its own thing; if the DOM was wiped
+   (or a stale screen is showing) we remount the workout. */
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) return;
+  if (!R.isActive()) return;
+  const inRunner = !!document.querySelector('.screen.run');
+  if (!inRunner) resumeWorkout(runCb);
+});
+window.addEventListener('pageshow', (e) => {
+  // e.persisted = restored from the back/forward cache
+  if (!R.isActive()) return;
+  if (e.persisted || !document.querySelector('.screen.run')) resumeWorkout(runCb);
+});
+
+/* A workout in progress also blocks accidental tab-closes / back-swipes. */
+window.addEventListener('beforeunload', (e) => {
+  if (!R.isActive()) return;
+  e.preventDefault();
+  e.returnValue = '';
+});
+
 function renderBeginner() {
   if (view.name === 'day') {
     return renderBDay(app, view.sessionId, {
@@ -35,7 +71,12 @@ function renderBeginner() {
     });
   }
   if (view.name === 'summary') return renderBSummary(app, { onBack: () => go('home') });
-  renderBHome(app, { onOpenDay: id => go('day', id), onOpenSummary: () => go('summary') });
+  if (view.name === 'history') return renderBHistory(app, { onBack: () => go('home') });
+  renderBHome(app, {
+    onOpenDay: id => go('day', id),
+    onOpenSummary: () => go('summary'),
+    onOpenHistory: () => go('history'),
+  });
   if (R.isActive()) injectResume();
 }
 
@@ -56,7 +97,8 @@ function injectResume() {
   screen.insertBefore(bar, screen.firstChild.nextSibling);
 }
 
-render();
+// If a workout was left running, go straight back into it — never to home.
+if (!bootIntoActiveRun()) render();
 
 /* ---- offline shell ----
    The service worker precaches the whole app, so once it has been opened

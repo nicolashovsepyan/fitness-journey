@@ -60,27 +60,79 @@ export function initAudio() {
   } catch (e) {}
   try { if (!preferredVoice) preferredVoice = pickVoice(); } catch (e) {}   // warm up the voice list
 }
-function tone(freq, ms, when = 0, vol = 0.5) {
+/* Master chain: everything routes through a compressor + make-up gain so the
+   cues stay audible OVER music. A pure sine is the easiest thing in the world
+   for a mix to mask, so the tones are now harmonically rich (square/sawtooth)
+   and land in the 1-3 kHz band where the ear is most sensitive and where most
+   music has the least energy. */
+let masterGain = null;
+function master() {
+  if (!actx) return null;
+  if (masterGain) return masterGain;
+  // input gain → compressor → MAKE-UP gain → out.
+  // The make-up stage after the compressor is the part that actually makes it
+  // loud: the compressor flattens the peaks, then we push the whole thing back
+  // up. Gain before the compressor alone just gets squashed away.
+  const comp = actx.createDynamicsCompressor();
+  comp.threshold.value = -24; comp.knee.value = 3; comp.ratio.value = 8;
+  comp.attack.value = 0.001; comp.release.value = 0.12;
+  const makeup = actx.createGain();
+  makeup.gain.value = 2.2;                 // ~+7 dB after compression
+  // Soft clipper (tanh). Two jobs: it stops the make-up gain from clipping
+  // into harsh digital distortion, and the gentle saturation adds upper
+  // harmonics — which is exactly what helps a cue cut through music.
+  const shaper = actx.createWaveShaper();
+  const n = 1024, curve = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    const x = (i / (n - 1)) * 2 - 1;
+    curve[i] = Math.tanh(x * 1.8) * 0.92;
+  }
+  shaper.curve = curve; shaper.oversample = '4x';
+  masterGain = actx.createGain();
+  masterGain.gain.value = 1.0;
+  masterGain.connect(comp).connect(makeup).connect(shaper).connect(actx.destination);
+  return masterGain;
+}
+
+/* one tone. `type` picks the timbre: 'square' cuts hardest, 'sawtooth' is
+   bright but slightly smoother, 'sine' is reserved for soft cues. */
+function tone(freq, ms, when = 0, vol = 0.5, type = 'square') {
   if (!actx) return;
+  const out = master(); if (!out) return;
   const t0 = actx.currentTime + when;
   const osc = actx.createOscillator();
   const gain = actx.createGain();
-  osc.type = 'sine';
+  osc.type = type;
   osc.frequency.value = freq;
+  // a touch of detune thickens the tone so it doesn't vanish into a dense mix
+  const osc2 = actx.createOscillator();
+  osc2.type = type; osc2.frequency.value = freq * 1.005;
   gain.gain.setValueAtTime(0.0001, t0);
-  gain.gain.exponentialRampToValueAtTime(vol, t0 + 0.01);
+  gain.gain.exponentialRampToValueAtTime(vol, t0 + 0.006);   // fast attack = percussive
   gain.gain.exponentialRampToValueAtTime(0.0001, t0 + ms / 1000);
-  osc.connect(gain).connect(actx.destination);
-  osc.start(t0); osc.stop(t0 + ms / 1000 + 0.02);
+  osc.connect(gain); osc2.connect(gain); gain.connect(out);
+  osc.start(t0); osc2.start(t0);
+  osc.stop(t0 + ms / 1000 + 0.02); osc2.stop(t0 + ms / 1000 + 0.02);
 }
-const VOL = 0.7;                 // standard cue volume (louder, to cut through music)
-const VOL_END = VOL * 1.15;      // the final beep pops 15% louder than the others
+
+/* Cue volume. Deliberately hot — these have to be heard over headphones
+   playing music at gym volume. The compressor keeps it from clipping. */
+const VOL = 1.0;
+const VOL_END = 1.0;
 export function beep(kind = 'tick') {
   initAudio();
-  if (kind === 'go')        { tone(880, 160, 0, 0.55); }              // start
-  else if (kind === 'end')  { tone(700, 120, 0, VOL); tone(1040, 240, 0.13, VOL_END); } // finish: rising double, last beep louder
-  else if (kind === 'count'){ tone(740, 90, 0, VOL); }               // 3-2-1 ticks
-  else                      { tone(700, 80, 0, VOL); }
+  if (kind === 'go') {                       // start — rising two-tone
+    tone(1046, 110, 0,    0.85, 'square');
+    tone(1568, 190, 0.09, VOL,  'square');
+  } else if (kind === 'end') {               // finish — bright triple, unmistakable
+    tone(1318, 110, 0,    VOL,     'square');
+    tone(1568, 110, 0.10, VOL,     'square');
+    tone(2093, 280, 0.20, VOL_END, 'square');
+  } else if (kind === 'count') {             // 3-2-1 ticks — short and sharp
+    tone(1760, 95, 0, VOL, 'square');
+  } else {
+    tone(1318, 85, 0, 0.9, 'square');
+  }
 }
 
 /* light haptic if supported */

@@ -16,6 +16,10 @@ import { store } from '../store.js';
 import { beginnerPlan, beginnerRunPlan, PROGRAM, DAY_IMG } from '../beginner.js';
 
 const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+const shortDate = iso => {
+  try { return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); }
+  catch (e) { return ''; }
+};
 
 /* Checkbox key. Two rows can share an exercise id (Side Plank left AND right),
    so the tick state has to be keyed per ROW, not per exercise. Notes and knee
@@ -207,6 +211,19 @@ export function renderBDay(host, sessionId, { onBack, onStart }) {
     const boxes = Array.from({ length: n }, (_, i) =>
       `<button class="setbox ${checks[i] ? 'on' : ''}" data-check="${rowKey(it)}" data-i="${i}">${checks[i] ? '✓' : i + 1}</button>`).join('');
 
+    /* What he did last time — the thing to beat. Shown right on the collapsed
+       row so a new week opens with last week's numbers already visible. */
+    const hist = store.exerciseHistory(it.exId, 4);
+    const last = hist[0];
+    const lastChip = last ? `<span class="last-chip" title="last time">↩ ${esc(last.text)}</span>` : '';
+    const histRows = hist.length ? `
+      <div class="ex-hist">
+        <div class="eh-head">Your history</div>
+        ${hist.map((h, i) => `<div class="eh-row ${i === 0 ? 'recent' : ''}">
+            <span class="eh-d">${esc(shortDate(h.date))}</span>
+            <span class="eh-v">${esc(h.setsText)}</span></div>`).join('')}
+      </div>` : `<div class="ex-hist none">First time — today sets your baseline 💪</div>`;
+
     return `
       <div class="bex ${flagged ? 'flagged' : ''} ${open ? 'open' : ''}">
         <div class="bex-top" data-expand="${uid}">
@@ -214,7 +231,7 @@ export function renderBDay(host, sessionId, { onBack, onStart }) {
           ${paired && it.pair ? `<span class="pairtag">${esc(it.pair)}</span>` : ''}
           <div class="bex-main">
             <div class="bex-name">${nm}${it.swappedFrom ? '<span class="swapped">swapped</span>' : ''}${flagged ? '<span class="knee-dot" title="knee flagged">🦵</span>' : ''}${hasNote ? '<span class="note-dot" title="note saved">📝</span>' : ''}</div>
-            <div class="bex-rx">${prescription(b, it)}${it.side ? ` · ${it.side}` : ''}</div>
+            <div class="bex-rx">${prescription(b, it)}${it.side ? ` · ${it.side}` : ''}${lastChip}</div>
           </div>
           <button class="bex-chev" aria-label="Details">⌄</button>
         </div>
@@ -222,6 +239,7 @@ export function renderBDay(host, sessionId, { onBack, onStart }) {
           ${cue ? `<div class="bex-cue">${esc(cue)}</div>` : ''}
           ${it.note ? `<div class="bex-note">${esc(it.note)}</div>` : ''}
           ${savedNote ? `<div class="bex-yournote">📝 ${esc(savedNote)}</div>` : ''}
+          ${histRows}
           <div class="setboxes"><span class="sb-lbl">Sets</span>${boxes}</div>
           <div class="bex-actions">
             ${subs.length ? `<button class="mini" data-swap="${it.exId}" data-subs="${subs.join(',')}">⇄ swap</button>` : ''}

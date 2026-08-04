@@ -130,6 +130,66 @@ export const store = {
     }
     return null;
   },
+  /* Every logged performance of one exercise, most recent first.
+     This is what powers "what did I do last time" — the single most
+     important thing to see when a new week starts.
+     → [{ date, sets:[{value,weight,side}], best, weight, text }] */
+  exerciseHistory(exId, limit = 12) {
+    const out = [];
+    const sessions = read().sessions;
+    for (let i = sessions.length - 1; i >= 0 && out.length < limit; i--) {
+      const s = sessions[i];
+      for (const b of (s.blocks || [])) {
+        for (const e of (b.entries || [])) {
+          if (e.exId !== exId) continue;
+          const sets = (e.sets || []).filter(x => x.value != null && x.value !== '');
+          if (!sets.length) continue;
+          const nums = sets.map(x => Number(x.value) || 0);
+          const weights = sets.map(x => Number(x.weight)).filter(w => w > 0);
+          const maxW = weights.length ? Math.max(...weights) : null;
+          // at the top weight, what reps did he get?
+          const atTop = maxW != null ? sets.filter(x => Number(x.weight) === maxW) : sets;
+          const best = Math.max(...atTop.map(x => Number(x.value) || 0));
+          const unit = e.unit || 'reps';
+          out.push({
+            date: s.date,
+            sessionName: s.name,
+            sets, unit,
+            best, weight: maxW,
+            total: nums.reduce((a, n) => a + n, 0),
+            text: maxW != null ? `${maxW} lb × ${best}` : `${best} ${unit}`,
+            setsText: sets.map(x => {
+              let t = String(x.value);
+              if (x.side) t = `${x.side}${t}`;
+              if (x.weight != null && x.weight !== '') t += `@${x.weight}`;
+              return t;
+            }).join(' · '),
+          });
+          break;
+        }
+      }
+    }
+    return out;
+  },
+
+  /* every exercise this user has ever logged, with its most recent entry */
+  loggedExercises() {
+    const map = new Map();
+    const sessions = read().sessions;
+    for (let i = sessions.length - 1; i >= 0; i--) {
+      const s = sessions[i];
+      for (const b of (s.blocks || [])) {
+        for (const e of (b.entries || [])) {
+          if (!e.exId || map.has(e.exId)) continue;
+          const sets = (e.sets || []).filter(x => x.value != null && x.value !== '');
+          if (!sets.length) continue;
+          map.set(e.exId, { exId: e.exId, name: e.name, date: s.date, unit: e.unit });
+        }
+      }
+    }
+    return [...map.values()];
+  },
+
   getPR(exId) { return read().prs[exId] || null; },
   setPR(exId, rec) { const s = read(); if (rec) s.prs[exId] = rec; else delete s.prs[exId]; write(s); },
   clearPR(exId) { const s = read(); delete s.prs[exId]; write(s); },
