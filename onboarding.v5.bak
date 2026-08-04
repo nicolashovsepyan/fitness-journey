@@ -96,18 +96,7 @@ body{
 #stage{position:absolute;top:0;right:0;bottom:0;left:0;padding:74px 20px 0;overflow:hidden}
 .screen{position:absolute;top:calc(74px + env(safe-area-inset-top));left:20px;right:20px;bottom:0;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;
   -webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;
-  scroll-padding-bottom:var(--footpad,150px)}
-/* A real element, not padding. iOS Safari drops padding-bottom on flex scroll
-   containers, which is what let option lists hide behind the button bar. */
-.footspacer{flex:0 0 auto;height:var(--footpad,150px);width:100%;pointer-events:none}
-/* "there is more below" cue — only when the screen actually scrolls */
-#moretag{position:absolute;left:50%;transform:translateX(-50%) translateY(6px);
-  bottom:calc(var(--footpad,150px) - 16px);z-index:16;opacity:0;pointer-events:none;
-  transition:opacity .3s,transform .3s;
-  font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);
-  display:flex;align-items:center;gap:6px}
-#moretag.on{opacity:1;transform:translateX(-50%) translateY(0)}
-#moretag svg{width:13px;height:13px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  padding-bottom:var(--footpad, 150px)}
 .screen::-webkit-scrollbar{display:none}
 .enter{animation:enter .46s cubic-bezier(.22,1,.36,1) both}
 .exit{animation:exit .26s ease-in both}
@@ -145,7 +134,6 @@ h1.q.big{font-size:33px}
 .opt.none .tx b{color:var(--accent)}
 
 /* ---------- footer cta ---------- */
-#foot:empty{padding:0;background:none}
 #foot{position:absolute;left:0;right:0;bottom:0;padding:14px 20px calc(24px + env(safe-area-inset-bottom));
   background:linear-gradient(rgba(23,26,30,0),var(--bg) 34%);z-index:15;pointer-events:none}
 #foot.on{pointer-events:auto}
@@ -158,7 +146,6 @@ h1.q.big{font-size:33px}
 .cta:active{transform:scale(.98)}
 .cta[disabled]{background:#2A303A;color:#5C646E;cursor:default}
 .cta.accent{background:var(--accent);color:#0C1512}
-.cta[disabled],.cta.accent[disabled]{background:#2A303A;color:#5C646E;cursor:default}
 .cta.ghost{background:transparent;color:var(--ink3);border:1.5px solid var(--line2);font-weight:500}
 .cta.ghost:active{background:rgba(255,255,255,.04)}
 .skip{display:block;width:100%;text-align:center;margin-top:8px;font-size:13.5px;color:var(--ink3);background:none;border:none;font-family:inherit;cursor:pointer;padding:14px 6px;min-height:46px}
@@ -246,8 +233,8 @@ svg.body .part.on{fill:var(--accent)}
 #toast.on{opacity:1;transform:none}
 
 /* ---------- dev index ---------- */
-#dev{position:absolute;top:calc(env(safe-area-inset-top) + 6px);right:8px;bottom:auto;left:auto;z-index:60;font-size:9.5px;color:var(--ink3);background:rgba(40,46,56,.8);
-  border:1px solid var(--line);border-radius:99px;padding:3px 8px;cursor:pointer;font-family:inherit;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);opacity:.28}
+#dev{position:absolute;bottom:10px;left:10px;z-index:60;font-size:9.5px;color:var(--ink3);background:rgba(40,46,56,.8);
+  border:1px solid var(--line);border-radius:99px;padding:4px 9px;cursor:pointer;font-family:inherit;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);opacity:.5}
 #dev:hover{opacity:1}
 #idx{position:absolute;top:0;right:0;bottom:0;left:0;background:rgba(23,26,30,.985);z-index:59;padding:56px 18px 18px;overflow-y:auto;display:none;-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}
 #idx.on{display:block}
@@ -396,86 +383,6 @@ h1.q{text-align:center}
 .btab{min-height:44px;padding:0 22px;border-radius:11px;border:1.5px solid var(--line);background:var(--bg2);
   color:var(--ink2);font-size:13.5px;font-family:inherit;cursor:pointer;transition:all .15s}
 .btab.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:650}
-
-/* ---------- opening: mark + steps ---------- */
-.mark{width:64px;height:64px;margin-bottom:30px;color:var(--accent)}
-.mark svg{width:100%;height:100%;stroke:currentColor;stroke-width:1.7;fill:none;
-  stroke-linecap:round;stroke-linejoin:round}
-.steps{display:flex;gap:9px;margin-top:26px}
-.steps i{width:26px;height:3px;border-radius:2px;background:var(--line2);
-  animation:stepOn 2.8s ease-in-out infinite}
-.steps i:nth-child(2){animation-delay:.28s}
-.steps i:nth-child(3){animation-delay:.56s}
-.steps i:nth-child(4){animation-delay:.84s}
-@keyframes stepOn{0%,8%{background:var(--line2)}18%,52%{background:var(--accent)}70%,100%{background:var(--line2)}}
-@supports not (gap:1px){.steps>*+*{margin-left:9px}}
-.metaline{margin-top:30px;font-size:12.5px;color:var(--ink3);letter-spacing:.02em}
-
-/* ---------- the contract ---------- */
-.promise{flex:1;display:flex;flex-direction:column;justify-content:center;padding:8px 0}
-.promise h1{font-size:26px;line-height:1.2;letter-spacing:-.022em;font-weight:600;margin-bottom:26px}
-.prow{display:flex;gap:15px;align-items:flex-start;margin-bottom:20px;
-  opacity:0;transform:translateY(10px);transition:opacity .5s cubic-bezier(.22,1,.36,1),transform .5s cubic-bezier(.22,1,.36,1)}
-.prow.on{opacity:1;transform:none}
-.prow .who{flex:0 0 auto;width:72px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
-  font-weight:650;color:var(--accent);padding-top:3px}
-.prow .what{flex:1;min-width:0;font-size:15.5px;line-height:1.45;color:var(--ink)}
-.prow .what small{display:block;margin-top:3px;font-size:12.5px;color:var(--ink3);line-height:1.4}
-.prow.dim .who{color:var(--ink3)}
-
-/* ---------- the deck ---------- */
-.deckwrap{flex:1;display:flex;flex-direction:column;min-height:0}
-.dkdots{display:flex;gap:4px;justify-content:center;margin-bottom:14px;flex:0 0 auto}
-.dkdots i{width:6px;height:6px;border-radius:50%;background:var(--line2)}
-.dkdots i.done{background:var(--accent)}
-.dkdots i.now{background:var(--ink)}
-.dkstack{flex:1 1 auto;position:relative;min-height:250px}
-.dkcard{position:absolute;top:0;right:0;bottom:0;left:0;background:var(--card);
-  border:1.5px solid var(--line);border-radius:20px;overflow:hidden;
-  display:flex;flex-direction:column;box-shadow:var(--shadow-lift);touch-action:pan-y}
-.dkvid{flex:1 1 auto;min-height:0;position:relative;overflow:hidden;
-  background:linear-gradient(160deg,#242A34,#1A1F26)}
-.dkvid .fig{width:100%;height:100%;padding:26px 0 18px;display:block}
-.dkvid .fig g{stroke:var(--ink);stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round;fill:none}
-.dkvid .fig .pa{animation:fA 1.15s steps(1,end) infinite}
-.dkvid .fig .pb{animation:fB 1.15s steps(1,end) infinite}
-@keyframes fA{0%,49%{opacity:1}50%,100%{opacity:0}}
-@keyframes fB{0%,49%{opacity:0}50%,100%{opacity:1}}
-.dkcap{flex:0 0 auto;padding:14px 17px 17px;border-top:1px solid var(--line)}
-.dkcap b{display:block;font-size:18px;font-weight:600;letter-spacing:-.015em}
-.dkcap span{display:block;margin-top:3px;font-size:12.5px;color:var(--ink3)}
-.dkstamp{position:absolute;top:16px;padding:7px 11px;border-radius:9px;border:2px solid;
-  font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:0;pointer-events:none}
-.dkstamp.yes{right:14px;color:var(--accent);border-color:var(--accent);transform:rotate(8deg)}
-.dkstamp.no{left:14px;color:var(--ink3);border-color:var(--line2);transform:rotate(-8deg)}
-.dkbands{position:absolute;top:0;right:0;bottom:0;left:0;background:var(--card);
-  display:none;flex-direction:column;justify-content:center;padding:22px 18px}
-.dkbands.on{display:flex}
-.dkbands .bq{font-size:17px;font-weight:600;letter-spacing:-.015em;margin-bottom:5px}
-.dkbands .bh{font-size:12.5px;color:var(--ink3);margin-bottom:18px}
-.dkbands button{width:100%;min-height:50px;border-radius:13px;border:1.5px solid var(--line);
-  background:var(--bg2);color:var(--ink);font-size:15px;font-weight:550;font-family:inherit;
-  margin-bottom:8px;padding:13px 15px;text-align:left;cursor:pointer}
-.dkbands button:active{transform:scale(.985)}
-.dkbands button.on{border-color:var(--accent);background:var(--accent-soft)}
-.dkbtns{display:flex;gap:10px;flex:0 0 auto;margin-top:12px}
-.dkbtn{flex:1;min-height:54px;border-radius:14px;border:1.5px solid var(--line2);
-  background:var(--card);color:var(--ink2);font-size:14.5px;font-weight:600;font-family:inherit;cursor:pointer}
-.dkbtn.yes{border-color:rgba(62,203,168,.42);color:var(--accent)}
-.dkhint{text-align:center;font-size:11.5px;color:var(--ink3);margin-top:10px;flex:0 0 auto}
-
-/* ---------- units toggle ---------- */
-.unitrow{display:flex;gap:10px;margin-top:6px}
-.unitrow button{flex:1;min-height:56px;border-radius:14px;border:1.5px solid var(--line);
-  background:var(--card);color:var(--ink);font-size:16px;font-weight:600;font-family:inherit;cursor:pointer}
-.unitrow button.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
-
-/* ---------- inline "none of this" chip ---------- */
-.nonechip{width:100%;min-height:52px;border-radius:14px;border:1.5px solid rgba(62,203,168,.4);
-  background:var(--accent-soft);color:var(--accent);font-size:15px;font-weight:600;
-  font-family:inherit;cursor:pointer;margin-bottom:14px;padding:14px}
-.nonechip.on{background:var(--accent);color:#0C1512;border-color:var(--accent)}
-
 /* ---------- logo ---------- */
 .logo{width:74%;max-width:280px;margin:0 auto 30px;display:block}
 </style>
@@ -491,8 +398,7 @@ h1.q{text-align:center}
   </div>
 
   <div id="stage"></div>
-  <div id="moretag"><svg viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></svg>more below</div>
-<div id="foot"></div>
+  <div id="foot"></div>
   <div id="toast"></div>
 </div>
 
@@ -659,19 +565,12 @@ const FOCUS_LABEL = { strong:'get stronger', lean:'lean out', muscle:'build musc
 /* ---------------- FLOW ---------------- */
 const FLOW = [
 
-{ ch:0, type:'hero',
-  h:'Take the<br>first step.',
-  p:['Four minutes. Then it\'s my turn.'],
-  meta:'8 short sections · no typing',
-  cta:'Start' },
-
-{ ch:0, type:'promise', h:'Here\'s how this works.', cta:'Got it',
-  rows:[
-    ['You',    'Answer honestly for four minutes.', 'No wrong answers. Nothing you can fail.'],
-    ['Me',     'I build you a real program.',       'Not a template. Built from your answers.'],
-    ['A coach','A human reviews it before you see it.','Within 24 hours.'],
-    ['Then',   'Every answer and every session is kept.','Dated. Yours. Forever.']
-  ]},
+{ ch:0, type:'hero', logo:true,
+  h:'This one<br><em>doesn\'t end.</em>',
+  p:['Every answer, every session, every number — kept, dated, yours.',
+     'A record of who you\'re becoming.'],
+  badges:['8 sections','4 minutes','No typing'],
+  cta:'Take the first step' },
 
 /* 1 · YOU */
 { ch:1, type:'chapter', n:1, title:'You', sub:'So every question after this is the right one.' },
@@ -705,25 +604,46 @@ const FLOW = [
         {v:'garmin',ic:'watch',t:'Garmin'},
         {v:'other',ic:'ring', t:'Something else'},
         {v:'none', ic:'none', t:'Nothing'}]},
-{ ch:3, type:'rankdyn', key:'metric', skipIfNoTracker:true, max:3,
-  h:'Which numbers do you actually look at?',
-  sub:'Tap in order. First tap is the one you check most.', cta:'Continue' },
-{ ch:3, type:'multi', key:'where', h:'Where does training happen?', sub:'Tick everything you have.',
+{ ch:3, type:'single', key:'metric', skipIfNoTracker:true,
+  h:'Which number do you actually look at?', sub:'Be honest.',
+  opts:[{v:'sleep',   ic:'moon',  t:'Sleep score'},
+        {v:'recovery',ic:'heart', t:'Recovery / readiness'},
+        {v:'steps',   ic:'run',   t:'Steps'},
+        {v:'cals',    ic:'bolt',  t:'Calories'},
+        {v:'forget',  ic:'shrug', t:'I open it and forget', s:'Most common answer'}]},
+{ ch:3, type:'bands', key:'capability', h:'What can you do today?', sub:'Rough is fine. Honest is better.',
   cta:'Continue',
-  opts:[{v:'gym',     ic:'gymBld',  t:'A full gym', s:'Racks, barbells, machines'},
-        {v:'homekit', ic:'dumbbell',t:'Home, some equipment'},
-        {v:'homenone',ic:'house',   t:'Home, nothing'},
-        {v:'outdoor', ic:'tree',    t:'Outdoors'},
-        {v:'hotel',   ic:'plane',   t:'Hotel gyms, often'}]},
+  rows:[['pushup','Push-ups','full, chest to floor',['0','1–5','6–15','16–30','30+']],
+        ['hang','Dead hang','from a bar',['0','<10s','10–30s','30–60s','60s+']],
+        ['squat','Squat','how deep, how loaded',['can\'t','bodyweight','+ load','+ heavy']],
+        ['run','Running','without stopping',['<1k','1–3k','3–5k','5k+']],
+        ['balance','One-foot balance','eyes open',['<10s','10–30s','30s+']]] },
+{ ch:3, type:'levels', key:'levels', h:'How well do you know your way around?',
+  sub:'These are two different skills. Be honest about both.',
+  cta:'Continue',
+  rows:[['gym','In a gym','barbells, machines, racks',['New','Some','Confident']],
+        ['body','Bodyweight & functional','calisthenics, mobility, carries',['New','Some','Confident']]] },
 
 /* 4 · YOUR TRAINING */
-{ ch:4, type:'chapter', n:4, title:'Your training', sub:'Ten cards. Swipe. That\'s the whole section.' },
-{ ch:4, type:'units', key:'unit', skipIfNoLoad:true, h:'Kilos or pounds?',
-  sub:'So the next part speaks your language.' },
-{ ch:4, type:'deckintro' },
-{ ch:4, type:'deck', key:'deck' },
-{ ch:4, type:'enjoy', key:'feelings', h:'Which of these do you actually enjoy?',
-  sub:'Enjoyment predicts whether you\'re still here in a year.', cta:'Continue' },
+{ ch:4, type:'chapter', n:4, title:'Your training', sub:'What goes in — and what you\'ll earn first.' },
+{ ch:4, type:'multi', key:'patterns', h:'Which have you trained regularly?', sub:'Weeks in a row, not once.',
+  cta:'Continue',
+  opts:[{v:'squat',ic:'pSquat',t:'Squat'},
+        {v:'hinge',ic:'pHinge',t:'Hinge or deadlift'},
+        {v:'push', ic:'pPush', t:'Press or push-up'},
+        {v:'pull', ic:'pPull', t:'Row or pull-up'},
+        {v:'carry',ic:'pCarry',t:'Loaded carries'},
+        {v:'oly',  ic:'pOly',  t:'Olympic lifts'},
+        {v:'none', ic:'seed',  t:'None of these', none:true}]},
+{ ch:4, type:'numbers', key:'lifts', h:'Your numbers, if you have them.',
+  sub:'Best set in the last 3 months. Guessing is allowed — just say so.',
+  fields:[['Squat'],['Press or bench'],['Deadlift'],['Row or pull-up']],
+  cta:'Save to my Log', skip:'Skip — find them in session one' },
+{ ch:4, type:'feelings', key:'feelings', h:'How do you feel about these?',
+  sub:'Enjoyment predicts whether you\'re still here in a year.',
+  items:[['heavy','Lifting heavy'],['sweat','Getting out of breath'],['skill','Learning technique'],
+         ['quiet','Training alone'],['running','Running'],['burpees','Burpees and circuits']],
+  cta:'Continue' },
 
 /* 5 · YOUR WEEK */
 { ch:5, type:'chapter', n:5, title:'Your week', sub:'What makes the plan real, not theoretical.' },
@@ -738,6 +658,13 @@ const FLOW = [
     3:'The sweet spot.',4:'Strong. This is where it compounds.',
     5:'Ambitious. I\'ll hold you to it.',6:'A commitment. Tell me now if it slips.'})[n],
   cta:'That\'s realistic' },
+{ ch:5, type:'multi', key:'where', h:'What do you have access to?', sub:'Tick everything.',
+  cta:'Continue',
+  opts:[{v:'gym',     ic:'gymBld',  t:'A full gym'},
+        {v:'homekit', ic:'dumbbell',t:'Home, some equipment'},
+        {v:'homenone',ic:'house',   t:'Home, nothing'},
+        {v:'outdoor', ic:'tree',    t:'Outdoors'},
+        {v:'hotel',   ic:'plane',   t:'Hotel gyms, often'}]},
 { ch:5, type:'single', key:'length', h:'How long have you got?', sub:'Twenty minutes consistently beats sixty sometimes.',
   opts:[{v:'20',ic:'bolt', t:'20 minutes'},
         {v:'35',ic:'clock',t:'30–40 minutes'},
@@ -747,14 +674,12 @@ const FLOW = [
 /* 6 · WHAT GETS IN THE WAY */
 { ch:6, type:'chapter', n:6, title:'What gets in the way', sub:'The part that decides everything.' },
 { ch:6, type:'single', key:'driver', h:'What\'s really driving this?', sub:'The truest one, not the best-sounding.',
-  opts:[{v:'best',   ic:'mountain',t:'I want to be in the best shape of my life'},
-        {v:'plateau',ic:'chart',   t:'I\'ve plateaued and I want past it'},
-        {v:'event',  ic:'target',  t:'I\'m training for something specific'},
+  opts:[{v:'doctor', ic:'stetho',  t:'My doctor told me to'},
+        {v:'kids',   ic:'child',   t:'I want to keep up with my kids'},
+        {v:'feel',   ic:'cloud',   t:'I don\'t like how I feel right now'},
         {v:'strong', ic:'barbell', t:'I want to be strong again'},
         {v:'miss',   ic:'heart',   t:'I actually miss training'},
-        {v:'feel',   ic:'cloud',   t:'I don\'t like how I feel right now'},
-        {v:'kids',   ic:'child',   t:'I want to keep up with my kids'},
-        {v:'doctor', ic:'stetho',  t:'My doctor told me to'}]},
+        {v:'event',  ic:'calendar',t:'Something\'s coming up'}]},
 { ch:6, type:'multi', key:'blockers', h:'What has stopped you before?', sub:'Every plan fails the same way twice.',
   cta:'Continue',
   opts:[{v:'time',   ic:'hourglass',t:'Time disappears'},
@@ -796,43 +721,28 @@ const FLOW = [
 
 /* ---------------- insight ---------------- */
 function insight1(){
-  const h=A.horizon||[], f=(A.focus||[]), age=A.age||38, nm=A.name?A.name+', ':'';
+  const h=A.horizon||[], f=(A.focus||[])[0], age=A.age||38;
   const first = H_LABEL[h[0]]||'staying capable';
-  const g1 = FOCUS_LABEL[f[0]]||'getting stronger';
-  const g2 = FOCUS_LABEL[f[1]];
   let head, body;
-
-  /* Every branch names two things they said, then says what it changes. */
-  if(f[0]==='lean' && (f[1]==='strong'||f[1]==='muscle')){
-    head='Those two compete.';
-    body='Leaning out and building muscle want opposite things from your recovery. I build the muscle first and let the leanness follow — that order works. The other one stalls at week six.';
-  } else if(f[0]==='lean' && (h.includes('heavy')||h.includes('sport'))){
-    head='Your ninety days and your '+horizonAge(age)+' disagree.';
-    body='You want to lean out now and still be lifting at '+horizonAge(age)+'. Muscle is the thing that gets you there. So we train for it and let the leanness come off the back of it, not the other way round.';
+  if(f==='lean' && (h.includes('heavy')||h.includes('sport'))){
+    head='Those two pull against each other.';
+    body='Leaning out and getting strong compete for the same recovery. We build strength first and let leanness follow — that order works, the other one doesn\'t.';
   } else if(h.includes('floor') && age>=50){
     head='You picked the one that actually predicts things.';
-    body='Getting off the floor unaided is one of the better markers of an independent old age — and unlike most markers, it stays trainable. It moves within eight weeks.';
-  } else if((f[0]==='energy'||f[0]==='wind') && (f[1]==='strong'||f[1]==='muscle')){
-    head='Same fix, different order.';
-    body='"'+cap(g1)+'" and "'+cap(g2||'strength')+'" both sit on an aerobic base almost nobody builds. Twenty minutes of easy work a week buys both. It is the least glamorous thing I will ask you to do.';
-  } else if(f[0]==='energy'||f[0]==='wind'){
-    head='That one has a cause.';
-    body='Tired and out of breath both trace back to an aerobic base nobody built. It is the fastest thing in fitness to change and the first thing I will put in your week.';
+    body='Getting off the floor unaided is one of the better markers of independent old age — and it stays trainable at any age.';
   } else if(h.includes('strongold')||(h.includes('heavy')&&age<35)){
-    head='You are thinking about this earlier than most.';
-    body='Muscle and bone built before forty is the account you draw down from for the next fifty years. Almost nobody makes that deposit on purpose. It changes what I load and how hard.';
-  } else if(g2){
-    head=cap(g1)+' first. '+cap(g2)+' second.';
-    body='You gave me two, in order, and the order is the useful part. Every session gets built around the first one. The second gets whatever is left — which is more than you would think.';
+    head='You\'re thinking about this earlier than most.';
+    body='Muscle and bone built now is the account you draw down from later. Almost nobody makes that deposit on purpose.';
+  } else if(f==='energy'||f==='wind'){
+    head='Those two are the same problem.';
+    body='Tired and out of breath both trace back to an aerobic base nobody built. Least glamorous fix in fitness, and the fastest.';
   } else {
     head='Specific enough to build on.';
-    body='Most people answer this with a number on a scale. You gave me something testable, so I can tell you whether it is working instead of asking how you feel about it.';
+    body='Most people answer this with a number on a scale. You gave me something testable — so I can tell whether it\'s working.';
   }
-  return {tag:'Entry 001 · first thing I have learned',
-    lines:[head, body,
-      '<b>'+cap(first)+'</b> is now what every exercise has to earn its place against.']};
+  return {tag:'Entry 001 · first thing I\'ve learned',
+    lines:[head, body, '<b>'+first[0].toUpperCase()+first.slice(1)+'</b> is now what every exercise has to earn its place against.']};
 }
-function cap(t){ return t? t[0].toUpperCase()+t.slice(1) : t; }
 function pattern(){
   const b=A.blockers||[], d=A.driver;
   if(b.includes('toohard')||b.includes('week3'))
@@ -847,132 +757,6 @@ function pattern(){
     return {n:'Deadline-Driven', b:'Something is pulling you forward, which works right until the day it passes. Watch for what replaces it around week six.'};
   return {n:'Quietly Consistent', b:'Nothing here suggests drama. You\'re building a habit, not chasing a transformation — and that profile outperforms almost everyone over two years. Your risk isn\'t quitting, it\'s plateauing politely.'};
 }
-
-/* ================= TRACKER METRICS — per device ================= */
-/* Whoop does not show "readiness". Garmin does not show "recovery".
-   Asking for a number the device doesn't display reads as sloppy. */
-const METRICS = {
-  whoop:  [['strain','Strain','how hard the day was'],['recovery','Recovery %',''],
-           ['sleep','Sleep performance',''],['hrv','HRV','']],
-  apple:  [['rings','The rings','move, exercise, stand'],['steps','Steps',''],
-           ['hr','Heart rate',''],['sleep','Sleep',''],['vo2','Cardio fitness','VO₂ max']],
-  garmin: [['battery','Body Battery',''],['ready','Training Readiness',''],
-           ['sleep','Sleep score',''],['steps','Steps',''],['vo2','VO₂ max','']],
-  oura:   [['ready','Readiness score',''],['sleep','Sleep score',''],
-           ['activity','Activity score',''],['hrv','HRV','']],
-  fitbit: [['ready','Daily Readiness',''],['sleep','Sleep score',''],
-           ['steps','Steps',''],['azm','Active Zone Minutes','']],
-  other:  [['sleep','Sleep',''],['recovery','Recovery or readiness',''],
-           ['steps','Steps',''],['cals','Calories',''],['hr','Heart rate','']]
-};
-const METRIC_ICON = {strain:'bolt',recovery:'heart',sleep:'moon',hrv:'wave',rings:'ring',
-  steps:'run',hr:'heart',vo2:'lungs',battery:'bolt',ready:'spark',activity:'run',
-  azm:'clock',cals:'flame'};
-
-/* ================= FIGURES ================= */
-const POSE = {
-  squat:[
-    'H50 22|M50 29L50 72|M50 40L58 52 56 66|M50 72L50 96 48 118|M42 118L58 118',
-    'H52 42|M52 49L46 84|M52 56L66 60 71 52|M46 84L66 96 48 118|M42 118L58 118'],
-  hinge:[
-    'H50 22|M50 29L50 72|M50 40L54 56 54 72|M50 72L50 96 48 118|M42 118L58 118',
-    'H66 52|M62 57L44 74|M60 62L62 80 62 96|M44 74L44 98 46 118|M40 118L56 118'],
-  push:[
-    'H72 56|M68 61L38 74|M66 63L68 90 70 112|M38 74L34 96 28 114|M22 116L76 116',
-    'H72 72|M68 77L38 84|M66 79L84 94 70 112|M38 84L34 100 28 114|M22 116L76 116'],
-  pull:[
-    'M28 16L72 16|H50 42|M50 49L50 88|M50 52L46 32 45 18|M50 52L56 32 57 18|M50 88L53 106 50 120',
-    'M28 16L72 16|H50 26|M50 33L50 74|M50 36L38 26 43 18|M50 36L62 26 57 18|M50 74L55 92 48 110'],
-  press:[
-    'M34 28L66 28|H50 22|M50 31L50 74|M50 38L38 46 42 30|M50 38L62 46 58 30|M50 74L50 98 48 118|M42 118L58 118',
-    'M34 12L66 12|H50 26|M50 33L50 74|M50 40L42 26 45 14|M50 40L58 26 55 14|M50 74L50 98 48 118|M42 118L58 118'],
-  carry:[
-    'H50 22|M50 29L50 70|M50 38L48 54 48 70|M50 70L64 92 66 116|M50 70L36 94 30 116|M24 118L72 118',
-    'H50 34|M50 41L50 82|M50 50L48 66 48 82|M50 82L70 96 72 116|M50 82L36 102 32 116|M24 118L72 118']
-};
-function poseSvg(arch){
-  const pr = POSE[arch]||POSE.squat;
-  const grp = (str,cls)=>'<g class="'+cls+'">'+str.split('|').map(function(d){
-      if(d.charAt(0)==='H'){ const m=d.slice(1).trim().split(' ');
-        const x=+m[0], y=+m[1];
-        return '<path d="M'+(x-7)+' '+y+'a7 7 0 1014 0 7 7 0 10-14 0"/>'; }
-      return '<path d="'+d+'"/>';
-    }).join('')+'</g>';
-  return '<svg class="fig" viewBox="0 0 100 140" preserveAspectRatio="xMidYMid meet">'+
-         grp(pr[0],'pa')+grp(pr[1],'pb')+'</svg>';
-}
-
-/* ================= THE DECK ================= */
-const GYM_DECK = [
- {id:'squat', n:'Back squat',   a:'squat', hint:'Bar on your back',        pat:'squat', kind:'w',
-  bands:{kg:['Bar only','40–60','60–90','90–120','120+'], lb:['Bar only','95–135','135–200','200–265','265+']}},
- {id:'dead',  n:'Deadlift',     a:'hinge', hint:'Off the floor',           pat:'hinge', kind:'w',
-  bands:{kg:['Bar only','60–80','80–110','110–150','150+'], lb:['Bar only','135–175','175–245','245–330','330+']}},
- {id:'bench', n:'Bench press',  a:'push',  hint:'Flat, chest to bar',      pat:'push', kind:'w',
-  bands:{kg:['Bar only','40–60','60–80','80–100','100+'], lb:['Bar only','95–135','135–175','175–225','225+']}},
- {id:'ohp',   n:'Overhead press',a:'press',hint:'Standing, strict',        pat:'press', kind:'w',
-  bands:{kg:['Bar only','25–35','35–50','50–65','65+'], lb:['Bar only','55–75','75–110','110–145','145+']}},
- {id:'row',   n:'Row',          a:'pull',  hint:'Barbell or dumbbell',     pat:'pull', kind:'w',
-  bands:{kg:['Under 20','20–35','35–50','50–70','70+'], lb:['Under 45','45–75','75–110','110–155','155+']}},
- {id:'pullup',n:'Pull-up',      a:'pull',  hint:'Dead hang, chin over',    pat:'vpull', kind:'r',
-  bands:['0','1–3','4–8','9–15','15+']},
- {id:'split', n:'Split squat',  a:'carry', hint:'One leg at a time',       pat:'unilat', kind:'x',
-  bands:['Not yet','Bodyweight','Light dumbbells','Heavy dumbbells']},
- {id:'thrust',n:'Hip thrust',   a:'hinge', hint:'Shoulders on a bench',    pat:'hinge', kind:'w',
-  bands:{kg:['Bodyweight','40–70','70–110','110–150','150+'], lb:['Bodyweight','95–155','155–245','245–330','330+']}},
- {id:'plank', n:'Plank',        a:'push',  hint:'Before the hips drop',    pat:'core', kind:'t',
-  bands:['Under 20s','20–45s','45–90s','90s+']},
- {id:'carry', n:'Farmer carry', a:'carry', hint:'Weight in each hand',     pat:'carry', kind:'w',
-  bands:{kg:['Under 20','20–30','30–40','40+'], lb:['Under 45','45–65','65–90','90+']}}
-];
-const BODY_DECK = [
- {id:'pushup', n:'Push-up',        a:'push',  hint:'Chest to the floor',   pat:'push', kind:'r',
-  bands:['0','1–5','6–15','16–30','30+']},
- {id:'bwsquat',n:'Bodyweight squat',a:'squat',hint:'Thighs past parallel', pat:'squat', kind:'r',
-  bands:['Under 10','10–20','20–40','40+']},
- {id:'lunge',  n:'Lunge',          a:'carry', hint:'Per leg, no support',  pat:'unilat', kind:'r',
-  bands:['0','1–5','6–12','12+']},
- {id:'plank',  n:'Plank',          a:'push',  hint:'Before the hips drop', pat:'core', kind:'t',
-  bands:['Under 20s','20–45s','45–90s','90s+']},
- {id:'bridge', n:'Glute bridge',   a:'hinge', hint:'Feet on the floor',    pat:'hinge', kind:'r',
-  bands:['Under 10','10–20','20–40','40+']},
- {id:'pullup', n:'Pull-up',        a:'pull',  hint:'Anything you can hang from', pat:'vpull', kind:'r',
-  bands:['0','1–3','4–8','8+']},
- {id:'hang',   n:'Dead hang',      a:'pull',  hint:'Just holding on',      pat:'vpull', kind:'t',
-  bands:['0','Under 10s','10–30s','30–60s','60s+']},
- {id:'hollow', n:'Hollow hold',    a:'push',  hint:'Low back flat',        pat:'core', kind:'t',
-  bands:['0','Under 15s','15–40s','40s+']},
- {id:'burpee', n:'Burpee',         a:'carry', hint:'In sixty seconds',     pat:'cond', kind:'r',
-  bands:['0','Under 8','8–15','15+']},
- {id:'balance',n:'One-foot balance',a:'carry',hint:'Eyes open',            pat:'balance', kind:'t',
-  bands:['Under 10s','10–30s','30–60s','60s+']}
-];
-function deckSet(){ return hasLoad() ? GYM_DECK : BODY_DECK; }
-function bandsFor(c){
-  if(c.kind==='w') return c.bands[A.unit==='lb'?'lb':'kg'];
-  return c.bands;
-}
-function bandQ(c){
-  return c.kind==='w' ? 'How much, for about five reps?'
-       : c.kind==='r' ? 'How many, in one honest set?'
-       : c.kind==='t' ? 'How long can you hold it?'
-       : 'How far do you take it?';
-}
-/* Gym literacy and bodyweight literacy fall out of the deck.
-   Never ask what the answer already tells you. */
-function deriveLevels(){
-  const d=A.deck||{}, set=deckSet();
-  let known=0, loaded=0;
-  set.forEach(function(c){ const r=d[c.id]; if(!r||!r.does) return; known++;
-    if(c.kind==='w' && r.band && r.band.indexOf('Bar only')<0 && r.band.indexOf('Bodyweight')<0) loaded++; });
-  const lvl = n => n>=8?'Confident' : n>=4?'Some' : 'New';
-  A.levels = hasLoad() ? {gym:lvl(known), body:lvl(Math.max(0,known-loaded))}
-                       : {gym:'New',      body:lvl(known)};
-  const seen={}; A.patterns=[];
-  set.forEach(function(c){ if((d[c.id]||{}).does && !seen[c.pat]){ seen[c.pat]=1; A.patterns.push(c.pat); } });
-  A.patternsTotal = (function(){ const t={}; set.forEach(function(c){t[c.pat]=1;}); return Object.keys(t).length; })();
-}
-
 /* ---------------- RENDER ---------------- */
 const stage=document.getElementById('stage'), foot=document.getElementById('foot'),
       bars=document.getElementById('bars'), chapname=document.getElementById('chapname'),
@@ -995,11 +779,8 @@ function progress(){
 }
 function toast(m,ms){toastEl.innerHTML=m;toastEl.classList.add('on');setTimeout(()=>toastEl.classList.remove('on'),ms||3400);}
 
-function hasLoad(){ const w=A.where||[]; return w.indexOf('gym')>-1 || w.indexOf('homekit')>-1 || w.indexOf('hotel')>-1; }
 function skipRule(s){
-  if(s.skipIfNoTracker && (A.tracker==='none' || !A.tracker)) return true;
-  if(s.skipIfNoLoad && !hasLoad()) return true;
-  return false;
+  return (s.skipIfNoTracker && (A.tracker==='none' || !A.tracker));
 }
 function go(n,back){
   if(busy) return;
@@ -1025,22 +806,7 @@ backBtn.onclick=function(){
   while(hist.length){ t=hist.pop(); if(!FLOW[t] || FLOW[t].type!=='chapter') break; t=null; }
   if(t!==null) go(t,true);
 };
-function el(h){
-  const d=document.createElement('div');d.className='screen enter';
-  d.innerHTML=h+'<div class="footspacer" aria-hidden="true"></div>';
-  stage.appendChild(d);
-  d.addEventListener('scroll',function(){checkMore(d);},{passive:true});
-  requestAnimationFrame(function(){checkMore(d);});
-  later(function(){checkMore(d);},420);
-  return d;
-}
-function checkMore(d){
-  const tag=document.getElementById('moretag'); if(!tag) return;
-  const room = d.scrollHeight - d.clientHeight - d.scrollTop;
-  const foot = document.getElementById('foot');
-  const fh = foot.offsetHeight||0;
-  tag.classList.toggle('on', room > fh + 40);
-}
+function el(h){const d=document.createElement('div');d.className='screen enter';d.innerHTML=h;stage.appendChild(d);return d;}
 function setFoot(h){
   foot.innerHTML=h;
   requestAnimationFrame(function(){ foot.classList.add('on'); syncFootPad(); });
@@ -1049,48 +815,23 @@ function syncFootPad(){
   requestAnimationFrame(function(){
     var h=foot.offsetHeight||0;
     document.documentElement.style.setProperty('--footpad',(h+28)+'px');
-    var sc=stage.querySelector('.screen'); if(sc) checkMore(sc);
   });
 }
-window.addEventListener('resize',syncFootPad);
-if(window.visualViewport){window.visualViewport.addEventListener('resize',syncFootPad);}
 function head(s,dynSub){
   return `${s.h?`<h1 class="q">${s.h}</h1>`:''}${(dynSub||s.sub)?`<p class="sub">${dynSub||s.sub}</p>`:''}`;
 }
 function render(){const s=FLOW[i];if(!s)return;
-  ({hero,promise,chapter,text,single,multi,rank,rankdyn,stepper,bands,levels,body,insight,numbers,feelings,
-    units,deckintro,deck,enjoy,loader,reveal,patternscreen,building,entry}[s.type])(s);}
+  ({hero,chapter,text,single,multi,rank,stepper,bands,levels,body,insight,numbers,feelings,
+    loader,reveal,patternscreen,building,entry}[s.type])(s);}
 
 /* hero */
-const MARK = '<svg viewBox="0 0 24 24"><path d="M4 9v6"/><path d="M7 6.5v11"/>'+
-             '<path d="M17 6.5v11"/><path d="M20 9v6"/><path d="M7 12h10"/></svg>';
 function hero(s){
   el(`<div class="hero">
-    <div class="mark">${MARK}</div>
+    ${s.logo?'<img class="logo" src="images/logo-onboarding.png" alt="Fitness Journey">':''}
     <h1>${s.h}</h1>${s.p.map(t=>`<p>${t}</p>`).join('')}
-    <div class="steps"><i></i><i></i><i></i><i></i></div>
-    <div class="metaline">${s.meta}</div></div>`);
+    <div class="badges">${s.badges.map(b=>`<span class="badge">${b}</span>`).join('')}</div></div>`);
   setFoot(`<button class="cta accent">${s.cta}</button>`);
   foot.querySelector('.cta').onclick=()=>{haptic(18);next();};
-}
-
-/* the contract — lines arrive one at a time, then the button */
-function promise(s){
-  const d=el(`<div class="promise"><h1>${s.h}</h1>
-    ${s.rows.map(r=>`<div class="prow"><div class="who">${r[0]}</div>
-      <div class="what">${r[1]}<small>${r[2]}</small></div></div>`).join('')}</div>`);
-  const rows=[].slice.call(d.querySelectorAll('.prow'));
-  rows.forEach(function(r,k){ later(function(){ r.classList.add('on'); haptic(8); }, 260 + k*620); });
-  later(function(){ setFoot(`<button class="cta accent">${s.cta}</button>`);
-    foot.querySelector('.cta').onclick=()=>{haptic(16);next();}; }, 260 + rows.length*620 + 180);
-  d.onclick=function(){                       /* impatient users skip the reveal */
-    rows.forEach(function(r){r.classList.add('on');});
-    clearPending();
-    if(!foot.querySelector('.cta')){
-      setFoot(`<button class="cta accent">${s.cta}</button>`);
-      foot.querySelector('.cta').onclick=()=>{haptic(16);next();};
-    }
-  };
 }
 
 /* chapter — auto-advances after 5s, tap to skip */
@@ -1311,286 +1052,51 @@ function feelings(s){
   sync();
 }
 
-
-/* ---- ranked, device-aware metrics ---- */
-function rankdyn(s){
-  const set = METRICS[A.tracker] || METRICS.other;
-  const opts = set.map(function(m){ return {v:m[0], ic:METRIC_ICON[m[0]]||'spark', t:m[1], sm:m[2]}; });
-  opts.push({v:'forget', ic:'shrug', t:'I open it and forget', sm:'Most common answer'});
-  const d=el(`${head(s)}<div class="opts">${opts.map(o=>`<button class="opt" data-v="${o.v}">
-      ${ico(o.ic)}<span class="tx"><b>${o.t}</b>${o.sm?`<small>${o.sm}</small>`:''}</span>
-      <span class="tick"></span><span class="rank"></span></button>`).join('')}</div>`);
-  const order=[];
-  setFoot(`<button class="cta ghost">Skip for now</button>`);
-  const cta=foot.querySelector('.cta');
-  const paint=()=>{
-    d.querySelectorAll('.opt').forEach(b=>{
-      const k=order.indexOf(b.dataset.v);
-      b.classList.toggle('ranked',k>-1);
-      if(k>-1) b.querySelector('.rank').textContent=k+1;
-    });
-    cta.classList.toggle('accent',order.length>0);
-    cta.classList.toggle('ghost',order.length===0);
-    cta.textContent = order.length ? s.cta+' · '+order.length : 'Skip for now';
-  };
-  d.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
-    const v=b.dataset.v, k=order.indexOf(v); haptic(14);
-    if(v==='forget'){ order.length=0; order.push(v); paint(); later(next,380); return; }
-    const f=order.indexOf('forget'); if(f>-1) order.splice(f,1);
-    if(k>-1) order.splice(k,1);
-    else { if(order.length>=s.max){ toast('Three is plenty. Tap one off to reorder.',2000); return; } order.push(v); }
-    paint();});
-  cta.onclick=()=>{haptic(14);A[s.key]=order.slice();next();};
-  paint();
-}
-
-/* ---- kilos or pounds ---- */
-function units(s){
-  const d=el(`${head(s)}<div class="unitrow">
-    <button data-u="kg">Kilos</button><button data-u="lb">Pounds</button></div>`);
-  setFoot('');
-  d.querySelectorAll('.unitrow button').forEach(b=>b.onclick=()=>{haptic(14);
-    d.querySelectorAll('.unitrow button').forEach(x=>x.classList.remove('on'));
-    b.classList.add('on'); A.unit=b.dataset.u; later(next,320);});
-}
-
-/* ---- deck intro ---- */
-function deckintro(){
-  const gym=hasLoad();
-  el(`<div class="promise">
-    <h1>Ten cards.</h1>
-    <div class="prow on"><div class="who">Right</div><div class="what">I do this one.<small>Then tell me roughly how much.</small></div></div>
-    <div class="prow on"><div class="who">Left</div><div class="what">Not really, or never.<small>No explanation needed.</small></div></div>
-    <p class="micro" style="margin-top:18px">${gym?'Gym movements, because you have a gym.':'Bodyweight movements, because that is what you have.'} About forty seconds.</p>
-  </div>`);
-  setFoot(`<button class="cta accent">Start swiping</button>`);
-  foot.querySelector('.cta').onclick=()=>{haptic(16);next();};
-}
-
-/* ---- the deck itself ---- */
-function deck(s){
-  const set=deckSet();
-  const res={}; let k=0;
-  const d=el(`<div class="deckwrap">
-      <div class="dkdots"></div>
-      <div class="dkstack"></div>
-      <div class="dkbtns">
-        <button class="dkbtn no">Not really</button>
-        <button class="dkbtn yes">I do this</button>
-      </div>
-      <div class="dkhint">Or swipe the card</div>
-    </div>`);
-  setFoot('');
-  const stackEl=d.querySelector('.dkstack'), dotsEl=d.querySelector('.dkdots');
-  const btnNo=d.querySelector('.dkbtn.no'), btnYes=d.querySelector('.dkbtn.yes');
-  const btnRow=d.querySelector('.dkbtns'), hintEl=d.querySelector('.dkhint');
-
-  function dots(){ dotsEl.innerHTML=set.map((_,j)=>
-    `<i class="${j<k?'done':(j===k?'now':'')}"></i>`).join(''); }
-
-  function card(j){
-    const c=set[j];
-    const e=document.createElement('div');
-    e.className='dkcard';
-    e.innerHTML=`<div class="dkvid">${poseSvg(c.a)}
-        <div class="dkstamp yes">I do this</div><div class="dkstamp no">Not really</div></div>
-      <div class="dkcap"><b>${c.n}</b><span>${c.hint}</span></div>
-      <div class="dkbands">
-        <div class="bq">${bandQ(c)}</div><div class="bh">${c.n} — rough is fine.</div>
-        ${bandsFor(c).map(v=>`<button data-v="${v}">${v}</button>`).join('')}
-      </div>`;
-    return e;
-  }
-
-  function paint(){
-    stackEl.innerHTML='';
-    if(k>=set.length){ finish(); return; }
-    if(k+1<set.length){
-      const back=card(k+1);
-      back.style.transform='scale(.955) translateY(9px)';
-      back.style.opacity='.5'; back.style.pointerEvents='none';
-      stackEl.appendChild(back);
-    }
-    const top=card(k);
-    stackEl.appendChild(top);
-    wire(top, set[k]);
-    dots();
-    btnRow.style.display=''; hintEl.style.display='';
-  }
-
-  function wire(e,c){
-    const yes=e.querySelector('.dkstamp.yes'), no=e.querySelector('.dkstamp.no');
-    const bandsEl=e.querySelector('.dkbands');
-    let sx=0,sy=0,dx=0,dy=0,on=false,lock=null,armed=true;
-
-    e.addEventListener('pointerdown',function(ev){
-      if(!armed) return;
-      on=true;lock=null;sx=ev.clientX;sy=ev.clientY;dx=0;dy=0;
-      e.style.transition='none';
-      try{e.setPointerCapture(ev.pointerId);}catch(err){}
-    });
-    e.addEventListener('pointermove',function(ev){
-      if(!on) return;
-      dx=ev.clientX-sx; dy=ev.clientY-sy;
-      if(lock===null && (Math.abs(dx)>6||Math.abs(dy)>6)) lock=Math.abs(dx)>Math.abs(dy)?'x':'y';
-      if(lock!=='x') return;
-      e.style.transform='translateX('+dx+'px) rotate('+(dx*0.042)+'deg)';
-      yes.style.opacity = dx>0?Math.min(1,dx/88):0;
-      no.style.opacity  = dx<0?Math.min(1,-dx/88):0;
-    });
-    function release(){
-      if(!on) return; on=false;
-      e.style.transition='transform .28s cubic-bezier(.3,.8,.3,1),opacity .28s';
-      if(lock==='x' && Math.abs(dx)>80) fly(dx>0);
-      else { e.style.transform=''; yes.style.opacity=0; no.style.opacity=0; }
-    }
-    e.addEventListener('pointerup',release);
-    e.addEventListener('pointercancel',release);
-
-    function fly(does){
-      if(!armed) return;
-      armed=false;
-      if(!does){
-        e.style.transform='translateX(-460px) rotate(-20deg)'; e.style.opacity='0';
-        res[c.id]={does:false}; haptic(12); k++; later(paint,180); return;
-      }
-      haptic(9);
-      e.style.transition='transform .2s'; e.style.transform='';
-      yes.style.opacity=0; no.style.opacity=0;
-      btnRow.style.display='none'; hintEl.style.display='none';
-      bandsEl.classList.add('on');
-      bandsEl.querySelectorAll('button').forEach(function(b){
-        b.onclick=function(){ haptic(14); b.classList.add('on');
-          res[c.id]={does:true, band:b.dataset.v};
-          later(function(){ e.style.transition='transform .28s,opacity .28s';
-            e.style.transform='translateX(460px) rotate(20deg)'; e.style.opacity='0';
-            k++; later(paint,180); },130);
-        };
-      });
-    }
-    e._fly=fly;
-  }
-
-  btnNo.onclick=function(){ const t=stackEl.lastElementChild; if(t&&t._fly) t._fly(false); };
-  btnYes.onclick=function(){ const t=stackEl.lastElementChild; if(t&&t._fly) t._fly(true); };
-
-  function finish(){
-    A[s.key]=res; deriveLevels();
-    const does=Object.keys(res).filter(function(x){return res[x].does;}).length;
-    btnRow.style.display='none'; hintEl.style.display='none';
-    dotsEl.innerHTML=set.map(()=>'<i class="done"></i>').join('');
-    stackEl.innerHTML=`<div class="dkcard" style="border-color:var(--line2);align-items:center;justify-content:center;padding:26px;text-align:center">
-      <div style="font-size:24px;font-weight:600;letter-spacing:-.02em;margin-bottom:10px">That's your baseline.</div>
-      <div style="font-size:14.5px;line-height:1.5;color:var(--ink2);max-width:250px">
-        ${does} of ${set.length} movements, with numbers. Everything I build starts from these.</div></div>`;
-    setFoot(`<button class="cta accent">Continue</button>`);
-    foot.querySelector('.cta').onclick=()=>{haptic(400);next();};
-  }
-
-  paint();
-}
-
-/* ---- enjoyment, for the ones they actually do ---- */
-function enjoy(s){
-  const set=deckSet(), d0=A.deck||{};
-  let items=set.filter(function(c){ return (d0[c.id]||{}).does; })
-               .map(function(c){ return [c.id, c.n]; });
-  if(items.length<3){
-    items=[['heavy','Lifting something heavy'],['sweat','Getting out of breath'],
-           ['skill','Learning technique'],['quiet','Training alone'],
-           ['running','Running'],['circuits','Circuits and burpees']];
-  }
-  const YES='M4 12l5 5L20 6', NO='M7 7l10 10M17 7L7 17';
-  const svg=dd=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">'+
-    dd.split('M').filter(Boolean).map(x=>'<path d="M'+x+'"/>').join('')+'</svg>';
-  const d=el(`${head(s)}
-    <div class="flegend"><span>love it</span><span>never</span></div>
-    ${items.map(it=>`<div class="frow" data-k="${it[0]}">
-      <span class="fname">${it[1]}</span>
-      <button class="fbtn love" data-m="love">${svg(YES)}</button>
-      <button class="fbtn never" data-m="never">${svg(NO)}</button></div>`).join('')}`);
-  const state={};
-  d.querySelectorAll('.frow').forEach(row=>{
-    row.querySelectorAll('.fbtn').forEach(btn=>btn.onclick=()=>{haptic(12);
-      const kk=row.dataset.k,m=btn.dataset.m;
-      if(state[kk]===m){delete state[kk];btn.classList.remove('on');}
-      else{state[kk]=m;row.querySelectorAll('.fbtn').forEach(x=>x.classList.remove('on'));btn.classList.add('on');}
-      sync();});
-  });
-  setFoot(`<button class="cta ghost">Skip for now</button>`);
-  const cta=foot.querySelector('.cta');
-  const sync=()=>{const n=Object.keys(state).length;cta.classList.toggle('accent',n>0);
-    cta.classList.toggle('ghost',n===0);cta.textContent=n?s.cta+' · '+n:'Skip for now';};
-  cta.onclick=()=>{haptic(14);A[s.key]=state;next();};
-  sync();
-}
-
 /* body map — front / back */
 function body(s){
-  /* Eight regions a side, not twelve. Left/right is a follow-up question,
-     not an intake question — and halving the count doubles the target. */
-  const FRONT=[
-    ['neck','Neck',      [[90,40,32,20]]],
-    ['shldr','Shoulders',[[44,58,36,30],[132,58,36,30]]],
-    ['chest','Chest',    [[70,72,72,40]]],
-    ['abs','Abdomen',    [[70,114,72,40]]],
-    ['arm','Elbow or wrist',[[44,94,26,58],[142,94,26,58]]],
-    ['hip','Hip or groin',[[72,156,68,32]]],
-    ['knee','Knees',     [[74,248,30,38],[108,248,30,38]]],
-    ['ankle','Ankles or feet',[[74,294,30,34],[108,294,30,34]]]];
-  const BACK=[
-    ['neckB','Neck',     [[90,40,32,20]]],
-    ['blade','Shoulder blades',[[68,64,36,40],[108,64,36,40]]],
-    ['mid','Mid back',   [[70,106,72,32]]],
-    ['low','Lower back', [[70,138,72,36]]],
-    ['armB','Elbow or wrist',[[44,94,26,58],[142,94,26,58]]],
-    ['glute','Glutes',   [[72,176,68,34]]],
-    ['ham','Hamstrings', [[74,214,30,52],[108,214,30,52]]],
-    ['calf','Calves',    [[74,272,30,46],[108,272,30,46]]]];
+  const FRONT=[['neck','Neck',94,42,24,16],['shoulderL','Left shoulder',44,58,24,26],['shoulderR','Right shoulder',144,58,24,26],
+    ['chest','Chest',78,66,56,38],['abs','Abdomen',78,106,56,32],
+    ['elbowL','Left elbow / wrist',44,92,24,34],['elbowR','Right elbow / wrist',144,92,24,34],
+    ['hip','Hip or groin',78,140,56,28],['kneeL','Left knee',79,220,26,28],['kneeR','Right knee',107,220,26,28],
+    ['ankleL','Left ankle / foot',79,274,26,28],['ankleR','Right ankle / foot',107,274,26,28]];
+  const BACK=[['neckB','Neck',94,42,24,16],['trapL','Left shoulder blade',72,62,30,36],['trapR','Right shoulder blade',110,62,30,36],
+    ['midback','Mid back',78,100,56,26],['lowback','Lower back',78,128,56,30],
+    ['elbowLB','Left elbow / wrist',44,92,24,34],['elbowRB','Right elbow / wrist',144,92,24,34],
+    ['glute','Glutes',78,158,56,30],['hamL','Left hamstring',79,196,26,34],['hamR','Right hamstring',107,196,26,34],
+    ['calfL','Left calf',79,248,26,32],['calfR','Right calf',107,248,26,32]];
   let view='front';
   const sel=new Set(); const names={};
-
-  const FIG = `
-    <circle cx="106" cy="28" r="20" fill="#2B313A"/>
-    <rect x="97" y="44" width="18" height="16" rx="7" fill="#2B313A"/>
-    <rect x="68" y="56" width="76" height="102" rx="20" fill="#2B313A"/>
-    <rect x="72" y="150" width="68" height="40" rx="15" fill="#2B313A"/>
-    <rect x="44" y="60" width="26" height="94" rx="13" fill="#2B313A"/>
-    <rect x="142" y="60" width="26" height="94" rx="13" fill="#2B313A"/>
-    <rect x="74" y="186" width="30" height="146" rx="15" fill="#2B313A"/>
-    <rect x="108" y="186" width="30" height="146" rx="15" fill="#2B313A"/>`;
-
   const draw=()=>{
     const P = view==='front'?FRONT:BACK;
     P.forEach(p=>names[p[0]]=p[1]);
-    const parts = P.map(p=>p[2].map(r=>
-      `<rect class="part${sel.has(p[0])?' on':''}" data-k="${p[0]}" x="${r[0]}" y="${r[1]}" width="${r[2]}" height="${r[3]}" rx="9"/>`).join('')).join('');
-    const hits = P.map(p=>p[2].map(r=>{
-      const w=Math.max(64,r[2]), h=Math.max(64,r[3]);
-      return `<rect class="hit" data-k="${p[0]}" x="${r[0]-(w-r[2])/2}" y="${r[1]-(h-r[3])/2}" width="${w}" height="${h}" fill="transparent"/>`;
-    }).join('')).join('');
-    d.querySelector('.bodywrap').innerHTML =
-      `<svg class="body" viewBox="0 0 212 344">${FIG}${parts}${hits}</svg>`;
+    const svg=`<svg class="body" viewBox="0 0 212 316">
+      <circle cx="106" cy="24" r="18" fill="#2B313A"/>
+      <rect x="74" y="58" width="64" height="84" rx="16" fill="#2B313A"/>
+      <rect x="76" y="138" width="60" height="30" rx="12" fill="#2B313A"/>
+      <rect x="44" y="58" width="24" height="76" rx="12" fill="#2B313A"/>
+      <rect x="144" y="58" width="24" height="76" rx="12" fill="#2B313A"/>
+      <rect x="78" y="164" width="27" height="140" rx="13" fill="#2B313A"/>
+      <rect x="107" y="164" width="27" height="140" rx="13" fill="#2B313A"/>
+      ${P.map(p=>`<rect class="part${sel.has(p[0])?' on':''}" data-k="${p[0]}" x="${p[2]}" y="${p[3]}" width="${p[4]}" height="${p[5]}" rx="8"/>`).join('')}
+      ${P.map(p=>{const w=Math.max(60,p[4]),h=Math.max(60,p[5]);
+        return `<rect class="hit" data-k="${p[0]}" x="${p[2]-(w-p[4])/2}" y="${p[3]-(h-p[5])/2}" width="${w}" height="${h}" fill="transparent"/>`;}).join('')}
+    </svg>`;
+    d.querySelector('.bodywrap').innerHTML=svg;
     d.querySelectorAll('.hit').forEach(hit=>hit.onclick=()=>{haptic(14);const k=hit.dataset.k;
       if(sel.has(k))sel.delete(k);else sel.add(k);
-      d.querySelectorAll('.part[data-k="'+k+'"]').forEach(x=>x.classList.toggle('on',sel.has(k)));
-      sync();});
+      d.querySelector('.part[data-k="'+k+'"]').classList.toggle('on',sel.has(k)); sync();});
   };
   const d=el(`${head(s)}
-    <button class="nonechip" id="nohurt">Nothing hurts</button>
     <div class="bodytabs"><button class="btab on" data-v="front">Front</button><button class="btab" data-v="back">Back</button></div>
     <div class="bodywrap"></div>
     <div class="chips" id="chips"></div>`);
-  const chips=d.querySelector('#chips'), nohurt=d.querySelector('#nohurt');
-  nohurt.onclick=()=>{haptic(14);A.pain=[];next();};
+  const chips=d.querySelector('#chips');
   const sync=()=>{chips.innerHTML=[...sel].map(k=>`<span class="chip">${names[k]||k}</span>`).join('');
-    nohurt.style.display=sel.size?'none':'';
-    cta.textContent=sel.size?'Continue · '+sel.size:'Tap anywhere that hurts';
-    cta.disabled=!sel.size;};
+    cta.textContent=sel.size?'Continue · '+sel.size:'Nothing hurts';};
   d.querySelectorAll('.btab').forEach(t=>t.onclick=()=>{haptic(12);
     d.querySelectorAll('.btab').forEach(x=>x.classList.remove('on'));t.classList.add('on');
     view=t.dataset.v; draw(); sync();});
-  setFoot(`<button class="cta accent">Tap anywhere that hurts</button>`);
+  setFoot(`<button class="cta accent">Nothing hurts</button>`);
   const cta=foot.querySelector('.cta');
   cta.onclick=()=>{haptic(14);A.pain=[...sel];
     if(sel.size)toast("Logged. I won't ask you to describe it now.",2400);
@@ -1604,21 +1110,16 @@ function insight(s){
   const d=el(`<div class="insight"><div class="ins-tag"><i></i>${data.tag}</div>
     ${data.lines.map((l,k)=>`<div class="ins-line${k>0?' s':''}">${l}</div>`).join('')}</div>`);
   const items=[...d.querySelectorAll('.ins-line')];
-  items.forEach((n,k)=>later(()=>n.classList.add('fadein'),150+k*360));
-  later(()=>{setFoot(`<button class="cta accent">Keep going</button>`);
-    foot.querySelector('.cta').onclick=()=>{if(autoT){clearTimeout(autoT);autoT=null;}haptic(14);next();};},
-    150+items.length*360);
-  /* moves on by itself, like the section cards */
-  autoT=setTimeout(next, 5000 + items.length*360);
-  d.onclick=()=>{ if(autoT){clearTimeout(autoT);autoT=null;next();} };
+  items.forEach((n,k)=>setTimeout(()=>n.classList.add('fadein'),150+k*360));
+  setTimeout(()=>{setFoot(`<button class="cta accent">Keep going</button>`);
+    foot.querySelector('.cta').onclick=()=>{haptic(14);next();};},150+items.length*360);
 }
 
 /* loader */
 function loader(){
-  const dk=A.deck||{};
-  const nDoes=Object.keys(dk).filter(function(x){return dk[x].does;}).length;
+  const cap=A.capability||{};
   const steps=[
-    'Reading '+(nDoes||5)+' movements you can already do…',
+    'Reading '+(Object.keys(cap).length||5)+' capability markers…',
     'Balancing "'+(FOCUS_LABEL[(A.focus||[])[0]]||'your goal')+'" against '+(A.days||3)+' days…',
     'Checking '+((A.blockers||[]).length)+' things that stopped you before…',
     'Locking movements you haven\'t earned the right to load…'];
@@ -1694,14 +1195,14 @@ function building(){
       <p>One exercise per card. Swipe right if you know it, left if you want me to show you. A minute, and it decides what I explain and what I assume.</p></div>
     <p class="micro" style="text-align:center">You'll get a notification the moment it's ready.</p>`);
   setFoot(`<button class="cta accent">Start the cards</button><button class="skip">Later</button>`);
-  foot.querySelector('.cta').onclick=()=>{haptic(400);A.cardsNow=true;next();};
-  foot.querySelector('.skip').onclick=()=>{haptic(14);A.cardsNow=false;next();};
+  foot.querySelector('.cta').onclick=()=>{haptic(400);A.deck='now';next();};
+  foot.querySelector('.skip').onclick=()=>{haptic(14);A.deck='later';next();};
 }
 
 /* entry 001 */
 function entry(){
   const dt=new Date(), ds=dt.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
-  const nPat=(A.patterns||[]).length, totPat=A.patternsTotal||8;
+  const nPat=(A.patterns||[]).filter(p=>p!=='none').length;
   const done=Object.keys(A).length;
   el(`<div class="hero" style="justify-content:flex-start;padding-top:4px">
     <img class="logo" src="images/logo-onboarding.png" alt="Fitness Journey" style="width:56%;margin-bottom:22px">
@@ -1711,8 +1212,8 @@ function entry(){
     <div class="logcard">
       <div class="lgrow"><span>Opened</span><b>${ds}</b></div>
       <div class="lgrow"><span>Horizon</span><b>Age ${horizonAge(A.age||38)}</b></div>
-      <div class="lgrow"><span>Profile</span><b>78% complete</b></div>
-      <div class="lgrow"><span>Patterns trained</span><b>${nPat} of ${totPat}</b></div>
+      <div class="lgrow"><span>Profile</span><b>76% complete</b></div>
+      <div class="lgrow"><span>Patterns trained</span><b>${nPat} of 6</b></div>
       <div class="lgrow"><span>Check-in</span><b>${({sun:'Sundays',mon:'Mondays',fri:'Fridays',wed:'Wednesdays'})[A.checkin]||'Sundays'}</b></div>
     </div>
     <p class="micro">Nothing gets overwritten. When something changes it becomes a new entry with a new date.</p></div>`);
