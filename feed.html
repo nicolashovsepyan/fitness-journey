@@ -1,0 +1,720 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#171A1E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Fitness Journey — The Feed</title>
+<style>
+:root{
+  --bg:#171A1E; --bg2:#1E232A; --card:#212630; --line:#2F3640; --line2:#3B434E;
+  --ink:#ECEFF3; --ink2:#A9B2BC; --ink3:#858E99;
+  --accent:#3ECBA8; --accent-soft:rgba(62,203,168,.13);
+  --red:#F0857A; --red-soft:rgba(240,133,122,.13);
+  --amber:#E3B25F;
+  --sat:env(safe-area-inset-top); --sab:env(safe-area-inset-bottom);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;height:100%;background:#0E1013;}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Inter,system-ui,sans-serif;
+  color:var(--ink); overscroll-behavior:none;
+  display:flex; align-items:center; justify-content:center;
+}
+#device{
+  position:relative; width:min(100vw,402px); height:874px; max-height:100%;
+  background:var(--bg); overflow:hidden; border-radius:34px;
+  box-shadow:0 30px 80px rgba(0,0,0,.6);
+  display:flex; flex-direction:column;
+}
+@media (pointer:coarse),(max-width:560px){
+  #device{width:100%;height:100vh;height:calc(var(--vh,1vh)*100);height:100dvh;
+    max-height:none;border-radius:0;box-shadow:none;}
+}
+
+/* ---------- prototype nav ---------- */
+#nav{
+  flex:0 0 auto; padding:calc(var(--sat) + 10px) 14px 10px;
+  display:flex; gap:6px; background:var(--bg); border-bottom:1px solid var(--line);
+  position:relative; z-index:60;
+}
+#nav button{
+  flex:1; height:44px; border:1px solid var(--line); background:transparent;
+  color:var(--ink3); font:600 12.5px/1 inherit; letter-spacing:.04em; text-transform:uppercase;
+  border-radius:10px; font-family:inherit;
+}
+#nav button.on{background:var(--card);color:var(--ink);border-color:var(--line2);}
+
+#stage{flex:1 1 auto; position:relative; overflow:hidden;}
+.view{position:absolute;top:0;right:0;bottom:0;left:0;display:none;flex-direction:column;}
+.view.on{display:flex;}
+
+/* ---------- figure ---------- */
+.fig{width:100%;height:100%;display:block;}
+.fig g{stroke:var(--ink);stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round;fill:none;}
+.fig .pa{animation:fA 1.15s steps(1,end) infinite;}
+.fig .pb{animation:fB 1.15s steps(1,end) infinite;}
+@keyframes fA{0%,49%{opacity:1}50%,100%{opacity:0}}
+@keyframes fB{0%,49%{opacity:0}50%,100%{opacity:1}}
+.fig .gnd{stroke:var(--line2);stroke-width:2;}
+@media (prefers-reduced-motion:reduce){.fig .pa,.fig .pb{animation-duration:2.6s;}}
+
+/* ---------- DECK ---------- */
+#deck{padding:0 18px;}
+.dots{display:flex;gap:5px;justify-content:center;padding:16px 0 4px;flex:0 0 auto;}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--line2);transition:background .2s;}
+.dot.done{background:var(--accent);}
+.dot.now{background:var(--ink);}
+.deckhd{text-align:center;padding:6px 0 12px;flex:0 0 auto;}
+.deckhd h2{margin:0;font:600 17px/1.3 inherit;letter-spacing:-.01em;}
+.deckhd p{margin:5px 0 0;font:400 13.5px/1.45 inherit;color:var(--ink3);}
+#stack{flex:1 1 auto;position:relative;margin:4px 0 10px;}
+.dcard{
+  position:absolute;top:0;right:0;bottom:0;left:0;
+  background:var(--card);border:1px solid var(--line);border-radius:22px;
+  overflow:hidden;display:flex;flex-direction:column;
+  box-shadow:0 12px 34px rgba(0,0,0,.35);
+  touch-action:pan-y;
+}
+.dcard .vid{flex:1 1 auto;min-height:0;position:relative;overflow:hidden;
+  background:linear-gradient(160deg,#242A34,#1A1F26);}
+.dcard .vid .fig{padding:34px 0 26px;}
+.dcard .cap{flex:0 0 auto;padding:16px 18px 20px;border-top:1px solid var(--line);}
+.dcard .cap b{display:block;font:600 19px/1.25 inherit;letter-spacing:-.015em;}
+.dcard .cap span{display:block;margin-top:4px;font:400 13px/1.4 inherit;color:var(--ink3);}
+.badge{
+  position:absolute;top:14px;left:14px;padding:5px 9px;border-radius:7px;
+  background:rgba(23,26,30,.72);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  font:600 10.5px/1 inherit;letter-spacing:.09em;text-transform:uppercase;color:var(--ink2);
+}
+.stamp{
+  position:absolute;top:20px;padding:8px 12px;border-radius:9px;border:2px solid;
+  font:700 13px/1 inherit;letter-spacing:.08em;text-transform:uppercase;opacity:0;
+  pointer-events:none;
+}
+.stamp.yes{right:16px;color:var(--accent);border-color:var(--accent);transform:rotate(9deg);}
+.stamp.no{left:16px;color:var(--amber);border-color:var(--amber);transform:rotate(-9deg);}
+.deckfoot{flex:0 0 auto;display:flex;gap:10px;padding:0 0 calc(var(--sab) + 18px);}
+.dbtn{
+  flex:1;height:56px;border-radius:14px;border:1px solid var(--line2);
+  background:var(--card);color:var(--ink);font:600 14.5px/1 inherit;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;gap:7px;
+}
+.dbtn.yes{border-color:rgba(62,203,168,.4);color:var(--accent);}
+.dbtn.no{border-color:rgba(227,178,95,.4);color:var(--amber);}
+.hintrow{flex:0 0 auto;text-align:center;font:400 11.5px/1.4 inherit;color:var(--ink3);padding:0 0 12px;}
+
+/* deck summary */
+#dsum{position:absolute;top:0;right:0;bottom:0;left:0;background:var(--bg);
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  padding:0 32px calc(var(--sab) + 24px);text-align:center;}
+#dsum.on{display:flex;}
+#dsum h2{margin:0 0 10px;font:600 26px/1.2 inherit;letter-spacing:-.02em;}
+#dsum p{margin:0;font:400 15px/1.55 inherit;color:var(--ink2);max-width:290px;}
+#dsum .num{font-variant-numeric:tabular-nums;color:var(--accent);font-weight:600;}
+.cta{margin-top:26px;height:56px;padding:0 30px;border-radius:14px;border:none;
+  background:var(--accent);color:#0E1013;font:600 15.5px/1 inherit;font-family:inherit;}
+.ghost{margin-top:14px;background:none;border:none;color:var(--ink3);font:500 13.5px/1 inherit;
+  font-family:inherit;padding:12px;}
+
+/* ---------- FEED ---------- */
+#feed{overflow:hidden;}
+#scroller{
+  flex:1 1 auto;overflow-y:auto;scroll-snap-type:y mandatory;
+  -webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+}
+.fcard{
+  position:relative;height:100%;scroll-snap-align:start;scroll-snap-stop:always;
+  background:#12151A;overflow:hidden;
+}
+.fcard .vid{position:absolute;top:0;right:0;bottom:0;left:0;
+  background:radial-gradient(120% 80% at 50% 30%,#272E39 0%,#12151A 74%);}
+.fcard .vid .fig{position:absolute;top:7%;left:0;right:0;height:57%;}
+.loopbar{pointer-events:none;position:absolute;top:0;left:0;height:2px;background:var(--accent);opacity:.75;
+  animation:loop 6s linear infinite;}
+@keyframes loop{from{width:0}to{width:100%}}
+@keyframes hintOut{to{opacity:0;transform:translateX(-50%) translateY(6px);}}
+.fshade{pointer-events:none;position:absolute;right:0;bottom:0;left:0;height:56%;
+  background:linear-gradient(to top,rgba(14,16,19,.94) 12%,rgba(14,16,19,0));}
+.fmeta{pointer-events:none;position:absolute;left:20px;right:100px;bottom:calc(var(--sab) + 26px);}
+.fmeta .rib{
+  display:inline-block;margin-bottom:10px;padding:5px 10px;border-radius:7px;
+  background:var(--accent-soft);color:var(--accent);
+  font:600 10.5px/1 inherit;letter-spacing:.08em;text-transform:uppercase;}
+.fmeta h3{margin:0;font:600 23px/1.2 inherit;letter-spacing:-.02em;}
+.fmeta p{margin:6px 0 0;font:400 13.5px/1.45 inherit;color:var(--ink2);}
+.facts{
+  position:absolute;right:14px;bottom:calc(var(--sab) + 26px);
+  display:flex;flex-direction:column;gap:12px;align-items:center;}
+.act{
+  width:64px;height:64px;border-radius:18px;border:1px solid var(--line2);
+  background:rgba(33,38,48,.82);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  color:var(--ink2);font:600 8.5px/1.15 inherit;font-family:inherit;letter-spacing:.03em;
+  text-transform:uppercase;padding:0 4px;text-align:center;
+}
+.act svg{width:22px;height:22px;stroke:currentColor;stroke-width:1.7;fill:none;
+  stroke-linecap:round;stroke-linejoin:round;}
+.act.on{color:var(--accent);border-color:rgba(62,203,168,.5);background:rgba(62,203,168,.14);}
+.act.no.on{color:var(--red);border-color:rgba(240,133,122,.5);background:rgba(240,133,122,.14);}
+.taphint{
+  animation:hintOut .4s ease 6s forwards;
+  pointer-events:none;
+  position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--sab) + 156px);
+  font:500 11.5px/1 inherit;color:var(--ink3);letter-spacing:.03em;
+  padding:8px 14px;border-radius:20px;background:rgba(23,26,30,.6);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+}
+.pat{pointer-events:none;position:absolute;top:calc(14px);left:16px;padding:5px 10px;border-radius:7px;
+  background:rgba(23,26,30,.6);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  font:600 10.5px/1 inherit;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);}
+
+/* interstitial */
+.stop{background:var(--bg2);display:flex;align-items:center;justify-content:center;
+  text-align:center;padding:0 34px;}
+.stop .in{max-width:300px;}
+.stop h3{margin:0 0 12px;font:600 25px/1.25 inherit;letter-spacing:-.02em;}
+.stop p{margin:0;font:400 15px/1.55 inherit;color:var(--ink2);}
+.stop .num{color:var(--accent);font-weight:600;font-variant-numeric:tabular-nums;}
+
+/* ---------- coaching sheet ---------- */
+#sheetwrap{position:absolute;top:0;right:0;bottom:0;left:0;display:none;z-index:70;}
+#sheetwrap.on{display:block;}
+#scrim{position:absolute;top:0;right:0;bottom:0;left:0;background:rgba(8,10,12,.62);
+  opacity:0;transition:opacity .22s;}
+#sheetwrap.on #scrim{opacity:1;}
+#sheet{
+  position:absolute;right:0;bottom:0;left:0;max-height:86%;overflow-y:auto;
+  background:var(--card);border-top:1px solid var(--line2);
+  border-radius:22px 22px 0 0;padding:10px 22px calc(var(--sab) + 24px);
+  transform:translateY(100%);transition:transform .26s cubic-bezier(.22,.8,.28,1);
+}
+#sheetwrap.on #sheet{transform:translateY(0);}
+.grabhit{display:block;width:100%;padding:8px 0 14px;border:none;background:none;}
+.grab{width:38px;height:4px;border-radius:2px;background:var(--line2);margin:0 auto;}
+#sheet h4{margin:0 0 3px;font:600 21px/1.2 inherit;letter-spacing:-.02em;}
+#sheet .sub{margin:0 0 20px;font:400 13px/1.4 inherit;color:var(--ink3);}
+.sec{margin-bottom:20px;}
+.sec .lbl{font:600 10.5px/1 inherit;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink3);margin-bottom:10px;}
+.cue{display:flex;gap:11px;align-items:flex-start;margin-bottom:9px;
+  font:400 14.5px/1.45 inherit;color:var(--ink);}
+.cue i{flex:0 0 auto;width:18px;height:18px;border-radius:50%;background:var(--accent-soft);
+  color:var(--accent);font:600 10px/18px inherit;text-align:center;font-style:normal;margin-top:2px;}
+.warn{padding:13px 15px;border-radius:12px;background:var(--red-soft);
+  border:1px solid rgba(240,133,122,.22);font:400 14px/1.45 inherit;color:var(--ink);}
+.swap{display:flex;gap:10px;}
+.swap div{flex:1;padding:12px 13px;border-radius:12px;border:1px solid var(--line);
+  background:var(--bg2);}
+.swap span{display:block;font:600 10px/1 inherit;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink3);margin-bottom:6px;}
+.swap b{font:500 13.5px/1.35 inherit;color:var(--ink);}
+
+/* ---------- LIBRARY ---------- */
+#lib{overflow-y:auto;padding:0 18px calc(var(--sab) + 28px);}
+.ring{display:flex;align-items:center;gap:16px;padding:20px 2px 22px;}
+.ring svg{flex:0 0 auto;width:64px;height:64px;transform:rotate(-90deg);}
+.ring .bgc{stroke:var(--line);stroke-width:5;fill:none;}
+.ring .fgc{stroke:var(--accent);stroke-width:5;fill:none;stroke-linecap:round;
+  transition:stroke-dashoffset .8s cubic-bezier(.22,.8,.28,1);}
+.ringtxt b{display:block;font:600 15.5px/1.25 inherit;letter-spacing:-.01em;}
+.ringtxt span{display:block;margin-top:3px;font:400 13px/1.4 inherit;color:var(--ink3);}
+.ringpct{position:absolute;font:600 13px/1 inherit;font-variant-numeric:tabular-nums;}
+.ringwrap{position:relative;display:flex;align-items:center;justify-content:center;}
+.libhd{font:600 10.5px/1 inherit;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink3);margin:22px 2px 11px;}
+.row{display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:13px;
+  background:var(--card);border:1px solid var(--line);margin-bottom:8px;}
+.row .nm{flex:1 1 auto;font:500 14.5px/1.3 inherit;}
+.row .pt{font:400 11.5px/1 inherit;color:var(--ink3);letter-spacing:.03em;}
+.row button{width:44px;height:44px;margin:-8px -8px -8px 0;border:none;background:none;
+  color:var(--ink3);font-family:inherit;display:flex;align-items:center;justify-content:center;}
+.row button svg{width:17px;height:17px;stroke:currentColor;stroke-width:1.8;fill:none;
+  stroke-linecap:round;}
+.empty{font:400 13.5px/1.5 inherit;color:var(--ink3);padding:2px 2px 4px;}
+.count{color:var(--ink3);font-weight:400;}
+
+#toast{
+  position:absolute;left:50%;transform:translateX(-50%) translateY(14px);
+  bottom:calc(var(--sab) + 232px);z-index:90;
+  background:var(--card);border:1px solid var(--line2);border-radius:11px;
+  padding:11px 16px;font:500 13px/1.3 inherit;color:var(--ink);
+  opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;
+  max-width:78%;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.4);
+}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div id="device">
+
+  <div id="nav">
+    <button data-v="deck" class="on">The Deck</button>
+    <button data-v="feed">The Feed</button>
+    <button data-v="lib">Library</button>
+  </div>
+
+  <div id="stage">
+    <!-- DECK -->
+    <div class="view on" id="deck">
+      <div class="dots" id="dots"></div>
+      <div class="deckhd">
+        <h2>Do you know this movement?</h2>
+        <p>Twelve cards. About forty seconds.</p>
+      </div>
+      <div id="stack"></div>
+      <div class="hintrow">Swipe right if you know it · left to be shown</div>
+      <div class="deckfoot">
+        <button class="dbtn no" id="dNo">Show me</button>
+        <button class="dbtn yes" id="dYes">I know this</button>
+      </div>
+      <div id="dsum">
+        <h2>Done.</h2>
+        <p><span class="num" id="sumK">0</span> you already know. <span class="num" id="sumL">0</span> I'll walk you through before your first set.</p>
+        <button class="cta" id="toFeed">See what's coming Monday</button>
+        <button class="ghost" id="redo">Run the deck again</button>
+      </div>
+    </div>
+
+    <!-- FEED -->
+    <div class="view" id="feed">
+      <div id="scroller"></div>
+    </div>
+
+    <!-- LIBRARY -->
+    <div class="view" id="lib"></div>
+  </div>
+
+  <div id="sheetwrap">
+    <div id="scrim"></div>
+    <div id="sheet"></div>
+  </div>
+
+  <div id="toast"></div>
+</div>
+
+<script>
+/* ============================================================
+   viewport height — iOS toolbars
+   ============================================================ */
+function vh(){document.documentElement.style.setProperty('--vh',(window.innerHeight*0.01)+'px');}
+vh();
+window.addEventListener('resize',vh);
+window.addEventListener('orientationchange',function(){setTimeout(vh,120);});
+if(window.visualViewport){window.visualViewport.addEventListener('resize',vh);}
+
+/* ============================================================
+   FIGURES — two poses per archetype, cross-faded.
+   Placeholder for real 5-7s clips.
+   ============================================================ */
+var POSE = {
+  squat:[
+    'M50 22a7 7 0 100 .1|M50 29L50 72|M50 40L58 52 56 66|M50 72L50 96 48 118|M42 118L58 118',
+    'M52 42a7 7 0 100 .1|M52 49L46 84|M52 56L66 60 71 52|M46 84L66 96 48 118|M42 118L58 118'
+  ],
+  hinge:[
+    'M50 22a7 7 0 100 .1|M50 29L50 72|M50 40L54 56 54 72|M50 72L50 96 48 118|M42 118L58 118',
+    'M66 52a7 7 0 100 .1|M62 57L44 74|M60 62L62 80 62 96|M44 74L44 98 46 118|M40 118L56 118'
+  ],
+  push:[
+    'M72 56a7 7 0 100 .1|M68 61L38 74|M66 63L68 90 70 112|M38 74L34 96 28 114|M22 116L76 116',
+    'M72 72a7 7 0 100 .1|M68 77L38 84|M66 79L84 94 70 112|M38 84L34 100 28 114|M22 116L76 116'
+  ],
+  pull:[
+    'M28 16L72 16|M50 42a7 7 0 100 .1|M50 49L50 88|M50 52L46 32 45 18|M50 52L56 32 57 18|M50 88L53 106 50 120',
+    'M28 16L72 16|M50 26a7 7 0 100 .1|M50 33L50 74|M50 36L38 26 43 18|M50 36L62 26 57 18|M50 74L55 92 48 110'
+  ],
+  press:[
+    'M34 28L66 28|M50 22a7 7 0 100 .1|M50 31L50 74|M50 38L38 46 42 30|M50 38L62 46 58 30|M50 74L50 98 48 118|M42 118L58 118',
+    'M34 12L66 12|M50 26a7 7 0 100 .1|M50 33L50 74|M50 40L42 26 45 14|M50 40L58 26 55 14|M50 74L50 98 48 118|M42 118L58 118'
+  ],
+  carry:[
+    'M50 22a7 7 0 100 .1|M50 29L50 70|M50 38L48 54 48 70|M50 70L64 92 66 116|M50 70L36 94 30 116|M24 118L72 118',
+    'M50 34a7 7 0 100 .1|M50 41L50 82|M50 50L48 66 48 82|M50 82L70 96 72 116|M50 82L36 102 32 116|M24 118L72 118'
+  ]
+};
+function head(x,y){return 'M'+(x-7)+' '+y+'a7 7 0 1014 0 7 7 0 10-14 0';}
+function poseSvg(arch){
+  var p = POSE[arch]||POSE.squat;
+  function grp(str,cls){
+    return '<g class="'+cls+'">'+str.split('|').map(function(d){
+      if(/a7 7 0 100 \.1$/.test(d)){
+        var m=d.match(/^M(\d+) (\d+)/);
+        return '<path d="'+head(+m[1],+m[2])+'"/>';
+      }
+      return '<path d="'+d+'"/>';
+    }).join('')+'</g>';
+  }
+  return '<svg class="fig" viewBox="0 0 100 140" preserveAspectRatio="xMidYMid meet">'+
+         grp(p[0],'pa')+grp(p[1],'pb')+'</svg>';
+}
+
+/* ============================================================
+   EXERCISE DATA
+   ============================================================ */
+var EX = [
+  {id:'gob', n:'Goblet squat',        a:'squat', p:'Squat',          one:'Legs, knees, everything underneath',
+   cues:['Weight at your chest, elbows in','Sit down between your heels','Knees track over your toes'],
+   bad:'Chest collapsing forward as you drop.', easy:'Box squat — sit, stand', hard:'Front squat with a bar'},
+  {id:'rdl', n:'Romanian deadlift',   a:'hinge', p:'Hinge',          one:'The whole back of your body',
+   cues:['Push your hips backwards, not down','Soft knees, they stay soft','Stop when your hamstrings say so'],
+   bad:'Rounding the low back to reach the floor.', easy:'Hips to a wall behind you', hard:'One leg at a time'},
+  {id:'pu',  n:'Push-up',             a:'push',  p:'Horizontal push', one:'Chest, shoulders, everything bracing',
+   cues:['Hands under your shoulders','Squeeze your glutes — one straight line','Elbows back at 45°, not flared'],
+   bad:'Hips sagging so the back does the work.', easy:'Hands on a bench', hard:'Feet elevated'},
+  {id:'row', n:'Dumbbell row',        a:'pull',  p:'Horizontal pull', one:'The muscles that hold you upright',
+   cues:['Flat back, chest over the bench','Pull to your hip, not your armpit','Shoulder blade moves first'],
+   bad:'Yanking with the arm while the torso twists.', easy:'Chest-supported row', hard:'Single-arm, no support'},
+  {id:'ohp', n:'Overhead press',      a:'press', p:'Vertical push',   one:'Shoulders overhead, honestly',
+   cues:['Ribs down, glutes tight','Head moves back, then through','Finish with biceps by your ears'],
+   bad:'Leaning back to fake the last few inches.', easy:'Half-kneeling, one arm', hard:'Strict standing barbell'},
+  {id:'pul', n:'Pull-up',             a:'pull',  p:'Vertical pull',   one:'The hardest one to fake',
+   cues:['Start from a dead hang','Pull your elbows to your ribs','Chin clears, then control the way down'],
+   bad:'Kicking the legs to generate momentum.', easy:'Band-assisted or lat pulldown', hard:'Weighted, slow negative'},
+  {id:'car', n:'Farmer carry',        a:'carry', p:'Carry',           one:'Grip, core, walking under load',
+   cues:['Stand tall, shoulders down','Short steps, quiet feet','Breathe — do not hold it'],
+   bad:'Leaning away from the heavier side.', easy:'Lighter, 20 metres', hard:'Suitcase carry, one side only'},
+  {id:'ht',  n:'Hip thrust',          a:'hinge', p:'Hip extension',   one:'Glutes, without loading your back',
+   cues:['Shoulder blades on the bench','Chin tucked, ribs down','Finish level — do not over-arch'],
+   bad:'Arching the low back at the top.', easy:'Glute bridge on the floor', hard:'Single leg'},
+  {id:'spl', n:'Split squat',         a:'carry', p:'Single leg',      one:'One leg at a time. Balance included.',
+   cues:['Feet on two train tracks, not one','Back knee drops straight down','Front heel stays glued'],
+   bad:'Front foot too close — knee dives forward.', easy:'Hold something for balance', hard:'Rear foot elevated'},
+  {id:'hol', n:'Hollow hold',         a:'push',  p:'Core',            one:'Bracing, before it gets heavy',
+   cues:['Low back pressed into the floor','Ribs down towards your hips','Lower the legs only as far as that holds'],
+   bad:'A gap under the low back.', easy:'Knees bent, hands on thighs', hard:'Arms overhead, legs long'},
+  {id:'lat', n:'Lat pulldown',        a:'pull',  p:'Vertical pull',   one:'Pull-up strength, built in stages',
+   cues:['Chest up, slight lean back','Drive elbows down to your sides','Let it stretch fully at the top'],
+   bad:'Rocking the whole torso to move the stack.', easy:'Lighter, pause at the bottom', hard:'Single arm'},
+  {id:'fsq', n:'Front squat',         a:'squat', p:'Squat',           one:'Legs, with nowhere to hide',
+   cues:['Elbows high, bar on your shoulders','Brace before you descend','Stay upright the whole way'],
+   bad:'Elbows dropping and the bar rolling forward.', easy:'Goblet squat', hard:'Pause at the bottom'},
+  /* feed-only */
+  {id:'kbs', n:'Kettlebell swing',    a:'hinge', p:'Hinge',           one:'Power, from the hips',
+   cues:['It is a hinge, not a squat','Snap the hips, float the bell','Arms are ropes, not levers'],
+   bad:'Lifting with the shoulders.', easy:'Hip hinge with a band', hard:'Heavier, single arm'},
+  {id:'inc', n:'Incline press',       a:'push',  p:'Horizontal push', one:'Upper chest and shoulders',
+   cues:['Set the bench around 30°','Wrists stacked over elbows','Touch, then drive'],
+   bad:'Bench too steep — it becomes a shoulder press.', easy:'Dumbbells, lighter', hard:'Pause on the chest'},
+  {id:'fac', n:'Face pull',           a:'pull',  p:'Horizontal pull', one:'The fix for desk shoulders',
+   cues:['Rope to your forehead','Thumbs back at the end','Light weight, slow'],
+   bad:'Going heavy and turning it into a row.', easy:'Band, standing', hard:'Half-kneeling, pause'},
+  {id:'lun', n:'Walking lunge',       a:'carry', p:'Single leg',      one:'Legs, balance, and lungs',
+   cues:['Long step, tall chest','Back knee towards the floor','Push through the front heel'],
+   bad:'Short steps that punish the front knee.', easy:'Static lunge in place', hard:'Carrying weight overhead'},
+  {id:'lmp', n:'Landmine press',      a:'press', p:'Vertical push',   one:'Overhead, for cranky shoulders',
+   cues:['Stagger your stance','Press up and slightly across','Ribs stay down'],
+   bad:'Leaning back to help it up.', easy:'Half-kneeling', hard:'Standing, single arm, heavier'},
+  {id:'cbr', n:'Cable row',           a:'pull',  p:'Horizontal pull', one:'Back thickness, controlled',
+   cues:['Tall spine, no rocking','Pull to your belly button','Two-second return, every rep'],
+   bad:'Using the low back as a lever.', easy:'Lighter, chest supported', hard:'Pause at the contraction'},
+  {id:'stp', n:'Step-up',             a:'carry', p:'Single leg',      one:'Stairs, but on purpose',
+   cues:['Whole foot on the box','No push off the back foot','Lower slowly — that is the rep'],
+   bad:'Hopping off the trailing leg.', easy:'Lower box, hold support', hard:'Higher box, weight in one hand'},
+  {id:'hng', n:'Dead hang',           a:'pull',  p:'Vertical pull',   one:'Grip, shoulders, and patience',
+   cues:['Full hang, shoulders active','Breathe slowly','Count, do not clench'],
+   bad:'Dropping into the shoulders completely.', easy:'Feet lightly on the floor', hard:'One arm, assisted'}
+];
+function byId(id){for(var i=0;i<EX.length;i++){if(EX[i].id===id)return EX[i];}return null;}
+
+var DECK_IDS = ['gob','rdl','pu','row','ohp','pul','car','ht','spl','hol','lat','fsq'];
+var MONDAY   = ['gob','rdl','row','car','hol'];
+
+/* state */
+var S = {know:{}, love:{}, nope:{}, deckDone:false};
+
+/* ============================================================
+   toast
+   ============================================================ */
+var toastEl=document.getElementById('toast'), toastT=null;
+function toast(msg){
+  toastEl.textContent=msg; toastEl.classList.add('on');
+  if(toastT) clearTimeout(toastT);
+  toastT=setTimeout(function(){toastEl.classList.remove('on');},1900);
+}
+function buzz(ms){ if(navigator.vibrate){try{navigator.vibrate(ms||10);}catch(e){}} }
+
+/* ============================================================
+   NAV
+   ============================================================ */
+var views={deck:document.getElementById('deck'),feed:document.getElementById('feed'),lib:document.getElementById('lib')};
+var navBtns=[].slice.call(document.querySelectorAll('#nav button'));
+function show(v){
+  navBtns.forEach(function(b){b.classList.toggle('on',b.dataset.v===v);});
+  for(var k in views){views[k].classList.toggle('on',k===v);}
+  if(v==='feed') buildFeed();
+  if(v==='lib')  buildLib();
+}
+navBtns.forEach(function(b){b.onclick=function(){show(b.dataset.v);};});
+
+/* ============================================================
+   THE DECK
+   ============================================================ */
+var stack=document.getElementById('stack'), dotsEl=document.getElementById('dots');
+var di=0;
+
+function drawDots(){
+  dotsEl.innerHTML = DECK_IDS.map(function(_,k){
+    return '<div class="dot '+(k<di?'done':(k===di?'now':''))+'"></div>';
+  }).join('');
+}
+function deckCard(k){
+  var e=byId(DECK_IDS[k]);
+  var el=document.createElement('div');
+  el.className='dcard';
+  el.innerHTML =
+    '<div class="vid">'+poseSvg(e.a)+
+      '<div class="badge">'+e.p+'</div>'+
+      '<div class="stamp yes">Know it</div><div class="stamp no">Show me</div>'+
+    '</div>'+
+    '<div class="cap"><b>'+e.n+'</b><span>'+e.one+'</span></div>';
+  return el;
+}
+function renderDeck(){
+  stack.innerHTML='';
+  if(di>=DECK_IDS.length){ endDeck(); return; }
+  if(di+1<DECK_IDS.length){
+    var back=deckCard(di+1);
+    back.style.transform='scale(.955) translateY(10px)';
+    back.style.opacity='.55'; back.style.pointerEvents='none';
+    stack.appendChild(back);
+  }
+  var top=deckCard(di);
+  stack.appendChild(top);
+  drag(top);
+  drawDots();
+}
+function drag(el){
+  var sx=0, sy=0, dx=0, dy=0, on=false, locked=null;
+  var yes=el.querySelector('.stamp.yes'), no=el.querySelector('.stamp.no');
+  el.addEventListener('pointerdown',function(ev){
+    on=true; locked=null; sx=ev.clientX; sy=ev.clientY; dx=0; dy=0;
+    el.style.transition='none';
+    try{el.setPointerCapture(ev.pointerId);}catch(e){}
+  });
+  el.addEventListener('pointermove',function(ev){
+    if(!on) return;
+    dx=ev.clientX-sx; dy=ev.clientY-sy;
+    if(locked===null && (Math.abs(dx)>6||Math.abs(dy)>6)) locked = Math.abs(dx)>Math.abs(dy)?'x':'y';
+    if(locked!=='x') return;
+    el.style.transform='translateX('+dx+'px) rotate('+(dx*0.045)+'deg)';
+    yes.style.opacity = dx>0 ? Math.min(1,dx/90) : 0;
+    no.style.opacity  = dx<0 ? Math.min(1,-dx/90) : 0;
+  });
+  function release(){
+    if(!on) return; on=false;
+    el.style.transition='transform .28s cubic-bezier(.3,.8,.3,1),opacity .28s';
+    if(locked==='x' && Math.abs(dx)>84){ fly(dx>0); }
+    else{ el.style.transform=''; yes.style.opacity=0; no.style.opacity=0; }
+  }
+  el.addEventListener('pointerup',release);
+  el.addEventListener('pointercancel',release);
+
+  function fly(knows){
+    el.style.transform='translateX('+(knows?520:-520)+'px) rotate('+(knows?22:-22)+'deg)';
+    el.style.opacity='0';
+    answer(knows);
+  }
+  el._fly=fly;
+}
+function answer(knows){
+  var id=DECK_IDS[di];
+  S.know[id]=knows;
+  buzz(knows?9:14);
+  di++;
+  setTimeout(renderDeck,190);
+}
+document.getElementById('dYes').onclick=function(){
+  var t=stack.lastElementChild; if(t&&t._fly) t._fly(true); else answer(true);
+};
+document.getElementById('dNo').onclick=function(){
+  var t=stack.lastElementChild; if(t&&t._fly) t._fly(false); else answer(false);
+};
+function endDeck(){
+  S.deckDone=true;
+  var k=0,l=0;
+  DECK_IDS.forEach(function(id){ S.know[id]?k++:l++; });
+  document.getElementById('sumK').textContent=k;
+  document.getElementById('sumL').textContent=l;
+  document.getElementById('dsum').classList.add('on');
+  drawDots();
+}
+document.getElementById('toFeed').onclick=function(){
+  document.getElementById('dsum').classList.remove('on');
+  show('feed');
+};
+document.getElementById('redo').onclick=function(){
+  di=0; S.know={}; document.getElementById('dsum').classList.remove('on'); renderDeck();
+};
+renderDeck();
+
+/* ============================================================
+   THE FEED
+   ============================================================ */
+var scroller=document.getElementById('scroller');
+var feedBuilt=false;
+
+function feedOrder(){
+  var out=[], used={};
+  /* 1 — Monday's session, no signal yet */
+  MONDAY.forEach(function(id){ if(!used[id]){out.push({id:id,rib:"In Monday's session"});used[id]=1;} });
+  /* 2 — substitutes for anything marked "show me" */
+  DECK_IDS.forEach(function(id){
+    if(S.know[id]===false && !used[id]){ out.push({id:id,rib:'You asked to be shown this'}); used[id]=1; }
+  });
+  /* 3 — everything else, cold cards mixed in */
+  EX.forEach(function(e){ if(!used[e.id]){ out.push({id:e.id,rib:''}); used[e.id]=1; } });
+  /* pad so the interstitial is reachable */
+  var base=out.slice();
+  while(out.length<18){ out.push({id:base[out.length%base.length].id,rib:''}); }
+  return out;
+}
+function icoHeart(){return '<svg viewBox="0 0 24 24"><path d="M12 20s-7-4.5-7-9a4 4 0 017-2.5A4 4 0 0119 11c0 4.5-7 9-7 9z"/></svg>';}
+function icoNo(){return '<svg viewBox="0 0 24 24"><path d="M12 4a8 8 0 100 16 8 8 0 100-16"/><path d="M6.5 6.5l11 11"/></svg>';}
+
+function feedCard(item,idx){
+  var e=byId(item.id);
+  var el=document.createElement('div');
+  el.className='fcard';
+  el.innerHTML =
+    '<div class="vid">'+poseSvg(e.a)+'</div>'+
+    '<div class="loopbar"></div>'+
+    '<div class="pat">'+e.p+'</div>'+
+    '<div class="fshade"></div>'+
+    (idx===0?'<div class="taphint">Tap the movement for the cues</div>':'')+
+    '<div class="fmeta">'+
+      (item.rib?'<div class="rib">'+item.rib+'</div>':'')+
+      '<h3>'+e.n+'</h3><p>'+e.one+'</p>'+
+    '</div>'+
+    '<div class="facts">'+
+      '<button class="act love'+(S.love[e.id]?' on':'')+'" data-a="love">'+icoHeart()+'Love</button>'+
+      '<button class="act no'+(S.nope[e.id]?' on':'')+'" data-a="no">'+icoNo()+'Not for me</button>'+
+    '</div>';
+  el.addEventListener('click',function(){ openSheet(e.id); });
+  el.querySelectorAll('.act').forEach(function(b){
+    b.addEventListener('click',function(ev){
+      ev.stopPropagation();
+      var a=b.dataset.a;
+      if(a==='love'){
+        S.love[e.id]=!S.love[e.id];
+        if(S.love[e.id]){ S.nope[e.id]=false; toast('Noted. You’ll see it at the end of a session.'); }
+        buzz(9);
+      }else{
+        S.nope[e.id]=!S.nope[e.id];
+        if(S.nope[e.id]){ S.love[e.id]=false; toast(e.n+' is out. Same job, different movement.'); }
+        buzz(14);
+      }
+      var wrap=b.parentNode;
+      wrap.querySelector('.love').classList.toggle('on',!!S.love[e.id]);
+      wrap.querySelector('.no').classList.toggle('on',!!S.nope[e.id]);
+    });
+  });
+  return el;
+}
+function stopCard(){
+  var newOnes=0;
+  Object.keys(S.love).forEach(function(k){ if(S.love[k]) newOnes++; });
+  var el=document.createElement('div');
+  el.className='fcard stop';
+  el.innerHTML='<div class="in"><h3>That’s Monday covered.</h3>'+
+    '<p><span class="num">12</span> exercises seen. <span class="num">'+newOnes+'</span> added to what you love.</p>'+
+    '<button class="cta" id="stopGo">Keep going</button>'+
+    '<button class="ghost" id="stopDone">Done for now</button></div>';
+  return el;
+}
+function buildFeed(){
+  if(feedBuilt) return;
+  feedBuilt=true;
+  var order=feedOrder();
+  order.forEach(function(it,k){
+    if(k===12) scroller.appendChild(stopCard());
+    scroller.appendChild(feedCard(it,k));
+  });
+  scroller.addEventListener('click',function(ev){
+    if(ev.target.id==='stopDone'){ show('lib'); }
+    if(ev.target.id==='stopGo'){
+      var n=ev.target.closest('.fcard').nextElementSibling;
+      if(n) n.scrollIntoView({behavior:'smooth'});
+    }
+  });
+}
+
+/* ============================================================
+   COACHING SHEET
+   ============================================================ */
+var sw=document.getElementById('sheetwrap'), sheet=document.getElementById('sheet');
+function openSheet(id){
+  var e=byId(id);
+  sheet.innerHTML =
+    '<button class="grabhit" id="sheetClose" aria-label="Close"><span class="grab"></span></button>'+
+    '<h4>'+e.n+'</h4><p class="sub">'+e.p+' · '+e.one.toLowerCase()+'</p>'+
+    '<div class="sec"><div class="lbl">Three cues</div>'+
+      e.cues.map(function(c,k){return '<div class="cue"><i>'+(k+1)+'</i><span>'+c+'</span></div>';}).join('')+
+    '</div>'+
+    '<div class="sec"><div class="lbl">What usually goes wrong</div>'+
+      '<div class="warn">'+e.bad+'</div></div>'+
+    '<div class="sec"><div class="lbl">If it is too much / not enough</div>'+
+      '<div class="swap"><div><span>Easier</span><b>'+e.easy+'</b></div>'+
+      '<div><span>Harder</span><b>'+e.hard+'</b></div></div></div>';
+  sw.classList.add('on');
+  S.opened = S.opened || {}; S.opened[id]=true;   /* high-weight passive signal */
+}
+function closeSheet(){ sw.classList.remove('on'); }
+document.getElementById('scrim').onclick=closeSheet;
+sheet.addEventListener('click',function(ev){ if(ev.target.closest('#sheetClose')) closeSheet(); });
+
+/* ============================================================
+   LIBRARY
+   ============================================================ */
+function libRow(id,action){
+  var e=byId(id);
+  return '<div class="row"><div class="nm">'+e.n+'</div><div class="pt">'+e.p+'</div>'+
+    (action?'<button data-un="'+id+'" data-k="'+action+'" aria-label="Undo">'+
+      '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>':'')+
+    '</div>';
+}
+function buildLib(){
+  var known=[],learn=[],loved=[],out=[];
+  EX.forEach(function(e){
+    if(S.nope[e.id]){ out.push(e.id); return; }   /* ruled out — it leaves the library */
+    if(S.love[e.id]) loved.push(e.id);
+    if(S.know[e.id]===true) known.push(e.id);
+    if(S.know[e.id]===false) learn.push(e.id);
+  });
+  var seen=known.length;
+  var pct = 78 + Math.round(22 * Math.min(1, (di/DECK_IDS.length)));
+  if(!S.deckDone) pct = 78 + Math.round(22*(di/DECK_IDS.length));
+  var C=2*Math.PI*27;
+  document.getElementById('lib').innerHTML =
+    '<div class="ring"><div class="ringwrap">'+
+      '<svg viewBox="0 0 64 64"><circle class="bgc" cx="32" cy="32" r="27"/>'+
+      '<circle class="fgc" cx="32" cy="32" r="27" stroke-dasharray="'+C+'" '+
+      'stroke-dashoffset="'+(C*(1-pct/100))+'"/></svg>'+
+      '<div class="ringpct">'+pct+'%</div></div>'+
+      '<div class="ringtxt"><b>'+(pct>=100?'Profile complete':'Your profile')+'</b>'+
+      '<span>'+(pct>=100?'Nothing left to do.':'The deck is the last piece — about forty seconds.')+'</span></div>'+
+    '</div>'+
+    '<div class="libhd">You know <span class="count">· '+seen+'</span></div>'+
+    (known.length?known.map(function(i){return libRow(i,null);}).join(''):'<div class="empty">Run the deck and this fills up.</div>')+
+    '<div class="libhd">You love <span class="count">· '+loved.length+'</span></div>'+
+    (loved.length?loved.map(function(i){return libRow(i,'love');}).join(''):'<div class="empty">Nothing yet. One of these gets slotted into the end of every session.</div>')+
+    '<div class="libhd">To learn <span class="count">· '+learn.length+'</span></div>'+
+    (learn.length?learn.map(function(i){return libRow(i,null);}).join(''):'<div class="empty">Nothing waiting.</div>')+
+    '<div class="libhd">Not for you <span class="count">· '+out.length+'</span></div>'+
+    (out.length?out.map(function(i){return libRow(i,'no');}).join(''):'<div class="empty">Anything you rule out lands here — and stays out of your program.</div>');
+
+  document.getElementById('lib').querySelectorAll('button[data-un]').forEach(function(b){
+    b.onclick=function(){
+      var id=b.dataset.un;
+      if(b.dataset.k==='love') S.love[id]=false; else S.nope[id]=false;
+      buzz(9);
+      feedBuilt=false; scroller.innerHTML='';
+      buildLib();
+    };
+  });
+}
+</script>
+</body>
+</html>
