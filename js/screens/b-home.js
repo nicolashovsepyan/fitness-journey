@@ -167,8 +167,14 @@ export function renderBHome(host, { onOpenDay, onOpenSummary, onOpenHistory }) {
             `<button class="choice ${u.id === activeUser().id ? 'on' : ''}" data-user="${u.id}">${u.name}</button>`).join('')}
         </div>
 
-        <div class="goal-row" style="margin-top:14px;"><span class="goal-name">Export my data</span>
-          <div class="focus"><button id="exportBtn">Export</button></div></div>
+        <div class="goal-row" style="margin-top:14px;"><span class="goal-name">Back up my training</span></div>
+        <div class="backup-row">
+          <button class="choice" id="exportBtn">⬇ Save backup</button>
+          <button class="choice" id="importBtn">⬆ Restore</button>
+        </div>
+        <div class="backup-note">Your training is saved on this phone only. Save a backup now and then
+          so nothing is lost if the phone clears its storage.${lastBackupLine()}</div>
+        <input type="file" id="importFile" accept="application/json,.json" style="display:none" />
 
         <button class="btn" id="close" style="margin-top:14px;">Done</button>
       </div>`;
@@ -181,8 +187,34 @@ export function renderBHome(host, { onOpenDay, onOpenSummary, onOpenHistory }) {
     ov.querySelector('#exportBtn').addEventListener('click', () => {
       const blob = new Blob([store.exportJSON()], { type: 'application/json' });
       const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-      a.download = `fitness-journey-${activeUser().id}.json`; a.click();
+      a.download = `fitness-journey-${activeUser().id}-${dayKey()}.json`; a.click();
+      store.setSetting('lastBackup', new Date().toISOString());
     });
+    const fileInput = ov.querySelector('#importFile');
+    ov.querySelector('#importBtn').addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', () => {
+      const f = fileInput.files?.[0]; if (!f) return;
+      const rd = new FileReader();
+      rd.onload = () => {
+        // merge, never replace — restoring an old backup must not delete newer work
+        const res = store.importJSON(String(rd.result), { mode: 'merge' });
+        alert(res.ok
+          ? `Restored ✓ ${res.sessions} session${res.sessions === 1 ? '' : 's'} added. Nothing already on this phone was removed.`
+          : `Could not restore. ${res.error}`);
+        if (res.ok) { ov.remove(); draw(); }
+      };
+      rd.readAsText(f);
+    });
+  }
+
+  function lastBackupLine() {
+    const last = store.getSetting('lastBackup');
+    if (!last) return '';
+    try {
+      const d = new Date(last);
+      const days = Math.floor((Date.now() - d.getTime()) / 86400000);
+      return ` Last backup: ${days === 0 ? 'today' : days === 1 ? 'yesterday' : days + ' days ago'}.`;
+    } catch (e) { return ''; }
   }
 
   store.startDate();      // stamp day one on first ever open

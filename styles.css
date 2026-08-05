@@ -897,28 +897,6 @@ html, body { touch-action: manipulation; }      /* kill double-tap-to-zoom (keep
 .trend.same { color:var(--faint); }
 .hist-card .htop { display:flex; align-items:center; justify-content:space-between; gap:10px; cursor:pointer; }
 
-/* unified log cell — reps · sec · weight on every exercise */
-.logset { display:flex; align-items:center; gap:10px; padding:7px 0; }
-.logset .sn { flex:0 0 auto; min-width:52px; font-size:12px; color:var(--muted); font-weight:600; }
-.logcell { display:flex; gap:7px; flex:1; justify-content:flex-end; flex-wrap:wrap; }
-.logcell .lf { display:flex; align-items:center; gap:4px; background:var(--box-2); border:1px solid var(--line); border-radius:9px; padding:5px 8px; }
-.logcell .lf input { width:42px; background:none; border:none; color:var(--text); font-size:15px; font-weight:700; text-align:center; font-family:var(--tnum); -moz-appearance:textfield; }
-.logcell .lf input::-webkit-outer-spin-button, .logcell .lf input::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
-.logcell .lf .u { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; }
-
-/* AMRAP — per-round rep steppers + best line */
-.amrap-best { margin-top:8px; font-size:13px; font-weight:700; color:var(--warn); }
-.amrap-row { display:flex; align-items:center; justify-content:space-between; gap:10px; }
-.amrap-step { display:flex; align-items:center; gap:6px; }
-.amrap-step button { width:34px; height:34px; border-radius:9px; background:var(--box-2); border:1px solid var(--line); color:var(--text); font-size:19px; cursor:pointer; }
-.amrap-step button:active { background:var(--accent); color:#14140a; }
-.amrap-step .av { min-width:30px; text-align:center; font-family:var(--tnum); font-weight:800; font-size:18px; }
-.amrap-step .u { font-size:11px; color:var(--muted); }
-
-/* timer controls row (−5s · reset · +5s) on every timed screen */
-.timer .read { display:flex; flex-direction:column; align-items:center; }
-.timer-btns { display:flex; align-items:center; gap:7px; margin-top:8px; }
-.timer-adj { background:var(--box-2); border:1px solid var(--line); color:var(--muted); font-size:12px; font-weight:700; padding:5px 11px; border-radius:999px; cursor:pointer; font-family:var(--font); }
-.timer-adj:active { background:var(--accent); color:#14140a; }
-.timer-reset { background:var(--box-2); border:1px solid var(--line); color:var(--muted); font-size:14px; font-weight:700; width:34px; height:30px; border-radius:999px; cursor:pointer; }
-.timer-reset:active { background:var(--accent); color:#14140a; }
+/* ---- backup / restore ---- */
+.backup-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.backup-note { color:var(--faint); font-size:11.5px; line-height:1.45; margin-top:8px; }

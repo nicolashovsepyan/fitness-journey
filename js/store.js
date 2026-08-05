@@ -367,5 +367,46 @@ export const store = {
   },
 
   exportJSON() { return JSON.stringify(read(), null, 2); },
+
+  /* Restore from an exported backup.
+     mode 'merge' (default) keeps whatever is already on the device and adds
+     anything missing — the safe choice, since restoring an old backup should
+     never delete newer training. 'replace' overwrites outright. */
+  importJSON(json, { mode = 'merge' } = {}) {
+    let incoming;
+    try { incoming = typeof json === 'string' ? JSON.parse(json) : json; }
+    catch (e) { return { ok: false, error: 'That file is not a valid backup.' }; }
+    if (!incoming || typeof incoming !== 'object' || !Array.isArray(incoming.sessions)) {
+      return { ok: false, error: "That doesn't look like a Fitness Journey backup." };
+    }
+    if (mode === 'replace') {
+      write({ ...structuredClone(DEFAULT), ...incoming });
+      return { ok: true, sessions: (incoming.sessions || []).length, mode };
+    }
+    const cur = read();
+    const key = s => `${s.date}|${s.name}`;
+    const have = new Set((cur.sessions || []).map(key));
+    const added = (incoming.sessions || []).filter(s => !have.has(key(s)));
+    const merged = {
+      ...cur,
+      sessions: [...(cur.sessions || []), ...added]
+        .sort((a, b) => new Date(a.date) - new Date(b.date)),
+      // for records, keep whichever is better; for the rest, current wins
+      prs: { ...(incoming.prs || {}), ...(cur.prs || {}) },
+      habits: { ...(incoming.habits || {}), ...(cur.habits || {}) },
+      notes: dedupe([...(incoming.notes || []), ...(cur.notes || [])], n => `${n.date}|${n.exId}`),
+      flags: dedupe([...(incoming.flags || []), ...(cur.flags || [])], f => `${f.date}|${f.exId}`),
+      feedback: dedupe([...(incoming.feedback || []), ...(cur.feedback || [])], f => `${f.date}|${f.sessionId}`),
+      startDate: cur.startDate || incoming.startDate || null,
+    };
+    write(merged);
+    return { ok: true, sessions: added.length, mode };
+  },
+
   reset() { localStorage.removeItem(KEY()); },
 };
+
+function dedupe(list, keyFn) {
+  const seen = new Set();
+  return list.filter(x => { const k = keyFn(x); if (seen.has(k)) return false; seen.add(k); return true; });
+}

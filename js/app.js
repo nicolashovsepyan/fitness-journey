@@ -97,6 +97,18 @@ function injectResume() {
   screen.insertBefore(bar, screen.firstChild.nextSibling);
 }
 
+/* ---- keep his training data from being evicted ----
+   All logs live in localStorage on the device. By default a browser treats
+   that as disposable — iOS in particular clears site data after about a week
+   of not opening the site, which would silently wipe his history.
+   Asking for persistent storage marks it as "do not evict". It is granted
+   outright once the app is installed to the home screen. */
+if (navigator.storage?.persist) {
+  navigator.storage.persisted()
+    .then(already => already || navigator.storage.persist())
+    .catch(() => {});
+}
+
 // If a workout was left running, go straight back into it — never to home.
 if (!bootIntoActiveRun()) render();
 
