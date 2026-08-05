@@ -896,3 +896,12 @@ html, body { touch-action: manipulation; }      /* kill double-tap-to-zoom (keep
 .trend.down { color:var(--warn); }
 .trend.same { color:var(--faint); }
 .hist-card .htop { display:flex; align-items:center; justify-content:space-between; gap:10px; cursor:pointer; }
+
+/* unified log cell — reps · sec · weight on every exercise */
+.logset { display:flex; align-items:center; gap:10px; padding:7px 0; }
+.logset .sn { flex:0 0 auto; min-width:52px; font-size:12px; color:var(--muted); font-weight:600; }
+.logcell { display:flex; gap:7px; flex:1; justify-content:flex-end; flex-wrap:wrap; }
+.logcell .lf { display:flex; align-items:center; gap:4px; background:var(--box-2); border:1px solid var(--line); border-radius:9px; padding:5px 8px; }
+.logcell .lf input { width:42px; background:none; border:none; color:var(--text); font-size:15px; font-weight:700; text-align:center; font-family:var(--tnum); -moz-appearance:textfield; }
+.logcell .lf input::-webkit-outer-spin-button, .logcell .lf input::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+.logcell .lf .u { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; }

@@ -950,7 +950,7 @@ function renderLog() {
     const sets = e.sets.length ? e.sets : [{ value: null }];
     const rows = sets.map((st, si) => {
       const lbl = st.side ? st.side : (sets.length > 1 ? `${word} ${si + 1}` : word);
-      return `<div class="logset"><span class="sn">${lbl}</span>${cellInputs({ measure: e.measure, load: e.load }, `b${ei}_${si}`, st.value, st.weight, e.exId)}</div>`;
+      return `<div class="logset"><span class="sn">${lbl}</span>${logCell(e, `b${ei}_${si}`, st)}</div>`;
     }).join('');
     return `<div class="loggroup"><div class="gname">${e.name}</div>${rows}</div>`;
   }).join('');
@@ -961,11 +961,26 @@ function renderLog() {
   document.getElementById('confirm').addEventListener('click', () => {
     entries.forEach((e, ei) => {
       const sets = e.sets.length ? e.sets : [{}];
-      sets.forEach((st, si) => { st.value = readInput(`b${ei}_${si}`); const w = document.getElementById(`w_b${ei}_${si}`); if (w && w.value !== '') st.weight = Number(w.value); });
+      sets.forEach((st, si) => readLogCell(e, `b${ei}_${si}`, st));
       e.sets = sets;
     });
     R.save(S); sectionNext();
   });
+}
+/* unified log cell — reps + hold(sec) + weight on EVERY exercise, all optional.
+   st.value stays the primary measure (reps→reps, hold→sec) for PRs/history. */
+function logCell(e, key, st) {
+  const reps = st.reps ?? (e.measure !== 'hold' ? st.value : null);
+  const sec  = st.sec  ?? (e.measure === 'hold' ? st.value : null);
+  const wt   = st.weight ?? (e.exId ? (store.getLast(e.exId)?.weight ?? null) : null);
+  const fld = (id, v, u, mode) => `<div class="lf"><input id="${id}_${key}" type="number" inputmode="${mode}" value="${v ?? ''}" placeholder="–" onfocus="this.select()"><span class="u">${u}</span></div>`;
+  return `<div class="logcell">${fld('r', reps, 'reps', 'numeric')}${fld('s', sec, 'sec', 'numeric')}${fld('w', wt, WUNIT, 'decimal')}</div>`;
+}
+function readLogCell(e, key, st) {
+  const num = id => { const el = document.getElementById(`${id}_${key}`); return el && el.value !== '' ? Number(el.value) : null; };
+  const reps = num('r'), sec = num('s'), wt = num('w');
+  st.reps = reps; st.sec = sec; if (wt != null) st.weight = wt;
+  st.value = e.measure === 'hold' ? (sec ?? reps) : (reps ?? sec);   // primary for PR/history
 }
 function renderSummary() {
   const b = block();

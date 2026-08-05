@@ -24,13 +24,19 @@ const unitFor = m => m === 'hold' ? 'sec' : m === 'cals' ? 'cals' : 'reps';
 
 /* turn a set list into "L 12 @25lb · R 11 @25lb  reps" (unit appended so it's never ambiguous) */
 function setStr(sets, measure) {
-  const parts = (sets || []).filter(s => s.value != null && s.value !== '').map(s => {
-    let t = String(s.value);
+  const has = v => v != null && v !== '';
+  const parts = (sets || []).filter(s => has(s.reps) || has(s.sec) || has(s.value)).map(s => {
+    const reps = has(s.reps) ? s.reps : (measure !== 'hold' ? s.value : null);
+    const sec  = has(s.sec)  ? s.sec  : (measure === 'hold' ? s.value : null);
+    const bits = [];
+    if (has(reps)) bits.push(`${reps} reps`);
+    if (has(sec))  bits.push(`${sec}s`);
+    let t = bits.join(' + ') || String(s.value ?? '');
     if (s.side) t = `${s.side} ${t}`;
-    if (s.weight != null && s.weight !== '') t += ` @${s.weight}lb`;
+    if (has(s.weight)) t += ` @${s.weight}lb`;
     return t;
   });
-  return parts.length ? `${parts.join(' · ')} <span class="u">${unitFor(measure)}</span>` : '–';
+  return parts.length ? parts.join(' · ') : '–';
 }
 
 export function renderHistory(host, { onBack }) {
