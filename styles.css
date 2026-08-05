@@ -914,3 +914,11 @@ html, body { touch-action: manipulation; }      /* kill double-tap-to-zoom (keep
 .amrap-step button:active { background:var(--accent); color:#14140a; }
 .amrap-step .av { min-width:30px; text-align:center; font-family:var(--tnum); font-weight:800; font-size:18px; }
 .amrap-step .u { font-size:11px; color:var(--muted); }
+
+/* timer controls row (−5s · reset · +5s) on every timed screen */
+.timer .read { display:flex; flex-direction:column; align-items:center; }
+.timer-btns { display:flex; align-items:center; gap:7px; margin-top:8px; }
+.timer-adj { background:var(--box-2); border:1px solid var(--line); color:var(--muted); font-size:12px; font-weight:700; padding:5px 11px; border-radius:999px; cursor:pointer; font-family:var(--font); }
+.timer-adj:active { background:var(--accent); color:#14140a; }
+.timer-reset { background:var(--box-2); border:1px solid var(--line); color:var(--muted); font-size:14px; font-weight:700; width:34px; height:30px; border-radius:999px; cursor:pointer; }
+.timer-reset:active { background:var(--accent); color:#14140a; }

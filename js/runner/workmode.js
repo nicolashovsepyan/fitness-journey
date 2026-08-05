@@ -28,10 +28,28 @@ if (typeof document !== 'undefined') {
   // tap the timer circle to pause/resume that countdown (not the session clock)
   document.addEventListener('click', e => {
     if (!S || S.done) return;
+    if (e.target.closest('.timer-reset') || e.target.closest('.timer-adj')) return;   // handled separately
     if (!e.target.closest('.timer-wrap')) return;
     if (S.stepDur == null || S.stepStartedAt == null) return;
     if (R.isStepPaused(S)) R.resumeStep(S); else { R.pauseStep(S); buzz(20); }
     reflectPause();
+  });
+  // restart the current countdown from full (started before you were ready)
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.timer-reset')) return;
+    e.stopPropagation();
+    if (!S || S.stepDur == null) return;
+    S.stepPausedAt = null; R.beginStep(S, S.stepDur); buzz(30); reflectPause();
+  });
+  // ±5s on any timer — add or trim time on the fly
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('.timer-adj'); if (!btn) return;
+    e.stopPropagation();
+    if (!S || S.stepDur == null) return;
+    const d = Number(btn.dataset.time) || 0;
+    if (d < 0 && R.stepRemaining(S) <= 5) return;
+    S.stepDur = Math.max(5, S.stepDur + d); R.save(S);
+    updateTimer(R.stepRemaining(S), S.stepDur); buzz(15);
   });
   // tap the demo button to watch the movement
   document.addEventListener('click', e => {
@@ -446,7 +464,8 @@ function timerSvg(cls) {
   const r = 110, c = 2 * Math.PI * r;
   return `<div class="timer ${cls}"><svg viewBox="0 0 240 240"><circle class="track" cx="120" cy="120" r="${r}"></circle>
     <circle class="fill" id="timerFill" cx="120" cy="120" r="${r}" stroke-dasharray="${c}" stroke-dashoffset="0"></circle></svg>
-    <div class="read"><div class="t" id="timerText">0:00</div><div class="cap" id="timerCap"></div></div></div>`;
+    <div class="read"><div class="t" id="timerText">0:00</div><div class="cap" id="timerCap"></div>
+      <div class="timer-btns"><button class="timer-adj" data-time="-5">−5s</button><button class="timer-reset" id="timerReset" title="Restart timer">↺</button><button class="timer-adj" data-time="5">+5s</button></div></div></div>`;
 }
 function updateTimer(rem, total) {
   const r = 110, c = 2 * Math.PI * r;
@@ -542,8 +561,8 @@ function renderSets() {
     const base = failureSet ? (item.reps || 0) : (item.reps || item.target || 0);
     curVal = base;
     const lastW = item.exId ? (store.getLast(item.exId)?.weight ?? '') : '';
-    const wField = weighted
-      ? `<div class="wfield"><input id="wMain" type="number" inputmode="decimal" placeholder="weight" value="${lastW}" onfocus="this.select()"/><span class="u">${WUNIT}</span></div>` : '';
+    // weight is ALWAYS available (optional) — you might load any move (e.g. weighted pike)
+    const wField = `<div class="wfield"><input id="wMain" type="number" inputmode="decimal" placeholder="weight (optional)" value="${weighted ? lastW : ''}" onfocus="this.select()"/><span class="u">${WUNIT}</span></div>`;
     const inputArea = uni
       ? `<div class="sides">
            <div class="side-col"><div class="lbl">Left</div><input class="big-input" id="valL" type="number" inputmode="numeric" value="${base}" onfocus="this.select()"/></div>
@@ -560,7 +579,7 @@ function renderSets() {
     document.querySelectorAll('.big-input, #wMain').forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') el.blur(); }));
     document.getElementById('done').addEventListener('click', () => {
       buzz(40);
-      const w = weighted ? numAt('wMain') : null;
+      const w = numAt('wMain');                 // read weight whether or not the move is "weighted"
       if (uni) { capture(numAt('valL') ?? base, w, 'L'); capture(numAt('valR') ?? base, w, 'R'); }
       else capture(curVal, w);
       afterSet();
@@ -631,6 +650,7 @@ function renderSkill() {
   const b = block(); const item = b.items[S.ii];
   if (!item) return completeBlock();
   if (S.sub === 'rest') return renderRest(item);
+  if (S.sub === 'buffer') return renderSkillBuffer();
   const n = b.items.length;
   const drillList = b.items.map((it, i) => `<div class="ci ${i === S.ii ? 'active' : ''}">${rowVid(it)}<span class="nm">${it.name}</span><span class="tg">${it.minutes ? it.minutes + ' min' : (it.sets || 1) + '×' + (it.measure === 'hold' ? (it.hold || 20) + 's' : (it.reps || 5))}</span></div>`).join('');
   const head = `<div class="now-ex"><div class="label">Skill ${S.ii + 1}/${n}${item.minutes ? ' · practice' : ` · set ${S.si + 1}/${item.sets || 3}`}</div><div class="name">${item.name}</div></div>${exActions(item)}`;
@@ -663,9 +683,19 @@ function afterSkillSet(item) {
   afterSkillItem();
 }
 function afterSkillItem() {
-  S.si = 0; S.sub = 'work';
-  if (S.ii < block().items.length - 1) { S.ii += 1; R.save(S); renderSkill(); }
+  S.si = 0;
+  if (S.ii < block().items.length - 1) { S.ii += 1; S.sub = 'buffer'; R.save(S); renderSkill(); }   // 8s set-up into the next drill
   else completeBlock();
+}
+/* 8-second set-up before the next skill/handstand drill (all-timed → you need it) */
+function renderSkillBuffer() {
+  const b = block(); const next = b.items[S.ii];
+  shell(`<div class="now-ex"><div class="label">Get ready</div><div class="name">${next.name}</div></div>
+    <div class="timer-wrap">${timerSvg('buffer')}</div>
+    <div class="actionbar"><button class="btn" id="go">Go now ▸</button></div>`);
+  beginStep(8, 'rest'); say(`Next. ${next.name}.`);
+  onStepDone = () => { S.sub = 'work'; R.save(S); renderSkill(); };
+  document.getElementById('go').addEventListener('click', () => { R.clearStep(S); onStepDone = null; S.sub = 'work'; R.save(S); renderSkill(); });
 }
 
 /* ---------------- SUPERSET (A1 → A2 with no rest, then one rest, repeat) ----------------
@@ -715,8 +745,7 @@ function renderSuperset() {
   const base = Number(item.reps) || 0;
   curVal = base;
   const lastW = item.exId ? (store.getLast(item.exId)?.weight ?? '') : '';
-  const wField = weighted
-    ? `<div class="wfield"><input id="wMain" type="number" inputmode="decimal" placeholder="weight" value="${lastW}" onfocus="this.select()"/><span class="u">${WUNIT}</span></div>` : '';
+  const wField = `<div class="wfield"><input id="wMain" type="number" inputmode="decimal" placeholder="weight (optional)" value="${weighted ? lastW : ''}" onfocus="this.select()"/><span class="u">${WUNIT}</span></div>`;
   const unitLbl = `${UNIT[item.measure]}${item.repsText ? ` · aim ${item.repsText}` : ''}`;
   shell(`<div class="rounds">${dots}</div>
     <div class="now-ex"><div class="label">${label}</div><div class="name">${item.name}</div></div>${exActions(item)}
@@ -728,7 +757,7 @@ function renderSuperset() {
   document.querySelectorAll('.big-input, #wMain').forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') el.blur(); }));
   document.getElementById('done').addEventListener('click', () => {
     buzz(40);
-    roundBuf[S.ci] = { value: curVal, weight: weighted ? numAt('wMain') : null };
+    roundBuf[S.ci] = { value: curVal, weight: numAt('wMain') };
     afterSupersetItem();
   });
 }
