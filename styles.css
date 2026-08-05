@@ -900,3 +900,16 @@ html, body { touch-action: manipulation; }      /* kill double-tap-to-zoom (keep
 /* ---- backup / restore ---- */
 .backup-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
 .backup-note { color:var(--faint); font-size:11.5px; line-height:1.45; margin-top:8px; }
+
+/* ---- install nudge ---- */
+.install-card { background:var(--accent-dim); border:1px solid var(--accent); border-radius:var(--radius);
+  padding:14px 16px; margin-bottom:14px; }
+.install-card.warn { background:rgba(255,184,77,.1); border-color:var(--warn); }
+.install-card .ic-top { display:flex; gap:11px; align-items:flex-start; }
+.install-card .ico { font-size:20px; line-height:1.1; flex:0 0 auto; }
+.install-card .ic-title { font-size:15px; font-weight:750; }
+.install-card .ic-body { color:var(--muted); font-size:12.5px; line-height:1.45; margin-top:3px; }
+.inst-steps { margin:10px 0 0; padding-left:20px; color:var(--text); font-size:12.5px; line-height:1.6; }
+.inst-steps li { margin-bottom:3px; }
+.ic-actions { display:flex; gap:8px; align-items:center; margin-top:12px; }
+.btn.sm { padding:8px 18px; font-size:13.5px; width:auto; }

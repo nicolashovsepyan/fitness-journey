@@ -16,6 +16,7 @@ import {
 import { blockMinutes } from '../core/resolve.js';
 import { USERS, activeUser, switchUser } from '../users.js';
 import { weeklyPromptDue } from '../coach.js';
+import { isInstalled, canPromptInstall, promptInstall, installGuidance, onInstallStateChange } from '../install.js';
 
 export function renderBHome(host, { onOpenDay, onOpenSummary, onOpenHistory }) {
   function draw() {
@@ -56,6 +57,8 @@ export function renderBHome(host, { onOpenDay, onOpenSummary, onOpenHistory }) {
 
         ${weeklyPromptDue() ? `<div class="callout act" id="weeklyNudge"><span class="ico">📤</span><span class="txt">
           Your weekly summary is ready — tap to send it to your coach.</span></div>` : ''}
+
+        ${installBanner()}
 
         <!-- TODAY -->
         ${today ? `
@@ -145,6 +148,15 @@ export function renderBHome(host, { onOpenDay, onOpenSummary, onOpenHistory }) {
     host.querySelector('#historyBtn').addEventListener('click', () => onOpenHistory());
     host.querySelector('#weeklyNudge')?.addEventListener('click', () => onOpenSummary());
     host.querySelector('#settingsBtn').addEventListener('click', openSettings);
+    host.querySelector('#installNow')?.addEventListener('click', async () => {
+      const r = await promptInstall();
+      if (r === 'accepted') store.setSetting('installSnoozed', null);
+      draw();
+    });
+    host.querySelector('#installLater')?.addEventListener('click', () => {
+      store.setSetting('installSnoozed', new Date().toISOString());
+      draw();
+    });
   }
 
   function openSettings() {
@@ -207,6 +219,29 @@ export function renderBHome(host, { onOpenDay, onOpenSummary, onOpenHistory }) {
     });
   }
 
+  /* Installing is what makes his training durable, so this nudges until it's
+     done — then never again. Dismissible, but it comes back after a week. */
+  function installBanner() {
+    if (isInstalled()) return '';
+    const snoozed = store.getSetting('installSnoozed');
+    if (snoozed && Date.now() - new Date(snoozed).getTime() < 7 * 86400000) return '';
+    const g = installGuidance();
+    const stepsHtml = g.steps ? `<ol class="inst-steps">${g.steps.map(s => `<li>${s}</li>`).join('')}</ol>` : '';
+    return `
+      <div class="install-card ${g.warn ? 'warn' : ''}">
+        <div class="ic-top">
+          <span class="ico">${g.warn ? '⚠️' : '📲'}</span>
+          <div><div class="ic-title">${g.title}</div>
+            <div class="ic-body">${g.body}</div></div>
+        </div>
+        ${stepsHtml}
+        <div class="ic-actions">
+          ${g.state === 'can-prompt' ? `<button class="btn sm" id="installNow">Install</button>` : ''}
+          <button class="mini" id="installLater">Not now</button>
+        </div>
+      </div>`;
+  }
+
   function lastBackupLine() {
     const last = store.getSetting('lastBackup');
     if (!last) return '';
@@ -218,5 +253,6 @@ export function renderBHome(host, { onOpenDay, onOpenSummary, onOpenHistory }) {
   }
 
   store.startDate();      // stamp day one on first ever open
+  onInstallStateChange(() => draw());   // Chrome fires beforeinstallprompt late
   draw();
 }
