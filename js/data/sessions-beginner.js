@@ -109,12 +109,13 @@ export const BEGINNER_SESSIONS = {
         ],
       },
       {
-        role: 'Work', format: 'superset', name: 'D · Inverted Row + Curl',
-        note: 'D1 into D2, no rest, then 75 sec.', optional: true, extra: true,
+        role: 'Work', format: 'superset', name: 'D · Reverse Fly + Curl',
+        note: 'D1 into D2, no rest, then 75 sec. Reverse fly is never heavy — light and slow.', optional: true, extra: true,
         rounds: 2, rest: 75,
         items: [
-          { ex: 'australian_pullup', pair: 'D1', name: 'Inverted Row', reps: 10, repsText: '8-10',
-            cue: 'Set a bar in the rack at about hip height. Lie under it, grab it, body straight with heels on the floor. Pull your chest up to the bar, lower slowly. Walk your feet forward to make it harder.' },
+          { ex: 'reverse_fly', pair: 'D1', reps: 12, repsText: '12-15',
+            cue: 'Chest flat on an incline bench, light dumbbells hanging. Arms almost straight — raise them out wide to the sides, squeeze the back of your shoulders, lower slowly. Light weight, always.',
+            subs: ['rear_delt_row', 'face_pull', 'cable_rear_delt_fly', 'prone_ytw'] },
           { ex: 'barbell_curl', pair: 'D2', reps: 12 },
         ],
       },

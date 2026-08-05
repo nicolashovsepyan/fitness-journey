@@ -79,6 +79,34 @@ export const GYM_EXERCISES = {
     methods: ['reps', 'weighted'], demoUrl: null,
     cues: 'Rope at head height. Pull it toward your forehead and let your hands split apart at the end. Light weight, slow, feel it between the shoulder blades.',
   },
+  /* ---- posterior shoulder / rear delt ----
+     The program presses on all three days and had zero loaded rear-delt
+     work, so this family fills that hole. All of them keep the elbow either
+     straight or in a free-rotating grip, which is what spares a cranky elbow. */
+  reverse_fly: {
+    name: 'Reverse Fly (chest-supported)', pattern: 'pull', families: ['rear-delt'], equipment: ['db', 'bench'], measure: 'reps', workType: 'reps',
+    load: 'weighted', laterality: 'bilateral', level: 'beg', diff: 2, main: true,
+    methods: ['reps', 'weighted', 'tempo'], demoUrl: null,
+    cues: 'Chest flat on an incline bench, a light dumbbell in each hand hanging down. Arms almost straight, raise them out to the sides like opening your arms wide. Squeeze the back of your shoulders at the top, lower slowly. Light weight — this is never a heavy movement.',
+  },
+  rear_delt_row: {
+    name: 'Chest-Supported Rear-Delt Row', pattern: 'pull', families: ['rear-delt', 'horizontal-pull'], equipment: ['db', 'bench'], measure: 'reps', workType: 'reps',
+    load: 'weighted', laterality: 'bilateral', level: 'beg', diff: 3,
+    methods: ['reps', 'weighted', 'tempo'], demoUrl: null,
+    cues: 'Chest on the incline bench, dumbbells hanging. Row them out WIDE with your elbows flared out to the sides, up toward your chest — not tucked to your ribs. The wide elbow path is what makes it hit the back of the shoulders. Squeeze, lower slow.',
+  },
+  cable_rear_delt_fly: {
+    name: 'Cable Rear-Delt Fly', pattern: 'pull', families: ['rear-delt'], equipment: ['cable'], measure: 'reps', workType: 'reps',
+    load: 'weighted', laterality: 'unilateral', level: 'beg', diff: 2,
+    methods: ['reps', 'weighted', 'tempo'], demoUrl: null,
+    cues: 'Cable set at shoulder height. Grab the handle with the opposite hand so the cable crosses your body, arm almost straight. Pull it out and across, away from your body. Constant tension the whole way. One arm at a time.',
+  },
+  prone_ytw: {
+    name: 'Prone Y-T-W Raise', pattern: 'pull', families: ['rear-delt', 'scap'], equipment: ['bench', 'db'], measure: 'reps', workType: 'reps',
+    load: 'bw', laterality: 'bilateral', level: 'beg', diff: 2, noPR: true, demoUrl: null,
+    cues: 'Face down on an incline bench, arms hanging, thumbs up. Raise the arms into a Y overhead, lower. Then straight out to a T, lower. Then bent into a W, lower. That is one rep. No weight or very light — this is for the small muscles that hold your shoulders back.',
+  },
+
   barbell_curl: {
     name: 'Barbell Curl', pattern: 'pull', family: 'arm', equipment: ['bb'], measure: 'reps', workType: 'reps',
     load: 'weighted', laterality: 'bilateral', level: 'beg', diff: 2, grip: 'supinated',

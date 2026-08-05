@@ -7,7 +7,6 @@ import { resolveSession, describeItem, alternatives, blockMinutes, libraryFor } 
 import { FORMATS } from '../data/formats.js';
 import { EXERCISES } from '../data/exercises.js';
 import { store } from '../store.js';
-import { openLibraryPicker, pickerInitialFor } from './library.js';
 
 const DURATIONS = [20, 30, 45, 60];
 const DUR_LABEL = { 20: 'Quick', 30: 'Short', 45: 'Full', 60: 'Long' };
@@ -202,32 +201,96 @@ export function renderDay(host, sessionId, { onBack, onStart, duration = 30, ses
     });
   }
 
-  /* Swap = the full library picker — opens pre-filtered to the move's own body part /
-     track, with a search bar and a top ✕ to bail without scrolling. */
   function openSwap(fromEx, blockId, rp) {
-    openLibraryPicker({ title: 'Swap · ' + (EXERCISES[fromEx]?.name || fromEx), initial: pickerInitialFor(fromEx),
-      onPick: id => { store.setSwap(sessionId, fromEx, id === fromEx ? null : id); draw(); } });
+    const block = rp.blocks.find(b => b.id === blockId);
+    const used = rp.blocks.flatMap(b => b.items.map(i => i.exId)).filter(x => x !== fromEx);
+    const alts = alternatives(fromEx, { constraint: rp.constraint }, used);
+    const current = block?.items.find(i => (i.swappedFrom || i.exId) === fromEx)?.exId;
+    const origName = EXERCISES[fromEx]?.name || fromEx;
+    let dividerInserted = false;
+
+    const rows = alts.map(a => {
+      let pre = '';
+      if (!a.recommended && !dividerInserted) { dividerInserted = true; pre = '<div class="swap-divider">More from your library</div>'; }
+      return pre + `<div class="swap-opt ${a.id === current ? 'cur' : ''}" data-id="${a.id}"><span>${a.name}</span>${a.id === current ? '<span class="muted">current</span>' : `<span class="muted">${a.pattern}</span>`}</div>`;
+    }).join('');
+
+    const ov = document.createElement('div');
+    ov.className = 'overlay';
+    ov.innerHTML = `
+      <div class="overlay-card scroll">
+        <div class="eyebrow">Swap exercise</div>
+        <h2 style="margin:6px 0 12px;">${origName}</h2>
+        ${alts.length ? rows : '<div class="muted" style="padding:8px 0;">No alternatives.</div>'}
+        ${current !== fromEx ? `<div class="swap-opt revert" data-id="__revert"><span>↩ Revert to ${origName}</span></div>` : ''}
+        <button class="btn ghost" id="swapCancel" style="margin-top:12px;">Cancel</button>
+      </div>`;
+    host.appendChild(ov);
+    ov.querySelector('#swapCancel').addEventListener('click', () => ov.remove());
+    ov.querySelectorAll('.swap-opt[data-id]').forEach(el => el.addEventListener('click', () => {
+      const id = el.dataset.id;
+      store.setSwap(sessionId, fromEx, id === '__revert' ? null : id);
+      ov.remove(); draw();
+    }));
   }
 
   function openFillerSwap(blockName, fromEx, rp) {
-    openLibraryPicker({ title: 'Swap secondary · ' + (EXERCISES[fromEx]?.name || fromEx), initial: pickerInitialFor(fromEx),
-      onPick: id => { store.setFillerSwap(sessionId, blockName, id); draw(); } });
+    const used = rp.blocks.flatMap(b => b.items.map(i => i.exId)).concat(rp.blocks.map(b => b.filler?.exId).filter(Boolean)).filter(x => x !== fromEx);
+    const alts = alternatives(fromEx, { constraint: rp.constraint }, used);
+    const origName = EXERCISES[fromEx]?.name || fromEx;
+    let dividerInserted = false;
+    const rows = alts.map(a => {
+      let pre = '';
+      if (!a.recommended && !dividerInserted) { dividerInserted = true; pre = '<div class="swap-divider">More from your library</div>'; }
+      return pre + `<div class="swap-opt" data-id="${a.id}"><span>${a.name}</span><span class="muted">${a.pattern}${a.diff ? ` · d${a.diff}` : ""}</span></div>`;
+    }).join('');
+    const ov = document.createElement('div'); ov.className = 'overlay';
+    ov.innerHTML = `
+      <div class="overlay-card scroll">
+        <div class="eyebrow">Swap secondary (superset)</div>
+        <h2 style="margin:6px 0 12px;">${origName}</h2>
+        ${alts.length ? rows : '<div class="muted" style="padding:8px 0;">No alternatives.</div>'}
+        <div class="swap-opt revert" data-id="__revert"><span>↩ Auto-pick (rotating)</span></div>
+        <button class="btn ghost" id="fsCancel" style="margin-top:12px;">Cancel</button>
+      </div>`;
+    host.appendChild(ov);
+    ov.querySelector('#fsCancel').addEventListener('click', () => ov.remove());
+    ov.querySelectorAll('.swap-opt[data-id]').forEach(el => el.addEventListener('click', () => {
+      const id = el.dataset.id;
+      store.setFillerSwap(sessionId, blockName, id === '__revert' ? null : id);
+      ov.remove(); draw();
+    }));
   }
 
   function openAdd(blockName, bid, rp) {
     const block = rp.blocks.find(b => b.id === bid);
+    const measure = block?.items[0]?.measure || 'reps';
+    const used = rp.blocks.flatMap(b => b.items.map(i => i.exId));
+    const list = libraryFor(measure, { constraint: rp.constraint }, used);
     const tmpl = block?.items[0] || {};
-    openLibraryPicker({ title: 'Add to ' + blockName, initial: pickerInitialFor(block?.items[0]?.exId), onPick: id => {
-      const m = EXERCISES[id]; const measure = m?.measure || tmpl.measure || 'reps';
+    const prescription = () => {
       const p = {};
       ['sets', 'reps', 'hold', 'rest', 'tempo', 'perSide'].forEach(k => { if (tmpl[k] != null) p[k] = tmpl[k]; });
       if (p.sets == null && ['straight', 'tempo', 'isometric'].includes(block?.format)) p.sets = 3;
       if (measure === 'reps' && p.reps == null) p.reps = 10;
-      if (measure === 'hold') { if (p.hold == null) p.hold = 30; delete p.reps; }
+      if (measure === 'hold' && p.hold == null) p.hold = 30;
       if (p.rest == null && p.sets) p.rest = 60;
-      store.addItem(sessionId, blockName, { ex: id, ...p });
-      draw();
-    } });
+      return p;
+    };
+    const ov = document.createElement('div'); ov.className = 'overlay';
+    ov.innerHTML = `
+      <div class="overlay-card scroll">
+        <div class="eyebrow">Add to ${blockName}</div>
+        <h2 style="margin:6px 0 12px;">Add exercise</h2>
+        ${list.length ? list.map(a => `<div class="swap-opt" data-id="${a.id}"><span>${a.name}</span><span class="muted">${a.pattern}${a.diff ? ` · d${a.diff}` : ""}</span></div>`).join('') : '<div class="muted" style="padding:8px 0;">Nothing to add.</div>'}
+        <button class="btn ghost" id="addCancel" style="margin-top:12px;">Cancel</button>
+      </div>`;
+    host.appendChild(ov);
+    ov.querySelector('#addCancel').addEventListener('click', () => ov.remove());
+    ov.querySelectorAll('.swap-opt[data-id]').forEach(el => el.addEventListener('click', () => {
+      store.addItem(sessionId, blockName, { ex: el.dataset.id, ...prescription() });
+      ov.remove(); draw();
+    }));
   }
 
   draw();
