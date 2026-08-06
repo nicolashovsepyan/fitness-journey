@@ -43,11 +43,19 @@ const files = walk(ROOT).sort();
 /* Precache the app SHELL only. The hero images are 2–3 MB each; downloading
    ~37 MB before the app is usable would be miserable on gym wifi, and it is
    not needed — the fetch handler caches them on first view anyway, and the
-   screens that matter offline (the beginner UI) do not use them at all. */
+   screens that matter offline (the beginner UI) do not use them at all.
+
+   The size cap applies to MEDIA ONLY. Code is the shell: an HTML, CSS or JS
+   file is precached whatever it weighs. onboarding.html quietly fell out of
+   the shell when the exercise artwork went inline and pushed it past 150 KB,
+   which meant the one page we are about to hand to a real user was the one
+   page that did not work offline. */
 const PRECACHE_MAX = 150 * 1024;
+const IS_CODE = /\.(html|css|js|mjs|webmanifest|json)$/i;
 const sizeOf = f => statSync(join(ROOT, f)).size;
-const precache = files.filter(f => sizeOf(f) <= PRECACHE_MAX);
-const deferred = files.filter(f => sizeOf(f) > PRECACHE_MAX);
+const keep = f => IS_CODE.test(f) || sizeOf(f) <= PRECACHE_MAX;
+const precache = files.filter(keep);
+const deferred = files.filter(f => !keep(f));
 
 // version = hash of every file's content, so a byte change anywhere busts the cache
 const h = createHash('sha1');

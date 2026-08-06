@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#171A1E">
+<title>Fitness Journey — Client profile</title>
+<style>
+:root{
+  --bg:#171A1E; --bg2:#1E232A; --card:#212630; --line:#2F3640; --line2:#3B434E;
+  --ink:#ECEFF3; --ink2:#A9B2BC; --ink3:#858E99;
+  --accent:#3ECBA8; --accent-soft:rgba(62,203,168,.13);
+  --red:#F0857A; --red-soft:rgba(240,133,122,.13);
+  --amber:#E3B25F; --amber-soft:rgba(227,178,95,.12);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink)}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Inter,system-ui,sans-serif;
+  line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:760px;margin:0 auto;padding:26px 20px 90px}
+
+header{border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:24px}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:20px;color:var(--accent)}
+.brand svg{width:26px;height:26px;stroke:currentColor;stroke-width:1.7;fill:none;stroke-linecap:round}
+.brand span{font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:650;color:var(--ink3)}
+h1{margin:0 0 6px;font-size:31px;line-height:1.15;letter-spacing:-.025em;font-weight:600}
+.meta{font-size:13.5px;color:var(--ink3)}
+.meta a{color:var(--ink2)}
+
+h2{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink3);
+  font-weight:650;margin:34px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:13px 14px}
+.tile span{display:block;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink3);font-weight:650;margin-bottom:5px}
+.tile b{font-size:16px;font-weight:600;letter-spacing:-.01em;line-height:1.3;display:block}
+.tile small{display:block;margin-top:3px;font-size:12px;color:var(--ink3);font-weight:400}
+
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--ink3);font-weight:650;padding:0 10px 8px 0;border-bottom:1px solid var(--line)}
+td{padding:11px 10px 11px 0;border-bottom:1px solid var(--line);vertical-align:top}
+td.n{font-weight:550}
+tr:last-child td{border-bottom:none}
+.pill{display:inline-block;padding:3px 9px;border-radius:7px;font-size:11.5px;font-weight:600;
+  letter-spacing:.02em;white-space:nowrap}
+.pill.y{background:var(--accent-soft);color:var(--accent)}
+.pill.n{background:rgba(255,255,255,.05);color:var(--ink3)}
+.pill.w{background:var(--amber-soft);color:var(--amber)}
+.pill.r{background:var(--red-soft);color:var(--red)}
+
+ul.plain{margin:0;padding:0;list-style:none}
+ul.plain li{padding:9px 0;border-bottom:1px solid var(--line);font-size:14.5px;display:flex;gap:10px}
+ul.plain li:last-child{border-bottom:none}
+ul.plain li i{flex:0 0 auto;width:20px;height:20px;border-radius:50%;background:var(--accent-soft);
+  color:var(--accent);font-size:10.5px;font-weight:700;font-style:normal;text-align:center;line-height:20px;margin-top:1px}
+ol.rank{margin:0;padding-left:20px;font-size:14.5px}
+ol.rank li{padding:5px 0}
+
+.note{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:0 13px 13px 0;padding:14px 16px;margin-bottom:10px}
+.note b{display:block;font-size:13.5px;margin-bottom:4px}
+.note p{margin:0;font-size:13.5px;color:var(--ink2);line-height:1.5}
+.note.warn{border-left-color:var(--amber)}
+.note.stop{border-left-color:var(--red)}
+
+.sils{display:flex;gap:22px;align-items:flex-end;flex-wrap:wrap}
+.silbox{text-align:center}
+.silbox svg{height:120px;display:block}
+.silbox svg path,.silbox svg circle{fill:var(--ink2)}
+.silbox.goal svg path,.silbox.goal svg circle{fill:var(--accent)}
+.silbox b{display:block;margin-top:8px;font-size:12.5px;font-weight:600}
+.silbox span{display:block;font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--ink3);font-weight:650;margin-bottom:6px}
+
+.empty{color:var(--ink3);font-size:14px;font-style:italic}
+details{margin-top:34px;border-top:1px solid var(--line);padding-top:16px}
+summary{cursor:pointer;font-size:12px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink3);font-weight:650}
+pre{background:var(--bg2);border:1px solid var(--line);border-radius:11px;padding:14px;
+  overflow-x:auto;font-size:11.5px;color:var(--ink2);line-height:1.5}
+.bar{position:fixed;left:0;right:0;bottom:0;background:rgba(23,26,30,.94);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  border-top:1px solid var(--line);padding:12px 20px calc(12px + env(safe-area-inset-bottom));
+  display:flex;gap:10px;justify-content:center}
+.bar button{min-height:46px;padding:0 20px;border-radius:12px;border:1.5px solid var(--line2);
+  background:var(--card);color:var(--ink);font:600 14px/1 inherit;font-family:inherit;cursor:pointer}
+.bar button.pri{background:var(--accent);color:#0C1512;border-color:var(--accent)}
+@media print{
+  :root{--bg:#fff;--bg2:#fff;--card:#fff;--line:#ddd;--ink:#111;--ink2:#333;--ink3:#666}
+  .bar{display:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap" id="wrap"></div>
+<div class="bar">
+  <button class="pri" onclick="window.print()">Print / save PDF</button>
+  <button onclick="copyJson()">Copy raw data</button>
+</div>
+
+<script>
+/* ---------------- label maps (mirrors the onboarding) ---------------- */
+const H_LABEL={sport:'Still playing their sport',heavy:'Still lifting heavy',
+  strongold:'Being the strong one at 55',nopain:'A day without pain',kids:'Keeping up with their kids',
+  anything:'Saying yes to anything',hike:'Walking anywhere they want',floor:'Getting off the floor unaided',
+  grand:'Picking a grandchild up',carry:'Carrying their own bags',indep:'Staying in their own home',
+  stairs:'Stairs without the rail',travel:'Still travelling properly'};
+const FOCUS={strong:'Get stronger',lean:'Lean out',muscle:'Build muscle',
+  pain:'Move without pain',energy:'More energy',wind:'Get their wind back'};
+const DRIVER={lose:'Wants to lose weight',best:'Best shape of their life',plateau:'Plateaued, wants past it',
+  event:'Training for something specific',strong:'Wants to be strong again',
+  miss:'Misses training',feel:"Doesn't like how they feel",
+  kids:'Keep up with the kids',doctor:'Doctor told them to'};
+const BLOCK={time:'Time disappears',week3:'Motivation dies at week three',
+  toohard:'Starts too hard, burns out',injury:'Something started hurting',
+  lost:"Couldn't tell if it was working",travel:'Travel breaks the rhythm',
+  life:'Life gets busy, training goes first',never:'Never really started'};
+const WHEN={early:'Before anyone else is up',lunch:'The gap in the middle',
+  after:'Straight after work',evening:'Late, once it is quiet',flex:'Whenever the day allows'};
+const LEN={'20':'20 minutes','35':'30–40 minutes','55':'45–60 minutes','75':'An hour or more'};
+const WHERE={gym:'Full gym',homekit:'Home + equipment',homenone:'Home, nothing',
+  outdoor:'Outdoors',hotel:'Hotel gyms'};
+const TRACKER={apple:'Apple Watch',whoop:'Whoop',oura:'Oura',garmin:'Garmin',
+  fitbit:'Fitbit',other:'Something else',none:'Nothing'};
+const METRIC={strain:'Strain',recovery:'Recovery',sleep:'Sleep',hrv:'HRV',rings:'The rings',
+  steps:'Steps',hr:'Heart rate',vo2:'VO₂ max / cardio fitness',battery:'Body Battery',
+  ready:'Readiness',activity:'Activity',azm:'Active Zone Minutes',cals:'Calories',
+  forget:'Opens it and forgets'};
+const PARQ={none:'None apply',heart:'Heart condition / high blood pressure',
+  chest:'Chest pain at rest or on activity',dizzy:'Dizziness or fainting in the last year',
+  chronic:'Another diagnosed chronic condition',meds:'Prescribed medication, chronic condition',
+  joint:'Bone or joint problem that could worsen',super:'Told to exercise only under supervision',
+  preg:'Pregnant or recently postpartum'};
+const PAIN={neck:'Neck',shldr:'Shoulders',chest:'Chest',abs:'Abdomen',arm:'Elbow / wrist',
+  hip:'Hip or groin',knee:'Knees',ankle:'Ankles / feet',neckB:'Neck (back)',
+  blade:'Shoulder blades',mid:'Mid back',low:'Lower back',armB:'Elbow / wrist',
+  glute:'Glutes',ham:'Hamstrings',calf:'Calves'};
+const TEND={loses:'Loses weight and muscle fast',stable:'Pretty stable',gains:'Gains quickly under stress',
+  swings:'Swings both ways',dunno:'Does not track it'};
+const KITNAME={db:'Dumbbells',kb:'Kettlebell',bb:'Barbell',rack:'Squat rack',bench:'Bench',
+  pullupbar:'Pull-up bar',rings:'Rings',dipbars:'Dip bars',parallettes:'Parallettes',band:'Bands',
+  vest:'Weighted vest',sliders:'Sliders',abwheel:'Ab wheel',slantboard:'Slant board',mat:'Mat'};
+const PATNAME={squat:'Squat',hinge:'Hinge',hipext:'Hip extension',push:'Horizontal push',
+  pull:'Horizontal pull',vpull:'Vertical pull',press:'Vertical press',unilat:'Single leg',
+  carry:'Carry',core:'Core',antirot:'Anti-rotation',grip:'Grip'};
+
+const GYM_NAMES={squat:'Back squat',dead:'Deadlift',rdl:'Romanian deadlift',bench:'Bench press',
+  ohp:'Overhead press',row:'Row',pullup:'Pull-up',split:'Split squat',thrust:'Hip thrust',
+  carry:'Farmer carry',plank:'Plank',sideplank:'Side plank'};
+const BODY_NAMES={pushup:'Push-up',bwsquat:'Bodyweight squat',lunge:'Split squat',
+  bridge:'Glute bridge',slrdl:'Single-leg RDL',pullup:'Pull-up',invrow:'Inverted row',
+  pike:'Pike push-up',bear:'Bear crawl',plank:'Plank',sideplank:'Side plank',hang:'Dead hang'};
+const EX_UNIT={squat:1,dead:1,rdl:1,bench:1,ohp:1,row:1,thrust:1,carry:1};
+const EX_PAT={squat:'squat',dead:'hinge',rdl:'hinge',bench:'push',ohp:'press',row:'pull',
+  pullup:'vpull',split:'unilat',thrust:'hipext',carry:'carry',plank:'core',sideplank:'antirot',
+  pushup:'push',bwsquat:'squat',lunge:'unilat',bridge:'hipext',slrdl:'hinge',invrow:'pull',
+  pike:'press',bear:'carry',hang:'grip'};
+
+const SIL_M=[{sh:25,ch:23,wa:15,hi:19,th:10,t:'Skinny'},{sh:33,ch:29,wa:16,hi:22,th:15,t:'Athletic'},
+  {sh:30,ch:29,wa:24,hi:27,th:15,t:'Average'},{sh:33,ch:34,wa:33,hi:34,th:19,t:'Soft'},
+  {sh:36,ch:40,wa:42,hi:42,th:24,t:'Overweight'}];
+const SIL_F=[{sh:21,ch:20,wa:14,hi:22,th:11,t:'Skinny'},{sh:27,ch:25,wa:15,hi:26,th:15,t:'Athletic'},
+  {sh:25,ch:25,wa:21,hi:31,th:16,t:'Average'},{sh:28,ch:29,wa:28,hi:37,th:20,t:'Soft'},
+  {sh:31,ch:35,wa:38,hi:44,th:26,t:'Overweight'}];
+function silSvg(f){
+  const cx=58, yTop=27, yWa=74, yHi=104, yFoot=170;
+  const maxW=Math.max(f.sh,f.ch,f.wa,f.hi);
+  const aw=f.th*0.62;                                  /* arm thickness */
+  const torso =
+    `M${cx-f.sh} ${yTop}`+
+    `C${cx-f.ch} ${yTop+17},${cx-f.wa} ${yWa-15},${cx-f.wa} ${yWa}`+
+    `C${cx-f.wa} ${yWa+13},${cx-f.hi} ${yHi-11},${cx-f.hi} ${yHi}`+
+    `L${cx+f.hi} ${yHi}`+
+    `C${cx+f.hi} ${yHi-11},${cx+f.wa} ${yWa+13},${cx+f.wa} ${yWa}`+
+    `C${cx+f.wa} ${yWa-15},${cx+f.ch} ${yTop+17},${cx+f.sh} ${yTop}`+
+    `Q${cx} ${yTop-13} ${cx-f.sh} ${yTop}Z`;
+  const arm=(sgn)=>{
+    const oT=cx+sgn*(f.sh+1), iT=cx+sgn*(f.sh+1-aw);
+    const oB=cx+sgn*(maxW+1), iB=cx+sgn*(maxW+1-aw*1.15);
+    return `M${oT} ${yTop+7}L${iT} ${yTop+9}L${iB} ${yWa+34}L${oB} ${yWa+36}Z`;
+  };
+  const leg=(sgn)=>`M${cx+sgn*f.hi} ${yHi-2}L${cx+sgn*1.6} ${yHi-2}`+
+    `L${cx+sgn*1.6} ${yFoot}L${cx+sgn*f.th*0.95} ${yFoot}Z`;
+  const nw=Math.max(5.5,f.wa*0.26);
+  return `<svg viewBox="0 0 116 176" preserveAspectRatio="xMidYMid meet">`+
+    `<circle cx="${cx}" cy="12" r="${9+(f.wa-15)*0.075}"/>`+
+    `<path d="M${cx-nw} 19L${cx+nw} 19L${cx+nw} ${yTop+3}L${cx-nw} ${yTop+3}Z"/>`+
+    `<path d="${arm(-1)}"/><path d="${arm(1)}"/>`+
+    `<path d="${torso}"/><path d="${leg(-1)}"/><path d="${leg(1)}"/></svg>`;
+}
+function silScale(sex){ return (sex==='f')?SIL_F:SIL_M; }
+function horizonAge(a){return a<30?55:a<40?65:a<50?70:a<60?80:a<70?85:90;}
+
+/* ---------------- decode ---------------- */
+let DATA=null;
+function decode(){
+  let h=(location.hash||'').replace(/^#/,'');
+  if(!h) return null;
+  try{
+    h=h.replace(/-/g,'+').replace(/_/g,'/');
+    while(h.length%4) h+='=';
+    return JSON.parse(decodeURIComponent(escape(atob(h))));
+  }catch(e){ return null; }
+}
+function bandTxt(k,r,unit){
+  if(!r.band) return '—';
+  const needsUnit = EX_UNIT[k] && unit && /\d/.test(r.band) && !/s$/.test(r.band);
+  return esc(r.band) + (needsUnit ? ' '+esc(unit) : '');
+}
+function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function list(arr,map){ if(!arr||!arr.length) return '<div class="empty">Not answered</div>';
+  return '<ul class="plain">'+arr.map(v=>'<li><i>•</i><span>'+esc((map&&map[v])||v)+'</span></li>').join('')+'</ul>'; }
+
+/* ---------------- programming notes ---------------- */
+function notes(A){
+  const out=[];
+  const days=A.days||3, len=A.length||'35';
+  const focus=(A.focus||[]), blockers=A.blockers||[], parq=A.parq||[], pain=A.pain||[];
+  const deck=A.deck||{}, lv=A.levels||{};
+  const gym=(A.where||[]).indexOf('gym')>-1||(A.where||[]).indexOf('homekit')>-1;
+
+  /* split */
+  const split = days<=2 ? 'Two full-body sessions. Every session hits every pattern.'
+    : days===3 ? 'Three full-body sessions, rotating which pattern leads.'
+    : days===4 ? 'Upper / lower, twice through.'
+    : 'Upper / lower / full, with the extra day as low-intensity work.';
+  out.push(['Structure', days+' days × '+(LEN[len]||len)+'. '+split]);
+
+  /* priority */
+  if(focus[0]) out.push(['Primary driver', (FOCUS[focus[0]]||focus[0])+
+    (focus[1]?' — with '+(FOCUS[focus[1]]||focus[1]).toLowerCase()+' as the secondary. Build for the first; the second gets what is left.':'. Single goal, so every session can serve it.')]);
+
+  /* gated movements — patterns they do not do */
+  const doesPat={};
+  Object.keys(deck).forEach(k=>{ if(deck[k].does) doesPat[EX_PAT[k]]=1; });
+  const gaps=['squat','hinge','hipext','push','press','pull','vpull','unilat','carry','core']
+    .filter(p=>!doesPat[p]).map(p=>PATNAME[p]);
+  if(gaps.length) out.push(['Gate these',
+    gaps.join(', ')+' — no history here, so introduce unloaded, groove the pattern, then load. Do not program these to a target in week one.', 'warn']);
+
+  /* strong points */
+  const loaded=Object.keys(deck).filter(k=>deck[k].does && deck[k].band &&
+    !/Bar only|Bodyweight|Not yet|^0$/.test(deck[k].band));
+  if(loaded.length>=4) out.push(['Can be loaded now',
+    loaded.map(k=>(GYM_NAMES[k]||BODY_NAMES[k]||k)).join(', ')+'. Real numbers exist here — start from them, not from a beginner template.']);
+
+  /* pull deficit heuristic */
+  const pu=deck.pullup, hang=deck.hang;
+  if(pu && pu.does===false) out.push(['Pulling deficit',
+    'No pull-up. Build it in stages — dead hang, scapular pull, band-assisted, negative — before it appears as a prescription.','warn']);
+
+  /* pacing */
+  if(blockers.indexOf('toohard')>-1||blockers.indexOf('week3')>-1)
+    out.push(['Pace it deliberately',
+      'Fast starter. Weeks one and two should feel conservative on purpose, and they need to be told that in advance or they will read it as the program being too easy.','warn']);
+  if(blockers.indexOf('time')>-1||blockers.indexOf('life')>-1)
+    out.push(['Make it small',
+      'Training is first to be dropped. Ship a 15-minute minimum version of every session so skipping stops being a decision.']);
+  if(blockers.indexOf('lost')>-1)
+    out.push(['Show the measurement',
+      'They stopped last time because they could not tell if it was working. Every block needs a stated test and a visible result.']);
+  if(blockers.indexOf('travel')>-1)
+    out.push(['Travel variant',
+      'Build a hotel-room version of each session from day one, not as a fallback later.']);
+
+  /* body + weight tendency */
+  const sh=A.shape||{};
+  if(sh.now!=null && sh.goal!=null){
+    const gap=sh.now-sh.goal;
+    if(gap>=4) out.push(['Expectation gap',
+      'Target is four steps from where they are. Set an honest timeline early — this is the single most common reason people quit at week six.','warn']);
+    else if(gap<=0) out.push(['Not a fat-loss client',
+      'Target is at or above where they are now. Programme for tissue and strength; do not put them in a deficit.']);
+  }
+  if(A.weightTend==='gains') out.push(['Weight responds fast',
+    'Gains quickly when routine slips. Adherence to the non-training side moves their number more than session volume will — say so plainly rather than adding cardio.']);
+  if(A.weightTend==='loses') out.push(['Hard gainer',
+    'Loses weight easily. Undereating is the likely limiter on strength. Protect calories before adding conditioning.']);
+
+  /* health */
+  const flags=parq.filter(x=>x!=='none');
+  if(flags.length) out.push(['Medical clearance first',
+    flags.map(f=>PARQ[f]||f).join('; ')+'. Do not issue a program until this is cleared. Outside scope of practice.','stop']);
+  if(pain.length) out.push(['Working around pain',
+    pain.map(x=>PAIN[x]||x).join(', ')+'. Substitute rather than omit, and confirm it is not acute before session one.','warn']);
+
+  /* literacy */
+  out.push(['Coaching depth',
+    'Gym literacy: '+(lv.gym||'unknown')+'. Bodyweight literacy: '+(lv.body||'unknown')+'. '+
+    ((lv.gym==='New')?'Explain setup and cues in full for anything with a barbell.':'Give the numbers, skip the lecture.')]);
+
+  const kit2=A.kit||{}, kitList=(kit2.have||[]).map(k=>KITNAME[k]||k).concat(kit2.other||[]);
+  if(kitList.length) out.push(['Programme against this kit only',
+    kitList.join(', ')+'. Anything outside this list needs a substitute, not an assumption.']);
+  if(!gym) out.push(['No loading available',
+    'Bodyweight and outdoors only. Progress through leverage, tempo and range rather than load — and flag when equipment becomes the limiter.']);
+
+  return out;
+}
+
+/* ---------------- render ---------------- */
+function render(){
+  const w=document.getElementById('wrap');
+  DATA=decode();
+  if(!DATA||!DATA.a){
+    w.innerHTML='<header><div class="brand"><svg viewBox="0 0 24 24"><path d="M4 9v6"/><path d="M7 6.5v11"/><path d="M17 6.5v11"/><path d="M20 9v6"/><path d="M7 12h10"/></svg><span>Fitness Journey</span></div>'+
+      '<h1>No profile in this link.</h1><p class="meta">Open the link exactly as it was sent — the profile travels in the part after the #.</p></header>';
+    return;
+  }
+  const A=DATA.a;
+  const when=new Date(DATA.at||Date.now());
+  const scale=silScale(A.sex);
+  const deck=A.deck||{};
+  const deckRows=Object.keys(deck);
+  const doesCount=deckRows.filter(k=>deck[k].does).length;
+  const sh=A.shape||{};
+
+  let h='';
+  h+=`<header><div class="brand"><svg viewBox="0 0 24 24"><path d="M4 9v6"/><path d="M7 6.5v11"/><path d="M17 6.5v11"/><path d="M20 9v6"/><path d="M7 12h10"/></svg><span>Fitness Journey · Client profile</span></div>
+    <h1>${esc(A.name||'Unnamed client')}</h1>
+    <div class="meta">${A.age?A.age+' · ':''}${A.sex==='f'?'Female':A.sex==='m'?'Male':'Sex not given'} · completed ${when.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}
+    ${A.email?' · <a href="mailto:'+esc(A.email)+'">'+esc(A.email)+'</a>':''}</div></header>`;
+
+  /* at a glance */
+  h+='<h2>At a glance</h2><div class="grid">';
+  const DAYN=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const wk=(A.trainDays||[]).map(k=>DAYN[k]).join(', ');
+  h+=`<div class="tile"><span>Days a week</span><b>${A.days||'—'}</b><small>${wk||''} · ${LEN[A.length]||''}</small></div>`;
+  if(A.heightCm||A.weightKg){
+    const ht = A.heightUnit==='ft' && A.heightCm
+      ? Math.floor(Math.round(A.heightCm/2.54)/12)+"'"+(Math.round(A.heightCm/2.54)%12)+'"'
+      : (A.heightCm?A.heightCm+' cm':'—');
+    const wt = A.weightKg ? (A.unit==='lb' ? Math.round(A.weightKg*2.2046)+' lb' : Math.round(A.weightKg)+' kg') : '—';
+    h+=`<div class="tile"><span>Height / weight</span><b>${ht} · ${wt}</b><small>self-reported</small></div>`;
+  }
+  h+=`<div class="tile"><span>90-day priority</span><b>${FOCUS[(A.focus||[])[0]]||'—'}</b><small>${FOCUS[(A.focus||[])[1]]||'single goal'}</small></div>`;
+  h+=`<div class="tile"><span>Movements they do</span><b>${doesCount} of ${deckRows.length||10}</b><small>from the deck</small></div>`;
+  h+=`<div class="tile"><span>Gym literacy</span><b>${(A.levels||{}).gym||'—'}</b><small>bodyweight: ${(A.levels||{}).body||'—'}</small></div>`;
+  h+=`<div class="tile"><span>Trains</span><b>${WHEN[A.when]||'—'}</b><small>${(A.where||[]).map(x=>WHERE[x]||x).join(', ')||''}</small></div>`;
+  h+=`<div class="tile"><span>Horizon</span><b>Age ${horizonAge(A.age||38)}</b><small>${(A.horizon||[]).length} things named</small></div>`;
+  h+='</div>';
+
+  /* programming notes first — it is the reason to open this page */
+  h+='<h2>Programming notes</h2>';
+  notes(A).forEach(n=>{ h+=`<div class="note ${n[2]||''}"><b>${esc(n[0])}</b><p>${esc(n[1])}</p></div>`; });
+
+  /* body */
+  h+='<h2>Body and weight history</h2><div class="sils">';
+  if(sh.now!=null) h+=`<div class="silbox"><span>Now</span>${silSvg(scale[sh.now])}<b>${scale[sh.now].t}</b></div>`;
+  if(sh.goal!=null) h+=`<div class="silbox goal"><span>Would like</span>${silSvg(scale[sh.goal])}<b>${scale[sh.goal].t}</b></div>`;
+  if(sh.now==null&&sh.goal==null) h+='<div class="empty">Not answered</div>';
+  h+='</div>';
+  h+=`<div style="margin-top:16px" class="grid"><div class="tile"><span>When life gets busy</span><b>${TEND[A.weightTend]||'Not answered'}</b></div>`;
+  const kit=A.kit||{};
+  const kitAll=(kit.have||[]).map(k=>KITNAME[k]||k).concat(kit.other||[]);
+  if(kitAll.length) h+=`<div class="tile"><span>Equipment at home</span><b style="font-size:14px">${esc(kitAll.join(', '))}</b></div>`;
+  h+='</div>';
+
+  /* baseline */
+  h+='<h2>Movement baseline</h2>';
+  if(deckRows.length){
+    h+='<table><tr><th>Movement</th><th>Pattern</th><th>Does it</th><th>Capability</th></tr>';
+    deckRows.forEach(k=>{
+      const r=deck[k];
+      h+=`<tr><td class="n">${esc(GYM_NAMES[k]||BODY_NAMES[k]||k)}</td>
+        <td style="color:var(--ink3)">${esc(PATNAME[EX_PAT[k]]||'')}</td>
+        <td><span class="pill ${r.does?'y':'n'}">${r.does?'Yes':'No'}</span></td>
+        <td>${bandTxt(k,r,A.unit)}</td></tr>`;
+    });
+    h+='</table>';
+  } else h+='<div class="empty">Deck not completed</div>';
+
+  /* goals */
+  h+='<h2>Where they are going</h2>';
+  h+=`<div style="font-size:12px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink3);font-weight:650;margin-bottom:8px">At ${horizonAge(A.age||38)} they want</div>`;
+  h+=list(A.horizon,H_LABEL);
+  h+='<div style="font-size:12px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink3);font-weight:650;margin:20px 0 8px">Next ninety days, in order</div>';
+  h+=(A.focus&&A.focus.length)?'<ol class="rank">'+A.focus.map(v=>'<li>'+esc(FOCUS[v]||v)+'</li>').join('')+'</ol>':'<div class="empty">Not answered</div>';
+
+  /* week + obstacles */
+  h+='<h2>The week, and what gets in the way</h2><div class="grid">';
+  h+=`<div class="tile"><span>Real driver</span><b>${DRIVER[A.driver]||'—'}</b></div>`;
+  h+=`<div class="tile"><span>Check-in day</span><b>${({sun:'Sunday',mon:'Monday',fri:'Friday',wed:'Wednesday'})[A.checkin]||'—'}</b></div>`;
+  h+='</div>';
+  h+='<div style="font-size:12px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink3);font-weight:650;margin:20px 0 8px">What stopped them before</div>';
+  h+=list(A.blockers,BLOCK);
+
+  /* enjoyment */
+  const fe=A.feelings||{};
+  const loved=Object.keys(fe).filter(k=>fe[k]==='love'), hated=Object.keys(fe).filter(k=>fe[k]==='never');
+  if(loved.length||hated.length){
+    h+='<h2>Enjoyment</h2><div class="grid">';
+    h+=`<div class="tile"><span>Loves</span><b style="font-size:14px">${loved.map(k=>esc(GYM_NAMES[k]||BODY_NAMES[k]||k)).join(', ')||'—'}</b><small>anchor one of these at the end of each session</small></div>`;
+    h+=`<div class="tile"><span>Hates</span><b style="font-size:14px">${hated.map(k=>esc(GYM_NAMES[k]||BODY_NAMES[k]||k)).join(', ')||'—'}</b><small>substitute, do not include</small></div>`;
+    h+='</div>';
+  }
+
+  /* health */
+  h+='<h2>Health</h2>';
+  const flags=(A.parq||[]).filter(x=>x!=='none');
+  if(flags.length){
+    h+='<div class="note stop"><b>PAR-Q+ flags — clearance required</b><p>'+flags.map(f=>esc(PARQ[f]||f)).join('<br>')+'</p></div>';
+  } else h+='<div class="note"><b>PAR-Q+</b><p>Nothing flagged.</p></div>';
+  h+=`<div class="note ${(A.pain||[]).length?'warn':''}"><b>Current pain</b><p>${(A.pain||[]).length?(A.pain).map(x=>esc(PAIN[x]||x)).join(', '):'Nothing reported.'}</p></div>`;
+  h+=`<div class="note"><b>Wearable</b><p>${TRACKER[A.tracker]||'Not answered'}${(A.metric||[]).length?' — follows '+(A.metric).map(m=>esc(METRIC[m]||m)).join(', then '):''}</p></div>`;
+
+  h+='<details><summary>Raw data</summary><pre id="raw">'+esc(JSON.stringify(DATA,null,2))+'</pre></details>';
+  w.innerHTML=h;
+  document.title='Fitness Journey — '+(A.name||'Client profile');
+}
+function copyJson(){
+  const t=JSON.stringify(DATA,null,2);
+  if(navigator.clipboard){navigator.clipboard.writeText(t).then(()=>alert('Raw data copied.'));}
+  else prompt('Copy:',t);
+}
+render();
+window.addEventListener('hashchange',render);
+</script>
+</body>
+</html>

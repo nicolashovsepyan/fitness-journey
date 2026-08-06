@@ -1,0 +1,221 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#171A1E">
+<title>Dumbbell — A vs B</title>
+<style>
+:root{--bg:#171A1E;--ink:#ECEFF3;--ink3:#858E99;--accent:#3ECBA8}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);min-height:100vh;
+  font:400 16px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:calc(24px + env(safe-area-inset-top)) 18px calc(24px + env(safe-area-inset-bottom))}
+.pair{display:flex;flex-direction:column;gap:34px;width:100%;max-width:420px}
+.slot{position:relative;display:flex;flex-direction:column;align-items:center}
+.tag{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink3);
+  font-weight:600;margin-bottom:14px;text-align:center}
+.slot.best .tag{color:var(--accent)}
+.art{position:relative;display:flex;align-items:center;justify-content:center;width:100%}
+.glow{position:absolute;width:190px;height:190px;border-radius:50%;z-index:1;opacity:0;
+  background:radial-gradient(circle,rgba(62,203,168,.26),rgba(62,203,168,0) 66%);
+  will-change:opacity,transform}
+.art.alive .glow{animation:gIn .55s cubic-bezier(.22,1,.36,1) both, gPulse 4.4s ease-in-out .55s infinite}
+@keyframes gIn{from{opacity:0;transform:scale(.88)}to{opacity:.40;transform:scale(.95)}}
+@keyframes gPulse{0%,100%{opacity:.40;transform:scale(.95)}50%{opacity:.86;transform:scale(1.06)}}
+svg{width:min(84%,320px);height:auto;overflow:visible;position:relative;z-index:2}
+/* B's silhouette is narrower, so it gets more of the width to land at the same
+   optical size — otherwise you would be comparing scale, not design */
+.slot.wide svg{width:min(95%,362px)}
+svg .stroked{fill:none;stroke:url(#gA);stroke-linecap:round}
+svg .bar{stroke:url(#gB)}
+.rep{will-change:transform}
+.art.alive .rep{animation:rep 4.4s cubic-bezier(.45,0,.55,1) infinite}
+@keyframes rep{0%{transform:translateY(0)}25%{transform:translateY(-9px)}
+  50%{transform:translateY(0)}75%{transform:translateY(9px)}100%{transform:translateY(0)}}
+/* the clip rectangles that wipe B's plates into place */
+.wipe{transform-box:fill-box;transform:scaleY(0)}
+.hint{margin-top:30px;font-size:12.5px;color:var(--ink3);letter-spacing:.02em}
+@media (prefers-reduced-motion:reduce){
+  svg .stroked{stroke-dashoffset:0!important;transition:none!important}
+  .wipe{transform:scaleY(1)!important;transition:none!important}
+  .art.alive .rep,.art.alive .glow{animation:none}.glow{opacity:.5}}
+</style></head><body>
+<div class="pair" id="pair"></div>
+<div class="hint">Tap anywhere to replay</div>
+<script>
+var GRADS=
+'<linearGradient id="gA" gradientUnits="userSpaceOnUse" x1="52" y1="0" x2="208" y2="0">'+
+'<stop offset="0%" stop-color="#34B396"/><stop offset="22%" stop-color="#93EAD7"/>'+
+'<stop offset="50%" stop-color="#A8F5E1"/><stop offset="78%" stop-color="#93EAD7"/>'+
+'<stop offset="100%" stop-color="#34B396"/></linearGradient>'+
+'<linearGradient id="gB" gradientUnits="userSpaceOnUse" x1="86" y1="0" x2="174" y2="0">'+
+'<stop offset="0%" stop-color="#93EAD7" stop-opacity="1"/>'+
+'<stop offset="32%" stop-color="#8FE6D3" stop-opacity="1"/>'+
+'<stop offset="36%" stop-color="#89DFCC" stop-opacity=".60"/>'+
+'<stop offset="39%" stop-color="#83D9C6" stop-opacity=".22"/>'+
+'<stop offset="41%" stop-color="#7FD5C2" stop-opacity="0"/>'+
+'<stop offset="59%" stop-color="#7FD5C2" stop-opacity="0"/>'+
+'<stop offset="61%" stop-color="#83D9C6" stop-opacity=".22"/>'+
+'<stop offset="64%" stop-color="#89DFCC" stop-opacity=".60"/>'+
+'<stop offset="68%" stop-color="#8FE6D3" stop-opacity="1"/>'+
+'<stop offset="100%" stop-color="#93EAD7" stop-opacity="1"/></linearGradient>'+
+/* Light on a machined face. Tinted rather than white-to-black: a white wash
+   desaturates the teal and the plate goes milky, so the highlight is a pale
+   mint and the shadow a deep teal. Keeps the mark one colour. */
+'<linearGradient id="gFace" gradientUnits="userSpaceOnUse" x1="0" y1="30" x2="0" y2="100">'+
+'<stop offset="0%" stop-color="#EAFFF8" stop-opacity=".17"/>'+
+'<stop offset="26%" stop-color="#EAFFF8" stop-opacity=".03"/>'+
+'<stop offset="58%" stop-color="#06342A" stop-opacity="0"/>'+
+'<stop offset="100%" stop-color="#06342A" stop-opacity=".30"/></linearGradient>'+
+/* A solid plate needs its own ramp. Reusing the line gradient made the fills
+   read pale and chalky, because the value that looks like light on a 7-unit
+   stroke is just a washed-out area when it fills a 25-unit slab. */
+'<linearGradient id="gPlate" gradientUnits="userSpaceOnUse" x1="52" y1="0" x2="208" y2="0">'+
+'<stop offset="0%" stop-color="#2FA78C"/><stop offset="30%" stop-color="#6FD9BF"/>'+
+'<stop offset="50%" stop-color="#93EAD7"/><stop offset="70%" stop-color="#6FD9BF"/>'+
+'<stop offset="100%" stop-color="#2FA78C"/></linearGradient>'+
+/* Knurling across the rim — deliberately near the threshold of visible. Loud
+   enough to read as stripes and it stops being texture and starts being pattern. */
+'<pattern id="gMill" width="4" height="3.4" patternUnits="userSpaceOnUse">'+
+'<line x1="0" y1=".35" x2="4" y2=".35" stroke="#FFFFFF" stroke-opacity=".038" stroke-width=".5"/>'+
+'<line x1="0" y1="2.0" x2="4" y2="2.0" stroke="#03251E" stroke-opacity=".05" stroke-width=".5"/>'+
+'</pattern>';
+
+var N=3,GAP=0.42,DUR=0.55,T0=0.20,BAR={d:'M86 65 H174',w:7},mirror=function(x){return 260-x;};
+var WIPE=0.72;
+
+var MARKS=[
+ {k:'A', label:'A · three plates', best:true, engine:'stroke', passes:[3,2,1],
+  plates:[{x:86,y1:38,y2:92,w:12.65},{x:66.8,y1:40.70,y2:89.30,w:9.90},{x:52.4,y1:47.50,y2:82.50,w:7.13}]},
+ {k:'B', label:'B · two plates, machined', best:false, engine:'plate', r:2.8, barW:8,
+  /* One radius for both plates, so the corner reads as a decision rather than
+     "whatever half the thickness happens to be" — that is what stops the thick
+     plate looking like a pill, and it is why the thin plate is a rounded bar
+     now instead of a stadium. */
+  plates:[{x:86,w:24.75,y0:32.5,y1:97.5},{x:63,w:9.9,y0:39,y1:91}]}
+];
+
+var timers=[];
+
+/* ---------- A: passes of widening line, drawn end to end ---------- */
+function buildStroke(m){
+  var passes=[],step=0;
+  function lay(ds,w,oppose,n,isBar){
+    n=n||N;
+    for(var i=0;i<n;i++){
+      var delay=T0+step*GAP; step++;
+      var rev=(i%2)===1;
+      ds.forEach(function(d,side){
+        passes.push({d:d,w:w*(i+1)/n,delay:delay,bar:!!isBar,
+                     rev:(oppose&&side===1)?!rev:rev});
+      });
+    }
+  }
+  lay([BAR.d],BAR.w,false,N,true);
+  m.plates.forEach(function(p,k){
+    lay(['M'+p.x+' '+p.y1+' V'+p.y2,'M'+mirror(p.x)+' '+p.y1+' V'+p.y2],p.w,true,m.passes[k]);
+  });
+  return {body:'<g class="rep">'+passes.map(function(q){
+      return '<path class="stroked'+(q.bar?' bar':'')+'" stroke-width="'+q.w.toFixed(2)+'" d="'+q.d+'"/>';
+    }).join('')+'</g>',
+    passes:passes, done:T0+(step-1)*GAP+DUR};
+}
+
+/* ---------- B: bar drawn, then solid plates wiped in from opposite sides ---------- */
+function buildPlate(m,uid){
+  var passes=[],step=0;
+  for(var i=0;i<N;i++){
+    passes.push({d:BAR.d,w:(m.barW||BAR.w)*(i+1)/N,delay:T0+step*GAP,bar:true,rev:(i%2)===1});
+    step++;
+  }
+  var barDone=T0+(step-1)*GAP+DUR;
+  var clips='',shapes='',wipes=[],last=0;
+  m.plates.forEach(function(p,k){
+    var start=barDone-0.38+k*0.42; last=start;
+    [p.x,mirror(p.x)].forEach(function(cx,side){
+      var id=uid+'c'+k+side;
+      var x=cx-p.w/2, y=p.y0, w=p.w, h=p.y1-p.y0, r=Math.min(m.r,w/2);
+      /* left plate fills downward while the right fills upward, and the pair
+         swaps on the next plate — the same opposition as the line version */
+      var down=((k+side)%2)===0;
+      clips+='<clipPath id="'+id+'" clipPathUnits="userSpaceOnUse">'+
+             '<rect class="wipe" data-w="'+id+'" x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'"'+
+             ' style="transform-origin:50% '+(down?'0%':'100%')+'"/></clipPath>';
+      var ins=2.5, ir=Math.max(1.1,r-ins);
+      shapes+='<g clip-path="url(#'+id+')">'+
+        '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="'+r+'" fill="url(#gPlate)"/>'+
+        (w>14 ? '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="'+r+'" fill="url(#gMill)"/>' : '')+
+        '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="'+r+'" fill="url(#gFace)"/>'+
+        (w>14 ? '<rect x="'+(x+ins)+'" y="'+(y+ins)+'" width="'+(w-ins*2)+'" height="'+(h-ins*2)+'"'+
+                ' rx="'+ir+'" fill="none" stroke="#EAFFF8" stroke-opacity=".17" stroke-width=".8"/>' : '')+
+        /* a hairline along the very top edge, where the light would actually land */
+        '<rect x="'+(x+r*0.5)+'" y="'+(y+0.55)+'" width="'+(w-r)+'" height="0"'+
+        ' fill="none" stroke="#F2FFFA" stroke-opacity=".34" stroke-width=".7"'+
+        ' stroke-linecap="round"/>'+
+        '</g>';
+      wipes.push({id:id,delay:start});
+    });
+  });
+  return {body:'<g class="rep">'+
+      passes.map(function(q){
+        return '<path class="stroked bar" stroke-width="'+q.w.toFixed(2)+'" d="'+q.d+'"/>';}).join('')+
+      shapes+'</g>',
+    defs:clips, passes:passes, wipes:wipes, done:last+WIPE};
+}
+
+function build(m,idx){
+  var uid='m'+idx;
+  var b=(m.engine==='plate')?buildPlate(m,uid):buildStroke(m,uid);
+  var slot=document.createElement('div');
+  slot.className='slot'+(m.best?' best':'')+(m.engine==='plate'?' wide':'');
+  slot.innerHTML='<div class="tag">'+m.label+(m.best?' · best so far':'')+'</div>'+
+    '<div class="art"><div class="glow"></div>'+
+    '<svg viewBox="0 0 260 130" preserveAspectRatio="xMidYMid meet">'+
+    '<defs>'+GRADS+(b.defs||'')+'</defs>'+b.body+'</svg></div>';
+  document.getElementById('pair').appendChild(slot);
+  b.slot=slot;
+  return b;
+}
+
+var built=MARKS.map(build);
+
+function play(){
+  timers.forEach(clearTimeout); timers=[];
+  built.forEach(function(b){
+    var art=b.slot.querySelector('.art');
+    art.classList.remove('alive');
+
+    var paths=[].slice.call(b.slot.querySelectorAll('.stroked'));
+    paths.forEach(function(el,k){
+      var L=el.getTotalLength()||1;
+      el.style.transition='none';
+      el.style.strokeDasharray=L;
+      el.style.strokeDashoffset=b.passes[k].rev?-L:L;
+      el.dataset.delay=b.passes[k].delay;
+    });
+    (b.wipes||[]).forEach(function(w){
+      var r=b.slot.querySelector('[data-w="'+w.id+'"]');
+      if(r){ r.style.transition='none'; r.style.transform='scaleY(0)'; }
+    });
+
+    void document.body.offsetHeight;          /* resolve the start values first */
+
+    requestAnimationFrame(function(){
+      paths.forEach(function(el){
+        el.style.transition='stroke-dashoffset '+DUR+'s cubic-bezier(.4,0,.25,1) '+el.dataset.delay+'s';
+        el.style.strokeDashoffset='0';
+      });
+      (b.wipes||[]).forEach(function(w){
+        var r=b.slot.querySelector('[data-w="'+w.id+'"]');
+        if(r){
+          r.style.transition='transform '+WIPE+'s cubic-bezier(.32,.9,.28,1) '+w.delay.toFixed(2)+'s';
+          r.style.transform='scaleY(1)';
+        }
+      });
+    });
+    timers.push(setTimeout(function(){art.classList.add('alive');},Math.round(b.done*1000)+60));
+  });
+}
+document.addEventListener('click',play);
+play();
+</script></body></html>

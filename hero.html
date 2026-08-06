@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#12151A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Fitness Journey — first screen, four ways</title>
+<style>
+:root{
+  --bg:#12151A; --bg2:#1A1F26; --card:#212630; --line:#2A313B; --line2:#3B434E;
+  --ink:#F2F5F8; --ink2:#A9B2BC; --ink3:#7E8792;
+  --accent:#3ECBA8; --accent2:#5BA8F5; --warm:#F0A868;
+  --sat:env(safe-area-inset-top); --sab:env(safe-area-inset-bottom);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%;background:#07090B;overflow:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Segoe UI",Inter,system-ui,sans-serif;
+  color:var(--ink);display:flex;align-items:center;justify-content:center;overscroll-behavior:none}
+
+#device{position:relative;width:min(100vw,402px);height:874px;max-height:100%;
+  background:var(--bg);overflow:hidden;border-radius:34px;box-shadow:0 30px 90px rgba(0,0,0,.65);
+  display:flex;flex-direction:column}
+@media (pointer:coarse),(max-width:560px){
+  #device{width:100%;height:100vh;height:calc(var(--vh,1vh)*100);height:100dvh;
+    max-height:none;border-radius:0;box-shadow:none}
+}
+
+/* ---------- concept switcher ---------- */
+#tabs{flex:0 0 auto;display:flex;gap:5px;padding:calc(var(--sat) + 9px) 12px 9px;
+  background:rgba(7,9,11,.72);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);position:relative;z-index:80}
+#tabs button{flex:1;height:44px;border-radius:11px;border:1px solid var(--line);
+  background:transparent;color:var(--ink3);font:650 11px/1.15 inherit;font-family:inherit;
+  letter-spacing:.05em;text-transform:uppercase;cursor:pointer;padding:0 2px}
+#tabs button.on{background:var(--card);color:var(--ink);border-color:var(--line2)}
+
+#stage{flex:1 1 auto;position:relative;overflow:hidden}
+.hero{position:absolute;top:0;right:0;bottom:0;left:0;display:none;flex-direction:column;
+  overflow:hidden;background:var(--bg)}
+.hero.on{display:flex}
+
+/* ---------- shared type + cta ---------- */
+.copy{position:relative;z-index:20;margin-top:auto;padding:0 26px}
+h1{margin:0;font-size:40px;line-height:1.06;letter-spacing:-.035em;font-weight:640}
+h1 .soft{color:var(--ink2);font-weight:400}
+h1 em{font-style:normal;color:var(--accent)}
+.kicker{font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;
+  color:var(--accent);margin-bottom:16px;opacity:.95}
+.footer{position:relative;z-index:20;padding:26px 22px calc(var(--sab) + 24px)}
+.cta{width:100%;min-height:58px;border:none;border-radius:17px;background:var(--accent);
+  color:#07120F;font:650 16.5px/1 inherit;font-family:inherit;letter-spacing:-.01em;cursor:pointer;
+  box-shadow:0 10px 34px rgba(62,203,168,.24);transition:transform .16s}
+.cta:active{transform:scale(.985)}
+.reassure{margin:13px 0 0;text-align:center;font-size:12px;color:var(--ink3);letter-spacing:.03em}
+
+/* ============ A — THE PATH ============ */
+#A .art{position:absolute;top:0;right:0;bottom:0;left:0;z-index:5}
+#A .art svg{width:100%;height:100%;display:block}
+#A .route{fill:none;stroke:url(#pathGrad);stroke-width:2.4;stroke-linecap:round;
+  stroke-dasharray:920;stroke-dashoffset:920;animation:draw 2.9s cubic-bezier(.4,0,.2,1) .25s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+#A .glowline{fill:none;stroke:var(--accent);stroke-width:9;stroke-linecap:round;opacity:.13;
+  filter:blur(9px);stroke-dasharray:920;stroke-dashoffset:920;
+  animation:draw 2.9s cubic-bezier(.4,0,.2,1) .25s forwards}
+#A .node{fill:var(--bg);stroke:var(--accent);stroke-width:2;opacity:0;animation:pop .5s ease forwards}
+#A .node.n1{animation-delay:1.0s} #A .node.n2{animation-delay:1.55s}
+#A .node.n3{animation-delay:2.1s}
+#A .peak{fill:var(--accent);opacity:0;animation:pop .6s ease 2.75s forwards}
+#A .peakGlow{fill:var(--accent);opacity:0;filter:blur(13px);
+  animation:peakGlow 3.4s ease-in-out 2.9s infinite}
+@keyframes pop{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:scale(1)}}
+@keyframes peakGlow{0%,100%{opacity:.22}50%{opacity:.55}}
+#A .veil{position:absolute;right:0;bottom:0;left:0;height:62%;z-index:10;
+  background:linear-gradient(to top,var(--bg) 24%,rgba(18,21,26,.86) 52%,rgba(18,21,26,0))}
+#A .copy{padding-bottom:8px}
+
+/* ============ B — AURORA ============ */
+#B{background:#0E1116}
+#B .blob{position:absolute;border-radius:50%;filter:blur(70px);will-change:transform}
+#B .b1{width:360px;height:360px;top:-30px;left:-80px;background:rgba(62,203,168,.92);
+  animation:float1 17s ease-in-out infinite}
+#B .b2{width:330px;height:330px;top:110px;right:-100px;background:rgba(91,168,245,.72);
+  animation:float2 21s ease-in-out infinite}
+#B .b3{width:290px;height:290px;top:290px;left:10px;background:rgba(240,168,104,.42);
+  animation:float3 25s ease-in-out infinite}
+@keyframes float1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(60px,90px) scale(1.16)}}
+@keyframes float2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-70px,110px) scale(1.1)}}
+@keyframes float3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(50px,-70px) scale(1.2)}}
+#B .grain{position:absolute;top:0;right:0;bottom:0;left:0;opacity:.28;z-index:6;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E")}
+#B .veil{position:absolute;top:0;right:0;bottom:0;left:0;z-index:8;
+  background:linear-gradient(to top,#0E1116 6%,rgba(14,17,22,.92) 26%,rgba(14,17,22,.30) 58%,rgba(14,17,22,.08) 100%)}
+#B .copy{padding-bottom:4px}
+#B h1{font-size:44px}
+
+/* ============ C — THE LOG ============ */
+#C .stack{position:absolute;top:0;right:0;left:0;height:56%;z-index:5;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:0 26px;perspective:900px}
+#C .entry{background:var(--card);border:1px solid var(--line);border-radius:17px;
+  padding:14px 16px;margin-bottom:10px;box-shadow:0 14px 34px rgba(0,0,0,.42);
+  transform-origin:50% 100%;opacity:0;animation:rise .8s cubic-bezier(.22,1,.36,1) forwards}
+#C .entry:nth-child(1){animation-delay:.15s;transform:scale(.9)}
+#C .entry:nth-child(2){animation-delay:.42s}
+#C .entry:nth-child(3){animation-delay:.69s}
+#C .entry:nth-child(4){animation-delay:.96s}
+@keyframes rise{from{opacity:0;transform:translateY(26px) rotateX(14deg) scale(.94)}
+  to{opacity:1;transform:none}}
+#C .entry .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+#C .entry .dt{font-size:10px;letter-spacing:.13em;text-transform:uppercase;
+  font-weight:700;color:var(--accent)}
+#C .entry .no{font-size:10px;letter-spacing:.1em;color:var(--ink3);font-weight:600}
+#C .entry .ln{font-size:14.5px;font-weight:550;letter-spacing:-.01em}
+#C .entry .sub{font-size:12.5px;color:var(--ink3);margin-top:2px}
+#C .entry.ghost{animation:riseGhost .8s cubic-bezier(.22,1,.36,1) 0s forwards}
+@keyframes riseGhost{from{opacity:0;transform:translateY(26px) scale(.9)}
+  to{opacity:.3;transform:scale(.93)}}
+#C .entry.faint{animation:riseFaint .8s cubic-bezier(.22,1,.36,1) .3s forwards}
+@keyframes riseFaint{from{opacity:0;transform:translateY(26px) scale(.94)}
+  to{opacity:.62;transform:scale(.97)}}
+#C .veil{position:absolute;right:0;bottom:0;left:0;height:38%;z-index:10;
+  background:linear-gradient(to top,var(--bg) 34%,rgba(18,21,26,.7) 72%,rgba(18,21,26,0))}
+#C .copy{padding-bottom:6px}
+#C h1{font-size:37px}
+
+/* ============ D — HORIZON ============ */
+#D{background:linear-gradient(to bottom,#0B0E12 0%,#141A21 52%,#1B242C 100%)}
+#D .sun{position:absolute;left:50%;bottom:42%;margin-bottom:-138px;width:276px;height:276px;margin-left:-138px;
+  border-radius:50%;background:radial-gradient(circle,rgba(62,203,168,.5),rgba(62,203,168,0) 66%);
+  filter:blur(2px);animation:breathe 7s ease-in-out infinite;z-index:4}
+@keyframes breathe{0%,100%{transform:scale(1);opacity:.82}50%{transform:scale(1.1);opacity:1}}
+#D .arc{position:absolute;left:50%;bottom:42%;margin-bottom:-96px;width:192px;height:192px;margin-left:-96px;
+  border-radius:50%;border:1.6px solid rgba(62,203,168,.62);z-index:5;
+  clip-path:polygon(0 0,100% 0,100% 50%,0 50%)}
+#D .ground{position:absolute;left:0;right:0;bottom:42%;height:1.4px;z-index:6;
+  background:linear-gradient(to right,rgba(62,203,168,0),rgba(62,203,168,.6) 26%,rgba(62,203,168,.6) 74%,rgba(62,203,168,0))}
+#D .walker{position:absolute;bottom:42%;left:0;width:100%;height:68px;z-index:7}
+#D .walker svg{position:absolute;bottom:1px;width:30px;height:66px;opacity:.95;
+  animation:walk 15s linear infinite}
+#D .walker svg g{stroke:var(--ink2);stroke-width:3.4;fill:none;stroke-linecap:round;stroke-linejoin:round}
+#D .walker .pa{animation:fA 1s steps(1,end) infinite}
+#D .walker .pb{animation:fB 1s steps(1,end) infinite}
+@keyframes fA{0%,49%{opacity:1}50%,100%{opacity:0}}
+@keyframes fB{0%,49%{opacity:0}50%,100%{opacity:1}}
+@keyframes walk{from{left:-12%}to{left:100%}}
+#D .haze{position:absolute;right:0;bottom:0;left:0;height:46%;z-index:8;
+  background:linear-gradient(to top,#151C23 42%,rgba(21,28,35,.86) 76%,rgba(21,28,35,0))}
+#D .copy{padding-bottom:10px}
+
+@media (max-height:700px){
+  h1{font-size:33px} #B h1{font-size:36px} #C h1{font-size:31px}
+  .copy{padding-left:22px;padding-right:22px}
+  .footer{padding:20px 20px calc(var(--sab) + 18px)}
+  #C .stack{height:56%}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001s !important;animation-iteration-count:1 !important}
+  #A .route,#A .glowline{stroke-dashoffset:0}
+  #A .node,#A .peak,#C .entry{opacity:1}
+}
+</style>
+</head>
+<body>
+<div id="device">
+  <div id="tabs">
+    <button data-h="A" class="on">A · Path</button>
+    <button data-h="B">B · Aurora</button>
+    <button data-h="C">C · The Log</button>
+    <button data-h="D">D · Horizon</button>
+  </div>
+
+  <div id="stage">
+
+    <!-- ============ A ============ -->
+    <div class="hero on" id="A">
+      <div class="art">
+        <svg viewBox="0 0 402 700" preserveAspectRatio="xMidYMax slice">
+          <defs>
+            <linearGradient id="pathGrad" x1="0" y1="1" x2="0" y2="0">
+              <stop offset="0%" stop-color="#3ECBA8" stop-opacity=".18"/>
+              <stop offset="55%" stop-color="#3ECBA8" stop-opacity=".85"/>
+              <stop offset="100%" stop-color="#8FF0D6" stop-opacity="1"/>
+            </linearGradient>
+          </defs>
+          <path class="glowline" d="M92 690 C 92 566, 300 540, 292 424 C 285 320, 96 300, 108 196 C 117 116, 236 108, 232 58"/>
+          <path class="route"    d="M92 690 C 92 566, 300 540, 292 424 C 285 320, 96 300, 108 196 C 117 116, 236 108, 232 58"/>
+          <circle class="node n1" cx="292" cy="424" r="6"/>
+          <circle class="node n2" cx="108" cy="196" r="6"/>
+          <circle class="node n3" cx="232" cy="58"  r="6"/>
+          <circle class="peakGlow" cx="232" cy="58" r="17"/>
+          <circle class="peak" cx="232" cy="58" r="7.5"/>
+        </svg>
+      </div>
+      <div class="veil"></div>
+      <div class="copy">
+        <div class="kicker">Fitness Journey</div>
+        <h1>Your journey<br>starts today.</h1>
+      </div>
+      <div class="footer">
+        <button class="cta">Take the first step</button>
+        <p class="reassure">8 short sections · no typing</p>
+      </div>
+    </div>
+
+    <!-- ============ B ============ -->
+    <div class="hero" id="B">
+      <div class="blob b1"></div>
+      <div class="blob b2"></div>
+      <div class="blob b3"></div>
+      <div class="veil"></div>
+      <div class="grain"></div>
+      <div class="copy">
+        <div class="kicker">Fitness Journey</div>
+        <h1>Your journey<br>starts <em>today.</em></h1>
+      </div>
+      <div class="footer">
+        <button class="cta">Take the first step</button>
+        <p class="reassure">8 short sections · no typing</p>
+      </div>
+    </div>
+
+    <!-- ============ C ============ -->
+    <div class="hero" id="C">
+      <div class="stack">
+        <div class="entry ghost">
+          <div class="top"><span class="dt">In two years</span><span class="no">Entry 312</span></div>
+          <div class="ln">Deadlift · 140 kg × 5</div>
+          <div class="sub">You started at 60.</div>
+        </div>
+        <div class="entry faint">
+          <div class="top"><span class="dt">Month six</span><span class="no">Entry 74</span></div>
+          <div class="ln">First unassisted pull-up</div>
+          <div class="sub">Logged, dated, kept.</div>
+        </div>
+        <div class="entry">
+          <div class="top"><span class="dt">Week three</span><span class="no">Entry 9</span></div>
+          <div class="ln">Session 9 · felt easy</div>
+          <div class="sub">The week most people stop.</div>
+        </div>
+        <div class="entry">
+          <div class="top"><span class="dt">Today</span><span class="no">Entry 001</span></div>
+          <div class="ln">You start here</div>
+          <div class="sub">Everything after this is the next one.</div>
+        </div>
+      </div>
+      <div class="veil"></div>
+      <div class="copy">
+        <div class="kicker">Fitness Journey</div>
+        <h1>Your journey<br>starts today.</h1>
+      </div>
+      <div class="footer">
+        <button class="cta">Take the first step</button>
+        <p class="reassure">8 short sections · no typing</p>
+      </div>
+    </div>
+
+    <!-- ============ D ============ -->
+    <div class="hero" id="D">
+      <div class="sun"></div>
+      <div class="arc"></div>
+      <div class="ground"></div>
+      <div class="walker">
+        <svg viewBox="0 0 40 80">
+          <g class="pa">
+            <path d="M20 8a5 5 0 100 .1"/><path d="M20 13L20 40"/>
+            <path d="M20 20L28 30 26 38"/><path d="M20 20L12 28 14 36"/>
+            <path d="M20 40L28 58 26 74"/><path d="M20 40L12 58 14 74"/>
+          </g>
+          <g class="pb">
+            <path d="M20 8a5 5 0 100 .1"/><path d="M20 13L20 40"/>
+            <path d="M20 20L27 32 30 40"/><path d="M20 20L13 30 10 38"/>
+            <path d="M20 40L26 60 30 74"/><path d="M20 40L14 56 10 74"/>
+          </g>
+        </svg>
+      </div>
+      <div class="haze"></div>
+      <div class="copy">
+        <div class="kicker">Fitness Journey</div>
+        <h1>Your journey<br>starts today.</h1>
+      </div>
+      <div class="footer">
+        <button class="cta">Take the first step</button>
+        <p class="reassure">8 short sections · no typing</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function vh(){document.documentElement.style.setProperty('--vh',(window.innerHeight*0.01)+'px');}
+vh(); window.addEventListener('resize',vh);
+window.addEventListener('orientationchange',function(){setTimeout(vh,120);});
+if(window.visualViewport){window.visualViewport.addEventListener('resize',vh);}
+
+var btns=[].slice.call(document.querySelectorAll('#tabs button'));
+function show(id){
+  btns.forEach(function(b){b.classList.toggle('on',b.dataset.h===id);});
+  ['A','B','C','D'].forEach(function(k){
+    var el=document.getElementById(k);
+    el.classList.toggle('on',k===id);
+  });
+  /* restart the entrance animation so each concept is seen as designed */
+  var live=document.getElementById(id);
+  var clone=live.cloneNode(true);
+  live.parentNode.replaceChild(clone,live);
+  clone.classList.add('on');
+  wireCta(clone);
+}
+btns.forEach(function(b){b.onclick=function(){show(b.dataset.h);};});
+
+function wireCta(scope){
+  var c=scope.querySelector('.cta');
+  if(c) c.onclick=function(){
+    if(navigator.vibrate){try{navigator.vibrate(18);}catch(e){}}
+    c.textContent='This is the one →';
+    setTimeout(function(){c.textContent='Take the first step';},1400);
+  };
+}
+['A','B','C','D'].forEach(function(k){wireCta(document.getElementById(k));});
+
+/* swipe between concepts */
+var stage=document.getElementById('stage'), sx=0, sy=0, lock=null;
+stage.addEventListener('touchstart',function(e){
+  sx=e.touches[0].clientX; sy=e.touches[0].clientY; lock=null;
+},{passive:true});
+stage.addEventListener('touchmove',function(e){
+  if(lock!==null) return;
+  var dx=e.touches[0].clientX-sx, dy=e.touches[0].clientY-sy;
+  if(Math.abs(dx)>36 && Math.abs(dx)>Math.abs(dy)){
+    lock='x';
+    var order=['A','B','C','D'];
+    var cur=order.indexOf(btns.filter(function(b){return b.classList.contains('on');})[0].dataset.h);
+    var nxt=dx<0 ? Math.min(order.length-1,cur+1) : Math.max(0,cur-1);
+    if(nxt!==cur) show(order[nxt]);
+  }
+},{passive:true});
+</script>
+</body>
+</html>

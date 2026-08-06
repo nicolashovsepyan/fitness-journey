@@ -6,8 +6,8 @@
   "scope": "./",
   "id": "fitness-journey",
   "display": "standalone",
-  "background_color": "#0a0a0c",
-  "theme_color": "#0a0a0c",
+  "background_color": "#171A1E",
+  "theme_color": "#171A1E",
   "orientation": "portrait",
   "icons": [
     { "src": "images/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
