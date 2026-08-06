@@ -913,3 +913,19 @@ html, body { touch-action: manipulation; }      /* kill double-tap-to-zoom (keep
 .inst-steps li { margin-bottom:3px; }
 .ic-actions { display:flex; gap:8px; align-items:center; margin-top:12px; }
 .btn.sm { padding:8px 18px; font-size:13.5px; width:auto; }
+
+/* ---- first-run: whose phone is this? ---- */
+.screen.claim { display:flex; flex-direction:column; justify-content:center; min-height:88vh; }
+.claim-inner { text-align:center; }
+.claim-inner h1 { font-size:26px; margin:6px 0 6px; }
+.claim-inner .muted { font-size:14px; line-height:1.5; max-width:30ch; margin:0 auto 22px; }
+.claim-grid { display:flex; flex-direction:column; gap:12px; }
+.claim-card { display:flex; align-items:center; gap:14px; text-align:left; cursor:pointer; font-family:inherit;
+  background:var(--box); border:1px solid var(--line); border-radius:var(--radius); padding:16px; color:var(--text); }
+.claim-card:active { transform:scale(.99); background:var(--box-2); }
+.cc-initial { flex:0 0 auto; width:46px; height:46px; border-radius:14px; display:flex; align-items:center;
+  justify-content:center; font-size:20px; font-weight:800; background:var(--c,#c8ff4d); color:#12120a; }
+.cc-name { flex:1; font-size:17px; font-weight:700; }
+.cc-sub { color:var(--muted); font-size:12px; }
+.claim-card .cc-name + .cc-sub { display:block; }
+.claim-foot { color:var(--faint); font-size:12px; margin-top:18px; }

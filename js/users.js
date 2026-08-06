@@ -49,17 +49,39 @@ export const DEFAULT_USER = 'nico';
 /* ── active user ─────────────────────────────────────────── */
 let active = null;
 
+/* Has this device been told who it belongs to? If not we must ASK — never
+   guess. Guessing is what put Nicolas's program on a phone that had just
+   installed Sevan's link: iOS gives an installed app a storage container
+   separate from Safari's, so the choice made in the browser is not there
+   when the installed app first launches, and a silent default takes over. */
+export function isClaimed() {
+  try {
+    if (localStorage.getItem(ACTIVE_KEY)) return true;
+    const q = new URLSearchParams(location.search).get('user');
+    return !!(q && USERS[q]);
+  } catch (e) { return false; }
+}
+
+export function claimDevice(id, name) {
+  if (!USERS[id]) return false;
+  try { localStorage.setItem(ACTIVE_KEY, id); } catch (e) {}
+  if (name) setDisplayName(id, name);
+  active = id;
+  return true;
+}
+
 export function activeUserId() {
   if (active) return active;
   let id = null;
-  // ?user=partner in the URL claims the device on first open, so a link sent
-  // to someone lands them in THEIR account instead of the default one. It wins
-  // once, then the stored choice takes over — a bookmarked link with the param
-  // must not keep resetting a device that has since been switched by hand.
+  /* ?user=… is an explicit instruction and always wins. Profiles are stored
+     under separate keys (fj.v1.<uid>), so switching never destroys anyone's
+     training — it only changes which profile is showing. Making it
+     authoritative (rather than first-open-only) means re-opening the invite
+     link repairs a device that ended up on the wrong profile. */
   try {
     const p = new URLSearchParams(location.search);
     const q = p.get('user');
-    if (q && USERS[q] && !localStorage.getItem(ACTIVE_KEY)) {
+    if (q && USERS[q]) {
       localStorage.setItem(ACTIVE_KEY, q);
       id = q;
       const n = p.get('name');

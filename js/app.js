@@ -14,7 +14,9 @@ import { renderBSummary } from './screens/b-summary.js';
 import { renderBHistory } from './screens/b-history.js';
 import { startWorkout, resumeWorkout } from './runner/workmode.js';
 import * as R from './runner/runstate.js';
-import { isBeginner } from './users.js';
+import { isBeginner, isClaimed } from './users.js';
+import { renderClaim } from './screens/claim.js';
+import { applyUserManifest } from './manifest-user.js';
 
 const app = document.getElementById('app');
 let view = { name: 'home', sessionId: null };
@@ -24,6 +26,8 @@ function go(name, sessionId) { view = { name, sessionId }; render(); }
 const runCb = { onExit: () => go('home'), onFinish: () => go('home') };
 
 function render() {
+  // Never guess whose phone this is — ask once if we were never told.
+  if (!isClaimed()) return renderClaim(app, { onDone: () => { applyUserManifest(); render(); } });
   if (isBeginner()) return renderBeginner();
   return renderPro();
 }
@@ -108,6 +112,10 @@ if (navigator.storage?.persist) {
     .then(already => already || navigator.storage.persist())
     .catch(() => {});
 }
+
+// Point the install manifest at THIS user, so the home-screen icon opens
+// their program and not the default one.
+if (isClaimed()) applyUserManifest();
 
 // If a workout was left running, go straight back into it — never to home.
 if (!bootIntoActiveRun()) render();
