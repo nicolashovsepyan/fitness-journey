@@ -50,10 +50,10 @@ export const DEFAULT_USER = 'nico';
 let active = null;
 
 /* Has this device been told who it belongs to? If not we must ASK — never
-   guess. Guessing is what put Nicolas's program on a phone that had just
-   installed Sevan's link: iOS gives an installed app a storage container
-   separate from Safari's, so the choice made in the browser is not there
-   when the installed app first launches, and a silent default takes over. */
+   guess. Guessing put the default profile on a phone that had just installed
+   the other person's invite link: iOS gives an installed app a storage
+   container separate from Safari's, so the choice made in the browser is not
+   there when the installed app first launches, and the default took over. */
 export function isClaimed() {
   try {
     if (localStorage.getItem(ACTIVE_KEY)) return true;
