@@ -1,8 +1,39 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#0a0a0c"/>
-  <path d="M150 256h60M302 256h60" stroke="#c8ff4d" stroke-width="26" stroke-linecap="round"/>
-  <rect x="118" y="206" width="40" height="100" rx="14" fill="#c8ff4d"/>
-  <rect x="354" y="206" width="40" height="100" rx="14" fill="#c8ff4d"/>
-  <rect x="92"  y="226" width="30" height="60" rx="12" fill="#c8ff4d" opacity="0.7"/>
-  <rect x="390" y="226" width="30" height="60" rx="12" fill="#c8ff4d" opacity="0.7"/>
+  <!-- The app mark is the same dumbbell that draws itself on the first screen:
+       one bar, three plates a side, each 90% of the one inside it, and a handle
+       whose middle dissolves so the two halves read as one object with air in it.
+       Both gradients live in the transformed local space of the group below,
+       which is why their coordinates match the 260x130 drawing, not the canvas. -->
+  <defs>
+    <linearGradient id="g" gradientUnits="userSpaceOnUse" x1="52" y1="0" x2="208" y2="0">
+      <stop offset="0%"   stop-color="#34B396"/>
+      <stop offset="22%"  stop-color="#93EAD7"/>
+      <stop offset="50%"  stop-color="#A8F5E1"/>
+      <stop offset="78%"  stop-color="#93EAD7"/>
+      <stop offset="100%" stop-color="#34B396"/>
+    </linearGradient>
+    <linearGradient id="gb" gradientUnits="userSpaceOnUse" x1="86" y1="0" x2="174" y2="0">
+      <stop offset="0%"   stop-color="#93EAD7" stop-opacity="1"/>
+      <stop offset="32%"  stop-color="#8FE6D3" stop-opacity="1"/>
+      <stop offset="36%"  stop-color="#89DFCC" stop-opacity=".60"/>
+      <stop offset="39%"  stop-color="#83D9C6" stop-opacity=".22"/>
+      <stop offset="41%"  stop-color="#7FD5C2" stop-opacity="0"/>
+      <stop offset="59%"  stop-color="#7FD5C2" stop-opacity="0"/>
+      <stop offset="61%"  stop-color="#83D9C6" stop-opacity=".22"/>
+      <stop offset="64%"  stop-color="#89DFCC" stop-opacity=".60"/>
+      <stop offset="68%"  stop-color="#8FE6D3" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#93EAD7" stop-opacity="1"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="#171A1E"/>
+  <g transform="translate(256,256) scale(2.03) translate(-130,-65)"
+     fill="none" stroke="url(#g)" stroke-linecap="round">
+    <path d="M86 65 H174"       stroke="url(#gb)" stroke-width="7"/>
+    <path d="M86 38 V92"        stroke-width="12.65"/>
+    <path d="M174 38 V92"       stroke-width="12.65"/>
+    <path d="M66.8 40.7 V89.3"  stroke-width="9.9"/>
+    <path d="M193.2 40.7 V89.3" stroke-width="9.9"/>
+    <path d="M52.4 47.5 V82.5"  stroke-width="7.13"/>
+    <path d="M207.6 47.5 V82.5" stroke-width="7.13"/>
+  </g>
 </svg>
