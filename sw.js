@@ -15,12 +15,9 @@
    Training data lives in localStorage, not here, so an update never
    touches a logged session.
    ============================================================ */
-const VERSION = '2ca1e89b6d';
+const VERSION = 'e1694db036';
 const CACHE = 'fj-' + VERSION;
 const ASSETS = [
-  "./deckart/art.js",
-  "./deckart/art.json",
-  "./deckart/art2.json",
   "./feed.html",
   "./hero.html",
   "./icon-180.png",
@@ -28,6 +25,10 @@ const ASSETS = [
   "./icon-512-maskable.png",
   "./icon-512.png",
   "./icon.svg",
+  "./images/icon-180.png",
+  "./images/icon-192.png",
+  "./images/icon-512-maskable.png",
+  "./images/icon-512.png",
   "./images/logo-onboarding.png",
   "./images/logo.png",
   "./index.html",
