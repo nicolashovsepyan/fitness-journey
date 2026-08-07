@@ -13,32 +13,39 @@
 
    Run:  node build-sw.mjs
    ============================================================ */
-import { readdirSync, statSync, readFileSync, writeFileSync, rmSync, mkdirSync, copyFileSync } from 'node:fs';
+import { statSync, readFileSync, writeFileSync, rmSync, mkdirSync, copyFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { join, relative, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 // fileURLToPath, not .pathname — the folder name has spaces and parentheses
 const ROOT = fileURLToPath(new URL('.', import.meta.url));
-const SKIP_DIR = new Set(['.git', '.claude', 'node_modules', '.DS_Store', 'dist']);
 const SKIP_FILE = new Set(['sw.js', 'build-sw.mjs', 'VIDEO-TODO.md', 'MEMORY.md', 'Yates_HIT_Hybrid_Protocol.md']);
 const KEEP_EXT = /\.(html|css|js|mjs|png|svg|webmanifest|json|woff2?)$/i;
 
-function walk(dir, out = []) {
-  for (const name of readdirSync(dir)) {
-    if (SKIP_DIR.has(name) || name.startsWith('.')) continue;
-    const full = join(dir, name);
-    if (statSync(full).isDirectory()) walk(full, out);
-    else {
-      const rel = relative(ROOT, full);
-      if (SKIP_FILE.has(rel) || !KEEP_EXT.test(name)) continue;
-      out.push(rel);
-    }
-  }
-  return out;
+/* The file list comes from GIT, not from the disk.
+
+   This used to walk the working directory with a hardcoded skip-list, which
+   meant anything sitting in the folder — an unzipped download, a scratch
+   folder of artwork — was swept into the precache manifest. Those paths do
+   not exist on the live site, and a precache manifest is all-or-nothing: one
+   404 rejects the install event, the service worker never activates, and
+   offline mode silently stops working. On an app whose whole promise is that
+   a workout survives anything, that is the worst possible failure.
+
+   Asking git removes the question. If a file is not committed, it is not on
+   the live site, so it must not be in the shell. */
+function listFiles() {
+  const out = execFileSync('git', ['ls-files', '-z'], { cwd: ROOT, encoding: 'buffer' });
+  return out.toString('utf8').split('\0')
+    .filter(Boolean)
+    .filter(rel => KEEP_EXT.test(rel) && !SKIP_FILE.has(rel))
+    // deleted-but-still-tracked files would 404 exactly like an untracked one
+    .filter(rel => { try { return statSync(join(ROOT, rel)).isFile(); } catch { return false; } });
 }
 
-const files = walk(ROOT).sort();
+const files = listFiles().sort();
 
 /* Precache the app SHELL only. The hero images are 2–3 MB each; downloading
    ~37 MB before the app is usable would be miserable on gym wifi, and it is
