@@ -24,6 +24,12 @@ const ROOT = fileURLToPath(new URL('.', import.meta.url));
 const SKIP_FILE = new Set(['sw.js', 'build-sw.mjs', 'VIDEO-TODO.md', 'MEMORY.md', 'Yates_HIT_Hybrid_Protocol.md']);
 const KEEP_EXT = /\.(html|css|js|mjs|png|svg|webmanifest|json|woff2?)$/i;
 
+/* Committed, published, but NOT part of the app. Tests are .mjs and would
+   otherwise match KEEP_EXT and be downloaded onto every user's phone as part
+   of the offline shell. The shell is what the app needs to run without a
+   connection; nothing else belongs in it. */
+const SKIP_PREFIX = ['test/', 'docs/'];
+
 /* The file list comes from GIT, not from the disk.
 
    This used to walk the working directory with a hardcoded skip-list, which
@@ -41,6 +47,7 @@ function listFiles() {
   return out.toString('utf8').split('\0')
     .filter(Boolean)
     .filter(rel => KEEP_EXT.test(rel) && !SKIP_FILE.has(rel))
+    .filter(rel => !SKIP_PREFIX.some(p => rel.startsWith(p)))
     // deleted-but-still-tracked files would 404 exactly like an untracked one
     .filter(rel => { try { return statSync(join(ROOT, rel)).isFile(); } catch { return false; } });
 }
