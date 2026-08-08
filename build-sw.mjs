@@ -66,8 +66,19 @@ const files = listFiles().sort();
    page that did not work offline. */
 const PRECACHE_MAX = 150 * 1024;
 const IS_CODE = /\.(html|css|js|mjs|webmanifest|json)$/i;
+
+/* Exercise artwork is deferred whatever it weighs. Each picture is small —
+   15 to 45 KB — so the size cap alone would sweep every one of them into the
+   shell. There are 19 today and there will be one per exercise eventually,
+   which is a several-megabyte download before the app opens, to show
+   thumbnails on a browsing screen. The fetch handler still caches each one
+   the first time it is seen, so they work offline after that; they are just
+   not part of what you wait for on install. */
+const DEFER_PREFIX = ['images/exercises/'];
+
 const sizeOf = f => statSync(join(ROOT, f)).size;
-const keep = f => IS_CODE.test(f) || sizeOf(f) <= PRECACHE_MAX;
+const keep = f => !DEFER_PREFIX.some(p => f.startsWith(p))
+              && (IS_CODE.test(f) || sizeOf(f) <= PRECACHE_MAX);
 const precache = files.filter(keep);
 const deferred = files.filter(f => !keep(f));
 

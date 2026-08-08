@@ -24,6 +24,11 @@
   .ex{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 13px;margin-bottom:6px}
   .ex.main{border-color:rgba(200,255,77,.4)}
   .exrow{display:flex;align-items:center;gap:9px}
+  /* Only drawn when artwork exists, so an exercise without a picture is a
+     clean card rather than a hole or a broken-image icon. */
+  .exthumb{flex:0 0 auto;width:46px;height:46px;border-radius:9px;background:var(--card2);
+    border:1px solid var(--line);object-fit:contain;object-position:center;padding:2px;
+    -webkit-user-drag:none;user-select:none}
   .dbadge{flex:0 0 auto;width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--tnum);font-weight:800;font-size:13px;color:#15150f}
   .exname{flex:1;min-width:0;font-size:15px;font-weight:600}
   .exname .star{color:var(--lime);font-size:12px;margin-left:5px}
@@ -50,6 +55,7 @@
 <div class="wrap" id="out"></div>
 <script type="module">
 import { EXERCISES } from './js/data/exercises.js';
+import { exerciseImage } from './js/data/exercise-images.js';
 const LVLC={beg:'#63b34d',int:'#ffb84d',adv:'#ff6b6b'};
 const PATGRP={quad:'Legs',hinge:'Legs',glute:'Legs',hamstring:'Legs',calf:'Legs',shin:'Legs',push:'Push',pull:'Pull',core:'Core',skill:'Skill',conditioning:'Conditioning',full:'Full body',mobility:'Mobility'};
 const PATORDER=['Push','Pull','Legs','Core','Skill','Conditioning','Full body','Mobility'];
@@ -83,8 +89,10 @@ function render(){
 function exCard(x){
   const lc=LVLC[x.level]||'#888';
   const gripSafe=x.grip==='supinated'||x.grip==='neutral';
+  const img=exerciseImage(x.id);
   return `<div class="ex ${x.main?'main':''}">
     <div class="exrow">
+      ${img?`<img class="exthumb" src="${img}" alt="" loading="lazy" draggable="false">`:''}
       <div class="dbadge" style="background:${lc}">${x.diff||'?'}</div>
       <div class="exname">${x.name}${x.main?'<span class="star">✦</span>':''}</div>
     </div>
