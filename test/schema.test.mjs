@@ -97,7 +97,7 @@ const methods = [
   'getIntake', 'saveIntake', 'listIntakes',
   'getProgram', 'savePrograms',
   'getSession', 'listSessions', 'saveSessions',
-  'appendLog', 'listLogs', 'getPRs', 'savePRs',
+  'appendLog', 'listLogs', 'getPRs', 'savePRs', 'getUserState', 'saveUserState',
   'listMessages', 'sendMessage',
   'getRunState', 'saveRunState', 'clearRunState',
   'getDevicePref', 'setDevicePref',

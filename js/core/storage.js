@@ -143,6 +143,44 @@ export class StorageAdapter {
   /** @returns {Promise<Object>} */
   savePRs(userId, prs) { return this.#todo('savePRs'); }
 
+  /* ---- the rest of a user's state --------------------------------
+     PHASE 1 CORRECTION. The contract as first written covered the
+     records a server will hold — users, intakes, programs, sessions,
+     logs, PRs, messages. It did not cover the other fifteen fields the
+     store actually persists:
+
+       goals · lastValues · swaps · removed · order · added ·
+       fillerSwaps · startDate · settings · habits · checks · notes ·
+       flags · blockSkips · feedback
+
+     Most of these are a person's edits to a workout — swap this
+     exercise, drop that one, reorder the block, tick these sets. They
+     are keyed by session id and they are genuinely document-shaped:
+     nobody queries across them, they are read and written whole, and
+     forcing them into columns would buy nothing.
+
+     Rather than invent fifteen method pairs nothing would use, they
+     travel together as one per-user document. On a server this is a
+     single jsonb row, not fifteen tables.
+
+     This is exactly the case the brief said to expect — a thing that
+     does not fit is a Phase 1 bug, so the schema changes rather than
+     the feature bending around it.
+
+     What must NOT drift into here: logs and PRs. They have their own
+     methods above because they are the irreplaceable data and a server
+     needs to query them per user and per date. The local adapter keeps
+     them inside the same blob because that is where they live today
+     and Phase 2 moves nothing — but the API keeps them separate so a
+     later adapter can put them in real tables without touching a
+     single call site. */
+
+  /** @returns {Promise<Object|null>} null when this user has no state yet */
+  getUserState(userId) { return this.#todo('getUserState'); }
+
+  /** @returns {Promise<void>} */
+  saveUserState(userId, state) { return this.#todo('saveUserState'); }
+
   /* ---- messages ----------------------------------------------------
      Not built yet. Present so that building it is not a schema change. */
 
