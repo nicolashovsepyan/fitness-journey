@@ -381,7 +381,10 @@ function render(){
 
   /* week + obstacles */
   h+='<h2>The week, and what gets in the way</h2><div class="grid">';
-  h+=`<div class="tile"><span>Real driver</span><b>${DRIVER[A.driver]||'—'}</b></div>`;
+  /* driver became a list of up to three; older dossier links still carry a
+     single value, so accept both rather than showing a dash for them. */
+  const dv=Array.isArray(A.driver)?A.driver:(A.driver?[A.driver]:[]);
+  h+=`<div class="tile"><span>Real driver</span><b>${dv.map(x=>esc(DRIVER[x]||x)).join(' · ')||'—'}</b></div>`;
   h+=`<div class="tile"><span>Check-in day</span><b>${({sun:'Sunday',mon:'Monday',fri:'Friday',wed:'Wednesday'})[A.checkin]||'—'}</b></div>`;
   h+='</div>';
   h+='<div style="font-size:12px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink3);font-weight:650;margin:20px 0 8px">What stopped them before</div>';

@@ -2,7 +2,7 @@
    BUILD AVATARS — slice the body-type sheets into the survey.
 
    Run:  node tools/build-avatars.mjs ["<sheets folder>"]
-   Default folder: "EXERCISE LIBRARY/Body Shape"
+   Default folder: "EXERCISE LIBRARY" (and one level below it)
 
    Nicolas renders one sheet per sex per age band: five figures in a
    row, transparent background, no labels. This script finds the five
@@ -42,7 +42,7 @@ import { join, dirname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
-const SRC_DIR = process.argv[2] || join(ROOT, 'EXERCISE LIBRARY', 'Body Shape');
+const SRC_DIR = process.argv[2] || join(ROOT, 'EXERCISE LIBRARY');
 const PAGE = join(ROOT, 'onboarding.html');
 
 /* Order matters and is not alphabetical — it is the order the figures
@@ -108,7 +108,20 @@ function verticalExtent(rgba, w, h) {
   return { top, bot };
 }
 
-const sheets = readdirSync(SRC_DIR).filter(f => /\.png$/i.test(f) && classify(f).band);
+/* Look in the folder and one level down. The sheets have arrived in both
+   "EXERCISE LIBRARY" and "EXERCISE LIBRARY/Body Shape", and which one a
+   render lands in is not something worth having to remember. */
+function findSheets(dir, depth = 1) {
+  const out = [];
+  for (const name of readdirSync(dir, { withFileTypes: true })) {
+    if (name.name.startsWith('.')) continue;
+    const full = join(dir, name.name);
+    if (name.isDirectory()) { if (depth > 0) out.push(...findSheets(full, depth - 1)); }
+    else if (/\.png$/i.test(name.name) && classify(name.name).band) out.push(full);
+  }
+  return out;
+}
+const sheets = findSheets(SRC_DIR);
 if (!sheets.length) {
   console.error(`No body-type sheets found in ${SRC_DIR}`);
   console.error('Expected filenames carrying an age band, e.g. ...age-12-37...png');
@@ -121,9 +134,9 @@ if (!sheets.length) {
    and "Body_type_Male_…" do not sort into any useful order. */
 const pick = new Map();
 for (const f of sheets) {
-  const { sex, band } = classify(f);
+  const { sex, band } = classify(basename(f));
   const key = `${sex}_${band}`;
-  const mtime = statSync(join(SRC_DIR, f)).mtimeMs;
+  const mtime = statSync(f).mtimeMs;
   const prev = pick.get(key);
   if (!prev || mtime > prev.mtime) pick.set(key, { file: f, mtime });
 }
@@ -131,21 +144,21 @@ for (const f of sheets) {
 const art = {};
 let bytes = 0;
 for (const [key, { file }] of [...pick].sort()) {
-  const full = join(SRC_DIR, file);
+  const full = file;
   const { w, h } = dims(full);
   const rgba = sh('ffmpeg', ['-v', 'error', '-i', full, '-f', 'rawvideo', '-pix_fmt', 'rgba', '-']);
-  if (rgba.length < w * h * 4) { console.error(`  ${file}: could not decode`); continue; }
+  if (rgba.length < w * h * 4) { console.error(`  ${basename(file)}: could not decode`); continue; }
 
   const figs = findFigures(rgba, w, h);
   if (figs.length !== 5) {
-    console.error(`  ${file}: found ${figs.length} figures, expected 5 — skipped.`);
+    console.error(`  ${basename(file)}: found ${figs.length} figures, expected 5 — skipped.`);
     console.error('    The five bodies must not touch or overlap in the sheet.');
     continue;
   }
   const { top, bot } = verticalExtent(rgba, w, h);
   const ch = bot - top + 2;
 
-  console.log(`${file}  (${w}x${h})  ->  ${key}`);
+  console.log(`${basename(file)}  (${w}x${h})  ->  ${key}`);
   for (let i = 0; i < 5; i++) {
     const [a, b] = figs[i];
     const cx = Math.max(0, a - PAD);
