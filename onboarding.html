@@ -566,6 +566,22 @@ h1.q{text-align:center}
 .dkbands{position:absolute;top:0;right:0;bottom:0;left:0;background:var(--card);
   display:none;flex-direction:column;justify-content:center;padding:22px 18px}
 .dkbands.on{display:flex}
+/* Second panel on the same card: how much, then how they feel about it.
+   Asked here rather than on a screen of its own at the end of the chapter —
+   the exercise is in front of them, so the answer is about that movement
+   instead of a name in a list. */
+.dkfeel{position:absolute;top:0;right:0;bottom:0;left:0;background:var(--card);
+  border-radius:inherit;padding:22px;display:none;flex-direction:column;justify-content:center}
+.dkfeel.on{display:flex}
+.dkfeel .bq{font-size:17px;font-weight:600;letter-spacing:-.015em;margin-bottom:5px}
+.dkfeel .bh{font-size:12.5px;color:var(--ink3);margin-bottom:18px}
+.dkfeel button{width:100%;min-height:54px;border-radius:13px;border:1.5px solid var(--line);
+  background:var(--card2);color:var(--ink);font:inherit;font-size:15.5px;font-weight:600;
+  display:flex;align-items:center;gap:12px;padding:0 16px;margin-bottom:9px;text-align:left}
+.dkfeel button span{width:26px;font-size:17px;color:var(--ink3);text-align:center}
+.dkfeel button:active{transform:scale(.985)}
+.dkfeel button.on{border-color:var(--accent);background:var(--accent-soft)}
+.dkfeel button.on span{color:var(--accent)}
 .dkbands .bq{font-size:17px;font-weight:600;letter-spacing:-.015em;margin-bottom:5px}
 .dkbands .bh{font-size:12.5px;color:var(--ink3);margin-bottom:18px}
 .dkbands button{width:100%;min-height:50px;border-radius:13px;border:1.5px solid var(--line);
@@ -677,6 +693,12 @@ h1.q{text-align:center}
 .howto{margin-top:6px}
 .hrow{display:flex;gap:14px;align-items:flex-start;padding:13px 0;border-bottom:1px solid var(--line)}
 .hrow:last-child{border-bottom:none}
+/* The deck intro's two arrows carry the whole instruction, so they are sized
+   like a signpost rather than a bullet point. Everything else on that screen
+   was cut back to let them do it. */
+.howto.big .hrow{padding:18px 0;align-items:center;gap:18px}
+.howto.big .hi{width:60px;height:60px;border-radius:18px;font-size:30px;font-weight:700}
+.howto.big b{font-size:18px}
 .hrow .hi{flex:0 0 auto;width:34px;height:34px;border-radius:11px;display:flex;
   align-items:center;justify-content:center;font-size:16px;font-weight:700;margin-top:1px}
 .hrow .hi.yes{background:var(--accent-soft);color:var(--accent)}
@@ -1001,8 +1023,10 @@ const FLOW = [
 { ch:4, type:'chapter', n:4, title:'Your training', sub:'Ten cards. Swipe. That\'s the whole section.' },
 { ch:4, type:'deckintro' },
 { ch:4, type:'deck', key:'deck' },
-{ ch:4, type:'enjoy', key:'feelings', h:'Which of these do you actually enjoy?',
-  sub:'Enjoyment predicts whether you\'re still here in a year.', cta:'Continue' },
+/* The "which of these do you enjoy?" screen used to sit here. It is asked on
+   each card now, while the exercise is in front of them, so this chapter is
+   one screen shorter and the answer is about a movement rather than a name in
+   a list. The enjoy() renderer is kept — nothing in FLOW reaches it. */
 
 /* 5 · YOUR WEEK */
 { ch:5, type:'chapter', n:5, title:'Your week', sub:'What makes the plan real, not theoretical.' },
@@ -2181,15 +2205,13 @@ function rankdyn(s){
 /* ---- deck intro: plain instructions, nothing clever ---- */
 function deckintro(){
   const gym=hasLoad();
-  el(`<h1 class="q">Which exercises do you know?</h1>
-    <p class="sub">Twelve movements worth owning for the rest of your life. Everything else is a variation of one of them.</p>
-    <div class="howto">
-      <div class="hrow"><span class="hi yes">→</span>
-        <div><b>Swipe right if you do it</b><small>Then tap roughly how much.</small></div></div>
-      <div class="hrow"><span class="hi no">←</span>
-        <div><b>Swipe left if you don't</b><small>No explanation needed.</small></div></div>
+  el(`<h1 class="q">Do you know these?</h1>
+    <p class="sub">Twelve movements. About a minute.</p>
+    <div class="howto big">
+      <div class="hrow"><span class="hi yes">→</span><b>Swipe right if you know it</b></div>
+      <div class="hrow"><span class="hi no">←</span><b>Swipe left if you don't</b></div>
     </div>
-    <p class="micro" style="margin-top:16px">${gym?'Gym versions, because you have a gym.':'Bodyweight versions, because that is what you have.'} About forty seconds. More get added once you are training.</p>`);
+    <p class="micro" style="margin-top:18px">${gym?'Gym versions, because you have a gym.':'Bodyweight versions, because that is what you have.'}</p>`);
   setFoot(`<button class="cta accent">Show me the first one</button>`);
   foot.querySelector('.cta').onclick=()=>{haptic(16);next();};
 }
@@ -2227,6 +2249,12 @@ function deck(s){
       <div class="dkbands">
         <div class="bq">${bandQ(c)}</div><div class="bh">${c.n} — rough is fine.</div>
         ${bandsFor(c).map(v=>`<button data-v="${v}">${v}</button>`).join('')}
+      </div>
+      <div class="dkfeel">
+        <div class="bq">And do you like it?</div><div class="bh">${c.n}</div>
+        <button data-f="love"><span>♥</span>Like it</button>
+        <button data-f="meh"><span>–</span>Neither</button>
+        <button data-f="never"><span>✕</span>Hate it</button>
       </div>`;
     return e;
   }
@@ -2249,7 +2277,7 @@ function deck(s){
 
   function wire(e,c){
     const yes=e.querySelector('.dkstamp.yes'), no=e.querySelector('.dkstamp.no');
-    const bandsEl=e.querySelector('.dkbands');
+    const bandsEl=e.querySelector('.dkbands'), feelEl=e.querySelector('.dkfeel');
     let sx=0,sy=0,dx=0,dy=0,on=false,lock=null,armed=true;
 
     e.addEventListener('pointerdown',function(ev){
@@ -2288,12 +2316,22 @@ function deck(s){
       yes.style.opacity=0; no.style.opacity=0;
       btnRow.style.display='none'; hintEl.style.display='none';
       bandsEl.classList.add('on');
+      /* Know it → how much → how they feel about it → next card. */
+      function away(){
+        later(function(){ e.style.transition='transform .28s,opacity .28s';
+          e.style.transform='translateX(460px) rotate(20deg)'; e.style.opacity='0';
+          k++; later(paint,180); },130);
+      }
       bandsEl.querySelectorAll('button').forEach(function(b){
         b.onclick=function(){ haptic(14); b.classList.add('on');
           res[c.id]={does:true, band:b.dataset.v};
-          later(function(){ e.style.transition='transform .28s,opacity .28s';
-            e.style.transform='translateX(460px) rotate(20deg)'; e.style.opacity='0';
-            k++; later(paint,180); },130);
+          later(function(){ bandsEl.classList.remove('on'); feelEl.classList.add('on'); },130);
+        };
+      });
+      feelEl.querySelectorAll('button').forEach(function(b){
+        b.onclick=function(){ haptic(14); b.classList.add('on');
+          res[c.id].feel=b.dataset.f;
+          away();
         };
       });
     }
@@ -2305,6 +2343,15 @@ function deck(s){
 
   function finish(){
     A[s.key]=res; deriveLevels();
+    /* The dossier reads A.feelings as { exerciseId: 'love' | 'never' }. That
+       used to be its own screen at the end of the chapter; it is answered on
+       the card now, so derive the same shape here and nothing downstream has
+       to change. "Neither" is simply absent, as it was before. */
+    A.feelings={};
+    Object.keys(res).forEach(function(id){
+      const f=res[id].feel;
+      if(f==='love'||f==='never') A.feelings[id]=f;
+    });
     const does=Object.keys(res).filter(function(x){return res[x].does;}).length;
     btnRow.style.display='none'; hintEl.style.display='none';
     dotsEl.innerHTML=set.map(()=>'<i class="done"></i>').join('');
