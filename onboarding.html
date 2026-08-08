@@ -1881,11 +1881,14 @@ function hero(s){
   if(REDUCED){ finishNow(); }
   else { raf=requestAnimationFrame(tick); }
 
-  /* nobody should have to wait out an animation — a tap lands it now */
+  /* Nobody should have to wait out an animation, and once it has landed there
+     is only one thing to do here — so the whole screen is the button. First
+     tap finishes the mark, the next one moves on. Two taps through the opening
+     without ever aiming at anything. */
   d.addEventListener('click', function(ev){
-    if(art.classList.contains('alive')) return;
     if(ev.target.closest && ev.target.closest('#foot')) return;
-    finishNow();
+    if(!art.classList.contains('alive')){ finishNow(); return; }
+    haptic(16); next();
   });
 }
 
@@ -1898,13 +1901,15 @@ function promise(s){
   rows.forEach(function(r,k){ later(function(){ r.classList.add('on'); haptic(8); }, 260 + k*500); });
   later(function(){ setFoot(`<button class="cta accent">${s.cta}</button>`);
     foot.querySelector('.cta').onclick=()=>{haptic(16);next();}; }, 260 + rows.length*500 + 180);
-  d.onclick=function(){                       /* impatient users skip the reveal */
+  /* First tap skips the reveal, the next one moves on — same two-tap rhythm
+     as the opening, so the whole intro can be got through without aiming at
+     anything. */
+  d.onclick=function(){
+    if(foot.querySelector('.cta')){ haptic(16); next(); return; }
     rows.forEach(function(r){r.classList.add('on');});
     clearPending();
-    if(!foot.querySelector('.cta')){
-      setFoot(`<button class="cta accent">${s.cta}</button>`);
-      foot.querySelector('.cta').onclick=()=>{haptic(16);next();};
-    }
+    setFoot(`<button class="cta accent">${s.cta}</button>`);
+    foot.querySelector('.cta').onclick=()=>{haptic(16);next();};
   };
 }
 
@@ -2342,7 +2347,7 @@ function rankdyn(s){
 /* ---- deck intro: plain instructions, nothing clever ---- */
 function deckintro(){
   const gym=hasLoad();
-  el(`<h1 class="q">Do you know these?</h1>
+  const d=el(`<h1 class="q">Do you know these?</h1>
     <p class="sub">Twelve movements. About a minute.</p>
     <div class="howto big">
       <div class="hrow"><span class="hi yes">→</span><b>Swipe right if you know it</b></div>
@@ -2351,6 +2356,11 @@ function deckintro(){
     <p class="micro" style="margin-top:18px">${gym?'Gym versions, because you have a gym.':'Bodyweight versions, because that is what you have.'}</p>`);
   setFoot(`<button class="cta accent">Show me the first one</button>`);
   foot.querySelector('.cta').onclick=()=>{haptic(16);next();};
+  /* Nothing to choose here, so the whole screen continues. */
+  d.onclick=function(ev){
+    if(ev.target.closest && ev.target.closest('#foot')) return;
+    haptic(16); next();
+  };
 }
 
 /* ---- the deck itself ---- */
