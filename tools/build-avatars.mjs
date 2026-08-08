@@ -48,8 +48,8 @@ const PAGE = join(ROOT, 'onboarding.html');
 /* Order matters and is not alphabetical — it is the order the figures
    appear in the sheet, and it must match SHAPE_NOTE[0..4] in the survey. */
 const TYPES = ['thin', 'athletic', 'average', 'soft', 'overweight'];
-const FIG_HEIGHT = 220;      // ~3x the 76px the row renders at
-const PALETTE = 128;
+const FIG_HEIGHT = 300;    // the carousel shows one figure large, not a row of five
+const PALETTE = 96;
 const PAD = 6;               // px of breathing room either side of a figure
 
 const sh = (cmd, args, opts = {}) => execFileSync(cmd, args, { maxBuffer: 1 << 30, ...opts });
