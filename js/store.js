@@ -5,10 +5,39 @@
 
    MULTI-USER: the storage key is now resolved per active user
    (fj.v1.<uid>) via users.js, so two people never share state.
-   ============================================================ */
-import { storeKey } from './users.js';
 
-const KEY = () => storeKey();
+   PHASE 2: this file no longer knows that localStorage exists. It
+   holds the active user's document in memory and persists it through
+   the storage adapter. Every method below keeps the signature it had.
+
+   WHY IT IS NOT AWAIT-ON-EVERY-CALL.
+   Making each method async would put an await between "read the
+   document" and "write it back", which is a door another operation can
+   walk through. Measured, before any of this was written:
+
+       three checkbox toggles in the same instant
+         synchronous (today)    → [true, true, true]
+         naive await everywhere → [null, null, true]
+
+   Two writes lost, nothing thrown. Fifteen of the writes here are
+   fired straight from tap handlers, so overlapping writes are ordinary.
+
+   Instead: the document is loaded once, awaited, at boot. Reads answer
+   from memory. Writes change memory synchronously — so they cannot
+   interleave — and hand the whole document to a serialised writer.
+
+   This is not a dodge of "make it work with a server". It is how a
+   local-first app talks to one. When Supabase arrives, loadStore()
+   fetches from it and the writer syncs to it; nothing in a screen
+   changes, and no screen has to render a "data not here yet" state
+   that, for an app whose data is on the device, should not exist.
+
+   What genuinely is async lives on the storage contract and is used
+   directly: intakes, programs, trainer views, messages. Those are
+   cross-user and paged, and cannot be preloaded.
+   ============================================================ */
+import { storage } from './core/storage.js';
+import { createWriter } from './core/persist.js';
 
 const DEFAULT = {
   goals: null,        // overrides data.js GOALS focus when set
@@ -32,25 +61,49 @@ const DEFAULT = {
   feedback: [],       // [{ date, sessionId, name, rating:'easy'|'right'|'hard', text }]
 };
 
-function read() {
-  try {
-    const raw = localStorage.getItem(KEY());
-    if (!raw) return structuredClone(DEFAULT);
-    return { ...structuredClone(DEFAULT), ...JSON.parse(raw) };
-  } catch (e) {
-    console.warn('store read failed, using default', e);
-    return structuredClone(DEFAULT);
-  }
+let uid = null;         // whose document is in memory
+let state = null;       // the document itself — null until loadStore()
+let writer = null;      // serialised persistence
+
+/* Boot step. The app must await this before it reads anything.
+   Previously this happened as a side effect of importing a module,
+   which only ever worked because it was synchronous — a read that
+   landed first would see an empty document and treat a returning user
+   as brand new. */
+export async function loadStore(userId) {
+  uid = userId;
+  const raw = await storage().getUserState(userId);
+  state = { ...structuredClone(DEFAULT), ...(raw || {}) };
+  writer = createWriter(doc => storage().saveUserState(uid, doc));
+  return state;
 }
 
-function write(state) {
-  try {
-    localStorage.setItem(KEY(), JSON.stringify(state));
-    return true;
-  } catch (e) {
-    console.error('store write failed', e);
-    return false;
+/** Await anything still queued — leaving a screen, backgrounding the
+ *  tab, finishing a workout, switching user. */
+export async function flushStore() { if (writer) await writer.flush(); }
+
+export function storeLoaded() { return state !== null; }
+
+/* Reading before the document is loaded is a programming error, not a
+   condition to paper over. Returning an empty document instead would
+   render an empty week and look exactly like a person who has never
+   trained — the failure the claim screen exists to prevent, in another
+   costume. Fail loudly and name the fix. */
+function read() {
+  if (state === null) {
+    throw new Error('store read before loadStore() — the app must await loadStore(userId) at boot');
   }
+  return state;
+}
+
+/* The live document is handed straight back. Callers only ever read it
+   (verified: every store.all site filters, slices or spreads), and the
+   old version re-parsed the whole training log on every single call,
+   so this is also markedly less work per render. */
+function write(next) {
+  state = next;
+  writer.put(state);
+  return true;
 }
 
 /* local YYYY-MM-DD (never UTC — a 9pm workout must not land on tomorrow) */
@@ -403,7 +456,7 @@ export const store = {
     return { ok: true, sessions: added.length, mode };
   },
 
-  reset() { localStorage.removeItem(KEY()); },
+  reset() { write(structuredClone(DEFAULT)); },
 };
 
 function dedupe(list, keyFn) {
