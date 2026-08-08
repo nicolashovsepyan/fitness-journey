@@ -60,8 +60,16 @@ function dims(file) {
   return { w: g('pixelWidth'), h: g('pixelHeight') };
 }
 
+/* Sheets whose filename carries no age band. Written down rather than
+   guessed: a wrong guess here puts a 25-year-old body on a 60-year-old's
+   screen, and nothing in the app would ever flag it. */
+const OVERRIDE = {
+  'fitness-journey-female-avatar-card-athletic-refined-v1.png': { sex: 'f', band: 'a1' },
+};
+
 /** Which sheet is this? Sex from the filename, age band from the numbers in it. */
 function classify(name) {
+  if (OVERRIDE[name]) return OVERRIDE[name];
   const n = name.toLowerCase();
   const sex = /female|woman|women|_f[_.-]|-f-/.test(n) ? 'f' : 'm';
   let band = null;
