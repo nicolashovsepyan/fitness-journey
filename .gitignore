@@ -9,3 +9,8 @@ ARCHITECTURE.md
 mockups/
 
 dist/
+
+# Source artwork — huge, and the survey inlines what it needs via
+# tools/build-avatars.mjs. Keeping it out of the shell and out of git.
+EXERCISE LIBRARY/
+fitness-journey-update/
