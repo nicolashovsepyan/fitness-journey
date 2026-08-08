@@ -1597,12 +1597,30 @@ function hero(s){
   const strokes=paths.map(function(el,k){
     const L=el.getTotalLength()||1;
     el.style.transition='none';
-    el.style.strokeDasharray=L;
+    /* "L L" — a dash of L followed by an equal gap, so a fully offset path
+       parks inside the gap rather than at the edge of the dash and cannot
+       paint a stray cap. The reveal is unchanged. */
+    el.style.strokeDasharray=L+' '+L;
+    /* THE DOTS.
+       These strokes are round-capped, and a round cap is drawn at full
+       stroke width no matter how short the dash it belongs to. So the
+       instant a stroke began drawing it appeared as a circle — up to 8.4px
+       across on the thickest plate — and because the strokes are staggered
+       you saw about four of them hanging in the air before the dumbbell
+       resolved. They read as deliberate dots. They were end caps.
+
+       A stroke is only dot-shaped while it is shorter than it is wide, so
+       that is exactly the window to hide: hold it transparent until it has
+       drawn past about one and a half stroke widths, then fade it up. Self
+       tuning — a thick plate needs longer than a thin one, and each path
+       gets its own threshold from its own width. */
+    const w=parseFloat(getComputedStyle(el).strokeWidth)||2;
     /* +L hides it before the start, -L hides it past the end, so the
        reveal runs from the opposite direction */
     const from = passes[k].rev ? -L : L;
     el.style.strokeDashoffset = from;
-    return {el:el, from:from, delay:passes[k].delay};
+    el.style.opacity = 0;
+    return {el:el, from:from, delay:passes[k].delay, len:L, fade:Math.max(1, w*2)};
   });
   const wipeEls=wipes.map(function(w){
     const r=d.querySelector('[data-w="'+w.id+'"]');
@@ -1652,7 +1670,14 @@ function hero(s){
     for(let k=0;k<strokes.length;k++){
       const st=strokes[k];
       const p=clamp01((t-st.delay)/DUR);
-      st.el.style.strokeDashoffset = (st.from*(1-easeDraw(p))).toFixed(2);
+      const e=easeDraw(p);
+      st.el.style.strokeDashoffset = (st.from*(1-e)).toFixed(2);
+      /* Invisible while it is still just an end cap, then up to full.
+         Squared, because a straight ramp still left the thickest plate at
+         a third opacity while it was three pixels long and seven wide —
+         which is a faint dot, not a stroke. */
+      const o=clamp01((st.len*e)/st.fade);
+      st.el.style.opacity = (o*o).toFixed(3);
     }
     for(let k=0;k<wipeEls.length;k++){
       const w=wipeEls[k];
@@ -1679,6 +1704,11 @@ function hero(s){
   function finishNow(){
     if(raf){ cancelAnimationFrame(raf); raf=0; }
     paint(done+1);                                   /* land every value exactly */
+    /* Hand the strokes back to the stylesheet. The fade-in above is a
+       function of drawn length over stroke width, so a path shorter than
+       one and a half of its own widths would top out below 1 and stay
+       faint for good. None are today; clearing it means none ever can be. */
+    for(let k=0;k<strokes.length;k++){ strokes[k].el.style.opacity=''; }
     hcopy.style.opacity=''; hcopy.style.transform='';
     cta.style.opacity='';   cta.style.transform='';
     heroEl.classList.add('ready');

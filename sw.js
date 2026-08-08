@@ -15,7 +15,7 @@
    Training data lives in localStorage, not here, so an update never
    touches a logged session.
    ============================================================ */
-const VERSION = '5a933b7c12';
+const VERSION = 'e78b1f6afa';
 const CACHE = 'fj-' + VERSION;
 const ASSETS = [
   "./feed.html",
@@ -32,6 +32,7 @@ const ASSETS = [
   "./images/logo-onboarding.png",
   "./images/logo.png",
   "./index.html",
+  "./js/adapters/local.js",
   "./js/app.js",
   "./js/beginner.js",
   "./js/coach.js",
@@ -70,7 +71,8 @@ const ASSETS = [
   "./onboarding.html",
   "./preview.html",
   "./profile.html",
-  "./styles.css"
+  "./styles.css",
+  "./tools/build-avatars.mjs"
 ];
 
 self.addEventListener('install', (e) => {
