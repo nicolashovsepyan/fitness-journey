@@ -42,7 +42,24 @@ import { join, dirname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
-const SRC_DIR = process.argv[2] || join(ROOT, 'EXERCISE LIBRARY');
+
+/* Find a folder by name, tolerating a leading/trailing space or different
+   case. Both "EXERCISE LIBRARY" and "FOR NICOLAS" turned up one day renamed
+   to " EXERCISE LIBRARY" and " FOR NICOLAS" — a space in front sorts them to
+   the top of Finder, which is a perfectly reasonable thing to want and used
+   to break every script here with ENOENT. */
+function resolveDir(parent, wanted) {
+  const want = wanted.trim().toLowerCase();
+  const exact = join(parent, wanted);
+  try { if (statSync(exact).isDirectory()) return exact; } catch {}
+  for (const name of readdirSync(parent)) {
+    if (name.trim().toLowerCase() !== want) continue;
+    const full = join(parent, name);
+    try { if (statSync(full).isDirectory()) return full; } catch {}
+  }
+  return exact;   // let the caller fail with a clear path
+}
+const SRC_DIR = process.argv[2] || resolveDir(ROOT, 'EXERCISE LIBRARY');
 const PAGE = join(ROOT, 'onboarding.html');
 const OUT_DIR = join(ROOT, 'images', 'avatars');
 
@@ -188,7 +205,11 @@ for (const [key, { file }] of [...pick].sort()) {
        from a shared link: the link needs a connection anyway. */
     const name = `${key}_${TYPES[i]}.png`;
     writeFileSync(join(OUT_DIR, name), png);
-    art[`${key}_${TYPES[i]}`] = 1;
+    /* The width matters downstream: the pain map overlays its tappable
+       regions on this image, and a frame sized for a 113px body puts the
+       "arms" beside an 81px one instead of on it. Derived from the crop
+       rather than read back off disk — same arithmetic ffmpeg just did. */
+    art[`${key}_${TYPES[i]}`] = Math.round(cw * (FIG_HEIGHT / ch));
     bytes += png.length;
     console.log(`    ${TYPES[i].padEnd(11)} ${String(cw).padStart(4)}px wide  ${(png.length / 1024).toFixed(1)} KB`);
   }
@@ -204,7 +225,7 @@ let page = readFileSync(PAGE, 'utf8');
    The survey checks it before building a URL, so a sheet that has not been
    rendered yet falls back to the drawn silhouette exactly as before rather
    than requesting a file that is not there. */
-const island = `<script type="application/json" id="avatarart">${JSON.stringify(Object.keys(art))}<\/script>`;
+const island = `<script type="application/json" id="avatarart">${JSON.stringify(art)}<\/script>`;
 const re = /<script type="application\/json" id="avatarart">[\s\S]*?<\/script>/;
 if (re.test(page)) {
   page = page.replace(re, island);

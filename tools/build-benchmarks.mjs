@@ -23,13 +23,30 @@
    The survey turns them into real kilos or pounds using the weight the
    person already gave in Chapter 1.
    ============================================================ */
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, statSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
+
+/* Find a folder by name, tolerating a leading/trailing space or different
+   case. Both "EXERCISE LIBRARY" and "FOR NICOLAS" turned up one day renamed
+   to " EXERCISE LIBRARY" and " FOR NICOLAS" — a space in front sorts them to
+   the top of Finder, which is a perfectly reasonable thing to want and used
+   to break every script here with ENOENT. */
+function resolveDir(parent, wanted) {
+  const want = wanted.trim().toLowerCase();
+  const exact = join(parent, wanted);
+  try { if (statSync(exact).isDirectory()) return exact; } catch {}
+  for (const name of readdirSync(parent)) {
+    if (name.trim().toLowerCase() !== want) continue;
+    const full = join(parent, name);
+    try { if (statSync(full).isDirectory()) return full; } catch {}
+  }
+  return exact;   // let the caller fail with a clear path
+}
 /* Lives in "FOR NICOLAS" — the one folder he owns and edits. */
-const SYS = process.argv[2] || join(ROOT, 'FOR NICOLAS');
+const SYS = process.argv[2] || resolveDir(ROOT, 'FOR NICOLAS');
 const PAGE = join(ROOT, 'onboarding.html');
 
 /* deck id -> the Exercise column in the CSVs */
