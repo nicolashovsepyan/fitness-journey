@@ -37,13 +37,14 @@
    Needs ffmpeg on PATH. No npm install.
    ============================================================ */
 import { execFileSync } from 'node:child_process';
-import { readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, writeFileSync, readdirSync, statSync, mkdirSync, rmSync } from 'node:fs';
 import { join, dirname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const SRC_DIR = process.argv[2] || join(ROOT, 'EXERCISE LIBRARY');
 const PAGE = join(ROOT, 'onboarding.html');
+const OUT_DIR = join(ROOT, 'images', 'avatars');
 
 /* Order matters and is not alphabetical — it is the order the figures
    appear in the sheet, and it must match SHAPE_NOTE[0..4] in the survey. */
@@ -149,6 +150,11 @@ for (const f of sheets) {
   if (!prev || mtime > prev.mtime) pick.set(key, { file: f, mtime });
 }
 
+/* Rebuilt from scratch each run so a renamed or removed sheet cannot leave
+   an orphan behind that the manifest no longer mentions. */
+rmSync(OUT_DIR, { recursive: true, force: true });
+mkdirSync(OUT_DIR, { recursive: true });
+
 const art = {};
 let bytes = 0;
 for (const [key, { file }] of [...pick].sort()) {
@@ -175,7 +181,14 @@ for (const [key, { file }] of [...pick].sort()) {
       `crop=${cw}:${ch}:${cx}:${top},scale=-1:${FIG_HEIGHT}:flags=lanczos,split[a][b];` +
       `[a]palettegen=max_colors=${PALETTE}:reserve_transparent=1[p];[b][p]paletteuse=alpha_threshold=128`,
       '-f', 'image2pipe', '-vcodec', 'png', '-']);
-    art[`${key}_${TYPES[i]}`] = `data:image/png;base64,${png.toString('base64')}`;
+    /* Written as a file, not inlined. Thirty figures is ~470 KB of base64 in
+       a page where any one person ever sees five of them — six times the
+       bytes for no benefit. As files the browser fetches only the five it
+       needs, and the survey page drops by the whole amount. It still works
+       from a shared link: the link needs a connection anyway. */
+    const name = `${key}_${TYPES[i]}.png`;
+    writeFileSync(join(OUT_DIR, name), png);
+    art[`${key}_${TYPES[i]}`] = 1;
     bytes += png.length;
     console.log(`    ${TYPES[i].padEnd(11)} ${String(cw).padStart(4)}px wide  ${(png.length / 1024).toFixed(1)} KB`);
   }
@@ -187,7 +200,11 @@ if (!Object.keys(art).length) { console.error('Nothing to write.'); process.exit
    Same trick as deckart: the browser does not parse a JSON island as
    JavaScript, so this costs nothing until the screen actually needs it. */
 let page = readFileSync(PAGE, 'utf8');
-const island = `<script type="application/json" id="avatarart">${JSON.stringify(art)}<\/script>`;
+/* The island is now just the list of which figures exist — under 400 bytes.
+   The survey checks it before building a URL, so a sheet that has not been
+   rendered yet falls back to the drawn silhouette exactly as before rather
+   than requesting a file that is not there. */
+const island = `<script type="application/json" id="avatarart">${JSON.stringify(Object.keys(art))}<\/script>`;
 const re = /<script type="application\/json" id="avatarart">[\s\S]*?<\/script>/;
 if (re.test(page)) {
   page = page.replace(re, island);

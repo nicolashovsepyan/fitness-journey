@@ -74,7 +74,7 @@ const IS_CODE = /\.(html|css|js|mjs|webmanifest|json)$/i;
    thumbnails on a browsing screen. The fetch handler still caches each one
    the first time it is seen, so they work offline after that; they are just
    not part of what you wait for on install. */
-const DEFER_PREFIX = ['images/exercises/'];
+const DEFER_PREFIX = ['images/exercises/', 'images/avatars/'];
 
 const sizeOf = f => statSync(join(ROOT, f)).size;
 const keep = f => !DEFER_PREFIX.some(p => f.startsWith(p))
