@@ -15,7 +15,7 @@
    Training data lives in localStorage, not here, so an update never
    touches a logged session.
    ============================================================ */
-const VERSION = '4ea1238ebf';
+const VERSION = '5caf1700ab';
 const CACHE = 'fj-' + VERSION;
 const ASSETS = [
   "./feed.html",

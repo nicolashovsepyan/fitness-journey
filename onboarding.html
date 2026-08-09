@@ -309,14 +309,29 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:32px;heigh
 .slends{display:flex;justify-content:space-between;font-size:12px;color:var(--ink3);margin-top:2px}
 
 /* ---------- body map ---------- */
-.bodywrap{display:flex;justify-content:center;margin:4px 0 2px}
-svg.body{width:158px;height:auto;overflow:visible}
-/* the un-tappable body — head, hands, the joins between regions */
-svg.body .basefig>*{fill:#333B46}
-/* each region IS the body part, not a box floating over a photo */
-svg.body .part{fill:#3B4450;transition:fill .18s cubic-bezier(.3,0,.2,1),filter .18s;pointer-events:none}
-svg.body .part.on{fill:var(--accent);filter:drop-shadow(0 0 7px rgba(200,255,77,.45))}
-svg.body .hit{cursor:pointer}
+/* ---- where it hurts: a grid of named zones, no diagram ----------------
+   Two columns of large targets. Every label is unambiguous on its own, so
+   there is no viewpoint to choose and no toggle to explain. */
+.zgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.zone{position:relative;min-height:66px;border-radius:14px;border:1.5px solid var(--line);
+  background:var(--card2);color:var(--ink);font:inherit;font-size:15px;font-weight:600;
+  text-align:left;padding:0 38px 0 15px;display:flex;align-items:center;
+  transition:border-color .15s,background .15s,color .15s}
+.zone:active{transform:scale(.985)}
+.zone.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+/* the last one sits alone on its row, so it takes the full width */
+.zone:last-child{grid-column:1 / -1}
+.ztick{position:absolute;right:13px;top:50%;width:19px;height:19px;margin-top:-9.5px;
+  border-radius:50%;border:1.5px solid var(--line2,#333B46);transition:.15s}
+.zone.on .ztick{border-color:var(--accent);background:var(--accent)}
+.zone.on .ztick::after{content:'';position:absolute;left:5.5px;top:2.5px;width:5px;height:9px;
+  border:solid #10120f;border-width:0 2px 2px 0;transform:rotate(45deg)}
+/* Neutral until it is actually the answer. Styled like the zones so the
+   whole screen reads as one set of choices rather than a button above a list. */
+.nonechip.big{width:100%;min-height:60px;border-radius:14px;font-size:15.5px;margin:2px 0 0;
+  border-color:var(--line);background:var(--card2);color:var(--ink)}
+.nonechip.big.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.zmicro{margin-top:14px;text-align:center}
 .chips{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:14px}
 .chip{font-size:12.5px;background:var(--accent-soft);color:var(--accent);padding:7px 13px;border-radius:99px;font-weight:550}
 
@@ -388,14 +403,12 @@ svg.body .hit{cursor:pointer}
   .ins-line{font-size:20px}
   .ins-line.s{font-size:15px}
   .eyebrow{margin-bottom:10px}
-  svg.body{width:146px}
   .badges{margin-top:16px}
 }
 @media(max-height:600px){
   h1.q{font-size:21px}
   .hero h1{font-size:27px}
   .slval{font-size:40px}
-  svg.body{width:132px}
   .opt .tx small{display:none}
 }
 
@@ -1230,7 +1243,7 @@ const FLOW = [
         {v:'joint',  ic:'leaf',   t:'A joint, back or bone problem that could get worse'},
         {v:'preg',   ic:'child',  t:'Pregnant, or recently gave birth'},
         {v:'other',  ic:'stetho', t:'Something else a doctor told me to be careful with'}]},
-{ ch:7, type:'body', key:'pain', h:'Anything hurting right now?', sub:'Tap where. Detail only when it matters.' },
+{ ch:7, type:'body', key:'pain', h:'Anything I should work around?', sub:'Only what is bothering you now.' },
 
 /* 8 · YOUR PLAN */
 { ch:8, type:'loader' },
@@ -2973,153 +2986,75 @@ function postEndpoint(){
 
 /* body map — front / back */
 function body(s){
-  /* WHY THIS IS NOT THE AVATAR.
+  /* NO BODY DIAGRAM. Two attempts at one were rejected and both deserved to
+     be: a photographic avatar has no back, and a figure drawn in code reads
+     as a mannequin no matter how carefully the shapes are placed. A bad
+     drawing of a person is worse than no drawing at all.
 
-     The avatar is a photograph of a person facing forward. There is no back
-     of it, and there never will be without doubling every render — so the
-     first attempt mirrored the front and flattened it to a silhouette. That
-     was a workaround wearing a design's clothes, and it looked like one.
+     The thing being avoided was never really the artwork — it was the front/
+     back toggle, which only exists because a picture forces a viewpoint.
+     Words do not. "Lower back" is unambiguous. So is "shoulders". Nobody
+     needs to be shown a diagram to say where it hurts, and the moment the
+     picture goes, the toggle goes with it and the screen is one tap deep.
 
-     The avatar's job is identity: this is roughly my body, on the shape
-     screen. This screen's job is anatomy, and anatomy wants a diagram. So
-     the figure here is drawn in code — front and back both real, no image
-     to fetch, sharp at any size, and it costs nothing.
-
-     THE BODY IS THE BUTTON. There is no invisible rectangle floating over a
-     picture: each region IS the shape of that part, so tapping a thigh
-     highlights a thigh. Same idea as the muscle maps in serious training
-     apps, and it reads instantly. */
-
-  /* Eight regions a side. Left/right is a follow-up question, not an intake
-     question — halving the count doubles the size of every target. */
-  const R = 'rect', E = 'ellipse';
-  const mir = x => 200 - x;
-
-  /* One continuous silhouette underneath, then the regions inset on top of
-     it. The first attempt drew each region as its own block with gaps
-     between them and it read as a robot — a body has to be one shape before
-     it can be eight parts. Everything below overlaps its neighbour on
-     purpose; sharing a fill makes the joins disappear. */
-  const BASE = `
-    <ellipse cx="100" cy="32" rx="23" ry="27"/>
-    <rect x="87"  y="52"  width="26" height="26" rx="10"/>
-    <rect x="64"  y="70"  width="72" height="116" rx="24"/>
-    <rect x="70"  y="176" width="60" height="48" rx="18"/>
-    <rect x="40"  y="92"  width="23" height="80" rx="11"/>
-    <rect x="137" y="92"  width="23" height="80" rx="11"/>
-    <rect x="39"  y="162" width="21" height="72" rx="10"/>
-    <rect x="140" y="162" width="21" height="72" rx="10"/>
-    <ellipse cx="49.5"  cy="242" rx="11" ry="13"/>
-    <ellipse cx="150.5" cy="242" rx="11" ry="13"/>
-    <rect x="73"  y="214" width="26" height="86" rx="13"/>
-    <rect x="101" y="214" width="26" height="86" rx="13"/>
-    <rect x="76"  y="292" width="21" height="96" rx="10"/>
-    <rect x="103" y="292" width="21" height="96" rx="10"/>
-    <ellipse cx="86"  cy="394" rx="14" ry="11"/>
-    <ellipse cx="114" cy="394" rx="14" ry="11"/>`;
-
-  /* [type, ...geometry] — rect: x,y,w,h,r · ellipse: cx,cy,rx,ry
-     Inset a little from the silhouette so a lit region reads as part of the
-     body rather than a sticker on it. */
-  const FRONT = [
-    ['neck',  'Neck',            [[R, 87, 54, 26, 20, 9]]],
-    ['shldr', 'Shoulders',       [[E, 68, 90, 22, 19], [E, mir(68), 90, 22, 19]]],
-    ['chest', 'Chest',           [[R, 66, 74, 68, 48, 20]]],
-    ['abs',   'Abdomen',         [[R, 67, 124, 66, 52, 18]]],
-    ['arm',   'Elbow or wrist',  [[R, 40, 94, 23, 78, 11],  [R, 39, 166, 21, 68, 10],
-                                  [R, mir(63), 94, 23, 78, 11], [R, mir(60), 166, 21, 68, 10]]],
-    ['hip',   'Hip or groin',    [[R, 70, 178, 60, 44, 17]]],
-    ['knee',  'Knees',           [[R, 74, 284, 25, 30, 12], [R, mir(99), 284, 25, 30, 12]]],
-    ['ankle', 'Ankles or feet',  [[R, 76, 366, 21, 28, 10], [R, mir(97), 366, 21, 28, 10]]],
+     This also follows the rule the old version already had for left and
+     right: that is a follow-up question, not an intake question. Front and
+     back is the same. A coach needs to know "knees" to program around them;
+     which side of the knee is a conversation, not a checkbox. */
+  const ZONES = [
+    ['neck',  'Neck'],
+    ['shldr', 'Shoulders'],
+    ['arm',   'Elbows / wrists'],
+    ['mid',   'Upper back'],
+    ['low',   'Lower back'],
+    ['hip',   'Hips'],
+    ['knee',  'Knees'],
+    ['ankle', 'Ankles / feet'],
+    ['other', 'Somewhere else'],
   ];
-  const BACK = [
-    ['neckB', 'Neck',            [[R, 87, 54, 26, 20, 9]]],
-    ['blade', 'Shoulder blades', [[R, 66, 74, 32, 46, 14], [R, mir(98), 74, 32, 46, 14]]],
-    ['mid',   'Mid back',        [[R, 67, 124, 66, 30, 14]]],
-    ['low',   'Lower back',      [[R, 68, 156, 64, 30, 14]]],
-    ['armB',  'Elbow or wrist',  [[R, 40, 94, 23, 78, 11],  [R, 39, 166, 21, 68, 10],
-                                  [R, mir(63), 94, 23, 78, 11], [R, mir(60), 166, 21, 68, 10]]],
-    ['glute', 'Glutes',          [[R, 70, 188, 60, 44, 18]]],
-    ['ham',   'Hamstrings',      [[R, 74, 230, 25, 62, 12], [R, mir(99), 230, 25, 62, 12]]],
-    ['calf',  'Calves',          [[R, 76, 300, 21, 60, 10], [R, mir(97), 300, 21, 60, 10]]],
-  ];
-
-  const shape = g => g[0] === E
-    ? `cx="${g[1]}" cy="${g[2]}" rx="${g[3]}" ry="${g[4]}"`
-    : `x="${g[1]}" y="${g[2]}" width="${g[3]}" height="${g[4]}" rx="${g[5]}"`;
-  const tag = g => g[0] === E ? 'ellipse' : 'rect';
-
-  let view = 'front';
-  const sel = new Set(A.pain ? A.pain : []);
-  const names = {};
-
-  const draw = () => {
-    const P = view === 'front' ? FRONT : BACK;
-    P.forEach(p => names[p[0]] = p[1]);
-    const parts = P.map(p => p[2].map(g =>
-      `<${tag(g)} class="part${sel.has(p[0]) ? ' on' : ''}" data-k="${p[0]}" ${shape(g)}/>`
-    ).join('')).join('');
-    /* A generous invisible target over each region — a fingertip is about
-       9mm and some of these shapes are narrower than that. */
-    const hits = P.map(p => p[2].map(g => {
-      const box = g[0] === E
-        ? [g[1] - g[3], g[2] - g[4], g[3] * 2, g[4] * 2]
-        : [g[1], g[2], g[3], g[4]];
-      const w = Math.max(44, box[2]), ht = Math.max(40, box[3]);
-      return `<rect class="hit" data-k="${p[0]}" x="${box[0] - (w - box[2]) / 2}" y="${box[1] - (ht - box[3]) / 2}" width="${w}" height="${ht}" fill="transparent"/>`;
-    }).join('')).join('');
-
-    d.querySelector('.bodywrap').innerHTML =
-      `<svg class="body" viewBox="0 0 200 424" aria-label="Body map">
-         <g class="basefig">${BASE}</g>${parts}${hits}</svg>`;
-
-    d.querySelectorAll('.hit').forEach(hit => hit.onclick = () => {
-      const k = hit.dataset.k;
-      haptic(sel.has(k) ? 9 : 15);
-      if (sel.has(k)) sel.delete(k); else sel.add(k);
-      d.querySelectorAll('.part[data-k="' + k + '"]').forEach(x => x.classList.toggle('on', sel.has(k)));
-      sync();
-    });
-  };
+  const names = {}; ZONES.forEach(z => names[z[0]] = z[1]);
+  const sel = new Set(Array.isArray(A.pain) ? A.pain.filter(k => names[k]) : []);
 
   const d = el(`${head(s)}
-    <div class="bodytabs"><button class="btab on" data-v="front">Front</button><button class="btab" data-v="back">Back</button></div>
-    <div class="bodywrap"></div>
-    <div class="chips" id="chips"></div>
-    <button class="nonechip" id="nohurt">Nothing hurts</button>`);
+    <button class="nonechip big" id="nohurt">Nothing hurts — I'm good</button>
+    <div class="zgrid">${ZONES.map(z =>
+      `<button class="zone${sel.has(z[0]) ? ' on' : ''}" data-k="${z[0]}">
+         <span>${z[1]}</span><i class="ztick"></i></button>`).join('')}</div>
+    <p class="micro zmicro">Nothing gets skipped — it gets swapped.</p>`);
 
-  const chips = d.querySelector('#chips'), nohurt = d.querySelector('#nohurt');
-  nohurt.onclick = () => { haptic(14); A.pain = []; next(); };
+  setFoot(`<button class="cta accent">Continue</button>`);
+  const cta = foot.querySelector('.cta');
+  const nohurt = d.querySelector('#nohurt');
 
-  /* Selections on the other side must stay visible, or someone who taps a
-     knee, flips to the back and taps a hamstring will think the knee was
-     forgotten. Every chip is removable from here. */
   const sync = () => {
-    const ALL = FRONT.concat(BACK);
-    ALL.forEach(p => names[p[0]] = p[1]);
-    chips.innerHTML = [...sel].map(k =>
-      `<button class="chip on" data-x="${k}">${names[k] || k}<i>&times;</i></button>`).join('');
-    chips.querySelectorAll('.chip').forEach(c => c.onclick = () => {
-      haptic(9); sel.delete(c.dataset.x);
-      d.querySelectorAll('.part[data-k="' + c.dataset.x + '"]').forEach(x => x.classList.remove('on'));
-      sync();
-    });
-    nohurt.style.display = sel.size ? 'none' : '';
-    cta.textContent = sel.size ? 'Continue · ' + sel.size : 'Tap anywhere that hurts';
-    cta.disabled = !sel.size;
+    nohurt.classList.toggle('on', sel.size === 0);
+    cta.textContent = sel.size ? 'Continue · ' + sel.size : 'Nothing hurts';
+    cta.classList.toggle('ghost', sel.size === 0);
+    cta.classList.toggle('accent', sel.size > 0);
   };
 
-  d.querySelectorAll('.btab').forEach(t => t.onclick = () => { haptic(12);
-    d.querySelectorAll('.btab').forEach(x => x.classList.remove('on')); t.classList.add('on');
-    view = t.dataset.v; draw(); sync(); });
+  d.querySelectorAll('.zone').forEach(btn => btn.onclick = () => {
+    const k = btn.dataset.k;
+    haptic(sel.has(k) ? 9 : 15);
+    if (sel.has(k)) sel.delete(k); else sel.add(k);
+    btn.classList.toggle('on', sel.has(k));
+    sync();
+  });
 
-  setFoot(`<button class="cta accent">Tap anywhere that hurts</button>`);
-  const cta = foot.querySelector('.cta');
+  /* Clears everything rather than being a ninth answer — someone who taps
+     three zones and then decides they are fine should not have to untap
+     them one at a time. */
+  nohurt.onclick = () => {
+    haptic(14); sel.clear();
+    d.querySelectorAll('.zone').forEach(b => b.classList.remove('on'));
+    sync();
+  };
+
   cta.onclick = () => { haptic(14); A.pain = [...sel];
-    if (sel.size) toast("Logged. I won't ask you to describe it now.", 2400);
-    later(next, sel.size ? 700 : 0); };
+    if (sel.size) toast("Noted. I won't ask you to describe it now.", 2400);
+    later(next, sel.size ? 600 : 0); };
 
-  draw(); sync();
+  sync();
 }
 
 /* insight */
