@@ -309,20 +309,14 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:32px;heigh
 .slends{display:flex;justify-content:space-between;font-size:12px;color:var(--ink3);margin-top:2px}
 
 /* ---------- body map ---------- */
-.bodywrap{display:flex;justify-content:center;margin:6px 0 4px}
-.bodyfig{position:relative;height:300px}
-.bodyimg{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;-webkit-user-drag:none;user-select:none;pointer-events:none}
-/* Mirrored and flattened to a silhouette for the back view. brightness(0)
-   crushes it to black, invert(1) lifts it to white, then it is dimmed — so
-   there is no face and no detail, only the shape of that body. */
-.bodyfig.back .bodyimg{transform:scaleX(-1);filter:brightness(0) invert(1) opacity(.32)}
-.bodyfig svg.body{position:absolute;inset:0;width:100%;height:100%}
-svg.body{width:120px;height:auto}
-svg.body .part{fill:transparent;stroke:rgba(255,255,255,.22);stroke-width:1.2;
-  transition:fill .18s,stroke .18s;pointer-events:none}
+.bodywrap{display:flex;justify-content:center;margin:4px 0 2px}
+svg.body{width:158px;height:auto;overflow:visible}
+/* the un-tappable body — head, hands, the joins between regions */
+svg.body .basefig>*{fill:#333B46}
+/* each region IS the body part, not a box floating over a photo */
+svg.body .part{fill:#3B4450;transition:fill .18s cubic-bezier(.3,0,.2,1),filter .18s;pointer-events:none}
+svg.body .part.on{fill:var(--accent);filter:drop-shadow(0 0 7px rgba(200,255,77,.45))}
 svg.body .hit{cursor:pointer}
-svg.body .part:active{fill:#454F5B}
-svg.body .part.on{fill:rgba(200,255,77,.42);stroke:var(--accent);stroke-width:2}
 .chips{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:14px}
 .chip{font-size:12.5px;background:var(--accent-soft);color:var(--accent);padding:7px 13px;border-radius:99px;font-weight:550}
 
@@ -394,14 +388,14 @@ svg.body .part.on{fill:rgba(200,255,77,.42);stroke:var(--accent);stroke-width:2}
   .ins-line{font-size:20px}
   .ins-line.s{font-size:15px}
   .eyebrow{margin-bottom:10px}
-  .bodyfig{height:280px}
+  svg.body{width:146px}
   .badges{margin-top:16px}
 }
 @media(max-height:600px){
   h1.q{font-size:21px}
   .hero h1{font-size:27px}
   .slval{font-size:40px}
-  .bodyfig{height:260px}
+  svg.body{width:132px}
   .opt .tx small{display:none}
 }
 
@@ -511,6 +505,11 @@ h1.q{text-align:center}
   color:var(--ink3);font-size:11.5px;font-family:inherit;cursor:pointer;transition:all .15s}
 .confb.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);font-weight:650}
 /* ---------- body front/back ---------- */
+#chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:12px}
+#chips .chip{display:inline-flex;align-items:center;gap:7px;border:1.5px solid var(--accent);
+  background:var(--accent-soft);color:var(--accent);border-radius:99px;padding:7px 12px;
+  font:inherit;font-size:13px;font-weight:600}
+#chips .chip i{font-style:normal;opacity:.65;font-size:15px;line-height:1}
 .bodytabs{display:flex;gap:8px;justify-content:center;margin-bottom:12px}
 .btab{min-height:44px;padding:0 22px;border-radius:11px;border:1.5px solid var(--line);background:var(--bg2);
   color:var(--ink2);font-size:13.5px;font-family:inherit;cursor:pointer;transition:all .15s}
@@ -2974,101 +2973,152 @@ function postEndpoint(){
 
 /* body map — front / back */
 function body(s){
-  /* Eight regions a side, not twelve. Left/right is a follow-up question,
-     not an intake question — and halving the count doubles the target. */
-  /* Laid out over a 120x300 frame — the avatars are 300 tall and 81 to 113
-     wide, so every body type fits centred and the spine is always at x=60.
-     Wider bodies push the limbs out a little; the hit areas are generous
-     enough to absorb it. */
-  /* Set against real standing proportions in the 300-unit frame:
-       head 0-40 · neck 40-52 · shoulders 52-68 · chest 62-100
-       waist 100-140 · hips 140-168 · thigh 168-208 · knee 208-238
-       shin 238-268 · foot 268-300
-     The first pass was eyeballed and sat about ten units high everywhere
-     below the waist, which put "knees" on the mid-thigh. */
-  /* x is a FRACTION of the body's width, y is absolute in a 300-tall frame.
-     The figures run from 81px wide (thin) to 113px (heavy), so a fixed frame
-     put the arm regions in empty space beside a thin body. Vertical
-     proportions are the same for everyone; horizontal ones are not. */
-  const FRONT=[
-    ['neck','Neck',            [[.40,40,.20,12]]],
-    ['shldr','Shoulders',      [[.08,52,.26,16],[.66,52,.26,16]]],
-    ['chest','Chest',          [[.24,62,.52,38]]],
-    ['abs','Abdomen',          [[.26,102,.48,38]]],
-    ['arm','Elbow or wrist',   [[.00,70,.17,70],[.83,70,.17,70]]],
-    ['hip','Hip or groin',     [[.26,141,.48,27]]],
-    ['knee','Knees',           [[.28,208,.19,30],[.53,208,.19,30]]],
-    ['ankle','Ankles or feet', [[.28,268,.19,30],[.53,268,.19,30]]]];
-  const BACK=[
-    ['neckB','Neck',            [[.40,40,.20,12]]],
-    ['blade','Shoulder blades', [[.20,60,.27,28],[.53,60,.27,28]]],
-    ['mid','Mid back',          [[.24,88,.52,28]]],
-    ['low','Lower back',        [[.25,116,.50,28]]],
-    ['armB','Elbow or wrist',   [[.00,70,.17,70],[.83,70,.17,70]]],
-    ['glute','Glutes',          [[.25,146,.50,30]]],
-    ['ham','Hamstrings',        [[.28,178,.19,38],[.53,178,.19,38]]],
-    ['calf','Calves',           [[.28,228,.19,40],[.53,228,.19,40]]]];
-  let view='front';
-  const sel=new Set(); const names={};
+  /* WHY THIS IS NOT THE AVATAR.
 
-  /* Their own body, not a generic outline — the one they picked two chapters
-     ago. Falls back to a drawn figure if that sheet does not exist yet. */
-  const shapeIdx = (A.shape && typeof A.shape.now==='number') ? A.shape.now : 2;
-  const AVATAR = avatarArt(shapeIdx);
-  const BW = AVATAR ? avatarWidth(shapeIdx) : 110;    // this body's width at 300 tall
-  const px = r => [ +(r[0]*BW).toFixed(1), r[1], +(r[2]*BW).toFixed(1), r[3] ];
+     The avatar is a photograph of a person facing forward. There is no back
+     of it, and there never will be without doubling every render — so the
+     first attempt mirrored the front and flattened it to a silhouette. That
+     was a workaround wearing a design's clothes, and it looked like one.
 
-  const FIG = `
-    <circle cx="60" cy="24" r="17" fill="#2B313A"/>
-    <rect x="52" y="38" width="16" height="14" rx="6" fill="#2B313A"/>
-    <rect x="38" y="48" width="44" height="90" rx="17" fill="#2B313A"/>
-    <rect x="41" y="132" width="38" height="34" rx="13" fill="#2B313A"/>
-    <rect x="23" y="52" width="17" height="82" rx="8" fill="#2B313A"/>
-    <rect x="80" y="52" width="17" height="82" rx="8" fill="#2B313A"/>
-    <rect x="43" y="162" width="17" height="128" rx="8" fill="#2B313A"/>
-    <rect x="60" y="162" width="17" height="128" rx="8" fill="#2B313A"/>`;
+     The avatar's job is identity: this is roughly my body, on the shape
+     screen. This screen's job is anatomy, and anatomy wants a diagram. So
+     the figure here is drawn in code — front and back both real, no image
+     to fetch, sharp at any size, and it costs nothing.
 
-  const draw=()=>{
-    const P = view==='front'?FRONT:BACK;
-    P.forEach(p=>names[p[0]]=p[1]);
-    const parts = P.map(p=>p[2].map(f=>{ const r=px(f);
-      return `<rect class="part${sel.has(p[0])?' on':''}" data-k="${p[0]}" x="${r[0]}" y="${r[1]}" width="${r[2]}" height="${r[3]}" rx="8"/>`;}).join('')).join('');
-    const hits = P.map(p=>p[2].map(f=>{ const r=px(f);
-      const w=Math.max(34,r[2]), h=Math.max(34,r[3]);
-      return `<rect class="hit" data-k="${p[0]}" x="${r[0]-(w-r[2])/2}" y="${r[1]-(h-r[3])/2}" width="${w}" height="${h}" fill="transparent"/>`;
+     THE BODY IS THE BUTTON. There is no invisible rectangle floating over a
+     picture: each region IS the shape of that part, so tapping a thigh
+     highlights a thigh. Same idea as the muscle maps in serious training
+     apps, and it reads instantly. */
+
+  /* Eight regions a side. Left/right is a follow-up question, not an intake
+     question — halving the count doubles the size of every target. */
+  const R = 'rect', E = 'ellipse';
+  const mir = x => 200 - x;
+
+  /* One continuous silhouette underneath, then the regions inset on top of
+     it. The first attempt drew each region as its own block with gaps
+     between them and it read as a robot — a body has to be one shape before
+     it can be eight parts. Everything below overlaps its neighbour on
+     purpose; sharing a fill makes the joins disappear. */
+  const BASE = `
+    <ellipse cx="100" cy="32" rx="23" ry="27"/>
+    <rect x="87"  y="52"  width="26" height="26" rx="10"/>
+    <rect x="64"  y="70"  width="72" height="116" rx="24"/>
+    <rect x="70"  y="176" width="60" height="48" rx="18"/>
+    <rect x="40"  y="92"  width="23" height="80" rx="11"/>
+    <rect x="137" y="92"  width="23" height="80" rx="11"/>
+    <rect x="39"  y="162" width="21" height="72" rx="10"/>
+    <rect x="140" y="162" width="21" height="72" rx="10"/>
+    <ellipse cx="49.5"  cy="242" rx="11" ry="13"/>
+    <ellipse cx="150.5" cy="242" rx="11" ry="13"/>
+    <rect x="73"  y="214" width="26" height="86" rx="13"/>
+    <rect x="101" y="214" width="26" height="86" rx="13"/>
+    <rect x="76"  y="292" width="21" height="96" rx="10"/>
+    <rect x="103" y="292" width="21" height="96" rx="10"/>
+    <ellipse cx="86"  cy="394" rx="14" ry="11"/>
+    <ellipse cx="114" cy="394" rx="14" ry="11"/>`;
+
+  /* [type, ...geometry] — rect: x,y,w,h,r · ellipse: cx,cy,rx,ry
+     Inset a little from the silhouette so a lit region reads as part of the
+     body rather than a sticker on it. */
+  const FRONT = [
+    ['neck',  'Neck',            [[R, 87, 54, 26, 20, 9]]],
+    ['shldr', 'Shoulders',       [[E, 68, 90, 22, 19], [E, mir(68), 90, 22, 19]]],
+    ['chest', 'Chest',           [[R, 66, 74, 68, 48, 20]]],
+    ['abs',   'Abdomen',         [[R, 67, 124, 66, 52, 18]]],
+    ['arm',   'Elbow or wrist',  [[R, 40, 94, 23, 78, 11],  [R, 39, 166, 21, 68, 10],
+                                  [R, mir(63), 94, 23, 78, 11], [R, mir(60), 166, 21, 68, 10]]],
+    ['hip',   'Hip or groin',    [[R, 70, 178, 60, 44, 17]]],
+    ['knee',  'Knees',           [[R, 74, 284, 25, 30, 12], [R, mir(99), 284, 25, 30, 12]]],
+    ['ankle', 'Ankles or feet',  [[R, 76, 366, 21, 28, 10], [R, mir(97), 366, 21, 28, 10]]],
+  ];
+  const BACK = [
+    ['neckB', 'Neck',            [[R, 87, 54, 26, 20, 9]]],
+    ['blade', 'Shoulder blades', [[R, 66, 74, 32, 46, 14], [R, mir(98), 74, 32, 46, 14]]],
+    ['mid',   'Mid back',        [[R, 67, 124, 66, 30, 14]]],
+    ['low',   'Lower back',      [[R, 68, 156, 64, 30, 14]]],
+    ['armB',  'Elbow or wrist',  [[R, 40, 94, 23, 78, 11],  [R, 39, 166, 21, 68, 10],
+                                  [R, mir(63), 94, 23, 78, 11], [R, mir(60), 166, 21, 68, 10]]],
+    ['glute', 'Glutes',          [[R, 70, 188, 60, 44, 18]]],
+    ['ham',   'Hamstrings',      [[R, 74, 230, 25, 62, 12], [R, mir(99), 230, 25, 62, 12]]],
+    ['calf',  'Calves',          [[R, 76, 300, 21, 60, 10], [R, mir(97), 300, 21, 60, 10]]],
+  ];
+
+  const shape = g => g[0] === E
+    ? `cx="${g[1]}" cy="${g[2]}" rx="${g[3]}" ry="${g[4]}"`
+    : `x="${g[1]}" y="${g[2]}" width="${g[3]}" height="${g[4]}" rx="${g[5]}"`;
+  const tag = g => g[0] === E ? 'ellipse' : 'rect';
+
+  let view = 'front';
+  const sel = new Set(A.pain ? A.pain : []);
+  const names = {};
+
+  const draw = () => {
+    const P = view === 'front' ? FRONT : BACK;
+    P.forEach(p => names[p[0]] = p[1]);
+    const parts = P.map(p => p[2].map(g =>
+      `<${tag(g)} class="part${sel.has(p[0]) ? ' on' : ''}" data-k="${p[0]}" ${shape(g)}/>`
+    ).join('')).join('');
+    /* A generous invisible target over each region — a fingertip is about
+       9mm and some of these shapes are narrower than that. */
+    const hits = P.map(p => p[2].map(g => {
+      const box = g[0] === E
+        ? [g[1] - g[3], g[2] - g[4], g[3] * 2, g[4] * 2]
+        : [g[1], g[2], g[3], g[4]];
+      const w = Math.max(44, box[2]), ht = Math.max(40, box[3]);
+      return `<rect class="hit" data-k="${p[0]}" x="${box[0] - (w - box[2]) / 2}" y="${box[1] - (ht - box[3]) / 2}" width="${w}" height="${ht}" fill="transparent"/>`;
     }).join('')).join('');
-    /* There is no back-view artwork, so the back is the same body rendered as
-       a flat silhouette and mirrored. No invented anatomy, no face, and the
-       proportions still match the person who is tapping it. */
+
     d.querySelector('.bodywrap').innerHTML =
-      `<div class="bodyfig${view==='back'?' back':''}" style="width:${BW}px">
-         ${AVATAR?`<img class="bodyimg" src="${AVATAR}" alt="" draggable="false">`:''}
-         <svg class="body" viewBox="0 0 ${BW} 300">${AVATAR?'':FIG}${parts}${hits}</svg>
-       </div>`;
-    d.querySelectorAll('.hit').forEach(hit=>hit.onclick=()=>{haptic(14);const k=hit.dataset.k;
-      if(sel.has(k))sel.delete(k);else sel.add(k);
-      d.querySelectorAll('.part[data-k="'+k+'"]').forEach(x=>x.classList.toggle('on',sel.has(k)));
-      sync();});
+      `<svg class="body" viewBox="0 0 200 424" aria-label="Body map">
+         <g class="basefig">${BASE}</g>${parts}${hits}</svg>`;
+
+    d.querySelectorAll('.hit').forEach(hit => hit.onclick = () => {
+      const k = hit.dataset.k;
+      haptic(sel.has(k) ? 9 : 15);
+      if (sel.has(k)) sel.delete(k); else sel.add(k);
+      d.querySelectorAll('.part[data-k="' + k + '"]').forEach(x => x.classList.toggle('on', sel.has(k)));
+      sync();
+    });
   };
-  const d=el(`${head(s)}
-    <button class="nonechip" id="nohurt">Nothing hurts</button>
+
+  const d = el(`${head(s)}
     <div class="bodytabs"><button class="btab on" data-v="front">Front</button><button class="btab" data-v="back">Back</button></div>
     <div class="bodywrap"></div>
-    <div class="chips" id="chips"></div>`);
-  const chips=d.querySelector('#chips'), nohurt=d.querySelector('#nohurt');
-  nohurt.onclick=()=>{haptic(14);A.pain=[];next();};
-  const sync=()=>{chips.innerHTML=[...sel].map(k=>`<span class="chip">${names[k]||k}</span>`).join('');
-    nohurt.style.display=sel.size?'none':'';
-    cta.textContent=sel.size?'Continue · '+sel.size:'Tap anywhere that hurts';
-    cta.disabled=!sel.size;};
-  d.querySelectorAll('.btab').forEach(t=>t.onclick=()=>{haptic(12);
-    d.querySelectorAll('.btab').forEach(x=>x.classList.remove('on'));t.classList.add('on');
-    view=t.dataset.v; draw(); sync();});
+    <div class="chips" id="chips"></div>
+    <button class="nonechip" id="nohurt">Nothing hurts</button>`);
+
+  const chips = d.querySelector('#chips'), nohurt = d.querySelector('#nohurt');
+  nohurt.onclick = () => { haptic(14); A.pain = []; next(); };
+
+  /* Selections on the other side must stay visible, or someone who taps a
+     knee, flips to the back and taps a hamstring will think the knee was
+     forgotten. Every chip is removable from here. */
+  const sync = () => {
+    const ALL = FRONT.concat(BACK);
+    ALL.forEach(p => names[p[0]] = p[1]);
+    chips.innerHTML = [...sel].map(k =>
+      `<button class="chip on" data-x="${k}">${names[k] || k}<i>&times;</i></button>`).join('');
+    chips.querySelectorAll('.chip').forEach(c => c.onclick = () => {
+      haptic(9); sel.delete(c.dataset.x);
+      d.querySelectorAll('.part[data-k="' + c.dataset.x + '"]').forEach(x => x.classList.remove('on'));
+      sync();
+    });
+    nohurt.style.display = sel.size ? 'none' : '';
+    cta.textContent = sel.size ? 'Continue · ' + sel.size : 'Tap anywhere that hurts';
+    cta.disabled = !sel.size;
+  };
+
+  d.querySelectorAll('.btab').forEach(t => t.onclick = () => { haptic(12);
+    d.querySelectorAll('.btab').forEach(x => x.classList.remove('on')); t.classList.add('on');
+    view = t.dataset.v; draw(); sync(); });
+
   setFoot(`<button class="cta accent">Tap anywhere that hurts</button>`);
-  const cta=foot.querySelector('.cta');
-  cta.onclick=()=>{haptic(14);A.pain=[...sel];
-    if(sel.size)toast("Logged. I won't ask you to describe it now.",2400);
-    later(next,sel.size?700:0);};
+  const cta = foot.querySelector('.cta');
+  cta.onclick = () => { haptic(14); A.pain = [...sel];
+    if (sel.size) toast("Logged. I won't ask you to describe it now.", 2400);
+    later(next, sel.size ? 700 : 0); };
+
   draw(); sync();
 }
 
