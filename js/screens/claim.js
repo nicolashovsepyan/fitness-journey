@@ -30,9 +30,12 @@ export function renderClaim(host, { onDone }) {
       </div>
     </div>`;
 
-  host.querySelectorAll('[data-uid]').forEach(el => el.addEventListener('click', () => {
-    claimDevice(el.dataset.uid);
+  /* claimDevice writes through the adapter, so wait for it. Calling
+     onDone() first would boot the app before the device knew who it
+     belonged to, and it would ask again. */
+  host.querySelectorAll('[data-uid]').forEach(el => el.addEventListener('click', async () => {
     try { navigator.vibrate?.(30); } catch (e) {}
+    await claimDevice(el.dataset.uid);
     onDone();
   }));
 }

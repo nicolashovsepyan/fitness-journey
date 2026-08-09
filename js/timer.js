@@ -7,6 +7,8 @@
    (halfway, 3-2-1, round done, PR). No spoken "Time".
    ============================================================ */
 
+import { storage } from './core/storage.js';
+
 /* ---- coach voice ---- */
 let voiceOn = true;
 export function setVoice(on) { voiceOn = on; }
@@ -15,7 +17,15 @@ export function isVoiceOn() { return voiceOn; }
 /* coach voice selection — auto-pick the most natural English voice,
    but let the user override it in Settings (saved). */
 let preferredVoice = null;
-let savedVoiceName = (() => { try { return localStorage.getItem('fj.voiceName') || ''; } catch (e) { return ''; } })();
+/* Read at boot rather than at import. This used to run at module
+   evaluation time, which only worked because storage was synchronous —
+   an ES module cannot await before it finishes evaluating. app.js
+   awaits loadVoicePref() instead. */
+let savedVoiceName = '';
+export async function loadVoicePref() {
+  savedVoiceName = (await storage().getDevicePref('voiceName', '')) || '';
+  preferredVoice = pickVoice();
+}
 
 function enVoices() { try { return speechSynthesis.getVoices().filter(v => /^en/i.test(v.lang)); } catch (e) { return []; } }
 function pickVoice() {
@@ -33,7 +43,11 @@ try { speechSynthesis.onvoiceschanged = () => { preferredVoice = pickVoice(); };
 /* Settings API */
 export function listVoices() { return enVoices().map(v => ({ name: v.name, lang: v.lang })); }
 export function getVoiceName() { return savedVoiceName || (preferredVoice && preferredVoice.name) || ''; }
-export function setVoiceName(name) { savedVoiceName = name || ''; try { localStorage.setItem('fj.voiceName', savedVoiceName); } catch (e) {} preferredVoice = pickVoice(); }
+export function setVoiceName(name) {
+  savedVoiceName = name || '';
+  storage().setDevicePref('voiceName', savedVoiceName);   // device-local, never synced
+  preferredVoice = pickVoice();
+}
 
 export function say(text) {
   if (!voiceOn) return;

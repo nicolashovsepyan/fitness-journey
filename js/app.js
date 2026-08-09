@@ -14,7 +14,11 @@ import { renderBSummary } from './screens/b-summary.js';
 import { renderBHistory } from './screens/b-history.js';
 import { startWorkout, resumeWorkout } from './runner/workmode.js';
 import * as R from './runner/runstate.js';
-import { isBeginner, isClaimed } from './users.js';
+import { isBeginner, isClaimed, activeUserId, loadUsers } from './users.js';
+import { setAdapter } from './core/storage.js';
+import { LocalAdapter } from './adapters/local.js';
+import { loadStore, flushStore } from './store.js';
+import { loadVoicePref } from './timer.js';
 import { renderClaim } from './screens/claim.js';
 import { applyUserManifest } from './manifest-user.js';
 
@@ -113,12 +117,54 @@ if (navigator.storage?.persist) {
     .catch(() => {});
 }
 
-// Point the install manifest at THIS user, so the home-screen icon opens
-// their program and not the default one.
-if (isClaimed()) applyUserManifest();
+/* ---- boot ------------------------------------------------------
+   Everything that used to happen as a side effect of importing a module
+   now happens here, in order, awaited.
 
-// If a workout was left running, go straight back into it — never to home.
-if (!bootIntoActiveRun()) render();
+   That mattered the moment storage stopped being synchronous. Importing
+   users.js used to run the legacy key migration; importing store.js used
+   to read the training log. Neither can be relied on to have finished
+   before a render once there is an await in the middle — and a render
+   that lands first sees an empty account and treats a returning person
+   as brand new.
+
+   Order is not arbitrary. The adapter has to exist before anything asks
+   it for data; identity has to resolve before we know whose document to
+   load; the run state has to be in memory before we can ask whether a
+   workout is in progress. */
+async function boot() {
+  setAdapter(new LocalAdapter());
+
+  const uid = await loadUsers();          // also runs the one-time key move
+
+  if (!uid) {                             // never guess whose phone this is
+    return renderClaim(app, { onDone: async () => { await boot(); } });
+  }
+
+  await Promise.all([
+    loadStore(uid),
+    R.loadRunState(uid),
+    loadVoicePref(),
+  ]);
+
+  applyUserManifest();                    // home-screen icon opens THEIR program
+
+  // If a workout was left running, go straight back into it — never to home.
+  if (!bootIntoActiveRun()) render();
+}
+
+/* A write that has not reached disk when the tab goes away is a lost set.
+   On this backend writes land synchronously, so this is really insurance
+   for the day the backend is a server. */
+document.addEventListener('visibilitychange', () => { if (document.hidden) flushStore(); });
+window.addEventListener('pagehide', () => { flushStore(); });
+
+boot().catch(err => {
+  console.error('boot failed', err);
+  app.innerHTML = '<div class="screen"><h1 class="q">Something went wrong starting up.</h1>'
+    + '<p class="sub">Your training is safe — it is stored on this device. '
+    + 'Close the app and open it again.</p></div>';
+});
 
 /* ---- offline shell ----
    The service worker precaches the whole app, so once it has been opened
