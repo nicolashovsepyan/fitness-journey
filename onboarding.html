@@ -684,6 +684,13 @@ h1.q{text-align:center}
   transition:background .16s,transform .16s}
 .shdots i.on{background:var(--accent);transform:scale(1.3)}
 .shdots + .silnote{text-align:center}
+.alrow{margin-bottom:20px}
+.allbl{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink3);
+  font-weight:650;margin-bottom:9px}
+.alchips{display:flex;gap:6px}
+.alchips button{flex:1;min-height:52px;border-radius:12px;border:1.5px solid var(--line);
+  background:var(--card2);color:var(--ink);font:inherit;font-size:14px;font-weight:600;padding:0}
+.alchips button.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
 .silrow{display:flex;gap:6px;padding:2px 0 6px}
 .silrow::-webkit-scrollbar{display:none}
 @supports not (gap:1px){.silrow>*+*{margin-left:6px}}
@@ -1134,6 +1141,25 @@ const FLOW = [
 
 /* 5 · YOUR WEEK */
 { ch:5, type:'chapter', n:5, title:'Your week', sub:'What makes the plan real, not theoretical.' },
+/* Asked BEFORE the days question, because it changes the answer. Someone
+   already playing football twice a week and doing a spin class does not have
+   four days of training in them — they have two, and a recovery problem if we
+   pretend otherwise. Two screens, not five: what, and how much of it. Which
+   specific class it is does not change programming; the load does. */
+{ ch:5, type:'multi', key:'otherAct', h:'Anything else in your week?',
+  sub:'Sport, classes, anything that already takes it out of you.', cta:'Continue',
+  opts:[{v:'none',    ic:'check',   t:'Nothing else', none:true},
+        {v:'run',     ic:'bolt',    t:'Running or cycling'},
+        {v:'team',    ic:'target',  t:'A team sport'},
+        {v:'yoga',    ic:'leaf',    t:'Yoga or pilates'},
+        {v:'hiit',    ic:'flame',   t:'HIIT or bootcamp classes'},
+        {v:'swim',    ic:'wave',    t:'Swimming'},
+        {v:'racket',  ic:'target',  t:'Tennis, padel or squash'},
+        {v:'martial', ic:'target',  t:'Martial arts or boxing'},
+        {v:'climb',   ic:'mountain',t:'Climbing'},
+        {v:'other',   ic:'cloud',   t:'Something else'}]},
+{ ch:5, type:'actload', key:'otherLoad', skipIfNoActivity:true,
+  h:'How much of it, in a normal week?', sub:'Roughly. It tells me what is left over.' },
 { ch:5, type:'single', key:'when', h:'When does training actually happen?', sub:'Not when you\'d like. When it does.',
   opts:[{v:'early',  ic:'sunrise', t:'Before anyone else is up'},
         {v:'lunch',  ic:'clock',   t:'The gap in the middle'},
@@ -1180,17 +1206,23 @@ const FLOW = [
 
 /* 7 · HEALTH CHECK */
 { ch:7, type:'chapter', n:7, title:'Health check', sub:'Two screens. Most people tap twice.' },
+/* Nine clinical-sounding items became five plain ones. Heart and chest pain
+   were always going to be ticked together and lead to the same place, so they
+   are one line. "Chronic condition", "prescribed medication" and "told to
+   train only under supervision" are gone as separate questions — they were
+   asking a person to self-diagnose, and all three ended in the same outcome.
+
+   The last option replaces all three. It is deliberately still here: this is
+   a medical screen, and cutting it to four with no catch-all would mean a
+   real contraindication has nowhere to go. Short is the goal, silent is not. */
 { ch:7, type:'multi', key:'parq', h:'Anything here apply to you?', sub:'So I don\'t give you the wrong thing.',
   cta:'Continue',
-  opts:[{v:'none',   ic:'check', t:'None of these apply to me', none:true},
-        {v:'heart',  t:'Heart condition or high blood pressure'},
-        {v:'chest',  t:'Chest pain at rest or during activity'},
-        {v:'dizzy',  t:'Dizziness or fainting in the last year'},
-        {v:'chronic',t:'Another diagnosed chronic condition'},
-        {v:'meds',   t:'Prescribed medication for a chronic condition'},
-        {v:'joint',  t:'A bone or joint problem that could worsen'},
-        {v:'super',  t:'Told to exercise only under supervision'},
-        {v:'preg',   t:'Pregnant or recently postpartum'}]},
+  opts:[{v:'none',   ic:'check', t:'None of these', none:true},
+        {v:'heart',  ic:'heart',  t:'Heart trouble, chest pain or high blood pressure'},
+        {v:'dizzy',  ic:'cloud',  t:'Dizziness or fainting spells'},
+        {v:'joint',  ic:'leaf',   t:'A joint, back or bone problem that could get worse'},
+        {v:'preg',   ic:'child',  t:'Pregnant, or recently gave birth'},
+        {v:'other',  ic:'stetho', t:'Something else a doctor told me to be careful with'}]},
 { ch:7, type:'body', key:'pain', h:'Anything hurting right now?', sub:'Tap where. Detail only when it matters.' },
 
 /* 8 · YOUR PLAN */
@@ -1573,6 +1605,8 @@ function skipRule(s){
   if(s.skipIfNoTracker && (A.tracker==='none' || !A.tracker)) return true;
   if(s.skipIfNoLoad && !hasLoad()) return true;
   if(s.skipIfNoHomeKit && (A.where||[]).indexOf('homekit')<0) return true;
+  if(s.skipIfNoActivity){ const a=A.otherAct||[];
+    if(!a.length || (a.length===1 && a[0]==='none')) return true; }
   return false;
 }
 function go(n,back){
@@ -1634,7 +1668,7 @@ function head(s,dynSub){
 }
 function render(){const s=FLOW[i];if(!s)return;
   ({hero,promise,chapter,text,single,multi,rank,rankdyn,stepper,bands,levels,body,shape,insight,numbers,feelings,
-    vitals,equip,deckintro,deck,enjoy,loader,reveal,patternscreen,building,entry}[s.type])(s);}
+    vitals,equip,deckintro,deck,enjoy,actload,loader,reveal,patternscreen,building,entry}[s.type])(s);}
 
 /* hero — "The Path": a route draws itself up the screen, milestones light,
    the summit glows and keeps breathing. Everything below is one clear promise. */
@@ -2180,6 +2214,36 @@ function numbers(s){
     toast(Object.keys(o).length?'Saved to your Log.':'No problem — session one will find them.',2200);
     later(next,700);};
   foot.querySelector('.skip').onclick=()=>{haptic(14);A[s.key]=null;A.calibrate=true;next();};
+}
+
+/* how much other training is already in the week — one screen, two taps */
+function actload(s){
+  const FREQ=[['1','Once'],['2','Twice'],['3','3×'],['4','4×'],['5','5+']];
+  const MINS=[['30','30 min'],['45','45 min'],['60','1 hour'],['90','90 min+']];
+  const prev=A[s.key]||{};
+  const row=(name,list,cur)=>`<div class="alrow"><div class="allbl">${name}</div>
+    <div class="alchips" data-g="${name==='How often'?'freq':'mins'}">${
+      list.map(o=>`<button data-v="${o[0]}" class="${cur===o[0]?'on':''}">${o[1]}</button>`).join('')}</div></div>`;
+  const d=el(`${head(s)}
+    ${row('How often',FREQ,prev.freq)}
+    ${row('Each time',MINS,prev.mins)}`);
+  let freq=prev.freq||null, mins=prev.mins||null;
+  setFoot(`<button class="cta ghost">Skip for now</button>`);
+  const cta=foot.querySelector('.cta');
+  const sync=()=>{ const ok=freq&&mins;
+    cta.classList.toggle('accent',!!ok); cta.classList.toggle('ghost',!ok);
+    cta.textContent= ok?'Continue':'Skip for now'; };
+  d.querySelectorAll('.alchips').forEach(g=>{
+    g.querySelectorAll('button').forEach(b=>b.onclick=()=>{ haptic(13);
+      g.querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on');
+      if(g.dataset.g==='freq') freq=b.dataset.v; else mins=b.dataset.v;
+      sync(); });
+  });
+  cta.onclick=()=>{ haptic(14);
+    A[s.key]=(freq&&mins)?{freq:freq,mins:mins}:null;
+    next(); };
+  sync();
 }
 
 /* feelings */

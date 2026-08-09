@@ -28,8 +28,8 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
-const SYS = process.argv[2] ||
-  '/Users/nicolashovsepyan/Library/CloudStorage/Dropbox/PERSONAL/COWORK/Fitness Journey/_system';
+/* Lives in "FOR NICOLAS" — the one folder he owns and edits. */
+const SYS = process.argv[2] || join(ROOT, 'FOR NICOLAS');
 const PAGE = join(ROOT, 'onboarding.html');
 
 /* deck id -> the Exercise column in the CSVs */
@@ -70,7 +70,8 @@ function parseCSV(text) {
 }
 
 function load(sex) {
-  const file = join(SYS, `BENCHMARK_${sex}.csv`);
+  const named = { M: 'BENCHMARKS - Male.csv', F: 'BENCHMARKS - Female.csv' }[sex];
+  const file = join(SYS, named);
   if (!existsSync(file)) { console.error(`Not found: ${file}`); process.exit(1); }
   const byName = new Map();
   for (const r of parseCSV(readFileSync(file, 'utf8'))) byName.set(r.Exercise, r);

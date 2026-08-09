@@ -1,0 +1,32 @@
+Category,Exercise,Mech,Beg,Int,Adv,Elite,GateM,GateF,Unit,HoldCap_Sec,UnlockAt,MovementStandard,Status,Notes
+PUSH,Push-Up,REPS,20,40,60,80,Y,Y,reps,,1,unbroken; locked-out top held no more than 5 sec,APPROVED,Push pillar gate (M+F) — Elite=100 (classic cali standard)
+PUSH,Dip,REPS,10,20,35,50,Y,Y,reps,,2,full ROM; shoulder dips below elbow at bottom,APPROVED,Push pillar gate (M+F) — Elite=50 strict
+PUSH,Wall HSPU,REPS,0,5,10,20,Y,N,reps,,3,top of head touches floor; elbows fully lock,APPROVED,Tracking — skill-locked at Beg
+PULL,Pull-Up,REPS,8,15,25,35,Y,Y,reps,,2,dead-hang start; chin over bar,APPROVED,M pull pillar gate · F uses Australian Pull-Up for level (strict Pull-Up F = tracking only)
+PULL,Australian Pull-Up,REPS,15,25,40,60,N,Y,reps,,1,chest to bar; scapular pull at top; feet on floor straight body,APPROVED,F pull pillar gate (replaces strict for F) · M tracking
+LOWER_QUAD,Squat,REPS,25,50,100,200,Y,Y,reps,,1,hip crease below knee; no momentum,APPROVED,Tracking — too variable to gate cleanly
+LOWER_QUAD,Pistol Squat,REPS,0,5,10,20,Y,Y,reps_per_side,,4,full depth; no momentum or hand assist,APPROVED,Lower pillar gate from Int onward (Beg=0 → skipped at Beg)
+LOWER_GLUTE,Hip Thrust (Bench),REPS,15,35,60,100,N,N,reps,,2,full hip lock-out; shoulders on bench,APPROVED,Tracking
+CORE_REPS,Toes to Bar,REPS,5,10,20,30,Y,Y,reps,,3,toes touch bar; controlled lower no kip,APPROVED,Tracking
+CORE_REPS,Dragon Flag,REPS,0,5,8,15,Y,Y,reps,,5,body straight; slow controlled descent,APPROVED,Tracking — skill-locked at Beg
+CORE_HOLD,Plank,HOLD,60,180,300,600,Y,Y,secs,700,1,hollow body; no hip sag,APPROVED,Anti-flexion hold pillar gate (M+F) — Elite=10min cali record territory
+CORE_HOLD,Hollow Body Hold,HOLD,45,120,180,240,Y,Y,secs,300,1,low back pressed to floor; arms + legs locked and lifted,APPROVED,Anti-extension hold pillar gate (M+F)
+CORE_HOLD,L-Sit Hold,HOLD,0,25,60,90,N,N,secs,120,4,legs straight + level with hips; shoulders depressed; elbows locked,APPROVED,Tracking — Elite=90s cap
+CORE_HOLD,Dead Hang,HOLD,45,90,150,240,Y,Y,secs,300,1,passive hang; full extension; no kipping,APPROVED,Grip/shoulder pillar gate
+CONDITIONING,Navy Seal Burpee,REPS,0,15,30,50,N,N,reps_per_minute,,3,full burpee + 3 push-ups at bottom,APPROVED,Tracking — skill-locked at Beg
+LOWER_QUAD,Bulgarian Split Squat,REPS,8,15,25,40,N,N,reps_per_side,,2,back foot on ~40cm bench; front thigh to parallel; no push off the back foot,DRAFT,suggested — calibrated between Squat and Pistol Squat in this file
+LOWER_QUAD,Jump Squat,REPS,10,20,35,60,N,N,reps,,2,hips below parallel; both feet leave the floor; land quiet and reset,DRAFT,"suggested — power/conditioning, not max strength"
+LOWER_GLUTE,Single-Leg RDL,REPS,8,15,25,40,N,N,reps_per_side,,2,hinge until the shin is vertical; hips square; free foot never touches down,DRAFT,suggested — limited by balance more than strength
+PUSH,Pike Push-Up,REPS,5,15,25,40,N,N,reps,,2,hips high; head touches the floor between the hands,DRAFT,suggested — sits between Push-Up and Wall HSPU in this file
+LOWER_QUAD,Wall Sit,HOLD,45,90,150,240,N,N,secs,300,1,thighs parallel; back flat on the wall; hands off the thighs,DRAFT,"suggested — shorter than Plank, quad-limited"
+CORE_HOLD,Mountain Climber,HOLD,30,60,120,180,N,N,secs,240,1,hips level; continuous knee drive; no piking,DRAFT,"suggested — pace-dependent, treat as a rough band"
+LOWER_QUAD,Back Squat,WEIGHT,1.0,1.5,2.0,2.75,N,N,xBW,,3,hip crease below the knee; 1 rep max,DRAFT,xBW = multiple of bodyweight. Legion/StrengthLevel consensus
+LOWER_GLUTE,Deadlift,WEIGHT,1.25,2.0,2.5,3.0,N,N,xBW,,3,floor to lockout; conventional or sumo; 1 rep max,DRAFT,xBW. 2x BW is the classic intermediate marker
+LOWER_GLUTE,Romanian Deadlift,WEIGHT,1.0,1.5,2.0,2.4,N,N,xBW,,3,hinge to mid-shin; plates never rest; 1 rep max,DRAFT,xBW. ~80% of the deadlift number
+PUSH,Bench Press,WEIGHT,0.75,1.25,1.75,2.0,N,N,xBW,,3,bar to chest; feet down; no bounce; 1 rep max,DRAFT,xBW. 2x BW bench is the elite marker
+PUSH,Overhead Press,WEIGHT,0.45,0.8,1.1,1.4,N,N,xBW,,3,standing strict; no leg drive; 1 rep max,DRAFT,xBW. The humbler — advanced is only ~1.1x
+PULL,Bent-Over Row,WEIGHT,0.6,1.0,1.3,1.6,N,N,xBW,,3,torso at 45 degrees or lower; no jerk; 1 rep max,DRAFT,xBW. ~2/3 of the squat (4:3:2:1 ratio)
+LOWER_GLUTE,Hip Thrust (Barbell),WEIGHT,0.9,1.5,2.0,2.4,N,N,xBW,,3,shoulders on a bench; full hip lockout; 1 rep max,DRAFT,"xBW. Contreras: novice 0.9x, elite 2.4x for men"
+CONDITIONING,Farmer Carry,WEIGHT,0.5,1.0,1.5,2.0,N,N,xBW_total,,2,total of both hands; 20m unbroken; shoulders back,DRAFT,xBW_total. Half bodyweight per hand = 1.0 total
+CONDITIONING,Kettlebell Swing,WEIGHT,0.2,0.3,0.45,0.6,N,N,xBW,,2,Russian swing to chest height; 20 unbroken; hips not arms,DRAFT,"xBW. Dan John: beginner 16kg, intermediate 24kg"
+LOWER_QUAD,Bulgarian Split Squat (Loaded),WEIGHT,0.2,0.4,0.6,0.9,N,N,xBW_total,,3,total dumbbell load; back foot elevated; front thigh to parallel,DRAFT,xBW_total across both hands

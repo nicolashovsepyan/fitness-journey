@@ -128,11 +128,20 @@ const METRIC={strain:'Strain',recovery:'Recovery',sleep:'Sleep',hrv:'HRV',rings:
   steps:'Steps',hr:'Heart rate',vo2:'VO₂ max / cardio fitness',battery:'Body Battery',
   ready:'Readiness',activity:'Activity',azm:'Active Zone Minutes',cals:'Calories',
   forget:'Opens it and forgets'};
-const PARQ={none:'None apply',heart:'Heart condition / high blood pressure',
-  chest:'Chest pain at rest or on activity',dizzy:'Dizziness or fainting in the last year',
-  chronic:'Another diagnosed chronic condition',meds:'Prescribed medication, chronic condition',
-  joint:'Bone or joint problem that could worsen',super:'Told to exercise only under supervision',
-  preg:'Pregnant or recently postpartum'};
+/* The survey now asks five plain questions instead of nine clinical ones.
+   The retired codes stay in this map so a dossier link shared before the
+   change still reads properly. */
+const PARQ={none:'None apply',
+  heart:'Heart trouble, chest pain or high blood pressure',
+  dizzy:'Dizziness or fainting spells',
+  joint:'Joint, back or bone problem that could worsen',
+  preg:'Pregnant or recently gave birth',
+  other:'Something a doctor told them to be careful with',
+  /* retired — older submissions may still carry these */
+  chest:'Chest pain at rest or on activity',
+  chronic:'Another diagnosed chronic condition',
+  meds:'Prescribed medication, chronic condition',
+  super:'Told to exercise only under supervision'};
 const PAIN={neck:'Neck',shldr:'Shoulders',chest:'Chest',abs:'Abdomen',arm:'Elbow / wrist',
   hip:'Hip or groin',knee:'Knees',ankle:'Ankles / feet',neckB:'Neck (back)',
   blade:'Shoulder blades',mid:'Mid back',low:'Lower back',armB:'Elbow / wrist',
