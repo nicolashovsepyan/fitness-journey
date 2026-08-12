@@ -146,6 +146,10 @@ const PAIN={neck:'Neck',shldr:'Shoulders',chest:'Chest',abs:'Abdomen',arm:'Elbow
   hip:'Hip or groin',knee:'Knees',ankle:'Ankles / feet',neckB:'Neck (back)',
   blade:'Shoulder blades',mid:'Mid back',low:'Lower back',armB:'Elbow / wrist',
   glute:'Glutes',ham:'Hamstrings',calf:'Calves'};
+/* Added 2026-08-12 with the Galpin gap pass. */
+const TRAINED={new:'Starting now',['<1']:'Under a year','1-3':'1–3 years','3-10':'3–10 years','10+':'10+ years'};
+const SLEEP={['<6']:'Under 6 hours','6-7':'6–7 hours','7-8':'7–8 hours','8+':'More than 8'};
+const AERO={no:'Could not jog 20 min',maybe:'Could, and would hate it',yes:'Comfortable for 20 min',runner:'Runs further already'};
 const TEND={loses:'Loses weight and muscle fast',stable:'Pretty stable',gains:'Gains quickly under stress',
   swings:'Swings both ways',dunno:'Does not track it'};
 const KITNAME={db:'Dumbbells',kb:'Kettlebell',bb:'Barbell',rack:'Squat rack',bench:'Bench',
@@ -361,7 +365,17 @@ function render(){
   if(sh.goal!=null) h+=`<div class="silbox goal"><span>Would like</span>${silSvg(scale[sh.goal])}<b>${scale[sh.goal].t}</b></div>`;
   if(sh.now==null&&sh.goal==null) h+='<div class="empty">Not answered</div>';
   h+='</div>';
-  h+=`<div style="margin-top:16px" class="grid"><div class="tile"><span>When life gets busy</span><b>${TEND[A.weightTend]||'Not answered'}</b></div>`;
+  h+='<div style="margin-top:16px" class="grid">';
+  if(A.weightTend) h+=`<div class="tile"><span>When life gets busy</span><b>${TEND[A.weightTend]}</b></div>`;
+  /* The four Galpin inputs the survey used to guess at. Sleep and capacity
+     decide how much work a week can hold; training age decides how fast to
+     progress it; aerobic is two of the nine adaptations that were simply
+     never measured. */
+  h+=`<div class="tile"><span>Training age</span><b>${TRAINED[A.trained]||'Not answered'}</b></div>`;
+  h+=`<div class="tile ${A.sleep==='<6'?'warn':''}"><span>Sleep</span><b>${SLEEP[A.sleep]||'Not answered'}</b>${A.sleep==='<6'?'<small>Under six hours — cap the hard sessions</small>':''}</div>`;
+  h+=`<div class="tile"><span>Aerobic base</span><b style="font-size:14px">${AERO[A.aerobic]||'Not answered'}</b></div>`;
+  if(A.capacity!=null) h+=`<div class="tile"><span>Room for training</span><b>${A.capacity} / 10</b><small>${
+    A.capacity<=2?'Two sessions, made to count':A.capacity<=4?'Protect three':A.capacity<=7?'Four to five is sustainable':'Room for a real block'}</small></div>`;
   const kit=A.kit||{};
   const kitAll=(kit.have||[]).map(k=>KITNAME[k]||k).concat(kit.other||[]);
   if(kitAll.length) h+=`<div class="tile"><span>Equipment at home</span><b style="font-size:14px">${esc(kitAll.join(', '))}</b></div>`;

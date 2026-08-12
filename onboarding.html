@@ -756,6 +756,40 @@ h1.q{text-align:center}
   transition:background .16s,transform .16s}
 .shdots i.on{background:var(--accent);transform:scale(1.3)}
 .shdots + .silnote{text-align:center}
+/* ---- both horizons on one screen ---- */
+.gsec{margin-bottom:20px}
+.glbl{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink3);
+  font-weight:650;margin-bottom:9px}
+.ggrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.gopt{position:relative;min-height:58px;border-radius:13px;border:1.5px solid var(--line);
+  background:var(--card2);color:var(--ink);font:inherit;font-size:13.5px;font-weight:600;
+  text-align:left;padding:0 30px 0 13px;display:flex;align-items:center;line-height:1.25}
+.gopt.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+/* the number IS the answer — order is the priority, not decoration */
+.grank{position:absolute;right:9px;top:50%;transform:translateY(-50%);width:19px;height:19px;
+  border-radius:50%;font-style:normal;font-size:11px;font-weight:800;display:grid;place-items:center;
+  background:transparent;color:transparent;transition:.15s}
+.gopt.on .grank{background:var(--accent);color:#0B0F14}
+
+/* ---- the week ---- */
+.wsec{margin-bottom:18px}
+.wlbl{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink3);
+  font-weight:650;margin-bottom:9px}
+.wexp{margin:-4px 0 9px}
+.wdays,.wlen{display:flex;gap:6px}
+.wdays button,.wlen button{flex:1;min-height:50px;border-radius:12px;border:1.5px solid var(--line);
+  background:var(--card2);color:var(--ink);font:inherit;font-size:14px;font-weight:650;padding:0}
+.wdays button.on,.wlen button.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+/* ten blocks, filled left to right — Galpin's split made tappable */
+.wpts{display:flex;gap:4px}
+.wpts button{flex:1;min-height:42px;border-radius:8px;border:1.5px solid var(--line);
+  background:var(--card2);color:var(--ink3);font:inherit;font-size:12px;font-weight:700;padding:0}
+.wpts button.on{border-color:var(--neon);background:var(--neon-soft);color:var(--neon);
+  box-shadow:0 0 10px var(--neon-line)}
+.wread{min-height:52px;border-radius:13px;border:1px solid var(--line);background:var(--bg2);
+  padding:11px 14px;display:flex;flex-direction:column;gap:3px;justify-content:center}
+.wread b{font-size:15px;font-weight:650}
+.wread span{font-size:12.5px;color:var(--ink3);line-height:1.4}
 .alrow{margin-bottom:20px}
 .allbl{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink3);
   font-weight:650;margin-bottom:9px}
@@ -1162,16 +1196,11 @@ const FLOW = [
 
 /* 2 · WHERE YOU'RE GOING */
 { ch:2, type:'chapter', n:2, title:'Where you\'re going', sub:'We start at the end and work back.' },
-{ ch:2, type:'multi', key:'horizon', max:3, dynamic:'horizon', h:'', sub:'Up to three.',
-  cta:'Continue', opts:[] },
-{ ch:2, type:'rank', key:'focus', max:2, h:'And in the next ninety days?',
-  sub:'Pick two. First tap is the priority.', cta:'Continue',
-  opts:[{v:'strong',ic:'arrowUp',t:'Get stronger'},
-        {v:'lean',  ic:'flame',  t:'Lean out'},
-        {v:'muscle',ic:'brick',  t:'Build muscle'},
-        {v:'pain',  ic:'leaf',   t:'Move without pain'},
-        {v:'energy',ic:'bolt',   t:'More energy'},
-        {v:'wind',  ic:'lungs',  t:'Get my wind back'}]},
+/* Both horizons on one screen. They were two, which meant asking "where are
+   you going" twice with a page turn between — and the answers only mean
+   anything beside each other. Someone who wants to still be lifting at 65
+   and wants to lean out this quarter has a tension worth seeing at once. */
+{ ch:2, type:'goals', key:'goals', cta:'Continue' },
 { ch:2, type:'insight', id:'ins1' },
 
 /* 3 · WHERE YOU ARE NOW */
@@ -1187,6 +1216,16 @@ const FLOW = [
         {v:'light',   ic:'leaf',     t:'Active, but not training', s:'On my feet, walking, the odd class'},
         {v:'regular', ic:'flame',    t:'Training 1–3 times a week'},
         {v:'serious', ic:'bolt',     t:'Training 4+ times a week',  s:'It is part of my week already'}]},
+/* Training age. Two people with the same push-up number and six months
+   versus ten years behind them need different progressions — the slider
+   cannot tell them apart and neither can "how active are you now". */
+{ ch:3, type:'single', key:'trained', h:'How long have you trained?',
+  sub:'Properly. Not counting the gaps.',
+  opts:[{v:'new',  ic:'leaf',    t:'This is the start'},
+        {v:'<1',   ic:'sunrise', t:'Under a year'},
+        {v:'1-3',  ic:'flame',   t:'One to three years'},
+        {v:'3-10', ic:'barbell', t:'Three to ten years'},
+        {v:'10+',  ic:'mountain',t:'Ten years or more'}]},
 { ch:3, type:'single', key:'tracker', h:'Do you wear anything?', sub:'I\'m not here to replace it.',
   opts:[{v:'apple',ic:'watch',t:'Apple Watch'},
         {v:'whoop',ic:'ring', t:'Whoop'},
@@ -1199,11 +1238,6 @@ const FLOW = [
   sub:'Tap all of them. The first one you tap is the one you check most.', cta:'Continue' },
 { ch:3, type:'shape', key:'shape', h:'Which one is closest to you?',
   sub:'Rough is fine. Nobody sees this but me.' },
-{ ch:3, type:'single', key:'weightTend', h:'What does your weight do?',
-  sub:'When life gets busy and training slips.',
-  opts:[{v:'loses', ic:'trendDown', t:'I lose weight and muscle fast'},
-        {v:'gains', ic:'trendUp',   t:'It creeps up fast'},
-        {v:'stable',ic:'trendFlat', t:'I\'m pretty stable'}]},
 { ch:3, type:'multi', key:'where', h:'Where will you train?', sub:'Tick everything you have.',
   cta:'Continue',
   opts:[{v:'gym',     ic:'gymBld',  t:'A full gym', s:'Racks, barbells, machines'},
@@ -1226,6 +1260,14 @@ const FLOW = [
    a list. The enjoy() renderer is kept — nothing in FLOW reaches it. */
 
 /* 5 · YOUR WEEK */
+/* Galpin assesses nine adaptations. Twelve cards of strength measure none
+   of the two aerobic ones, so they were being assumed rather than asked. */
+{ ch:4, type:'single', key:'aerobic', h:'Could you jog for twenty minutes?',
+  sub:'Steady, without stopping, able to hold a conversation.',
+  opts:[{v:'no',    ic:'cloud',   t:'Not a chance'},
+        {v:'maybe', ic:'leaf',    t:'Probably, and I would hate it'},
+        {v:'yes',   ic:'flame',   t:'Yes, comfortably'},
+        {v:'runner',ic:'bolt',    t:'I run further than that already'}]},
 { ch:5, type:'chapter', n:5, title:'Your week', sub:'What makes the plan real, not theoretical.' },
 /* Asked BEFORE the days question, because it changes the answer. Someone
    already playing football twice a week and doing a spin class does not have
@@ -1252,18 +1294,25 @@ const FLOW = [
         {v:'after',  ic:'door',    t:'Straight after work'},
         {v:'evening',ic:'moon',    t:'Late, once it\'s quiet'},
         {v:'flex',   ic:'dice',    t:'Whenever the day allows'}]},
-{ ch:5, type:'stepper', key:'days', h:'How many days can you protect?', min:1, max:6, def:3, unit:'',
-  dynsub:n=>({1:'One is real. We\'ll make it count.',2:'Two is enough. Genuinely.',
-    3:'The sweet spot.',4:'Strong. This is where it compounds.',
-    5:'Ambitious. I\'ll hold you to it.',6:'A commitment. Tell me now if it slips.'})[n],
-  cta:'That\'s realistic' },
-{ ch:5, type:'single', key:'length', h:'How long have you got?', sub:'Twenty minutes consistently beats sixty sometimes.',
-  opts:[{v:'20',ic:'bolt', t:'20 minutes'},
-        {v:'35',ic:'clock',t:'30–40 minutes'},
-        {v:'55',ic:'clock',t:'45–60 minutes'},
-        {v:'75',ic:'hourglass',t:'An hour or more'}]},
+/* Days, session length and Galpin's ten points on one screen, because they
+   are one decision. He splits ten points across business, relationships,
+   fitness and recovery and treats a programme that ignores the split as
+   already failed — but nobody answers a four-way abstract allocation
+   honestly. Asked straight after "four days, forty-five minutes", the same
+   question becomes concrete: is that share of you actually there? The
+   screen shows the arithmetic back. */
+/* The stand-in for HRV. With no wearable this is the only recovery signal
+   there is, and it decides how much hard work a week can hold — under six
+   hours, adding sessions makes someone worse, not better. */
+{ ch:5, type:'single', key:'sleep', h:'How much sleep do you actually get?',
+  sub:'Not what you aim for. What happens.',
+  opts:[{v:'<6',  ic:'cloud',   t:'Under 6 hours'},
+        {v:'6-7', ic:'moon',    t:'6 to 7'},
+        {v:'7-8', ic:'sunrise', t:'7 to 8'},
+        {v:'8+',  ic:'leaf',    t:'More than 8'}]},
+{ ch:5, type:'week', key:'week', h:'Your week, honestly.',
+  sub:'Two hard numbers, then the honest one.' },
 
-/* 6 · WHAT GETS IN THE WAY */
 { ch:6, type:'chapter', n:6, title:'What gets in the way', sub:'The part that decides everything.' },
 /* More than one reason is the honest answer — almost nobody trains for a
    single thing. Capped at three so it still ranks rather than becoming a
@@ -1756,7 +1805,7 @@ function head(s,dynSub){
 }
 function render(){const s=FLOW[i];if(!s)return;
   ({hero,promise,chapter,text,single,multi,rank,rankdyn,stepper,bands,levels,body,shape,insight,numbers,feelings,
-    vitals,equip,deckintro,deck,enjoy,actload,loader,reveal,patternscreen,building,entry}[s.type])(s);}
+    vitals,equip,deckintro,deck,enjoy,actload,goals,week,loader,reveal,patternscreen,building,entry}[s.type])(s);}
 
 /* hero — "The Path": a route draws itself up the screen, milestones light,
    the summit glows and keeps breathing. Everything below is one clear promise. */
@@ -2302,6 +2351,115 @@ function numbers(s){
     toast(Object.keys(o).length?'Saved to your Log.':'No problem — session one will find them.',2200);
     later(next,700);};
   foot.querySelector('.skip').onclick=()=>{haptic(14);A[s.key]=null;A.calibrate=true;next();};
+}
+
+/* ---- both horizons, one screen ----------------------------------------
+   Long-range first because it reframes the ninety days underneath it. */
+const FOCUS_OPTS = [
+  {v:'strong',ic:'arrowUp',t:'Get stronger'},
+  {v:'lean',  ic:'flame',  t:'Lean out'},
+  {v:'muscle',ic:'brick',  t:'Build muscle'},
+  {v:'pain',  ic:'leaf',   t:'Move without pain'},
+  {v:'energy',ic:'bolt',   t:'More energy'},
+  {v:'wind',  ic:'lungs',  t:'Get my wind back'},
+];
+function goals(s){
+  const age=A.age||38, hz=HORIZONS[horizonBand(age)];
+  const pickH=[...(A.horizon||[])], pickF=[...(A.focus||[])];
+  const grid=(list,cur,g)=>`<div class="ggrid" data-g="${g}">${list.map(o=>{
+    const n=cur.indexOf(o.v);
+    return `<button class="gopt${n>=0?' on':''}" data-v="${o.v}">${o.t}
+      <i class="grank">${n>=0?n+1:''}</i></button>`;}).join('')}</div>`;
+
+  const d=el(`<h1 class="q">Where is this going?</h1>
+    <p class="sub">Two answers. They are allowed to disagree.</p>
+    <div class="gsec"><div class="glbl">At ${horizonAge(age)} — still able to</div>
+      ${grid(hz,pickH,'h')}</div>
+    <div class="gsec"><div class="glbl">In the next ninety days</div>
+      ${grid(FOCUS_OPTS,pickF,'f')}
+      <p class="micro" id="gnote"></p></div>`);
+
+  setFoot(`<button class="cta ghost">Skip for now</button>`);
+  const cta=foot.querySelector('.cta'), note=d.querySelector('#gnote');
+
+  /* Order is the answer, not a bonus: the first thing tapped is the
+     priority, which is what the programme is actually built around. */
+  const sync=()=>{
+    d.querySelectorAll('.ggrid').forEach(g=>{
+      const cur=g.dataset.g==='h'?pickH:pickF;
+      g.querySelectorAll('.gopt').forEach(b=>{
+        const n=cur.indexOf(b.dataset.v);
+        b.classList.toggle('on',n>=0);
+        b.querySelector('.grank').textContent = n>=0 ? n+1 : '';
+      });
+    });
+    const ok=pickH.length&&pickF.length;
+    cta.classList.toggle('accent',!!ok); cta.classList.toggle('ghost',!ok);
+    cta.textContent = ok?'Continue':'Skip for now';
+    note.textContent = pickF.length ? 'First tap is the priority — that is what gets built around.' : '';
+  };
+  d.querySelectorAll('.gopt').forEach(b=>b.onclick=()=>{
+    const g=b.closest('.ggrid').dataset.g, cur=g==='h'?pickH:pickF, max=2;
+    const at=cur.indexOf(b.dataset.v);
+    if(at>=0) cur.splice(at,1);
+    else { if(cur.length>=max) cur.shift(); cur.push(b.dataset.v); }
+    haptic(13); sync();
+  });
+  cta.onclick=()=>{haptic(14); A.horizon=pickH; A.focus=pickF; next();};
+  sync();
+}
+
+/* ---- the week, and what it can actually hold -------------------------- */
+function week(s){
+  const LEN=[['20','20 min'],['35','30–40'],['55','45–60'],['75','60–90']];
+  let days=+(A.days||3), len=A.length||null, pts=A.capacity||null;
+
+  const d=el(`${head(s)}
+    <div class="wsec"><div class="wlbl">Days you can protect</div>
+      <div class="wdays">${[1,2,3,4,5,6].map(n=>
+        `<button data-d="${n}" class="${n===days?'on':''}">${n}</button>`).join('')}</div></div>
+    <div class="wsec"><div class="wlbl">How long, realistically</div>
+      <div class="wlen">${LEN.map(o=>
+        `<button data-l="${o[0]}" class="${o[0]===len?'on':''}">${o[1]}</button>`).join('')}</div></div>
+    <div class="wsec pts"><div class="wlbl">Out of ten, how much of you does training get?</div>
+      <p class="micro wexp">Work, family and sleep take the rest. Answer for the next three months, not your best month.</p>
+      <div class="wpts">${[1,2,3,4,5,6,7,8,9,10].map(n=>
+        `<button data-p="${n}">${n}</button>`).join('')}</div></div>
+    <div class="wread" id="wread"></div>`);
+
+  setFoot(`<button class="cta ghost">Skip for now</button>`);
+  const cta=foot.querySelector('.cta'), read=d.querySelector('#wread');
+
+  /* The arithmetic, said back to them. This is the whole reason the three
+     questions share a screen: "four days of forty-five minutes" is three
+     hours, and three hours is a real share of a week — which is either
+     what they just claimed or it is not. */
+  const sync=()=>{
+    d.querySelectorAll('.wdays button').forEach(b=>b.classList.toggle('on',+b.dataset.d===days));
+    d.querySelectorAll('.wlen button').forEach(b=>b.classList.toggle('on',b.dataset.l===len));
+    d.querySelectorAll('.wpts button').forEach(b=>b.classList.toggle('on',pts!==null&&+b.dataset.p<=pts));
+    if(len){
+      const mins=days*(+len), h=Math.round(mins/6)/10;
+      let verdict='';
+      if(pts!==null){
+        const claimed=days*(+len)/60;
+        verdict = pts<=2 ? ' — I will build two sessions and make them count.'
+          : pts<=4 ? (days>=4?' — that is more days than you have room for. I will protect the best three.':' — that fits.')
+          : pts<=7 ? (days>=6?' — six days at that share is where people stall. I will hold you at five.':' — that fits.')
+          : (days<=2?' — you have more room than you are using. Worth one more day.':' — good. That is a real block of work.');
+      }
+      read.innerHTML = `<b>${days} × ${len==='35'?'35':len==='55'?'55':len==='75'?'75':'20'} min ≈ ${h} hours a week</b>`
+        + (pts!==null?`<span>${pts}/10 of you${verdict}</span>`:'<span>Now the honest one.</span>');
+    } else read.innerHTML='';
+    const ok=len&&pts!==null;
+    cta.classList.toggle('accent',!!ok); cta.classList.toggle('ghost',!ok);
+    cta.textContent = ok?'That is realistic':'Skip for now';
+  };
+  d.querySelectorAll('.wdays button').forEach(b=>b.onclick=()=>{haptic(12);days=+b.dataset.d;sync();});
+  d.querySelectorAll('.wlen button').forEach(b=>b.onclick=()=>{haptic(12);len=b.dataset.l;sync();});
+  d.querySelectorAll('.wpts button').forEach(b=>b.onclick=()=>{haptic(13);pts=+b.dataset.p;sync();});
+  cta.onclick=()=>{haptic(14); A.days=days; A.length=len; A.capacity=pts; next();};
+  sync();
 }
 
 /* how much other training is already in the week — one screen, two taps */
