@@ -433,9 +433,40 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:32px;heigh
 }
 
 /* ---------- chapter interstitial ---------- */
-.chapwrap{flex:1;display:flex;flex-direction:column;justify-content:center}
-.chapnum{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:650;margin-bottom:18px}
-.chaptitle{font-size:44px;line-height:1.08;letter-spacing:-.03em;margin-bottom:16px;font-weight:400}
+/* The synthwave horizon. One motif, on the eight chapter screens only —
+   they are the pauses between questions, which is the one place a bit of
+   theatre costs nothing. Pure CSS: two repeating gradients laid flat by a
+   perspective rotation, faded out towards the horizon so it reads as
+   distance rather than wallpaper. */
+.chapwrap{flex:1;display:flex;flex-direction:column;justify-content:center;
+  position:relative;isolation:isolate}
+/* The synthwave floor, on the eight chapter screens only — they are the
+   pauses between questions, the one place a bit of theatre costs nothing.
+   Pure CSS: gradients laid flat by a perspective rotation.
+
+   The horizon line is the TOP EDGE of the same element, not a separate
+   rule. Drawn separately it landed wherever it was told and read as an
+   underline beneath the subtitle; drawn as part of the floor it gets
+   foreshortened with everything else and comes to rest exactly where the
+   grid vanishes, which is the only place a horizon can be. */
+.chapwrap::before{
+  content:'';position:absolute;left:-45%;right:-45%;bottom:0;height:62%;
+  background:
+    linear-gradient(180deg,var(--neon) 0 2px,transparent 2px),
+    repeating-linear-gradient(90deg,var(--neon-line) 0 1px,transparent 1px 40px),
+    repeating-linear-gradient(0deg, var(--neon-line) 0 1px,transparent 1px 26px);
+  transform:perspective(340px) rotateX(66deg);transform-origin:bottom center;
+  -webkit-mask-image:linear-gradient(#000 0 62%,transparent);
+  mask-image:linear-gradient(#000 0 62%,transparent);
+  opacity:.62;pointer-events:none;z-index:-1}
+.chapnum{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--neon);
+  font-weight:650;margin-bottom:18px;text-shadow:0 0 12px var(--neon-line)}
+/* Chrome, the other 80s signature — a bright top edge falling to a duller
+   base, which is what makes eighties lettering look like metal. */
+.chaptitle{font-size:44px;line-height:1.08;letter-spacing:-.03em;margin-bottom:16px;font-weight:400;
+  background:linear-gradient(178deg,#FFFFFF 8%,#E6ECF2 38%,#9FB0C0 62%,#EAF0F6 92%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  -webkit-text-fill-color:transparent}
 .chapsub{font-size:16px;line-height:1.55;color:var(--ink2);max-width:300px}
 .chapdots{display:flex;gap:7px;margin-top:34px}
 .cd{width:22px;height:4px;border-radius:2px;background:var(--line2)}
@@ -766,13 +797,17 @@ h1.q{text-align:center}
 /* ---------- send / handoff ---------- */
 .sendbox{background:var(--card);border:1.5px solid var(--line);border-radius:16px;
   padding:16px 17px;margin-top:4px}
-/* Coach yellow appears exactly twice in the survey: the promise that a human
-   reads this, and the moment it is sent to him. If it turns up anywhere else
-   it has stopped meaning "a person". */
-.coachbtn{background:var(--coach)!important;color:#0B0F14!important;
-  box-shadow:0 0 20px var(--coach-line)}
-.sendto{margin-top:10px;text-align:center;color:var(--ink3)}
-.sendto b{color:var(--coach)}
+/* Coach yellow marks a human, but a whole button of it shouted. A big
+   yellow slab reads as a warning, not a person — and it fought the jade
+   primary two inches below it. It is a tag and a name now: enough to say
+   "this one goes to someone real", not enough to take over the screen. */
+.coachtag{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:700;
+  letter-spacing:.13em;text-transform:uppercase;color:var(--coach);margin-bottom:9px}
+.coachtag i{width:20px;height:20px;border-radius:50%;background:var(--coach-soft);
+  border:1px solid var(--coach-line);display:grid;place-items:center;
+  font-style:normal;font-size:10px;font-weight:800;color:var(--coach)}
+.sendto{margin-top:10px;text-align:center;color:var(--ink3);font-size:11.5px}
+.sendto b{color:var(--coach);font-weight:600}
 .prow .who{transition:color .3s}
 .promise .prow:nth-child(4) .who,.promise .prow:nth-child(5) .who{color:var(--coach)}
 .sendbox{border-color:var(--coach-line)!important;box-shadow:0 0 0 1px var(--coach-soft) inset}
@@ -3253,10 +3288,11 @@ function entry(){
       <div class="lgrow"><span>Check-in</span><b>${({sun:'Sundays',mon:'Mondays',fri:'Fridays',wed:'Wednesdays'})[A.checkin]||'Sundays'}</b></div>
     </div>
     <div class="sendbox">
-      <h4>Send it to Coach ${COACH.name}</h4>
+      <div class="coachtag"><i>N</i>Coach ${COACH.name}</div>
+      <h4>Send it over</h4>
       <p>Everything you just answered, in one link. ${COACH.name} reads it, builds the program, and it comes back within 24 hours.</p>
       <div class="sendrow">
-        <button class="pri coachbtn" id="sendBtn">Send to ${COACH.name}</button>
+        <button class="pri" id="sendBtn">Send to ${COACH.name}</button>
         <button id="copyBtn">Copy link</button>
       </div>
       <p class="micro sendto">Opens your mail app, already addressed to<br><b>${COACH.email}</b></p>
