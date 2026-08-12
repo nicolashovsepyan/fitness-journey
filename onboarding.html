@@ -34,6 +34,20 @@
   --accent:#3ECBA8;
   --accent-soft:rgba(62,203,168,.13);
   --accent-2:#D9A94C;
+  /* The 80s layer. Two more colours from spine/theme.json, each with one
+     job — the whole point of the system is that they never drift into
+     decoration.
+       neon  (Miami)   rails, rules, the heartbeat
+       coach (Voltage) only ever a message from a human
+     The base above already matched the spine exactly; this is what the
+     survey was missing. */
+  --neon:#FF5FA2;
+  --neon-soft:rgba(255,95,162,.13);
+  --neon-line:rgba(255,95,162,.32);
+  --neon-glow:0 0 22px rgba(255,95,162,.26);
+  --coach:#FFE24A;
+  --coach-soft:rgba(255,226,74,.13);
+  --coach-line:rgba(255,226,74,.34);
   --red:#F0857A;
   --shadow:0 1px 2px rgba(0,0,0,.30),0 8px 24px rgba(0,0,0,.28);
   --shadow-lift:0 2px 6px rgba(0,0,0,.32),0 18px 44px rgba(62,203,168,.16);
@@ -105,7 +119,13 @@ body{
 #chrome{pointer-events:none;position:absolute;top:0;left:0;right:0;padding:calc(16px + env(safe-area-inset-top)) 20px 10px;z-index:20;background:linear-gradient(var(--bg) 62%,rgba(23,26,30,0))}
 #bars{display:flex;gap:4px;height:3px}
 .bar{flex:1;background:var(--line);border-radius:2px;overflow:hidden}
-.bar i{display:block;height:100%;width:0;background:var(--accent);border-radius:2px;transition:width .55s cubic-bezier(.22,1,.36,1)}
+/* The rail is the one thing on screen for the whole four minutes, so it is
+   where the neon lives. Glow only on the chapter being filled — a glow on
+   all eight is a lightshow, and theme.json budgets three per screen. */
+.bar i{display:block;height:100%;width:0;background:var(--accent);border-radius:2px;
+  transition:width .55s cubic-bezier(.22,1,.36,1)}
+.bar.now i{background:linear-gradient(90deg,var(--accent),var(--neon));
+  box-shadow:0 0 10px var(--neon-line)}
 #chapline{display:flex;justify-content:space-between;align-items:center;margin-top:11px;height:16px}
 #chapname{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);font-weight:600;transition:opacity .3s}
 #back{pointer-events:auto;font-size:12.5px;color:var(--ink3);cursor:pointer;padding:15px 12px;margin:-15px -12px;border:none;background:none;font-family:inherit;opacity:0;pointer-events:none;transition:opacity .3s}
@@ -450,7 +470,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:32px;heigh
 .opt.none .ico{color:var(--accent)}
 /* ---------- chapter auto-advance ---------- */
 .chaptime{height:2px;background:var(--line);border-radius:2px;margin-top:30px;overflow:hidden;max-width:240px}
-.chaptime i{display:block;height:100%;width:0;background:var(--accent);animation:fill 1.5s linear forwards}
+.chaptime i{display:block;height:100%;width:0;animation:fill 1.5s linear forwards;
+  background:linear-gradient(90deg,var(--accent),var(--neon));box-shadow:0 0 8px var(--neon-line)}
 @keyframes fill{to{width:100%}}
 .chapskip{margin-top:18px;font-size:12.5px;color:var(--ink3)}
 /* ---------- feelings grid (merged love / never) ---------- */
@@ -745,6 +766,16 @@ h1.q{text-align:center}
 /* ---------- send / handoff ---------- */
 .sendbox{background:var(--card);border:1.5px solid var(--line);border-radius:16px;
   padding:16px 17px;margin-top:4px}
+/* Coach yellow appears exactly twice in the survey: the promise that a human
+   reads this, and the moment it is sent to him. If it turns up anywhere else
+   it has stopped meaning "a person". */
+.coachbtn{background:var(--coach)!important;color:#0B0F14!important;
+  box-shadow:0 0 20px var(--coach-line)}
+.sendto{margin-top:10px;text-align:center;color:var(--ink3)}
+.sendto b{color:var(--coach)}
+.prow .who{transition:color .3s}
+.promise .prow:nth-child(4) .who,.promise .prow:nth-child(5) .who{color:var(--coach)}
+.sendbox{border-color:var(--coach-line)!important;box-shadow:0 0 0 1px var(--coach-soft) inset}
 .sendbox h4{margin:0 0 6px;font-size:14.5px;font-weight:600;letter-spacing:-.01em}
 .sendbox p{margin:0;font-size:13px;line-height:1.5;color:var(--ink3)}
 .sendrow{display:flex;gap:9px;margin-top:12px}
@@ -1570,6 +1601,8 @@ function progress(){
     else if(c===cur){const inCh=FLOW.filter(s=>s.ch===c), pos=inCh.indexOf(FLOW[i]);
       els[c].style.width=Math.max(24,(pos/inCh.length)*100+24)+'%';}
     else els[c].style.width='0%';
+    /* neon only on the chapter being filled — see .bar.now */
+    els[c].parentNode.classList.toggle('now', c===cur);
   });
   chapname.textContent = cur===0?'':CHAPTERS[cur];
   backBtn.classList.toggle('on', hist.length>0 && !['loader','entry','chapter'].includes(FLOW[i].type));
@@ -2957,6 +2990,11 @@ function shape(s){
    Left blank, the link-based handoff below still works with no backend. */
 const ENDPOINT = '';
 
+/* Where a finished profile goes. Deliberately in the source: it is the
+   coach's own working address, published on purpose so a client can send
+   their intake with one tap and no typing. */
+const COACH = { name: 'Nico', email: 'nicolashovsepyan@gmail.com' };
+
 function payload(){
   return {v:6, at:new Date().toISOString(), a:A};
 }
@@ -3215,12 +3253,13 @@ function entry(){
       <div class="lgrow"><span>Check-in</span><b>${({sun:'Sundays',mon:'Mondays',fri:'Fridays',wed:'Wednesdays'})[A.checkin]||'Sundays'}</b></div>
     </div>
     <div class="sendbox">
-      <h4>Send it to your coach</h4>
-      <p>Everything you just answered, in one link. Nico reads it, builds the program, and it comes back within 24 hours.</p>
+      <h4>Send it to Coach ${COACH.name}</h4>
+      <p>Everything you just answered, in one link. ${COACH.name} reads it, builds the program, and it comes back within 24 hours.</p>
       <div class="sendrow">
-        <button class="pri" id="sendBtn">Send my profile</button>
+        <button class="pri coachbtn" id="sendBtn">Send to ${COACH.name}</button>
         <button id="copyBtn">Copy link</button>
       </div>
+      <p class="micro sendto">Opens your mail app, already addressed to<br><b>${COACH.email}</b></p>
       <div id="sentMark"></div>
     </div>
     <p class="micro">Nothing gets overwritten. When something changes it becomes a new entry with a new date.${saved?'':' <b>Note:</b> this browser blocked local saving — use the link.'}</p></div>`);
@@ -3235,14 +3274,14 @@ function entry(){
     const subject='Fitness Journey profile — '+(A.name||'new client');
     const body='Profile for '+(A.name||'a new client')+
       (A.email?' ('+A.email+')':'')+':\n\n'+link+'\n\nOpen the link to see the full intake.';
-    if(navigator.share){
-      navigator.share({title:subject, text:'My Fitness Journey profile', url:link})
-        .then(function(){ done('Sent.'); })
-        .catch(function(){});
-      return;
-    }
-    location.href='mailto:?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
-    done('Opening your mail app…');
+    /* Straight to the coach's inbox, already addressed. The share sheet
+       used to come first, which on a phone means picking an app and then
+       typing an address from memory — the one step most likely to be
+       abandoned at the very end of a four-minute survey. */
+    location.href='mailto:'+encodeURIComponent(COACH.email)
+      +'?subject='+encodeURIComponent(subject)
+      +'&body='+encodeURIComponent(body);
+    done('Opening your mail app, addressed to '+COACH.name+'.');
   };
   document.getElementById('copyBtn').onclick=function(){
     haptic(14);
