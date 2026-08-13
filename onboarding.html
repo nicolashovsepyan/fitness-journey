@@ -222,8 +222,8 @@ body.opening #bars,body.opening #chapline{opacity:0;pointer-events:none}
    words down to clear it would have cost vertical space on the one screen
    that has none to spare, and the mark would have stopped being centred in
    it — which is the whole composition. */
-.heroA .tri{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);
-  width:min(94%,368px);height:auto;overflow:visible;z-index:0;pointer-events:none}
+.heroA .tri{position:absolute;left:50%;top:41.5%;transform:translate(-50%,-50%);
+  width:min(78%,300px);height:auto;overflow:visible;z-index:0;pointer-events:none}
 .heroA .tri path{fill:none;stroke-width:2.4;stroke-linejoin:round;stroke-linecap:round}
 .heroA .tri-l{stroke:url(#triGrad);filter:drop-shadow(0 0 7px rgba(255,95,162,.45))}
 /* One short bright dash chasing the perimeter. Hidden until the mark has
@@ -233,7 +233,7 @@ body.opening #bars,body.opening #chapline{opacity:0;pointer-events:none}
   filter:drop-shadow(0 0 9px #FF5FA2) drop-shadow(0 0 3px #fff)}
 .heroA.lit .tri-spark{opacity:1;animation:triRun var(--beat,2400ms) linear infinite}
 .heroA.lit .tri-l{animation:triBeat var(--beat,2400ms) ease-in-out infinite}
-@keyframes triRun{ from{stroke-dashoffset:0} to{stroke-dashoffset:-817} }
+@keyframes triRun{ from{stroke-dashoffset:0} to{stroke-dashoffset:-777} }
 /* The line breathes on the same clock as the spark, so the glow swells as
    the light comes round — one heartbeat, not two things blinking. */
 @keyframes triBeat{
@@ -247,13 +247,16 @@ body.opening #bars,body.opening #chapline{opacity:0;pointer-events:none}
 }
 .heroA .art{z-index:2}
 .heroA .hcopy{z-index:3}
+/* The apex now lands between the mark and the words, so the copy is pushed
+   down to sit clear of it. Smaller triangle plus this gap means nothing
+   crosses the wordmark any more. */
 .heroA .art{position:relative;display:flex;align-items:center;justify-content:center;
-  width:100%;margin-bottom:26px}
+  width:100%;margin-bottom:80px}
 /* the mark carries the screen; the words sit under it, deliberately smaller */
-.heroA .db{width:min(86%,340px);height:auto;overflow:visible;position:relative;z-index:2}
+.heroA .db{width:min(78%,308px);height:auto;overflow:visible;position:relative;z-index:2}
 /* B's silhouette is narrower than A's, so it gets a little more of the width
    to land at the same optical size */
-.heroA .db.mb{width:min(97%,384px)}
+.heroA .db.mb{width:min(88%,348px)}
 .heroA .dbglow{position:absolute;width:210px;height:210px;border-radius:50%;z-index:1;
   background:radial-gradient(circle,rgba(62,203,168,.26),rgba(62,203,168,0) 66%);
   opacity:0;will-change:opacity,transform}
@@ -321,9 +324,9 @@ body.opening #bars,body.opening #chapline{opacity:0;pointer-events:none}
   font-weight:600;color:var(--accent);opacity:.9}
 
 @media (max-height:720px){
-  .heroA .art{margin-bottom:22px}
-  .heroA .db{width:min(74%,278px)}
-  .heroA .db.mb{width:min(84%,314px)}
+  .heroA .art{margin-bottom:64px}
+  .heroA .db{width:min(68%,254px)}
+  .heroA .db.mb{width:min(77%,288px)}
   .heroA h1{font-size:min(7.9vw,28px)}
 }
 @media (prefers-reduced-motion:reduce){
@@ -1946,8 +1949,14 @@ function hero(s){
           <stop offset="100%" stop-color="#FF5FA2"/>
         </linearGradient>
       </defs>
-      <path class="tri-l" d="M14 16 H286 L150 252 Z"/>
-      <path class="tri-spark" d="M14 16 H286 L150 252 Z"/>
+      <!-- Not a closed triangle. It starts at x=100 on the top edge, runs
+           right, down to the apex, back up the left side and stops at x=60 —
+           leaving a 40-unit break in the top-left, the way a neon tube in a
+           real sign has a dark segment. Drawn as one open path rather than
+           faked with a dash gap, so the draw-in animation still works and
+           the light has somewhere to enter and leave. -->
+      <path class="tri-l" d="M100 16 H286 L150 252 L14 16 H60"/>
+      <path class="tri-spark" d="M100 16 H286 L150 252 L14 16 H60"/>
     </svg>
     <div class="art">
       <div class="dbglow"></div>
@@ -2021,7 +2030,7 @@ function hero(s){
      closes as the name lands. Two separate timers would drift apart on a
      phone exactly the way the fifteen CSS transitions did. */
   const triL=d.querySelector('.tri-l'), triSpark=d.querySelector('.tri-spark');
-  const TRI_LEN=817;                       // 272 base + two 272.4 sides
+  const TRI_LEN=777;                       // 186 + 272.4 + 272.4 + 46, minus the break
   if(triL){
     triL.style.strokeDasharray=TRI_LEN;
     triL.style.strokeDashoffset=TRI_LEN;
