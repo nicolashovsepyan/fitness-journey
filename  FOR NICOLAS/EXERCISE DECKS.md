@@ -81,6 +81,19 @@ floor gets, and there is always something there.
 | Core, dynamic | — | — | **Hanging knee raise** | Lying leg raise |
 | Core, static | — | — | — | **Plank** |
 
+
+
+
+my adjsutments would be:
+Full body: 
+we should have 
+power clean to overhead press with barbell but i understand this is an advanced movment. 
+man maker with dumbells 
+
+
+i feel like some of these like i would personally pick push-up over bench press, but let the user decide which he prefers maybe? 
+pike push-up is the right one but should we have handstand PU for more advanced? if you look at are push and are core curation files, they are pretty good on determining progressions, this should be incorporated. i realize this is more functional movments and body wieght.  
+
 Worked examples:
 
 - **Bare floor.** Bodyweight squat, single-leg RDL, Bulgarian split squat,
@@ -134,7 +147,7 @@ programme's own vocabulary — hangs off it.
 **2 — Are the ladders right?**
 Especially: is a **goblet squat** the right stand-in for a back squat, and is
 a **towel door row** honest enough to ask about, or would you rather vertical
-pull just be blank for someone with nothing?
+pull just be blank for someone with nothing? thats a good question
 
 ---
 
