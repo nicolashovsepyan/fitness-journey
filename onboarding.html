@@ -222,8 +222,8 @@ body.opening #bars,body.opening #chapline{opacity:0;pointer-events:none}
    words down to clear it would have cost vertical space on the one screen
    that has none to spare, and the mark would have stopped being centred in
    it — which is the whole composition. */
-.heroA .tri{position:absolute;left:50%;top:41.5%;transform:translate(-50%,-50%);
-  width:min(78%,300px);height:auto;overflow:visible;z-index:0;pointer-events:none}
+.heroA .tri{position:absolute;left:50%;top:41.5%;transform:translate(-50%,-50%) rotate(-4deg);
+  width:min(70%,270px);height:auto;overflow:visible;z-index:0;pointer-events:none}
 .heroA .tri path{fill:none;stroke-width:2.4;stroke-linejoin:round;stroke-linecap:round}
 .heroA .tri-l{stroke:url(#triGrad);filter:drop-shadow(0 0 7px rgba(255,95,162,.45))}
 /* One short bright dash chasing the perimeter. Hidden until the mark has
@@ -253,10 +253,10 @@ body.opening #bars,body.opening #chapline{opacity:0;pointer-events:none}
 .heroA .art{position:relative;display:flex;align-items:center;justify-content:center;
   width:100%;margin-bottom:80px}
 /* the mark carries the screen; the words sit under it, deliberately smaller */
-.heroA .db{width:min(78%,308px);height:auto;overflow:visible;position:relative;z-index:2}
+.heroA .db{width:min(70%,277px);height:auto;overflow:visible;position:relative;z-index:2}
 /* B's silhouette is narrower than A's, so it gets a little more of the width
    to land at the same optical size */
-.heroA .db.mb{width:min(88%,348px)}
+.heroA .db.mb{width:min(79%,313px)}
 .heroA .dbglow{position:absolute;width:210px;height:210px;border-radius:50%;z-index:1;
   background:radial-gradient(circle,rgba(62,203,168,.26),rgba(62,203,168,0) 66%);
   opacity:0;will-change:opacity,transform}
@@ -325,8 +325,8 @@ body.opening #bars,body.opening #chapline{opacity:0;pointer-events:none}
 
 @media (max-height:720px){
   .heroA .art{margin-bottom:64px}
-  .heroA .db{width:min(68%,254px)}
-  .heroA .db.mb{width:min(77%,288px)}
+  .heroA .db{width:min(61%,228px)}
+  .heroA .db.mb{width:min(69%,259px)}
   .heroA h1{font-size:min(7.9vw,28px)}
 }
 @media (prefers-reduced-motion:reduce){
