@@ -218,11 +218,12 @@ body.opening #bars,body.opening #chapline{opacity:0;pointer-events:none}
   margin:calc(-74px - env(safe-area-inset-top)) -20px 0;
   padding:calc(74px + env(safe-area-inset-top)) 20px calc(var(--footpad,150px) + 3vh)}
 .heroA .lock{display:flex;flex-direction:column;align-items:center;width:100%;position:relative}
-/* The triangle sits BEHIND everything rather than above it. Nudging the
-   words down to clear it would have cost vertical space on the one screen
-   that has none to spare, and the mark would have stopped being centred in
-   it — which is the whole composition. */
-.heroA .tri{position:absolute;left:50%;top:41.5%;transform:translate(-50%,-50%) rotate(-4deg);
+/* The triangle sits BEHIND everything rather than above it, and is anchored
+   to the dumbbell rather than to the block as a whole — so it frames the
+   mark and stays framing it no matter what the copy below does. -37% rather
+   than -50% drops the dumbbell below the triangle's midline; a percentage
+   because it has to hold at every width, where a pixel offset would not. */
+.heroA .tri{position:absolute;left:50%;top:50%;transform:translate(-50%,-34%);
   width:min(70%,270px);height:auto;overflow:visible;z-index:0;pointer-events:none}
 .heroA .tri path{fill:none;stroke-width:2.4;stroke-linejoin:round;stroke-linecap:round}
 .heroA .tri-l{stroke:url(#triGrad);filter:drop-shadow(0 0 7px rgba(255,95,162,.45))}
@@ -247,16 +248,16 @@ body.opening #bars,body.opening #chapline{opacity:0;pointer-events:none}
 }
 .heroA .art{z-index:2}
 .heroA .hcopy{z-index:3}
-/* The apex now lands between the mark and the words, so the copy is pushed
-   down to sit clear of it. Smaller triangle plus this gap means nothing
-   crosses the wordmark any more. */
+/* A starting value only. placeCopy() below measures the real gap, so that
+   the words end up exactly halfway between the point of the triangle and
+   the top of the button. */
 .heroA .art{position:relative;display:flex;align-items:center;justify-content:center;
   width:100%;margin-bottom:80px}
 /* the mark carries the screen; the words sit under it, deliberately smaller */
-.heroA .db{width:min(70%,277px);height:auto;overflow:visible;position:relative;z-index:2}
+.heroA .db{width:min(62%,245px);height:auto;overflow:visible;position:relative;z-index:2}
 /* B's silhouette is narrower than A's, so it gets a little more of the width
    to land at the same optical size */
-.heroA .db.mb{width:min(79%,313px)}
+.heroA .db.mb{width:min(70%,277px)}
 .heroA .dbglow{position:absolute;width:210px;height:210px;border-radius:50%;z-index:1;
   background:radial-gradient(circle,rgba(62,203,168,.26),rgba(62,203,168,0) 66%);
   opacity:0;will-change:opacity,transform}
@@ -325,8 +326,8 @@ body.opening #bars,body.opening #chapline{opacity:0;pointer-events:none}
 
 @media (max-height:720px){
   .heroA .art{margin-bottom:64px}
-  .heroA .db{width:min(61%,228px)}
-  .heroA .db.mb{width:min(69%,259px)}
+  .heroA .db{width:min(54%,202px)}
+  .heroA .db.mb{width:min(61%,229px)}
   .heroA h1{font-size:min(7.9vw,28px)}
 }
 @media (prefers-reduced-motion:reduce){
@@ -1936,6 +1937,7 @@ function hero(s){
 
   const d=el(`<div class="heroA">
     <div class="lock">
+    <div class="art">
     <svg class="tri" viewBox="0 0 300 268" aria-hidden="true">
       <defs>
         <!-- userSpaceOnUse, always. objectBoundingBox has bitten this file
@@ -1958,7 +1960,6 @@ function hero(s){
       <path class="tri-l" d="M100 16 H286 L150 252 L14 16 H60"/>
       <path class="tri-spark" d="M100 16 H286 L150 252 L14 16 H60"/>
     </svg>
-    <div class="art">
       <div class="dbglow"></div>
       <svg class="db${MARK.engine==='plate'?' mb':''}" viewBox="0 0 260 130" preserveAspectRatio="xMidYMid meet">
         <defs>
@@ -2164,7 +2165,39 @@ function hero(s){
     if(triL) triL.style.strokeDashoffset=0;
     if(!landedText){ landedText=true; foot.classList.add('on'); syncFootPad(); }
     landArt();
+    placeCopy();
+    requestAnimationFrame(placeCopy);      // after syncFootPad's padding lands
   }
+
+  /* THE WORDS SIT HALFWAY BETWEEN THE POINT OF THE TRIANGLE AND THE BUTTON.
+     Both ends move: the triangle scales with the width of the screen and the
+     button rides the safe-area inset, so a fixed margin that looks right on
+     one phone is wrong on the next. Measured instead.
+
+     It has to iterate. The block is vertically centred, so adding N to the
+     gap pushes the words down by only N/2 — and drags the triangle, and with
+     it the apex, up by the other half. Each pass halves the error, so three
+     or four settle it; the loop exits on half a pixel. */
+  function placeCopy(){
+    const tri=d.querySelector('.tri'), lock=d.querySelector('.lock'),
+          btn=foot.querySelector('.cta');
+    if(!tri||!lock||!btn||!d.isConnected) return;
+    let gap=parseFloat(getComputedStyle(art).marginBottom)||0;
+    for(let i=0;i<10;i++){
+      const t=tri.getBoundingClientRect();
+      const apex=t.top+t.height*(252/268);          // the point, not the box
+      const mid=(apex+btn.getBoundingClientRect().top)/2;
+      /* offsetTop, not a rect: hcopy carries a transform on the way in and a
+         rect would measure where it is flying from, not where it lands. */
+      const at=lock.getBoundingClientRect().top+hcopy.offsetTop;
+      const dy=mid-hcopy.offsetHeight/2-at;
+      if(Math.abs(dy)<0.5) break;
+      const next=Math.min(340,Math.max(16,gap+dy*2));
+      if(next===gap) break;                          // clamped; stop rather than spin
+      gap=next; art.style.marginBottom=gap+'px';
+    }
+  }
+  window.addEventListener('resize',placeCopy);
 
 
   if(REDUCED){ finishNow(); }
