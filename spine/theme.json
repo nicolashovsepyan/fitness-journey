@@ -1,0 +1,44 @@
+{
+  "version": 2,
+  "note": "Hand-authored, not generated. The only place a colour is named. Six palettes, three slots — the user assigns any palette to any slot, which is why nothing here is called 'the pink' or 'the yellow'.",
+
+  "base": {
+    "note": "The ground. Not user-changeable; the three slots are.",
+    "bg": "#171A1E", "bg2": "#1E232A", "card": "#212630", "surface2": "#282E38",
+    "line": "#2F3640", "line2": "#3B434E",
+    "ink": "#ECEFF3", "ink2": "#A9B2BC", "ink3": "#858E99",
+    "onColour": "#0B0F14",
+    "red": "#F0857A", "redSoft": "rgba(240,133,122,.12)"
+  },
+
+  "palettes": [
+    { "id": "jade",     "name": "Jade",     "hint": "The dumbbell green. Where this started.", "hex": "#3ECBA8" },
+    { "id": "miami",    "name": "Miami",    "hint": "Hot pink. The synthwave one.",            "hex": "#FF5FA2" },
+    { "id": "voltage",  "name": "Voltage",  "hint": "Neon yellow. Loudest at night.",          "hex": "#FFE24A" },
+    { "id": "electric", "name": "Electric", "hint": "Cyan. Coldest of the six.",               "hex": "#4FD8FF" },
+    { "id": "violet",   "name": "Violet",   "hint": "Purple. Calmest at night.",               "hex": "#B57BFF" },
+    { "id": "acid",     "name": "Acid",     "hint": "Lime. Turn it up.",                       "hex": "#B6FF3D" }
+  ],
+
+  "slots": [
+    { "id": "accent", "name": "Buttons & rings", "hint": "What you tap and what fills up",  "default": "jade" },
+    { "id": "neon",   "name": "Glow & edges",    "hint": "Rails, rules, the heartbeat",     "default": "miami" },
+    { "id": "coach",  "name": "Coach Nico",      "hint": "Only ever a message from a human","default": "voltage" }
+  ],
+
+  "random": {
+    "note": "Shuffles the three slots once a week, seeded by the week number so it is the same all week rather than changing on every render.",
+    "enabled": false,
+    "distinct": true
+  },
+
+  "motion": {
+    "note": "Budgets, not suggestions. Anything outside these repaints every frame on a phone.",
+    "animatable": ["transform", "opacity", "stroke-dashoffset"],
+    "glowBudgetPerScreen": 3,
+    "beatMs": 2400,
+    "travelMs": 2600,
+    "respectReducedMotion": true,
+    "pauseOffscreen": true
+  }
+}

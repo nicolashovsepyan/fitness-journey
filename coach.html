@@ -1,0 +1,751 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#171A1E">
+<title>Coach Console — Ozzy</title>
+<link rel="icon" href="icon.svg">
+<style>
+/* ============================================================
+   COACH CONSOLE — where the program actually gets built.
+
+   Not a client screen. This is the workbench: Nicolas on one
+   side, me on the other, Ozzy's answers in the middle, and
+   Galpin's ten program-design steps as the scaffold we build
+   in layers.
+
+   Three things have to be true on every layer, in this order:
+     WHAT HE SAID    — his raw answers, unedited, so the
+                       interpretation can always be checked
+                       against the source.
+     HOW I READ IT   — my inference, stated as inference.
+     WHAT I PROPOSE  — the actual call, with the protocol it
+                       comes from.
+   Then Nicolas decides. Nothing reaches Ozzy until he does.
+   ============================================================ */
+
+:root{
+  --bg:#131619;
+  --bg2:#171A1E;
+  --card:#1E232A;
+  --card2:#242A33;
+  --line:#2C333C;
+  --line2:#39414C;
+  --ink:#ECEFF3;
+  --ink2:#A9B2BC;
+  --ink3:#818A95;
+  --accent:#3ECBA8;
+  --accent-soft:rgba(62,203,168,.12);
+  --gold:#D9A94C;
+  --gold-soft:rgba(217,169,76,.12);
+  --red:#F0857A;
+  --red-soft:rgba(240,133,122,.11);
+  /* the 80s layer — structure and glow only, never body text */
+  --neon:#FF5FA2;
+  --neon-soft:rgba(255,95,162,.13);
+  --neon-line:rgba(255,95,162,.34);
+  --r:14px;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.26);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Segoe UI",Roboto,sans-serif;
+  font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;
+  padding-bottom:120px;
+}
+.serif{font-family:"New York","Iowan Old Style",ui-serif,Georgia,serif;font-weight:400}
+.tnum{font-variant-numeric:tabular-nums}
+a{color:var(--accent)}
+
+/* ---------- masthead ---------- */
+header{
+  position:relative;overflow:hidden;
+  background:linear-gradient(150deg,#1B2028,#141820 70%);
+  border-bottom:1px solid var(--line);
+  padding:26px 28px 24px;
+}
+/* one 80s flourish, and only one: a horizon grid bleeding off the masthead */
+header:after{
+  content:"";position:absolute;left:-10%;right:-10%;bottom:-70px;height:150px;pointer-events:none;
+  background:
+    repeating-linear-gradient(90deg,transparent 0 58px,var(--neon-line) 58px 59px),
+    repeating-linear-gradient(0deg,transparent 0 26px,var(--neon-line) 26px 27px);
+  transform:perspective(240px) rotateX(66deg);
+  mask-image:linear-gradient(180deg,transparent,#000 62%);
+  -webkit-mask-image:linear-gradient(180deg,transparent,#000 62%);
+  opacity:.5;
+}
+.mast{position:relative;z-index:2;display:flex;align-items:flex-start;gap:20px;
+  max-width:1180px;margin:0 auto;flex-wrap:wrap}
+.mast .mk{width:62px;height:31px;flex:none;margin-top:5px;
+  filter:drop-shadow(0 0 10px rgba(255,95,162,.45))}
+.mast .mk path{fill:none;stroke:var(--accent);stroke-linecap:round}
+.mast h1{font-size:25px;font-weight:550;letter-spacing:-.022em;line-height:1.15}
+.mast .kick{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;
+  color:var(--neon);margin-bottom:8px}
+.mast .sub{font-size:13px;color:var(--ink2);margin-top:7px;max-width:56ch}
+.mast .grow{flex:1;min-width:260px}
+.mast .meter{flex:none;text-align:right}
+.mast .meter .big{font-size:34px;font-weight:550;letter-spacing:-.03em;line-height:1}
+.mast .meter .big i{font-style:normal;color:var(--ink3);font-size:17px}
+.mast .meter .lbl{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink3);font-weight:600;margin-top:7px}
+
+/* ---------- shell ---------- */
+.wrap{max-width:1180px;margin:0 auto;padding:24px 28px;display:grid;
+  grid-template-columns:308px 1fr;gap:26px;align-items:start}
+@media (max-width:940px){ .wrap{grid-template-columns:1fr;padding:20px 18px} .rail{position:static!important} }
+
+/* ---------- the client rail ---------- */
+.rail{position:sticky;top:20px;display:flex;flex-direction:column;gap:12px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--shadow);overflow:hidden}
+.panel > h2{font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink3);
+  font-weight:600;padding:14px 16px 0}
+.panel .pad{padding:14px 16px 16px}
+.who{display:flex;align-items:center;gap:13px;padding:16px}
+.who .av{width:44px;height:44px;border-radius:13px;flex:none;display:flex;align-items:center;
+  justify-content:center;font-size:18px;font-weight:600;color:#0C1512;
+  background:linear-gradient(140deg,var(--accent),#7ee0c6);
+  box-shadow:0 0 0 1px rgba(255,95,162,.35),0 0 18px rgba(255,95,162,.28)}
+.who b{font-size:18px;font-weight:550;letter-spacing:-.015em;display:block}
+.who small{font-size:12px;color:var(--ink3);display:block;margin-top:2px}
+
+.fact{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+.fact:last-child{border-bottom:none}
+.fact .k{color:var(--ink3);width:96px;flex:none}
+.fact .v{color:var(--ink);flex:1}
+.fact .v em{font-style:normal;color:var(--ink3)}
+
+.warn{display:flex;gap:9px;align-items:flex-start;background:var(--red-soft);
+  border:1px solid rgba(240,133,122,.24);border-radius:11px;padding:11px 12px;font-size:12.5px;
+  line-height:1.45;color:var(--ink2);margin-top:12px}
+.warn b{color:var(--red);display:block;font-size:11.5px;letter-spacing:.06em;
+  text-transform:uppercase;margin-bottom:4px}
+
+/* ---------- inbox ---------- */
+#inboxPanel{border-color:var(--neon-line);box-shadow:0 0 24px rgba(255,95,162,.10)}
+#inboxPanel > h2{color:var(--neon)}
+.inbox-it b{display:block;font-size:14px;font-weight:600;letter-spacing:-.01em;margin-bottom:10px}
+.ib-l{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;
+  color:var(--ink3);margin-top:10px}
+.inbox-it p{font-size:12.5px;line-height:1.5;color:var(--ink2);margin-top:4px}
+.inbox-it .btn{margin-top:13px;width:100%;font-size:12.5px;padding:8px}
+
+/* ---------- layers ---------- */
+.lead{margin-bottom:18px}
+.lead h2{font-size:19px;font-weight:550;letter-spacing:-.018em}
+.lead p{font-size:13.5px;color:var(--ink2);margin-top:6px;max-width:70ch}
+
+.layer{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  margin-bottom:12px;box-shadow:var(--shadow);overflow:hidden;
+  transition:border-color .2s}
+.layer.ok{border-color:rgba(62,203,168,.38)}
+.layer.work{border-color:rgba(217,169,76,.38)}
+.layer.blocked{border-color:rgba(240,133,122,.34)}
+
+.lhead{display:flex;align-items:flex-start;gap:14px;padding:16px 18px;cursor:pointer;
+  user-select:none;-webkit-user-select:none}
+.lhead:hover{background:rgba(255,255,255,.014)}
+.lnum{width:29px;height:29px;border-radius:9px;flex:none;display:flex;align-items:center;
+  justify-content:center;font-size:12.5px;font-weight:650;background:var(--card2);
+  color:var(--ink3);border:1px solid var(--line2);margin-top:1px}
+.layer.ok .lnum{background:var(--accent);color:#0C1512;border-color:var(--accent)}
+.layer.work .lnum{background:var(--gold);color:#1A1305;border-color:var(--gold)}
+.layer.blocked .lnum{background:var(--red);color:#2A0F0C;border-color:var(--red)}
+.lhead .tx{flex:1;min-width:0}
+.lhead .tx b{font-size:15.5px;font-weight:550;letter-spacing:-.012em;display:block}
+.lhead .tx small{font-size:12px;color:var(--ink3);display:block;margin-top:3px}
+.pill{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;
+  padding:5px 9px;border-radius:999px;flex:none;background:var(--card2);
+  color:var(--ink3);border:1px solid var(--line2);margin-top:2px;white-space:nowrap}
+.pill.ok{background:var(--accent-soft);color:var(--accent);border-color:rgba(62,203,168,.3)}
+.pill.work{background:var(--gold-soft);color:var(--gold);border-color:rgba(217,169,76,.3)}
+.pill.blocked{background:var(--red-soft);color:var(--red);border-color:rgba(240,133,122,.3)}
+.chev{width:16px;height:16px;flex:none;margin-top:8px;stroke:var(--ink3);fill:none;
+  stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .22s}
+.layer.open .chev{transform:rotate(90deg)}
+
+.lbody{display:none;padding:0 18px 18px;border-top:1px solid var(--line)}
+.layer.open .lbody{display:block}
+
+.step{padding:16px 0;border-bottom:1px solid var(--line)}
+.step:last-of-type{border-bottom:none}
+.step > h4{font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;font-weight:600;
+  margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.step > h4:before{content:"";width:14px;height:2px;border-radius:2px;background:currentColor;opacity:.55}
+.h-said{color:var(--ink3)}
+.h-read{color:var(--neon)}
+.h-prop{color:var(--accent)}
+.h-why{color:var(--gold)}
+
+.quotes{display:flex;flex-wrap:wrap;gap:7px}
+.q{font-size:12.5px;background:rgba(255,255,255,.04);border:1px solid var(--line);
+  border-radius:9px;padding:7px 11px;color:var(--ink2)}
+.q b{color:var(--ink);font-weight:600}
+
+.read{font-size:14px;line-height:1.6;color:var(--ink2);border-left:2px solid var(--neon-line);
+  padding-left:14px;background:linear-gradient(90deg,var(--neon-soft),transparent 60%);
+  padding-top:2px;padding-bottom:2px}
+.read b{color:var(--ink);font-weight:600}
+
+.prop{list-style:none;display:flex;flex-direction:column;gap:9px}
+.prop li{display:flex;gap:11px;font-size:14px;line-height:1.55;color:var(--ink2)}
+.prop li:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);
+  flex:none;margin-top:8px}
+.prop li b{color:var(--ink);font-weight:600}
+.prop li.flag:before{background:var(--red)}
+.prop li.ask:before{background:var(--gold)}
+
+.why{font-size:13px;line-height:1.55;color:var(--ink2);background:var(--gold-soft);
+  border:1px solid rgba(217,169,76,.2);border-radius:11px;padding:12px 14px}
+.why b{color:var(--gold);font-weight:600}
+
+/* ---------- decision bar ---------- */
+.decide{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-top:16px;
+  border-top:1px solid var(--line);margin-top:4px}
+.btn{font:inherit;font-size:13px;font-weight:550;padding:9px 14px;border-radius:10px;
+  border:1px solid var(--line2);background:var(--card2);color:var(--ink2);cursor:pointer;
+  transition:all .16s}
+.btn:hover{border-color:var(--ink3)}
+.btn.on-ok{background:var(--accent);border-color:var(--accent);color:#0C1512}
+.btn.on-work{background:var(--gold);border-color:var(--gold);color:#1A1305}
+.btn.on-blocked{background:var(--red);border-color:var(--red);color:#2A0F0C}
+.decide .sp{flex:1}
+textarea{width:100%;margin-top:10px;background:rgba(255,255,255,.035);border:1px solid var(--line);
+  border-radius:10px;padding:11px 12px;color:var(--ink);font:inherit;font-size:13.5px;
+  min-height:62px;resize:vertical;outline:none}
+textarea:focus{border-color:var(--neon)}
+textarea::placeholder{color:var(--ink3)}
+
+/* ---------- release panel ---------- */
+.rel{display:flex;align-items:center;gap:13px;padding:13px 0;border-bottom:1px solid var(--line)}
+.rel:last-child{border-bottom:none}
+.rel .tx{flex:1;min-width:0}
+.rel .tx b{font-size:14px;font-weight:550;display:block}
+.rel .tx small{font-size:12px;color:var(--ink3);display:block;margin-top:2px}
+.sw{width:46px;height:27px;border-radius:999px;background:var(--card2);border:1px solid var(--line2);
+  flex:none;cursor:pointer;position:relative;transition:all .22s;padding:0}
+.sw:after{content:"";position:absolute;left:2px;top:2px;width:21px;height:21px;border-radius:50%;
+  background:var(--ink3);transition:all .22s}
+.sw.on{background:var(--accent);border-color:var(--accent);
+  box-shadow:0 0 16px rgba(62,203,168,.3)}
+.sw.on:after{left:21px;background:#0C1512}
+
+/* ---------- footer actions ---------- */
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:40;
+  background:rgba(19,22,25,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-top:1px solid var(--line);padding:13px 28px}
+.dock:before{content:"";position:absolute;left:0;right:0;top:-1px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--neon-line) 30%,var(--neon-line) 70%,transparent)}
+.dockin{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.dockin .st{font-size:12.5px;color:var(--ink3);flex:1;min-width:200px}
+.dockin .st b{color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#0C1512;font-weight:600}
+.btn.neon{background:transparent;border-color:var(--neon-line);color:var(--neon)}
+.btn.neon:hover{background:var(--neon-soft);border-color:var(--neon)}
+
+#out{position:fixed;inset:0;z-index:60;background:rgba(8,10,12,.72);
+  display:none;align-items:center;justify-content:center;padding:28px}
+#out.on{display:flex}
+#out .sheet{background:var(--card);border:1px solid var(--line2);border-radius:var(--r);
+  width:min(760px,100%);max-height:82vh;display:flex;flex-direction:column;box-shadow:var(--shadow)}
+#out h3{font-size:16px;font-weight:550;padding:18px 20px 0}
+#out p{font-size:13px;color:var(--ink2);padding:6px 20px 0}
+#out pre{margin:16px 20px;padding:16px;background:var(--bg);border:1px solid var(--line);
+  border-radius:11px;overflow:auto;font-size:12.5px;line-height:1.6;color:var(--ink2);
+  font-family:"SF Mono",ui-monospace,monospace;white-space:pre-wrap;flex:1}
+#out .row{display:flex;gap:9px;padding:0 20px 20px}
+
+#toast{position:fixed;left:50%;bottom:86px;transform:translateX(-50%) translateY(12px);z-index:70;
+  background:var(--card2);border:1px solid var(--line2);border-radius:999px;padding:11px 18px;
+  font-size:13px;opacity:0;pointer-events:none;transition:all .26s;box-shadow:var(--shadow)}
+#toast.on{opacity:1;transform:translateX(-50%)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="mast">
+    <svg class="mk" viewBox="0 0 260 130">
+      <path d="M86 65 H174" stroke-width="7" opacity=".55"/>
+      <path d="M86 38 V92" stroke-width="12.65"/><path d="M174 38 V92" stroke-width="12.65"/>
+      <path d="M66.8 40.7 V89.3" stroke-width="9.9"/><path d="M193.2 40.7 V89.3" stroke-width="9.9"/>
+      <path d="M52.4 47.5 V82.5" stroke-width="7.13"/><path d="M207.6 47.5 V82.5" stroke-width="7.13"/>
+    </svg>
+    <div class="grow">
+      <div class="kick">Coach console</div>
+      <h1>Building Ozzy's first program</h1>
+      <div class="sub">Ten layers, in Galpin's order. Each one shows his own words, how I read them, and
+        what I propose. You approve, push back, or park it — and nothing reaches his app until you release it.</div>
+    </div>
+    <div class="meter">
+      <div class="big tnum"><span id="mOk">0</span><i>/10</i></div>
+      <div class="lbl">Layers agreed</div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- ================= THE CLIENT ================= -->
+  <aside class="rail">
+    <div class="panel">
+      <div class="who">
+        <div class="av">O</div>
+        <div><b id="whoName">Ozzy</b><small>45 · male · Canada · survey v6, 10 Aug</small></div>
+      </div>
+      <div class="pad" style="padding-top:0" id="facts"></div>
+    </div>
+
+    <div class="panel" id="inboxPanel" style="display:none">
+      <h2>From Ozzy</h2>
+      <div class="pad" id="inbox"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Hard constraints</h2>
+      <div class="pad" id="constraints"></div>
+    </div>
+
+    <div class="panel">
+      <h2>What Ozzy can see right now</h2>
+      <div class="pad" id="release"></div>
+    </div>
+  </aside>
+
+  <!-- ================= THE BUILD ================= -->
+  <main>
+    <div class="lead">
+      <h2>The build, in layers</h2>
+      <p>Galpin's ten program-design steps, run in order. A layer can't be honestly settled before the
+        one above it, which is the point of doing it this way rather than writing four sessions and
+        reverse-engineering a rationale.</p>
+    </div>
+    <div id="layers"></div>
+  </main>
+</div>
+
+<div class="dock">
+  <div class="dockin">
+    <div class="st" id="dockSt"></div>
+    <button class="btn" id="btnReset">Reset decisions</button>
+    <button class="btn neon" id="btnBrief">Copy brief for Claude</button>
+    <button class="btn primary" id="btnSave">Save</button>
+  </div>
+</div>
+
+<div id="out"><div class="sheet">
+  <h3>Brief for Claude</h3>
+  <p>Everything you decided, in one block. Paste it into the chat and I'll pick up exactly here.</p>
+  <pre id="outTx"></pre>
+  <div class="row">
+    <button class="btn primary" id="btnCopy">Copy to clipboard</button>
+    <button class="btn" id="btnClose">Close</button>
+  </div>
+</div></div>
+
+<div id="toast"></div>
+
+<script>
+/* ============================================================
+   1 · THE CLIENT — straight off the survey, nothing invented.
+   ============================================================ */
+const A = {
+  name:'Ozzy', sex:'m', age:45, heightCm:180, weightKg:88.6, unit:'lb', country:'CA',
+  horizon:['kids','nopain','sport'], focus:['lean','strong'],
+  activity:'light', tracker:'none', shape:{now:3}, weightTend:'gains',
+  where:['homekit'], kit:['kb','bench','mat'],
+  levels:{gym:'New',body:'New'}, deckAllFalse:true,
+  when:'flex', days:4, length:'20', trainDays:[0,1,3,5],
+  driver:['lose','doctor','kids'], blockers:['time','life','week3'],
+  parq:['joint','other'], pain:['arm','knee','ankle'],
+  intensity:'push', checkin:'mon'
+};
+
+const FACTS = [
+  ['Goal, 90 days','Lean out, <em>then</em> get stronger'],
+  ['Ten years out','Keep up with the kids · no pain · play sport'],
+  ['Real driver','Lose weight · doctor said so · the kids'],
+  ['Experience','New to the gym · new to bodyweight'],
+  ['The deck','<b>0 of 12</b> movements he already does'],
+  ['Kit','Kettlebell · bench · mat <em>(3 of 15 ticked)</em>'],
+  ['Week','4 days · 20 min · Sun Mon Wed Fri'],
+  ['Timing','&ldquo;Whenever the day allows&rdquo;'],
+  ['Intensity','Push me'],
+  ['Wearable','None'],
+  ['Stopped before','Time · life · <b>motivation dies at week 3</b>']
+];
+
+const CONSTRAINTS = [
+  ['Medical','Joint problem + something a doctor mentioned. <b>GP clearance before load goes up.</b>',1],
+  ['Pain','Arm, knee, ankle. No loaded deep knee bend, nothing overhead, no impact.',1],
+  ['No bar','No pull-up bar in the house — the pull pattern is limited to a single-arm row.',0],
+  ['No bands','No bands either. Shoulder prep has to come from the bell.',0],
+  ['80 min a week','4 × 20. That is the entire training budget, warm-up included.',0]
+];
+
+/* ============================================================
+   2 · THE TEN LAYERS
+   Galpin's program-design sequence (Huberman Lab, Ep 4), each
+   filled in against Ozzy. `said` is quoted from his answers,
+   `read` is my inference stated as inference, `prop` is the
+   actual call.
+   ============================================================ */
+const LAYERS = [
+{ id:'assess', n:1, title:'Assess across the nine adaptations',
+  tag:'Where he actually is, before anything is prescribed',
+  said:[['Activity','Active, but not training'],['Gym level','New'],['Bodyweight level','New'],
+        ['Movement deck','0 of 12'],['Wearable','None'],['Self-image','3 of 5']],
+  read:`Nothing here is a <b>weak</b> score — it is an <b>absent</b> one. He has never performed a single
+        one of the twelve foundational patterns, and with no wearable there is no passive data either.
+        The honest reading is that eight of Galpin's nine adaptations are simply untested, and the ninth
+        (long-duration endurance) is only guessable from &ldquo;on my feet, walking&rdquo;.`,
+  prop:[['Score all nine as <b>untested</b> rather than guessing a level from his age and weight.',''],
+        ['Treat <b>weeks 1–2 as the assessment</b>, not as training. The sessions double as the test.',''],
+        ['Test only three adaptations now: muscular endurance (bench push-up), strength (KB deadlift), and the isometric brace (plank). Those are the three his kit and his joints can safely measure.',''],
+        ['Leave speed, power, anaerobic capacity, VO₂ max and long-duration formally untested until phase 2. Testing them on a deconditioned 45-year-old with a sore ankle buys nothing and risks something.','flag']],
+  why:`<b>Galpin step 1</b> — assess across all nine adaptations before prescribing. He is explicit that
+       an unmeasured adaptation should be recorded as unknown, not assumed.` },
+
+{ id:'goals', n:2, title:'Turn his answers into SMART goals',
+  tag:'Specific, measurable, and his — not ours',
+  said:[['Focus 1','Lean out'],['Focus 2','Get stronger'],['Driver','Lose weight'],
+        ['Driver','My doctor told me to'],['Weight tends to','Creep up fast']],
+  read:`He ranked <b>lean</b> first and strong second, so fat loss is the ninety-day priority and strength
+        is the vehicle, not the headline. &ldquo;My doctor told me to&rdquo; is the most under-weighted answer in
+        the survey — it implies an external deadline and a number someone else is watching, neither of
+        which he has told us. <b>Worth asking at the first check-in.</b>`,
+  prop:[['<b>Primary:</b> lose ~8 kg in 12 weeks. That is 0.65 kg/week — inside the safe rate, and visible.',''],
+        ['<b>Secondary:</b> 20 unbroken push-ups with hands on the bench, from an untested start.',''],
+        ['<b>Tertiary — and the one that actually predicts the other two:</b> complete 4 of 4 sessions in 10 of the 12 weeks.',''],
+        ['Blocked: he has <b>not set a target weight</b> in the app yet. Until he does, the 8 kg is my number, not his, and the chart has no line.','ask'],
+        ['Ask at check-in one: what did the doctor actually say, and is there a date attached?','ask']],
+  why:`<b>Galpin step 2</b> — SMART goals. Each of the three above is specific, measurable against something
+       we already log, and time-bound to the twelve-week block.` },
+
+{ id:'defenders', n:3, title:'Name the defenders',
+  tag:'What has beaten him before, and what will try again',
+  said:[['Stopped before','Time disappears'],['Stopped before','Life gets busy, it goes first'],
+        ['Stopped before','Motivation dies at week three'],['Trains','Whenever the day allows']],
+  read:`He named week three <b>unprompted</b>. People do not volunteer that unless it has happened to them
+        more than once — he is telling us where the program will break and roughly when. The quieter risk
+        is &ldquo;whenever the day allows&rdquo;: a session with no fixed slot has no cue, and a habit without a cue
+        is the one that loses to a busy Tuesday.`,
+  prop:[['<b>The 20-minute ceiling is never breached</b>, in any phase. The moment a session runs 27 minutes it stops being the thing he agreed to.',''],
+        ['<b>Week 3 gets deliberately lighter</b> — not a full deload, a visible easing — plus a coach touchpoint that week rather than a generic check-in.',''],
+        ['Push for a <b>fixed time of day</b> at check-in one. &ldquo;Whenever&rdquo; is the single most fixable risk in this profile.','ask'],
+        ['Two of his four days are the weekend (Sun) and Monday — the two most protectable days in most people\'s weeks. Good instinct; leave it.','']],
+  why:`<b>Galpin step 3</b> — identify the obstacles before designing around them. He calls these the
+       defenders, and treats a program that ignores them as already failed.` },
+
+{ id:'quadrant', n:4, title:'The ten-point quadrant',
+  tag:'Business · relationships · fitness · recovery',
+  said:[['Not asked','The survey has no question for this'],['Inferred','45, kids, &ldquo;life gets busy&rdquo;']],
+  read:`We genuinely do not know this one. Galpin's default baseline is 2 points to fitness and 1 to
+        recovery out of 10, and everything about Ozzy's answers is consistent with a man at exactly that
+        baseline — but that is an assumption, and it should be labelled as one rather than quietly used.`,
+  prop:[['Run phase 1 on the <b>2 fitness / 1 recovery</b> baseline. Four twenty-minute sessions is what that budget buys, which is a useful sanity check on the rest of this build.',''],
+        ['Ask the quadrant question at check-in one, in plain words: <em>&ldquo;out of ten, how much of you is available for this right now?&rdquo;</em>','ask'],
+        ['If recovery comes back at 0, the deload weeks move earlier and the intensity ceiling comes down.','']],
+  why:`<b>Galpin step 4</b> — distribute ten points across the four quadrants. It is the step most
+       programs skip, and the one that explains why ambitious plans fail people with jobs.` },
+
+{ id:'time', n:5, title:'What 80 minutes a week can actually buy',
+  tag:'The constraint everything else bends around',
+  said:[['Days','4'],['Length','20 minutes'],['Days chosen','Sun · Mon · Wed · Fri']],
+  read:`Eighty minutes a week, warm-ups included, is the whole budget. This is the layer where most
+        programs quietly lie. Galpin's strength protocol alone asks for 3–5 minutes of rest between sets —
+        <b>three sets of one exercise would eat half a session in rest</b>. So classical strength work is
+        arithmetically off the table, and pretending otherwise would produce a program that looks
+        impressive and delivers nothing.`,
+  prop:[['<b>Drop max-strength as a phase-1 target.</b> Not because he is a beginner — because the rest periods do not fit in the box he gave us.',''],
+        ['Build phase 1 on <b>muscular endurance + hypertrophy</b>, 6–30 reps, 30–90 second rests. This is also precisely Galpin\'s fat-loss prescription, which is his stated first priority.',''],
+        ['<b>Skill and technique ride along free.</b> They cost no fatigue and no rest, and for someone at 0 of 12 patterns they are the highest-return work in the session.',''],
+        ['Budget per session: 4 min prime · 13 min work · 3 min finish. Held to, in every session, across all three phases.','']],
+  why:`<b>Galpin step 5 + fat-loss protocol</b> — realistic time commitments first, then adaptation
+       selection. Fat loss = hypertrophy + muscular endurance in the 6–30 rep range.` },
+
+{ id:'select', n:6, title:'Exercise selection by pattern',
+  tag:'Six patterns, one kettlebell, three sore joints',
+  said:[['Kit','Kettlebell · bench · mat'],['Pain','Arm · knee · ankle'],
+        ['Wants','Kettlebell-focused <em>(said to you, not in the survey)</em>']],
+  read:`His kit answers the question before we ask it — the bell is his only load, so this is a kettlebell
+        program whether or not he had asked for one. The real finding is the shape of the hole:
+        <b>the pull pattern has no home</b>. With no bar and no bands, every pulling rep he does for twelve
+        weeks is a single-arm row.`,
+  prop:[['<b>Hinge</b> — KB deadlift → KB RDL → (week 5) the swing. This is the spine of the program.',''],
+        ['<b>Squat</b> — bench squat → goblet squat. The bench is the depth gauge, which is what makes it knee-safe.',''],
+        ['<b>Push</b> — bench push-up + KB floor press. The floor press has a hard stop at the bottom, so the sore shoulder never travels further than it wants.',''],
+        ['<b>Pull</b> — single-arm row, and nothing else. <b>Under-served, and it will stay that way</b> until he owns something to hang from.','flag'],
+        ['<b>Carry</b> — suitcase carry. The most underrated thing a kettlebell does, and it costs no joint load at all.',''],
+        ['<b>Core</b> — plank, side plank, dead bug, goblet march. Anti-rotation and anti-extension, no spinal flexion under load.',''],
+        ['<b>No swings before week 5.</b> A swing is a ballistic hinge; he has never hinged. Weeks 1–4 teach the deadlift so week 5 has something to be fast with.','']],
+  why:`<b>Galpin step 6</b> — select by movement pattern rather than by muscle or by exercise name. The
+       pattern list is what exposes a gap like the pull one; an exercise list would have hidden it.` },
+
+{ id:'dose', n:7, title:'Volume, intensity, frequency',
+  tag:'And the number we are knowingly under',
+  said:[['Budget','80 min/week'],['Intensity preference','&ldquo;Push me&rdquo;'],['Sessions','4']],
+  read:`Galpin puts hypertrophy at <b>10–25 working sets per muscle per week</b>. Inside 80 minutes, across
+        six patterns, Ozzy will land at roughly <b>6–9 sets per muscle</b>. That is <b>below the stated
+        minimum</b> and I do not think we should quietly round it up or pretend the range is softer than it
+        is. In phase 1 the adaptation we are actually buying is technique and adherence; hypertrophy is a
+        phase-2 conversation once the sessions are habitual.`,
+  prop:[['<b>Reps 8–15</b>, stopping ~2 short of failure. Not to failure — he is 45, deconditioned, and has a medical flag.',''],
+        ['<b>Rest 45–75 s.</b> Tight, per Galpin\'s time-efficient hypertrophy variant, because the clock is the binding constraint.',''],
+        ['<b>Cadence 312</b> on working sets — 3 down, 1 pause, 2 up. Slow eccentrics are free technique practice for someone at 0 of 12.',''],
+        ['<b>48-hour rule respected by accident and by design</b> — Sun/Mon/Wed/Fri with rotating patterns means no muscle group is hit twice inside 48 hours.',''],
+        ['<b>State the shortfall to him plainly</b> rather than hiding it. &ldquo;Push me&rdquo; means he can take being told that week 1 is deliberately below what growth requires.','flag']],
+  why:`<b>Galpin step 7 + hypertrophy protocol</b> — 10–25 sets/muscle/week, 8–15 rep sweet spot, 2 min
+       rest (30–90 s for the time-efficient variant), 48 h between sessions for the same muscle.` },
+
+{ id:'progress', n:8, title:'How it gets harder',
+  tag:'Double progression, and what unlocks when',
+  said:[['Intensity','Push me'],['Weeks','12'],['Phases','Foundation → Build → Peak']],
+  read:`With one bell he has <b>one load</b>. That removes the obvious progression lever, so progression has
+        to come from reps, then tempo, then leverage, then density — in that order. It also means the
+        second kettlebell becomes genuinely necessary somewhere around week eight, which is a purchase
+        conversation to have <em>then</em>, not now.`,
+  prop:[['<b>Weeks 1–2 — calibrate.</b> Find his real numbers. Nothing progresses; we are collecting a baseline.',''],
+        ['<b>Weeks 3–4 — add reps</b> inside the 8–15 band, same load, same tempo. Week 3 stays deliberately light.',''],
+        ['<b>Week 5 — the swing arrives</b>, plus two-bell carries. The first real unlock, and it lands right after the week-3 danger zone on purpose.',''],
+        ['<b>Weeks 6–8 — add tempo and range</b> before adding anything else.',''],
+        ['<b>Week 9 — reassess the joints.</b> If the knee is quiet, split squats enter. If the arm is quiet, overhead press enters. <b>Both are conditional, neither is promised.</b>','flag'],
+        ['<b>Weeks 9–12 — density.</b> Same work, less rest. It is the only lever left inside 20 minutes.','']],
+  why:`<b>Galpin step 8</b> — progression strategy chosen deliberately, and 3–5% weekly progression before
+       a deload. With a single fixed load, reps and tempo carry what percentage load normally would.` },
+
+{ id:'recover', n:9, title:'Recovery and deloads',
+  tag:'With no wearable, and a body that has told us three things',
+  said:[['Wearable','None'],['PAR-Q','Joint problem · doctor'],['Pain','Arm · knee · ankle'],['Sleep','Not asked']],
+  read:`No wearable means no HRV, so Galpin's primary objective recovery marker is unavailable to us. His
+        fallback — the <b>WUT check</b> (weight, urine, thirst) — is free, needs no hardware, and we are
+        already asking for one of the three. The daily <b>&ldquo;how's the body?&rdquo;</b> tap in the app is the
+        closest honest substitute, and it already scales the session.`,
+  prop:[['<b>The readiness tap is the recovery system.</b> Rough pulls a set off everything and drops the finisher; good adds a set to the first two working movements. It already does this.',''],
+        ['<b>Deload weeks 5 and 10</b> — Galpin\'s every-five-weeks rhythm. Week 5 is also when the swing lands, so the deload is in volume, not in novelty.',''],
+        ['Add <b>weight and thirst</b> to the Monday check-in. That is two thirds of WUT for two extra taps.','ask'],
+        ['<b>Three &ldquo;rough&rdquo; days in a row triggers a coach flag</b>, mirroring Galpin\'s three-day HRV rule.',''],
+        ['Sleep was never asked in onboarding. For a 45-year-old whose weight &ldquo;creeps up fast&rdquo;, that is a real gap.','ask']],
+  why:`<b>Galpin step 9 + recovery protocol</b> — deload every ~5 weeks; sleep first, light movement
+       second; HRV is the primary marker, WUT the accessible one; 3 days of decline is the warning.` },
+
+{ id:'review', n:10, title:'Review and adjust',
+  tag:'The loop that makes the other nine layers correctable',
+  said:[['Check-in','Monday morning'],['Contact','Weekly, 60 seconds']],
+  read:`He chose Monday, which is the right end of the week for a man whose weekends are protected
+        training days — it reviews what just happened rather than forecasting what might. Sixty seconds
+        is the correct length; anything longer and it becomes the fifth thing to do.`,
+  prop:[['<b>Watch four numbers only:</b> sessions completed, average readiness, weight trend, and whether the knee has been mentioned.',''],
+        ['<b>Week 3 gets a real message</b>, not an automated one. He told us that is where it breaks.',''],
+        ['<b>Week 6 is the first honest re-plan</b> — by then there are 24 sessions of data and the phase-2 volume question can be answered instead of guessed.',''],
+        ['<b>Every layer above is revisable.</b> Layer 7 in particular is my weakest call and should be first to change once real numbers exist.','']],
+  why:`<b>Galpin step 10</b> — review and adjust. He frames the program as a hypothesis, not a plan;
+       the review cadence is what makes it one.` }
+];
+
+/* What Ozzy is allowed to see. Locked chunks show as "your coach is
+   still building this" in his app — not as an error, and not as nothing. */
+const RELEASE = [
+  ['shape','The program shape','Name, 12 weeks, 4 days, 20 minutes'],
+  ['d1','Day 1 · Ground Floor','Full body — the first session'],
+  ['d2','Day 2 · Hinge & Carry','Posterior + loaded carry'],
+  ['d3','Day 3 · Press & Pull','Upper, arm-safe'],
+  ['d4','Day 4 · Reset & Move','Mobility'],
+  ['bench','Benchmarks','The six he can test at home'],
+  ['arc','The 12-week arc','Phases, and what unlocks at weeks 5 and 9']
+];
+
+/* ============================================================
+   3 · STATE — shared with the client app through localStorage,
+   which is how a release here becomes an unlock there.
+   ============================================================ */
+/* Same key scheme as the client app: fj.v1.<user>.<record>. The console is
+   pointed at a client rather than built for one — swapping USER is all it
+   takes to open somebody else's program. */
+const USER = new URLSearchParams(location.search).get('client') || 'ozzy';
+const KEY = `fj.v1.${USER}.coach`;
+const blank={decisions:{},notes:{},released:{shape:true},open:{},inbox:[]};
+let S=load();
+function load(){ try{const r=localStorage.getItem(KEY);return r?Object.assign({},structuredClone(blank),JSON.parse(r)):structuredClone(blank);}catch(e){return structuredClone(blank);} }
+function save(quiet){ try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){} if(!quiet)toast('Saved'); }
+
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const strip=h=>String(h).replace(/<[^>]*>/g,'');
+
+/* ============================================================
+   4 · RENDER
+   ============================================================ */
+function drawRail(){
+  document.getElementById('facts').innerHTML =
+    FACTS.map(([k,v])=>`<div class="fact"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('');
+  document.getElementById('constraints').innerHTML =
+    CONSTRAINTS.map(([k,v,hard])=>hard
+      ? `<div class="warn"><div><b>${k}</b>${v}</div></div>`
+      : `<div class="fact"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('');
+  drawRelease(); drawInbox();
+}
+
+/* Anything the client changed that should reach a human. Right now that is
+   kit, which is the change most likely to make a live program wrong. */
+function drawInbox(){
+  const box = (S.inbox||[]).filter(m=>m.unread);
+  const panel=document.getElementById('inboxPanel');
+  panel.style.display = box.length ? '' : 'none';
+  document.getElementById('inbox').innerHTML = box.map((m,i)=>`
+    <div class="inbox-it">
+      <b>${m.title}</b>
+      <div class="ib-l">Change now</div><p>${m.now}</p>
+      <div class="ib-l">Next block</div><p>${m.next}</p>
+      <button class="btn" data-seen="${i}">Got it</button>
+    </div>`).join('');
+  document.querySelectorAll('[data-seen]').forEach(b=>b.onclick=()=>{
+    const t=(S.inbox||[]).filter(m=>m.unread)[+b.dataset.seen];
+    if(t) t.unread=false;
+    save(1); drawInbox();
+  });
+}
+
+function drawRelease(){
+  document.getElementById('release').innerHTML = RELEASE.map(([id,t,s])=>`
+    <div class="rel">
+      <div class="tx"><b>${t}</b><small>${s}</small></div>
+      <button class="sw ${S.released[id]?'on':''}" data-rel="${id}"
+        aria-pressed="${!!S.released[id]}" aria-label="Release ${strip(t)} to Ozzy"></button>
+    </div>`).join('');
+  document.querySelectorAll('[data-rel]').forEach(b=>b.onclick=()=>{
+    const id=b.dataset.rel;
+    S.released[id]=!S.released[id]; save(1); drawRelease(); drawDock();
+    toast(S.released[id]?'Released — it is live in his app now':'Hidden from his app again');
+  });
+}
+
+function drawLayers(){
+  document.getElementById('layers').innerHTML = LAYERS.map(L=>{
+    const d=S.decisions[L.id]||'';
+    const pill=d==='ok'?['ok','Agreed']:d==='work'?['work','Needs work']:d==='blocked'?['blocked','Parked']:['','Undecided'];
+    return `<section class="layer ${d} ${S.open[L.id]?'open':''}" data-layer="${L.id}">
+      <div class="lhead" data-toggle="${L.id}">
+        <span class="lnum">${L.n}</span>
+        <span class="tx"><b>${L.title}</b><small>${L.tag}</small></span>
+        <span class="pill ${pill[0]}">${pill[1]}</span>
+        <svg class="chev" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg>
+      </div>
+      <div class="lbody">
+
+        <div class="step">
+          <h4 class="h-said">What he said</h4>
+          <div class="quotes">${L.said.map(([k,v])=>`<span class="q">${k} &middot; <b>${v}</b></span>`).join('')}</div>
+        </div>
+
+        <div class="step">
+          <h4 class="h-read">How I read it</h4>
+          <div class="read">${L.read}</div>
+        </div>
+
+        <div class="step">
+          <h4 class="h-prop">What I propose</h4>
+          <ul class="prop">${L.prop.map(([t,f])=>`<li class="${f}">${t}</li>`).join('')}</ul>
+        </div>
+
+        <div class="step">
+          <h4 class="h-why">Where it comes from</h4>
+          <div class="why">${L.why}</div>
+        </div>
+
+        <div class="decide">
+          <button class="btn ${d==='ok'?'on-ok':''}" data-dec="${L.id}:ok">Agreed</button>
+          <button class="btn ${d==='work'?'on-work':''}" data-dec="${L.id}:work">Needs work</button>
+          <button class="btn ${d==='blocked'?'on-blocked':''}" data-dec="${L.id}:blocked">Park it</button>
+          <span class="sp"></span>
+        </div>
+        <textarea data-note="${L.id}" placeholder="Your thinking, corrections, or what you want me to change — this goes straight into the brief.">${esc(S.notes[L.id]||'')}</textarea>
+      </div>
+    </section>`;
+  }).join('');
+
+  document.querySelectorAll('[data-toggle]').forEach(b=>b.onclick=()=>{
+    const id=b.dataset.toggle; S.open[id]=!S.open[id]; save(1);
+    b.closest('.layer').classList.toggle('open');
+  });
+  document.querySelectorAll('[data-dec]').forEach(b=>b.onclick=e=>{
+    e.stopPropagation();
+    const [id,v]=b.dataset.dec.split(':');
+    S.decisions[id] = S.decisions[id]===v ? '' : v;
+    S.open[id]=true; save(1); drawLayers(); drawDock();
+  });
+  document.querySelectorAll('[data-note]').forEach(t=>{
+    t.oninput=()=>{ S.notes[t.dataset.note]=t.value; save(1); drawDock(); };
+    t.onclick=e=>e.stopPropagation();
+  });
+}
+
+function drawDock(){
+  const ok=LAYERS.filter(L=>S.decisions[L.id]==='ok').length;
+  const work=LAYERS.filter(L=>S.decisions[L.id]==='work').length;
+  const parked=LAYERS.filter(L=>S.decisions[L.id]==='blocked').length;
+  const notes=Object.values(S.notes).filter(n=>n&&n.trim()).length;
+  const rel=RELEASE.filter(r=>S.released[r[0]]).length;
+  document.getElementById('mOk').textContent=ok;
+  document.getElementById('dockSt').innerHTML =
+    `<b>${ok}</b> agreed &middot; <b>${work}</b> need work &middot; <b>${parked}</b> parked &middot; ` +
+    `<b>${notes}</b> note${notes===1?'':'s'} &middot; <b>${rel}</b> of ${RELEASE.length} sections live for Ozzy`;
+}
+
+/* ---------- the handoff back to me ---------- */
+function brief(){
+  const L=[];
+  L.push('# Coach console — Ozzy, program build');
+  L.push('');
+  L.push('## Decisions');
+  LAYERS.forEach(x=>{
+    const d=S.decisions[x.id];
+    const label=d==='ok'?'AGREED':d==='work'?'NEEDS WORK':d==='blocked'?'PARKED':'undecided';
+    L.push(`${x.n}. ${x.title} — **${label}**`);
+    const n=(S.notes[x.id]||'').trim();
+    if(n) L.push(`   > ${n.replace(/\n/g,'\n   > ')}`);
+  });
+  L.push('');
+  L.push('## Released to Ozzy');
+  RELEASE.forEach(([id,t])=>L.push(`- [${S.released[id]?'x':' '}] ${t}`));
+  const work=LAYERS.filter(x=>S.decisions[x.id]==='work');
+  if(work.length){
+    L.push('');
+    L.push('## Rework these first');
+    work.forEach(x=>L.push(`- Layer ${x.n} · ${x.title}${(S.notes[x.id]||'').trim()?' — '+S.notes[x.id].trim():''}`));
+  }
+  return L.join('\n');
+}
+
+/* ---------- chrome ---------- */
+let tT; function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');
+  clearTimeout(tT);tT=setTimeout(()=>t.classList.remove('on'),2200);}
+
+document.getElementById('btnSave').onclick=()=>save();
+document.getElementById('btnReset').onclick=()=>{
+  if(!confirm('Clear every decision, note and release? This cannot be undone.')) return;
+  S=structuredClone(blank); save(1); drawLayers(); drawRelease(); drawDock(); toast('Cleared');
+};
+document.getElementById('btnBrief').onclick=()=>{
+  document.getElementById('outTx').textContent=brief();
+  document.getElementById('out').classList.add('on');
+};
+document.getElementById('btnClose').onclick=()=>document.getElementById('out').classList.remove('on');
+document.getElementById('out').onclick=e=>{ if(e.target.id==='out') e.currentTarget.classList.remove('on'); };
+document.getElementById('btnCopy').onclick=async()=>{
+  try{ await navigator.clipboard.writeText(brief()); toast('Copied — paste it into the chat'); }
+  catch(e){ const p=document.getElementById('outTx');
+    const r=document.createRange(); r.selectNodeContents(p);
+    const s=getSelection(); s.removeAllRanges(); s.addRange(r);
+    toast('Selected — press Cmd+C'); }
+};
+
+drawRail(); drawInbox(); drawLayers(); drawDock();
+</script>
+</body>
+</html>

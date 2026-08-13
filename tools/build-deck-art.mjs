@@ -76,13 +76,28 @@ const MAP = {
   carry:     'farmers-carry-anime-transparent.png',
   kbswing:   'kettlebell-swing-anime.png',
   split:     'bulgarian-split-squat-50lb-dumbbells-anime.png',   // gym deck = loaded version
+
+  /* Added 2026-08-13 — the two holes the gym deck actually had. */
+  dead:      'Exercise_Illustration_Collection/03_Lower_Body_Glutes_Posterior_Chain/033_conventional_deadlift_135lb.png',
+  thrust:    'Exercise_Illustration_Collection/FitnessJourney_Exercise_Illustrations_Set_2/hip_thrust.png',
+};
+
+/* Drawn and ready, deliberately NOT inlined yet: dips, burpee, hanging knee
+   raise, man-maker. No deck asks for them until the ladders are wired, and
+   every entry here is base64 in the first byte of the page — four unused
+   cards cost about 180 KB on a cold link over mobile data. They are already
+   built into images/exercises/ for the app. Move them up into MAP the day
+   the ladder gives them a card. */
+const PENDING = {
+  dips:      'Exercise_Illustration_Collection/FitnessJourney_Exercise_Illustrations_Set_2/dip.png',
+  burpee:    'burpee-five-stage-transparent.png',
+  hkr:       'hanging-knee-raises-transparent-v3.png',
+  manmaker:  'man-maker-six-stage-transparent.png',
 };
 
 /* Asked for by the deck, no artwork yet. Listed rather than left silent. */
 const MISSING = {
-  dead:   'Deadlift',
-  rdl:    'Romanian deadlift',
-  thrust: 'Hip thrust (the 45-degree hip extension and glute bridge renders are different movements)',
+  rdl:    'Romanian deadlift (the conventional deadlift render is a different movement)',
 };
 
 const sh = (c, a) => execFileSync(c, a, { maxBuffer: 1 << 30 });
