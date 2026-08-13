@@ -1,34 +1,104 @@
 # The exercise decks
 
-The survey asks about **twelve movements**. Which twelve depends on what the
-person has to train with. Change anything here and tell me.
-
-Every deck is checked for the same balance: **lower, upper push, upper pull,
-explosive, full body, core.**
+**You changed the model and you were right.** This file is rewritten around
+your note. Read the two decisions at the bottom and mark them — that is all I
+need.
 
 ---
 
-## The equipment problem you spotted
+## What you said, and why it kills the old version
 
-You are right, and it is bigger than dips.
+> *each equipment should unlock a set of exercises. we need to decide of our
+> Foundational movements*
 
-A "bodyweight" deck is not really bodyweight. **Pull-up, inverted row, dead
-hang, hanging knee raise and dips all need something to hang from or push
-between.** Someone with a bare floor cannot do any of them — that is five of
-twelve movements they would have to answer "no" to, which reads as *you are
-weak* when it actually means *you have no bar*.
+The old version had four fixed decks — bodyweight-with-a-bar,
+bodyweight-with-nothing, home kit, full gym — and picked one. That is wrong
+for the obvious reason: **almost nobody is one of those four people.** Someone
+with a pull-up bar and two dumbbells and nothing else got handed the home-kit
+deck and asked about a bench press they cannot do, or the bodyweight deck and
+never asked about the dumbbells they own.
 
-So the bodyweight deck **splits in two**, on the answers they have already
-given on the equipment screen:
+Your model fixes it. But it needs one thing added or it breaks: if equipment
+only ever *unlocks*, then a full gym unlocks twenty movements and we still
+only have twelve cards — and someone with a bare floor unlocks nothing and has
+holes. So:
 
-- **Has a bar / dip station / rings / parallettes** → the full deck below
-- **Has nothing** → the substitutions, and a recommendation
+**Twelve slots, fixed. Each slot has a ladder. Equipment decides how high up
+the ladder you are asked.**
 
-I do not think we should just tell them to go buy something and leave a hole
-in the survey. They get a full twelve either way, and the recommendation
-appears once, at the end of the chapter, as a note rather than a barrier.
+The slots never change — those are your foundational movements, the twelve
+things a person should own for life. The ladder is only how we meet them where
+they actually are.
 
-**Suggested wording for the recommendation:**
+Nobody ever gets a hole. Nobody ever gets asked about a bar they do not own.
+
+---
+
+## The twelve foundational slots
+
+These are the answer to *"we need to decide of our Foundational movements."*
+Twelve patterns, not twelve exercises — the exercise is whatever their kit
+allows.
+
+| # | Slot | Why it earns a place |
+|---|---|---|
+| 1 | **Squat** | Knee-dominant. The one everybody needs and most do badly. |
+| 2 | **Hinge** | Where back health and every athletic movement comes from. |
+| 3 | **Single leg** | Everything in life is one leg at a time. Also finds imbalance. |
+| 4 | **Horizontal push** | Chest and triceps. |
+| 5 | **Vertical push** | Overhead. The shoulder health test hiding as a strength test. |
+| 6 | **Horizontal pull** | The counterweight to a desk. |
+| 7 | **Vertical pull** | The hardest one to fake, and the best single upper-body number. |
+| 8 | **Explosive** | Power. First thing lost with age, and Galpin's biggest flag. |
+| 9 | **Carry / grip** | Grip strength predicts more than any other single number. |
+| 10 | **Full body** | Conditioning under fatigue. |
+| 11 | **Core, dynamic** | Moving through the trunk. |
+| 12 | **Core, static** | Holding a position. Different quality, different test. |
+
+Balance: three lower, two push, two pull, one explosive, one carry, one full
+body, two core.
+
+---
+
+## The ladders
+
+Read each row left to right. **We ask the first one they have the kit for.**
+Bold is what a full gym gets; the last column is what someone with a bare
+floor gets, and there is always something there.
+
+| Slot | Barbell + rack | Dumbbell / kettlebell | Bar, rings or dip bars | Nothing but a floor |
+|---|---|---|---|---|
+| Squat | **Back squat** | Goblet squat | — | Bodyweight squat |
+| Hinge | **Deadlift** | Dumbbell RDL | — | Single-leg RDL |
+| Single leg | — | **Split squat, loaded** | — | Bulgarian split squat |
+| Horizontal push | **Bench press** | Dumbbell floor press | Dips | Push-up |
+| Vertical push | **Overhead press** | Dumbbell overhead press | — | Pike push-up |
+| Horizontal pull | **Bent-over row** | Single-arm row | Inverted row | Table row |
+| Vertical pull | — | — | **Pull-up** | Towel door row |
+| Explosive | — | **Kettlebell swing** | — | Jump squat |
+| Carry / grip | — | **Farmer carry** | Dead hang | Loaded backpack carry |
+| Full body | — | — | — | **Burpee** |
+| Core, dynamic | — | — | **Hanging knee raise** | Lying leg raise |
+| Core, static | — | — | — | **Plank** |
+
+Worked examples:
+
+- **Bare floor.** Bodyweight squat, single-leg RDL, Bulgarian split squat,
+  push-up, pike push-up, table row, towel door row, jump squat, backpack
+  carry, burpee, lying leg raise, plank. Twelve. No holes, nothing they cannot
+  do, and not one question that reads as *you are weak* when it means *you
+  have no bar*.
+- **Pull-up bar and two dumbbells** — the setup the old version handled worst.
+  Goblet squat, dumbbell RDL, loaded split squat, dumbbell floor press, pike
+  push-up (no bench-press-grade option, so vertical push stays bodyweight),
+  single-arm row, **pull-up**, kettlebell swing or jump squat, farmer carry,
+  burpee, **hanging knee raise**, plank. Every piece of kit they own is used.
+- **Full gym.** Back squat, deadlift, loaded split squat, bench press,
+  overhead press, bent-over row, pull-up, kettlebell swing, farmer carry,
+  burpee, hanging knee raise, plank.
+
+The recommendation for someone with nothing still appears, once, at the end of
+the chapter — as a note, not a barrier:
 
 > Two things would open up most of what is missing from your setup: **a
 > doorway pull-up bar** and **something solid to dip between** — parallettes,
@@ -37,121 +107,78 @@ appears once, at the end of the chapter, as a note rather than a barrier.
 
 ---
 
-## Deck A — Bodyweight, with a bar
+## What I dropped, and why
 
-| # | Movement | Role | Picture? |
-|---|---|---|---|
-| 1 | Push-up | Push | yes |
-| 2 | Pike push-up | Vertical press | yes |
-| 3 | **Dips** | Push | **no** |
-| 4 | Pull-up | Vertical pull | yes |
-| 5 | Inverted row | Horizontal pull | yes |
-| 6 | Bodyweight squat | Lower | yes |
-| 7 | Bulgarian split squat | Lower, single leg | yes |
-| 8 | Single-leg RDL | Hinge | yes |
-| 9 | Jump squat | Explosive | yes |
-| 10 | **Burpee** | **Full body** | **no** |
-| 11 | Plank | Core | yes |
-| 12 | **Hanging knee raise** | **Core** | **no** |
+**Mountain climber** and **wall sit** were in the bodyweight deck. Both are
+gone. Neither tells us anything the other eleven do not, and both were there
+to fill a slot rather than answer a question.
 
-*Dead hang was dropped to make room for dips — hanging knee raise already
-covers the bar, and grip gets tested by it.*
+**Power clean** is not in the explosive ladder even for a full gym. It is the
+best answer on paper and the wrong one here — most people asked will have
+never done one, so the card measures coaching history, not power. Kettlebell
+swing and jump squat measure the same quality and everyone can attempt them.
 
-## Deck A2 — Bodyweight, no bar and nothing to dip on
-
-Same deck, five swaps. Nothing here needs anything but a floor, a wall and a
-sturdy table or chair.
-
-| # | Movement | Replaces | Picture? |
-|---|---|---|---|
-| 1 | Push-up | — | yes |
-| 2 | Pike push-up | — | yes |
-| 3 | **Chair / bench dip** | Dips | **no** |
-| 4 | **Table row** | Pull-up | **no** |
-| 5 | **Towel door row** | Inverted row | **no** |
-| 6 | Bodyweight squat | — | yes |
-| 7 | Bulgarian split squat | — | yes |
-| 8 | Single-leg RDL | — | yes |
-| 9 | Jump squat | — | yes |
-| 10 | **Burpee** | — | **no** |
-| 11 | Plank | — | yes |
-| 12 | **Lying leg raise** | Hanging knee raise | **no** |
-
-## Deck B — Home kit
-
-Dumbbells, kettlebell, bands, bench, bar.
-
-| # | Movement | Role | Picture? |
-|---|---|---|---|
-| 1 | Goblet squat | Lower | **no** |
-| 2 | Dumbbell RDL | Hinge | **no** |
-| 3 | Bulgarian split squat (loaded) | Lower, single leg | yes |
-| 4 | Jump squat | Explosive | yes |
-| 5 | Dumbbell floor / bench press | Push | **no** |
-| 6 | Dumbbell overhead press | Vertical press | **no** |
-| 7 | Push-up | Push | yes |
-| 8 | Single-arm dumbbell row | Horizontal pull | **no** |
-| 9 | Pull-up | Vertical pull | yes |
-| 10 | Kettlebell swing | Ballistic, full body | yes |
-| 11 | Farmer carry | Full body | yes |
-| 12 | Plank | Core | yes |
-
-*If they own a kettlebell but no dumbbells, the dumbbell movements ask about
-the kettlebell instead. Same movement, different handle.*
-
-## Deck C — Full gym
-
-Barbell and a rack. **Also used when someone has both a gym and home kit** —
-it is the higher-capability set and covers everything.
-
-| # | Movement | Role | Picture? |
-|---|---|---|---|
-| 1 | Back squat | Lower | yes |
-| 2 | Deadlift | Hinge | **no** |
-| 3 | Bulgarian split squat (loaded) | Lower, single leg | yes |
-| 4 | Hip thrust | Hip extension | **no** |
-| 5 | Bench press | Push | yes |
-| 6 | Overhead press | Vertical press | yes |
-| 7 | **Dips** | Push | **no** |
-| 8 | Bent-over row | Horizontal pull | yes |
-| 9 | Pull-up | Vertical pull | yes |
-| 10 | Power clean | Explosive, full body | yes |
-| 11 | Farmer carry | Full body | yes |
-| 12 | Plank | Core | yes |
+**Dead hang** dropped from a slot of its own to the second rung of carry/grip.
+Same quality as farmer carry, and now it only appears for someone who has a
+bar but no weight — which is exactly who it is the right question for.
 
 ---
 
-## Pictures still needed for all this
+## Two decisions I need from you
+
+**1 — Are the twelve slots right?**
+That list is your foundational movements. If you would swap one, swap it now:
+everything downstream — the ladders, the artwork, the benchmarks and the
+programme's own vocabulary — hangs off it.
+
+**2 — Are the ladders right?**
+Especially: is a **goblet squat** the right stand-in for a back squat, and is
+a **towel door row** honest enough to ask about, or would you rather vertical
+pull just be blank for someone with nothing?
+
+---
+
+## Stop before you finish the benchmark file
+
+**This changes which rows matter, so finishing the CSVs first would waste your
+time.** Thirteen movements in the ladders have no benchmark row yet:
+
+goblet squat · dumbbell RDL · dumbbell floor press · dumbbell overhead press ·
+single-arm row · dips · table row · towel door row · burpee · hanging knee
+raise · lying leg raise · backpack carry · loaded split squat
+
+And these have rows that the new model no longer asks about: mountain
+climber, wall sit, hip thrust, power clean.
+
+Mark the two decisions above and I will (a) wire the ladders, and (b) draft
+all thirteen rows the same way as the last sixteen — researched, marked
+`DRAFT`, for you to correct. Then the CSV is one pass instead of two.
+
+---
+
+## Artwork this needs
+
+Unchanged from before except for the drops. Fourteen pictures:
 
 | Movement | Save as |
 |---|---|
 | Dips | `dips.png` |
 | Burpee | `burpee.png` |
 | Hanging knee raise | `hanging-knee-raise.png` |
-| Chair / bench dip | `bench-dip.png` |
 | Table row | `table-row.png` |
 | Towel door row | `towel-row.png` |
 | Lying leg raise | `lying-leg-raise.png` |
+| Loaded backpack carry | `backpack-carry.png` |
 | Goblet squat | `goblet-squat.png` |
 | Dumbbell RDL | `dumbbell-rdl.png` |
 | Dumbbell floor press | `dumbbell-floor-press.png` |
 | Dumbbell overhead press | `dumbbell-overhead-press.png` |
 | Single-arm dumbbell row | `single-arm-dumbbell-row.png` |
 | Deadlift | `deadlift.png` |
-| Hip thrust | `hip-thrust.png` |
+| Hip thrust | ~~not needed any more~~ |
 
-Fourteen. **Seven of them are only for Deck A2** (the no-equipment version) —
-if you would rather not draw those yet, say so and I will have that deck fall
-back to the drawn figures until the artwork exists. It still works, it just
-looks plainer.
-
-## Benchmarks still needed
-
-Every movement above needs Beginner / Intermediate / Advanced / Elite numbers
-in the two benchmark files, or its slider has nothing to say. Already there:
-dips, burpee (as Navy Seal Burpee), everything in Deck C except the new ones.
-Missing: hanging knee raise, chair dip, table row, towel row, lying leg raise,
-goblet squat, and the four dumbbell movements.
-
-I can draft those the same way I did the last sixteen — researched, put in the
-file as `DRAFT`, for you to correct.
+**Six of these are the bare-floor rungs** (table row, towel row, lying leg
+raise, backpack carry, burpee, dips). If you would rather not draw them yet,
+say so — those cards fall back to the drawn stick figure. It still works, it
+just looks plainer, and it only looks plainer for the people with no kit,
+which is the wrong way round. Worth drawing when you get a chance.
