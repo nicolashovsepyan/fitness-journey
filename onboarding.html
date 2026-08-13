@@ -217,7 +217,36 @@ body.opening #bars,body.opening #chapline{opacity:0;pointer-events:none}
   align-items:center;justify-content:center;overflow:hidden;
   margin:calc(-74px - env(safe-area-inset-top)) -20px 0;
   padding:calc(74px + env(safe-area-inset-top)) 20px calc(var(--footpad,150px) + 3vh)}
-.heroA .lock{display:flex;flex-direction:column;align-items:center;width:100%}
+.heroA .lock{display:flex;flex-direction:column;align-items:center;width:100%;position:relative}
+/* The triangle sits BEHIND everything rather than above it. Nudging the
+   words down to clear it would have cost vertical space on the one screen
+   that has none to spare, and the mark would have stopped being centred in
+   it — which is the whole composition. */
+.heroA .tri{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);
+  width:min(94%,368px);height:auto;overflow:visible;z-index:0;pointer-events:none}
+.heroA .tri path{fill:none;stroke-width:2.4;stroke-linejoin:round;stroke-linecap:round}
+.heroA .tri-l{stroke:url(#triGrad);filter:drop-shadow(0 0 7px rgba(255,95,162,.45))}
+/* One short bright dash chasing the perimeter. Hidden until the mark has
+   landed — a light running around an outline that is still being drawn
+   reads as two animations fighting. */
+.heroA .tri-spark{stroke:#fff;stroke-width:3.2;opacity:0;
+  filter:drop-shadow(0 0 9px #FF5FA2) drop-shadow(0 0 3px #fff)}
+.heroA.lit .tri-spark{opacity:1;animation:triRun var(--beat,2400ms) linear infinite}
+.heroA.lit .tri-l{animation:triBeat var(--beat,2400ms) ease-in-out infinite}
+@keyframes triRun{ from{stroke-dashoffset:0} to{stroke-dashoffset:-817} }
+/* The line breathes on the same clock as the spark, so the glow swells as
+   the light comes round — one heartbeat, not two things blinking. */
+@keyframes triBeat{
+  0%,58%  {filter:drop-shadow(0 0 7px rgba(255,95,162,.45))}
+  72%     {filter:drop-shadow(0 0 15px rgba(255,95,162,.75))}
+  100%    {filter:drop-shadow(0 0 7px rgba(255,95,162,.45))}
+}
+@media (prefers-reduced-motion:reduce){
+  .heroA.lit .tri-spark{animation:none;opacity:.85}
+  .heroA.lit .tri-l{animation:none}
+}
+.heroA .art{z-index:2}
+.heroA .hcopy{z-index:3}
 .heroA .art{position:relative;display:flex;align-items:center;justify-content:center;
   width:100%;margin-bottom:26px}
 /* the mark carries the screen; the words sit under it, deliberately smaller */
@@ -1904,6 +1933,22 @@ function hero(s){
 
   const d=el(`<div class="heroA">
     <div class="lock">
+    <svg class="tri" viewBox="0 0 300 268" aria-hidden="true">
+      <defs>
+        <!-- userSpaceOnUse, always. objectBoundingBox has bitten this file
+             three times: on a straight line the bounding box has zero area
+             and the gradient renders nothing at all in iOS Safari. -->
+        <linearGradient id="triGrad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="300" y2="0">
+          <stop offset="0%"   stop-color="#FF5FA2"/>
+          <stop offset="32%"  stop-color="#FFB3D2"/>
+          <stop offset="50%"  stop-color="#FFFFFF"/>
+          <stop offset="68%"  stop-color="#FFB3D2"/>
+          <stop offset="100%" stop-color="#FF5FA2"/>
+        </linearGradient>
+      </defs>
+      <path class="tri-l" d="M14 16 H286 L150 252 Z"/>
+      <path class="tri-spark" d="M14 16 H286 L150 252 Z"/>
+    </svg>
     <div class="art">
       <div class="dbglow"></div>
       <svg class="db${MARK.engine==='plate'?' mb':''}" viewBox="0 0 260 130" preserveAspectRatio="xMidYMid meet">
@@ -1972,6 +2017,19 @@ function hero(s){
 
   const heroEl=d.querySelector('.heroA');
   const art=d.querySelector('.art');
+  /* The triangle is drawn on the SAME clock as the words, so the outline
+     closes as the name lands. Two separate timers would drift apart on a
+     phone exactly the way the fifteen CSS transitions did. */
+  const triL=d.querySelector('.tri-l'), triSpark=d.querySelector('.tri-spark');
+  const TRI_LEN=817;                       // 272 base + two 272.4 sides
+  if(triL){
+    triL.style.strokeDasharray=TRI_LEN;
+    triL.style.strokeDashoffset=TRI_LEN;
+    /* short bright dash, one long gap — the gap is the rest of the outline */
+    triSpark.style.strokeDasharray='54 '+(TRI_LEN-54);
+    triSpark.style.strokeDashoffset=0;
+    heroEl.style.setProperty('--beat','2400ms');   // spine/theme.json beatMs
+  }
   const paths=[].slice.call(d.querySelectorAll('.rep path.stroked'));
   const strokes=paths.map(function(el,k){
     const L=el.getTotalLength()||1;
@@ -2067,6 +2125,7 @@ function hero(s){
     const e=1-Math.pow(1-q,3);
     hcopy.style.opacity=e.toFixed(3);
     hcopy.style.transform='translateY('+(12*(1-e)).toFixed(2)+'px)';
+    if(triL) triL.style.strokeDashoffset=(TRI_LEN*(1-e)).toFixed(1);
     cta.style.opacity=e.toFixed(3);
     cta.style.transform='translateY('+(8*(1-e)).toFixed(2)+'px)';
     if(!landedText && t>=t3start){ landedText=true; foot.classList.add('on'); syncFootPad(); }
@@ -2091,6 +2150,9 @@ function hero(s){
     hcopy.style.opacity=''; hcopy.style.transform='';
     cta.style.opacity='';   cta.style.transform='';
     heroEl.classList.add('ready');
+    /* Only now does the light start running. */
+    heroEl.classList.add('lit');
+    if(triL) triL.style.strokeDashoffset=0;
     if(!landedText){ landedText=true; foot.classList.add('on'); syncFootPad(); }
     landArt();
   }
