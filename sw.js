@@ -15,7 +15,7 @@
    Training data lives in localStorage, not here, so an update never
    touches a logged session.
    ============================================================ */
-const VERSION = '4ca9692a2e';
+const VERSION = '7ad5cd806f';
 const CACHE = 'fj-' + VERSION;
 const ASSETS = [
   "./ EXERCISE LIBRARY/Exercise_Illustration_Collection/03_Lower_Body_Glutes_Posterior_Chain/019_bodyweight_squat.png",
@@ -73,6 +73,9 @@ const ASSETS = [
   "./js/timer.js",
   "./js/users.js",
   "./library.html",
+  "./logo/LOGO LAB.html",
+  "./logo/hero.css",
+  "./logo/hero.js",
   "./manifest.webmanifest",
   "./mark-compare.html",
   "./onboarding.html",
@@ -90,6 +93,7 @@ const ASSETS = [
   "./tools/build-classifier.mjs",
   "./tools/build-deck-art.mjs",
   "./tools/build-exercise-images.mjs",
+  "./tools/build-logo.mjs",
   "./tools/build-spine.mjs",
   "./tools/fix-progression-links.mjs"
 ];

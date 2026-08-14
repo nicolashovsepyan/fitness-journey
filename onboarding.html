@@ -818,40 +818,44 @@ h1.q{text-align:center}
 .wpspent{font-size:12.5px;color:var(--ink3);text-align:center;margin-top:13px}
 .wpspent b{color:var(--ink2)}
 
-/* The chosen days carry the mark itself, the way they will in the app's own
-   week view. A dot said "selected"; the dumbbell says what it is. */
-.wkpick button{position:relative}
-.wkpick .wdb{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.6);
-  width:26px;opacity:0;transition:opacity .22s,transform .22s;pointer-events:none}
-.wkpick .wdb svg{width:26px;height:26px;display:block;fill:none;stroke:var(--accent);
-  stroke-width:2;stroke-linecap:round}
-.wkpick button.on .wdb{opacity:1;transform:translate(-50%,-50%) scale(1)}
-.wkpick button.on .wd{opacity:.35;transform:translateY(-13px)}
-.wkpick .wd{transition:opacity .22s,transform .22s}
-.wkpick button.act .wdb svg{stroke:#8FB8FF}
-.wkpick button.both .wdb svg{stroke:#F2C14E}
-
-/* Two axes, because Training is an order of magnitude off the other three.
-   Marked rather than hidden — the alternative is a two-pixel stub nobody can
-   grab, or three rods squashed flat. */
-.rxaxis{flex:0 0 26px;display:flex;flex-direction:column;justify-content:space-between;
-  padding:20px 0 26px;z-index:2;pointer-events:none}
-.rxaxis span{font-size:9px;color:var(--ink3);letter-spacing:.02em;line-height:1}
-.rxaxis.big{text-align:right}
-.rxaxis.small{text-align:left;color:var(--accent)}
-.rxaxis.small span{color:rgba(123,227,196,.75)}
-.rxrod.small{border-left:1px dashed rgba(123,227,196,.22);padding-left:7px;margin-left:2px}
-.rxscale{font-size:11px;color:var(--ink3);text-align:right;margin:7px 2px 0}
-
-/* the headline numbers */
-.wkband{display:flex;gap:8px;margin:2px 0 16px}
-.wkstat{flex:1;background:var(--card);border:1px solid var(--line);border-radius:14px;
-  padding:11px 6px 9px;text-align:center}
-.wkstat b{display:block;font-size:24px;font-weight:750;letter-spacing:-.03em;
+/* ---- the week page ----
+   The cells lost their status dot: a dot under the dumbbell said "selected"
+   a second time, and the mark already says it and says what it is. What sits
+   under the mark now is the one thing the cell cannot otherwise tell you —
+   how long that day is. */
+.wkhero{display:flex;align-items:baseline;justify-content:center;gap:8px;margin:2px 0 4px}
+.wkn{font-size:46px;font-weight:750;letter-spacing:-.035em;line-height:1;
   background:linear-gradient(180deg,#fff,var(--accent));-webkit-background-clip:text;
-  background-clip:text;color:transparent;line-height:1.1}
-.wkstat span{display:block;margin-top:4px;font-size:10px;letter-spacing:.12em;
-  text-transform:uppercase;color:var(--ink3);font-weight:650}
+  background-clip:text;color:transparent}
+.wkn.sm{font-size:26px}
+.wku{font-size:13px;color:var(--ink3);font-weight:600;letter-spacing:.04em}
+.wkx{font-size:20px;color:var(--ink3);font-weight:300;padding:0 2px}
+.wksub{text-align:center;font-size:13.5px;color:var(--ink3);margin:0 0 18px}
+.wksub b{color:var(--ink2)}
+
+.wkpick button{position:relative;flex-direction:column;gap:0;padding-top:7px}
+.wkpick .wd{font-size:11px;font-weight:700;letter-spacing:.08em;opacity:.5;
+  transition:opacity .2s;position:absolute;top:7px;left:0;right:0}
+.wkpick .wdb{margin-top:11px;width:24px;opacity:.16;transform:scale(.78);
+  transition:opacity .22s,transform .22s}
+.wkpick .wdb svg{width:24px;height:24px;display:block;fill:none;stroke:var(--ink3);
+  stroke-width:2;stroke-linecap:round;transition:stroke .22s}
+.wkpick .wdl{font-size:9.5px;font-weight:700;letter-spacing:.03em;color:var(--accent);
+  margin-top:2px;min-height:12px;opacity:0;transition:opacity .22s}
+.wkpick button.on{border-color:var(--accent);background:var(--accent-soft)}
+.wkpick button.on .wd{opacity:1;color:var(--accent)}
+.wkpick button.on .wdb{opacity:1;transform:none}
+.wkpick button.on .wdb svg{stroke:var(--accent)}
+.wkpick button.on .wdl{opacity:1}
+.wkpick button.act{border-color:rgba(143,184,255,.55)}
+.wkpick button.act .wd{opacity:1;color:#8FB8FF}
+.wkpick button.act:not(.on) .wdl{opacity:1;color:#8FB8FF;font-size:15px;line-height:.7}
+.wkpick button.both{border-color:#F2C14E;background:rgba(242,193,78,.09)}
+.wkpick button.both .wd{color:#F2C14E}
+.wkpick button.both .wdb svg{stroke:#F2C14E}
+.wkpick button.both .wdl{color:#F2C14E}
+.wkpick.actmode button.on:not(.act){opacity:.5}
+.wkcount b{color:var(--ink2)}
 
 /* the other sport on the same week, in its own colour */
 .wkmode{display:flex;gap:7px;margin-bottom:11px}
@@ -861,10 +865,8 @@ h1.q{text-align:center}
 .wkmode button i{width:8px;height:8px;border-radius:2px;background:var(--accent);flex:none}
 .wkmode button[data-m="act"] i{background:#8FB8FF}
 .wkmode button.on{color:var(--ink);border-color:var(--ink3);background:#20252b}
-.wkpick button.act .wm{background:#8FB8FF;box-shadow:0 0 8px rgba(143,184,255,.6)}
 .wkpick button.act{border-color:rgba(143,184,255,.5)}
 .wkpick button.both{border-color:#F2C14E}
-.wkpick button.both .wm{background:linear-gradient(90deg,var(--accent) 50%,#8FB8FF 50%)}
 .wkpick.actmode button.on:not(.act){opacity:.55}
 .wkclash{display:block;margin-top:5px;font-size:11.5px;color:#F2C14E}
 
@@ -1139,13 +1141,11 @@ h1.q{text-align:center}
 /* ---------- the week, editable ---------- */
 .wkpick{display:flex;gap:6px;margin:4px 0 6px}
 @supports not (gap:1px){.wkpick>*+*{margin-left:6px}}
-.wkpick button{flex:1;min-width:0;height:62px;border-radius:14px;border:1px solid var(--line);
+.wkpick button{flex:1;min-width:0;height:76px;border-radius:14px;border:1px solid var(--line);
   background:rgba(255,255,255,.030);color:var(--ink3);font-family:inherit;cursor:pointer;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
 .wkpick button .wd{font-size:12.5px;font-weight:650;letter-spacing:.02em}
-.wkpick button .wm{width:7px;height:7px;border-radius:50%;background:var(--line2)}
 .wkpick button.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
-.wkpick button.on .wm{background:var(--accent)}
 .wkcount{font-size:12.5px;color:var(--ink3);margin:0 0 20px}
 .wkcount b{color:var(--accent);font-weight:650}
 /* ---------- deck intro how-to ---------- */
@@ -4133,20 +4133,21 @@ const DEFAULT_WEEK={1:[2],2:[0,3],3:[0,2,5],4:[0,1,3,5],5:[0,1,3,4,6],6:[0,1,2,3
 const SLOTS=[['early','Early morning'],['lunch','Midday'],
              ['after','After work'],['evening','Evening']];
 /* ================= THE WEEK =================
-   Everything the survey has worked out, on one page they can argue with.
-   Days, how long, and when — proposed rather than asked, with the reasoning
-   shown and every part of it movable.
+   The page everything lands on. It is a proposal, not a question: the survey
+   already knows enough to say what the week should be, so it says it, and
+   then hands over every part of it.
 
-   Their other sport sits on the same seven days in its own colour, because
-   someone who plays football on Tuesday should not be handed Tuesday. */
+   Two lines carry the whole idea — "based on your answers", then "our
+   suggestion, adjust anything" — because a plan someone can change is a plan
+   they will keep, and a plan handed down is one they will quietly drop.
+
+   The day cells lost their status dot. A dot under the dumbbell said
+   "selected" twice; the mark already says it, and says what it is. */
 function reveal(){
-  const r = A.rods||{work:55,people:50,recovery:50,training:45};
+  const r = A.rods||PRESETS[0].v;
   const load = A.otherLoad||{};
   const otherSessions = +(load.freq||0);
 
-  /* The proposal: days from the training rod, capped by the recovery rod,
-     minus one if they already train three or more times elsewhere. */
-  /* Days from the training rod, in hours a day; ceiling from recovery. */
   const wanted = r.training<0.28?2 : r.training<0.5?3 : r.training<0.8?4 : r.training<1.2?5 : 6;
   const ceil   = r.recovery<7?3 : r.recovery<8.5?4 : r.recovery<10?5 : 6;
   const sugDays = Math.max(2, Math.min(wanted, ceil) - (otherSessions>=3?1:0));
@@ -4154,6 +4155,7 @@ function reveal(){
 
   const LEN=[['20','20 min'],['35','30–40'],['45','45 min'],['55','45–60'],['75','60–90']];
   const LENNAME=Object.fromEntries(LEN);
+  const SHORT={'20':'20m','35':'35m','45':'45m','55':'50m','75':'75m'};
 
   let picked = (A.trainDays && A.trainDays.length)
     ? A.trainDays.slice()
@@ -4169,14 +4171,15 @@ function reveal(){
   let actDays=(A.actDays||[]).slice();
   let mode='train';
 
-  const d=el(`<h1 class="q">This is your week.</h1>
-    <p class="sub">Built from everything you just told me. Move any of it.</p>
-
-    <div class="wkband">
-      <div class="wkstat"><b id="wkD">${picked.length}</b><span>days</span></div>
-      <div class="wkstat"><b id="wkL">${LENNAME[len]}</b><span>each</span></div>
-      <div class="wkstat"><b id="wkH">0</b><span>hours a week</span></div>
+  const d=el(`
+    <div class="eyebrow ctr">Based on your answers</div>
+    <div class="wkhero">
+      <span class="wkn" id="wkD">${picked.length}</span>
+      <span class="wku">days</span>
+      <span class="wkx">&times;</span>
+      <span class="wkn sm" id="wkL">${LENNAME[len]}</span>
     </div>
+    <p class="wksub">Our suggestion — <b>adjust anything</b>.</p>
 
     ${hasAct?`<div class="wkmode" id="wkmode">
       <button data-m="train" class="on"><i></i>Training</button>
@@ -4184,10 +4187,11 @@ function reveal(){
 
     <div class="wkpick" id="wk">${DAYNAME.map((n,k)=>
       `<button data-k="${k}"><span class="wd">${n[0]}</span>
-        <span class="wdb">${MARK}</span><span class="wm"></span></button>`).join('')}</div>
+        <span class="wdb">${MARK}</span>
+        <span class="wdl"></span></button>`).join('')}</div>
     <p class="wkcount" id="wkc"></p>
 
-    <div class="sillabel">How long</div>
+    <div class="sillabel">How long each time</div>
     <div class="segrow" id="lens">${LEN.map(o=>
       `<button data-l="${o[0]}" style="flex:1 1 30%">${o[1]}</button>`).join('')}</div>
 
@@ -4201,7 +4205,6 @@ function reveal(){
   setFoot(`<button class="cta accent">This is my week</button>`);
   const cta=foot.querySelector('.cta');
 
-  /* Honest about the trade, never refusing it. */
   function verdict(){
     if(picked.length>ceil) return ['warn',
       `<b>${picked.length} days</b> at the recovery you drew is where people stall. I would hold you at ${ceil} — your call.`];
@@ -4219,10 +4222,13 @@ function reveal(){
   function paint(){
     picked.sort((a,b)=>a-b); actDays.sort((a,b)=>a-b);
     wk.querySelectorAll('button').forEach(b=>{
-      const k=+b.dataset.k;
-      b.classList.toggle('on',picked.indexOf(k)>-1);
-      b.classList.toggle('act',actDays.indexOf(k)>-1);
-      b.classList.toggle('both',picked.indexOf(k)>-1 && actDays.indexOf(k)>-1);
+      const k=+b.dataset.k, train=picked.indexOf(k)>-1, act=actDays.indexOf(k)>-1;
+      b.classList.toggle('on',train);
+      b.classList.toggle('act',act);
+      b.classList.toggle('both',train&&act);
+      /* The label under the mark carries the only thing the cell does not
+         already say: how long that day is. Sport days say what they are. */
+      b.querySelector('.wdl').textContent = train ? SHORT[len] : (act ? '•' : '');
     });
     d.querySelectorAll('#lens button').forEach(b=>b.classList.toggle('on',b.dataset.l===len));
     d.querySelectorAll('#slots button').forEach(b=>b.classList.toggle('on',b.dataset.t===slot));
@@ -4230,10 +4236,9 @@ function reveal(){
     const mins=picked.length*(len==='35'?35:len==='45'?45:len==='55'?52:len==='75'?75:20);
     d.querySelector('#wkD').textContent=picked.length;
     d.querySelector('#wkL').textContent=LENNAME[len];
-    d.querySelector('#wkH').textContent=(Math.round(mins/6)/10);
 
     wkc.innerHTML = picked.length
-      ? picked.map(k=>DAYNAME[k]).join(' · ')
+      ? `${picked.map(k=>DAYNAME[k]).join(' · ')} &nbsp;·&nbsp; <b>${(Math.round(mins/6)/10)} hours a week</b>`
       : 'Pick at least one day.';
     const [cls,txt]=verdict();
     note.className='wpnote'+(cls?' '+cls:''); note.innerHTML=txt;
