@@ -244,6 +244,12 @@ body.opening #bars,body.opening #chapline{opacity:0;pointer-events:none}
   width:min(82%,315px);height:auto;overflow:visible;z-index:0;pointer-events:none}
 .heroA .tri path{fill:none;stroke-width:2.6;stroke-linejoin:round;stroke-linecap:round}
 .heroA .tri-l{stroke:url(#triGrad);filter:drop-shadow(0 0 7px rgba(255,95,162,.45))}
+/* Two passes: a soft bloom and a tighter core, both fading out away from the
+   bar. Together they read as light rather than as paint. */
+.heroA .tri-glare{stroke:url(#triGlare);stroke-width:5.5;opacity:0;
+  filter:blur(3.5px) drop-shadow(0 0 10px rgba(255,255,255,.55));
+  transition:opacity .5s ease}
+.heroA.lit .tri-glare{opacity:.9}
 /* One short bright dash chasing the perimeter. Hidden until the mark has
    landed — a light running around an outline that is still being drawn
    reads as two animations fighting. */
@@ -258,11 +264,12 @@ body.opening #bars,body.opening #chapline{opacity:0;pointer-events:none}
    the whole thump is over by 20% and the outline sits quiet for the three
    sides where nothing is passing. One event per lap, in one place. */
 @keyframes triBeat{
-  0%      {filter:drop-shadow(0 0 7px rgba(255,95,162,.45))}
-  5%      {filter:drop-shadow(0 0 18px rgba(255,95,162,.88))}
-  10%     {filter:drop-shadow(0 0 9px  rgba(255,95,162,.52))}
-  15%     {filter:drop-shadow(0 0 14px rgba(255,95,162,.72))}
-  22%,100%{filter:drop-shadow(0 0 7px  rgba(255,95,162,.45))}
+  0%      {filter:drop-shadow(0 0 7px  rgba(255,95,162,.45)); stroke-width:2.6}
+  4%      {filter:drop-shadow(0 0 34px rgba(255,95,162,1))
+                  drop-shadow(0 0 9px rgba(255,255,255,.6));  stroke-width:3.5}
+  9%      {filter:drop-shadow(0 0 10px rgba(255,95,162,.5));  stroke-width:2.7}
+  14%     {filter:drop-shadow(0 0 24px rgba(255,95,162,.9));  stroke-width:3.1}
+  21%,100%{filter:drop-shadow(0 0 7px  rgba(255,95,162,.45)); stroke-width:2.6}
 }
 @media (prefers-reduced-motion:reduce){
   .heroA.lit .tri-spark{animation:none;opacity:.85}
@@ -2068,10 +2075,18 @@ function setFoot(h){
   foot.innerHTML=h;
   requestAnimationFrame(function(){ foot.classList.add('on'); syncFootPad(); });
 }
+/* Measured synchronously, not a frame later. --footpad drives the bottom
+   padding of every screen, so deferring it meant the first frame was laid
+   out against the 150px default and the second against the real value —
+   every screen settled by about 16px after it appeared. On the hero, where
+   the block is vertically centred, that was the glitch on the opening. One
+   forced layout per screen is a fair price for never showing a wrong one. */
 function syncFootPad(){
+  var h=foot.offsetHeight||0;
+  if(h) document.documentElement.style.setProperty('--footpad',(h+28)+'px');
   requestAnimationFrame(function(){
-    var h=foot.offsetHeight||0;
-    document.documentElement.style.setProperty('--footpad',(h+28)+'px');
+    var hh=foot.offsetHeight||0;
+    if(hh) document.documentElement.style.setProperty('--footpad',(hh+28)+'px');
     var sc=stage.querySelector('.screen'); if(sc) checkMore(sc);
   });
 }
@@ -2189,10 +2204,21 @@ function hero(s){
              and the gradient renders nothing at all in iOS Safari. -->
         <linearGradient id="triGrad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="268">
           <stop offset="0%"   stop-color="#FF5FA2"/>
-          <stop offset="22%"  stop-color="#FFB3D2"/>
-          <stop offset="37%"  stop-color="#FFFFFF"/>
-          <stop offset="54%"  stop-color="#FFB3D2"/>
+          <stop offset="26%"  stop-color="#FF8FBE"/>
+          <stop offset="37%"  stop-color="#FFD9E8"/>
+          <stop offset="50%"  stop-color="#FF8FBE"/>
           <stop offset="100%" stop-color="#FF5FA2"/>
+        </linearGradient>
+        <!-- The glare. Light coming OFF the dumbbell and landing on the tube,
+             so it is its own blurred overlay fading to nothing a little above
+             and below the bar line, rather than a white stop inside the pink.
+             y=100 is where the bar crosses the two sides — measured. -->
+        <linearGradient id="triGlare" gradientUnits="userSpaceOnUse" x1="0" y1="70" x2="0" y2="132">
+          <stop offset="0%"   stop-color="#FFFFFF" stop-opacity="0"/>
+          <stop offset="34%"  stop-color="#FFFFFF" stop-opacity=".55"/>
+          <stop offset="50%"  stop-color="#FFFFFF" stop-opacity="1"/>
+          <stop offset="66%"  stop-color="#FFFFFF" stop-opacity=".55"/>
+          <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
         </linearGradient>
       </defs>
       <!-- Not a closed triangle. It starts at x=100 on the top edge, runs
@@ -2205,6 +2231,7 @@ function hero(s){
            Both ends of the break sit at y=16. They were stepped for a
            version and it read as a mistake rather than a choice. -->
       <path class="tri-l" d="M100 16 H286 L150 252 L14 16 H60"/>
+      <path class="tri-glare" d="M100 16 H286 L150 252 L14 16 H60"/>
       <path class="tri-spark" d="M100 16 H286 L150 252 L14 16 H60"/>
     </svg>
       <div class="dbglow"></div>
