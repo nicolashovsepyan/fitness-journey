@@ -741,8 +741,8 @@ h1.q{text-align:center}
 .rxpre button.on{background:rgba(123,227,196,.09);border-color:var(--accent);color:var(--accent)}
 .rxpre button.on span{color:var(--ink2)}
 
-.rxbay{flex:1 1 auto;display:flex;gap:9px;align-items:stretch;min-height:190px;
-  padding:16px 12px 12px;border-radius:18px;background:var(--card);
+.rxbay{flex:1 1 auto;display:flex;gap:9px;align-items:stretch;min-height:210px;
+  padding:44px 12px 12px;border-radius:18px;background:var(--card);
   border:1px solid var(--line);position:relative;overflow:hidden}
 /* the core: a wash behind the rods that changes colour with the mix */
 .rxcore{position:absolute;left:50%;bottom:-42%;width:150%;height:110%;transform:translateX(-50%);
@@ -755,6 +755,21 @@ h1.q{text-align:center}
 
 .rxrod{flex:1;display:flex;flex-direction:column;justify-content:flex-end;
   position:relative;z-index:1;touch-action:none;cursor:grab;user-select:none}
+/* The hours are the number that means something, so they are the number that
+   is big. The sentence underneath says what it feels like; this says what it
+   costs. */
+.rxhrs{text-align:center;margin-bottom:6px;line-height:1;color:var(--rod)}
+.rxhrs b{font-size:19px;font-weight:750;letter-spacing:-.02em}
+.rxhrs i{font-size:11px;font-style:normal;opacity:.75;margin-left:1px}
+.rxlock{position:absolute;top:-30px;left:50%;transform:translateX(-50%);
+  width:26px;height:26px;padding:0;border-radius:8px;border:1px solid var(--line);
+  background:#1b2026;display:grid;place-items:center;cursor:pointer;z-index:3;opacity:.5}
+.rxlock svg{width:13px;height:13px;fill:none;stroke:var(--ink2);stroke-width:1.9;
+  stroke-linecap:round;stroke-linejoin:round}
+.rxrod.locked .rxlock{opacity:1;border-color:var(--rod);background:#22282e}
+.rxrod.locked .rxlock svg{stroke:var(--rod)}
+.rxrod.locked .rxtrack{box-shadow:inset 0 0 0 1.5px var(--rod)}
+.rxrod.locked{cursor:default}
 .rxrod:active{cursor:grabbing}
 .rxtrack{flex:1;display:flex;align-items:flex-end;border-radius:10px;
   background:rgba(255,255,255,.035);overflow:hidden;box-shadow:inset 0 0 0 1px var(--line)}
@@ -763,8 +778,9 @@ h1.q{text-align:center}
 .rxrod.drag .rxfill{transition:none}
 .rxname{font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;font-weight:750;
   text-align:center;margin-top:9px;color:var(--rod)}
-.rxsay{margin-top:12px;min-height:52px;flex:0 0 auto}
-.rxsay div{display:flex;gap:9px;align-items:baseline;font-size:13px;padding:2px 0;color:var(--ink2)}
+.rxsay{margin-top:14px;min-height:56px;flex:0 0 auto}
+.rxsay div{display:flex;gap:9px;align-items:baseline;font-size:13.5px;padding:3px 0;color:var(--ink2)}
+.rxsay em{font-style:normal;color:var(--rod);font-weight:650;margin-left:5px}
 .rxsay i{width:7px;height:7px;border-radius:2px;flex:none;background:var(--rod);
   box-shadow:0 0 7px var(--rod);position:relative;top:-1px}
 .rxsay b{color:var(--ink);font-weight:600}
@@ -1505,8 +1521,8 @@ const FLOW = [
    a share out of ten on a single page, and the share is the part nobody can
    answer honestly in the abstract. Now: draw the week, watch it read back,
    then be told what it comes to and argue with that. */
-{ ch:5, type:'reactor', h:'Where does your week actually go?',
-  sub:'No numbers. Just move the bars until the sentences below are true.' },
+{ ch:5, type:'reactor', h:'How is your life split right now?',
+  sub:'Move the bars until the 4 lines underneath are true. Lock one to hold it still.' },
 { ch:5, type:'reading' },
 { ch:5, type:'weekplan' },
 
@@ -2830,21 +2846,30 @@ function goalone(s){
 /* ================= THE REACTOR =================
    Four rods, a fixed budget, and every rod labelled in plain life rather
    than in points. See FOR NICOLAS/YOUR WEEK — THE REACTOR.md */
+/* Each rod carries its own hour range, because they are not comparable on one
+   scale: 50 on Recovery is roughly sixty hours of sleep and rest a week, 50 on
+   Training is about four. A single ladder down the side would either make
+   Training a sliver or make Recovery meaningless, so the hours live on each
+   rod instead — big, and updating as it moves. */
 const RODS = [
-  { k:'work',     n:'Work',     c:'#8FB8FF',
+  { k:'work',     n:'Work',     c:'#8FB8FF', h:[21,62],
     say:['Under 35 hour weeks','A steady 40 hours','Long weeks, most weeks','It takes the evenings too'] },
-  { k:'people',   n:'People',   c:'#FFB3D2',
+  { k:'people',   n:'People',   c:'#FFB3D2', h:[0,32],
     say:['Weekends, mostly','A few evenings a week','Most evenings are theirs','They come first, always'] },
-  { k:'recovery', n:'Recovery', c:'#C9A7FF',
+  { k:'recovery', n:'Recovery', c:'#C9A7FF', h:[28,69],
     say:['Under 6 hours, no rest day','6 to 7 hours, one easy day','7 to 8 hours, a real rest day','8 hours and a protected day'] },
-  { k:'training', n:'Training', c:'#7BE3C4',
+  { k:'training', n:'Training', c:'#7BE3C4', h:[0,7],
     say:['Whatever is left over','2 or 3 sessions','3 or 4 sessions, planned','5 sessions, planned first'] },
 ];
+function rodHours(o, v){
+  const h = Math.max(0.5, o.h[0] + (o.h[1]-o.h[0]) * (v/100));
+  return h < 10 ? (Math.round(h*2)/2) : Math.round(h);
+}
 const RXBUDGET = 200;                      // four rods, 50 each is even
 const PRESETS = [
-  { k:'steady',  n:'Steady',  s:'Nothing dominates',      v:{work:55,people:50,recovery:50,training:45} },
-  { k:'surge',   n:'Surge',   s:'Training comes first',   v:{work:45,people:40,recovery:50,training:65} },
-  { k:'holding', n:'Holding', s:'It goes in the gaps',    v:{work:70,people:55,recovery:45,training:30} },
+  { k:'stable',  n:'Stable',        s:'Nothing dominates',    v:{work:55,people:50,recovery:50,training:45} },
+  { k:'booster', n:'Health booster',s:'Training comes first', v:{work:45,people:40,recovery:50,training:65} },
+  { k:'minimum', n:'Bare minimum',  s:'It goes in the gaps',  v:{work:70,people:55,recovery:45,training:30} },
 ];
 /* Which of the four sentences a rod is currently saying. */
 function rodBand(v){ return v<35 ? 0 : v<52 ? 1 : v<70 ? 2 : 3; }
@@ -2863,6 +2888,10 @@ function rxStrain(r){
 function reactor(s){
   const r = Object.assign({work:55,people:50,recovery:50,training:45}, A.rods||{});
   let preset = A.rodPreset || (A.rods ? '' : null);
+  /* Locked rods are held out of the rebalance entirely. Two is the cap: with
+     three locked there is only one rod left and the budget stops being a
+     trade-off, it just becomes a number you cannot change. */
+  const locked = new Set(A.rodLocks||[]);
 
   const d=el(`${head(s)}
     <div class="rxwrap">
@@ -2870,6 +2899,8 @@ function reactor(s){
         `<button data-p="${pz.k}"><b>${pz.n}</b><span>${pz.s}</span></button>`).join('')}</div>
       <div class="rxbay"><div class="rxcore" id="rxcore"></div>
         ${RODS.map(o=>`<div class="rxrod" data-k="${o.k}" style="--rod:${o.c}">
+          <button class="rxlock" data-k="${o.k}" aria-label="Lock ${o.n}">${LOCKSVG}</button>
+          <div class="rxhrs"><b>0</b><i>h</i></div>
           <div class="rxtrack"><div class="rxfill"></div></div>
           <div class="rxname">${o.n}</div></div>`).join('')}</div>
       <div class="rxsay" id="rxsay"></div>
@@ -2880,21 +2911,23 @@ function reactor(s){
   const cta=foot.querySelector('.cta'), core=d.querySelector('#rxcore'),
         say=d.querySelector('#rxsay'), hint=d.querySelector('#rxhint');
 
-  /* Move one rod, and the others give up the difference in proportion to
-     what they have — so a rod already near the floor is not driven negative
-     and the one you are holding lands exactly where you put it. */
   function setRod(k, want){
     want = Math.max(8, Math.min(92, Math.round(want)));
-    const others = RODS.map(o=>o.k).filter(x=>x!==k);
-    const pool = others.reduce((a,x)=>a+r[x], 0);
-    const left = RXBUDGET - want;
-    if(pool<=0){ others.forEach(x=>r[x]=left/others.length); }
-    else { others.forEach(x=>{ r[x] = Math.max(8, r[x] * (left/pool)); }); }
+    const free = RODS.map(o=>o.k).filter(x=>x!==k && !locked.has(x));
+    if(!free.length) return;                       // everything else is held
+    const heldTotal = RODS.map(o=>o.k).filter(x=>x!==k && locked.has(x))
+                          .reduce((a,x)=>a+r[x],0);
+    const pool = free.reduce((a,x)=>a+r[x], 0);
+    const left = RXBUDGET - want - heldTotal;
+    if(left < free.length*8){                      // not enough room; clamp the drag
+      want = RXBUDGET - heldTotal - free.length*8;
+      free.forEach(x=>r[x]=8);
+    } else if(pool<=0){ free.forEach(x=>r[x]=left/free.length); }
+    else { free.forEach(x=>{ r[x] = Math.max(8, r[x] * (left/pool)); }); }
     r[k] = want;
-    /* rounding drift lands on the biggest of the others, where it shows least */
     const drift = RXBUDGET - RODS.reduce((a,o)=>a+r[o.k],0);
-    if(Math.abs(drift)>0.01){
-      const big = others.sort((a,b)=>r[b]-r[a])[0];
+    if(Math.abs(drift)>0.01 && free.length){
+      const big = free.slice().sort((a,b)=>r[b]-r[a])[0];
       r[big] += drift;
     }
   }
@@ -2903,17 +2936,20 @@ function reactor(s){
     RODS.forEach(o=>{
       const rod=d.querySelector(`.rxrod[data-k="${o.k}"]`);
       rod.querySelector('.rxfill').style.height = r[o.k].toFixed(1)+'%';
+      rod.querySelector('.rxhrs b').textContent = rodHours(o, r[o.k]);
+      rod.classList.toggle('locked', locked.has(o.k));
     });
     say.innerHTML = RODS.map(o=>
-      `<div style="--rod:${o.c}"><i></i><span><b>${o.n}</b> — ${o.say[rodBand(r[o.k])]}</span></div>`).join('');
+      `<div style="--rod:${o.c}"><i></i><span><b>${o.n}</b> — ${o.say[rodBand(r[o.k])]}
+        <em>${rodHours(o,r[o.k])}h a week</em></span></div>`).join('');
 
     const st = rxStrain(r);
     core.style.setProperty('--rxc', st<.42 ? '#7BE3C4' : st<.68 ? '#F2C14E' : '#FF5F6D');
     core.style.setProperty('--rxbeat', Math.round(3200 - st*1700)+'ms');
     core.style.opacity = (0.42 + st*0.4).toFixed(2);
     hint.className = 'rxhint' + (st>=.68?' rxwarn':'');
-    hint.textContent = st<.42 ? 'That holds. Drag any bar to change it.'
-      : st<.68 ? 'Tight, but it works. Drag any bar to change it.'
+    hint.textContent = st<.42 ? 'That holds. Drag any bar, or lock one to hold it still.'
+      : st<.68 ? 'Tight, but it works. Drag any bar, or lock one to hold it still.'
       : 'Training is being paid for out of recovery. That is the mix that stalls.';
 
     cta.classList.toggle('accent', preset!==null);
@@ -2928,8 +2964,17 @@ function reactor(s){
     paint();
   });
 
-  /* Drag anywhere on a rod. Pointer events so it works with a finger, a
-     mouse and a pencil without three code paths. */
+  d.querySelectorAll('.rxlock').forEach(b=>b.onclick=ev=>{
+    ev.stopPropagation();
+    const k=b.dataset.k;
+    if(locked.has(k)) locked.delete(k);
+    else {
+      if(locked.size>=2){ toast('2 locks at a time — the rest has to be free to move.',2400); return; }
+      locked.add(k);
+    }
+    haptic(15); paint();
+  });
+
   d.querySelectorAll('.rxrod').forEach(rod=>{
     const track=rod.querySelector('.rxtrack');
     let id=null, last=-1;
@@ -2938,6 +2983,8 @@ function reactor(s){
       return (1 - (ev.clientY - box.top) / box.height) * 100;
     };
     rod.addEventListener('pointerdown', ev=>{
+      if(ev.target.closest('.rxlock')) return;
+      if(locked.has(rod.dataset.k)){ haptic(6); toast('That one is locked. Tap the padlock to free it.',2000); return; }
       id=ev.pointerId; rod.setPointerCapture(id); rod.classList.add('drag');
       preset = preset===null ? '' : preset;
       d.querySelectorAll('.rxpre button').forEach(x=>x.classList.remove('on'));
@@ -2945,9 +2992,9 @@ function reactor(s){
     });
     rod.addEventListener('pointermove', ev=>{
       if(id===null) return;
-      const v=from(ev); setRod(rod.dataset.k, v); paint();
+      setRod(rod.dataset.k, from(ev)); paint();
       const band=rodBand(r[rod.dataset.k]);
-      if(band!==last){ last=band; haptic(11); }        // a tick as the sentence changes
+      if(band!==last){ last=band; haptic(11); }
     });
     ['pointerup','pointercancel'].forEach(e=>rod.addEventListener(e, ()=>{
       if(id===null) return;
@@ -2956,15 +3003,18 @@ function reactor(s){
     }));
   });
 
-  if(preset) d.querySelector(`.rxpre button[data-p="${preset}"]`).classList.add('on');
+  if(preset) { const b=d.querySelector(`.rxpre button[data-p="${preset}"]`); if(b) b.classList.add('on'); }
   cta.onclick=()=>{ haptic(14);
     A.rods = {work:Math.round(r.work),people:Math.round(r.people),
               recovery:Math.round(r.recovery),training:Math.round(r.training)};
     A.rodPreset = preset || 'custom';
+    A.rodLocks = [...locked];
     A.capacity = rodsToCapacity(A.rods);
     next(); };
   paint();
 }
+const LOCKSVG='<svg viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="9.5" rx="2.2"/>'
+  +'<path d="M8.2 10.5V7.8a3.8 3.8 0 017.6 0v2.7"/></svg>';
 
 /* ---- reading your week: the only place 21 and 22 are ever used ---- */
 function reading(s){
