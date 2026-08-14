@@ -49,19 +49,32 @@ function resolveDir(parent, wanted) {
 const SYS = process.argv[2] || resolveDir(ROOT, 'FOR NICOLAS');
 const PAGE = join(ROOT, 'onboarding.html');
 
-/* deck id -> the Exercise column in the CSVs */
+/* deck id -> the Exercise column in the CSVs.
+   These are the ladder's ids, so the list changed when the ladder replaced
+   the two fixed decks: mountain climber, wall sit, hip thrust and the
+   Romanian deadlift are no longer asked about, and ten rungs arrived that
+   have no row yet. A missing row is not fatal — the card still has its own
+   bands — it just means the slider cannot tell the person where they sit
+   against a standard, which is the whole point of the slider. */
 const MAP = {
-  pushup:   'Push-Up',              bwsquat: 'Squat',
-  lunge:    'Bulgarian Split Squat', jumpsquat: 'Jump Squat',
-  slrdl:    'Single-Leg RDL',       pullup:  'Pull-Up',
-  invrow:   'Australian Pull-Up',   pike:    'Pike Push-Up',
-  mtnclimb: 'Mountain Climber',     wallsit: 'Wall Sit',
-  plank:    'Plank',                hang:    'Dead Hang',
-  squat:    'Back Squat',           dead:    'Deadlift',
-  rdl:      'Romanian Deadlift',    bench:   'Bench Press',
-  ohp:      'Overhead Press',       row:     'Bent-Over Row',
-  thrust:   'Hip Thrust (Barbell)', carry:   'Farmer Carry',
-  kbswing:  'Kettlebell Swing',     split:   'Bulgarian Split Squat (Loaded)',
+  /* bodyweight rungs */
+  pushup:   'Push-Up',              bwsquat:  'Squat',
+  lunge:    'Bulgarian Split Squat',jumpsquat:'Jump Squat',
+  slrdl:    'Single-Leg RDL',       pullup:   'Pull-Up',
+  invrow:   'Australian Pull-Up',   pike:     'Pike Push-Up',
+  plank:    'Plank',                hang:     'Dead Hang',
+  /* loaded rungs */
+  squat:    'Back Squat',           dead:     'Deadlift',
+  bench:    'Bench Press',          ohp:      'Overhead Press',
+  row:      'Bent-Over Row',        carry:    'Farmer Carry',
+  kbswing:  'Kettlebell Swing',     splitld:  'Bulgarian Split Squat (Loaded)',
+  /* new rungs — rows still to be drafted with Nicolas */
+  goblet:   'Goblet Squat',         dbrdl:    'Dumbbell RDL',
+  dbpress:  'Dumbbell Press',       dbohp:    'Dumbbell Overhead Press',
+  dbrow:    'Single-Arm Row',       dips:     'Dip',
+  tablerow: 'Table Row',            towelrow: 'Towel Door Row',
+  burpee:   'Navy Seal Burpee',     hkr:      'Hanging Knee Raise',
+  legraise: 'Lying Leg Raise',      bagcarry: 'Loaded Backpack Carry',
 };
 
 /* Minimal CSV reader. These files are hand-edited, so a value may well

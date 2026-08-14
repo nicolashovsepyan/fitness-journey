@@ -63,8 +63,6 @@ const MAP = {
   pullup:    'pull-up-anime-male.png',
   invrow:    'inverted-row-squat-rack-barbell-lower-v2.png',
   pike:      'pike-push-up-anime-transparent-v2.png',
-  mtnclimb:  'mountain-climber-anime.png',
-  wallsit:   'wall-sit-anime.png',
   plank:     'plank-forearms-and-straight-arms-stacked-transparent.png',
   hang:      'dead-hang-anime.png',
 
@@ -75,29 +73,42 @@ const MAP = {
   row:       'bent-over-barbell-row-135lb-Supinated.png',
   carry:     'farmers-carry-anime-transparent.png',
   kbswing:   'kettlebell-swing-anime.png',
-  split:     'bulgarian-split-squat-50lb-dumbbells-anime.png',   // gym deck = loaded version
 
-  /* Added 2026-08-13 — the two holes the gym deck actually had. */
-  dead:      'Exercise_Illustration_Collection/03_Lower_Body_Glutes_Posterior_Chain/033_conventional_deadlift_135lb.png',
-  thrust:    'Exercise_Illustration_Collection/FitnessJourney_Exercise_Illustrations_Set_2/hip_thrust.png',
-};
+  /* The loaded split squat is the same render the old gym deck used. */
+  splitld:   'bulgarian-split-squat-50lb-dumbbells-anime.png',
 
-/* Drawn and ready, deliberately NOT inlined yet: dips, burpee, hanging knee
-   raise, man-maker. No deck asks for them until the ladders are wired, and
-   every entry here is base64 in the first byte of the page — four unused
-   cards cost about 180 KB on a cold link over mobile data. They are already
-   built into images/exercises/ for the app. Move them up into MAP the day
-   the ladder gives them a card. */
-const PENDING = {
+  /* Added 2026-08-13 — the holes the old gym deck had, then the ones the
+     ladder gave a card to. Movements the ladder no longer asks about
+     (Romanian deadlift, hip thrust, mountain climber, wall sit) came out:
+     each entry is base64 in the first byte of the page, so an unused card is
+     pure weight on a cold link over mobile data. */
   dips:      'Exercise_Illustration_Collection/FitnessJourney_Exercise_Illustrations_Set_2/dip.png',
   burpee:    'burpee-five-stage-transparent.png',
   hkr:       'hanging-knee-raises-transparent-v3.png',
+  dead:      'Exercise_Illustration_Collection/03_Lower_Body_Glutes_Posterior_Chain/033_conventional_deadlift_135lb.png',
+};
+
+/* Drawn and ready, deliberately NOT inlined: no deck asks for the man-maker
+   yet, and every entry here is base64 in the first byte of the page. It is
+   already built into images/exercises/ for the app. Move it up into MAP the
+   day the ladder gives it a card. */
+const PENDING = {
   manmaker:  'man-maker-six-stage-transparent.png',
 };
 
-/* Asked for by the deck, no artwork yet. Listed rather than left silent. */
+/* Asked for by the ladder, no artwork yet. Listed rather than left silent.
+   Six of these are the bare-floor and dumbbell rungs, so the people with the
+   least kit currently get the plainest cards — the wrong way round. */
 const MISSING = {
-  rdl:    'Romanian deadlift (the conventional deadlift render is a different movement)',
+  goblet:   'Goblet squat',
+  dbrdl:    'Dumbbell RDL',
+  dbpress:  'Dumbbell press (floor or bench)',
+  dbohp:    'Dumbbell overhead press',
+  dbrow:    'Single-arm dumbbell row',
+  tablerow: 'Table row',
+  towelrow: 'Towel door row',
+  legraise: 'Lying leg raise',
+  bagcarry: 'Loaded backpack carry',
 };
 
 const sh = (c, a) => execFileSync(c, a, { maxBuffer: 1 << 30 });
