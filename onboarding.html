@@ -231,15 +231,20 @@ body.opening #bars,body.opening #chapline{opacity:0;pointer-events:none}
    reads as two animations fighting. */
 .heroA .tri-spark{stroke:#fff;stroke-width:3.5;opacity:0;
   filter:drop-shadow(0 0 9px #FF5FA2) drop-shadow(0 0 3px #fff)}
-.heroA.lit .tri-spark{opacity:1;animation:triRun var(--beat,2400ms) linear infinite}
-.heroA.lit .tri-l{animation:triBeat var(--beat,2400ms) ease-in-out infinite}
+.heroA.lit .tri-spark{opacity:1;
+  animation:triRun var(--beat,4400ms) linear -1650ms infinite}
+.heroA.lit .tri-l{animation:triBeat var(--beat,4400ms) ease-in-out -1650ms infinite}
 @keyframes triRun{ from{stroke-dashoffset:0} to{stroke-dashoffset:-777} }
-/* The line breathes on the same clock as the spark, so the glow swells as
-   the light comes round — one heartbeat, not two things blinking. */
+/* A real heartbeat — lub, then a smaller dub — and it only happens while the
+   light is on the long top edge. That window is the first 24% of the lap, so
+   the whole thump is over by 20% and the outline sits quiet for the three
+   sides where nothing is passing. One event per lap, in one place. */
 @keyframes triBeat{
-  0%,58%  {filter:drop-shadow(0 0 7px rgba(255,95,162,.45))}
-  72%     {filter:drop-shadow(0 0 15px rgba(255,95,162,.75))}
-  100%    {filter:drop-shadow(0 0 7px rgba(255,95,162,.45))}
+  0%      {filter:drop-shadow(0 0 7px rgba(255,95,162,.45))}
+  5%      {filter:drop-shadow(0 0 18px rgba(255,95,162,.88))}
+  10%     {filter:drop-shadow(0 0 9px  rgba(255,95,162,.52))}
+  15%     {filter:drop-shadow(0 0 14px rgba(255,95,162,.72))}
+  22%,100%{filter:drop-shadow(0 0 7px  rgba(255,95,162,.45))}
 }
 @media (prefers-reduced-motion:reduce){
   .heroA.lit .tri-spark{animation:none;opacity:.85}
@@ -631,6 +636,43 @@ h1.q{text-align:center}
 .metaline{margin-top:30px;font-size:12.5px;color:var(--ink3);letter-spacing:.02em}
 
 /* ---------- the contract ---------- */
+/* ---------- the opening, as a message thread ----------
+   It was a table: label on the left, promise on the right, five rows. True,
+   and it read like terms and conditions. The same five things arriving as
+   messages from the coach say something the table could not — that there is
+   a person on the other end — before a single question is asked. */
+.chatwrap{flex:1;display:flex;flex-direction:column;justify-content:flex-end;
+  padding:8px 0 4px;min-height:0}
+.chathead{display:flex;align-items:center;gap:9px;padding-bottom:14px;margin-bottom:14px;
+  border-bottom:1px solid var(--line);flex:0 0 auto}
+.chathead i{width:30px;height:30px;border-radius:50%;flex:none;display:grid;place-items:center;
+  background:linear-gradient(145deg,var(--accent),#2f8f78);color:#0d1114;
+  font-size:13px;font-weight:800;font-style:normal;box-shadow:0 0 14px rgba(123,227,196,.28)}
+.chathead b{font-size:14.5px;font-weight:600;letter-spacing:-.01em}
+.chathead span{font-size:11px;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;
+  font-weight:650;margin-left:auto;display:flex;align-items:center;gap:5px}
+.chathead span::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);
+  box-shadow:0 0 8px var(--accent)}
+.chat{display:flex;flex-direction:column;gap:8px;overflow:hidden}
+.cbub{align-self:flex-start;max-width:84%;background:var(--card);border:1px solid var(--line);
+  border-radius:19px 19px 19px 5px;padding:11px 15px;font-size:15px;line-height:1.42;
+  color:var(--ink);opacity:0;transform:translateY(9px) scale(.97);transform-origin:0 100%;
+  transition:opacity .32s cubic-bezier(.22,1,.36,1),transform .32s cubic-bezier(.22,1,.36,1)}
+.cbub.on{opacity:1;transform:none}
+/* The last one is the point of the screen, so it is the only one that glows. */
+.cbub.key{border-color:rgba(123,227,196,.42);box-shadow:0 0 22px rgba(123,227,196,.13)}
+.cbub b{color:var(--accent);font-weight:600}
+.cbub small{display:block;margin-top:4px;font-size:12.5px;color:var(--ink3);line-height:1.4}
+.typing{align-self:flex-start;display:none;gap:4px;background:var(--card);
+  border:1px solid var(--line);border-radius:19px 19px 19px 5px;padding:13px 15px}
+.typing.on{display:flex}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--ink3);
+  animation:tdot 1.25s ease-in-out infinite}
+.typing i:nth-child(2){animation-delay:.16s}
+.typing i:nth-child(3){animation-delay:.32s}
+@keyframes tdot{0%,60%,100%{opacity:.28;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+@media (prefers-reduced-motion:reduce){ .typing i{animation:none;opacity:.6} }
+
 .promise{flex:1;display:flex;flex-direction:column;justify-content:center;padding:8px 0}
 .promise h1{font-size:26px;line-height:1.22;letter-spacing:-.022em;font-weight:550;margin-bottom:24px}
 /* a row with no label is a continuation of the one above it, so it sits closer */
@@ -1213,14 +1255,14 @@ const FLOW = [
   sub:'starts here',
   cta:'Take the first step' },
 
-{ ch:0, type:'promise', h:'Here\'s how this works.', cta:'Got it',
-  rows:[
-    ['You',     'Answer honestly.',                    '4 minutes. No wrong answers, nothing to fail.'],
-    ['The AI',  'Reads every answer and learns you.',  'Not a template. Built from what you actually said.'],
-    ['A coach', 'A human reviews it and guides you.',  'Read line by line before it reaches you.'],
-    /* second coach line, no label — it reads as a continuation of the one above */
-    ['',        'Together we build a program that works.','Functional, progressive, and built around your week.'],
-    ['Then',    'Your log. Your data. Your journey.',  'Every answer and every session, yours, forever.']
+{ ch:0, type:'promise', cta:'Got it',
+  msgs:[
+    "Right. Here is how this works.",
+    "You answer honestly. <b>4 minutes</b>, no typing, nothing you can fail.",
+    "The AI reads every answer and learns you. Not a template — built from what you actually said.",
+    "Then I read it. Line by line, before it reaches you.",
+    "And we build the program together. Functional, progressive, built around your week.",
+    "After that it is your log. Your data. Your journey.<small>Every answer and every session, yours, forever.</small>"
   ]},
 
 /* 1 · YOU */
@@ -2044,7 +2086,9 @@ function hero(s){
     /* short bright dash, one long gap — the gap is the rest of the outline */
     triSpark.style.strokeDasharray='54 '+(TRI_LEN-54);
     triSpark.style.strokeDashoffset=0;
-    heroEl.style.setProperty('--beat','2400ms');   // spine/theme.json beatMs
+    /* The dumbbell's clock, not theme.json's — the light is meant to travel
+       at the speed of the mark, so it takes the rep animation's period. */
+    heroEl.style.setProperty('--beat','4400ms');
   }
   const paths=[].slice.call(d.querySelectorAll('.rep path.stroked'));
   const strokes=paths.map(function(el,k){
@@ -2225,24 +2269,48 @@ function hero(s){
   });
 }
 
-/* the contract — lines arrive one at a time, then the button */
+/* the contract — as messages, arriving one at a time with the coach typing */
 function promise(s){
-  const d=el(`<div class="promise"><h1>${s.h}</h1>
-    ${s.rows.map(r=>`<div class="prow${r[0]?'':' cont'}"><div class="who">${r[0]}</div>
-      <div class="what">${r[1]}<small>${r[2]}</small></div></div>`).join('')}</div>`);
-  const rows=[].slice.call(d.querySelectorAll('.prow'));
-  rows.forEach(function(r,k){ later(function(){ r.classList.add('on'); haptic(8); }, 260 + k*500); });
-  later(function(){ setFoot(`<button class="cta accent">${s.cta}</button>`);
-    foot.querySelector('.cta').onclick=()=>{haptic(16);next();}; }, 260 + rows.length*500 + 180);
-  /* First tap skips the reveal, the next one moves on — same two-tap rhythm
-     as the opening, so the whole intro can be got through without aiming at
-     anything. */
-  d.onclick=function(){
-    if(foot.querySelector('.cta')){ haptic(16); next(); return; }
-    rows.forEach(function(r){r.classList.add('on');});
-    clearPending();
+  const d=el(`<div class="chatwrap">
+    <div class="chathead"><i>${COACH.name[0]}</i><b>Coach ${COACH.name}</b><span>Online</span></div>
+    <div class="chat" id="chat">
+      ${s.msgs.map((m,k)=>`<div class="cbub${k===s.msgs.length-1?' key':''}">${m}</div>`).join('')}
+      <div class="typing" id="typing"><i></i><i></i><i></i></div>
+    </div></div>`);
+  const bubs=[].slice.call(d.querySelectorAll('.cbub')), typing=d.querySelector('#typing');
+
+  /* Typing indicator, then the bubble — the pause is what makes it read as a
+     person rather than a list animating in. Longer messages take longer to
+     "type", capped so nobody waits on the last one. */
+  let k=0;
+  function step(){
+    if(k>=bubs.length){ typing.classList.remove('on'); showCta(); return; }
+    typing.classList.add('on');
+    const chars=bubs[k].textContent.trim().length;
+    later(function(){
+      typing.classList.remove('on');
+      bubs[k].classList.add('on');
+      typing.parentNode.appendChild(typing);      // stays at the bottom
+      haptic(9); k++;
+      later(step, 260);
+    }, Math.min(900, 340 + chars*7));
+  }
+  function showCta(){
+    if(foot.querySelector('.cta')) return;
     setFoot(`<button class="cta accent">${s.cta}</button>`);
     foot.querySelector('.cta').onclick=()=>{haptic(16);next();};
+  }
+  function skip(){
+    clearPending(); typing.classList.remove('on');
+    bubs.forEach(b=>b.classList.add('on')); k=bubs.length; showCta();
+  }
+  if(REDUCED) skip(); else later(step, 420);
+
+  /* Same two-tap rhythm as the opening: first tap lands the whole thread,
+     the next one moves on. */
+  d.onclick=function(){
+    if(k>=bubs.length){ haptic(16); next(); return; }
+    haptic(12); skip();
   };
 }
 
