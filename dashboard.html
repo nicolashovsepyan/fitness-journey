@@ -945,38 +945,6 @@ h2.h{font-size:23px;line-height:1.2;letter-spacing:-.022em;font-weight:550}
   animation:foldIn .3s cubic-bezier(.22,1,.36,1) both}
 .dayx-art{flex:none;display:flex}
 
-/* ---- the square, shared by cell and stack --------------------------
-   A lit square is solid. The one you are inside is an outline holding a
-   partial fill, so the remainder is visible instead of rounded off. The
-   first empty square breathes: that is the one being asked for. */
-.sq{position:relative;display:block;border-radius:3px;overflow:visible;
-  background:rgba(255,255,255,.055);box-shadow:inset 0 0 0 1px rgba(255,255,255,.045);
-  transition:background .35s,box-shadow .35s;transition-delay:var(--d,0s)}
-.sq.on{background:linear-gradient(180deg,var(--neon),var(--accent));
-  box-shadow:0 0 8px var(--accent-soft), inset 0 0 0 1px rgba(255,255,255,.18)}
-.sq.part{box-shadow:inset 0 0 0 1px var(--accent)}
-.sq.part:after{content:"";position:absolute;left:0;right:0;bottom:0;border-radius:2px;
-  height:calc(var(--f) * 100%);background:var(--accent);opacity:.75}
-.sq.next{box-shadow:inset 0 0 0 1px var(--neon-line);animation:sqNext 2s ease-in-out infinite}
-@keyframes sqNext{0%,100%{opacity:.35}50%{opacity:1}}
-
-/* the spark, shared by ember and stack */
-.spk{position:absolute;left:50%;top:0;width:0;height:0;pointer-events:none;z-index:3}
-.spk i{position:absolute;left:-1.5px;top:0;width:3px;height:3px;border-radius:50%;
-  background:var(--neon);box-shadow:0 0 7px var(--neon);
-  animation:spark 2.2s ease-out infinite;animation-delay:var(--d,0s)}
-@keyframes spark{
-  0%{opacity:0;transform:translate(0,2px) scale(.5)}
-  20%{opacity:1}
-  100%{opacity:0;transform:translate(-7px,-19px) scale(.15)}}
-
-/* ---- CELL: squares in a row under the number ---- */
-.sty-cell .dayx-hd{flex-wrap:wrap;gap:0 13px}
-.sty-cell .dayx-chev{margin-left:auto}
-.sty-cell .dayx-art{flex:1 1 100%;order:3;margin-top:13px}
-.sty-cell .row{display:flex;gap:4px;width:100%}
-.sty-cell .sq{flex:1;height:15px}
-
 /* ---- CLIMB ----------------------------------------------------------
    The number moved next to the rungs. It was on the far left, a whole card
    away from the thing it describes, so the eye had to travel to connect
@@ -1016,30 +984,83 @@ h2.h{font-size:23px;line-height:1.2;letter-spacing:-.022em;font-weight:550}
 .rung.next{background:var(--neon);box-shadow:0 0 7px var(--neon);
   animation:sqNext 2s ease-in-out infinite}
 
-/* ---- EMBER: a bar burning toward 100 ---- */
-.sty-ember .dayx-hd{padding-bottom:30px}
-.sty-ember .dayx-art{position:absolute;left:17px;right:17px;bottom:13px;display:block}
-/* embar, not bar: a bare .bar also caught the photo progress bars and gave
-   them a pill radius and an inset outline they were never meant to have. */
-.embar{position:relative;display:block;height:7px;border-radius:999px;
-  background:rgba(0,0,0,.34);box-shadow:inset 0 0 0 1px var(--line)}
-.embar-f{position:absolute;left:0;top:0;bottom:0;width:var(--p);border-radius:999px;
-  background:linear-gradient(90deg,var(--accent),var(--neon) 84%,#fff);
-  box-shadow:0 0 16px var(--neon-line);transition:width .9s cubic-bezier(.22,1,.36,1)}
-.embar-tip{position:absolute;top:0;left:var(--p);width:0;height:0;
-  transition:left .9s cubic-bezier(.22,1,.36,1)}
-.sty-ember.full .embar-tip{display:none}
+/* ---- SUNSET -----------------------------------------------------------
+   The disc lives in a box on the right and the horizon is a rule across the
+   whole card, so the sun sits IN the card rather than in a widget parked on
+   it. overflow:hidden on that box is what makes the horizon a horizon: the
+   sun is genuinely cut off by it rather than drawn short. */
+.sty-sunset .dayx-art{position:absolute;right:0;top:0;bottom:12px;width:190px;
+  overflow:hidden;pointer-events:none;
+  -webkit-mask:linear-gradient(90deg,transparent,#000 40%);
+          mask:linear-gradient(90deg,transparent,#000 40%)}
+.sty-sunset:after{content:"";position:absolute;left:0;right:0;bottom:12px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--accent) 30%,var(--accent));
+  box-shadow:0 0 12px var(--accent);opacity:.5;pointer-events:none;z-index:1}
+.sun{width:100%;height:100%;overflow:visible}
+.sun-c,.sun-h{transition:cy .9s cubic-bezier(.22,1,.36,1)}
+.sun-h{fill:var(--neon);opacity:.2;filter:blur(11px);
+  animation:sunBreathe 5s ease-in-out infinite}
+@keyframes sunBreathe{0%,100%{opacity:.14}50%{opacity:.32}}
+.sty-sunset.full .sun-h{opacity:.45}
 
-/* ---- STACK: the three favourites in one — squares climbing the right
-       edge, one at a time, with a spark off the top lit one ---- */
-/* Ten squares up a 20px column would be 5px dashes. Widening the column
-   and giving the card a little more height gets them close enough to
-   square to read as blocks rather than as a dashed line. */
-.sty-stack .dayx-hd{min-height:104px}
-.sty-stack .dayx-art{width:26px;height:92px;margin:-4px 2px -4px 0}
-.sqcol{gap:2.5px}
-.sty-stack .sq{flex:1;width:100%;border-radius:2.5px}
-.sty-stack.full .spk{display:none}
+/* ---- GRID -------------------------------------------------------------
+   One-point perspective, vanishing at the top edge. The rungs you have
+   already passed are lit, and the scan runs away from you on a loop, eased
+   IN so it accelerates toward the horizon the way a road does. */
+/* the whole card, not a strip of it — a road in a 60px band reads as a
+   stack of lines rather than as distance */
+.sty-grid .dayx-art{position:absolute;inset:0;pointer-events:none;overflow:hidden;
+  -webkit-mask:linear-gradient(0deg,#000 42%,transparent 96%);
+          mask:linear-gradient(0deg,#000 42%,transparent 96%)}
+.grid{width:100%;height:100%}
+.grid line{vector-effect:non-scaling-stroke}
+.gv{stroke:var(--line2);stroke-width:1;opacity:.42}
+.gl{stroke:var(--line2);stroke-width:1;opacity:.34;transition:stroke .5s,opacity .5s}
+.gl.on{stroke:var(--accent);opacity:.95;filter:drop-shadow(0 0 4px var(--accent))}
+.gscan{stroke:var(--neon);stroke-width:1.6;opacity:0;
+  filter:drop-shadow(0 0 7px var(--neon));
+  animation:gScan 3.6s cubic-bezier(.6,0,.85,.4) infinite}
+@keyframes gScan{
+  0%  {transform:translateY(60px);opacity:0}
+  12% {opacity:.9}
+  92% {opacity:0}
+  100%{transform:translateY(0);opacity:0}}
+
+/* ---- REELS ------------------------------------------------------------
+   Each digit in its own window, cylinder-shaded top and bottom, with the
+   hairline across the middle where a real reel is split. */
+.sty-reels .dayx-art{order:-1;margin-right:14px}
+.reels{display:flex;gap:4px;align-items:stretch}
+.rl{position:relative;width:34px;height:52px;border-radius:6px;overflow:hidden;
+  background:linear-gradient(180deg,#11151a,#1b2129 46%,#1b2129 54%,#0d1116);
+  box-shadow:inset 0 0 0 1px var(--line2), inset 0 8px 12px -8px #000,
+             inset 0 -8px 12px -8px #000}
+.rl i{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-style:normal;font-size:31px;font-weight:600;letter-spacing:-.04em;
+  color:var(--ink);font-variant-numeric:tabular-nums;
+  text-shadow:0 0 12px var(--accent-soft)}
+.rl:after{content:"";position:absolute;left:0;right:0;top:50%;height:1px;
+  background:rgba(255,255,255,.10)}
+.rl.pc{width:20px;background:none;box-shadow:none}
+.rl.pc i{font-size:13px;color:var(--accent);align-items:flex-end;padding-bottom:11px}
+.rl.pc:after{display:none}
+.reels.roll .rl i{animation:reelRoll .5s cubic-bezier(.2,.9,.3,1) both;animation-delay:var(--d,0s)}
+@keyframes reelRoll{
+  0%  {transform:translateY(-115%);filter:blur(2.5px)}
+  70% {filter:blur(0)}
+  100%{transform:translateY(0);filter:blur(0)}}
+
+/* ---- BOARD ------------------------------------------------------------
+   The unlit segments stay visible. That is the whole trick of a real LED
+   panel: you can see the shape of the eight that the number is not. */
+.sty-board .dayx-art{order:-1;margin-right:14px;align-items:center}
+.board{display:flex;align-items:flex-end;gap:3px}
+.sev{width:29px;height:51px;overflow:visible}
+.sg{fill:var(--ink);opacity:.06;transition:opacity .35s,fill .35s}
+.sg.on{fill:var(--accent);opacity:1;filter:drop-shadow(0 0 5px var(--accent))}
+.bpc{font-size:13px;font-weight:700;color:var(--accent);letter-spacing:.04em;
+  padding-bottom:5px;text-shadow:0 0 8px var(--accent-soft)}
+.sty-board.full .sg.on{fill:var(--neon);filter:drop-shadow(0 0 7px var(--neon))}
 
 /* ---- the receipt, shared ---- */
 .dh-list{display:flex;flex-wrap:wrap;gap:7px}
@@ -2468,40 +2489,119 @@ function header(){
    "eleven percent" is not. The part-filled square carries the
    remainder so nothing is rounded away.
    ------------------------------------------------------------ */
-const DAY_STYLES = [['cell','Cell'],['climb','Climb'],['ember','Ember'],['stack','Stack']];
-const dayStyle = () => S.dayStyle || 'stack';
-const STEPS = 10;
+/* Five gauges that are not all the same idea in different clothes. Cell,
+   Climb, Ember and Stack were four ways of counting blocks; these change
+   what the card IS.
 
-/* how many blocks are full, and how full the next one is */
+     sunset  the synthwave sun, rising out of the slats as the day fills.
+     grid    a perspective road that lights up toward the horizon.
+     reels   the number on slot-machine reels that roll when it changes.
+     board   an arcade scoreboard — seven-segment, ghost segments and all.
+     climb   the incumbent, kept so there is something to judge against.
+
+   The rule I held to: no palm trees, no chrome lettering, no gradient
+   sunburst. Eighties by MECHANISM — a rising sun, a receding road, a
+   mechanical reel, an LED panel — rather than by costume. Costume is what
+   makes this stuff cheesy; the machinery is what makes it good. */
+const DAY_STYLES = [['sunset','Sunset'],['grid','Grid'],['reels','Reels'],
+                    ['board','Board'],['climb','Climb']];
+const dayStyle = () => S.dayStyle || 'sunset';
+const STEPS = 10;
+/* the two where the number IS the gauge, so the default one is suppressed */
+const NUM_IN_ART = st => st === 'reels' || st === 'board';
+
 function blocks(pct){
   const exact = pct/100*STEPS;
   const full = Math.floor(exact + 1e-9);
   return {full, frac: Math.min(1, exact - full)};
 }
 
+/* ---- seven-segment geometry, in a 16x28 cell ---- */
+const SEG_ON = ['abcdef','bc','abdeg','abcdg','bcfg','acdfg','acdefg','abc','abcdefg','abcdfg'];
+/* A real seven-segment bar is about six times longer than it is thick. At
+   two-to-one they stop reading as strokes of a numeral and start reading as
+   a pile of hexagons, which is what the first pass did. */
+const hbar = y => `2.5,${y} 4.3,${y-1.7} 11.7,${y-1.7} 13.5,${y} 11.7,${y+1.7} 4.3,${y+1.7}`;
+const vbar = (x,y1,y2) => `${x},${y1} ${x+1.7},${y1+1.8} ${x+1.7},${y2-1.8} ${x},${y2} ${x-1.7},${y2-1.8} ${x-1.7},${y1+1.8}`;
+const SEG_PTS = {a:hbar(2.5), g:hbar(14), d:hbar(25.5),
+                 f:vbar(2.5,4.2,12.3), b:vbar(13.5,4.2,12.3),
+                 e:vbar(2.5,15.7,23.8), c:vbar(13.5,15.7,23.8)};
+const digit = d => {
+  const on = SEG_ON[d] || '';
+  return `<svg class="sev" viewBox="0 0 16 28" aria-hidden="true">${
+    Object.keys(SEG_PTS).map(k =>
+      `<polygon class="sg ${on.includes(k)?'on':''}" points="${SEG_PTS[k]}"/>`).join('')}</svg>`;
+};
+
 function dayArt(st, pct){
   const {full, frac} = blocks(pct);
-  const sq = (i, extra) =>
-    `<span class="sq ${i<full?'on':''} ${i===full&&frac>0?'part':''} ${i===full&&frac<=0?'next':''}"
-       style="--d:${(i*0.045).toFixed(2)}s;--f:${(i===full?frac:0).toFixed(3)}">${extra||''}</span>`;
-  const spark = `<span class="spk">${[0,1,2].map(i=>`<i style="--d:${(i*0.6).toFixed(2)}s"></i>`).join('')}</span>`;
 
-  if(st === 'cell')
-    return `<span class="row">${Array.from({length:STEPS},(_,i)=>
-      sq(i, (i===full-1 && frac<=0) || (i===full && frac>0) ? spark : '')).join('')}</span>`;
+  /* ---- SUNSET ---------------------------------------------------------
+     The sun sits BELOW the horizon at zero and climbs out of it. Slats get
+     thicker toward the bottom, so the lower half of the disc is mostly gap
+     and the top is nearly solid — which is what sells it as light rather
+     than as a striped circle. */
+  if(st === 'sunset'){
+    /* The box is cut off AT the horizon, so 0% is a disc entirely below the
+       line and 100% is one clear of it. cy runs 112 down to 40 across that. */
+    const cy = (112 - pct/100 * 72).toFixed(1);
+    const slats = Array.from({length:10}, (_,i) =>
+      `<rect x="0" y="${(30 + i*5).toFixed(1)}" width="140" height="${(0.7 + i*0.55).toFixed(1)}"/>`).join('');
+    return `<svg class="sun" viewBox="0 0 140 80" preserveAspectRatio="xMaxYMax meet" aria-hidden="true">
+      <defs>
+        <linearGradient id="sunG" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stop-color="var(--neon)"/>
+          <stop offset="45%"  stop-color="var(--neon)"/>
+          <stop offset="100%" stop-color="var(--accent)"/>
+        </linearGradient>
+        <mask id="slatM">
+          <rect x="0" y="0" width="140" height="140" fill="#fff"/>
+          <g fill="#000">${slats}</g>
+        </mask>
+      </defs>
+      <circle class="sun-h" cx="84" cy="${cy}" r="36"/>
+      <circle class="sun-c" cx="84" cy="${cy}" r="36" fill="url(#sunG)" mask="url(#slatM)"/>
+    </svg>`;
+  }
 
-  if(st === 'climb')
-    return `<span class="gcol">${Array.from({length:STEPS},(_,i)=>
-      `<span class="rung ${STEPS-1-i<full?'on':''} ${STEPS-1-i===full?'next':''}"></span>`).join('')}</span>`;
+  /* ---- GRID -----------------------------------------------------------
+     A road, drawn in one-point perspective. The rungs nearest you light
+     first and the lit edge travels toward the horizon, so filling the day
+     is distance covered. A scan runs the same way on a loop. */
+  if(st === 'grid'){
+    const N = 7;
+    const ys = Array.from({length:N}, (_,i) => 60 * Math.pow(1 - i/N, 2.2));
+    const lit = Math.round(pct/100 * N);
+    const rows = ys.map((y,i) =>
+      `<line class="gl ${i < lit ? 'on' : ''}" x1="0" y1="${y.toFixed(2)}" x2="120" y2="${y.toFixed(2)}"/>`).reverse().join('');
+    const cols = Array.from({length:9}, (_,j) =>
+      `<line class="gv" x1="60" y1="0" x2="${-120 + j*45}" y2="60"/>`).join('');
+    return `<svg class="grid" viewBox="0 0 120 60" preserveAspectRatio="none" aria-hidden="true">
+      ${cols}${rows}<line class="gscan" x1="0" y1="0" x2="120" y2="0"/>
+    </svg>`;
+  }
 
-  if(st === 'ember')
-    return `<span class="embar"><span class="embar-f"></span><span class="embar-tip">${spark}</span></span>`;
+  /* ---- REELS ----------------------------------------------------------
+     One window per digit, a bright line across the middle, and cylinder
+     shading top and bottom. They roll on every render where the number
+     changed, which is the only time a reel should ever move. */
+  if(st === 'reels'){
+    const ds = String(pct).split('');
+    return `<span class="reels ${DAY_ROLLED ? 'roll' : ''}">
+      ${ds.map((d,i) => `<span class="rl" style="--d:${(i*0.07).toFixed(2)}s"><i>${d}</i></span>`).join('')}
+      <span class="rl pc"><i>%</i></span>
+    </span>`;
+  }
 
-  /* stack — squares up the right edge, spark off the top lit one */
-  return `<span class="gcol sqcol">${Array.from({length:STEPS},(_,i)=>{
-    const idx = STEPS-1-i;
-    return sq(idx, idx===full-1 || (idx===full && frac>0) ? spark : '');
-  }).join('')}</span>`;
+  /* ---- BOARD ---------------------------------------------------------- */
+  if(st === 'board'){
+    const ds = String(pct).split('');
+    return `<span class="board">${ds.map(d => digit(+d)).join('')}<span class="bpc">%</span></span>`;
+  }
+
+  /* ---- CLIMB ---------------------------------------------------------- */
+  return `<span class="gcol">${Array.from({length:STEPS},(_,i)=>
+    `<span class="rung ${STEPS-1-i<full?'on':''} ${STEPS-1-i===full?'next':''}"></span>`).join('')}</span>`;
 }
 
 /* ---- what the card SAYS ------------------------------------------
@@ -2533,6 +2633,8 @@ function dayLine(sc){
 
 function dayHero(sc){
   const st = dayStyle();
+  DAY_ROLLED = DAY_LAST !== null && DAY_LAST !== sc.pct;
+  DAY_LAST = sc.pct;
   const open = !!(S.folds && S.folds.score);
   const {title, sub} = dayLine(sc);
   const rows = sc.parts.filter(p=>p.pts>0).map(p=>{
@@ -2545,7 +2647,7 @@ function dayHero(sc){
       style="--pf:${(sc.pct/100).toFixed(3)};--p:${sc.pct}%">
     <span class="dayx-glow" aria-hidden="true"></span>
     <button class="dayx-hd" data-act="fold:score">
-      <span class="dayx-n"><span class="tnum">${sc.pct}</span><i>%</i></span>
+      ${NUM_IN_ART(st) ? '' : `<span class="dayx-n"><span class="tnum">${sc.pct}</span><i>%</i></span>`}
       <span class="dayx-tx"><b>${title}</b><small>${sub}</small></span>
       <span class="dayx-art">${dayArt(st, sc.pct)}</span>
       <span class="dayx-chev">${svg(I.arrow)}</span>
@@ -3694,6 +3796,9 @@ let PENDING_TODO = null;
 /* Which habit was ticked a moment ago, so its percentage can visibly catch
    light on the way into the total. Cleared as soon as it has been drawn. */
 let JUST_HABIT = null;
+/* The last percentage the day gauge drew. A reel that spins on every render
+   is a fidget; one that spins only when the number changed is a machine. */
+let DAY_LAST = null, DAY_ROLLED = false;
 function closeSheet(){ sheet.classList.remove('on'); scrim.classList.remove('on'); PENDING_TODO=null; }
 scrim.onclick=closeSheet;
 

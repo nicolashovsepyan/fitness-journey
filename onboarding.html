@@ -855,28 +855,52 @@ h1.q{text-align:center}
 .wksub{text-align:center;font-size:13.5px;color:var(--ink3);margin:0 0 18px}
 .wksub b{color:var(--ink2)}
 
-.wkpick button{position:relative;flex-direction:column;gap:0;padding-top:7px}
-.wkpick .wd{font-size:11px;font-weight:700;letter-spacing:.08em;opacity:.5;
-  transition:opacity .2s;position:absolute;top:7px;left:0;right:0}
-.wkpick .wdb{margin-top:11px;width:24px;opacity:.16;transform:scale(.78);
-  transition:opacity .22s,transform .22s}
-.wkpick .wdb svg{width:24px;height:24px;display:block;fill:none;stroke:var(--ink3);
-  stroke-width:2;stroke-linecap:round;transition:stroke .22s}
-.wkpick .wdl{font-size:9.5px;font-weight:700;letter-spacing:.03em;color:var(--accent);
-  margin-top:2px;min-height:12px;opacity:0;transition:opacity .22s}
-.wkpick button.on{border-color:var(--accent);background:var(--accent-soft)}
-.wkpick button.on .wd{opacity:1;color:var(--accent)}
+.wkpick button{position:relative;flex-direction:column;gap:0;padding-top:8px;
+  background:var(--card);transition:border-color .25s,box-shadow .25s,background .25s}
+.wkpick .wd{font-size:11.5px;font-weight:700;letter-spacing:.08em;opacity:.42;
+  transition:opacity .2s,color .2s}
+/* The box stays the same dark grey as every other day. Only the outline and
+   the glow change — a training day should read as lit, not as a filled tile. */
+.wkpick .wdb{margin-top:9px;width:26px;opacity:.14;transform:scale(.8);
+  transition:opacity .3s,transform .3s}
+.wkpick .wdb svg{width:26px;height:26px;display:block;fill:none;stroke:var(--ink3);
+  stroke-width:2;stroke-linecap:round;transition:stroke .25s}
+.wkpick button.on{border-color:var(--neon);
+  box-shadow:0 0 18px -3px var(--neon-line), inset 0 0 14px -6px var(--neon-line)}
+.wkpick button.on .wd{opacity:1;color:var(--neon)}
 .wkpick button.on .wdb{opacity:1;transform:none}
-.wkpick button.on .wdb svg{stroke:var(--accent)}
-.wkpick button.on .wdl{opacity:1}
-.wkpick button.act{border-color:rgba(143,184,255,.55)}
+.wkpick button.on .wdb svg{stroke:var(--neon)}
+/* the mark breathes on the training days, on the mark's own clock */
+.wkpick button.on .wdb{animation:wkPulse 4400ms ease-in-out infinite}
+.wkpick button.on:nth-child(2) .wdb{animation-delay:-500ms}
+.wkpick button.on:nth-child(3) .wdb{animation-delay:-1000ms}
+.wkpick button.on:nth-child(4) .wdb{animation-delay:-1500ms}
+.wkpick button.on:nth-child(5) .wdb{animation-delay:-2000ms}
+.wkpick button.on:nth-child(6) .wdb{animation-delay:-2500ms}
+.wkpick button.on:nth-child(7) .wdb{animation-delay:-3000ms}
+@keyframes wkPulse{0%,100%{filter:drop-shadow(0 0 0 transparent)}
+                   50%{filter:drop-shadow(0 0 7px var(--neon-line))}}
+.wkpick button.act{border-color:rgba(143,184,255,.6)}
 .wkpick button.act .wd{opacity:1;color:#8FB8FF}
-.wkpick button.act:not(.on) .wdl{opacity:1;color:#8FB8FF;font-size:15px;line-height:.7}
-.wkpick button.both{border-color:#F2C14E;background:rgba(242,193,78,.09)}
+.wkpick button.act .wdb{opacity:.5;transform:scale(.86)}
+.wkpick button.act .wdb svg{stroke:#8FB8FF}
+.wkpick button.both{border-color:#F2C14E;
+  box-shadow:0 0 18px -3px rgba(242,193,78,.5), inset 0 0 14px -6px rgba(242,193,78,.5)}
 .wkpick button.both .wd{color:#F2C14E}
+.wkpick button.both .wdb{opacity:1;transform:none}
 .wkpick button.both .wdb svg{stroke:#F2C14E}
-.wkpick button.both .wdl{color:#F2C14E}
-.wkpick.actmode button.on:not(.act){opacity:.5}
+.wkpick.actmode button.on:not(.act){opacity:.45}
+/* the row arrives, left to right */
+.wkpick button{animation:wkIn .42s cubic-bezier(.22,1,.36,1) both}
+.wkpick button:nth-child(1){animation-delay:.04s} .wkpick button:nth-child(2){animation-delay:.09s}
+.wkpick button:nth-child(3){animation-delay:.14s} .wkpick button:nth-child(4){animation-delay:.19s}
+.wkpick button:nth-child(5){animation-delay:.24s} .wkpick button:nth-child(6){animation-delay:.29s}
+.wkpick button:nth-child(7){animation-delay:.34s}
+@keyframes wkIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){
+  .wkpick button{animation:none}
+  .wkpick button.on .wdb{animation:none}
+}
 .wkcount b{color:var(--ink2)}
 
 /* the other sport on the same week, in its own colour */
@@ -891,6 +915,37 @@ h1.q{text-align:center}
 .wkpick button.both{border-color:#F2C14E}
 .wkpick.actmode button.on:not(.act){opacity:.55}
 .wkclash{display:block;margin-top:5px;font-size:11.5px;color:#F2C14E}
+
+.sendwhy{display:block;margin-top:5px;opacity:.72}
+
+/* the add-to-home-screen card, and the logo on the last screen */
+.addbox{display:flex;align-items:center;gap:13px;margin-top:16px;padding:13px 15px;
+  background:var(--card);border:1px solid var(--line);border-radius:16px;
+  opacity:0;transform:translateY(9px);transition:opacity .45s,transform .45s}
+.addbox.on{opacity:1;transform:none;border-color:rgba(255,95,162,.45);
+  box-shadow:0 0 26px -8px var(--neon-line)}
+.addmark{width:38px;height:38px;flex:none;border-radius:10px;display:grid;place-items:center;
+  background:#12161a;border:1px solid rgba(255,95,162,.4)}
+.addmark svg{width:24px;height:24px;fill:none;stroke:var(--neon);stroke-width:2;stroke-linecap:round}
+.addbox b{display:block;font-size:14px;font-weight:650}
+.addbox span{display:block;font-size:12.5px;color:var(--ink3);line-height:1.4;margin-top:2px}
+.addbox span b{display:inline;color:var(--ink2);font-size:12.5px}
+
+.entrymark{position:relative;width:104px;height:93px;margin:0 auto 18px}
+.entrymark .tri{position:absolute;inset:0;width:104px;height:93px;overflow:visible}
+.entrymark .tri path{fill:none;stroke:url(#eGrad);stroke-width:3.4;stroke-linejoin:round;
+  stroke-linecap:round;filter:drop-shadow(0 0 7px var(--neon-line));
+  animation:entryBeat 4400ms ease-in-out infinite}
+@keyframes entryBeat{
+  0%     {filter:drop-shadow(0 0 7px  var(--neon-line))}
+  5%     {filter:drop-shadow(0 0 20px rgba(255,95,162,.9))}
+  11%    {filter:drop-shadow(0 0 9px  var(--neon-line))}
+  16%    {filter:drop-shadow(0 0 15px rgba(255,95,162,.75))}
+  24%,100%{filter:drop-shadow(0 0 7px var(--neon-line))}}
+.entrydb{position:absolute;left:50%;top:36%;transform:translate(-50%,-50%);width:56px}
+.entrydb svg{width:56px;height:56px;display:block;fill:none;stroke:var(--accent);
+  stroke-width:2;stroke-linecap:round;filter:drop-shadow(0 0 10px rgba(123,227,196,.4))}
+@media (prefers-reduced-motion:reduce){ .entrymark .tri path{animation:none} }
 
 /* ---------- the deck ---------- */
 .deckwrap{flex:1;display:flex;flex-direction:column;min-height:0}
@@ -1163,7 +1218,7 @@ h1.q{text-align:center}
 /* ---------- the week, editable ---------- */
 .wkpick{display:flex;gap:6px;margin:4px 0 6px}
 @supports not (gap:1px){.wkpick>*+*{margin-left:6px}}
-.wkpick button{flex:1;min-width:0;height:76px;border-radius:14px;border:1px solid var(--line);
+.wkpick button{flex:1;min-width:0;height:72px;border-radius:14px;border:1px solid var(--line);
   background:rgba(255,255,255,.030);color:var(--ink3);font-family:inherit;cursor:pointer;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
 .wkpick button .wd{font-size:12.5px;font-weight:650;letter-spacing:.02em}
@@ -1648,14 +1703,22 @@ const FLOW = [
 { ch:8, type:'loader' },
 { ch:8, type:'reveal' },
 { ch:8, type:'patternscreen' },
-{ ch:8, type:'building' },
-/* "Pick the day we talk" moved to the dashboard. It promised a
-   conversation the app cannot yet have, and the weekly check-in it points
-   at is a format of its own that has not been designed. Asking for a day
-   before the thing exists is asking someone to commit to nothing.
-   See DASHBOARD QUESTIONS.md */
-{ ch:8, type:'text', key:'email', h:'Where should I send your program?',
-  sub:'One email when it is ready. Nothing else, ever.',
+/* The ending, as a thread again — the same voice that opened it. The
+   deliverable changed: nothing gets emailed. The link goes on the home
+   screen, becomes the app, and the programme arrives inside it. */
+{ ch:8, type:'nextsteps', cta:'Add it to my home screen',
+  msgs:[
+    "That is everything I need.",
+    "Last part, and it is the important one. <b>Add this page to your home screen.</b>",
+    "It stops being a link and becomes <b>your app</b> — it opens full screen, it works with no signal, and everything you just told me is already in it.",
+    "Open it and you land on <b>your dashboard</b>. Have a look around: your log, your movements, your week — all of it is yours from the first day.",
+    "I build the programme from here and it appears <b>inside the app</b>. <b>You will get a message the moment it is ready.</b><small>Nothing to check. Nothing to wait for in an inbox.</small>"
+  ]},
+/* Still asked, but not as a delivery address any more — the programme
+   arrives in the app. This is only so the account can be found again from
+   another phone. Optional, and said so. */
+{ ch:8, type:'text', key:'email', h:'An email, so you can never lose this.',
+  sub:'Only used to find your account again from another phone. Skip it if you would rather.',
   placeholder:'you@email.com', kb:'email', cta:'Finish' },
 { ch:8, type:'entry' }
 ];
@@ -2183,7 +2246,7 @@ function head(s,dynSub){
 }
 function render(){const s=FLOW[i];if(!s)return;
   ({hero,promise,chapter,text,single,multi,rank,rankdyn,stepper,bands,levels,body,shape,insight,numbers,feelings,
-    vitals,equip,deckintro,deck,enjoy,actload,goalone,week,reactor,reading,weekplan,loader,reveal,patternscreen,building,entry}[s.type])(s);}
+    vitals,equip,deckintro,deck,enjoy,actload,goalone,week,reactor,reading,nextsteps,loader,reveal,patternscreen,entry}[s.type])(s);}
 
 /* hero — "The Path": a route draws itself up the screen, milestones light,
    the summit glows and keeps breathing. Everything below is one clear promise. */
@@ -4229,14 +4292,13 @@ function reveal(){
     </div>
     <p class="wksub">Our suggestion — <b>adjust anything</b>.</p>
 
-    ${hasAct?`<div class="wkmode" id="wkmode">
+    <div class="wkmode" id="wkmode">
       <button data-m="train" class="on"><i></i>Training</button>
-      <button data-m="act"><i></i>${actName}</button></div>`:''}
+      <button data-m="act"><i></i>${hasAct?actName:'Anything else'}</button></div>
 
     <div class="wkpick" id="wk">${DAYNAME.map((n,k)=>
       `<button data-k="${k}"><span class="wd">${n[0]}</span>
-        <span class="wdb">${MARK}</span>
-        <span class="wdl"></span></button>`).join('')}</div>
+        <span class="wdb">${MARK}</span></button>`).join('')}</div>
     <p class="wkcount" id="wkc"></p>
 
     <div class="sillabel">How long each time</div>
@@ -4276,7 +4338,8 @@ function reveal(){
       b.classList.toggle('both',train&&act);
       /* The label under the mark carries the only thing the cell does not
          already say: how long that day is. Sport days say what they are. */
-      b.querySelector('.wdl').textContent = train ? SHORT[len] : (act ? '•' : '');
+      /* Nothing under the mark. The duration is stated once, large, at the
+         top of the page — repeating it seven times was noise. */
     });
     d.querySelectorAll('#lens button').forEach(b=>b.classList.toggle('on',b.dataset.l===len));
     d.querySelectorAll('#slots button').forEach(b=>b.classList.toggle('on',b.dataset.t===slot));
@@ -4299,7 +4362,7 @@ function reveal(){
     const at=list.indexOf(k);
     if(at>-1) list.splice(at,1); else list.push(k);
     paint();});
-  if(hasAct) d.querySelectorAll('#wkmode button').forEach(b=>b.onclick=()=>{haptic(12);
+  d.querySelectorAll('#wkmode button').forEach(b=>b.onclick=()=>{haptic(12);
     mode=b.dataset.m;
     d.querySelectorAll('#wkmode button').forEach(x=>x.classList.toggle('on',x===b));
     wk.classList.toggle('actmode', mode==='act');});
@@ -4332,22 +4395,60 @@ function patternscreen(){
   foot.querySelector('.cta').onclick=()=>{haptic(400);next();};
 }
 
-/* building — 24h, human review, and the deck to do meanwhile */
-function building(){
-  const dt=new Date(); dt.setDate(dt.getDate()+1);
-  const when=dt.toLocaleDateString('en-GB',{weekday:'long'})+' morning';
-  el(`<div class="eyebrow ctr">What happens next</div>
-    <h1 class="q">Your program is being written.</h1>
-    <div style="text-align:center"><span class="eta">${ico('clock')} Ready ${when}</span></div>
-    <p class="sub">Not generated and forgotten. Built from your answers, then <b>read line by line by a human coach</b>. That is why it takes a day and not a second.</p>
-    <div class="byline"><div class="avatar">N</div>
-      <div><b>Nico</b>Reviews and adjusts every program before it ships</div></div>
-    <div class="todo"><h4>20 cards while you wait</h4>
-      <p>One exercise per card. Swipe right if you know it, left if you want me to show you. A minute, and it decides what I explain and what I assume.</p></div>
-    <p class="micro" style="text-align:center">You will get a notification the moment it is ready.</p>`);
-  setFoot(`<button class="cta accent">Start the cards</button><button class="skip">Later</button>`);
-  foot.querySelector('.cta').onclick=()=>{haptic(400);A.cardsNow=true;next();};
-  foot.querySelector('.skip').onclick=()=>{haptic(14);A.cardsNow=false;next();};
+/* ---- the ending, as a thread ----
+   Same voice as the opening screen, and the same rhythm: typing, then the
+   bubble. It closes the loop the survey opened — the person who said "here
+   is how this works" is the one telling them what happens now.
+
+   What happens now changed. Nothing is emailed. The page goes on the home
+   screen, becomes the app, and the programme lands inside it. */
+function nextsteps(s){
+  const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const how = ios
+    ? 'Tap <b>Share</b>, then <b>Add to Home Screen</b>.'
+    : 'Open the browser menu, then <b>Add to Home screen</b> — or <b>Install</b>.';
+
+  const d=el(`<div class="chatwrap">
+    <div class="chathead"><i>${COACH.name[0]}</i><b>Coach ${COACH.name}</b><span>Online</span></div>
+    <div class="chat" id="chat">
+      ${s.msgs.map((m,k)=>`<div class="cbub${k===s.msgs.length-1?' key':''}">${m}</div>`).join('')}
+      <div class="typing" id="typing"><i></i><i></i><i></i></div>
+    </div>
+    <div class="addbox" id="addbox">
+      <div class="addmark">${MARK}</div>
+      <div><b>Fitness Journey</b><span>${how}</span></div>
+    </div></div>`);
+
+  const bubs=[].slice.call(d.querySelectorAll('.cbub')), typing=d.querySelector('#typing'),
+        addbox=d.querySelector('#addbox');
+  let k=0;
+  function step(){
+    if(k>=bubs.length){ typing.classList.remove('on'); land(); return; }
+    typing.classList.add('on');
+    const chars=bubs[k].textContent.trim().length;
+    later(function(){
+      typing.classList.remove('on');
+      bubs[k].classList.add('on');
+      typing.parentNode.appendChild(typing);
+      haptic(9); k++;
+      later(step, 240);
+    }, Math.min(950, 340 + chars*6));
+  }
+  function land(){
+    addbox.classList.add('on');
+    if(foot.querySelector('.cta')) return;
+    setFoot(`<button class="cta accent">${s.cta}</button>`);
+    foot.querySelector('.cta').onclick=()=>{haptic(400);next();};
+    syncFootPad();
+  }
+  function skip(){ clearPending(); typing.classList.remove('on');
+    bubs.forEach(b=>b.classList.add('on')); k=bubs.length; land(); }
+  if(REDUCED) skip(); else later(step, 420);
+  d.onclick=function(ev){
+    if(ev.target.closest('#addbox')) return;
+    if(k>=bubs.length){ haptic(16); next(); return; }
+    haptic(12); skip();
+  };
 }
 
 /* entry 001 — the Log opens, and the profile goes to the coach */
@@ -4357,7 +4458,20 @@ function entry(){
   const saved=saveLocal();
   const link=profileLink();
   el(`<div class="hero" style="justify-content:flex-start;padding-top:4px">
-    <div class="mark" style="width:44px;margin-bottom:16px">${MARK}</div>
+    <!-- The mark here is the logo, so it is drawn as the logo: inside the
+         triangle, lit, the same object the survey opened with. -->
+    <div class="entrymark">
+      <svg class="tri lit" viewBox="0 0 300 268" aria-hidden="true">
+        <defs>
+          <linearGradient id="eGrad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="268">
+            <stop offset="0%" stop-color="#FF5FA2"/><stop offset="37%" stop-color="#FFD9E8"/>
+            <stop offset="100%" stop-color="#FF5FA2"/>
+          </linearGradient>
+        </defs>
+        <path d="M100 16 H286 L150 252 L14 16 H60"/>
+      </svg>
+      <span class="entrydb">${MARK}</span>
+    </div>
     <div class="eyebrow">${A.name?A.name+"'s Log":'Your Log'} &middot; Entry 001</div>
     <h1 style="font-size:30px">That is the<br><em>first rep.</em></h1>
     <p style="font-size:15px">It counts, and it is logged. Everything from here is just the next one.</p>
@@ -4369,13 +4483,15 @@ function entry(){
     </div>
     <div class="sendbox">
       <div class="coachtag"><i>N</i>Coach ${COACH.name}</div>
-      <h4>Send it over</h4>
-      <p>Everything you just answered, in one link. ${COACH.name} reads it, builds the program, and it comes back within 24 hours.</p>
+      <h4>One last tap</h4>
+      <p>This sends me everything you just answered, in one link. I read it, build the programme,
+         and <b>it appears in your app</b> — you will get a message there when it is ready.</p>
       <div class="sendrow">
         <button class="pri" id="sendBtn">Send to ${COACH.name}</button>
         <button id="copyBtn">Copy link</button>
       </div>
-      <p class="micro sendto">Opens your mail app, already addressed to<br><b>${COACH.email}</b></p>
+      <p class="micro sendto">Opens your mail app, already addressed to<br><b>${COACH.email}</b><br>
+        <span class="sendwhy">Until the app can carry it itself, this is how your answers reach me.</span></p>
       <div id="sentMark"></div>
     </div>
     <p class="micro">Nothing gets overwritten. When something changes it becomes a new entry with a new date.${saved?'':' <b>Note:</b> this browser blocked local saving — use the link.'}</p></div>`);

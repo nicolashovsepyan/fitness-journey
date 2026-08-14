@@ -1,0 +1,976 @@
+<meta charset="utf-8">
+<title>Metropolis Mark</title>
+
+<style>
+/* ==========================================================================
+   LOGO PREVIEW — the mark, its motion, and its two halves.
+
+   Generated from logo/hero.css + logo/hero.js. The mark's own rules are
+   copied VERBATIM below between the LOGO:CSS markers so that what is judged
+   here is what ships. Everything outside those markers is page chrome and
+   exists only in this file.
+
+   Single theme on purpose. The glare and the drop-shadows are built against
+   a dark ground; rendering them on white would misrepresent the mark.
+   ========================================================================== */
+
+:root{
+  /* Ground and panels: near-black carrying a slight cool bias, so the app's
+     own #171A1E panels sit ABOVE the page rather than dissolving into it. */
+  --ground:#101317;
+  --panel:#171B20;
+  --panel-2:#1D2229;
+  --line:#262C34;
+  --line-2:#333B45;
+  --ink:#E8EDF2;
+  --ink-2:#9AA5B1;
+  --ink-3:#6B7681;
+  /* The only two saturated colours on the page belong to the mark. */
+  --neon:#FF5FA2;
+  --jade:#3ECBA8;
+  --ok:#3ECBA8;
+  --warn:#E8B04B;
+  --off:#6B7681;
+
+  --sans:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Roboto,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace;
+
+  --gut:clamp(20px,4vw,40px);
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--ground);
+  color:var(--ink);
+  font:400 15.5px/1.55 var(--sans);
+  letter-spacing:-.006em;
+}
+
+/* ---------- shell ---------- */
+.wrap{max-width:1080px;margin:0 auto;padding:0 var(--gut) 96px}
+
+.eyebrow{
+  font:600 10.5px/1 var(--mono);
+  letter-spacing:.22em;text-transform:uppercase;color:var(--ink-3);
+  margin:0;
+}
+
+/* ---------- masthead ---------- */
+.mast{padding:clamp(44px,8vh,84px) 0 0;display:flex;flex-direction:column;gap:18px}
+.mast h1{
+  margin:0;font-size:clamp(30px,5.2vw,46px);line-height:1.05;
+  letter-spacing:-.03em;font-weight:600;text-wrap:balance;
+}
+.mast .lede{
+  margin:0;max-width:60ch;color:var(--ink-2);font-size:16.5px;line-height:1.6;
+}
+.mast .lede b{color:var(--ink);font-weight:550}
+
+.credits{
+  display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;
+}
+.credits span{
+  font:500 11px/1 var(--mono);letter-spacing:.08em;
+  color:var(--ink-2);background:var(--panel);
+  border:1px solid var(--line);border-radius:999px;padding:7px 11px;
+}
+.credits span em{font-style:normal;color:var(--ink-3)}
+
+/* ---------- sections ---------- */
+section{padding-top:clamp(48px,7vh,76px)}
+.shead{
+  display:flex;align-items:baseline;justify-content:space-between;gap:20px;
+  flex-wrap:wrap;border-top:1px solid var(--line);padding-top:20px;margin-bottom:26px;
+}
+.shead h2{margin:0;font-size:21px;letter-spacing:-.02em;font-weight:600}
+.shead p{margin:6px 0 0;color:var(--ink-2);font-size:14.5px;max-width:56ch}
+.shead .lhs{min-width:0}
+
+/* ---------- the phone ---------- */
+.stagerow{display:flex;gap:clamp(20px,3.5vw,40px);align-items:flex-start;flex-wrap:wrap}
+
+#phone{
+  flex:0 0 auto;width:375px;height:700px;position:relative;overflow:hidden;
+  background:#171A1E;border:1px solid var(--line-2);border-radius:30px;
+  box-shadow:0 24px 70px rgba(0,0,0,.6);
+}
+/* 74px and a 118px foot pad are the survey's own numbers, so the mark sits
+   at the same height in this frame as it does on the opening screen. */
+#stage{position:absolute;inset:0;padding:74px 20px 0;overflow:hidden}
+.screen{position:absolute;top:74px;left:20px;right:20px;bottom:0;
+  display:flex;flex-direction:column;overflow:hidden}
+
+/* ---------- control rail ---------- */
+.rail{flex:1 1 300px;min-width:280px;display:flex;flex-direction:column;gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 17px}
+.card > .eyebrow{margin-bottom:13px}
+
+.btnrow{display:flex;gap:8px;flex-wrap:wrap}
+button.ui{
+  font:550 13px/1 var(--sans);letter-spacing:-.005em;
+  color:var(--ink);background:var(--panel-2);
+  border:1px solid var(--line-2);border-radius:9px;
+  padding:10px 13px;cursor:pointer;transition:background .15s,border-color .15s;
+}
+button.ui:hover{background:#252B33;border-color:#414A55}
+button.ui:active{background:#1A1F25}
+button.ui[aria-pressed="true"]{border-color:var(--jade);color:var(--jade)}
+button.ui:focus-visible,input:focus-visible,a:focus-visible{
+  outline:2px solid var(--jade);outline-offset:2px}
+
+.slider{display:grid;grid-template-columns:1fr auto;gap:6px 12px;align-items:center;margin-top:14px}
+.slider label{font:600 10.5px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3)}
+.slider output{font:500 12px/1 var(--mono);color:var(--jade);font-variant-numeric:tabular-nums}
+.slider input{grid-column:1/-1;width:100%;margin:0;accent-color:var(--jade)}
+
+/* readout */
+.read{
+  margin:0;font:400 12px/1.75 var(--mono);color:var(--ink-2);
+  font-variant-numeric:tabular-nums;white-space:pre;overflow-x:auto;
+}
+.read b{color:var(--ink);font-weight:500}
+.read .g{color:var(--ok)}
+.read .r{color:var(--neon)}
+
+.note{margin:12px 0 0;font-size:13px;line-height:1.55;color:var(--ink-3)}
+.note b{color:var(--ink-2);font-weight:550}
+
+/* ---------- the two halves ---------- */
+.halves{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.half{
+  background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  padding:22px 20px 18px;display:flex;flex-direction:column;gap:16px;
+}
+.half .plate{
+  display:flex;align-items:center;justify-content:center;
+  min-height:150px;background:#131619;border-radius:10px;padding:20px;
+}
+.half h3{margin:0;font-size:15px;font-weight:600;letter-spacing:-.012em}
+.half p{margin:5px 0 0;font-size:13.2px;line-height:1.5;color:var(--ink-3)}
+.half .meta{margin-top:auto;font:500 11px/1 var(--mono);letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3)}
+
+/* ---------- stamp sizes ---------- */
+.sizes{display:flex;align-items:flex-end;gap:clamp(16px,3vw,32px);flex-wrap:wrap;
+  background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:26px 24px}
+.size{display:flex;flex-direction:column;align-items:center;gap:11px}
+.size .box{display:flex;align-items:flex-end;justify-content:center}
+.size .cap{font:500 10.5px/1 var(--mono);letter-spacing:.1em;color:var(--ink-3)}
+
+/* ---------- selection demo ---------- */
+.pickdemo{display:grid;gap:8px;background:var(--panel);border:1px solid var(--line);
+  border-radius:14px;padding:14px}
+.pick{
+  display:flex;align-items:center;gap:13px;padding:13px 15px;
+  background:var(--panel-2);border:1px solid var(--line);border-radius:11px;
+  cursor:pointer;transition:border-color .18s,background .18s;text-align:left;
+  font:inherit;color:inherit;width:100%;
+}
+.pick:hover{border-color:var(--line-2)}
+.pick .txt{flex:1;min-width:0}
+.pick .txt b{display:block;font-size:14.5px;font-weight:550;letter-spacing:-.01em}
+.pick .txt small{display:block;font-size:12.5px;color:var(--ink-3);margin-top:2px}
+.pick .stamp{flex:0 0 auto;width:30px;height:30px;display:grid;place-items:center;
+  opacity:.22;transition:opacity .2s,transform .2s;transform:scale(.9)}
+.pick[aria-pressed="true"]{border-color:rgba(255,95,162,.5);background:#20191E}
+.pick[aria-pressed="true"] .stamp{opacity:1;transform:scale(1)}
+
+/* ---------- app icon ---------- */
+.icons{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.iconcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px 20px 18px;
+  display:flex;flex-direction:column;gap:18px}
+.iconcard .big{display:flex;justify-content:center;padding:8px 0}
+.iconcard .scale{display:flex;align-items:flex-end;gap:16px;justify-content:center;
+  padding-top:16px;border-top:1px solid var(--line)}
+.iconcard .scale .u{display:flex;flex-direction:column;align-items:center;gap:8px}
+.iconcard .scale .u span{font:500 10px/1 var(--mono);color:var(--ink-3)}
+.iconcard h3{margin:0;font-size:15px;font-weight:600;letter-spacing:-.012em}
+.iconcard p{margin:5px 0 0;font-size:13.2px;line-height:1.5;color:var(--ink-3)}
+.tagline{display:inline-flex;align-items:center;gap:7px;font:600 10px/1 var(--mono);
+  letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.tagline .dot{width:6px;height:6px;border-radius:50%;background:var(--off)}
+.tagline.now .dot{background:var(--jade)}
+.tagline.now{color:var(--jade)}
+
+/* ---------- deploy map ---------- */
+.mapwrap{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:14px}
+table.map{border-collapse:collapse;width:100%;min-width:620px;font-size:13.8px}
+table.map th{
+  text-align:left;font:600 10px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink-3);padding:15px 18px;border-bottom:1px solid var(--line);white-space:nowrap;
+}
+table.map td{padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+table.map tr:last-child td{border-bottom:none}
+table.map code{font:400 12.5px/1.4 var(--mono);color:var(--ink)}
+table.map td.what{color:var(--ink-2)}
+.state{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;
+  font:600 11px/1 var(--mono);letter-spacing:.06em}
+.state .d{width:7px;height:7px;border-radius:50%;flex:0 0 auto}
+.state.wired{color:var(--ok)}       .state.wired .d{background:var(--ok)}
+.state.drift{color:var(--warn)}     .state.drift .d{background:var(--warn)}
+.state.none{color:var(--ink-3)}     .state.none .d{background:var(--off)}
+
+footer{margin-top:72px;padding-top:22px;border-top:1px solid var(--line);
+  color:var(--ink-3);font-size:13px}
+footer b{color:var(--ink-2);font-weight:550}
+footer code{font:400 12.5px/1.4 var(--mono);color:var(--ink-2)}
+
+@media (max-width:900px){
+  #phone{width:100%;max-width:375px;height:620px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms!important;animation-iteration-count:1!important;
+    transition-duration:.001ms!important}
+}
+
+/* ==========================================================================
+   LOGO:CSS — verbatim from logo/hero.css. Do not edit here.
+   ========================================================================== */
+.heroA{position:absolute;top:0;right:0;bottom:0;left:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;overflow:hidden;
+  margin:-74px -20px 0;
+  padding:74px 20px calc(var(--footpad,118px) + 3vh)}
+.heroA .lock{display:flex;flex-direction:column;align-items:center;width:100%;position:relative}
+/* The triangle sits BEHIND everything rather than above it, and is anchored
+   to the dumbbell rather than to the block as a whole. */
+.heroA .tri{position:absolute;left:50%;top:50%;transform:translate(-50%,-37.5%);
+  width:min(82%,315px);height:auto;overflow:visible;z-index:0;pointer-events:none}
+.heroA .tri path{fill:none;stroke-width:2.6;stroke-linejoin:round;stroke-linecap:round}
+.heroA .tri-l{stroke:url(#triGrad);filter:drop-shadow(0 0 7px rgba(255,95,162,.45))}
+.heroA .tri-glare{stroke:url(#triGlare);stroke-width:5.5;opacity:0;
+  filter:blur(3.5px) drop-shadow(0 0 10px rgba(255,255,255,.55));
+  transition:opacity .5s ease}
+.heroA.lit .tri-glare{opacity:.9}
+.heroA .tri-spark{stroke:#fff;stroke-width:3.5;opacity:0;
+  filter:drop-shadow(0 0 9px #FF5FA2) drop-shadow(0 0 3px #fff)}
+.heroA.lit .tri-spark{opacity:1;
+  animation:triRun var(--beat,4400ms) linear -1650ms infinite}
+.heroA.lit .tri-l{animation:triBeat var(--beat,4400ms) ease-in-out -1650ms infinite}
+@keyframes triRun{ from{stroke-dashoffset:0} to{stroke-dashoffset:-777} }
+/* A real heartbeat — lub, then a smaller dub — and it only happens while the
+   light is on the long top edge. One event per lap, in one place. */
+@keyframes triBeat{
+  0%      {filter:drop-shadow(0 0 7px  rgba(255,95,162,.45)); stroke-width:2.6}
+  4%      {filter:drop-shadow(0 0 34px rgba(255,95,162,1))
+                  drop-shadow(0 0 9px rgba(255,255,255,.6));  stroke-width:3.5}
+  9%      {filter:drop-shadow(0 0 10px rgba(255,95,162,.5));  stroke-width:2.7}
+  14%     {filter:drop-shadow(0 0 24px rgba(255,95,162,.9));  stroke-width:3.1}
+  21%,100%{filter:drop-shadow(0 0 7px  rgba(255,95,162,.45)); stroke-width:2.6}
+}
+.heroA .art{z-index:2}
+.heroA .hcopy{z-index:3}
+.heroA .art{position:relative;display:flex;align-items:center;justify-content:center;
+  width:100%;margin-bottom:80px}
+.heroA .db{width:min(70%,277px);height:auto;overflow:visible;position:relative;z-index:2}
+.heroA .db.mb{width:min(79%,313px)}
+.heroA .dbglow{position:absolute;width:210px;height:210px;border-radius:50%;z-index:1;
+  background:radial-gradient(circle,rgba(62,203,168,.26),rgba(62,203,168,0) 66%);
+  opacity:0;will-change:opacity,transform}
+.heroA .art.alive .dbglow{
+  animation:dbGlowIn .55s cubic-bezier(.22,1,.36,1) both,
+            dbGlow 4.4s ease-in-out .55s infinite}
+@keyframes dbGlowIn{from{opacity:0;transform:scale(.88)}to{opacity:.40;transform:scale(.95)}}
+@keyframes dbGlow{0%,100%{opacity:.40;transform:scale(.95)}50%{opacity:.86;transform:scale(1.06)}}
+
+.heroA .db path.stroked{fill:none;stroke:url(#dbGrad);stroke-linecap:round}
+.heroA .db path.bar{stroke:url(#dbBar)}
+
+/* A real bob is a sine wave: it only rests at the top and the bottom and
+   moves fastest through the middle, so each segment gets its own half-sine. */
+.heroA .art.alive .rep{will-change:transform;animation:rep 4.4s linear infinite}
+@keyframes rep{
+  0%  {transform:translateY(0);    animation-timing-function:cubic-bezier(.39,.575,.565,1)}
+  25% {transform:translateY(-9px); animation-timing-function:cubic-bezier(.47,0,.745,.715)}
+  50% {transform:translateY(0);    animation-timing-function:cubic-bezier(.39,.575,.565,1)}
+  75% {transform:translateY(9px);  animation-timing-function:cubic-bezier(.47,0,.745,.715)}
+  100%{transform:translateY(0)}
+}
+
+.heroA .hcopy{display:flex;flex-direction:column;align-items:center;text-align:center;
+  opacity:0;transform:translateY(12px)}
+.heroA.ready .hcopy{opacity:1;transform:none}
+.heroA h1{margin:0;white-space:nowrap;font-size:min(7.9vw,31px);line-height:1.12;
+  letter-spacing:-.022em;font-weight:550;color:#ECEFF3}
+.heroA .hsub{margin-top:13px;font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;
+  font-weight:600;color:#3ECBA8;opacity:.9}
+/* ===== /LOGO:CSS ===== */
+</style>
+
+<div class="wrap">
+
+  <header class="mast">
+    <p class="eyebrow">Fitness Journey — the mark</p>
+    <h1>An inverted neon triangle, with a dumbbell centred in it.</h1>
+    <p class="lede">Drawn from an 80s album cover. The outline is an open
+      polyline with a dead segment in the top-left, the way a real neon tube
+      has one. Everything you see hangs off a single <b>4400&nbsp;ms</b> rep —
+      the light finishes its lap along the top edge at the exact instant the
+      glow behind the dumbbell swells, and the outline thumps once, there,
+      and nowhere else.</p>
+    <div class="credits">
+      <span><em>outline</em>&nbsp; #FF5FA2</span>
+      <span><em>mark</em>&nbsp; #3ECBA8</span>
+      <span><em>beat</em>&nbsp; 4400ms</span>
+      <span><em>perimeter</em>&nbsp; 777</span>
+      <span><em>break</em>&nbsp; 40 units</span>
+    </div>
+  </header>
+
+  <!-- ================= 1. IN MOTION ================= -->
+  <section>
+    <div class="shead">
+      <div class="lhs">
+        <h2>In motion</h2>
+        <p>The opening screen at true size, running the shipping engine —
+          one <code>requestAnimationFrame</code> clock driving every stroke.</p>
+      </div>
+      <p class="eyebrow">375 &times; 812 · iPhone</p>
+    </div>
+
+    <div class="stagerow">
+      <div id="phone"><div id="stage"></div></div>
+
+      <div class="rail">
+        <div class="card">
+          <p class="eyebrow">Transport</p>
+          <div class="btnrow">
+            <button class="ui" id="replay">Replay the draw</button>
+            <button class="ui" id="play" aria-pressed="true">Pause</button>
+            <button class="ui" id="edge">Jump to the thump</button>
+          </div>
+          <div class="slider">
+            <label for="scrub">Position in the lap</label>
+            <output id="scrubV">live</output>
+            <input type="range" id="scrub" min="0" max="4400" step="20" value="0">
+          </div>
+          <p class="note">The heartbeat lasts a fifth of a second. Scrubbing is
+            the only way to actually see it — it pauses everything and steps
+            the animation by hand.</p>
+        </div>
+
+        <div class="card">
+          <p class="eyebrow">Measured, live</p>
+          <pre class="read" id="read">…</pre>
+          <p class="note"><b>Clearance</b> is the gap between each plate and the
+            neon beside it. The triangle narrows as it descends, so if this goes
+            negative the plates are crossing the outline.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 2. THE TWO HALVES ================= -->
+  <section>
+    <div class="shead">
+      <div class="lhs">
+        <h2>The two halves</h2>
+        <p>The mark divides cleanly. Each half carries the identity on its own,
+          which is what makes it usable as a stamp.</p>
+      </div>
+      <p class="eyebrow">Split</p>
+    </div>
+
+    <div class="halves">
+      <div class="half">
+        <div class="plate">
+          <svg viewBox="0 0 300 268" width="150" style="overflow:visible" aria-label="The outline, alone">
+            <defs>
+              <linearGradient id="sTriG" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="268">
+                <stop offset="0%" stop-color="#FF5FA2"/><stop offset="26%" stop-color="#FF8FBE"/>
+                <stop offset="37%" stop-color="#FFD9E8"/><stop offset="50%" stop-color="#FF8FBE"/>
+                <stop offset="100%" stop-color="#FF5FA2"/>
+              </linearGradient>
+            </defs>
+            <path d="M100 16 H286 L150 252 L14 16 H60" fill="none" stroke="url(#sTriG)"
+                  stroke-width="6" stroke-linejoin="round" stroke-linecap="round"
+                  style="filter:drop-shadow(0 0 7px rgba(255,95,162,.5))"/>
+          </svg>
+        </div>
+        <div>
+          <h3>The outline</h3>
+          <p>Reads at any size and holds its meaning empty. The natural
+            container — a badge, a rank, a state.</p>
+        </div>
+        <p class="meta">Open polyline · 300 &times; 268</p>
+      </div>
+
+      <div class="half">
+        <div class="plate">
+          <svg viewBox="0 0 260 130" width="176" style="overflow:visible" aria-label="The dumbbell, alone">
+            <defs>
+              <linearGradient id="sDbG" gradientUnits="userSpaceOnUse" x1="52" y1="0" x2="208" y2="0">
+                <stop offset="0%" stop-color="#34B396"/><stop offset="22%" stop-color="#93EAD7"/>
+                <stop offset="50%" stop-color="#A8F5E1"/><stop offset="78%" stop-color="#93EAD7"/>
+                <stop offset="100%" stop-color="#34B396"/>
+              </linearGradient>
+              <linearGradient id="sDbB" gradientUnits="userSpaceOnUse" x1="86" y1="0" x2="174" y2="0">
+                <stop offset="0%" stop-color="#93EAD7"/><stop offset="32%" stop-color="#8FE6D3"/>
+                <stop offset="36%" stop-color="#89DFCC" stop-opacity=".6"/>
+                <stop offset="39%" stop-color="#83D9C6" stop-opacity=".22"/>
+                <stop offset="41%" stop-color="#7FD5C2" stop-opacity="0"/>
+                <stop offset="59%" stop-color="#7FD5C2" stop-opacity="0"/>
+                <stop offset="61%" stop-color="#83D9C6" stop-opacity=".22"/>
+                <stop offset="64%" stop-color="#89DFCC" stop-opacity=".6"/>
+                <stop offset="68%" stop-color="#8FE6D3"/><stop offset="100%" stop-color="#93EAD7"/>
+              </linearGradient>
+            </defs>
+            <g fill="none" stroke="url(#sDbG)" stroke-linecap="round"
+               style="filter:drop-shadow(0 0 10px rgba(62,203,168,.35))">
+              <path d="M86 65 H174"       stroke="url(#sDbB)" stroke-width="7"/>
+              <path d="M86 38 V92"        stroke-width="12.65"/>
+              <path d="M174 38 V92"       stroke-width="12.65"/>
+              <path d="M66.8 40.7 V89.3"  stroke-width="9.9"/>
+              <path d="M193.2 40.7 V89.3" stroke-width="9.9"/>
+              <path d="M52.4 47.5 V82.5"  stroke-width="7.13"/>
+              <path d="M207.6 47.5 V82.5" stroke-width="7.13"/>
+            </g>
+          </svg>
+        </div>
+        <div>
+          <h3>The dumbbell</h3>
+          <p>Three plates a side, each 90% of the one inside it. The bar's
+            middle dissolves, so the halves read as one object with air in it.</p>
+        </div>
+        <p class="meta">7 strokes · 260 &times; 130</p>
+      </div>
+
+      <div class="half">
+        <div class="plate">
+          <svg viewBox="0 0 300 268" width="150" style="overflow:visible" aria-label="The mark, whole">
+            <g style="filter:drop-shadow(0 0 7px rgba(255,95,162,.5))">
+              <path d="M100 16 H286 L150 252 L14 16 H60" fill="none" stroke="url(#sTriG)"
+                    stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+            </g>
+            <g transform="translate(150,96) scale(.72) translate(-130,-65)"
+               fill="none" stroke="url(#sDbG)" stroke-linecap="round"
+               style="filter:drop-shadow(0 0 10px rgba(62,203,168,.35))">
+              <path d="M86 65 H174"       stroke="url(#sDbB)" stroke-width="7"/>
+              <path d="M86 38 V92"        stroke-width="12.65"/>
+              <path d="M174 38 V92"       stroke-width="12.65"/>
+              <path d="M66.8 40.7 V89.3"  stroke-width="9.9"/>
+              <path d="M193.2 40.7 V89.3" stroke-width="9.9"/>
+              <path d="M52.4 47.5 V82.5"  stroke-width="7.13"/>
+              <path d="M207.6 47.5 V82.5" stroke-width="7.13"/>
+            </g>
+          </svg>
+        </div>
+        <div>
+          <h3>Whole</h3>
+          <p>The bar sits 35.8% down the triangle, where clearance to the neon
+            is about ten pixels a side.</p>
+        </div>
+        <p class="meta">Locked · 300 &times; 268</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 3. AS A STAMP ================= -->
+  <section>
+    <div class="shead">
+      <div class="lhs">
+        <h2>As a stamp</h2>
+        <p>Small sizes are where a mark fails. Below about 20&nbsp;px the
+          dumbbell's outer plates close up and the triangle keeps reading —
+          which decides which half does the marking.</p>
+      </div>
+      <p class="eyebrow">Selection</p>
+    </div>
+
+    <div class="sizes" id="sizes"></div>
+
+    <div style="height:14px"></div>
+
+    <div class="pickdemo" id="pickdemo">
+      <button class="pick" aria-pressed="true">
+        <span class="stamp"></span>
+        <span class="txt"><b>Push · Pull · Legs</b><small>Three days, rotating</small></span>
+      </button>
+      <button class="pick" aria-pressed="false">
+        <span class="stamp"></span>
+        <span class="txt"><b>Upper / Lower</b><small>Four days, alternating</small></span>
+      </button>
+      <button class="pick" aria-pressed="false">
+        <span class="stamp"></span>
+        <span class="txt"><b>Full body</b><small>Three days, everything each time</small></span>
+      </button>
+    </div>
+    <p class="note" style="max-width:60ch">The triangle inks in when a row is
+      chosen. It is the mark doing a job the app already needs done, rather
+      than a logo parked in a corner.</p>
+  </section>
+
+  <!-- ================= 4. THE APP ICON ================= -->
+  <section>
+    <div class="shead">
+      <div class="lhs">
+        <h2>The app icon</h2>
+        <p>Two candidates on the same tile. What ships today is the dumbbell
+          alone — drawn by hand in <code>icon.svg</code>, not generated from
+          the mark, and so already out of step with it.</p>
+      </div>
+      <p class="eyebrow">Home screen</p>
+    </div>
+
+    <div class="icons" id="icons"></div>
+  </section>
+
+  <!-- ================= 5. WHERE IT LIVES ================= -->
+  <section>
+    <div class="shead">
+      <div class="lhs">
+        <h2>Where it lives</h2>
+        <p>Every place the mark is meant to appear, and whether that place is
+          fed from the source or maintained by hand.</p>
+      </div>
+      <p class="eyebrow">Deploy map</p>
+    </div>
+
+    <div class="mapwrap">
+      <table class="map">
+        <thead><tr><th>Destination</th><th>What it carries</th><th>Source</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>onboarding.html</code></td>
+            <td class="what">The opening screen — the mark in full motion</td>
+            <td><span class="state wired"><span class="d"></span>Wired</span></td>
+          </tr>
+          <tr>
+            <td><code>icon.svg</code></td>
+            <td class="what">Favicon, PWA icon. Dumbbell only, no triangle</td>
+            <td><span class="state drift"><span class="d"></span>By hand</span></td>
+          </tr>
+          <tr>
+            <td><code>icon-{180,192,512}.png</code></td>
+            <td class="what">Home screen, install prompt, share card</td>
+            <td><span class="state drift"><span class="d"></span>Stale</span></td>
+          </tr>
+          <tr>
+            <td><code>dashboard.html</code>, <code>coach.html</code></td>
+            <td class="what">Favicon only — no mark inside the interface</td>
+            <td><span class="state none"><span class="d"></span>Absent</span></td>
+          </tr>
+          <tr>
+            <td>Stamp assets</td>
+            <td class="what">The selection mark shown above</td>
+            <td><span class="state none"><span class="d"></span>Not built</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    <b>To change the mark:</b> edit <code>logo/hero.css</code> and
+    <code>logo/hero.js</code>, then run <code>node tools/build-logo.mjs</code>.
+    That is the only road back into the survey — it replaces two marked blocks
+    in <code>onboarding.html</code> and refuses to run if a marker is missing.
+    The rows above marked <b>By hand</b>, <b>Stale</b> and <b>Not built</b> have
+    no such road yet.
+  </footer>
+</div>
+
+<script>
+/* ==========================================================================
+   The mark's engine. Ported from logo/hero.js with the survey's chrome
+   removed — no button, no copy placement — and the geometry, gradients and
+   timing left exactly as they ship.
+   ========================================================================== */
+(function(){
+'use strict';
+
+var REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---- geometry, verbatim ------------------------------------------------ */
+var N=3, GAP=0.31, DUR=0.46, T0=0.18;
+var BAR = {d:'M86 65 H174', w:7};
+var PLATES = [
+  {x:86,   y1:38,    y2:92,    w:12.65},
+  {x:66.8, y1:40.70, y2:89.30, w:9.90},
+  {x:52.4, y1:47.50, y2:82.50, w:7.13}
+];
+var PASS_N = [3,2,1];
+var TRI_D  = 'M100 16 H286 L150 252 L14 16 H60';
+var TRI_LEN = 777;
+var BEAT = 4400;
+var mirror = function(x){ return 260-x; };
+
+/* the shared gradient block — one copy, referenced by every svg on the page */
+var DEFS =
+ '<linearGradient id="triGrad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="268">'+
+ '<stop offset="0%" stop-color="#FF5FA2"/><stop offset="26%" stop-color="#FF8FBE"/>'+
+ '<stop offset="37%" stop-color="#FFD9E8"/><stop offset="50%" stop-color="#FF8FBE"/>'+
+ '<stop offset="100%" stop-color="#FF5FA2"/></linearGradient>'+
+ /* The glare. Light coming OFF the dumbbell and landing on the tube, so it is
+    its own blurred overlay rather than a white stop inside the pink.
+    y=100 is where the bar crosses the two sides — measured. */
+ '<linearGradient id="triGlare" gradientUnits="userSpaceOnUse" x1="0" y1="70" x2="0" y2="132">'+
+ '<stop offset="0%" stop-color="#FFF" stop-opacity="0"/>'+
+ '<stop offset="34%" stop-color="#FFF" stop-opacity=".55"/>'+
+ '<stop offset="50%" stop-color="#FFF" stop-opacity="1"/>'+
+ '<stop offset="66%" stop-color="#FFF" stop-opacity=".55"/>'+
+ '<stop offset="100%" stop-color="#FFF" stop-opacity="0"/></linearGradient>'+
+ '<linearGradient id="dbGrad" gradientUnits="userSpaceOnUse" x1="52" y1="0" x2="208" y2="0">'+
+ '<stop offset="0%" stop-color="#34B396"/><stop offset="22%" stop-color="#93EAD7"/>'+
+ '<stop offset="50%" stop-color="#A8F5E1"/><stop offset="78%" stop-color="#93EAD7"/>'+
+ '<stop offset="100%" stop-color="#34B396"/></linearGradient>'+
+ '<linearGradient id="dbBar" gradientUnits="userSpaceOnUse" x1="86" y1="0" x2="174" y2="0">'+
+ '<stop offset="0%" stop-color="#93EAD7"/><stop offset="32%" stop-color="#8FE6D3"/>'+
+ '<stop offset="36%" stop-color="#89DFCC" stop-opacity=".60"/>'+
+ '<stop offset="39%" stop-color="#83D9C6" stop-opacity=".22"/>'+
+ '<stop offset="41%" stop-color="#7FD5C2" stop-opacity="0"/>'+
+ '<stop offset="59%" stop-color="#7FD5C2" stop-opacity="0"/>'+
+ '<stop offset="61%" stop-color="#83D9C6" stop-opacity=".22"/>'+
+ '<stop offset="64%" stop-color="#89DFCC" stop-opacity=".60"/>'+
+ '<stop offset="68%" stop-color="#8FE6D3"/><stop offset="100%" stop-color="#93EAD7"/></linearGradient>';
+
+/* ---- lay the passes out ------------------------------------------------ */
+var passes=[], step=0;
+function lay(ds, w, oppose, n, isBar){
+  n = n || N;
+  for(var i=0;i<n;i++){
+    var delay = T0 + step*GAP; step++;
+    /* every other pass runs backwards, so each one picks up where the
+       previous finished — like a brush going back over itself */
+    var rev = (i%2)===1;
+    ds.forEach(function(dd, side){
+      passes.push({d:dd, w:w*(i+1)/n, delay:delay, bar:!!isBar,
+                   rev:(oppose && side===1) ? !rev : rev});
+    });
+  }
+}
+lay([BAR.d], BAR.w, false, N, true);
+var plateStart=[];
+PLATES.forEach(function(p,k){
+  plateStart[k] = T0 + step*GAP;
+  lay(['M'+p.x+' '+p.y1+' V'+p.y2, 'M'+mirror(p.x)+' '+p.y1+' V'+p.y2],
+      p.w, true, PASS_N[k]);
+});
+var DONE = T0 + (step-1)*GAP + DUR;
+/* the words start arriving the moment the SECOND plate does */
+var T3A = plateStart[1], T3B = DONE;
+
+/* ---- markup ------------------------------------------------------------ */
+var stage = document.getElementById('stage');
+var screen = document.createElement('div');
+screen.className = 'screen';
+screen.innerHTML =
+'<div class="heroA"><div class="lock"><div class="art">'+
+  '<svg class="tri" viewBox="0 0 300 268" aria-hidden="true"><defs>'+DEFS+'</defs>'+
+    /* Not a closed triangle: it starts at x=100 on the top edge, runs right,
+       down to the apex, back up the left side and stops at x=60 — a 40-unit
+       break, the way a neon tube in a real sign has a dark segment. Drawn as
+       one open path rather than faked with a dash gap, so the draw-in still
+       works and the light has somewhere to enter and leave. */
+    '<path class="tri-l" d="'+TRI_D+'"/>'+
+    '<path class="tri-glare" d="'+TRI_D+'"/>'+
+    '<path class="tri-spark" d="'+TRI_D+'"/>'+
+  '</svg>'+
+  '<div class="dbglow"></div>'+
+  '<svg class="db" viewBox="0 0 260 130" preserveAspectRatio="xMidYMid meet">'+
+    '<g class="rep">'+ passes.map(function(q){
+      return '<path class="stroked'+(q.bar?' bar':'')+'" stroke-width="'+
+             q.w.toFixed(2)+'" d="'+q.d+'"/>';
+    }).join('') +'</g>'+
+  '</svg>'+
+'</div><div class="hcopy"><h1>Fitness Journey</h1>'+
+'<div class="hsub">Your training, dialed in</div></div></div></div>';
+stage.appendChild(screen);
+
+var heroEl = screen.querySelector('.heroA');
+var art    = screen.querySelector('.art');
+var hcopy  = screen.querySelector('.hcopy');
+var triL   = screen.querySelector('.tri-l');
+var triSpark = screen.querySelector('.tri-spark');
+var db     = screen.querySelector('.db');
+var tri    = screen.querySelector('.tri');
+
+triL.style.strokeDasharray  = TRI_LEN;
+triL.style.strokeDashoffset = TRI_LEN;
+/* short bright dash, one long gap — the gap is the rest of the outline */
+triSpark.style.strokeDasharray = '54 ' + (TRI_LEN-54);
+triSpark.style.strokeDashoffset = 0;
+heroEl.style.setProperty('--beat', BEAT+'ms');
+
+/* ---- prime every stroke ------------------------------------------------ */
+var paths = [].slice.call(screen.querySelectorAll('.rep path.stroked'));
+var strokes = paths.map(function(el,k){
+  var L = el.getTotalLength() || 1;
+  el.style.transition = 'none';
+  /* "L L" — a dash of L followed by an equal gap, so a fully offset path
+     parks inside the gap rather than at the edge of the dash and cannot
+     paint a stray cap. */
+  el.style.strokeDasharray = L+' '+L;
+  var w = parseFloat(getComputedStyle(el).strokeWidth) || 2;
+  /* THE DOTS. These strokes are round-capped, and a round cap draws at full
+     width no matter how short its dash — so each one appeared as a circle
+     before it drew. A stroke is only dot-shaped while it is shorter than it
+     is wide, so hold it transparent until it has drawn past about one and a
+     half stroke widths, then fade it up. Each path gets its own threshold
+     from its own width. */
+  var from = passes[k].rev ? -L : L;
+  el.style.strokeDashoffset = from;
+  el.style.opacity = 0;
+  return {el:el, from:from, delay:passes[k].delay, len:L, fade:Math.max(1, w*2)};
+});
+
+/* ---- ONE CLOCK ---------------------------------------------------------
+   Every stroke used to be its own CSS transition with its own delay, and the
+   browser scheduled all fifteen. Desktop copes; a phone does not, and they
+   drift apart from each other. A single rAF loop computing every position
+   from elapsed time cannot desync. --------------------------------------- */
+var easeDraw = function(p){ return 1-Math.pow(1-p,2.2); };
+var clamp01  = function(v){ return v<0?0:(v>1?1:v); };
+var raf=0, t0=0, landedArt=false;
+
+function paint(t){
+  for(var k=0;k<strokes.length;k++){
+    var st = strokes[k];
+    var e  = easeDraw(clamp01((t-st.delay)/DUR));
+    st.el.style.strokeDashoffset = (st.from*(1-e)).toFixed(2);
+    /* Squared, because a straight ramp still left the thickest plate at a
+       third opacity while it was three pixels long and seven wide. */
+    var o = clamp01((st.len*e)/st.fade);
+    st.el.style.opacity = (o*o).toFixed(3);
+  }
+  var q = clamp01((t-T3A)/Math.max(.35, T3B-T3A));
+  var e2 = 1-Math.pow(1-q,3);
+  hcopy.style.opacity = e2.toFixed(3);
+  hcopy.style.transform = 'translateY('+(12*(1-e2)).toFixed(2)+'px)';
+  /* The triangle is drawn on the SAME clock as the words, so the outline
+     closes as the name lands. */
+  triL.style.strokeDashoffset = (TRI_LEN*(1-e2)).toFixed(1);
+  if(!landedArt && t>=DONE){ landedArt=true; art.classList.add('alive'); }
+}
+
+function tick(now){
+  if(!t0) t0 = now;
+  var t = (now-t0)/1000;
+  paint(t);
+  if(t < DONE+0.05){ raf = requestAnimationFrame(tick); }
+  else { raf = 0; finishNow(); }
+}
+
+function finishNow(){
+  if(raf){ cancelAnimationFrame(raf); raf=0; }
+  paint(DONE+1);
+  /* hand the strokes back to the stylesheet */
+  for(var k=0;k<strokes.length;k++){ strokes[k].el.style.opacity=''; }
+  hcopy.style.opacity=''; hcopy.style.transform='';
+  triL.style.strokeDashoffset = 0;
+  heroEl.classList.add('ready');
+  heroEl.classList.add('lit');   /* only now does the light start running */
+  art.classList.add('alive');
+  landedArt = true;
+  syncScrub();
+}
+
+function replay(){
+  heroEl.classList.remove('ready','lit');
+  art.classList.remove('alive');
+  landedArt = false;
+  for(var k=0;k<strokes.length;k++){
+    strokes[k].el.style.strokeDashoffset = strokes[k].from;
+    strokes[k].el.style.opacity = 0;
+  }
+  triL.style.strokeDashoffset = TRI_LEN;
+  t0 = 0;
+  if(raf) cancelAnimationFrame(raf);
+  setPlaying(true);
+  raf = requestAnimationFrame(tick);
+}
+
+/* ---- transport --------------------------------------------------------- */
+var scrub  = document.getElementById('scrub');
+var scrubV = document.getElementById('scrubV');
+var playBtn = document.getElementById('play');
+var playing = true;
+
+function loopAnims(){
+  /* every looping animation on the mark: the light, the heartbeat, the glow,
+     the rep. They all share one period, so one currentTime drives all four. */
+  return heroEl.getAnimations({subtree:true}).filter(function(a){
+    return a.effect && a.effect.getTiming().iterations === Infinity;
+  });
+}
+function setPlaying(on){
+  playing = on;
+  playBtn.textContent = on ? 'Pause' : 'Play';
+  playBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  loopAnims().forEach(function(a){ on ? a.play() : a.pause(); });
+  /* going live retires the scrub position — leaving the thumb parked next to
+     the word "live" reads as a control that stopped working */
+  if(on){ scrubV.textContent = 'live'; scrub.value = 0; }
+}
+function seek(ms){
+  setPlaying(false);
+  loopAnims().forEach(function(a){
+    /* the light and the heartbeat carry a -1650ms delay, so their own
+       timeline is offset from the lap position by exactly that much */
+    a.currentTime = ms;
+  });
+  scrubV.textContent = ms + ' ms';
+}
+function syncScrub(){ scrub.value = 0; }
+
+document.getElementById('replay').onclick = replay;
+playBtn.onclick = function(){
+  if(!heroEl.classList.contains('lit')) return replay();
+  setPlaying(!playing);
+};
+/* The peak of the lub sits at 4% of triBeat's active cycle. That animation
+   carries a -1650 ms delay, so active time = currentTime + 1650: to land on
+   4% of 4400 (176 ms) the clock has to read 176 - 1650 + 4400 = 2926. Which
+   is also 2750 + 176 — the thump firing a beat after the glow peaks and the
+   light enters the top edge, which is the whole point of the arrangement. */
+var THUMP = 2926;
+document.getElementById('edge').onclick = function(){
+  if(!heroEl.classList.contains('lit')) finishNow();
+  scrub.value = THUMP; seek(THUMP);
+};
+scrub.oninput = function(){
+  if(!heroEl.classList.contains('lit')) finishNow();
+  seek(+scrub.value);
+};
+
+/* ---- the readout ------------------------------------------------------- */
+var read = document.getElementById('read');
+function measure(){
+  if(!tri || !db) return;
+  var t = tri.getBoundingClientRect(), b = db.getBoundingClientRect();
+  if(!t.width || !b.width) return;
+  /* Where the bar crosses the triangle, as a fraction of the outline's
+     height — and how much room is left beside the outermost plate. */
+  var barY = b.top + b.height/2;
+  var down = (barY - t.top) / t.height;
+  /* the triangle's half-width at that height, in screen px. Its top edge
+     spans x=14..286 of a 300-unit box and closes to a point at y=252/268. */
+  var uy = down * 268;
+  var frac = clamp01((252 - uy) / (252 - 16));
+  var halfW = (136/300) * t.width * frac;
+  var cx = t.left + t.width/2;
+  /* the outermost plate sits at x=52.4 of 260 */
+  var plateX = b.left + b.width * (52.4/260);
+  var clearance = (cx - halfW) === 0 ? 0 : (plateX - (cx - halfW));
+  var ok = clearance > 4;
+  read.innerHTML =
+    'bar sits at    <b>' + (down*100).toFixed(1) + '%</b> down the triangle\n' +
+    'clearance      <span class="' + (ok?'g':'r') + '">' +
+      clearance.toFixed(1) + ' px</span> each side\n' +
+    'triangle       <b>' + t.width.toFixed(0) + '</b> × ' + t.height.toFixed(0) + ' px\n' +
+    'dumbbell       <b>' + b.width.toFixed(0) + '</b> × ' + b.height.toFixed(0) + ' px\n' +
+    'perimeter      <b>' + TRI_LEN + '</b> units\n' +
+    'draw completes <b>' + DONE.toFixed(2) + ' s</b>\n' +
+    'rep            <b>' + BEAT + ' ms</b>, light offset −1650 ms';
+}
+addEventListener('resize', measure);
+
+if(REDUCED){ finishNow(); }
+else { raf = requestAnimationFrame(tick); }
+setTimeout(measure, 60);
+setInterval(measure, 900);
+
+/* ==========================================================================
+   The stamp — the same two halves, rendered small.
+   ========================================================================== */
+/* A stamp is not the hero scaled down. At 2.6 units the outline vanishes by
+   28 px, and at a fixed pixel weight it looks bloated at 64. So the stroke
+   grows with the mark but far more slowly than it does — 2.5 px at 16, about
+   5 px at 64 — and is converted back into the 300-unit box each time. */
+function triStamp(px, flat){
+  var px_stroke = 1.6 + px*0.055;
+  return '<svg viewBox="0 0 300 268" width="'+px+'" height="'+(px*268/300).toFixed(1)+'"'+
+    ' style="overflow:visible" aria-hidden="true">'+
+    '<path d="'+TRI_D+'" fill="none" stroke="'+(flat?'currentColor':'url(#triGrad)')+'"'+
+    ' stroke-width="'+(px_stroke*300/px).toFixed(1)+'"'+
+    ' stroke-linejoin="round" stroke-linecap="round"/></svg>';
+}
+function dbStamp(px){
+  var k = px/260;
+  return '<svg viewBox="0 0 260 130" width="'+px+'" height="'+(px*130/260).toFixed(1)+'"'+
+    ' style="overflow:visible" aria-hidden="true">'+
+    '<g fill="none" stroke="url(#dbGrad)" stroke-linecap="round">'+
+    '<path d="M86 65 H174" stroke="url(#dbBar)" stroke-width="7"/>'+
+    '<path d="M86 38 V92" stroke-width="12.65"/><path d="M174 38 V92" stroke-width="12.65"/>'+
+    '<path d="M66.8 40.7 V89.3" stroke-width="9.9"/><path d="M193.2 40.7 V89.3" stroke-width="9.9"/>'+
+    '<path d="M52.4 47.5 V82.5" stroke-width="7.13"/><path d="M207.6 47.5 V82.5" stroke-width="7.13"/>'+
+    '</g></svg>';
+}
+
+/* one hidden svg holds the gradients every stamp on the page points at */
+var defsHost = document.createElement('div');
+defsHost.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden';
+defsHost.innerHTML = '<svg aria-hidden="true" focusable="false"><defs>'+DEFS+'</defs></svg>';
+document.body.appendChild(defsHost);
+
+var SIZES = [64, 44, 28, 20, 16];
+document.getElementById('sizes').innerHTML = SIZES.map(function(px){
+  return '<div class="size"><div class="box">'+
+    '<div style="display:flex;align-items:flex-end;gap:10px">'+
+    triStamp(px)+dbStamp(px)+'</div></div>'+
+    '<div class="cap">'+px+' px</div></div>';
+}).join('');
+
+/* the selection demo */
+[].forEach.call(document.querySelectorAll('#pickdemo .pick'), function(b){
+  b.querySelector('.stamp').innerHTML = triStamp(26);
+  b.onclick = function(){
+    [].forEach.call(document.querySelectorAll('#pickdemo .pick'), function(o){
+      o.setAttribute('aria-pressed', o===b ? 'true' : 'false');
+    });
+  };
+});
+
+/* ==========================================================================
+   The app icon — two candidates, at the sizes iOS actually draws them.
+   ========================================================================== */
+function tile(px, withTri){
+  var r = px * (112/512);          /* the squircle radius the current icon uses */
+  var s = px/512;
+  var g = withTri
+    /* dumbbell shrinks and rises so the triangle has room to close beneath it */
+    ? '<g transform="translate(256,214) scale(1.30) translate(-130,-65)"'
+    : '<g transform="translate(256,256) scale(2.03) translate(-130,-65)"';
+  var out = '<svg viewBox="0 0 512 512" width="'+px+'" height="'+px+'" aria-hidden="true"'+
+            ' style="display:block;border-radius:'+r.toFixed(1)+'px">'+
+            '<rect width="512" height="512" rx="112" fill="#171A1E"/>';
+  if(withTri){
+    out += '<g transform="translate(256,268) scale(1.42) translate(-150,-134)">'+
+           '<path d="'+TRI_D+'" fill="none" stroke="url(#triGrad)" stroke-width="'+
+           (9/1.42).toFixed(2)+'" stroke-linejoin="round" stroke-linecap="round"/></g>';
+  }
+  out += g + ' fill="none" stroke="url(#dbGrad)" stroke-linecap="round">'+
+    '<path d="M86 65 H174" stroke="url(#dbBar)" stroke-width="7"/>'+
+    '<path d="M86 38 V92" stroke-width="12.65"/><path d="M174 38 V92" stroke-width="12.65"/>'+
+    '<path d="M66.8 40.7 V89.3" stroke-width="9.9"/><path d="M193.2 40.7 V89.3" stroke-width="9.9"/>'+
+    '<path d="M52.4 47.5 V82.5" stroke-width="7.13"/><path d="M207.6 47.5 V82.5" stroke-width="7.13"/>'+
+    '</g></svg>';
+  return out;
+}
+var ICON_SIZES = [
+  {px:60,  cap:'home'},
+  {px:40,  cap:'spotlight'},
+  {px:29,  cap:'settings'},
+  {px:20,  cap:'notification'}
+];
+function iconCard(withTri, title, blurb, isNow){
+  return '<div class="iconcard">'+
+    '<span class="tagline'+(isNow?' now':'')+'"><span class="dot"></span>'+
+      (isNow?'Ships today':'Candidate')+'</span>'+
+    '<div class="big">'+tile(148, withTri)+'</div>'+
+    '<div><h3>'+title+'</h3><p>'+blurb+'</p></div>'+
+    '<div class="scale">'+ICON_SIZES.map(function(s){
+      return '<div class="u">'+tile(s.px, withTri)+'<span>'+s.px+'</span></div>';
+    }).join('')+'</div></div>';
+}
+document.getElementById('icons').innerHTML =
+  iconCard(false, 'The dumbbell alone',
+    'Survives to 20 px and reads as one object. Gives up the pink entirely, '+
+    'so nothing on the home screen connects the icon to the opening screen.', true) +
+  iconCard(true, 'The whole mark',
+    'Carries the neon, so the icon and the app agree. The dumbbell has to '+
+    'shrink to clear the outline, which costs it at the smallest sizes.', false);
+
+})();
+</script>
