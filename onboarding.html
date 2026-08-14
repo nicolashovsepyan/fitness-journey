@@ -686,6 +686,86 @@ h1.q{text-align:center}
 .prow .what small{display:block;margin-top:3px;font-size:12.5px;color:var(--ink3);line-height:1.4}
 .prow.dim .who{color:var(--ink3)}
 
+
+/* ================= THE REACTOR =================
+   Nobody can answer "how many points is your sleep". They can read a
+   sentence about their life and say whether it is true. So no rod is ever
+   labelled with a number — each one is labelled with what its height MEANS,
+   and the label rewrites itself as the rod moves.
+
+   The budget is fixed, so pulling one up pushes the others down. That is
+   Galpin's whole point about the ten-point split, made physical: you cannot
+   give training more without taking it from somewhere you can see. */
+.rxwrap{flex:1;display:flex;flex-direction:column;min-height:0}
+.rxpre{display:flex;gap:7px;margin-bottom:16px;flex:0 0 auto}
+.rxpre button{flex:1;background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:9px 6px 8px;color:var(--ink3);font:inherit;cursor:pointer;text-align:center;
+  transition:border-color .2s,color .2s,background .2s}
+.rxpre button b{display:block;font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;
+  font-weight:750;margin-bottom:2px}
+.rxpre button span{font-size:10.5px;line-height:1.25;display:block;color:var(--ink3)}
+.rxpre button.on{background:rgba(123,227,196,.09);border-color:var(--accent);color:var(--accent)}
+.rxpre button.on span{color:var(--ink2)}
+
+.rxbay{flex:1 1 auto;display:flex;gap:9px;align-items:stretch;min-height:190px;
+  padding:16px 12px 12px;border-radius:18px;background:var(--card);
+  border:1px solid var(--line);position:relative;overflow:hidden}
+/* the core: a wash behind the rods that changes colour with the mix */
+.rxcore{position:absolute;left:50%;bottom:-42%;width:150%;height:110%;transform:translateX(-50%);
+  pointer-events:none;border-radius:50%;opacity:.5;
+  background:radial-gradient(closest-side,var(--rxc,#7BE3C4) 0%,transparent 72%);
+  transition:background .45s,opacity .45s;
+  animation:rxPulse var(--rxbeat,3200ms) ease-in-out infinite}
+@keyframes rxPulse{0%,100%{opacity:.34;transform:translateX(-50%) scale(.94)}
+                   50%{opacity:.62;transform:translateX(-50%) scale(1.04)}}
+
+.rxrod{flex:1;display:flex;flex-direction:column;justify-content:flex-end;
+  position:relative;z-index:1;touch-action:none;cursor:grab;user-select:none}
+.rxrod:active{cursor:grabbing}
+.rxtrack{flex:1;display:flex;align-items:flex-end;border-radius:10px;
+  background:rgba(255,255,255,.035);overflow:hidden;box-shadow:inset 0 0 0 1px var(--line)}
+.rxfill{width:100%;border-radius:9px;background:linear-gradient(180deg,var(--rod),transparent 220%);
+  box-shadow:0 0 16px -2px var(--rod);transition:height .28s cubic-bezier(.22,1,.36,1)}
+.rxrod.drag .rxfill{transition:none}
+.rxname{font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;font-weight:750;
+  text-align:center;margin-top:9px;color:var(--rod)}
+.rxsay{margin-top:12px;min-height:52px;flex:0 0 auto}
+.rxsay div{display:flex;gap:9px;align-items:baseline;font-size:13px;padding:2px 0;color:var(--ink2)}
+.rxsay i{width:7px;height:7px;border-radius:2px;flex:none;background:var(--rod);
+  box-shadow:0 0 7px var(--rod);position:relative;top:-1px}
+.rxsay b{color:var(--ink);font-weight:600}
+.rxhint{font-size:11.5px;color:var(--ink3);text-align:center;margin-top:9px}
+.rxwarn{color:var(--warn,#F2C14E)}
+
+/* ---- the reading transition ---- */
+.rdwrap{flex:1;display:flex;flex-direction:column;justify-content:center;text-align:center}
+.rdline{opacity:0;transform:translateY(8px);transition:opacity .45s,transform .45s;
+  font-size:15px;line-height:1.5;margin:9px 0;color:var(--ink2)}
+.rdline.on{opacity:1;transform:none}
+.rdline b{color:var(--accent);font-weight:600}
+
+/* ---- the proposal ---- */
+.wpbig{text-align:center;margin:6px 0 4px}
+.wpbig .n{font-size:52px;font-weight:750;letter-spacing:-.03em;line-height:1;
+  background:linear-gradient(180deg,#fff,var(--accent));-webkit-background-clip:text;
+  background-clip:text;color:transparent}
+.wpbig .u{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink3);
+  font-weight:650;margin-top:7px}
+.wpx{font-size:26px;color:var(--ink3);font-weight:300;align-self:center;padding:0 4px}
+.wprow{display:flex;align-items:center;justify-content:center;gap:10px;margin:10px 0 18px}
+.wpcard{flex:1;max-width:150px;background:var(--card);border:1px solid var(--line);
+  border-radius:16px;padding:14px 8px 12px}
+.wpstep{display:flex;justify-content:center;gap:12px;margin-top:11px}
+.wpstep button{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);
+  background:#20252b;color:var(--ink);font-size:19px;line-height:1;cursor:pointer;font-family:inherit}
+.wpstep button:disabled{opacity:.3;cursor:default}
+.wpnote{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:0 13px 13px 0;padding:12px 14px;font-size:13.5px;line-height:1.5;color:var(--ink2)}
+.wpnote b{color:var(--ink)}
+.wpnote.warn{border-left-color:var(--warn,#F2C14E)}
+.wpspent{font-size:12.5px;color:var(--ink3);text-align:center;margin-top:13px}
+.wpspent b{color:var(--ink2)}
+
 /* ---------- the deck ---------- */
 .deckwrap{flex:1;display:flex;flex-direction:column;min-height:0}
 .dkdots{display:flex;gap:4px;justify-content:center;margin-bottom:14px;flex:0 0 auto}
@@ -1372,8 +1452,14 @@ const FLOW = [
    honestly. Asked straight after "four days, forty-five minutes", the same
    question becomes concrete: is that share of you actually there? The
    screen shows the arithmetic back. */
-{ ch:5, type:'week', key:'week', h:'Your week, honestly.',
-  sub:'2 hard numbers, then the honest one.' },
+/* Three screens where there was one. The old one asked for days, length and
+   a share out of ten on a single page, and the share is the part nobody can
+   answer honestly in the abstract. Now: draw the week, watch it read back,
+   then be told what it comes to and argue with that. */
+{ ch:5, type:'reactor', h:'Where does your week actually go?',
+  sub:'No numbers. Just move the bars until the sentences below are true.' },
+{ ch:5, type:'reading' },
+{ ch:5, type:'weekplan' },
 
 { ch:6, type:'chapter', n:6, title:'Your why', sub:'The part that decides everything.' },
 /* More than one reason is the honest answer — almost nobody trains for a
@@ -1883,7 +1969,7 @@ function head(s,dynSub){
 }
 function render(){const s=FLOW[i];if(!s)return;
   ({hero,promise,chapter,text,single,multi,rank,rankdyn,stepper,bands,levels,body,shape,insight,numbers,feelings,
-    vitals,equip,deckintro,deck,enjoy,actload,goalone,week,loader,reveal,patternscreen,building,entry}[s.type])(s);}
+    vitals,equip,deckintro,deck,enjoy,actload,goalone,week,reactor,reading,weekplan,loader,reveal,patternscreen,building,entry}[s.type])(s);}
 
 /* hero — "The Path": a route draws itself up the screen, milestones light,
    the summit glows and keeps breathing. Everything below is one clear promise. */
@@ -2588,6 +2674,236 @@ function goalone(s){
   });
   cta.onclick=()=>{haptic(14); A[key]=pick; next();};
   sync();
+}
+
+
+/* ================= THE REACTOR =================
+   Four rods, a fixed budget, and every rod labelled in plain life rather
+   than in points. See FOR NICOLAS/YOUR WEEK — THE REACTOR.md */
+const RODS = [
+  { k:'work',     n:'Work',     c:'#8FB8FF',
+    say:['Under 35 hour weeks','A steady 40 hours','Long weeks, most weeks','It takes the evenings too'] },
+  { k:'people',   n:'People',   c:'#FFB3D2',
+    say:['Weekends, mostly','A few evenings a week','Most evenings are theirs','They come first, always'] },
+  { k:'recovery', n:'Recovery', c:'#C9A7FF',
+    say:['Under 6 hours, no rest day','6 to 7 hours, one easy day','7 to 8 hours, a real rest day','8 hours and a protected day'] },
+  { k:'training', n:'Training', c:'#7BE3C4',
+    say:['Whatever is left over','2 or 3 sessions','3 or 4 sessions, planned','5 sessions, planned first'] },
+];
+const RXBUDGET = 200;                      // four rods, 50 each is even
+const PRESETS = [
+  { k:'steady',  n:'Steady',  s:'Nothing dominates',      v:{work:55,people:50,recovery:50,training:45} },
+  { k:'surge',   n:'Surge',   s:'Training comes first',   v:{work:45,people:40,recovery:50,training:65} },
+  { k:'holding', n:'Holding', s:'It goes in the gaps',    v:{work:70,people:55,recovery:45,training:30} },
+];
+/* Which of the four sentences a rod is currently saying. */
+function rodBand(v){ return v<35 ? 0 : v<52 ? 1 : v<70 ? 2 : 3; }
+
+/* How much of themselves training is getting, on the old 1–10 scale. Kept
+   because the coach console, the insights and the reveal all read
+   A.capacity, and none of them should have to know the reactor exists. */
+function rodsToCapacity(r){ return Math.max(1, Math.min(10, Math.round(r.training/10))); }
+
+/* The core is honest about the mix. Training bought with recovery is the
+   thing that breaks people, so that is what it watches. */
+function rxStrain(r){
+  return Math.max(0, Math.min(1, (r.training - r.recovery + Math.max(0,r.work-55)*0.5 + 30) / 90));
+}
+
+function reactor(s){
+  const r = Object.assign({work:55,people:50,recovery:50,training:45}, A.rods||{});
+  let preset = A.rodPreset || (A.rods ? '' : null);
+
+  const d=el(`${head(s)}
+    <div class="rxwrap">
+      <div class="rxpre">${PRESETS.map(pz=>
+        `<button data-p="${pz.k}"><b>${pz.n}</b><span>${pz.s}</span></button>`).join('')}</div>
+      <div class="rxbay"><div class="rxcore" id="rxcore"></div>
+        ${RODS.map(o=>`<div class="rxrod" data-k="${o.k}" style="--rod:${o.c}">
+          <div class="rxtrack"><div class="rxfill"></div></div>
+          <div class="rxname">${o.n}</div></div>`).join('')}</div>
+      <div class="rxsay" id="rxsay"></div>
+      <p class="rxhint" id="rxhint">Pick the one closest to you, then drag any bar.</p>
+    </div>`);
+
+  setFoot(`<button class="cta ghost">Skip for now</button>`);
+  const cta=foot.querySelector('.cta'), core=d.querySelector('#rxcore'),
+        say=d.querySelector('#rxsay'), hint=d.querySelector('#rxhint');
+
+  /* Move one rod, and the others give up the difference in proportion to
+     what they have — so a rod already near the floor is not driven negative
+     and the one you are holding lands exactly where you put it. */
+  function setRod(k, want){
+    want = Math.max(8, Math.min(92, Math.round(want)));
+    const others = RODS.map(o=>o.k).filter(x=>x!==k);
+    const pool = others.reduce((a,x)=>a+r[x], 0);
+    const left = RXBUDGET - want;
+    if(pool<=0){ others.forEach(x=>r[x]=left/others.length); }
+    else { others.forEach(x=>{ r[x] = Math.max(8, r[x] * (left/pool)); }); }
+    r[k] = want;
+    /* rounding drift lands on the biggest of the others, where it shows least */
+    const drift = RXBUDGET - RODS.reduce((a,o)=>a+r[o.k],0);
+    if(Math.abs(drift)>0.01){
+      const big = others.sort((a,b)=>r[b]-r[a])[0];
+      r[big] += drift;
+    }
+  }
+
+  function paint(){
+    RODS.forEach(o=>{
+      const rod=d.querySelector(`.rxrod[data-k="${o.k}"]`);
+      rod.querySelector('.rxfill').style.height = r[o.k].toFixed(1)+'%';
+    });
+    say.innerHTML = RODS.map(o=>
+      `<div style="--rod:${o.c}"><i></i><span><b>${o.n}</b> — ${o.say[rodBand(r[o.k])]}</span></div>`).join('');
+
+    const st = rxStrain(r);
+    core.style.setProperty('--rxc', st<.42 ? '#7BE3C4' : st<.68 ? '#F2C14E' : '#FF5F6D');
+    core.style.setProperty('--rxbeat', Math.round(3200 - st*1700)+'ms');
+    core.style.opacity = (0.42 + st*0.4).toFixed(2);
+    hint.className = 'rxhint' + (st>=.68?' rxwarn':'');
+    hint.textContent = st<.42 ? 'That holds. Drag any bar to change it.'
+      : st<.68 ? 'Tight, but it works. Drag any bar to change it.'
+      : 'Training is being paid for out of recovery. That is the mix that stalls.';
+
+    cta.classList.toggle('accent', preset!==null);
+    cta.classList.toggle('ghost', preset===null);
+    cta.textContent = preset===null ? 'Skip for now' : 'That is my week';
+  }
+
+  d.querySelectorAll('.rxpre button').forEach(b=>b.onclick=()=>{
+    haptic(14); preset=b.dataset.p;
+    Object.assign(r, PRESETS.find(x=>x.k===preset).v);
+    d.querySelectorAll('.rxpre button').forEach(x=>x.classList.toggle('on', x===b));
+    paint();
+  });
+
+  /* Drag anywhere on a rod. Pointer events so it works with a finger, a
+     mouse and a pencil without three code paths. */
+  d.querySelectorAll('.rxrod').forEach(rod=>{
+    const track=rod.querySelector('.rxtrack');
+    let id=null, last=-1;
+    const from = ev => {
+      const box=track.getBoundingClientRect();
+      return (1 - (ev.clientY - box.top) / box.height) * 100;
+    };
+    rod.addEventListener('pointerdown', ev=>{
+      id=ev.pointerId; rod.setPointerCapture(id); rod.classList.add('drag');
+      preset = preset===null ? '' : preset;
+      d.querySelectorAll('.rxpre button').forEach(x=>x.classList.remove('on'));
+      setRod(rod.dataset.k, from(ev)); paint(); haptic(9); ev.preventDefault();
+    });
+    rod.addEventListener('pointermove', ev=>{
+      if(id===null) return;
+      const v=from(ev); setRod(rod.dataset.k, v); paint();
+      const band=rodBand(r[rod.dataset.k]);
+      if(band!==last){ last=band; haptic(11); }        // a tick as the sentence changes
+    });
+    ['pointerup','pointercancel'].forEach(e=>rod.addEventListener(e, ()=>{
+      if(id===null) return;
+      try{ rod.releasePointerCapture(id); }catch(err){}
+      id=null; last=-1; rod.classList.remove('drag'); haptic(13);
+    }));
+  });
+
+  if(preset) d.querySelector(`.rxpre button[data-p="${preset}"]`).classList.add('on');
+  cta.onclick=()=>{ haptic(14);
+    A.rods = {work:Math.round(r.work),people:Math.round(r.people),
+              recovery:Math.round(r.recovery),training:Math.round(r.training)};
+    A.rodPreset = preset || 'custom';
+    A.capacity = rodsToCapacity(A.rods);
+    next(); };
+  paint();
+}
+
+/* ---- reading your week: the only place 21 and 22 are ever used ---- */
+function reading(s){
+  const r=A.rods||{work:55,people:50,recovery:50,training:45};
+  const load=A.otherLoad||{}, acts=(A.otherAct||[]).filter(x=>x!=='none');
+  const lines=[];
+  if(acts.length && load.freq){
+    const nm={run:'Running',team:'Your sport',yoga:'Yoga',hiit:'Your classes',swim:'Swimming',
+              racket:'Racket sport',martial:'Training',climb:'Climbing',other:'What you already do'}[acts[0]]||'What you already do';
+    const times={'1':'once','2':'twice','3':'3 times','4':'4 times','5':'5 times'}[load.freq]||load.freq+'×';
+    lines.push(`${nm}, <b>${times} a week</b> — counted, not ignored.`);
+  }
+  const rec=rodBand(r.recovery);
+  lines.push(rec<=0 ? 'Recovery is <b>thin</b>. That caps how much hard work a week can hold.'
+    : rec===1 ? 'Recovery at <b>6 to 7 hours</b> — that holds 3 or 4 hard sessions.'
+    : 'Recovery is <b>protected</b>. That holds real work.');
+  lines.push(`Training is <b>${Math.round(r.training/RXBUDGET*100*4)}%</b> of your week as you drew it.`);
+
+  const d=el(`<div class="rdwrap">
+    <h1 class="q" style="text-align:center">Reading your week.</h1>
+    ${lines.map(l=>`<p class="rdline">${l}</p>`).join('')}</div>`);
+  const ls=[].slice.call(d.querySelectorAll('.rdline'));
+  ls.forEach((l,k)=>later(()=>{l.classList.add('on');haptic(9);}, 420+k*620));
+  setFoot('');
+  autoT=setTimeout(next, 620*ls.length + 1100);
+  d.onclick=()=>{ if(autoT){clearTimeout(autoT);autoT=null;} clearPending();
+    ls.forEach(l=>l.classList.add('on')); later(next,120); };
+}
+
+/* ---- the proposal, derived rather than asked ---- */
+function weekplan(s){
+  const r=A.rods||{work:55,people:50,recovery:50,training:45};
+  const load=A.otherLoad||{};
+  const otherSessions = +(load.freq||0);
+
+  /* Days come from the training rod, then recovery puts a ceiling on it,
+     then whatever they already do comes off the top. */
+  const wanted = r.training<35?2 : r.training<50?3 : r.training<62?4 : r.training<75?5 : 6;
+  const ceil   = r.recovery<35?3 : r.recovery<52?4 : r.recovery<70?5 : 6;
+  let days = Math.max(2, Math.min(wanted, ceil) - (otherSessions>=3?1:0));
+  /* Session length follows the pressure on the day, not the ambition. */
+  let len  = (r.work>=68 || r.people>=68) ? '35' : r.training>=62 ? '55' : '45';
+  if(A.days) days=+A.days; if(A.length) len=A.length;
+  const LEN={'20':'20 min','35':'30–40 min','45':'45 min','55':'45–60 min','75':'60–90 min'};
+  const ORDER=['20','35','45','55','75'];
+
+  const d=el(`<h1 class="q">Here is what that comes to.</h1>
+    <p class="sub">Built from your bars${otherSessions?', minus what you already do':''}. Change either.</p>
+    <div class="wprow">
+      <div class="wpcard"><div class="wpbig"><div class="n" id="wpd">${days}</div>
+        <div class="u">days a week</div></div>
+        <div class="wpstep"><button id="dm">&minus;</button><button id="dp">+</button></div></div>
+      <div class="wpx">&times;</div>
+      <div class="wpcard"><div class="wpbig"><div class="n" id="wpl" style="font-size:26px">${LEN[len]}</div>
+        <div class="u">each</div></div>
+        <div class="wpstep"><button id="lm">&minus;</button><button id="lp">+</button></div></div>
+    </div>
+    <div class="wpnote" id="wpn"></div>
+    <p class="wpspent" id="wps"></p>`);
+
+  setFoot(`<button class="cta accent">That works</button>`);
+  const cta=foot.querySelector('.cta'), note=d.querySelector('#wpn'), spent=d.querySelector('#wps');
+
+  /* It pushes back, but it never refuses. The trade is always theirs. */
+  function verdict(){
+    if(days>ceil) return ['warn', `<b>${days} days</b> at the recovery you drew is where people stall. I would hold you at ${ceil} — but it is your call.`];
+    if(days<2)    return ['warn', 'Below 2 days nothing compounds. Two is the floor that still works.'];
+    if(days<wanted) return ['', `<b>${days} days</b> is honest. Fewer days done properly beats more days missed.`];
+    if(days===2)  return ['', '<b>2 days</b> is enough to get stronger. Not enough to get stronger fast — a fine trade if it is the one you can keep.'];
+    return ['', `<b>${days} × ${LEN[len]}</b> is a real block of work. That is a programme, not a plan.`];
+  }
+  function paint(){
+    d.querySelector('#wpd').textContent=days;
+    d.querySelector('#wpl').textContent=LEN[len];
+    const [cls,txt]=verdict();
+    note.className='wpnote'+(cls?' '+cls:''); note.innerHTML=txt;
+    const mins=days*(len==='35'?35:len==='45'?45:len==='55'?52:len==='75'?75:20);
+    spent.innerHTML=`That is <b>${(Math.round(mins/6)/10)} hours</b> a week`
+      + (otherSessions?` on top of what you already do` : '');
+    d.querySelector('#dm').disabled=days<=1; d.querySelector('#dp').disabled=days>=7;
+    d.querySelector('#lm').disabled=ORDER.indexOf(len)<=0;
+    d.querySelector('#lp').disabled=ORDER.indexOf(len)>=ORDER.length-1;
+  }
+  d.querySelector('#dm').onclick=()=>{haptic(11);days=Math.max(1,days-1);paint();};
+  d.querySelector('#dp').onclick=()=>{haptic(11);days=Math.min(7,days+1);paint();};
+  d.querySelector('#lm').onclick=()=>{haptic(11);len=ORDER[Math.max(0,ORDER.indexOf(len)-1)];paint();};
+  d.querySelector('#lp').onclick=()=>{haptic(11);len=ORDER[Math.min(ORDER.length-1,ORDER.indexOf(len)+1)];paint();};
+  cta.onclick=()=>{haptic(14); A.days=days; A.length=len; A.trainDays=null; next();};
+  paint();
 }
 
 /* ---- the week, and what it can actually hold -------------------------- */
