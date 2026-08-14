@@ -2171,8 +2171,9 @@ function hero(s){
     if(triL) triL.style.strokeDashoffset=0;
     if(!landedText){ landedText=true; foot.classList.add('on'); syncFootPad(); }
     landArt();
+    /* A no-op unless syncFootPad changed the padding when the button came
+       in. Left in so a footer that does resize cannot leave the copy off. */
     placeCopy();
-    requestAnimationFrame(placeCopy);      // after syncFootPad's padding lands
   }
 
   /* THE WORDS SIT HALFWAY BETWEEN THE POINT OF THE TRIANGLE AND THE BUTTON.
@@ -2205,6 +2206,10 @@ function hero(s){
   }
   window.addEventListener('resize',placeCopy);
 
+
+  /* Settle the layout before the first frame. */
+  placeCopy();
+  requestAnimationFrame(placeCopy);        // again once fonts have settled
 
   if(REDUCED){ finishNow(); }
   else { raf=requestAnimationFrame(tick); }
