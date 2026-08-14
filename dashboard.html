@@ -134,7 +134,7 @@ h2.h{font-size:23px;line-height:1.2;letter-spacing:-.022em;font-weight:550}
    to a serif name set this large — it read as a stray icon rather than the
    thing the app is called. The triangle gives it a shape with presence and
    an aspect ratio that stands up to a heavy first line. */
-#head .lockup{width:58px;height:52px;flex:none;overflow:visible}
+#head .lockup{width:62px;height:55px;flex:none;overflow:visible}
 #head .lockup path{fill:none;stroke-linecap:round;stroke-linejoin:round}
 #head .lk-tri{stroke:url(#hdTri);stroke-width:8;
   filter:drop-shadow(0 0 5px var(--neon-line))}
@@ -164,7 +164,23 @@ h2.h{font-size:23px;line-height:1.2;letter-spacing:-.022em;font-weight:550}
 
 /* the shock landing: flat for most of the cycle, then a jump at 82% —
    the instant the trace's leading edge arrives at the mark */
-#head .lk-db{animation:pump var(--beat,2400ms) linear infinite;transform-origin:130px 65px}
+/* The same slow rep as the opening screen, not a scale pulse. The geometry
+   here is already onboarding's mark verbatim — same bar, same three plates,
+   same widths — so the motion is taken across verbatim too: 9 user units of
+   bob in the same 260-unit box, on the same 4.4s clock, with each segment
+   carrying its own half-sine so it only rests at the top and the bottom.
+   Scaled down by the group around it, which is the whole point: identical
+   proportions, smaller. */
+#head .lk-db{will-change:transform;animation:rep 4.4s linear infinite}
+@keyframes rep{
+  0%  {transform:translateY(0);   animation-timing-function:cubic-bezier(.39,.575,.565,1)}
+  25% {transform:translateY(-9px);animation-timing-function:cubic-bezier(.47,0,.745,.715)}
+  50% {transform:translateY(0);   animation-timing-function:cubic-bezier(.39,.575,.565,1)}
+  75% {transform:translateY(9px); animation-timing-function:cubic-bezier(.47,0,.745,.715)}
+  100%{transform:translateY(0)}}
+/* and the glow breathes on the same clock, as it does there */
+#head .lk-glow{transform-origin:150px 96px;animation:lkGlow 4.4s ease-in-out infinite}
+@keyframes lkGlow{0%,100%{opacity:.42;transform:scale(.95)}50%{opacity:.9;transform:scale(1.06)}}
 @keyframes pump{
   0%,74%   {transform:scale(1);    filter:drop-shadow(0 0 3px var(--accent-dim))}
   80%      {transform:scale(1.09); filter:drop-shadow(0 0 11px var(--accent))}
@@ -278,7 +294,7 @@ h2.h{font-size:23px;line-height:1.2;letter-spacing:-.022em;font-weight:550}
   *,*:before,*:after{animation-duration:.001ms!important;animation-iteration-count:1!important;
     transition-duration:.001ms!important}
   .ecg-l{stroke-dasharray:none;stroke-dashoffset:0}
-  #head .lk-db{animation:none}
+  #head .lk-db,#head .lk-glow{animation:none}
   #head .lk-spark{animation:none;opacity:.8}
   .trav-l rect{stroke-dasharray:none;opacity:.55}
 }
@@ -399,16 +415,21 @@ h2.h{font-size:23px;line-height:1.2;letter-spacing:-.022em;font-weight:550}
 .hab:after{content:"";position:absolute;left:0;top:0;bottom:0;width:64px;pointer-events:none;
   background:linear-gradient(90deg,var(--neon-soft),transparent);opacity:.55;
   transition:opacity .35s}
-.hab.on{border-color:var(--accent);background:var(--accent-soft);
-  box-shadow:0 0 18px var(--accent-soft)}
-.hab.on:before{background:var(--accent);opacity:1;box-shadow:0 0 12px var(--accent)}
+/* A ticked habit used to light the whole row: accent border, accent wash,
+   an outer glow AND a solid accent disc. Four things saying "done" is what
+   made three of them at once feel like a Christmas tree. Now the row barely
+   tints, and the tick is REVERSED — an outlined ring with the mark drawn
+   inside it rather than a filled disc with the mark punched out. Same
+   information, a fraction of the light. */
+.hab.on{border-color:var(--accent-line, rgba(62,203,168,.34));
+  background:rgba(62,203,168,.045);box-shadow:none}
+.hab.on:before{background:var(--accent);opacity:.85;box-shadow:none}
 .hab.on:after{opacity:0}
 .hab .tick{width:21px;height:21px;border-radius:50%;border:1.5px solid var(--line2);flex:none;
-  position:relative;transition:all .18s;box-shadow:0 0 0 0 var(--accent)}
-.hab.on .tick{background:var(--accent);border-color:var(--accent);
-  box-shadow:0 0 14px var(--accent)}
-.hab.on .tick:after{content:"";position:absolute;left:6.5px;top:3.5px;width:5px;height:9px;
-  border:solid #0C1512;border-width:0 2px 2px 0;transform:rotate(45deg)}
+  position:relative;display:flex;align-items:center;justify-content:center;transition:all .18s}
+.hab.on .tick{background:none;border-color:var(--accent)}
+.hab .tick .tk{width:11px;height:11px;stroke:var(--accent);fill:none;stroke-width:3;
+  stroke-linecap:round;stroke-linejoin:round}
 .hab .tick,.hab .tx,.hab .hpts{position:relative;z-index:1}
 .hab .tx{flex:1;min-width:0}
 .hab .tx b{display:block;font-size:14.5px;font-weight:550;letter-spacing:-.01em;color:var(--ink)}
@@ -674,15 +695,20 @@ h2.h{font-size:23px;line-height:1.2;letter-spacing:-.022em;font-weight:550}
 .kp.on span{color:var(--accent)}
 
 /* ---------- the week, with the mark on it ---------- */
+/* A training day carries the mark, in the mark's own colour. Today carries
+   the triangle instead of a highlighted box — the logo doing the pointing
+   rather than a rectangle, which is one more place the shape gets seen
+   without anything having to say so. */
 .wd .b svg.wdb{width:24px;height:12px;fill:none;stroke:var(--line2);stroke-linecap:round;
   transition:stroke .25s,filter .25s}
 .wd.plan .b{border-style:solid;border-color:var(--line)}
-.wd.plan .b svg.wdb{stroke:var(--ink3)}
+.wd.plan .b svg.wdb{stroke:var(--neon);filter:drop-shadow(0 0 5px var(--neon-line))}
 .wd.done .b svg.wdb{stroke:var(--accent)}
-/* today: the square glows from its edge */
-.wd.now .b{border-color:var(--neon);background:var(--neon-soft);
-  box-shadow:0 0 0 1px var(--neon-line), 0 0 18px var(--neon-line), inset 0 0 12px rgba(255,255,255,.04)}
-.wd.now .b svg.wdb{stroke:var(--neon);filter:drop-shadow(0 0 6px var(--neon))}
+.wd .b svg.wtri{width:19px;height:17px;fill:none;stroke:var(--neon);stroke-width:16;
+  stroke-linejoin:round;stroke-linecap:round;overflow:visible;
+  filter:drop-shadow(0 0 6px var(--neon))}
+/* the box steps back so the shape can be the signal */
+.wd.now .b{border-color:transparent;background:none;box-shadow:none}
 .wd.now .l{color:var(--neon);text-shadow:0 0 10px var(--neon-line)}
 
 /* ---------- YOUR PROFILE ------------------------------------------------
@@ -815,7 +841,8 @@ h2.h{font-size:23px;line-height:1.2;letter-spacing:-.022em;font-weight:550}
    percentage; both exist because some skins want a width and some want it
    inside calc(). --f on a square is how full THAT square is, 0..1.
    ------------------------------------------------------------------- */
-.dayx{position:relative;border:1px solid var(--line2);border-radius:var(--r);overflow:hidden;
+.dayx{position:relative;margin-top:12px;
+  border:1px solid var(--line2);border-radius:var(--r);overflow:hidden;
   background:radial-gradient(120% 140% at 100% 0%, var(--neon-soft), transparent 58%),
     linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015));
   box-shadow:0 0 26px rgba(0,0,0,.32);transition:border-color .4s,box-shadow .4s}
@@ -953,9 +980,25 @@ h2.h{font-size:23px;line-height:1.2;letter-spacing:-.022em;font-weight:550}
 .chip.pay-c{color:var(--accent);border-color:var(--accent);background:var(--accent-soft);
   font-weight:700;box-shadow:0 0 12px var(--accent-soft)}
 .chip.pay-c.earned{box-shadow:0 0 16px var(--accent-soft)}
-.hpts{font-size:11px;font-weight:700;color:var(--ink3);flex:none;
+/* The percentage is the reward, so it is the one thing that gets to move.
+   On the tick it swells once and throws two sparks — the same idea as the
+   ember on the day gauge, at the size of a chip: the number visibly leaves
+   here and goes into the total. */
+.hpts{position:relative;font-size:11px;font-weight:700;color:var(--ink3);flex:none;
   border:1px solid var(--line);border-radius:999px;padding:4px 9px}
-.hab.on .hpts{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+.hab.on .hpts{color:var(--accent);border-color:rgba(62,203,168,.45);background:none}
+.hpts.just{animation:ptsPop .75s cubic-bezier(.22,1,.36,1)}
+@keyframes ptsPop{
+  0%  {transform:scale(1);   box-shadow:0 0 0 0 var(--accent-soft)}
+  28% {transform:scale(1.2); box-shadow:0 0 16px 2px var(--accent-soft)}
+  100%{transform:scale(1);   box-shadow:0 0 0 0 rgba(0,0,0,0)}}
+.pspark{position:absolute;left:50%;top:2px;width:3px;height:3px;border-radius:50%;
+  background:var(--accent);box-shadow:0 0 7px var(--accent);pointer-events:none;
+  animation:pSpark .8s ease-out both;animation-delay:var(--d,0s)}
+@keyframes pSpark{
+  0%  {opacity:0;transform:translate(-50%,0) scale(.5)}
+  25% {opacity:1}
+  100%{opacity:0;transform:translate(-190%,-17px) scale(.2)}}
 
 /* ---------- fold ------------------------------------------------------
    A flat row with a plus on it reads as a spreadsheet. These are the way
@@ -2157,6 +2200,7 @@ function go(tab, keep){
   view.scrollTop=y;
   wire();
   layoutRings(view);
+  if(JUST_HABIT) requestAnimationFrame(()=>{ JUST_HABIT = null; });
   requestAnimationFrame(()=>document.querySelectorAll('[data-grow]').forEach(e=>e.style.width=e.dataset.grow));
 }
 
@@ -2231,11 +2275,16 @@ function header(){
              with one group the placement would be wiped the moment the pulse
              ran and the dumbbell would jump to the corner. The outer group
              owns the placement, the inner one owns the beat. -->
+        <radialGradient id="hdGlow">
+          <stop offset="0%"   stop-color="var(--accent)" stop-opacity=".38"/>
+          <stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/>
+        </radialGradient>
+        <circle class="lk-glow" cx="150" cy="96" r="88" fill="url(#hdGlow)"/>
         <!-- Sized against the triangle's INTERIOR, not its bounding box. At
-             y=95 the two edges are ~178 units apart, so a 120-unit dumbbell
-             sits inside with air on both sides. Centre of the drawn mark is
-             (130,65) in its own 260x130 box, hence the offsets. -->
-        <g transform="translate(50,45) scale(0.77)">
+             this height the two edges are ~178 units apart, so a 131-unit
+             dumbbell sits inside with air on both sides. Centre of the drawn
+             mark is (130,65) in its own 260x130 box, hence the offsets. -->
+        <g transform="translate(41.5,41) scale(0.84)">
         <g class="lk-db">
           <path d="M86 65 H174" stroke-width="7" opacity=".55"/>
           <path d="M86 38 V92" stroke-width="12.65"/><path d="M174 38 V92" stroke-width="12.65"/>
@@ -2472,12 +2521,16 @@ function paneToday(){
         const cls = dn?'done':(plan&&past?'miss':(plan&&i>=PROGRAM_START_DOW?'plan':''));
         return `<div class="wd ${cls} ${now?'now':''}">
           <span class="l">${d[0]}</span>
-          <span class="b">${dn?svg(I.check)
-            :(plan?`<svg class="wdb" viewBox="0 0 260 130" aria-hidden="true">
+          <span class="b">${
+            dn   ? svg(I.check)
+          : now  ? `<svg class="wtri" viewBox="0 0 300 268" aria-hidden="true">
+                      <path d="M100 23 H286 L150 252 L14 16 H60"/></svg>`
+          : plan ? `<svg class="wdb" viewBox="0 0 260 130" aria-hidden="true">
                 <path d="M86 65 H174" stroke-width="9"/>
                 <path d="M86 34 V96" stroke-width="15"/><path d="M174 34 V96" stroke-width="15"/>
                 <path d="M62 44 V86" stroke-width="11"/><path d="M198 44 V86" stroke-width="11"/>
-              </svg>`:'')}</span>
+              </svg>`
+          : ''}</span>
         </div>`;
       }).join('')}
     </div>
@@ -2511,10 +2564,12 @@ function paneToday(){
   <div class="habits">
     ${hbs.map(x=>{
       const on=S.habits[x.id];
+      const just = on && JUST_HABIT===x.id;
       return `<button class="hab ${on?'on':''}" data-habit="${x.id}">
-        <span class="tick"></span>
+        <span class="tick">${on?svg(I.check,'tk'):''}</span>
         <span class="tx"><b>${x.t}</b><small>${x.s}</small></span>
-        <span class="hpts">&plus;${Math.round((todayId?20:60)/hbs.length)}%</span>
+        <span class="hpts ${just?'just':''}">&plus;${Math.round((todayId?18:50)/hbs.length)}%${
+          just?`<i class="pspark"></i><i class="pspark" style="--d:.12s"></i>`:''}</span>
       </button>`;
     }).join('')}
   </div>
@@ -3449,6 +3504,9 @@ function openSheet(html){ sBody.innerHTML=html; sheet.classList.add('on'); scrim
 /* Which to-do, if any, opened the sheet that is currently up. Cleared on
    close as well as on save, so backing out never ticks anything. */
 let PENDING_TODO = null;
+/* Which habit was ticked a moment ago, so its percentage can visibly catch
+   light on the way into the total. Cleared as soon as it has been drawn. */
+let JUST_HABIT = null;
 function closeSheet(){ sheet.classList.remove('on'); scrim.classList.remove('on'); PENDING_TODO=null; }
 scrim.onclick=closeSheet;
 
@@ -3755,6 +3813,12 @@ function wire(){
     }, {passive:true});
     track();
   }
+
+  view.querySelectorAll('[data-habit]').forEach(b=>b.addEventListener('click', ()=>{
+    /* Remembered only long enough to render once. It is a visual beat, not
+       state — persisting it would replay the spark on every reload. */
+    if(!S.habits[b.dataset.habit]) JUST_HABIT = b.dataset.habit;
+  }, true));
 
   view.querySelectorAll('[data-todo1]').forEach(b=>b.onclick=()=>{
     /* Needs a number? Open the sheet and remember what it was for; the save
