@@ -227,6 +227,7 @@ h1.q.big{font-size:33px}
 .cta.ghost:active{background:rgba(255,255,255,.04)}
 .skip{display:block;width:100%;text-align:center;margin-top:8px;font-size:13.5px;color:var(--ink3);background:none;border:none;font-family:inherit;cursor:pointer;padding:14px 6px;min-height:46px}
 
+/* ===== LOGO:CSS — generated from logo/hero.css, do not edit here ===== */
 /* ---------- hero: the dumbbell ---------- */
 body.opening #bars,body.opening #chapline{opacity:0;pointer-events:none}
 #bars,#chapline{transition:opacity .4s}
@@ -368,6 +369,34 @@ body.opening #bars,body.opening #chapline{opacity:0;pointer-events:none}
   .heroA .dbglow{opacity:.5}
 }
 
+
+/* ---------- compact phones (SE, and any short window) ---------- */
+@media(max-height:700px){
+  h1.q{font-size:23px}
+  h1.q.big{font-size:28px}
+  .sub{font-size:14px;margin-bottom:16px}
+  .hero h1{font-size:31px}
+  .hero p{font-size:15px;margin-bottom:9px}
+  .orb{width:56px;height:56px;margin-bottom:18px}
+  .opt{min-height:52px;padding:12px 14px}
+  .opt .tx b{font-size:14.5px}
+  .slval{font-size:46px}
+  .slwrap{margin:12px 0 4px}
+  input[type=range]{margin-top:12px}
+  .slcap{font-size:14px;min-height:38px;margin-top:8px}
+  .ins-num{font-size:44px}
+  .ins-line{font-size:20px}
+  .ins-line.s{font-size:15px}
+  .eyebrow{margin-bottom:10px}
+  .badges{margin-top:16px}
+}
+@media(max-height:600px){
+  h1.q{font-size:21px}
+  .hero h1{font-size:27px}
+  .slval{font-size:40px}
+  .opt .tx small{display:none}
+}
+/* ===== /LOGO:CSS ===== */
 /* ---------- insight ---------- */
 .insight{flex:1;display:flex;flex-direction:column;justify-content:center}
 .ins-tag{display:inline-flex;align-items:center;gap:7px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;
@@ -467,33 +496,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:32px;heigh
 #idx button{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:11px;
   padding:11px 13px;font-size:13.5px;font-family:inherit;margin-bottom:6px;cursor:pointer;color:var(--ink)}
 #idx button b{color:var(--ink3);font-weight:600;font-size:11px;margin-right:8px}
-
-/* ---------- compact phones (SE, and any short window) ---------- */
-@media(max-height:700px){
-  h1.q{font-size:23px}
-  h1.q.big{font-size:28px}
-  .sub{font-size:14px;margin-bottom:16px}
-  .hero h1{font-size:31px}
-  .hero p{font-size:15px;margin-bottom:9px}
-  .orb{width:56px;height:56px;margin-bottom:18px}
-  .opt{min-height:52px;padding:12px 14px}
-  .opt .tx b{font-size:14.5px}
-  .slval{font-size:46px}
-  .slwrap{margin:12px 0 4px}
-  input[type=range]{margin-top:12px}
-  .slcap{font-size:14px;min-height:38px;margin-top:8px}
-  .ins-num{font-size:44px}
-  .ins-line{font-size:20px}
-  .ins-line.s{font-size:15px}
-  .eyebrow{margin-bottom:10px}
-  .badges{margin-top:16px}
-}
-@media(max-height:600px){
-  h1.q{font-size:21px}
-  .hero h1{font-size:27px}
-  .slval{font-size:40px}
-  .opt .tx small{display:none}
-}
 
 /* ---------- chapter interstitial ---------- */
 /* The synthwave horizon. One motif, on the eight chapter screens only —
@@ -2153,6 +2155,7 @@ function render(){const s=FLOW[i];if(!s)return;
    the summit glows and keeps breathing. Everything below is one clear promise. */
 const MARK = '<svg viewBox="0 0 24 24"><path d="M4 9v6"/><path d="M7 6.5v11"/>'+
              '<path d="M17 6.5v11"/><path d="M20 9v6"/><path d="M7 12h10"/></svg>';
+/* ===== LOGO:JS — generated from logo/hero.js, do not edit here ===== */
 function hero(s){
   /* Two marks share one engine.
 
@@ -2544,6 +2547,7 @@ function hero(s){
     haptic(16); next();
   });
 }
+/* ===== /LOGO:JS ===== */
 
 /* the contract — as messages, arriving one at a time with the coach typing */
 function promise(s){

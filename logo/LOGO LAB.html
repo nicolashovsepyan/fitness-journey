@@ -1,0 +1,774 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Logo lab — Fitness Journey</title>
+<style>
+:root{
+  --bg:#171a1e; --card:#1c2026; --line:#2b3138; --line2:#39414a;
+  --ink:#e9edf2; --ink2:#b6bfc9; --ink3:#8a95a1;
+  --accent:#7BE3C4; --accent-soft:rgba(123,227,196,.12);
+  --neon:#FF5FA2; --neon-line:rgba(255,95,162,.45);
+  --shadow:0 1px 2px rgba(0,0,0,.3); --shadow-lift:0 8px 24px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);overflow:hidden;
+  font:15px/1.45 -apple-system,BlinkMacSystemFont,'SF Pro Text',Inter,'Segoe UI',Roboto,sans-serif}
+
+/* the phone the mark is judged in */
+#phone{position:absolute;top:0;left:0;width:375px;height:812px;overflow:hidden;
+  background:var(--bg);border-right:1px solid var(--line)}
+#stage{position:absolute;top:0;right:0;bottom:0;left:0;padding:74px 20px 0;overflow:hidden}
+.screen{position:absolute;top:74px;left:20px;right:20px;bottom:0;
+  display:flex;flex-direction:column;overflow:hidden}
+.footspacer{flex:0 0 auto;height:var(--footpad,118px);width:100%}
+#foot{position:absolute;left:0;right:0;bottom:0;padding:0 20px 26px;z-index:18}
+.cta{display:block;width:100%;border:none;border-radius:16px;background:var(--accent);
+  color:#0d1114;padding:17px;font-size:16px;font-weight:600;font-family:inherit;cursor:pointer}
+.ctawrap{position:relative}
+.ctaglow{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:80%;height:120%;border-radius:50%;pointer-events:none;
+  background:radial-gradient(closest-side,rgba(123,227,196,.45),transparent 70%);opacity:0}
+.ctawrap.alive .ctaglow{opacity:1;transition:opacity .6s}
+
+/* ---------- the mark, verbatim from onboarding.html ---------- */
+/* ---------- hero: the dumbbell ---------- */
+body.opening #bars,body.opening #chapline{opacity:0;pointer-events:none}
+#bars,#chapline{transition:opacity .4s}
+.heroA{position:absolute;top:0;right:0;bottom:0;left:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;overflow:hidden;
+  margin:calc(-74px - env(safe-area-inset-top)) -20px 0;
+  padding:calc(74px + env(safe-area-inset-top)) 20px calc(var(--footpad,150px) + 3vh)}
+.heroA .lock{display:flex;flex-direction:column;align-items:center;width:100%;position:relative}
+/* The triangle sits BEHIND everything rather than above it, and is anchored
+   to the dumbbell rather than to the block as a whole — so it frames the
+   mark and stays framing it no matter what the copy below does. -37% rather
+   than -50% drops the dumbbell below the triangle's midline; a percentage
+   because it has to hold at every width, where a pixel offset would not. */
+.heroA .tri{position:absolute;left:50%;top:50%;transform:translate(-50%,-37.5%);
+  width:min(82%,315px);height:auto;overflow:visible;z-index:0;pointer-events:none}
+.heroA .tri path{fill:none;stroke-width:2.6;stroke-linejoin:round;stroke-linecap:round}
+.heroA .tri-l{stroke:url(#triGrad);filter:drop-shadow(0 0 7px rgba(255,95,162,.45))}
+/* Two passes: a soft bloom and a tighter core, both fading out away from the
+   bar. Together they read as light rather than as paint. */
+.heroA .tri-glare{stroke:url(#triGlare);stroke-width:5.5;opacity:0;
+  filter:blur(3.5px) drop-shadow(0 0 10px rgba(255,255,255,.55));
+  transition:opacity .5s ease}
+.heroA.lit .tri-glare{opacity:.9}
+/* One short bright dash chasing the perimeter. Hidden until the mark has
+   landed — a light running around an outline that is still being drawn
+   reads as two animations fighting. */
+.heroA .tri-spark{stroke:#fff;stroke-width:3.5;opacity:0;
+  filter:drop-shadow(0 0 9px #FF5FA2) drop-shadow(0 0 3px #fff)}
+.heroA.lit .tri-spark{opacity:1;
+  animation:triRun var(--beat,4400ms) linear -1650ms infinite}
+.heroA.lit .tri-l{animation:triBeat var(--beat,4400ms) ease-in-out -1650ms infinite}
+@keyframes triRun{ from{stroke-dashoffset:0} to{stroke-dashoffset:-777} }
+/* A real heartbeat — lub, then a smaller dub — and it only happens while the
+   light is on the long top edge. That window is the first 24% of the lap, so
+   the whole thump is over by 20% and the outline sits quiet for the three
+   sides where nothing is passing. One event per lap, in one place. */
+@keyframes triBeat{
+  0%      {filter:drop-shadow(0 0 7px  rgba(255,95,162,.45)); stroke-width:2.6}
+  4%      {filter:drop-shadow(0 0 34px rgba(255,95,162,1))
+                  drop-shadow(0 0 9px rgba(255,255,255,.6));  stroke-width:3.5}
+  9%      {filter:drop-shadow(0 0 10px rgba(255,95,162,.5));  stroke-width:2.7}
+  14%     {filter:drop-shadow(0 0 24px rgba(255,95,162,.9));  stroke-width:3.1}
+  21%,100%{filter:drop-shadow(0 0 7px  rgba(255,95,162,.45)); stroke-width:2.6}
+}
+@media (prefers-reduced-motion:reduce){
+  .heroA.lit .tri-spark{animation:none;opacity:.85}
+  .heroA.lit .tri-l{animation:none}
+}
+.heroA .art{z-index:2}
+.heroA .hcopy{z-index:3}
+/* A starting value only. placeCopy() below measures the real gap, so that
+   the words end up exactly halfway between the point of the triangle and
+   the top of the button. */
+.heroA .art{position:relative;display:flex;align-items:center;justify-content:center;
+  width:100%;margin-bottom:80px}
+/* the mark carries the screen; the words sit under it, deliberately smaller */
+.heroA .db{width:min(70%,277px);height:auto;overflow:visible;position:relative;z-index:2}
+/* B's silhouette is narrower than A's, so it gets a little more of the width
+   to land at the same optical size */
+.heroA .db.mb{width:min(79%,313px)}
+.heroA .dbglow{position:absolute;width:210px;height:210px;border-radius:50%;z-index:1;
+  background:radial-gradient(circle,rgba(62,203,168,.26),rgba(62,203,168,0) 66%);
+  opacity:0;will-change:opacity,transform}
+/* The glow fades up before it starts breathing, so it never pops in at
+   full strength the instant the mark finishes drawing. */
+.heroA .art.alive .dbglow{
+  animation:dbGlowIn .55s cubic-bezier(.22,1,.36,1) both,
+            dbGlow 4.4s ease-in-out .55s infinite}
+@keyframes dbGlowIn{from{opacity:0;transform:scale(.88)}to{opacity:.40;transform:scale(.95)}}
+@keyframes dbGlow{0%,100%{opacity:.40;transform:scale(.95)}50%{opacity:.86;transform:scale(1.06)}}
+
+.heroA .db path.stroked{fill:none;stroke:url(#dbGrad);stroke-linecap:round}
+.heroA .db path.bar{stroke:url(#dbBar)}
+/* the clip rectangles that wipe B's plates into place */
+.heroA .db .wipe{transform-box:fill-box;transform:scaleY(0)}
+
+/* The whole thing does a slow rep, forever. The cycle STARTS and ENDS at zero
+   because that is where the mark already sits when the drawing finishes — a
+   keyframe list that opens at translateY(9px) makes the group jump 9px the
+   instant the animation is attached, which is the catch-up you could see.
+
+   But adding the two zero-crossings created a second problem: with one easing
+   curve applied BETWEEN EVERY PAIR of keyframes, the motion decelerated to a
+   stop at 0, -9, 0, +9 and 0 — five dead stops per cycle instead of two. That
+   is the stutter. A real bob is a sine wave: it only rests at the top and the
+   bottom and moves fastest through the middle. So each segment gets its own
+   half-sine curve — decelerating into an extreme, accelerating out of it —
+   and the crossings are no longer stops at all. */
+.heroA .art.alive .rep{will-change:transform;animation:rep 4.4s linear infinite}
+@keyframes rep{
+  0%  {transform:translateY(0);    animation-timing-function:cubic-bezier(.39,.575,.565,1)}
+  25% {transform:translateY(-9px); animation-timing-function:cubic-bezier(.47,0,.745,.715)}
+  50% {transform:translateY(0);    animation-timing-function:cubic-bezier(.39,.575,.565,1)}
+  75% {transform:translateY(9px);  animation-timing-function:cubic-bezier(.47,0,.745,.715)}
+  100%{transform:translateY(0)}
+}
+
+/* the button breathes on the same clock as the mark */
+.ctawrap{position:relative}
+.ctawrap .cta{position:relative;z-index:1}
+.ctaglow{position:absolute;left:50%;top:50%;z-index:0;width:104%;height:280%;
+  border-radius:50%;pointer-events:none;opacity:0;
+  transform:translate(-50%,-50%) scale(.95);
+  background:radial-gradient(ellipse at center,
+    rgba(62,203,168,.46) 0%,rgba(62,203,168,.20) 38%,rgba(62,203,168,0) 68%);
+  will-change:opacity,transform}
+.ctawrap.alive .ctaglow{
+  animation:ctaGlowIn .55s cubic-bezier(.22,1,.36,1) both,
+            ctaGlow 4.4s ease-in-out .55s infinite}
+@keyframes ctaGlowIn{
+  from{opacity:0;transform:translate(-50%,-50%) scale(.86)}
+  to  {opacity:.40;transform:translate(-50%,-50%) scale(.95)}}
+@keyframes ctaGlow{
+  0%,100%{opacity:.40;transform:translate(-50%,-50%) scale(.95)}
+  50%    {opacity:.86;transform:translate(-50%,-50%) scale(1.06)}}
+
+/* words sit under the mark as one lockup */
+.heroA .hcopy{display:flex;flex-direction:column;align-items:center;text-align:center;
+  opacity:0;transform:translateY(12px);
+  transition:opacity .42s cubic-bezier(.22,1,.36,1),transform .48s cubic-bezier(.22,1,.36,1)}
+.heroA.ready .hcopy{opacity:1;transform:none}
+.heroA h1{margin:0;white-space:nowrap;font-size:min(7.9vw,31px);line-height:1.12;
+  letter-spacing:-.022em;font-weight:550;color:var(--ink)}
+.heroA .hsub{margin-top:13px;font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;
+  font-weight:600;color:var(--accent);opacity:.9}
+
+@media (max-height:720px){
+  .heroA .art{margin-bottom:64px}
+  .heroA .db{width:min(61%,228px)}
+  .heroA .db.mb{width:min(69%,259px)}
+  .heroA h1{font-size:min(7.9vw,28px)}
+}
+@media (prefers-reduced-motion:reduce){
+  .heroA .db path.stroked{stroke-dashoffset:0 !important;transition:none !important}
+  .heroA .db .wipe{transform:scaleY(1) !important;transition:none !important}
+  .heroA .art.alive .rep,.heroA .art.alive .dbglow,.ctawrap.alive .ctaglow{animation:none}
+  .ctaglow{opacity:.42}
+  .heroA .hcopy{opacity:1;transform:none;transition:none}
+  .heroA .dbglow{opacity:.5}
+}
+
+
+/* ---------- compact phones (SE, and any short window) ---------- */
+@media(max-height:700px){
+  h1.q{font-size:23px}
+  h1.q.big{font-size:28px}
+  .sub{font-size:14px;margin-bottom:16px}
+  .hero h1{font-size:31px}
+  .hero p{font-size:15px;margin-bottom:9px}
+  .orb{width:56px;height:56px;margin-bottom:18px}
+  .opt{min-height:52px;padding:12px 14px}
+  .opt .tx b{font-size:14.5px}
+  .slval{font-size:46px}
+  .slwrap{margin:12px 0 4px}
+  input[type=range]{margin-top:12px}
+  .slcap{font-size:14px;min-height:38px;margin-top:8px}
+  .ins-num{font-size:44px}
+  .ins-line{font-size:20px}
+  .ins-line.s{font-size:15px}
+  .eyebrow{margin-bottom:10px}
+  .badges{margin-top:16px}
+}
+@media(max-height:600px){
+  h1.q{font-size:21px}
+  .hero h1{font-size:27px}
+  .slval{font-size:40px}
+  .opt .tx small{display:none}
+}
+
+
+
+/* ---------- lab chrome, never shipped ---------- */
+#panel{position:absolute;top:0;left:376px;right:0;bottom:0;overflow:auto;padding:22px 26px}
+h1{font-size:17px;margin:0 0 3px} .sub{color:var(--ink3);font-size:12.5px;margin:0 0 20px}
+fieldset{border:1px solid var(--line);border-radius:12px;padding:13px 15px 16px;margin:0 0 14px}
+legend{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink3);
+  font-weight:700;padding:0 6px}
+.ctl{display:flex;align-items:center;gap:11px;margin:9px 0;font-size:13px}
+.ctl label{flex:0 0 150px;color:var(--ink2)}
+.ctl input[type=range]{flex:1;accent-color:var(--accent)}
+.ctl output{flex:0 0 64px;text-align:right;font-variant-numeric:tabular-nums;color:var(--accent);
+  font-weight:650}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+button.lab{font:inherit;font-size:12.5px;background:#222831;color:var(--ink);border:1px solid var(--line);
+  border-radius:9px;padding:7px 12px;cursor:pointer}
+button.lab:hover{border-color:var(--line2)}
+button.lab.on{background:var(--accent);color:#0d1114;border-color:transparent;font-weight:650}
+pre{background:#12161a;border:1px solid var(--line);border-radius:10px;padding:12px;
+  font-size:11.5px;line-height:1.5;overflow:auto;color:var(--ink2);white-space:pre-wrap}
+.note{font-size:12px;color:var(--ink3);line-height:1.5;margin-top:8px}
+.note b{color:var(--ink2)}
+@media (max-width:900px){ #panel{position:static;padding:20px} #phone{position:relative} body{overflow:auto} }
+</style></head>
+<body>
+<div id="phone">
+  <div id="stage"></div>
+  <div id="foot"></div>
+</div>
+
+<div id="panel">
+  <h1>Logo lab</h1>
+  <p class="sub">The mark, on its own. Nothing here can reach the survey until
+    you run <code>node tools/build-logo.mjs</code>.</p>
+
+  <fieldset><legend>Timing</legend>
+    <div class="ctl"><label>Beat (light + heart)</label>
+      <input type="range" id="beat" min="1600" max="7000" step="100" value="4400">
+      <output id="beatV">4400ms</output></div>
+    <div class="ctl"><label>Phase offset</label>
+      <input type="range" id="phase" min="-4400" max="0" step="50" value="-1650">
+      <output id="phaseV">-1650ms</output></div>
+    <div class="note"><b>Why -1650:</b> the dumbbell reps on 4400ms and the glow
+      behind it peaks 2750ms into every cycle. -1650 puts the start of the
+      light's lap — the left end of the top edge — exactly on that peak.
+      Change the beat and this has to move with it: offset = beat − 2750.</div>
+  </fieldset>
+
+  <fieldset><legend>The outline</legend>
+    <div class="ctl"><label>Triangle width</label>
+      <input type="range" id="triw" min="60" max="100" step="1" value="82">
+      <output id="triwV">82%</output></div>
+    <div class="ctl"><label>Mark drop</label>
+      <input type="range" id="drop" min="-50" max="-20" step="0.5" value="-37.5">
+      <output id="dropV">-37.5%</output></div>
+    <div class="ctl"><label>Stroke</label>
+      <input type="range" id="sw" min="1.6" max="4.5" step="0.1" value="2.6">
+      <output id="swV">2.6</output></div>
+    <div class="ctl"><label>Glare spread</label>
+      <input type="range" id="glare" min="10" max="80" step="2" value="31">
+      <output id="glareV">31</output></div>
+    <div class="ctl"><label>Dumbbell width</label>
+      <input type="range" id="dbw" min="45" max="95" step="1" value="70">
+      <output id="dbwV">70%</output></div>
+  </fieldset>
+
+  <fieldset><legend>Freeze the clock</legend>
+    <div class="ctl"><label>Position in the lap</label>
+      <input type="range" id="scrub" min="0" max="100" step="1" value="0">
+      <output id="scrubV">live</output></div>
+    <div class="row">
+      <button class="lab" id="play">Play</button>
+      <button class="lab" id="replay">Replay the draw</button>
+      <button class="lab" id="edge">Jump to the top edge</button>
+    </div>
+    <div class="note">Scrubbing pauses everything and steps the animation by
+      hand — the only way to inspect the heartbeat, since it lasts a fifth of
+      a second.</div>
+  </fieldset>
+
+  <fieldset><legend>Measured, live</legend>
+    <pre id="read">…</pre>
+  </fieldset>
+
+  <fieldset><legend>To ship a change</legend>
+    <div class="note">Edit <b>logo/hero.css</b> and <b>logo/hero.js</b> — the
+      lab loads them verbatim, so what you see here is what ships. Then run
+      <b>node tools/build-logo.mjs</b>, which replaces only the marked block
+      in onboarding.html and touches nothing else. It refuses to run if the
+      markers are missing.</div>
+  </fieldset>
+</div>
+
+<script>
+/* ---- the survey's collaborators, stubbed so hero() runs unchanged ---- */
+const stage=document.getElementById('stage'), foot=document.getElementById('foot');
+const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let pending=[];
+function later(fn,ms){const t=setTimeout(fn,ms);pending.push(t);return t;}
+function clearPending(){pending.forEach(clearTimeout);pending=[];}
+function haptic(){}
+function next(){ replay(); }
+function toast(){}
+function setFoot(h){ foot.innerHTML='<div class="ctawrap"><div class="ctaglow"></div>'+h+'</div>'; syncFootPad(); }
+function syncFootPad(){ var h=foot.offsetHeight||0;
+  if(h) document.documentElement.style.setProperty('--footpad',(h+28)+'px'); }
+function el(h){ const d=document.createElement('div'); d.className='screen';
+  d.innerHTML=h+'<div class="footspacer"></div>'; stage.appendChild(d); return d; }
+const MARK={engine:'a'};
+
+/* ---- the mark, verbatim from onboarding.html ---- */
+function hero(s){
+  /* Two marks share one engine.
+
+     A — three plates a side, drawn as passes of a widening round-capped line.
+         Every pass is a little wider than the last, so the line genuinely
+         thickens and the final pass IS the finished shape.
+
+     B — two plates, the inner one 2.25x thicker. A thick round-capped line is
+         a pill, not a plate, so B's plates are real rounded rectangles with ONE
+         corner radius shared by both, and they wipe into place from opposite
+         sides instead of being brushed on. Same idea, different instrument.
+
+     Add ?mark=b to the URL to see B. */
+  /* A second off the whole build. GAP and DUR both come down, which keeps the
+     overlap between passes roughly where it was — shortening only GAP would
+     have left each stroke lingering after the next had started. */
+  const N=3, GAP=0.31, DUR=0.46, T0=0.18, WIPE=0.60;
+  const BAR = {d:'M86 65 H174', w:7};
+  const mirror=x=>260-x;
+
+  const MARKS = {
+    a:{ engine:'stroke', passes:[3,2,1],
+        plates:[{x:86,   y1:38,    y2:92,    w:12.65},
+                {x:66.8, y1:40.70, y2:89.30, w:9.90},
+                {x:52.4, y1:47.50, y2:82.50, w:7.13}] },
+    b:{ engine:'plate', barW:8, r:2.8,
+        plates:[{x:86, w:24.75, y0:32.5, y1:97.5},
+                {x:63, w:9.90,  y0:39,   y1:91}] }
+  };
+  const MARK = (/[?&]mark=b\b/i.test(location.search) ? MARKS.b : MARKS.a);
+
+  const passes=[]; let step=0;
+  function lay(ds, w, oppose, n, isBar){
+    n = n || N;
+    for(let i=0;i<n;i++){
+      const delay=T0+step*GAP; step++;
+      /* every other pass runs backwards, so each one picks up where the
+         previous finished — like a brush going back over itself */
+      const rev = (i%2)===1;
+      ds.forEach(function(dd,side){
+        /* on the plates the two sides run against each other: while the left
+           fills downward the right fills upward, and they swap each pass */
+        passes.push({d:dd, w:w*(i+1)/n, delay:delay, bar:!!isBar,
+                     rev: (oppose && side===1) ? !rev : rev});
+      });
+    }
+  }
+
+  let extraDefs='', shapes='', wipes=[], t3start=0, t3end=0, done=0;
+  const plateStart=[];
+
+  lay([BAR.d], MARK.barW||BAR.w, false, N, true);
+
+  if(MARK.engine==='plate'){
+    const barDone = T0 + (step-1)*GAP + DUR;
+    let last=0;
+    MARK.plates.forEach(function(p,k){
+      const start = barDone - 0.38 + k*0.42; last=start;
+      [p.x, mirror(p.x)].forEach(function(cx,side){
+        const id='wp'+k+side;
+        const x=cx-p.w/2, y=p.y0, w=p.w, h=p.y1-p.y0, r=Math.min(MARK.r, w/2);
+        const down=((k+side)%2)===0;
+        extraDefs+='<clipPath id="'+id+'" clipPathUnits="userSpaceOnUse">'+
+          '<rect class="wipe" data-w="'+id+'" x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'"'+
+          ' style="transform-origin:50% '+(down?'0%':'100%')+'"/></clipPath>';
+        const ins=2.5, ir=Math.max(1.1,r-ins);
+        shapes+='<g clip-path="url(#'+id+')">'+
+          '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="'+r+'" fill="url(#dbPlate)"/>'+
+          (w>14?'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="'+r+'" fill="url(#dbMill)"/>':'')+
+          '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="'+r+'" fill="url(#dbFace)"/>'+
+          (w>14?'<rect x="'+(x+ins)+'" y="'+(y+ins)+'" width="'+(w-ins*2)+'" height="'+(h-ins*2)+'"'+
+                ' rx="'+ir+'" fill="none" stroke="#EAFFF8" stroke-opacity=".17" stroke-width=".8"/>':'')+
+          '</g>';
+        wipes.push({id:id, delay:start});
+      });
+    });
+    t3start=last; t3end=last+WIPE; done=t3end;
+  } else {
+    MARK.plates.forEach(function(p,k){
+      plateStart[k] = T0 + step*GAP;                 /* when this plate's first pass fires */
+      lay(['M'+p.x+' '+p.y1+' V'+p.y2,
+           'M'+mirror(p.x)+' '+p.y1+' V'+p.y2], p.w, true, MARK.passes[k]);
+    });
+    done = T0 + (step-1)*GAP + DUR;
+    /* The words start arriving the moment the SECOND plate does, and are fully
+       there when the mark is. A longer, earlier window than before — the copy
+       used to be crammed into the last half second. */
+    t3start = plateStart.length>1 ? plateStart[1] : Math.max(0, done-0.9);
+    t3end   = done;
+  }
+
+  const d=el(`<div class="heroA">
+    <div class="lock">
+    <div class="art">
+    <svg class="tri" viewBox="0 0 300 268" aria-hidden="true">
+      <defs>
+        <!-- userSpaceOnUse, always. objectBoundingBox has bitten this file
+             three times: on a straight line the bounding box has zero area
+             and the gradient renders nothing at all in iOS Safari. -->
+        <linearGradient id="triGrad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="268">
+          <stop offset="0%"   stop-color="#FF5FA2"/>
+          <stop offset="26%"  stop-color="#FF8FBE"/>
+          <stop offset="37%"  stop-color="#FFD9E8"/>
+          <stop offset="50%"  stop-color="#FF8FBE"/>
+          <stop offset="100%" stop-color="#FF5FA2"/>
+        </linearGradient>
+        <!-- The glare. Light coming OFF the dumbbell and landing on the tube,
+             so it is its own blurred overlay fading to nothing a little above
+             and below the bar line, rather than a white stop inside the pink.
+             y=100 is where the bar crosses the two sides — measured. -->
+        <linearGradient id="triGlare" gradientUnits="userSpaceOnUse" x1="0" y1="70" x2="0" y2="132">
+          <stop offset="0%"   stop-color="#FFFFFF" stop-opacity="0"/>
+          <stop offset="34%"  stop-color="#FFFFFF" stop-opacity=".55"/>
+          <stop offset="50%"  stop-color="#FFFFFF" stop-opacity="1"/>
+          <stop offset="66%"  stop-color="#FFFFFF" stop-opacity=".55"/>
+          <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <!-- Not a closed triangle. It starts at x=100 on the top edge, runs
+           right, down to the apex, back up the left side and stops at x=60 —
+           leaving a 40-unit break in the top-left, the way a neon tube in a
+           real sign has a dark segment. Drawn as one open path rather than
+           faked with a dash gap, so the draw-in animation still works and
+           the light has somewhere to enter and leave.
+
+           Both ends of the break sit at y=16. They were stepped for a
+           version and it read as a mistake rather than a choice. -->
+      <path class="tri-l" d="M100 16 H286 L150 252 L14 16 H60"/>
+      <path class="tri-glare" d="M100 16 H286 L150 252 L14 16 H60"/>
+      <path class="tri-spark" d="M100 16 H286 L150 252 L14 16 H60"/>
+    </svg>
+      <div class="dbglow"></div>
+      <svg class="db${MARK.engine==='plate'?' mb':''}" viewBox="0 0 260 130" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <!-- Light sits on the inner plates and falls away outward, so the mass
+               of the mark is where the two halves face each other. -->
+          <linearGradient id="dbGrad" gradientUnits="userSpaceOnUse" x1="52" y1="0" x2="208" y2="0">
+            <stop offset="0%"   stop-color="#34B396"/>
+            <stop offset="22%"  stop-color="#93EAD7"/>
+            <stop offset="50%"  stop-color="#A8F5E1"/>
+            <stop offset="78%"  stop-color="#93EAD7"/>
+            <stop offset="100%" stop-color="#34B396"/>
+          </linearGradient>
+          <!-- The bar carries the same colour as everything else, but its middle
+               falls away to nothing. Not a cut — the ends hold full weight, then
+               dissolve, so the two halves read as one object with air in it.
+               Colours are sampled off dbGrad at the same x, so the seam is invisible. -->
+          <linearGradient id="dbBar" gradientUnits="userSpaceOnUse" x1="86" y1="0" x2="174" y2="0">
+            <stop offset="0%"   stop-color="#93EAD7" stop-opacity="1"/>
+            <stop offset="32%"  stop-color="#8FE6D3" stop-opacity="1"/>
+            <stop offset="36%"  stop-color="#89DFCC" stop-opacity=".60"/>
+            <stop offset="39%"  stop-color="#83D9C6" stop-opacity=".22"/>
+            <stop offset="41%"  stop-color="#7FD5C2" stop-opacity="0"/>
+            <stop offset="59%"  stop-color="#7FD5C2" stop-opacity="0"/>
+            <stop offset="61%"  stop-color="#83D9C6" stop-opacity=".22"/>
+            <stop offset="64%"  stop-color="#89DFCC" stop-opacity=".60"/>
+            <stop offset="68%"  stop-color="#8FE6D3" stop-opacity="1"/>
+            <stop offset="100%" stop-color="#93EAD7" stop-opacity="1"/>
+          </linearGradient>
+          <!-- B only. A solid plate needs its own ramp: the value that reads as
+               light on a 7-unit stroke is just washed out when it fills a slab. -->
+          <linearGradient id="dbPlate" gradientUnits="userSpaceOnUse" x1="52" y1="0" x2="208" y2="0">
+            <stop offset="0%"   stop-color="#2FA78C"/>
+            <stop offset="30%"  stop-color="#6FD9BF"/>
+            <stop offset="50%"  stop-color="#93EAD7"/>
+            <stop offset="70%"  stop-color="#6FD9BF"/>
+            <stop offset="100%" stop-color="#2FA78C"/>
+          </linearGradient>
+          <!-- Light on a machined face. Tinted, not white-to-black: a white wash
+               desaturates the teal and the plate goes chalky. -->
+          <linearGradient id="dbFace" gradientUnits="userSpaceOnUse" x1="0" y1="30" x2="0" y2="100">
+            <stop offset="0%"   stop-color="#EAFFF8" stop-opacity=".17"/>
+            <stop offset="26%"  stop-color="#EAFFF8" stop-opacity=".03"/>
+            <stop offset="58%"  stop-color="#06342A" stop-opacity="0"/>
+            <stop offset="100%" stop-color="#06342A" stop-opacity=".30"/>
+          </linearGradient>
+          <!-- Knurling across the rim, deliberately near the threshold of visible.
+               Loud enough to read as stripes and it stops being texture. -->
+          <pattern id="dbMill" width="4" height="3.4" patternUnits="userSpaceOnUse">
+            <line x1="0" y1=".35" x2="4" y2=".35" stroke="#FFFFFF" stroke-opacity=".038" stroke-width=".5"/>
+            <line x1="0" y1="2.0" x2="4" y2="2.0" stroke="#03251E" stroke-opacity=".05"  stroke-width=".5"/>
+          </pattern>
+          ${extraDefs}
+        </defs>
+        <g class="rep">${passes.map(function(q){
+          return '<path class="stroked'+(q.bar?' bar':'')+'" stroke-width="'+q.w.toFixed(2)+'" d="'+q.d+'"/>';
+        }).join('')}${shapes}</g>
+      </svg>
+    </div>
+    <div class="hcopy">
+      <h1>${s.h}</h1>
+      <div class="hsub">${s.sub}</div>
+    </div>
+    </div>
+  </div>`);
+
+  const heroEl=d.querySelector('.heroA');
+  const art=d.querySelector('.art');
+  /* The triangle is drawn on the SAME clock as the words, so the outline
+     closes as the name lands. Two separate timers would drift apart on a
+     phone exactly the way the fifteen CSS transitions did. */
+  const triL=d.querySelector('.tri-l'), triSpark=d.querySelector('.tri-spark');
+  const TRI_LEN=777;                       // 186 + 272.4 + 272.4 + 46, minus the break
+  if(triL){
+    triL.style.strokeDasharray=TRI_LEN;
+    triL.style.strokeDashoffset=TRI_LEN;
+    /* short bright dash, one long gap — the gap is the rest of the outline */
+    triSpark.style.strokeDasharray='54 '+(TRI_LEN-54);
+    triSpark.style.strokeDashoffset=0;
+    /* The dumbbell's clock, not theme.json's — the light is meant to travel
+       at the speed of the mark, so it takes the rep animation's period. */
+    heroEl.style.setProperty('--beat','4400ms');
+  }
+  const paths=[].slice.call(d.querySelectorAll('.rep path.stroked'));
+  const strokes=paths.map(function(el,k){
+    const L=el.getTotalLength()||1;
+    el.style.transition='none';
+    /* "L L" — a dash of L followed by an equal gap, so a fully offset path
+       parks inside the gap rather than at the edge of the dash and cannot
+       paint a stray cap. The reveal is unchanged. */
+    el.style.strokeDasharray=L+' '+L;
+    /* THE DOTS.
+       These strokes are round-capped, and a round cap is drawn at full
+       stroke width no matter how short the dash it belongs to. So the
+       instant a stroke began drawing it appeared as a circle — up to 8.4px
+       across on the thickest plate — and because the strokes are staggered
+       you saw about four of them hanging in the air before the dumbbell
+       resolved. They read as deliberate dots. They were end caps.
+
+       A stroke is only dot-shaped while it is shorter than it is wide, so
+       that is exactly the window to hide: hold it transparent until it has
+       drawn past about one and a half stroke widths, then fade it up. Self
+       tuning — a thick plate needs longer than a thin one, and each path
+       gets its own threshold from its own width. */
+    const w=parseFloat(getComputedStyle(el).strokeWidth)||2;
+    /* +L hides it before the start, -L hides it past the end, so the
+       reveal runs from the opposite direction */
+    const from = passes[k].rev ? -L : L;
+    el.style.strokeDashoffset = from;
+    el.style.opacity = 0;
+    return {el:el, from:from, delay:passes[k].delay, len:L, fade:Math.max(1, w*2)};
+  });
+  const wipeEls=wipes.map(function(w){
+    const r=d.querySelector('[data-w="'+w.id+'"]');
+    if(r){ r.style.transition='none'; r.style.transform='scaleY(0)'; }
+    return {el:r, delay:w.delay};
+  }).filter(function(w){return w.el;});
+
+  /* The words and the button hold until the mark is finished, then arrive
+     together. The footer markup goes in now so the layout is already settled;
+     only the reveal waits. The button gets the same slow pulse that sits behind
+     the mark, so the two things breathing on this screen breathe together. */
+  foot.innerHTML=`<div class="ctawrap"><span class="ctaglow" aria-hidden="true"></span>`+
+                 `<button class="cta accent">${s.cta}</button></div>`;
+  foot.classList.remove('on');
+  syncFootPad();
+  foot.querySelector('.cta').onclick=()=>{haptic(18);next();};
+  const ctaWrap=foot.querySelector('.ctawrap');
+  const cta=foot.querySelector('.cta');
+  const hcopy=heroEl.querySelector('.hcopy');
+  hcopy.style.opacity='0'; hcopy.style.transform='translateY(12px)';
+  cta.style.opacity='0';   cta.style.transform='translateY(8px)';
+
+  function landArt(){
+    if(art.classList.contains('alive')) return;
+    art.classList.add('alive');
+    if(ctaWrap) ctaWrap.classList.add('alive');   /* same instant, same phase */
+  }
+
+  /* ---- ONE CLOCK ----------------------------------------------------------
+     Every stroke used to be its own CSS transition with its own delay, and the
+     browser scheduled all fifteen of them. Desktop copes; a phone does not —
+     if the main thread is busy when a delay expires the transition starts late,
+     and because each one is independent they drift apart from each other. That
+     is why the mark drew "weird" on the phone and fine in the browser: the two
+     platforms were running fifteen separate animations, not one.
+
+     Now a single requestAnimationFrame loop computes every stroke's position
+     from elapsed time. Drop a frame and the next one lands exactly where the
+     clock says it should be, so nothing can desync. Same code, same timeline,
+     every platform. The text and the button ride the same clock for the same
+     reason. -------------------------------------------------------------- */
+  const easeDraw = p => 1-Math.pow(1-p,2.2);       /* matches the old curve's feel */
+  const clamp01  = v => v<0?0:(v>1?1:v);
+  let raf=0, landedText=false, landedArt=false, t0=0;
+
+  function paint(t){
+    for(let k=0;k<strokes.length;k++){
+      const st=strokes[k];
+      const p=clamp01((t-st.delay)/DUR);
+      const e=easeDraw(p);
+      st.el.style.strokeDashoffset = (st.from*(1-e)).toFixed(2);
+      /* Invisible while it is still just an end cap, then up to full.
+         Squared, because a straight ramp still left the thickest plate at
+         a third opacity while it was three pixels long and seven wide —
+         which is a faint dot, not a stroke. */
+      const o=clamp01((st.len*e)/st.fade);
+      st.el.style.opacity = (o*o).toFixed(3);
+    }
+    for(let k=0;k<wipeEls.length;k++){
+      const w=wipeEls[k];
+      w.el.style.transform='scaleY('+easeDraw(clamp01((t-w.delay)/WIPE)).toFixed(4)+')';
+    }
+    /* the words rise and fade in across the same window, on the same clock */
+    const q=clamp01((t-t3start)/Math.max(.35,t3end-t3start));
+    const e=1-Math.pow(1-q,3);
+    hcopy.style.opacity=e.toFixed(3);
+    hcopy.style.transform='translateY('+(12*(1-e)).toFixed(2)+'px)';
+    if(triL) triL.style.strokeDashoffset=(TRI_LEN*(1-e)).toFixed(1);
+    cta.style.opacity=e.toFixed(3);
+    cta.style.transform='translateY('+(8*(1-e)).toFixed(2)+'px)';
+    if(!landedText && t>=t3start){ landedText=true; foot.classList.add('on'); syncFootPad(); }
+    if(!landedArt  && t>=done)   { landedArt=true;  landArt(); }
+  }
+  function tick(now){
+    if(!d.isConnected){ raf=0; return; }            /* screen left; stop the clock */
+    if(!t0) t0=now;
+    const t=(now-t0)/1000;
+    paint(t);
+    if(t<done+0.05){ raf=requestAnimationFrame(tick); }
+    else { raf=0; finishNow(); }
+  }
+  function finishNow(){
+    if(raf){ cancelAnimationFrame(raf); raf=0; }
+    paint(done+1);                                   /* land every value exactly */
+    /* Hand the strokes back to the stylesheet. The fade-in above is a
+       function of drawn length over stroke width, so a path shorter than
+       one and a half of its own widths would top out below 1 and stay
+       faint for good. None are today; clearing it means none ever can be. */
+    for(let k=0;k<strokes.length;k++){ strokes[k].el.style.opacity=''; }
+    hcopy.style.opacity=''; hcopy.style.transform='';
+    cta.style.opacity='';   cta.style.transform='';
+    heroEl.classList.add('ready');
+    /* Only now does the light start running. */
+    heroEl.classList.add('lit');
+    if(triL) triL.style.strokeDashoffset=0;
+    if(!landedText){ landedText=true; foot.classList.add('on'); syncFootPad(); }
+    landArt();
+    /* A no-op unless syncFootPad changed the padding when the button came
+       in. Left in so a footer that does resize cannot leave the copy off. */
+    placeCopy();
+  }
+
+  /* THE WORDS SIT HALFWAY BETWEEN THE POINT OF THE TRIANGLE AND THE BUTTON.
+     Both ends move: the triangle scales with the width of the screen and the
+     button rides the safe-area inset, so a fixed margin that looks right on
+     one phone is wrong on the next. Measured instead.
+
+     It has to iterate. The block is vertically centred, so adding N to the
+     gap pushes the words down by only N/2 — and drags the triangle, and with
+     it the apex, up by the other half. Each pass halves the error, so three
+     or four settle it; the loop exits on half a pixel. */
+  function placeCopy(){
+    const tri=d.querySelector('.tri'), lock=d.querySelector('.lock'),
+          btn=foot.querySelector('.cta');
+    if(!tri||!lock||!btn||!d.isConnected) return;
+    let gap=parseFloat(getComputedStyle(art).marginBottom)||0;
+    for(let i=0;i<10;i++){
+      const t=tri.getBoundingClientRect();
+      const apex=t.top+t.height*(252/268);          // the point, not the box
+      const mid=(apex+btn.getBoundingClientRect().top)/2;
+      /* offsetTop, not a rect: hcopy carries a transform on the way in and a
+         rect would measure where it is flying from, not where it lands. */
+      const at=lock.getBoundingClientRect().top+hcopy.offsetTop;
+      const dy=mid-hcopy.offsetHeight/2-at;
+      if(Math.abs(dy)<0.5) break;
+      const next=Math.min(340,Math.max(16,gap+dy*2));
+      if(next===gap) break;                          // clamped; stop rather than spin
+      gap=next; art.style.marginBottom=gap+'px';
+    }
+  }
+  window.addEventListener('resize',placeCopy);
+
+
+  /* Settle the layout before the first frame. */
+  placeCopy();
+  requestAnimationFrame(placeCopy);        // again once fonts have settled
+
+  if(REDUCED){ finishNow(); }
+  else { raf=requestAnimationFrame(tick); }
+
+  /* Nobody should have to wait out an animation, and once it has landed there
+     is only one thing to do here — so the whole screen is the button. First
+     tap finishes the mark, the next one moves on. Two taps through the opening
+     without ever aiming at anything. */
+  d.addEventListener('click', function(ev){
+    if(ev.target.closest && ev.target.closest('#foot')) return;
+    if(!art.classList.contains('alive')){ finishNow(); return; }
+    haptic(16); next();
+  });
+}
+
+
+/* ---- lab wiring ---- */
+function replay(){ clearPending(); stage.innerHTML=''; foot.innerHTML='';
+  hero({h:'Your fitness journey', sub:'starts here', cta:'Take the first step'});
+  applyAll(); }
+
+const $=id=>document.getElementById(id);
+function tri(){ return document.querySelector('.tri'); }
+function heroEl(){ return document.querySelector('.heroA'); }
+
+function applyAll(){
+  const H=heroEl(); if(!H) return;
+  const t=tri(), db=document.querySelector('.db');
+  H.style.setProperty('--beat', $('beat').value+'ms');
+  t.style.width='min('+$('triw').value+'%,'+Math.round($('triw').value*3.84)+'px)';
+  t.style.transform='translate(-50%,'+$('drop').value+'%)';
+  t.querySelectorAll('path').forEach(p=>{ if(!p.classList.contains('tri-glare')) p.style.strokeWidth=$('sw').value; });
+  db.style.width='min('+$('dbw').value+'%,'+Math.round($('dbw').value*3.96)+'px)';
+  const g=document.querySelector('#triGlare');
+  if(g){ g.setAttribute('y1', 100-(+$('glare').value)); g.setAttribute('y2', 100+(+$('glare').value)); }
+  document.querySelectorAll('.tri-spark,.tri-l').forEach(x=>{
+    x.getAnimations().forEach(a=>{ a.effect.updateTiming({delay:+$('phase').value}); }); });
+  ['beat','phase'].forEach(k=>$(k+'V').textContent=$(k).value+'ms');
+  $('triwV').textContent=$('triw').value+'%';
+  $('dropV').textContent=$('drop').value+'%';
+  $('swV').textContent=$('sw').value;
+  $('glareV').textContent=$('glare').value;
+  $('dbwV').textContent=$('dbw').value+'%';
+  measure();
+}
+function measure(){
+  const H=heroEl(), t=tri(), db=document.querySelector('.db'), l=document.querySelector('.tri-l');
+  if(!H||!t||!db) return;
+  const r=t.getBoundingClientRect(), u=r.width/300;
+  let out={};
+  try{
+    const g=db.getBBox(), m=db.getScreenCTM();
+    const gl=g.x*m.a+m.e, gr=(g.x+g.width)*m.a+m.e, gcy=(g.y+g.height/2)*m.d+m.f;
+    const drawTop=r.top+16*u, drawH=236*u, frac=(gcy-drawTop)/drawH;
+    out.barSitsAt=(frac*100).toFixed(1)+'% down the triangle';
+    out.barCrossesAtViewBoxY=Math.round(16+frac*236)+'   (the glare should centre here)';
+    out.clearanceEachSide=(((1-frac)*272*u/2)-(gr-gl)/2).toFixed(1)+'px';
+  }catch(e){}
+  const f=getComputedStyle(l).filter;
+  out.glowBlurNow=Math.max(...[...f.matchAll(/([\d.]+)px/g)].map(x=>+x[1]))+'px  (rest 7, lub 34, dub 24)';
+  out.triangleWidth=r.width.toFixed(0)+'px';
+  $('read').textContent=Object.entries(out).map(([k,v])=>k.padEnd(24)+v).join('\n');
+}
+['beat','phase','triw','drop','sw','glare','dbw'].forEach(k=>$(k).oninput=applyAll);
+
+let scrubbing=false;
+$('scrub').oninput=()=>{
+  scrubbing=true;
+  const T=(+$('scrub').value/100)*(+$('beat').value);
+  $('scrubV').textContent=Math.round(T)+'ms';
+  document.querySelectorAll('.tri-spark,.tri-l,.dbglow,.rep').forEach(x=>
+    x.getAnimations().forEach(a=>{ a.pause(); a.currentTime=T; }));
+  measure();
+};
+$('play').onclick=()=>{ scrubbing=false; $('scrubV').textContent='live';
+  document.querySelectorAll('*').forEach(x=>x.getAnimations().forEach(a=>a.play())); };
+$('replay').onclick=replay;
+$('edge').onclick=()=>{ $('scrub').value=Math.round(((+$('beat').value+ +$('phase').value)/+$('beat').value)*100);
+  $('scrub').oninput(); };
+
+replay();
+setInterval(()=>{ if(!scrubbing) measure(); }, 400);
+</script></body></html>

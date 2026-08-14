@@ -1,0 +1,169 @@
+/* ---------- hero: the dumbbell ---------- */
+body.opening #bars,body.opening #chapline{opacity:0;pointer-events:none}
+#bars,#chapline{transition:opacity .4s}
+.heroA{position:absolute;top:0;right:0;bottom:0;left:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;overflow:hidden;
+  margin:calc(-74px - env(safe-area-inset-top)) -20px 0;
+  padding:calc(74px + env(safe-area-inset-top)) 20px calc(var(--footpad,150px) + 3vh)}
+.heroA .lock{display:flex;flex-direction:column;align-items:center;width:100%;position:relative}
+/* The triangle sits BEHIND everything rather than above it, and is anchored
+   to the dumbbell rather than to the block as a whole — so it frames the
+   mark and stays framing it no matter what the copy below does. -37% rather
+   than -50% drops the dumbbell below the triangle's midline; a percentage
+   because it has to hold at every width, where a pixel offset would not. */
+.heroA .tri{position:absolute;left:50%;top:50%;transform:translate(-50%,-37.5%);
+  width:min(82%,315px);height:auto;overflow:visible;z-index:0;pointer-events:none}
+.heroA .tri path{fill:none;stroke-width:2.6;stroke-linejoin:round;stroke-linecap:round}
+.heroA .tri-l{stroke:url(#triGrad);filter:drop-shadow(0 0 7px rgba(255,95,162,.45))}
+/* Two passes: a soft bloom and a tighter core, both fading out away from the
+   bar. Together they read as light rather than as paint. */
+.heroA .tri-glare{stroke:url(#triGlare);stroke-width:5.5;opacity:0;
+  filter:blur(3.5px) drop-shadow(0 0 10px rgba(255,255,255,.55));
+  transition:opacity .5s ease}
+.heroA.lit .tri-glare{opacity:.9}
+/* One short bright dash chasing the perimeter. Hidden until the mark has
+   landed — a light running around an outline that is still being drawn
+   reads as two animations fighting. */
+.heroA .tri-spark{stroke:#fff;stroke-width:3.5;opacity:0;
+  filter:drop-shadow(0 0 9px #FF5FA2) drop-shadow(0 0 3px #fff)}
+.heroA.lit .tri-spark{opacity:1;
+  animation:triRun var(--beat,4400ms) linear -1650ms infinite}
+.heroA.lit .tri-l{animation:triBeat var(--beat,4400ms) ease-in-out -1650ms infinite}
+@keyframes triRun{ from{stroke-dashoffset:0} to{stroke-dashoffset:-777} }
+/* A real heartbeat — lub, then a smaller dub — and it only happens while the
+   light is on the long top edge. That window is the first 24% of the lap, so
+   the whole thump is over by 20% and the outline sits quiet for the three
+   sides where nothing is passing. One event per lap, in one place. */
+@keyframes triBeat{
+  0%      {filter:drop-shadow(0 0 7px  rgba(255,95,162,.45)); stroke-width:2.6}
+  4%      {filter:drop-shadow(0 0 34px rgba(255,95,162,1))
+                  drop-shadow(0 0 9px rgba(255,255,255,.6));  stroke-width:3.5}
+  9%      {filter:drop-shadow(0 0 10px rgba(255,95,162,.5));  stroke-width:2.7}
+  14%     {filter:drop-shadow(0 0 24px rgba(255,95,162,.9));  stroke-width:3.1}
+  21%,100%{filter:drop-shadow(0 0 7px  rgba(255,95,162,.45)); stroke-width:2.6}
+}
+@media (prefers-reduced-motion:reduce){
+  .heroA.lit .tri-spark{animation:none;opacity:.85}
+  .heroA.lit .tri-l{animation:none}
+}
+.heroA .art{z-index:2}
+.heroA .hcopy{z-index:3}
+/* A starting value only. placeCopy() below measures the real gap, so that
+   the words end up exactly halfway between the point of the triangle and
+   the top of the button. */
+.heroA .art{position:relative;display:flex;align-items:center;justify-content:center;
+  width:100%;margin-bottom:80px}
+/* the mark carries the screen; the words sit under it, deliberately smaller */
+.heroA .db{width:min(70%,277px);height:auto;overflow:visible;position:relative;z-index:2}
+/* B's silhouette is narrower than A's, so it gets a little more of the width
+   to land at the same optical size */
+.heroA .db.mb{width:min(79%,313px)}
+.heroA .dbglow{position:absolute;width:210px;height:210px;border-radius:50%;z-index:1;
+  background:radial-gradient(circle,rgba(62,203,168,.26),rgba(62,203,168,0) 66%);
+  opacity:0;will-change:opacity,transform}
+/* The glow fades up before it starts breathing, so it never pops in at
+   full strength the instant the mark finishes drawing. */
+.heroA .art.alive .dbglow{
+  animation:dbGlowIn .55s cubic-bezier(.22,1,.36,1) both,
+            dbGlow 4.4s ease-in-out .55s infinite}
+@keyframes dbGlowIn{from{opacity:0;transform:scale(.88)}to{opacity:.40;transform:scale(.95)}}
+@keyframes dbGlow{0%,100%{opacity:.40;transform:scale(.95)}50%{opacity:.86;transform:scale(1.06)}}
+
+.heroA .db path.stroked{fill:none;stroke:url(#dbGrad);stroke-linecap:round}
+.heroA .db path.bar{stroke:url(#dbBar)}
+/* the clip rectangles that wipe B's plates into place */
+.heroA .db .wipe{transform-box:fill-box;transform:scaleY(0)}
+
+/* The whole thing does a slow rep, forever. The cycle STARTS and ENDS at zero
+   because that is where the mark already sits when the drawing finishes — a
+   keyframe list that opens at translateY(9px) makes the group jump 9px the
+   instant the animation is attached, which is the catch-up you could see.
+
+   But adding the two zero-crossings created a second problem: with one easing
+   curve applied BETWEEN EVERY PAIR of keyframes, the motion decelerated to a
+   stop at 0, -9, 0, +9 and 0 — five dead stops per cycle instead of two. That
+   is the stutter. A real bob is a sine wave: it only rests at the top and the
+   bottom and moves fastest through the middle. So each segment gets its own
+   half-sine curve — decelerating into an extreme, accelerating out of it —
+   and the crossings are no longer stops at all. */
+.heroA .art.alive .rep{will-change:transform;animation:rep 4.4s linear infinite}
+@keyframes rep{
+  0%  {transform:translateY(0);    animation-timing-function:cubic-bezier(.39,.575,.565,1)}
+  25% {transform:translateY(-9px); animation-timing-function:cubic-bezier(.47,0,.745,.715)}
+  50% {transform:translateY(0);    animation-timing-function:cubic-bezier(.39,.575,.565,1)}
+  75% {transform:translateY(9px);  animation-timing-function:cubic-bezier(.47,0,.745,.715)}
+  100%{transform:translateY(0)}
+}
+
+/* the button breathes on the same clock as the mark */
+.ctawrap{position:relative}
+.ctawrap .cta{position:relative;z-index:1}
+.ctaglow{position:absolute;left:50%;top:50%;z-index:0;width:104%;height:280%;
+  border-radius:50%;pointer-events:none;opacity:0;
+  transform:translate(-50%,-50%) scale(.95);
+  background:radial-gradient(ellipse at center,
+    rgba(62,203,168,.46) 0%,rgba(62,203,168,.20) 38%,rgba(62,203,168,0) 68%);
+  will-change:opacity,transform}
+.ctawrap.alive .ctaglow{
+  animation:ctaGlowIn .55s cubic-bezier(.22,1,.36,1) both,
+            ctaGlow 4.4s ease-in-out .55s infinite}
+@keyframes ctaGlowIn{
+  from{opacity:0;transform:translate(-50%,-50%) scale(.86)}
+  to  {opacity:.40;transform:translate(-50%,-50%) scale(.95)}}
+@keyframes ctaGlow{
+  0%,100%{opacity:.40;transform:translate(-50%,-50%) scale(.95)}
+  50%    {opacity:.86;transform:translate(-50%,-50%) scale(1.06)}}
+
+/* words sit under the mark as one lockup */
+.heroA .hcopy{display:flex;flex-direction:column;align-items:center;text-align:center;
+  opacity:0;transform:translateY(12px);
+  transition:opacity .42s cubic-bezier(.22,1,.36,1),transform .48s cubic-bezier(.22,1,.36,1)}
+.heroA.ready .hcopy{opacity:1;transform:none}
+.heroA h1{margin:0;white-space:nowrap;font-size:min(7.9vw,31px);line-height:1.12;
+  letter-spacing:-.022em;font-weight:550;color:var(--ink)}
+.heroA .hsub{margin-top:13px;font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;
+  font-weight:600;color:var(--accent);opacity:.9}
+
+@media (max-height:720px){
+  .heroA .art{margin-bottom:64px}
+  .heroA .db{width:min(61%,228px)}
+  .heroA .db.mb{width:min(69%,259px)}
+  .heroA h1{font-size:min(7.9vw,28px)}
+}
+@media (prefers-reduced-motion:reduce){
+  .heroA .db path.stroked{stroke-dashoffset:0 !important;transition:none !important}
+  .heroA .db .wipe{transform:scaleY(1) !important;transition:none !important}
+  .heroA .art.alive .rep,.heroA .art.alive .dbglow,.ctawrap.alive .ctaglow{animation:none}
+  .ctaglow{opacity:.42}
+  .heroA .hcopy{opacity:1;transform:none;transition:none}
+  .heroA .dbglow{opacity:.5}
+}
+
+
+/* ---------- compact phones (SE, and any short window) ---------- */
+@media(max-height:700px){
+  h1.q{font-size:23px}
+  h1.q.big{font-size:28px}
+  .sub{font-size:14px;margin-bottom:16px}
+  .hero h1{font-size:31px}
+  .hero p{font-size:15px;margin-bottom:9px}
+  .orb{width:56px;height:56px;margin-bottom:18px}
+  .opt{min-height:52px;padding:12px 14px}
+  .opt .tx b{font-size:14.5px}
+  .slval{font-size:46px}
+  .slwrap{margin:12px 0 4px}
+  input[type=range]{margin-top:12px}
+  .slcap{font-size:14px;min-height:38px;margin-top:8px}
+  .ins-num{font-size:44px}
+  .ins-line{font-size:20px}
+  .ins-line.s{font-size:15px}
+  .eyebrow{margin-bottom:10px}
+  .badges{margin-top:16px}
+}
+@media(max-height:600px){
+  h1.q{font-size:21px}
+  .hero h1{font-size:27px}
+  .slval{font-size:40px}
+  .opt .tx small{display:none}
+}
+

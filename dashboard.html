@@ -138,9 +138,14 @@ h2.h{font-size:23px;line-height:1.2;letter-spacing:-.022em;font-weight:550}
 #head .lockup path{fill:none;stroke-linecap:round;stroke-linejoin:round}
 #head .lk-tri{stroke:url(#mkTri);stroke-width:8;
   filter:drop-shadow(0 0 5px rgba(255,95,162,.45))}
-/* the glare rides the line at 2.1x its width, as it does on the opening screen */
-#head .lk-glare{stroke:url(#mkGlare);stroke-width:17;opacity:.9;
-  filter:blur(1px) drop-shadow(0 0 3px rgba(255,255,255,.55))}
+/* On the opening screen the glare is 2.1x the line and blurred 3.5px — on a
+   mark 315px wide. Copying those ratios to a 62px mark put a fat white band
+   across the middle of the triangle and washed the pink out of it, which is
+   why the colour looked wrong even though the gradient is verbatim. A soft
+   light on a big sign is a smear on a small one. Pulled back to 1.5x and a
+   blur measured against THIS size. */
+#head .lk-glare{stroke:url(#mkGlare);stroke-width:12;opacity:.7;
+  filter:blur(.7px) drop-shadow(0 0 2px rgba(255,255,255,.4))}
 #head .lk-db path{stroke:var(--accent);stroke-linecap:round;
   filter:drop-shadow(0 0 4px var(--accent-soft))}
 /* one short bright dash chasing the perimeter — 771 is the path's length */
@@ -716,24 +721,35 @@ h2.h{font-size:23px;line-height:1.2;letter-spacing:-.022em;font-weight:550}
    solving for it rather than picking a number: in the lockup the drawn bell
    is 45.5% of the mark's width, the mark is 108% of a cell, so the bell is
    49.1% of a cell. A lone bell fills 62.5% of its own 260-wide box, so that
-   box has to be about half a cell. Measured rather than trusted: the two
-   frames pad the stroke differently, so this was tuned until the ink of a
-   lone bell matched the ink of the one inside the stamp exactly. */
-.wd .b svg.wdb{width:47%}
+   box has to be 79% of the cell.
+
+   It was briefly 47% because I checked it wrong — comparing the lone SVG's
+   ELEMENT box against the stamp's INK box, which are not the same thing and
+   made a bell two-thirds the size look correct. Both are measured as ink
+   now. */
+.wd .b svg.wdb{width:79%}
 
 /* TODAY IS A STAMP.
    The dark square stays where it is and the mark is pressed on top, hanging
    over the bottom. It is REGISTERED, not centred: the viewBox above starts
    at the triangle's top line, so top:0 lands that line exactly on the top
    line of the square and everything else falls where it falls. */
-.wd .b svg.wmark{position:absolute;left:50%;top:0;width:108%;
+/* top:-1px, not 0. An absolutely-placed child is positioned against the
+   PADDING box, so top:0 sits it one border-width below the square's top
+   line — which is exactly the hairline of misregistration that was
+   showing. The border is invisible on this cell but still occupies its
+   pixel, so the mark steps back over it. */
+.wd .b svg.wmark{position:absolute;left:50%;top:-1px;width:108%;
   transform:translateX(-50%);z-index:2}
-.wd.now .b{border-color:var(--line2)}
+/* no outline on today — the stamp is the marker, a box round it as well is
+   two markers for one day */
+.wd.now .b{border-color:transparent}
 .mk-db path{stroke:var(--accent);stroke-linecap:round;fill:none;
   transition:stroke .25s,filter .25s}
 .mk-tri{stroke:url(#mkTri);stroke-width:9;stroke-linejoin:round;stroke-linecap:round;fill:none}
-.mk-glare{stroke:url(#mkGlare);stroke-width:19;opacity:.9;fill:none;
-  stroke-linejoin:round;stroke-linecap:round;filter:blur(1.5px)}
+/* and at 44px the glare has no room at all — the line alone carries the
+   gradient, which is what makes the pink read as pink */
+.mk-glare{display:none}
 
 .wd.plan .b{border-style:solid;border-color:var(--line)}
 .wd.plan .b .mk-db path{filter:drop-shadow(0 0 4px var(--accent-soft))}
@@ -852,6 +868,24 @@ h2.h{font-size:23px;line-height:1.2;letter-spacing:-.022em;font-weight:550}
   border:1px solid var(--neon);border-radius:999px;padding:4px 9px}
 .onething.on .ot-pts{color:var(--neon);border-color:var(--neon-line);background:none}
 .ot-go{margin-top:9px}
+
+/* two ways out of a rest day, side by side */
+.restcta{display:flex;gap:8px;margin-top:2px}
+.restcta .go{flex:1;margin-top:0}
+
+/* A freestyle day is a done day, marked so it can still be told apart: the
+   coach needs to know the difference between "did what I wrote" and "did his
+   own thing", because only one of those says the plan is working. */
+.wd.free .b{border-style:dashed;border-color:var(--accent)}
+
+/* THE LAST WORD ON TODAY'S CELL.
+   .wd.plan, .done, .miss and .free each set a border, and every one of them
+   can also be the current day — so a .wd.now rule written before them loses
+   on source order, which is exactly why the outline kept coming back on a
+   day that was both today AND a training day. This one sits after all of
+   them and doubles the class to outrank them outright. It also kills the
+   old teal focus ring further up; the stamp is the marker. */
+.wd.now.now .b{border-color:transparent;box-shadow:none}
 
 /* ---------- the week, slimmer -------------------------------------------
    The count and the three stats share one line; the strip below it lost a
@@ -2181,7 +2215,13 @@ async function loadTheme(){
 /* ============================================================
    4 · TIME
    ============================================================ */
-const NOW = new Date(2026,7,10,21,40);         /* Monday 10 Aug 2026, in bed */
+/* THE REAL DAY.
+   This was pinned to Monday 10 Aug so the demo always opened on session one.
+   The cost was that the week strip said Monday while the person holding the
+   phone was standing in a Friday, which makes the one thing on this screen
+   that has to be trusted — the agenda — the one thing that is visibly wrong.
+   So it is the actual date now, and the program is read off it. */
+const NOW = new Date();
 const DOW = NOW.getDay();
 const DAYNM = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 function greet(){ const h=NOW.getHours(); return h<5?'Still up':h<12?'Morning':h<17?'Afternoon':h<21?'Evening':'Late one'; }
@@ -2191,11 +2231,10 @@ function dstr(){ return NOW.toLocaleDateString('en-GB',{weekday:'long',day:'nume
    items landed wherever the array happened to put them — a session logged
    last showed up above the coach reply that came before it.
 
-   The prototype's "now" is fixed at Monday 21:40 for the demo, so a real
-   Date.now() would be three days out. This advances the fake clock in real
-   time from the moment the page loads, which orders entries correctly and
-   prints a believable time next to each one. */
-const T0 = NOW.getTime(), BOOT = Date.now();
+   The clock is real now, but the indirection stays: everything that writes
+   a timestamp goes through nowMs(), so pinning the clock again for a demo
+   is a one-line change rather than a hunt. */
+const T0 = NOW.getTime(), BOOT = Date.now();   /* now the same instant, kept for ordering */
 const nowMs = () => T0 + (Date.now() - BOOT);
 const hhmm = ms => new Date(ms).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
 function stamp(ms){
@@ -2208,7 +2247,30 @@ function stamp(ms){
   return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
 }
 
-const PROGRAM_START_DOW = 1;                   /* the program begins today, a Monday */
+/* Sunday, because that is where his four training days start. Days before it
+   in the strip are not "missed" — the program had not begun. */
+const PROGRAM_START_DOW = 0;
+
+/* ---- FREESTYLE ---------------------------------------------------------
+   The program owns four days. It does not own the other three, and a person
+   who did a hundred push-ups on a Tuesday has trained — the agenda saying
+   otherwise is the app calling him a liar. So anything logged freehand
+   counts on the strip, in the week total, and in the minutes.
+
+   It is kept distinct from a program day rather than merged: the coach needs
+   to know the difference between "did what I wrote" and "did his own thing",
+   because only one of those tells him the plan is working. */
+const weekStart = () => {
+  const d = new Date(NOW); d.setHours(0,0,0,0); d.setDate(d.getDate() - DOW);
+  return d.getTime();
+};
+function freeOn(i){
+  const a = weekStart() + i*86400000;
+  return (S.freestyle||[]).some(f => f.at >= a && f.at < a + 86400000);
+}
+const freeThisWeek = () => (S.freestyle||[]).filter(f => f.at >= weekStart()).length;
+const freeMins = () => (S.freestyle||[]).filter(f => f.at >= weekStart())
+  .reduce((t,f) => t + (parseInt(f.mins,10) || 20), 0);
 const todayId = WEEKPLAN[DOW];
 /* A function, not a constant. As a constant it was read once at load, so
    finishing the session left the day score reading 40% until a reload. */
@@ -2502,7 +2564,7 @@ function paneToday(){
   const scaled = s ? scaleSession(s) : null;
   const mins = scaled ? scaled.blocks.reduce((t,b)=>t+b.mins,0) : 0;
   const blocks = scaled ? scaled.blocks.length : 0;
-  const doneCount = Object.keys(S.done).length;
+  const doneCount = Object.keys(S.done).length + freeThisWeek();
   const HABITS = HABITS_FOR();
   const habDone = HABITS.filter(h=>S.habits[h.id]).length;
 
@@ -2537,7 +2599,7 @@ function paneToday(){
       <div class="wk-n"><b class="tnum">${doneCount}</b><i>/4</i></div>
       <div class="wk-st">
         <span><i class="tnum">${S.streak||1}</i>streak</span>
-        <span><i class="tnum">${doneCount*20}</i>min</span>
+        <span><i class="tnum">${Object.keys(S.done).length*20 + freeMins()}</i>min</span>
         <span><i class="tnum">${Math.round(habDone/HABITS.length*100)}</i>% habits</span>
       </div>
     </div>
@@ -2545,9 +2607,15 @@ function paneToday(){
       ${DAYNM.map((d,i)=>{
         /* the mark itself marks a training day — the app's own symbol doing
            a job rather than decorating one */
-        const plan = WEEKPLAN[i], dn = !!S.done[d], now = i===DOW;
+        const plan = WEEKPLAN[i], free = freeOn(i);
+        const dn = !!S.done[d] || free, now = i===DOW;
         const past = i<DOW && i>=PROGRAM_START_DOW;
-        const cls = dn?'done':(plan&&past?'miss':(plan&&i>=PROGRAM_START_DOW?'plan':''));
+        /* You cannot miss a session that was never handed to you. A day only
+           counts as missed if it was released and the day has passed —
+           otherwise it stays a plain planned day, which is what it is. */
+        const missed = plan && past && released(plan);
+        const cls = (dn?'done':(missed?'miss':(plan&&i>=PROGRAM_START_DOW?'plan':'')))
+                  + (free && !S.done[d] ? ' free' : '');
         return `<div class="wd ${cls} ${now?'now':''}">
           <span class="l">${d[0]}</span>
           <span class="b">${
@@ -2617,8 +2685,11 @@ function paneToday(){
       <div class="in">
         <div class="tag"><i></i>Rest day</div>
         <h3>Nothing today</h3>
-        <div class="why">Next up is ${SESSIONS[nx.id].name}, ${nx.when}. Ten minutes outside still counts.</div>
-        <button class="go ghost">Look at ${nx.when}'s session</button>
+        <div class="why">Next up is ${SESSIONS[nx.id].name}, ${nx.when}. Did something anyway? Log it and the day counts.</div>
+        <div class="restcta">
+          <button class="go ghost">Look at ${nx.when}'s session</button>
+          <button class="go" data-act="logsheet:session">Log what you did</button>
+        </div>
       </div>
     </div>`;
   }
@@ -2680,7 +2751,7 @@ function paneToday(){
     <button class="ql" data-act="log:weight">${svg(I.scale)}<span>Weight</span></button>
     <button class="ql" data-act="log:note">${svg(I.pen)}<span>Note</span></button>
     <button class="ql" data-act="log:photo">${svg(I.cam)}<span>Photo</span></button>
-    <button class="ql" data-act="log:session">${svg(I.plus)}<span>Session</span></button>
+    <button class="ql" data-act="log:session">${svg(I.plus)}<span>Freestyle</span></button>
   </div>`;
 
 
@@ -3104,7 +3175,7 @@ function paneLog(){
   /* ---- THE LOG ITSELF — the reason this tab exists ---- */
   h += `<div class="sect"><b>Everything, newest first</b><a data-act="logsheet:note">Write</a></div>`;
   h += `<div class="rail4">
-    <button class="ql" data-act="logsheet:session">${svg(I.plus)}<span>Session</span></button>
+    <button class="ql" data-act="logsheet:session">${svg(I.plus)}<span>Freestyle</span></button>
     <button class="ql" data-act="logsheet:weight">${svg(I.scale)}<span>Weight</span></button>
     <button class="ql" data-act="logsheet:note">${svg(I.pen)}<span>Note</span></button>
     <button class="ql" data-act="logsheet:photo">${svg(I.cam)}<span>Photo</span></button>
