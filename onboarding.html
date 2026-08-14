@@ -784,6 +784,21 @@ h1.q{text-align:center}
 .wpspent{font-size:12.5px;color:var(--ink3);text-align:center;margin-top:13px}
 .wpspent b{color:var(--ink2)}
 
+/* the other sport on the same week, in its own colour */
+.wkmode{display:flex;gap:7px;margin-bottom:11px}
+.wkmode button{flex:1;background:var(--card);border:1px solid var(--line);border-radius:11px;
+  padding:8px 10px;color:var(--ink3);font:inherit;font-size:12.5px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:7px}
+.wkmode button i{width:8px;height:8px;border-radius:2px;background:var(--accent);flex:none}
+.wkmode button[data-m="act"] i{background:#8FB8FF}
+.wkmode button.on{color:var(--ink);border-color:var(--ink3);background:#20252b}
+.wkpick button.act .wm{background:#8FB8FF;box-shadow:0 0 8px rgba(143,184,255,.6)}
+.wkpick button.act{border-color:rgba(143,184,255,.5)}
+.wkpick button.both{border-color:#F2C14E}
+.wkpick button.both .wm{background:linear-gradient(90deg,var(--accent) 50%,#8FB8FF 50%)}
+.wkpick.actmode button.on:not(.act){opacity:.55}
+.wkclash{display:block;margin-top:5px;font-size:11.5px;color:#F2C14E}
+
 /* ---------- the deck ---------- */
 .deckwrap{flex:1;display:flex;flex-direction:column;min-height:0}
 .dkdots{display:flex;gap:4px;justify-content:center;margin-bottom:14px;flex:0 0 auto}
@@ -1265,7 +1280,7 @@ function ico(n){
          'stroke-linecap="round" stroke-linejoin="round">'+
          d.split('M').filter(Boolean).map(p=>'<path d="M'+p+'"/>').join('')+'</svg></span>';
 }
-const CHAPTERS = ['Start','You','Where you\'re going','Where you are now','Your training','Your week','What gets in the way','Health check','Your plan'];
+const CHAPTERS = ['Start','You','Where you are going','Where you are now','Your training','Your week','What gets in the way','Health check','Your plan'];
 const A = {};
 let i = 0, hist = [];
 
@@ -1368,10 +1383,10 @@ const FLOW = [
 { ch:1, type:'text', key:'name', h:'What should I call you?', sub:'Goes on the front of your Log.',
   placeholder:'First name', cta:'Continue' },
 { ch:1, type:'vitals', h:'The basics.',
-  sub:'Strength benchmarks and starting loads all hang off these.', cta:'That\'s me' },
+  sub:'Strength benchmarks and starting loads all hang off these.', cta:'That is me' },
 
 /* 2 · WHERE YOU'RE GOING */
-{ ch:2, type:'chapter', n:2, title:'Where you\'re going', sub:'We start at the end and work back.' },
+{ ch:2, type:'chapter', n:2, title:'Where you are going', sub:'We start at the end and work back.' },
 /* Two screens again. They were merged onto one and it was worse: the far
    horizon and the ninety-day focus are different questions and asking them
    side by side made the second one feel like a footnote to the first. */
@@ -1424,7 +1439,7 @@ const FLOW = [
   cta:'Continue' },
 
 /* 4 · YOUR TRAINING */
-{ ch:4, type:'chapter', n:4, title:'Your training', sub:'10 cards. Swipe. That\'s the whole section.' },
+{ ch:4, type:'chapter', n:4, title:'Your training', sub:'10 cards. Swipe. That is the whole section.' },
 { ch:4, type:'deckintro' },
 { ch:4, type:'deck', key:'deck' },
 /* The "which of these do you enjoy?" screen used to sit here. It is asked on
@@ -1486,12 +1501,12 @@ const FLOW = [
 { ch:6, type:'multi', key:'driver', max:3, h:'Why does this matter to you?',
   sub:'Pick up to 3. The true ones, not the best-sounding.', cta:'Continue',
   opts:[{v:'best',   ic:'mountain',t:'I want to be in the best shape of my life'},
-        {v:'plateau',ic:'chart',   t:'I\'ve plateaued and I want past it'},
-        {v:'event',  ic:'target',  t:'I\'m training for something specific'},
+        {v:'plateau',ic:'chart',   t:'I have plateaued and I want past it'},
+        {v:'event',  ic:'target',  t:'I am training for something specific'},
         {v:'strong', ic:'barbell', t:'I want to be strong again'},
         {v:'miss',   ic:'heart',   t:'I actually miss training'},
         {v:'lose',   ic:'trendDown',t:'I want to lose weight'},
-        {v:'feel',   ic:'cloud',   t:'I don\'t like how I feel right now'},
+        {v:'feel',   ic:'cloud',   t:'I do not like how I feel right now'},
         {v:'kids',   ic:'child',   t:'I want to keep up with my kids'},
         {v:'doctor', ic:'stetho',  t:'My doctor told me to'}]},
 { ch:6, type:'multi', key:'blockers', h:'What has stopped you before?', sub:'Every plan fails the same way twice.',
@@ -1500,7 +1515,7 @@ const FLOW = [
         {v:'week3',  ic:'chart',    t:'Motivation dies at week 3'},
         {v:'toohard',ic:'burst',    t:'I start too hard and burn out'},
         {v:'injury', ic:'cross',    t:'Something started hurting'},
-        {v:'lost',   ic:'question', t:'Didn\'t know if it was working'},
+        {v:'lost',   ic:'question', t:'Did not know if it was working'},
         {v:'travel', ic:'luggage',  t:'Travel breaks the rhythm'},
         {v:'life',   ic:'house',    t:'Life gets busy, it goes first'},
         {v:'never',  ic:'seed',     t:'Never really started', none:true}]},
@@ -1516,7 +1531,7 @@ const FLOW = [
    The last option replaces all three. It is deliberately still here: this is
    a medical screen, and cutting it to four with no catch-all would mean a
    real contraindication has nowhere to go. Short is the goal, silent is not. */
-{ ch:7, type:'multi', key:'parq', h:'Anything here apply to you?', sub:'So I don\'t give you the wrong thing.',
+{ ch:7, type:'multi', key:'parq', h:'Anything here apply to you?', sub:'So I do not give you the wrong thing.',
   cta:'Continue',
   opts:[{v:'none',   ic:'check', t:'None of these', none:true},
         {v:'heart',  ic:'heart',  t:'Heart trouble, chest pain or high blood pressure'},
@@ -3875,8 +3890,23 @@ function reveal(){
   let slot = A.when || 'after';
   const len=({'20':'22','35':'35','55':'50','75':'60'})[A.length]||'35';
 
-  const d=el(`<h1 class="q">Here's the week I'd give you.</h1>
+  /* Their other sport goes on the same week, in its own colour. It was
+     collected two chapters ago and never shown, so someone playing football
+     on Tuesday could be handed Tuesday and had no way to say so. The toggle
+     decides which of the two a tap places. */
+  const ACTS={run:'Running',team:'Your sport',yoga:'Yoga',hiit:'Classes',swim:'Swimming',
+              racket:'Racket',martial:'Martial arts',climb:'Climbing',other:'Other'};
+  const actList=(A.otherAct||[]).filter(x=>x!=='none');
+  const actName=ACTS[actList[0]]||'Other sport';
+  const hasAct=actList.length>0;
+  let actDays=(A.actDays||[]).slice();
+  let mode='train';
+
+  const d=el(`<h1 class="q">Here is the week I would give you.</h1>
     <p class="sub">Tap to change it. This is the version I build.</p>
+    ${hasAct?`<div class="wkmode" id="wkmode">
+      <button data-m="train" class="on"><i></i>Training</button>
+      <button data-m="act"><i></i>${actName}</button></div>`:''}
     <div class="wkpick" id="wk">${DAYNAME.map((n,k)=>
       `<button data-k="${k}"><span class="wd">${n[0]}</span><span class="wm"></span></button>`).join('')}</div>
     <p class="wkcount" id="wkc"></p>
@@ -3890,32 +3920,48 @@ function reveal(){
   const cta=foot.querySelector('.cta');
 
   function paint(){
-    picked.sort((a,b)=>a-b);
-    wk.querySelectorAll('button').forEach(b=>b.classList.toggle('on',picked.indexOf(+b.dataset.k)>-1));
+    picked.sort((a,b)=>a-b); actDays.sort((a,b)=>a-b);
+    wk.querySelectorAll('button').forEach(b=>{
+      const k=+b.dataset.k;
+      b.classList.toggle('on',picked.indexOf(k)>-1);
+      b.classList.toggle('act',actDays.indexOf(k)>-1);
+      /* A day that is both is worth seeing — it is not forbidden, it is just
+         a hard day, and the coach should know before the programme is built. */
+      b.classList.toggle('both',picked.indexOf(k)>-1 && actDays.indexOf(k)>-1);
+    });
     d.querySelectorAll('#slots button').forEach(b=>b.classList.toggle('on',b.dataset.t===slot));
     const names=picked.map(k=>DAYNAME[k]);
     wkc.innerHTML = picked.length
       ? `<b>${picked.length} ${picked.length===1?'day':'days'}</b> · ${names.join(', ')} · ${len} min`
       : 'Pick at least one day.';
+    const clash=picked.filter(k=>actDays.indexOf(k)>-1);
+    if(hasAct && clash.length) wkc.innerHTML += `<span class="wkclash">${clash.length} day${clash.length>1?'s':''} doubled up with ${actName.toLowerCase()}</span>`;
     const t=(SLOTS.filter(x=>x[0]===slot)[0]||[])[2];
     const first=names[0], second=names[1], last=names[names.length-1];
     let h='';
     if(picked.length){
-      h+=`<div class="pred"><span class="pd">${first}</span><span class="pt">Session one${t?', <b>'+t+'</b>':''}, ${len} min. You'll finish thinking it was too easy. <b>That's the plan.</b></span></div>`;
-      if(second) h+=`<div class="pred"><span class="pd">${second}</span><span class="pt">This one feels easier than the first. That's your nervous system, not fitness. Fitness starts week 3.</span></div>`;
-      if(picked.length>1) h+=`<div class="pred"><span class="pd">${last}</span><span class="pt">The one that matters. <b>You'll want to skip it.</b> Do it anyway and your odds of still being here in 6 months roughly double.</span></div>`;
+      h+=`<div class="pred"><span class="pd">${first}</span><span class="pt">Session one${t?', <b>'+t+'</b>':''}, ${len} min. You will finish thinking it was too easy. <b>That is the plan.</b></span></div>`;
+      if(second) h+=`<div class="pred"><span class="pd">${second}</span><span class="pt">This one feels easier than the first. That is your nervous system, not fitness. Fitness starts week 3.</span></div>`;
+      if(picked.length>1) h+=`<div class="pred"><span class="pd">${last}</span><span class="pt">The one that matters. <b>You will want to skip it.</b> Do it anyway and your odds of still being here in 6 months roughly double.</span></div>`;
     }
     preds.innerHTML=h;
     cta.disabled = picked.length===0;
     syncFootPad();
   }
   wk.querySelectorAll('button').forEach(b=>b.onclick=()=>{haptic(12);
-    const k=+b.dataset.k, i=picked.indexOf(k);
-    if(i>-1) picked.splice(i,1); else picked.push(k);
+    const k=+b.dataset.k;
+    const list = mode==='act' ? actDays : picked;
+    const at=list.indexOf(k);
+    if(at>-1) list.splice(at,1); else list.push(k);
     paint();});
+  if(hasAct) d.querySelectorAll('#wkmode button').forEach(b=>b.onclick=()=>{haptic(12);
+    mode=b.dataset.m;
+    d.querySelectorAll('#wkmode button').forEach(x=>x.classList.toggle('on',x===b));
+    d.querySelector('#wk').classList.toggle('actmode', mode==='act');});
   d.querySelectorAll('#slots button').forEach(b=>b.onclick=()=>{haptic(12);slot=b.dataset.t;paint();});
   cta.onclick=()=>{ if(!picked.length) return; haptic(400);
-    A.trainDays=picked.slice(); A.days=picked.length; A.when=slot; next(); };
+    A.trainDays=picked.slice(); A.days=picked.length; A.when=slot;
+    A.actDays=actDays.slice(); next(); };
   paint();
 }
 
@@ -3923,16 +3969,16 @@ function reveal(){
 function patternscreen(){
   const p=pattern();
   const gate=(A.patterns||[]).includes('squat')?'':
-    `<div class="pred"><span class="pd">Note</span><span class="pt">You haven't trained a <b>squat pattern</b> regularly, so I'm not loading one yet. You'll earn it — unassisted, then eccentric, then loaded.</span></div>`;
+    `<div class="pred"><span class="pd">Note</span><span class="pt">You have not trained a <b>squat pattern</b> regularly, so I am not loading one yet. You will earn it — unassisted, then eccentric, then loaded.</span></div>`;
   el(`<div class="eyebrow ctr">What I already think I know</div>
     <div class="patcard"><div class="pl">Your pattern</div><div class="pn">${p.n}</div><div class="pb">${p.b}</div></div>
-    <button class="notme" id="notme">That's not me →</button>
+    <button class="notme" id="notme">That is not me →</button>
     ${gate}
-    <div class="later"><h4>And what I don't know yet.</h4>
+    <div class="later"><h4>And what I do not know yet.</h4>
       <div class="li"><span>Day 3</span><span>Whether session one was the right load. One tap.</span></div>
       <div class="li"><span>Week 2</span><span>What time you <em>really</em> train — from your logs.</span></div>
       <div class="li"><span>Week 4</span><span>How much you recover from. Solved, never asked.</span></div>
-      <div class="li"><span>Month 2</span><span>Sleep, stress, food — once I've earned the right to ask.</span></div>
+      <div class="li"><span>Month 2</span><span>Sleep, stress, food — once I have earned the right to ask.</span></div>
       <div class="li"><span>Ongoing</span><span>Which exercises you quietly avoid.</span></div></div>`);
   document.getElementById('notme').onclick=()=>{haptic(14);
     toast('Good. Tell me what I got wrong and I rebuild it — the model changes, not the label.',3400);};
@@ -3947,12 +3993,12 @@ function building(){
   el(`<div class="eyebrow ctr">What happens next</div>
     <h1 class="q">Your program is being written.</h1>
     <div style="text-align:center"><span class="eta">${ico('clock')} Ready ${when}</span></div>
-    <p class="sub">Not generated and forgotten. Built from your answers, then <b>read line by line by a human coach</b>. That's why it takes a day and not a second.</p>
+    <p class="sub">Not generated and forgotten. Built from your answers, then <b>read line by line by a human coach</b>. That is why it takes a day and not a second.</p>
     <div class="byline"><div class="avatar">N</div>
       <div><b>Nico</b>Reviews and adjusts every program before it ships</div></div>
     <div class="todo"><h4>20 cards while you wait</h4>
       <p>One exercise per card. Swipe right if you know it, left if you want me to show you. A minute, and it decides what I explain and what I assume.</p></div>
-    <p class="micro" style="text-align:center">You'll get a notification the moment it's ready.</p>`);
+    <p class="micro" style="text-align:center">You will get a notification the moment it is ready.</p>`);
   setFoot(`<button class="cta accent">Start the cards</button><button class="skip">Later</button>`);
   foot.querySelector('.cta').onclick=()=>{haptic(400);A.cardsNow=true;next();};
   foot.querySelector('.skip').onclick=()=>{haptic(14);A.cardsNow=false;next();};
@@ -3967,8 +4013,8 @@ function entry(){
   el(`<div class="hero" style="justify-content:flex-start;padding-top:4px">
     <div class="mark" style="width:44px;margin-bottom:16px">${MARK}</div>
     <div class="eyebrow">${A.name?A.name+"'s Log":'Your Log'} &middot; Entry 001</div>
-    <h1 style="font-size:30px">That's the<br><em>first rep.</em></h1>
-    <p style="font-size:15px">It counts, and it's logged. Everything from here is just the next one.</p>
+    <h1 style="font-size:30px">That is the<br><em>first rep.</em></h1>
+    <p style="font-size:15px">It counts, and it is logged. Everything from here is just the next one.</p>
     <div class="logcard">
       <div class="lgrow"><span>Opened</span><b>${ds}</b></div>
       <div class="lgrow"><span>Horizon</span><b>Age ${horizonAge(A.age||38)}</b></div>

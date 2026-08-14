@@ -695,20 +695,37 @@ h2.h{font-size:23px;line-height:1.2;letter-spacing:-.022em;font-weight:550}
 .kp.on span{color:var(--accent)}
 
 /* ---------- the week, with the mark on it ---------- */
-/* A training day carries the mark, in the mark's own colour. Today carries
-   the triangle instead of a highlighted box — the logo doing the pointing
-   rather than a rectangle, which is one more place the shape gets seen
-   without anything having to say so. */
-.wd .b svg.wdb{width:24px;height:12px;fill:none;stroke:var(--line2);stroke-linecap:round;
+/* THE WEEK, IN THE LOGO'S OWN TERMS
+   The triangle is not an icon here, it is the selection — it replaces the
+   highlighted square entirely and fills the cell at the size the square used
+   to occupy. The dumbbell is the icon, and it marks a training day.
+
+   Which means a training day that happens to be today draws both, at the
+   proportions they hold in the logo, because both come out of the same
+   markSvg() the header uses. The lockup appears in the calendar three or
+   four times a week without ever being pasted in.
+
+   Colours follow the logo too, and only the logo: bell teal, triangle
+   neon. */
+.wd .b{overflow:visible}
+.wd .b svg.wdb,.wd .b svg.wmark{height:auto;overflow:visible;fill:none}
+.wd .b svg.wdb{width:60%}
+/* 86%, not 100% — at full cell width the triangle is 39px tall in a 32px row
+   and rides up into the day letter. */
+.wd .b svg.wmark{width:86%}
+.mk-db path{stroke:var(--accent);stroke-linecap:round;fill:none;
   transition:stroke .25s,filter .25s}
+.mk-tri{stroke:var(--neon);stroke-width:9;stroke-linejoin:round;stroke-linecap:round;fill:none}
+
 .wd.plan .b{border-style:solid;border-color:var(--line)}
-.wd.plan .b svg.wdb{stroke:var(--neon);filter:drop-shadow(0 0 5px var(--neon-line))}
-.wd.done .b svg.wdb{stroke:var(--accent)}
-.wd .b svg.wtri{width:19px;height:17px;fill:none;stroke:var(--neon);stroke-width:16;
-  stroke-linejoin:round;stroke-linecap:round;overflow:visible;
-  filter:drop-shadow(0 0 6px var(--neon))}
-/* the box steps back so the shape can be the signal */
-.wd.now .b{border-color:transparent;background:none;box-shadow:none}
+.wd.plan .b .mk-db path{filter:drop-shadow(0 0 4px var(--accent-soft))}
+.wd.done .b svg.wdb .mk-db path{stroke:var(--accent)}
+
+/* today: the box gets out of the way and the triangle does the selecting */
+.wd.now .b{border-color:transparent;background:none;box-shadow:none;
+  align-items:center;padding:0}
+.wd.now .b .mk-tri{filter:drop-shadow(0 0 6px var(--neon-line))}
+.wd.now .b .mk-db path{filter:drop-shadow(0 0 5px var(--accent-soft))}
 .wd.now .l{color:var(--neon);text-shadow:0 0 10px var(--neon-line)}
 
 /* ---------- YOUR PROFILE ------------------------------------------------
@@ -737,7 +754,9 @@ h2.h{font-size:23px;line-height:1.2;letter-spacing:-.022em;font-weight:550}
 .prof.open .fold-chev svg{stroke:var(--accent)}
 .prof-body{padding:0 14px 14px;animation:foldIn .3s cubic-bezier(.22,1,.36,1) both}
 
-.rx{position:relative;display:block;width:88px;height:88px}
+/* rxg, not rx: .rx is already the small right-hand label in the session
+   and week sheets, and this rule was forcing those to 88x88. */
+.rxg{position:relative;display:block;width:88px;height:88px}
 .rx-orbit{position:absolute;inset:6px;border-radius:50%;
   background:conic-gradient(from 0deg, transparent 0 62%, var(--accent) 78%, transparent 92%);
   -webkit-mask:radial-gradient(circle, transparent 0 60%, #000 63%);
@@ -816,7 +835,7 @@ h2.h{font-size:23px;line-height:1.2;letter-spacing:-.022em;font-weight:550}
 .onething.on .ot-tx small{color:var(--accent)}
 .ot-pts{position:relative;z-index:1;flex:none;font-size:11px;font-weight:700;color:var(--neon);
   border:1px solid var(--neon);border-radius:999px;padding:4px 9px}
-.onething.on .ot-pts{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+.onething.on .ot-pts{color:var(--neon);border-color:var(--neon-line);background:none}
 .ot-go{margin-top:9px}
 
 /* ---------- the week, slimmer -------------------------------------------
@@ -940,7 +959,7 @@ h2.h{font-size:23px;line-height:1.2;letter-spacing:-.022em;font-weight:550}
   0%,100%{transform:scale(.9);filter:blur(14px)}
   50%    {transform:scale(1.06);filter:blur(8px)}}
 .sty-climb.full .dayx-glow{opacity:.42}
-.col{display:flex;flex-direction:column;justify-content:space-between;width:100%;height:100%}
+.gcol{display:flex;flex-direction:column;justify-content:space-between;width:100%;height:100%}
 .rung{display:block;height:3px;border-radius:2px;width:100%;
   background:rgba(255,255,255,.07);transition:background .35s,box-shadow .35s}
 .rung.on{background:var(--accent);box-shadow:0 0 6px var(--accent-soft)}
@@ -950,14 +969,16 @@ h2.h{font-size:23px;line-height:1.2;letter-spacing:-.022em;font-weight:550}
 /* ---- EMBER: a bar burning toward 100 ---- */
 .sty-ember .dayx-hd{padding-bottom:30px}
 .sty-ember .dayx-art{position:absolute;left:17px;right:17px;bottom:13px;display:block}
-.bar{position:relative;display:block;height:7px;border-radius:999px;
+/* embar, not bar: a bare .bar also caught the photo progress bars and gave
+   them a pill radius and an inset outline they were never meant to have. */
+.embar{position:relative;display:block;height:7px;border-radius:999px;
   background:rgba(0,0,0,.34);box-shadow:inset 0 0 0 1px var(--line)}
-.bar-f{position:absolute;left:0;top:0;bottom:0;width:var(--p);border-radius:999px;
+.embar-f{position:absolute;left:0;top:0;bottom:0;width:var(--p);border-radius:999px;
   background:linear-gradient(90deg,var(--accent),var(--neon) 84%,#fff);
   box-shadow:0 0 16px var(--neon-line);transition:width .9s cubic-bezier(.22,1,.36,1)}
-.bar-tip{position:absolute;top:0;left:var(--p);width:0;height:0;
+.embar-tip{position:absolute;top:0;left:var(--p);width:0;height:0;
   transition:left .9s cubic-bezier(.22,1,.36,1)}
-.sty-ember.full .bar-tip{display:none}
+.sty-ember.full .embar-tip{display:none}
 
 /* ---- STACK: the three favourites in one — squares climbing the right
        edge, one at a time, with a spark off the top lit one ---- */
@@ -986,14 +1007,18 @@ h2.h{font-size:23px;line-height:1.2;letter-spacing:-.022em;font-weight:550}
    here and goes into the total. */
 .hpts{position:relative;font-size:11px;font-weight:700;color:var(--ink3);flex:none;
   border:1px solid var(--line);border-radius:999px;padding:4px 9px}
-.hab.on .hpts{color:var(--accent);border-color:rgba(62,203,168,.45);background:none}
+/* THE RULE: an unearned percentage is grey, an earned one is the SECOND
+   colour — not the first. The first colour already means "this section is
+   complete"; using it for points too made completion and reward look like
+   the same event. Points are neon, everywhere, and the ember stays. */
+.hab.on .hpts{color:var(--neon);border-color:var(--neon-line);background:none}
 .hpts.just{animation:ptsPop .75s cubic-bezier(.22,1,.36,1)}
 @keyframes ptsPop{
-  0%  {transform:scale(1);   box-shadow:0 0 0 0 var(--accent-soft)}
-  28% {transform:scale(1.2); box-shadow:0 0 16px 2px var(--accent-soft)}
+  0%  {transform:scale(1);   box-shadow:0 0 0 0 var(--neon-soft)}
+  28% {transform:scale(1.2); box-shadow:0 0 16px 2px var(--neon-soft)}
   100%{transform:scale(1);   box-shadow:0 0 0 0 rgba(0,0,0,0)}}
 .pspark{position:absolute;left:50%;top:2px;width:3px;height:3px;border-radius:50%;
-  background:var(--accent);box-shadow:0 0 7px var(--accent);pointer-events:none;
+  background:var(--neon);box-shadow:0 0 7px var(--neon);pointer-events:none;
   animation:pSpark .8s ease-out both;animation-delay:var(--d,0s)}
 @keyframes pSpark{
   0%  {opacity:0;transform:translate(-50%,0) scale(.5)}
@@ -1037,38 +1062,42 @@ h2.h{font-size:23px;line-height:1.2;letter-spacing:-.022em;font-weight:550}
    Nodes had the best light of the first three, so that intensity is now
    the baseline everywhere.
    ------------------------------------------------------------------- */
-.ring{position:absolute;top:1.5px;left:1.5px;width:calc(100% - 3px);height:calc(100% - 3px);
+/* oring, not ring. `.ring` is ALSO the program card's week dial, and an
+   unscoped `.ring{position:absolute}` here tore that dial out of flow and
+   dropped it on the name in the header. A shared word in a global stylesheet
+   is a collision waiting for the next component to arrive. */
+.oring{position:absolute;top:1.5px;left:1.5px;width:calc(100% - 3px);height:calc(100% - 3px);
   pointer-events:none;z-index:2;overflow:visible}
-.fold.open .ring{opacity:.55}
+.fold.open .oring{opacity:.55}
 /* NOTE: stroke-dasharray is deliberately NOT transitioned. Chrome mis-lands
    the final length when it interpolates a dash list on a pathLength-normalised
    shape — a half-full card painted about 85% full and stayed there. The dash
    is set at render time instead; the light still arrives, it just arrives
    already in place, and the glow fades in around it. */
-.ring rect{fill:none;stroke-linecap:round;
+.oring rect{fill:none;stroke-linecap:round;
   transition:stroke .55s,opacity .55s,filter .55s;transition-delay:var(--d,0s)}
 
 /* ---- ARC: one run growing clockwise out of the top-left corner ---- */
-.ring.arc .track,.ring.comet .track{stroke:var(--line2);stroke-width:1;opacity:.2}
-.ring.arc .notch,.ring.comet .notch{stroke:var(--line2);stroke-width:2.5;opacity:.45}
-.ring.arc .rgh,.ring.comet .rgh{stroke:transparent;stroke-width:8;opacity:0}
-.ring.arc .rgh.on,.ring.comet .rgh.on{stroke:var(--accent);opacity:.5;
+.oring.arc .track,.oring.comet .track{stroke:var(--line2);stroke-width:1;opacity:.2}
+.oring.arc .notch,.oring.comet .notch{stroke:var(--line2);stroke-width:2.5;opacity:.45}
+.oring.arc .rgh,.oring.comet .rgh{stroke:transparent;stroke-width:8;opacity:0}
+.oring.arc .rgh.on,.oring.comet .rgh.on{stroke:var(--accent);opacity:.5;
   filter:blur(6px) drop-shadow(0 0 12px var(--accent))}
-.ring.arc .rg,.ring.comet .rg{stroke:transparent;stroke-width:2}
-.ring.arc .rg.on,.ring.comet .rg.on{stroke:var(--accent);opacity:1;
+.oring.arc .rg,.oring.comet .rg{stroke:transparent;stroke-width:2}
+.oring.arc .rg.on,.oring.comet .rg.on{stroke:var(--accent);opacity:1;
   filter:drop-shadow(0 0 5px var(--accent)) drop-shadow(0 0 11px var(--accent))}
 
 /* ---- COMET: same run, with a bright head where the light stopped ---- */
-.ring.comet .head{stroke:#fff;stroke-width:3.4;opacity:.95;
+.oring.comet .head{stroke:#fff;stroke-width:3.4;opacity:.95;
   filter:drop-shadow(0 0 6px var(--accent)) drop-shadow(0 0 16px var(--accent));
   animation:cometPulse 2.4s ease-in-out infinite}
 @keyframes cometPulse{0%,100%{opacity:.95}50%{opacity:.55}}
 
 /* ---- BARS: a thick lit bar per task, even hairline gap throughout ---- */
-.ring.bars .rgh{stroke:transparent;stroke-width:9;opacity:0}
-.ring.bars .rgh.on{stroke:var(--accent);opacity:.5;filter:blur(6px) drop-shadow(0 0 12px var(--accent))}
-.ring.bars .rg{stroke:var(--line2);stroke-width:2.6;opacity:.28}
-.ring.bars .rg.on{stroke:var(--accent);stroke-width:3.2;opacity:1;
+.oring.bars .rgh{stroke:transparent;stroke-width:9;opacity:0}
+.oring.bars .rgh.on{stroke:var(--accent);opacity:.5;filter:blur(6px) drop-shadow(0 0 12px var(--accent))}
+.oring.bars .rg{stroke:var(--line2);stroke-width:2.6;opacity:.28}
+.oring.bars .rg.on{stroke:var(--accent);stroke-width:3.2;opacity:1;
   filter:drop-shadow(0 0 5px var(--accent)) drop-shadow(0 0 11px var(--accent))}
 
 /* ---- RING + CHARGE: no outline at all, the icon tile is the meter ---- */
@@ -1094,13 +1123,13 @@ h2.h{font-size:23px;line-height:1.2;letter-spacing:-.022em;font-weight:550}
 .fold.sty-charge.done .chg{display:none}
 
 /* ---- complete, in every style: the seams stop mattering ---- */
-.fold.done .ring .rg,.fold.done .ring .rg.on{stroke:var(--accent);opacity:.62;
+.fold.done .oring .rg,.fold.done .oring .rg.on{stroke:var(--accent);opacity:.62;
   filter:drop-shadow(0 0 2px var(--accent)) drop-shadow(0 0 5px var(--accent))}
-.fold.done .ring .rgh,.fold.done .ring .rgh.on{stroke:var(--accent);opacity:.16;
+.fold.done .oring .rgh,.fold.done .oring .rgh.on{stroke:var(--accent);opacity:.16;
   filter:blur(6px) drop-shadow(0 0 8px var(--accent))}
-.fold.done .ring .notch,.fold.done .ring .track,.fold.done .ring .head{opacity:0}
-.fold.live .ring .rg.on{stroke:var(--coach);filter:drop-shadow(0 0 4px var(--coach))}
-.fold.live .ring .rgh.on{stroke:var(--coach);filter:blur(5px) drop-shadow(0 0 10px var(--coach))}
+.fold.done .oring .notch,.fold.done .oring .track,.fold.done .oring .head{opacity:0}
+.fold.live .oring .rg.on{stroke:var(--coach);filter:drop-shadow(0 0 4px var(--coach))}
+.fold.live .oring .rgh.on{stroke:var(--coach);filter:blur(5px) drop-shadow(0 0 10px var(--coach))}
 
 /* the count becomes a tick */
 .fold-note.tick{border-color:var(--accent);background:var(--accent-soft);padding:4px 8px;
@@ -1188,7 +1217,7 @@ h2.h{font-size:23px;line-height:1.2;letter-spacing:-.022em;font-weight:550}
   display:inline-flex;align-items:center;gap:7px}
 .dchip i{font-style:normal;font-size:10.5px;opacity:.75;font-variant-numeric:tabular-nums}
 .dchip.part{color:var(--ink2);border-color:var(--line2)}
-.dchip.on{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+.dchip.on{color:var(--neon);border-color:var(--neon-line);background:none}
 
 /* ---------- the weigh-in ------------------------------------------------
    A weekly appointment, not a button. It says which day, how far away, and
@@ -2243,6 +2272,31 @@ function ecg(){
   </svg>`;
 }
 
+/* ---- THE MARK, once ---------------------------------------------------
+   The header lockup and the calendar's "today" cell are the same drawing at
+   two sizes, so the numbers live here and both read them. That is what makes
+   the proportions match: not care, but a shared constant.
+   ------------------------------------------------------------------- */
+const TRI_D = 'M100 23 H286 L150 252 L14 16 H60';
+/* onboarding's mark verbatim — same bar, same three plates, same widths */
+const DB_PATHS =
+  '<path d="M86 65 H174" stroke-width="7" opacity=".55"/>' +
+  '<path d="M86 38 V92" stroke-width="12.65"/><path d="M174 38 V92" stroke-width="12.65"/>' +
+  '<path d="M66.8 40.7 V89.3" stroke-width="9.9"/><path d="M193.2 40.7 V89.3" stroke-width="9.9"/>' +
+  '<path d="M52.4 47.5 V82.5" stroke-width="7.13"/><path d="M207.6 47.5 V82.5" stroke-width="7.13"/>';
+/* where the dumbbell sits inside the triangle, in the triangle's own units */
+const DB_PLACE = 'translate(41.5,41) scale(0.84)';
+
+/* The whole mark at any size. `db` decides whether the bell is inside it —
+   which is exactly the calendar's rule: the triangle marks today, the
+   dumbbell marks a training day, and a training day that is today is the
+   logo. */
+const markSvg = (cls, db) =>
+  `<svg class="${cls}" viewBox="0 0 300 268" aria-hidden="true">
+    <path class="mk-tri" d="${TRI_D}"/>
+    ${db?`<g transform="${DB_PLACE}"><g class="mk-db">${DB_PATHS}</g></g>`:''}
+  </svg>`;
+
 function header(){
   return `<div id="head">
     <div class="who">
@@ -2267,8 +2321,8 @@ function header(){
              top-left is the dark segment of a real neon tube, and the two ends
              sit at different heights on purpose. Stroke is far heavier than
              onboarding's 2.4 because this is rendered at a fifth of the size. -->
-        <path class="lk-tri" d="M100 23 H286 L150 252 L14 16 H60"/>
-        <path class="lk-spark" d="M100 23 H286 L150 252 L14 16 H60"/>
+        <path class="lk-tri" d="${TRI_D}"/>
+        <path class="lk-spark" d="${TRI_D}"/>
         <!-- the dumbbell, inside the triangle rather than beside it -->
         <!-- Two groups, not one. The beat animates the transform property,
              and a CSS transform beats an SVG transform ATTRIBUTE outright:
@@ -2284,13 +2338,7 @@ function header(){
              this height the two edges are ~178 units apart, so a 131-unit
              dumbbell sits inside with air on both sides. Centre of the drawn
              mark is (130,65) in its own 260x130 box, hence the offsets. -->
-        <g transform="translate(41.5,41) scale(0.84)">
-        <g class="lk-db">
-          <path d="M86 65 H174" stroke-width="7" opacity=".55"/>
-          <path d="M86 38 V92" stroke-width="12.65"/><path d="M174 38 V92" stroke-width="12.65"/>
-          <path d="M66.8 40.7 V89.3" stroke-width="9.9"/><path d="M193.2 40.7 V89.3" stroke-width="9.9"/>
-          <path d="M52.4 47.5 V82.5" stroke-width="7.13"/><path d="M207.6 47.5 V82.5" stroke-width="7.13"/>
-        </g></g>
+        <g transform="${DB_PLACE}"><g class="lk-db">${DB_PATHS}</g></g>
       </svg>
     </div>
   </div>`;
@@ -2340,14 +2388,14 @@ function dayArt(st, pct){
       sq(i, (i===full-1 && frac<=0) || (i===full && frac>0) ? spark : '')).join('')}</span>`;
 
   if(st === 'climb')
-    return `<span class="col">${Array.from({length:STEPS},(_,i)=>
+    return `<span class="gcol">${Array.from({length:STEPS},(_,i)=>
       `<span class="rung ${STEPS-1-i<full?'on':''} ${STEPS-1-i===full?'next':''}"></span>`).join('')}</span>`;
 
   if(st === 'ember')
-    return `<span class="bar"><span class="bar-f"></span><span class="bar-tip">${spark}</span></span>`;
+    return `<span class="embar"><span class="embar-f"></span><span class="embar-tip">${spark}</span></span>`;
 
   /* stack — squares up the right edge, spark off the top lit one */
-  return `<span class="col sqcol">${Array.from({length:STEPS},(_,i)=>{
+  return `<span class="gcol sqcol">${Array.from({length:STEPS},(_,i)=>{
     const idx = STEPS-1-i;
     return sq(idx, idx===full-1 || (idx===full && frac>0) ? spark : '');
   }).join('')}</span>`;
@@ -2522,14 +2570,13 @@ function paneToday(){
         return `<div class="wd ${cls} ${now?'now':''}">
           <span class="l">${d[0]}</span>
           <span class="b">${
-            dn   ? svg(I.check)
-          : now  ? `<svg class="wtri" viewBox="0 0 300 268" aria-hidden="true">
-                      <path d="M100 23 H286 L150 252 L14 16 H60"/></svg>`
-          : plan ? `<svg class="wdb" viewBox="0 0 260 130" aria-hidden="true">
-                <path d="M86 65 H174" stroke-width="9"/>
-                <path d="M86 34 V96" stroke-width="15"/><path d="M174 34 V96" stroke-width="15"/>
-                <path d="M62 44 V86" stroke-width="11"/><path d="M198 44 V86" stroke-width="11"/>
-              </svg>`
+            dn  ? svg(I.check)
+          : now ? markSvg('wmark', !!plan)          /* today: the triangle IS the selection */
+          /* A lone bell gets its own frame. Inside the triangle's 300x268 box
+             it would be drawn at the size it is IN the logo, which is a
+             sixth of a cell — right for the lockup, invisible on its own. */
+          : plan? `<svg class="wdb" viewBox="0 0 260 130" aria-hidden="true">
+                     <g class="mk-db">${DB_PATHS}</g></svg>`
           : ''}</span>
         </div>`;
       }).join('')}
@@ -2666,7 +2713,7 @@ const RX = 14;
    itself, not after the curve, because ORIGIN winds the start back by one
    corner arc — the reason a filling outline should never begin mid-edge. */
 function layoutRings(root){
-  (root||document).querySelectorAll('.ring').forEach(svg=>{
+  (root||document).querySelectorAll('.oring').forEach(svg=>{
     const w = svg.clientWidth, h = svg.clientHeight;
     if(!w || !h) return;
     const rx = Math.min(RX, w/2, h/2);
@@ -2696,7 +2743,7 @@ function ringSvg(total, done){
          data-a="${(i*seg + gap/2).toFixed(5)}" data-b="${((i+1)*seg - gap/2).toFixed(5)}"
          style="--d:${(i*0.08).toFixed(2)}s"/>`;
     const idx = Array.from({length: total}, (_,i)=>i);
-    return `<svg class="ring bars" aria-hidden="true">
+    return `<svg class="oring bars" aria-hidden="true">
       ${idx.map(i=>one(i,'rgh')).join('')}${idx.map(i=>one(i,'rg')).join('')}
     </svg>`;
   }
@@ -2711,7 +2758,7 @@ function ringSvg(total, done){
   const head = done && done < total
     ? `<rect class="head" ${RRECT}
          data-a="${Math.max(0, pct-0.009).toFixed(5)}" data-b="${pct.toFixed(5)}"/>` : '';
-  return `<svg class="ring ${st}" aria-hidden="true">
+  return `<svg class="oring ${st}" aria-hidden="true">
     <rect class="track" ${RRECT}/>
     ${notch}${run('rgh')}${run('rg')}${st==='comet'?head:''}
   </svg>`;
@@ -3332,7 +3379,7 @@ function reactor(pct){
   const arc = pct <= 0 ? '' : (pct >= 99.9
     ? `M ${C} ${C-R} A ${R} ${R} 0 1 1 ${C-0.01} ${C-R}`
     : `M ${pt(0)} A ${R} ${R} 0 ${pct>50?1:0} 1 ${pt(pct*3.6)}`);
-  return `<span class="rx"><span class="rx-orbit"></span>
+  return `<span class="rxg"><span class="rx-orbit"></span>
     <svg class="rx-svg" viewBox="0 0 88 88" aria-hidden="true">
       <circle class="rx-t" cx="44" cy="44" r="34"/>
       ${arc?`<path class="rx-h" d="${arc}"/><path class="rx-c" d="${arc}"/>`:''}

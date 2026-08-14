@@ -15,9 +15,14 @@
    Training data lives in localStorage, not here, so an update never
    touches a logged session.
    ============================================================ */
-const VERSION = 'a95d97fd04';
+const VERSION = 'e6f3b0a69b';
 const CACHE = 'fj-' + VERSION;
 const ASSETS = [
+  "./ EXERCISE LIBRARY/Exercise_Illustration_Collection/03_Lower_Body_Glutes_Posterior_Chain/019_bodyweight_squat.png",
+  "./ FOR NICOLAS/EXERCISE CLASSIFIER.html",
+  "./.claude/launch.json",
+  "./coach.html",
+  "./dashboard.html",
   "./feed.html",
   "./hero.html",
   "./icon-180.png",
@@ -73,11 +78,20 @@ const ASSETS = [
   "./onboarding.html",
   "./preview.html",
   "./profile.html",
+  "./spine/aliases.json",
+  "./spine/art.manifest.json",
+  "./spine/benchmarks.json",
+  "./spine/catalog.json",
+  "./spine/theme.json",
   "./styles.css",
+  "./tools/build-app-data.mjs",
   "./tools/build-avatars.mjs",
   "./tools/build-benchmarks.mjs",
+  "./tools/build-classifier.mjs",
   "./tools/build-deck-art.mjs",
-  "./tools/build-exercise-images.mjs"
+  "./tools/build-exercise-images.mjs",
+  "./tools/build-spine.mjs",
+  "./tools/fix-progression-links.mjs"
 ];
 
 self.addEventListener('install', (e) => {
