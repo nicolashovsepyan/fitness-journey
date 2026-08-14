@@ -223,18 +223,18 @@ body.opening #bars,body.opening #chapline{opacity:0;pointer-events:none}
    mark and stays framing it no matter what the copy below does. -37% rather
    than -50% drops the dumbbell below the triangle's midline; a percentage
    because it has to hold at every width, where a pixel offset would not. */
-.heroA .tri{position:absolute;left:50%;top:50%;transform:translate(-50%,-34%);
-  width:min(76%,292px);height:auto;overflow:visible;z-index:0;pointer-events:none}
-.heroA .tri path{fill:none;stroke-width:2.4;stroke-linejoin:round;stroke-linecap:round}
+.heroA .tri{position:absolute;left:50%;top:50%;transform:translate(-50%,-37.5%);
+  width:min(82%,315px);height:auto;overflow:visible;z-index:0;pointer-events:none}
+.heroA .tri path{fill:none;stroke-width:2.6;stroke-linejoin:round;stroke-linecap:round}
 .heroA .tri-l{stroke:url(#triGrad);filter:drop-shadow(0 0 7px rgba(255,95,162,.45))}
 /* One short bright dash chasing the perimeter. Hidden until the mark has
    landed — a light running around an outline that is still being drawn
    reads as two animations fighting. */
-.heroA .tri-spark{stroke:#fff;stroke-width:3.2;opacity:0;
+.heroA .tri-spark{stroke:#fff;stroke-width:3.5;opacity:0;
   filter:drop-shadow(0 0 9px #FF5FA2) drop-shadow(0 0 3px #fff)}
 .heroA.lit .tri-spark{opacity:1;animation:triRun var(--beat,2400ms) linear infinite}
 .heroA.lit .tri-l{animation:triBeat var(--beat,2400ms) ease-in-out infinite}
-@keyframes triRun{ from{stroke-dashoffset:0} to{stroke-dashoffset:-771} }
+@keyframes triRun{ from{stroke-dashoffset:0} to{stroke-dashoffset:-777} }
 /* The line breathes on the same clock as the spark, so the glow swells as
    the light comes round — one heartbeat, not two things blinking. */
 @keyframes triBeat{
@@ -1943,11 +1943,11 @@ function hero(s){
         <!-- userSpaceOnUse, always. objectBoundingBox has bitten this file
              three times: on a straight line the bounding box has zero area
              and the gradient renders nothing at all in iOS Safari. -->
-        <linearGradient id="triGrad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="300" y2="0">
+        <linearGradient id="triGrad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="268">
           <stop offset="0%"   stop-color="#FF5FA2"/>
-          <stop offset="32%"  stop-color="#FFB3D2"/>
-          <stop offset="50%"  stop-color="#FFFFFF"/>
-          <stop offset="68%"  stop-color="#FFB3D2"/>
+          <stop offset="22%"  stop-color="#FFB3D2"/>
+          <stop offset="37%"  stop-color="#FFFFFF"/>
+          <stop offset="54%"  stop-color="#FFB3D2"/>
           <stop offset="100%" stop-color="#FF5FA2"/>
         </linearGradient>
       </defs>
@@ -1958,11 +1958,10 @@ function hero(s){
            faked with a dash gap, so the draw-in animation still works and
            the light has somewhere to enter and leave.
 
-           The two ends of the break are at different heights on purpose:
-           the long edge runs at y=23, the short stub at y=16. Parallel, not
-           aligned — a sign whose broken halves have settled out of true. -->
-      <path class="tri-l" d="M100 23 H286 L150 252 L14 16 H60"/>
-      <path class="tri-spark" d="M100 23 H286 L150 252 L14 16 H60"/>
+           Both ends of the break sit at y=16. They were stepped for a
+           version and it read as a mistake rather than a choice. -->
+      <path class="tri-l" d="M100 16 H286 L150 252 L14 16 H60"/>
+      <path class="tri-spark" d="M100 16 H286 L150 252 L14 16 H60"/>
     </svg>
       <div class="dbglow"></div>
       <svg class="db${MARK.engine==='plate'?' mb':''}" viewBox="0 0 260 130" preserveAspectRatio="xMidYMid meet">
@@ -2035,7 +2034,7 @@ function hero(s){
      closes as the name lands. Two separate timers would drift apart on a
      phone exactly the way the fifteen CSS transitions did. */
   const triL=d.querySelector('.tri-l'), triSpark=d.querySelector('.tri-spark');
-  const TRI_LEN=771;                       // 186 + 266.3 + 272.4 + 46, with the step at the break
+  const TRI_LEN=777;                       // 186 + 272.4 + 272.4 + 46, minus the break
   if(triL){
     triL.style.strokeDasharray=TRI_LEN;
     triL.style.strokeDashoffset=TRI_LEN;
