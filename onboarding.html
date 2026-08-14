@@ -743,8 +743,8 @@ h1.q{text-align:center}
 .rxpre button.on{background:rgba(123,227,196,.09);border-color:var(--accent);color:var(--accent)}
 .rxpre button.on span{color:var(--ink2)}
 
-.rxbay{flex:1 1 auto;display:flex;gap:9px;align-items:stretch;min-height:210px;
-  padding:44px 12px 12px;border-radius:18px;background:var(--card);
+.rxbay{flex:1 1 auto;display:flex;gap:7px;align-items:stretch;min-height:216px;
+  padding:44px 8px 12px;border-radius:18px;background:var(--card);
   border:1px solid var(--line);position:relative;overflow:hidden}
 /* the core: a wash behind the rods that changes colour with the mix */
 .rxcore{position:absolute;left:50%;bottom:-42%;width:150%;height:110%;transform:translateX(-50%);
@@ -830,6 +830,18 @@ h1.q{text-align:center}
 .wkpick .wd{transition:opacity .22s,transform .22s}
 .wkpick button.act .wdb svg{stroke:#8FB8FF}
 .wkpick button.both .wdb svg{stroke:#F2C14E}
+
+/* Two axes, because Training is an order of magnitude off the other three.
+   Marked rather than hidden — the alternative is a two-pixel stub nobody can
+   grab, or three rods squashed flat. */
+.rxaxis{flex:0 0 26px;display:flex;flex-direction:column;justify-content:space-between;
+  padding:20px 0 26px;z-index:2;pointer-events:none}
+.rxaxis span{font-size:9px;color:var(--ink3);letter-spacing:.02em;line-height:1}
+.rxaxis.big{text-align:right}
+.rxaxis.small{text-align:left;color:var(--accent)}
+.rxaxis.small span{color:rgba(123,227,196,.75)}
+.rxrod.small{border-left:1px dashed rgba(123,227,196,.22);padding-left:7px;margin-left:2px}
+.rxscale{font-size:11px;color:var(--ink3);text-align:right;margin:7px 2px 0}
 
 /* the headline numbers */
 .wkband{display:flex;gap:8px;margin:2px 0 16px}
@@ -2875,63 +2887,93 @@ function goalone(s){
 /* ================= THE REACTOR =================
    Four rods, a fixed budget, and every rod labelled in plain life rather
    than in points. See FOR NICOLAS/YOUR WEEK — THE REACTOR.md */
-/* Each rod carries its own hour range, because they are not comparable on one
-   scale: 50 on Recovery is roughly sixty hours of sleep and rest a week, 50 on
-   Training is about four. A single ladder down the side would either make
-   Training a sliver or make Recovery meaningless, so the hours live on each
-   rod instead — big, and updating as it moves. */
+/* A REAL DAY. The rods add up to 24 hours, because that is the only budget
+   everybody already understands — and because "9 hours of work" is an answer
+   a person can check against their own life in a second, where "55 out of
+   200" is not.
+
+   Training breaks the scale, and that is the honest part rather than a
+   problem to hide: it lives in tens of minutes while the other three live in
+   hours. Drawn at true scale it would be a two-pixel stub nobody could grab.
+   So it keeps its own axis — marked on the screen, in minutes — and the
+   three big rods share theirs. A secondary axis is a normal thing to do when
+   one series is an order of magnitude off; pretending they are comparable is
+   what would be dishonest. */
+const DAY_HOURS = 24;
 const RODS = [
-  { k:'work',     n:'Work',     c:'#8FB8FF', h:[21,62],
-    say:['Under 35 hour weeks','A steady 40 hours','Long weeks, most weeks','It takes the evenings too'] },
-  { k:'people',   n:'People',   c:'#FFB3D2', h:[0,32],
-    say:['Weekends, mostly','A few evenings a week','Most evenings are theirs','They come first, always'] },
-  { k:'recovery', n:'Recovery', c:'#C9A7FF', h:[28,69],
-    say:['Under 6 hours, no rest day','6 to 7 hours, one easy day','7 to 8 hours, a real rest day','8 hours and a protected day'] },
-  { k:'training', n:'Training', c:'#7BE3C4', h:[0,7],
-    say:['Whatever is left over','2 or 3 sessions','3 or 4 sessions, planned','5 sessions, planned first'] },
+  { k:'work',     n:'Work',     c:'#8FB8FF', min:1,   max:14, axis:'big',
+    say:['A short day','A steady day','Long days','It takes the evenings too'],
+    band:[5,8,10.5] },
+  { k:'people',   n:'People',   c:'#FFB3D2', min:0.5, max:10, axis:'big',
+    say:['Weekends, mostly','An hour or two','Most evenings are theirs','They come first, always'],
+    band:[1.5,3.5,5.5] },
+  { k:'recovery', n:'Recovery', c:'#C9A7FF', min:5,   max:13, axis:'big',
+    say:['Short sleep, no let-up','6 to 7 hours, little downtime','7 to 8 hours and some rest','8 hours and real downtime'],
+    band:[7,8.5,10] },
+  { k:'training', n:'Training', c:'#7BE3C4', min:0,   max:1.75, axis:'small',
+    say:['Whatever is left over','2 or 3 sessions a week','3 or 4 sessions, planned','5 sessions, planned first'],
+    band:[0.28,0.5,0.8] },
 ];
-function rodHours(o, v){
-  const h = Math.max(0.5, o.h[0] + (o.h[1]-o.h[0]) * (v/100));
-  return h < 10 ? (Math.round(h*2)/2) : Math.round(h);
+const BIG_AXIS   = [0,4,8,12];      // hours, for the three that share a scale
+const SMALL_AXIS = [0,30,60,90];    // minutes, for training
+
+/* Which of the four sentences a rod is saying, from its hours. */
+function rodBand(o, h){ return h<o.band[0]?0 : h<o.band[1]?1 : h<o.band[2]?2 : 3; }
+/* Bar height as a share of its own axis, not of the day. */
+function rodFill(o, h){
+  const top = o.axis==='big' ? BIG_AXIS[BIG_AXIS.length-1]+2 : SMALL_AXIS[SMALL_AXIS.length-1]/60+0.25;
+  return Math.max(2, Math.min(100, (h/top)*100));
 }
-const RXBUDGET = 200;                      // four rods, 50 each is even
+function rodSays(o, h){
+  return o.axis==='small' ? Math.round(h*60)+' min a day'
+                          : (Math.round(h*2)/2)+'h a day';
+}
 const PRESETS = [
-  { k:'stable',  n:'Stable',        s:'Nothing dominates',    v:{work:55,people:50,recovery:50,training:45} },
-  { k:'booster', n:'Health booster',s:'Training comes first', v:{work:45,people:40,recovery:50,training:65} },
-  { k:'minimum', n:'Bare minimum',  s:'It goes in the gaps',  v:{work:70,people:55,recovery:45,training:30} },
+  { k:'stable',  n:'Stable',        s:'Nothing dominates',    v:{work:8.5,people:5,  recovery:10, training:0.5} },
+  { k:'booster', n:'Health booster',s:'Training comes first', v:{work:8,  people:4.5,recovery:10.5,training:1} },
+  { k:'minimum', n:'Bare minimum',  s:'It goes in the gaps',  v:{work:10.5,people:5, recovery:8.25,training:0.25} },
 ];
-/* Which of the four sentences a rod is currently saying. */
-function rodBand(v){ return v<35 ? 0 : v<52 ? 1 : v<70 ? 2 : 3; }
 
 /* How much of themselves training is getting, on the old 1–10 scale. Kept
    because the coach console, the insights and the reveal all read
    A.capacity, and none of them should have to know the reactor exists. */
-function rodsToCapacity(r){ return Math.max(1, Math.min(10, Math.round(r.training/10))); }
+function rodsToCapacity(r){ return Math.max(1, Math.min(10, Math.round((r.training/1.75)*10))); }
 
 /* The core is honest about the mix. Training bought with recovery is the
    thing that breaks people, so that is what it watches. */
+/* Training bought out of recovery is what breaks people, so that is what the
+   core watches. Scaled to hours: a full training rod against short sleep is
+   the top of the range. */
 function rxStrain(r){
-  return Math.max(0, Math.min(1, (r.training - r.recovery + Math.max(0,r.work-55)*0.5 + 30) / 90));
+  const short = Math.max(0, 9.5 - r.recovery) / 4.5;        // 0 at 9.5h, 1 at 5h
+  const hard  = Math.min(1, r.training / 1.5);
+  const long  = Math.max(0, r.work - 9) / 5;
+  return Math.max(0, Math.min(1, short*0.55 + hard*0.3 + long*0.25));
 }
 
 function reactor(s){
-  const r = Object.assign({work:55,people:50,recovery:50,training:45}, A.rods||{});
+  const def = PRESETS[0].v;
+  const r = Object.assign({}, def, A.rods||{});
   let preset = A.rodPreset || (A.rods ? '' : null);
-  /* Locked rods are held out of the rebalance entirely. Two is the cap: with
-     three locked there is only one rod left and the budget stops being a
-     trade-off, it just becomes a number you cannot change. */
   const locked = new Set(A.rodLocks||[]);
+  const byK = Object.fromEntries(RODS.map(o=>[o.k,o]));
 
   const d=el(`${head(s)}
     <div class="rxwrap">
       <div class="rxpre">${PRESETS.map(pz=>
         `<button data-p="${pz.k}"><b>${pz.n}</b><span>${pz.s}</span></button>`).join('')}</div>
+
       <div class="rxbay"><div class="rxcore" id="rxcore"></div>
-        ${RODS.map(o=>`<div class="rxrod" data-k="${o.k}" style="--rod:${o.c}">
+        <div class="rxaxis big">${BIG_AXIS.slice().reverse().map(v=>`<span>${v}h</span>`).join('')}</div>
+        ${RODS.map(o=>`<div class="rxrod ${o.axis}" data-k="${o.k}" style="--rod:${o.c}">
           <button class="rxlock" data-k="${o.k}" aria-label="Lock ${o.n}">${LOCKSVG}</button>
-          <div class="rxhrs"><b>0</b><i>h</i></div>
+          <div class="rxhrs"><b>0</b><i></i></div>
           <div class="rxtrack"><div class="rxfill"></div></div>
-          <div class="rxname">${o.n}</div></div>`).join('')}</div>
+          <div class="rxname">${o.n}</div></div>`).join('')}
+        <div class="rxaxis small">${SMALL_AXIS.slice().reverse().map(v=>`<span>${v}m</span>`).join('')}</div>
+      </div>
+      <p class="rxscale">Training runs on the right-hand scale — minutes, not hours.</p>
+
       <div class="rxsay" id="rxsay"></div>
       <p class="rxhint" id="rxhint">Pick the one closest to you, then drag any bar.</p>
     </div>`);
@@ -2940,37 +2982,43 @@ function reactor(s){
   const cta=foot.querySelector('.cta'), core=d.querySelector('#rxcore'),
         say=d.querySelector('#rxsay'), hint=d.querySelector('#rxhint');
 
-  function setRod(k, want){
-    want = Math.max(8, Math.min(92, Math.round(want)));
-    const free = RODS.map(o=>o.k).filter(x=>x!==k && !locked.has(x));
-    if(!free.length) return;                       // everything else is held
-    const heldTotal = RODS.map(o=>o.k).filter(x=>x!==k && locked.has(x))
-                          .reduce((a,x)=>a+r[x],0);
-    const pool = free.reduce((a,x)=>a+r[x], 0);
-    const left = RXBUDGET - want - heldTotal;
-    if(left < free.length*8){                      // not enough room; clamp the drag
-      want = RXBUDGET - heldTotal - free.length*8;
-      free.forEach(x=>r[x]=8);
-    } else if(pool<=0){ free.forEach(x=>r[x]=left/free.length); }
-    else { free.forEach(x=>{ r[x] = Math.max(8, r[x] * (left/pool)); }); }
-    r[k] = want;
-    const drift = RXBUDGET - RODS.reduce((a,o)=>a+r[o.k],0);
-    if(Math.abs(drift)>0.01 && free.length){
-      const big = free.slice().sort((a,b)=>r[b]-r[a])[0];
-      r[big] += drift;
+  /* The day is 24 hours and it does not negotiate. Move one rod and the
+     unlocked others give up the difference in proportion to the room they
+     have above their own floor — so nothing is driven below what a person
+     could actually live on. */
+  function setRod(k, wantH){
+    const me=byK[k];
+    wantH = Math.max(me.min, Math.min(me.max, wantH));
+    const free = RODS.filter(o=>o.k!==k && !locked.has(o.k));
+    if(!free.length) return;
+    const held = RODS.filter(o=>o.k!==k && locked.has(o.k)).reduce((a,o)=>a+r[o.k],0);
+    let left = DAY_HOURS - wantH - held;
+    const floor = free.reduce((a,o)=>a+o.min,0);
+    if(left < floor){ wantH = DAY_HOURS - held - floor; left = floor; }
+    const room = free.reduce((a,o)=>a+(r[o.k]-o.min),0);
+    const spare = left - floor;
+    free.forEach(o=>{ r[o.k] = o.min + (room<=0 ? spare/free.length : (r[o.k]-o.min)*(spare/room)); });
+    r[k] = wantH;
+    const drift = DAY_HOURS - RODS.reduce((a,o)=>a+r[o.k],0);
+    if(Math.abs(drift)>0.001){
+      const big = free.slice().sort((a,b)=>r[b.k]-r[a.k])[0];
+      if(big) r[big.k] += drift;
     }
   }
 
   function paint(){
     RODS.forEach(o=>{
       const rod=d.querySelector(`.rxrod[data-k="${o.k}"]`);
-      rod.querySelector('.rxfill').style.height = r[o.k].toFixed(1)+'%';
-      rod.querySelector('.rxhrs b').textContent = rodHours(o, r[o.k]);
+      rod.querySelector('.rxfill').style.height = rodFill(o, r[o.k]).toFixed(1)+'%';
+      const hrs=rod.querySelector('.rxhrs');
+      hrs.querySelector('b').textContent = o.axis==='small'
+        ? Math.round(r[o.k]*60) : (Math.round(r[o.k]*2)/2);
+      hrs.querySelector('i').textContent = o.axis==='small' ? 'min' : 'h';
       rod.classList.toggle('locked', locked.has(o.k));
     });
     say.innerHTML = RODS.map(o=>
-      `<div style="--rod:${o.c}"><i></i><span><b>${o.n}</b> — ${o.say[rodBand(r[o.k])]}
-        <em>${rodHours(o,r[o.k])}h a week</em></span></div>`).join('');
+      `<div style="--rod:${o.c}"><i></i><span><b>${o.n}</b> — ${o.say[rodBand(o,r[o.k])]}
+        <em>${rodSays(o,r[o.k])}</em></span></div>`).join('');
 
     const st = rxStrain(r);
     core.style.setProperty('--rxc', st<.42 ? '#7BE3C4' : st<.68 ? '#F2C14E' : '#FF5F6D');
@@ -2979,11 +3027,11 @@ function reactor(s){
     hint.className = 'rxhint' + (st>=.68?' rxwarn':'');
     hint.textContent = st<.42 ? 'That holds. Drag any bar, or lock one to hold it still.'
       : st<.68 ? 'Tight, but it works. Drag any bar, or lock one to hold it still.'
-      : 'Training is being paid for out of recovery. That is the mix that stalls.';
+      : 'Training is being paid for out of sleep. That is the mix that stalls.';
 
     cta.classList.toggle('accent', preset!==null);
     cta.classList.toggle('ghost', preset===null);
-    cta.textContent = preset===null ? 'Skip for now' : 'That is my week';
+    cta.textContent = preset===null ? 'Skip for now' : 'That is my day';
   }
 
   d.querySelectorAll('.rxpre button').forEach(b=>b.onclick=()=>{
@@ -3005,24 +3053,28 @@ function reactor(s){
   });
 
   d.querySelectorAll('.rxrod').forEach(rod=>{
-    const track=rod.querySelector('.rxtrack');
+    const o=byK[rod.dataset.k], track=rod.querySelector('.rxtrack');
     let id=null, last=-1;
+    /* Drag position reads against the rod's OWN axis, so training is as easy
+       to place at 40 minutes as work is at 9 hours. */
     const from = ev => {
       const box=track.getBoundingClientRect();
-      return (1 - (ev.clientY - box.top) / box.height) * 100;
+      const pct = 1 - (ev.clientY - box.top) / box.height;
+      const top = o.axis==='big' ? BIG_AXIS[BIG_AXIS.length-1]+2 : SMALL_AXIS[SMALL_AXIS.length-1]/60+0.25;
+      return pct*top;
     };
     rod.addEventListener('pointerdown', ev=>{
       if(ev.target.closest('.rxlock')) return;
-      if(locked.has(rod.dataset.k)){ haptic(6); toast('That one is locked. Tap the padlock to free it.',2000); return; }
+      if(locked.has(o.k)){ haptic(6); toast('That one is locked. Tap the padlock to free it.',2000); return; }
       id=ev.pointerId; rod.setPointerCapture(id); rod.classList.add('drag');
       preset = preset===null ? '' : preset;
       d.querySelectorAll('.rxpre button').forEach(x=>x.classList.remove('on'));
-      setRod(rod.dataset.k, from(ev)); paint(); haptic(9); ev.preventDefault();
+      setRod(o.k, from(ev)); paint(); haptic(9); ev.preventDefault();
     });
     rod.addEventListener('pointermove', ev=>{
       if(id===null) return;
-      setRod(rod.dataset.k, from(ev)); paint();
-      const band=rodBand(r[rod.dataset.k]);
+      setRod(o.k, from(ev)); paint();
+      const band=rodBand(o, r[o.k]);
       if(band!==last){ last=band; haptic(11); }
     });
     ['pointerup','pointercancel'].forEach(e=>rod.addEventListener(e, ()=>{
@@ -3034,8 +3086,7 @@ function reactor(s){
 
   if(preset) { const b=d.querySelector(`.rxpre button[data-p="${preset}"]`); if(b) b.classList.add('on'); }
   cta.onclick=()=>{ haptic(14);
-    A.rods = {work:Math.round(r.work),people:Math.round(r.people),
-              recovery:Math.round(r.recovery),training:Math.round(r.training)};
+    A.rods = {}; RODS.forEach(o=>A.rods[o.k]=Math.round(r[o.k]*100)/100);
     A.rodPreset = preset || 'custom';
     A.rodLocks = [...locked];
     A.capacity = rodsToCapacity(A.rods);
@@ -3056,11 +3107,11 @@ function reading(s){
     const times={'1':'once','2':'twice','3':'3 times','4':'4 times','5':'5 times'}[load.freq]||load.freq+'×';
     lines.push(`${nm}, <b>${times} a week</b> — counted, not ignored.`);
   }
-  const rec=rodBand(r.recovery);
+  const recRod=RODS.find(o=>o.k==='recovery'), rec=rodBand(recRod, r.recovery);
   lines.push(rec<=0 ? 'Recovery is <b>thin</b>. That caps how much hard work a week can hold.'
     : rec===1 ? 'Recovery at <b>6 to 7 hours</b> — that holds 3 or 4 hard sessions.'
     : 'Recovery is <b>protected</b>. That holds real work.');
-  lines.push(`Training is <b>${Math.round(r.training/RXBUDGET*100*4)}%</b> of your week as you drew it.`);
+  lines.push(`Training is <b>${(Math.round(r.training*7*2)/2)} hours a week</b> as you drew it.`);
 
   const d=el(`<div class="rdwrap">
     <h1 class="q" style="text-align:center">Reading your week.</h1>
@@ -3081,11 +3132,12 @@ function weekplan(s){
 
   /* Days come from the training rod, then recovery puts a ceiling on it,
      then whatever they already do comes off the top. */
-  const wanted = r.training<35?2 : r.training<50?3 : r.training<62?4 : r.training<75?5 : 6;
-  const ceil   = r.recovery<35?3 : r.recovery<52?4 : r.recovery<70?5 : 6;
+  /* Days from the training rod, in hours a day; ceiling from recovery. */
+  const wanted = r.training<0.28?2 : r.training<0.5?3 : r.training<0.8?4 : r.training<1.2?5 : 6;
+  const ceil   = r.recovery<7?3 : r.recovery<8.5?4 : r.recovery<10?5 : 6;
   let days = Math.max(2, Math.min(wanted, ceil) - (otherSessions>=3?1:0));
   /* Session length follows the pressure on the day, not the ambition. */
-  let len  = (r.work>=68 || r.people>=68) ? '35' : r.training>=62 ? '55' : '45';
+  let len  = (r.work>=10.5 || r.people>=5.5) ? '35' : r.training>=0.8 ? '55' : '45';
   if(A.days) days=+A.days; if(A.length) len=A.length;
   const LEN={'20':'20 min','35':'30–40 min','45':'45 min','55':'45–60 min','75':'60–90 min'};
   const ORDER=['20','35','45','55','75'];
@@ -4094,10 +4146,11 @@ function reveal(){
 
   /* The proposal: days from the training rod, capped by the recovery rod,
      minus one if they already train three or more times elsewhere. */
-  const wanted = r.training<35?2 : r.training<50?3 : r.training<62?4 : r.training<75?5 : 6;
-  const ceil   = r.recovery<35?3 : r.recovery<52?4 : r.recovery<70?5 : 6;
+  /* Days from the training rod, in hours a day; ceiling from recovery. */
+  const wanted = r.training<0.28?2 : r.training<0.5?3 : r.training<0.8?4 : r.training<1.2?5 : 6;
+  const ceil   = r.recovery<7?3 : r.recovery<8.5?4 : r.recovery<10?5 : 6;
   const sugDays = Math.max(2, Math.min(wanted, ceil) - (otherSessions>=3?1:0));
-  const sugLen  = (r.work>=68 || r.people>=68) ? '35' : r.training>=62 ? '55' : '45';
+  const sugLen  = (r.work>=10.5 || r.people>=5.5) ? '35' : r.training>=0.8 ? '55' : '45';
 
   const LEN=[['20','20 min'],['35','30–40'],['45','45 min'],['55','45–60'],['75','60–90']];
   const LENNAME=Object.fromEntries(LEN);
