@@ -816,6 +816,29 @@ h1.q{text-align:center}
 .wpspent{font-size:12.5px;color:var(--ink3);text-align:center;margin-top:13px}
 .wpspent b{color:var(--ink2)}
 
+/* The chosen days carry the mark itself, the way they will in the app's own
+   week view. A dot said "selected"; the dumbbell says what it is. */
+.wkpick button{position:relative}
+.wkpick .wdb{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.6);
+  width:26px;opacity:0;transition:opacity .22s,transform .22s;pointer-events:none}
+.wkpick .wdb svg{width:26px;height:26px;display:block;fill:none;stroke:var(--accent);
+  stroke-width:2;stroke-linecap:round}
+.wkpick button.on .wdb{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.wkpick button.on .wd{opacity:.35;transform:translateY(-13px)}
+.wkpick .wd{transition:opacity .22s,transform .22s}
+.wkpick button.act .wdb svg{stroke:#8FB8FF}
+.wkpick button.both .wdb svg{stroke:#F2C14E}
+
+/* the headline numbers */
+.wkband{display:flex;gap:8px;margin:2px 0 16px}
+.wkstat{flex:1;background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:11px 6px 9px;text-align:center}
+.wkstat b{display:block;font-size:24px;font-weight:750;letter-spacing:-.03em;
+  background:linear-gradient(180deg,#fff,var(--accent));-webkit-background-clip:text;
+  background-clip:text;color:transparent;line-height:1.1}
+.wkstat span{display:block;margin-top:4px;font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink3);font-weight:650}
+
 /* the other sport on the same week, in its own colour */
 .wkmode{display:flex;gap:7px;margin-bottom:11px}
 .wkmode button{flex:1;background:var(--card);border:1px solid var(--line);border-radius:11px;
@@ -1524,7 +1547,9 @@ const FLOW = [
 { ch:5, type:'reactor', h:'How is your life split right now?',
   sub:'Move the bars until the 4 lines underneath are true. Lock one to hold it still.' },
 { ch:5, type:'reading' },
-{ ch:5, type:'weekplan' },
+/* The proposal used to be its own screen here and then the week was drawn
+   again four screens later. Same decision, asked twice. It is one page now,
+   and it is the one at the end where everything lands. */
 
 { ch:6, type:'chapter', n:6, title:'Your why', sub:'The part that decides everything.' },
 /* More than one reason is the honest answer — almost nobody trains for a
@@ -4046,20 +4071,39 @@ function loader(){
 /* reveal — a proposal, not a prediction. They edit it before it is built. */
 const DAYNAME=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 const DEFAULT_WEEK={1:[2],2:[0,3],3:[0,2,5],4:[0,1,3,5],5:[0,1,3,4,6],6:[0,1,2,3,4,6]};
-const SLOTS=[['early','Early morning','6:15am'],['lunch','Midday','12:30pm'],
-             ['after','After work','5:45pm'],['evening','Evening','8:30pm'],
-             ['flex','Whenever I can','']];
+/* No clock times. "After work" is 4pm for one person and 8pm for another, and
+   printing 5:45pm told half of them the plan was not for them. The slot is
+   the shape of the day, not a time. */
+const SLOTS=[['early','Early morning'],['lunch','Midday'],
+             ['after','After work'],['evening','Evening']];
+/* ================= THE WEEK =================
+   Everything the survey has worked out, on one page they can argue with.
+   Days, how long, and when — proposed rather than asked, with the reasoning
+   shown and every part of it movable.
+
+   Their other sport sits on the same seven days in its own colour, because
+   someone who plays football on Tuesday should not be handed Tuesday. */
 function reveal(){
+  const r = A.rods||{work:55,people:50,recovery:50,training:45};
+  const load = A.otherLoad||{};
+  const otherSessions = +(load.freq||0);
+
+  /* The proposal: days from the training rod, capped by the recovery rod,
+     minus one if they already train three or more times elsewhere. */
+  const wanted = r.training<35?2 : r.training<50?3 : r.training<62?4 : r.training<75?5 : 6;
+  const ceil   = r.recovery<35?3 : r.recovery<52?4 : r.recovery<70?5 : 6;
+  const sugDays = Math.max(2, Math.min(wanted, ceil) - (otherSessions>=3?1:0));
+  const sugLen  = (r.work>=68 || r.people>=68) ? '35' : r.training>=62 ? '55' : '45';
+
+  const LEN=[['20','20 min'],['35','30–40'],['45','45 min'],['55','45–60'],['75','60–90']];
+  const LENNAME=Object.fromEntries(LEN);
+
   let picked = (A.trainDays && A.trainDays.length)
     ? A.trainDays.slice()
-    : (DEFAULT_WEEK[A.days||3]||DEFAULT_WEEK[3]).slice();
+    : (DEFAULT_WEEK[sugDays]||DEFAULT_WEEK[3]).slice();
+  let len  = A.length || sugLen;
   let slot = A.when || 'after';
-  const len=({'20':'22','35':'35','55':'50','75':'60'})[A.length]||'35';
 
-  /* Their other sport goes on the same week, in its own colour. It was
-     collected two chapters ago and never shown, so someone playing football
-     on Tuesday could be handed Tuesday and had no way to say so. The toggle
-     decides which of the two a tap places. */
   const ACTS={run:'Running',team:'Your sport',yoga:'Yoga',hiit:'Classes',swim:'Swimming',
               racket:'Racket',martial:'Martial arts',climb:'Climbing',other:'Other'};
   const actList=(A.otherAct||[]).filter(x=>x!=='none');
@@ -4068,22 +4112,52 @@ function reveal(){
   let actDays=(A.actDays||[]).slice();
   let mode='train';
 
-  const d=el(`<h1 class="q">Here is the week I would give you.</h1>
-    <p class="sub">Tap to change it. This is the version I build.</p>
+  const d=el(`<h1 class="q">This is your week.</h1>
+    <p class="sub">Built from everything you just told me. Move any of it.</p>
+
+    <div class="wkband">
+      <div class="wkstat"><b id="wkD">${picked.length}</b><span>days</span></div>
+      <div class="wkstat"><b id="wkL">${LENNAME[len]}</b><span>each</span></div>
+      <div class="wkstat"><b id="wkH">0</b><span>hours a week</span></div>
+    </div>
+
     ${hasAct?`<div class="wkmode" id="wkmode">
       <button data-m="train" class="on"><i></i>Training</button>
       <button data-m="act"><i></i>${actName}</button></div>`:''}
-    <div class="wkpick" id="wk">${DAYNAME.map((n,k)=>
-      `<button data-k="${k}"><span class="wd">${n[0]}</span><span class="wm"></span></button>`).join('')}</div>
-    <p class="wkcount" id="wkc"></p>
-    <div class="sillabel" style="margin-bottom:9px">Usually at</div>
-    <div class="segrow" id="slots" style="flex-wrap:wrap">${SLOTS.map(t=>
-      `<button data-t="${t[0]}" style="flex:1 1 44%">${t[1]}</button>`).join('')}</div>
-    <div id="preds" style="margin-top:22px"></div>`);
 
-  const wk=d.querySelector('#wk'), wkc=d.querySelector('#wkc'), preds=d.querySelector('#preds');
+    <div class="wkpick" id="wk">${DAYNAME.map((n,k)=>
+      `<button data-k="${k}"><span class="wd">${n[0]}</span>
+        <span class="wdb">${MARK}</span><span class="wm"></span></button>`).join('')}</div>
+    <p class="wkcount" id="wkc"></p>
+
+    <div class="sillabel">How long</div>
+    <div class="segrow" id="lens">${LEN.map(o=>
+      `<button data-l="${o[0]}" style="flex:1 1 30%">${o[1]}</button>`).join('')}</div>
+
+    <div class="sillabel">When it usually happens</div>
+    <div class="segrow" id="slots">${SLOTS.map(t=>
+      `<button data-t="${t[0]}" style="flex:1 1 44%">${t[1]}</button>`).join('')}</div>
+
+    <div class="wpnote" id="wpn"></div>`);
+
+  const wk=d.querySelector('#wk'), wkc=d.querySelector('#wkc'), note=d.querySelector('#wpn');
   setFoot(`<button class="cta accent">This is my week</button>`);
   const cta=foot.querySelector('.cta');
+
+  /* Honest about the trade, never refusing it. */
+  function verdict(){
+    if(picked.length>ceil) return ['warn',
+      `<b>${picked.length} days</b> at the recovery you drew is where people stall. I would hold you at ${ceil} — your call.`];
+    if(picked.length<2) return ['warn','Below 2 days nothing compounds. 2 is the floor that still works.'];
+    const clash=picked.filter(k=>actDays.indexOf(k)>-1).length;
+    if(clash) return ['warn',
+      `<b>${clash} day${clash>1?'s':''}</b> doubled up with ${actName.toLowerCase()}. Not forbidden — just a hard day, and I will build it as one.`];
+    if(picked.length<wanted) return ['',
+      `<b>${picked.length} days</b> is honest. Fewer days done properly beats more days missed.`];
+    if(picked.length===2) return ['',
+      '<b>2 days</b> is enough to get stronger. Not enough to get stronger fast — a fine trade if it is the one you can keep.'];
+    return ['', `<b>${picked.length} × ${LENNAME[len]}</b> is a real block of work. That is a programme, not a plan.`];
+  }
 
   function paint(){
     picked.sort((a,b)=>a-b); actDays.sort((a,b)=>a-b);
@@ -4091,43 +4165,39 @@ function reveal(){
       const k=+b.dataset.k;
       b.classList.toggle('on',picked.indexOf(k)>-1);
       b.classList.toggle('act',actDays.indexOf(k)>-1);
-      /* A day that is both is worth seeing — it is not forbidden, it is just
-         a hard day, and the coach should know before the programme is built. */
       b.classList.toggle('both',picked.indexOf(k)>-1 && actDays.indexOf(k)>-1);
     });
+    d.querySelectorAll('#lens button').forEach(b=>b.classList.toggle('on',b.dataset.l===len));
     d.querySelectorAll('#slots button').forEach(b=>b.classList.toggle('on',b.dataset.t===slot));
-    const names=picked.map(k=>DAYNAME[k]);
+
+    const mins=picked.length*(len==='35'?35:len==='45'?45:len==='55'?52:len==='75'?75:20);
+    d.querySelector('#wkD').textContent=picked.length;
+    d.querySelector('#wkL').textContent=LENNAME[len];
+    d.querySelector('#wkH').textContent=(Math.round(mins/6)/10);
+
     wkc.innerHTML = picked.length
-      ? `<b>${picked.length} ${picked.length===1?'day':'days'}</b> · ${names.join(', ')} · ${len} min`
+      ? picked.map(k=>DAYNAME[k]).join(' · ')
       : 'Pick at least one day.';
-    const clash=picked.filter(k=>actDays.indexOf(k)>-1);
-    if(hasAct && clash.length) wkc.innerHTML += `<span class="wkclash">${clash.length} day${clash.length>1?'s':''} doubled up with ${actName.toLowerCase()}</span>`;
-    const t=(SLOTS.filter(x=>x[0]===slot)[0]||[])[2];
-    const first=names[0], second=names[1], last=names[names.length-1];
-    let h='';
-    if(picked.length){
-      h+=`<div class="pred"><span class="pd">${first}</span><span class="pt">Session one${t?', <b>'+t+'</b>':''}, ${len} min. You will finish thinking it was too easy. <b>That is the plan.</b></span></div>`;
-      if(second) h+=`<div class="pred"><span class="pd">${second}</span><span class="pt">This one feels easier than the first. That is your nervous system, not fitness. Fitness starts week 3.</span></div>`;
-      if(picked.length>1) h+=`<div class="pred"><span class="pd">${last}</span><span class="pt">The one that matters. <b>You will want to skip it.</b> Do it anyway and your odds of still being here in 6 months roughly double.</span></div>`;
-    }
-    preds.innerHTML=h;
+    const [cls,txt]=verdict();
+    note.className='wpnote'+(cls?' '+cls:''); note.innerHTML=txt;
     cta.disabled = picked.length===0;
     syncFootPad();
   }
+
   wk.querySelectorAll('button').forEach(b=>b.onclick=()=>{haptic(12);
-    const k=+b.dataset.k;
-    const list = mode==='act' ? actDays : picked;
+    const k=+b.dataset.k, list = mode==='act' ? actDays : picked;
     const at=list.indexOf(k);
     if(at>-1) list.splice(at,1); else list.push(k);
     paint();});
   if(hasAct) d.querySelectorAll('#wkmode button').forEach(b=>b.onclick=()=>{haptic(12);
     mode=b.dataset.m;
     d.querySelectorAll('#wkmode button').forEach(x=>x.classList.toggle('on',x===b));
-    d.querySelector('#wk').classList.toggle('actmode', mode==='act');});
+    wk.classList.toggle('actmode', mode==='act');});
+  d.querySelectorAll('#lens button').forEach(b=>b.onclick=()=>{haptic(12);len=b.dataset.l;paint();});
   d.querySelectorAll('#slots button').forEach(b=>b.onclick=()=>{haptic(12);slot=b.dataset.t;paint();});
   cta.onclick=()=>{ if(!picked.length) return; haptic(400);
-    A.trainDays=picked.slice(); A.days=picked.length; A.when=slot;
-    A.actDays=actDays.slice(); next(); };
+    A.trainDays=picked.slice(); A.days=picked.length; A.length=len;
+    A.when=slot; A.actDays=actDays.slice(); next(); };
   paint();
 }
 
