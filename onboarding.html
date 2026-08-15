@@ -250,117 +250,51 @@ body.opening #bars,body.opening #chapline{opacity:0;pointer-events:none}
 .heroA .tri-glare{stroke:url(#triGlare);stroke-width:5.5;opacity:0;
   filter:blur(3.5px) drop-shadow(0 0 10px rgba(255,255,255,.55))}
 /* ===== BEAT:START — mirrored into logo/LOGO PREVIEW.html by the build ===== */
-/* THE THIRD PEAK. This used to be a constant — opacity:.9 the moment the mark
-   lit, and never anything else — so the white glare was always there and the
-   beat had nothing to do with it. It runs on --lap-phase now, which means its
-   10.5% is the same instant as the outline's spike and the same instant as
-   the glow behind the dumbbell. Three things, one moment. */
-.heroA.lit .tri-glare{animation:triGlare var(--beat,4400ms) linear var(--lap-phase,-2112ms) infinite}
-/* THE TRACE. One bright dash chasing the perimeter — but the path it runs is
-   not the triangle. It is the triangle with a PQRST complex built into the
-   top edge, so as the light crosses the top it lifts off the line, spikes,
-   and settles back: a hospital monitor drawing one beat per lap. The outline
-   underneath stays a clean triangle; only the light deflects.
+/* THE GLARE. Light coming off the dumbbell and landing on the tube. It holds
+   at a steady value once the mark is lit — it is a reflection, and a
+   reflection does not flash. */
+.heroA.lit .tri-glare{opacity:.9;transition:opacity .5s ease}
+/* THE LIGHT. One short bright dash chasing the perimeter, and the only thing
+   that moves on the outline. Hidden until the mark has landed — a light
+   running around an outline that is still being drawn reads as two
+   animations fighting.
 
-   Hidden until the mark has landed — a light running around an outline that
-   is still being drawn reads as two animations fighting. */
+   THE OUTLINE ITSELF DOES NOT PULSE. It used to carry a lub-dub, and for a
+   while it carried a full PQRST complex with the light deflecting into a
+   heartbeat as it crossed the top edge. Both are gone. The mark is a neon
+   sign, not a monitor: the tube is lit, the light travels, and that is all
+   that happens. Anything reinstating a beat has to earn it against how
+   quiet this reads. */
 .heroA .tri-spark{stroke:#fff;stroke-width:3.2;opacity:0;
   filter:drop-shadow(0 0 9px #FF5FA2) drop-shadow(0 0 3px #fff)}
 .heroA.lit .tri-spark{opacity:1;
-  animation:triRun var(--beat,4400ms) linear var(--lap-phase,-2112ms) infinite}
-/* linear, NOT ease-in-out. The easing is per-segment below, because a single
-   curve applied between every pair of keyframes is what made the old beat
-   mushy: it eased INTO the spike over 460ms, which is a swell, not a thump. */
-.heroA.lit .tri-l{animation:triBeat var(--beat,4400ms) linear var(--lap-phase,-2112ms) infinite}
-/* --sparklen is measured off the real path in hero.js. The complex adds 112
-   units to the plain triangle's 777, and a hard-coded number here would make
-   the light jump at the seam of every lap. */
+  animation:triRun var(--beat,4400ms) linear var(--lap-phase,-1650ms) infinite}
+/* --sparklen is measured off the real path in hero.js rather than assumed, so
+   the light cannot jump at the seam of a lap if the outline is ever redrawn.
+   On today's path it resolves to the plain perimeter, 777. */
 @keyframes triRun{ from{stroke-dashoffset:0}
-                   to{stroke-dashoffset:calc(-1 * var(--sparklen,888.8px))} }
-/* Lub and dub, fired at the two places the trace actually spikes. These are
-   NOT free numbers — every one is measured off the path:
+                   to{stroke-dashoffset:calc(-1 * var(--sparklen,777px))} }
 
-     P wave    3.27%   8 units tall
-     R spike  10.50%  34 units      <- lub
-     S trough 16.05%  15 units
-     T wave   24.67%  12 units      <- dub
-     corner   33.48%                <- quiet from here
+/* THE BREATH. The glow behind the dumbbell, on the same 4400ms rep as the
+   mark's bob. A slow sine — it swells and falls and never strikes.
 
-   so the whole event is over before the light turns the corner, and the
-   outline sits still for the three sides where nothing is passing. One
-   event per lap, in one place.
-
-   > Redraw the complex and these all move. hero.js measures the real path
-   > at runtime and the lab prints measured-vs-keyframe side by side. */
-/* THE THUMP. Flat, then a 48ms strike, then a 75ms fall — the shape of a
-   blip on a monitor rather than a swell. The old version spent 462ms rising
-   into its peak and 242ms coming off it, which is why it read as slow: at
-   that length the eye tracks it as a fade, and a fade cannot land on a beat.
-
-   The percentages are still the trace's own — 10.5% is the R apex, 24.7% the
-   T wave — but now almost all of the lap is spent at rest, and the two
-   strikes are the only things that happen. */
-@keyframes triBeat{
-  0%,9.4% {filter:drop-shadow(0 0 6px  rgba(255,95,162,.38)); stroke-width:2.6;
-           animation-timing-function:cubic-bezier(.15,.9,.3,1)}      /* strike */
-  10.5%   {filter:drop-shadow(0 0 44px rgba(255,95,162,1))
-                  drop-shadow(0 0 13px rgba(255,255,255,.9));  stroke-width:3.9;
-           animation-timing-function:cubic-bezier(.35,0,.7,.45)}     /* fall away */
-  12.2%   {filter:drop-shadow(0 0 9px  rgba(255,95,162,.42)); stroke-width:2.68}
-  23.9%   {filter:drop-shadow(0 0 7px  rgba(255,95,162,.40)); stroke-width:2.62;
-           animation-timing-function:cubic-bezier(.15,.9,.3,1)}
-  24.7%   {filter:drop-shadow(0 0 27px rgba(255,95,162,.95))
-                  drop-shadow(0 0 8px rgba(255,255,255,.5));   stroke-width:3.28;
-           animation-timing-function:cubic-bezier(.35,0,.7,.45)}
-  26.6%   {filter:drop-shadow(0 0 7px  rgba(255,95,162,.42)); stroke-width:2.6}
-  33.5%,100%{filter:drop-shadow(0 0 6px rgba(255,95,162,.38));stroke-width:2.6}
-}
-/* The glare rides the same shape. Kept below the outline's peak so the white
-   reads as light thrown ONTO the tube rather than as a second light source. */
-@keyframes triGlare{
-  0%,9.4% {opacity:.20; animation-timing-function:cubic-bezier(.15,.9,.3,1)}
-  10.5%   {opacity:1;   animation-timing-function:cubic-bezier(.35,0,.7,.45)}
-  12.6%   {opacity:.28}
-  23.9%   {opacity:.24; animation-timing-function:cubic-bezier(.15,.9,.3,1)}
-  24.7%   {opacity:.66; animation-timing-function:cubic-bezier(.35,0,.7,.45)}
-  26.8%   {opacity:.24}
-  33.5%,100%{opacity:.20}
-}
-
-/* THE THIRD THING, and the reason all of this is in one block. The glow
-   behind the dumbbell is on a different clock from the outline — it hangs
-   off .alive with a .55s delay rather than off --lap-phase — and the two
-   clocks only agree because .lit and .alive are set in the same statement in
-   finishNow(). That is fragile enough without the rules being 60 lines apart.
-
-   The glow fades up before it starts breathing, so it never pops in at full
-   strength the instant the mark finishes drawing. */
+   The .55s delay puts its peak at 2750ms, and --lap-phase of -1650ms puts
+   the light at the start of the top edge at that same moment. That is the
+   one coincidence left in the mark, and it is a quiet one: the light begins
+   its run along the top edge just as the mark is at its brightest. */
 .heroA .art.alive .dbglow{
   animation:dbGlowIn .55s cubic-bezier(.22,1,.36,1) both,
-            dbGlow var(--beat,4400ms) linear .55s infinite}
+            dbGlow var(--beat,4400ms) ease-in-out .55s infinite}
 @keyframes dbGlowIn{from{opacity:0;transform:scale(.88)}to{opacity:.40;transform:scale(.95)}}
-/* The slow breath is still here — it is what the mark does between beats —
-   but it now arrives at 46% and is then STRUCK, so the peak is a hit rather
-   than the top of a sine wave. 46%->50% is 176ms up, 50%->55% is 220ms down.
-
-   > .55s delay + 50% of 4400ms = 2750ms. That is the number the outline's
-   > 10.5% and the glare's 10.5% both resolve to. Move any of the three and
-   > the mark stops landing on one beat. */
 @keyframes dbGlow{
-  0%   {opacity:.38;transform:scale(.95); animation-timing-function:cubic-bezier(.45,0,.55,1)}
-  46%  {opacity:.62;transform:scale(1.02);animation-timing-function:cubic-bezier(.15,.9,.3,1)}
-  50%  {opacity:1;  transform:scale(1.13);animation-timing-function:cubic-bezier(.35,0,.7,.45)}
-  55%  {opacity:.60;transform:scale(1.01);animation-timing-function:cubic-bezier(.45,0,.55,1)}
-  100% {opacity:.38;transform:scale(.95)}
+  0%,100%{opacity:.40;transform:scale(.95)}
+  50%    {opacity:.86;transform:scale(1.06)}
 }
 /* ===== BEAT:END ===== */
+/* Only the light moves on the outline now, so this is the only thing to stop.
+   The glare and the outline are static values already. */
 @media (prefers-reduced-motion:reduce){
   .heroA.lit .tri-spark{animation:none;opacity:.85}
-  .heroA.lit .tri-l{animation:none}
-  /* The glare is animated now, so switching the animation off would leave it
-     on its .tri-glare base of opacity:0 — the white would vanish rather than
-     hold still. It gets an explicit resting value instead. */
-  .heroA.lit .tri-glare{animation:none;opacity:.55}
 }
 .heroA .art{z-index:2}
 .heroA .hcopy{z-index:3}
@@ -544,12 +478,16 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:32px;heigh
 .ring circle{fill:none;stroke-width:3.5;stroke-linecap:round}
 .ring .rtrack{stroke:var(--line)}
 .ring .rfill{stroke:var(--accent);stroke-dasharray:188.5;stroke-dashoffset:188.5;
-  transition:stroke-dashoffset .75s cubic-bezier(.22,1,.36,1);
-  filter:drop-shadow(0 0 6px rgba(123,227,196,.5))}
+  transition:stroke-dashoffset .12s linear;
+  filter:drop-shadow(0 0 var(--glow,4px) rgba(123,227,196,.75))}
 .ring .rpct{position:absolute;inset:0;display:grid;place-items:center;
   font-size:15px;font-weight:750;color:var(--accent);font-variant-numeric:tabular-nums;
   transition:opacity .3s}
-.ring.full .rfill{filter:drop-shadow(0 0 14px rgba(123,227,196,.85))}
+.ring.full .rfill{animation:ringDone 1.1s cubic-bezier(.22,1,.36,1) forwards}
+@keyframes ringDone{
+  0%  {filter:drop-shadow(0 0 20px rgba(123,227,196,.8))}
+  35% {filter:drop-shadow(0 0 34px rgba(123,227,196,1))}
+  100%{filter:drop-shadow(0 0 12px rgba(123,227,196,.7))}}
 .ring.full .rpct{opacity:0}
 .ring .rtick{position:absolute;inset:0;display:grid;place-items:center;opacity:0;
   transform:scale(.5);transition:opacity .35s,transform .35s cubic-bezier(.34,1.56,.64,1)}
@@ -2244,7 +2182,8 @@ function progress(){
   const tot  = FLOW.filter(x=>x.ch>0).length;
   bars.style.setProperty('--railglow', (cur===0?0:(done/tot)*11).toFixed(1)+'px');
   chapname.textContent = cur===0?'':CHAPTERS[cur];
-  backBtn.classList.toggle('on', hist.length>0 && !['loader','entry','chapter'].includes(FLOW[i].type));
+  backBtn.classList.toggle('on',
+    (hist.length>0 || !!screenBack) && !['loader','entry','chapter'].includes(FLOW[i].type));
 }
 function toast(m,ms){toastEl.innerHTML=m;toastEl.classList.add('on');setTimeout(()=>toastEl.classList.remove('on'),ms||3400);}
 
@@ -2320,12 +2259,20 @@ function go(n,back){
   foot.innerHTML=''; foot.classList.remove('on');
   setTimeout(function(){
     stage.querySelectorAll('.screen').forEach(function(el){el.remove();});
+    screenBack = null;                       // the new screen claims it or does not
     render(); progress();
   }, back?0:60);
   setTimeout(function(){busy=false;},320);
 }
 const next=()=>go(i+1);
+/* Some screens are several steps in one — the deck is twelve cards behind a
+   single FLOW entry. Back used to walk out of the whole thing and dump
+   someone at the start of the sequence with no way to fix the card they had
+   just got wrong. A screen can now claim the button: return true from the
+   handler and the step is handled inside, return false and we leave. */
+let screenBack = null;
 backBtn.onclick=function(){
+  if(screenBack && screenBack()) return;
   var t=null;
   while(hist.length){ t=hist.pop(); if(!FLOW[t] || FLOW[t].type!=='chapter') break; t=null; }
   if(t!==null) go(t,true);
@@ -2399,23 +2346,11 @@ function hero(s){
   const BAR = {d:'M86 65 H174', w:7};
   const mirror=x=>260-x;
 
-  /* THE ECG. The triangle, with the top edge replaced by one cardiac cycle.
-     Baseline is y=16 — the top edge itself — so the trace sits ON the line
-     everywhere except through the complex.
-
-       H118            baseline out of the break
-       Q125 0 132 16   P wave, a low rounded bump
-       L139 23         Q, a short dip below the line
-       L145 -18        R, the spike — 34 units, clearing the top of the box
-       L151 31         S, the overshoot below
-       H196            the flat segment that makes the spike read
-       Q212 -8 228 16  T wave, broader and softer than the P
-       H286            baseline into the corner
-
-     The R deliberately overshoots y=0. The .tri svg is overflow:visible, so
-     it renders; a static export has to pad its viewBox to keep it. */
-  const ECG_D = 'M100 16 H118 Q125 0 132 16 H136 L139 23 L145 -18 L151 31 '+
-                'L156 16 H196 Q212 -8 228 16 H286 L150 252 L14 16 H60';
+  /* The light runs the outline itself. There was a version where it ran a
+     separate path carrying a PQRST complex in the top edge, so it deflected
+     into a heartbeat once a lap — removed. The mark is a neon sign, not a
+     monitor. */
+  const TRI_D = 'M100 16 H286 L150 252 L14 16 H60';
 
   const MARKS = {
     a:{ engine:'stroke', passes:[3,2,1],
@@ -2524,15 +2459,9 @@ function hero(s){
 
            Both ends of the break sit at y=16. They were stepped for a
            version and it read as a mistake rather than a choice. -->
-      <path class="tri-l" d="M100 16 H286 L150 252 L14 16 H60"/>
-      <path class="tri-glare" d="M100 16 H286 L150 252 L14 16 H60"/>
-      <!-- The trace runs a DIFFERENT path from the outline: same triangle,
-           but the top edge carries a PQRST complex. The light therefore
-           leaves the line, draws one beat, and rejoins — while the outline
-           behind it stays a clean triangle. P at 3% of the lap, R at 10%,
-           S at 16%, T at 24%; the top edge ends at 32.6%. Those four
-           numbers are what @keyframes triBeat is tuned to. -->
-      <path class="tri-spark" d="${ECG_D}"/>
+      <path class="tri-l" d="${TRI_D}"/>
+      <path class="tri-glare" d="${TRI_D}"/>
+      <path class="tri-spark" d="${TRI_D}"/>
     </svg>
       <div class="dbglow"></div>
       <svg class="db${MARK.engine==='plate'?' mb':''}" viewBox="0 0 260 130" preserveAspectRatio="xMidYMid meet">
@@ -2609,42 +2538,27 @@ function hero(s){
   if(triL){
     triL.style.strokeDasharray=TRI_LEN;
     triL.style.strokeDashoffset=TRI_LEN;
-    /* The trace's path is longer than the outline's — the complex adds about
-       a hundred units — so it is MEASURED rather than assumed. A hard-coded
-       length here would leave the light jumping at the seam of every lap. */
-    const SPARK_LEN = triSpark.getTotalLength() || 877;
-    /* A longer dash than the outline used to carry: at 54 units the complex
-       is only ever half visible, and a heartbeat you see in pieces does not
-       read as a heartbeat. */
-    const DASH = 110;
+    /* MEASURED, not assumed. It resolves to TRI_LEN on today's path, but the
+       outline has been redrawn twice and a hard-coded length leaves the light
+       jumping at the seam of every lap when it is. */
+    const SPARK_LEN = triSpark.getTotalLength() || TRI_LEN;
+    /* short bright dash, one long gap — the gap is the rest of the outline */
+    const DASH = 54;
     triSpark.style.strokeDasharray = DASH+' '+(SPARK_LEN-DASH);
     triSpark.style.strokeDashoffset = 0;
     heroEl.style.setProperty('--sparklen', SPARK_LEN.toFixed(1)+'px');
 
-    /* THE PHASE. The glow behind the dumbbell peaks 2750ms into every cycle.
-       The whole arrangement exists so that the R spike — the one moment the
-       trace jumps — lands on that peak. Solve for it rather than trusting a
-       constant: find the R apex by walking the path for its highest point,
-       then shift the lap so that position sits at t=2750.
+    /* THE PHASE. The glow behind the dumbbell peaks 2750ms into every cycle
+       (0.55 + 2.2). A -1650ms shift puts lap-position 0 at t=2750, so the
+       light starts its run along the top edge at the instant the mark is at
+       its brightest. That is the only coincidence left in the mark.
 
-         phase = (R_fraction x beat - 2750) mod beat,  applied negative
-
-       At the plain triangle's R_fraction of 0 this returns the old -1650ms,
-       which is the check that the formula is the same one as before. */
-    let rPos=0, rY=1e9;
-    for(let s=0; s<SPARK_LEN*0.4; s+=0.5){
-      const pt=triSpark.getPointAtLength(s);
-      if(pt.x<200 && pt.y<rY){ rY=pt.y; rPos=s; }
-    }
+       > If you change the beat, this moves with it: phase = beat - 2750. */
     const beat = 4400;
-    const phase = (((rPos/SPARK_LEN)*beat - 2750) % beat + beat) % beat;
     /* The dumbbell's clock, not theme.json's — the light is meant to travel
        at the speed of the mark, so it takes the rep animation's period. */
     heroEl.style.setProperty('--beat', beat+'ms');
-    heroEl.style.setProperty('--lap-phase', '-'+Math.round(phase)+'ms');
-    /* What triBeat's percentages have to agree with. Read it off the console
-       if the complex is ever redrawn. */
-    heroEl.dataset.rAt = ((rPos/SPARK_LEN)*100).toFixed(2)+'%';
+    heroEl.style.setProperty('--lap-phase', '-'+(beat-2750)+'ms');
   }
   const paths=[].slice.call(d.querySelectorAll('.rep path.stroked'));
   const strokes=paths.map(function(el,k){
@@ -2793,7 +2707,14 @@ function hero(s){
     for(let i=0;i<10;i++){
       const t=tri.getBoundingClientRect();
       const apex=t.top+t.height*(252/268);          // the point, not the box
-      const mid=(apex+btn.getBoundingClientRect().top)/2;
+      /* The button flies in on translateY(8px), and a rect INCLUDES that
+         transform — so measuring it before the landing put it 8px low, and
+         the second pass after the landing moved the whole block by about a
+         pixel. That was the last of the opening glitch. foot has no
+         transform of its own, so its rect plus the button's offsetTop is
+         where the button actually lands. */
+      const btnTop=foot.getBoundingClientRect().top+btn.offsetTop;
+      const mid=(apex+btnTop)/2;
       /* offsetTop, not a rect: hcopy carries a transform on the way in and a
          rect would measure where it is flying from, not where it lands. */
       const at=lock.getBoundingClientRect().top+hcopy.offsetTop;
@@ -3823,6 +3744,17 @@ function deck(s){
   function dots(){ dotsEl.innerHTML=set.map((_,j)=>
     `<i class="${j<k?'done':(j===k?'now':'')}"></i>`).join(''); }
 
+  /* Twelve cards behind one FLOW entry, so back has to mean "the card
+     before" until there is no card before. Answering a card wrongly and
+     having the only way out be restarting the chapter is the kind of thing
+     that makes someone close the tab. */
+  screenBack = function(){
+    if(k<=0) return false;                    // let the survey take it
+    k--; delete res[set[k].id];
+    haptic(12); paint();
+    return true;
+  };
+
   function card(j){
     const c=set[j];
     const e=document.createElement('div');
@@ -4417,12 +4349,34 @@ function loader(){
   const CIRC=188.5;
   /* Filled from lines finished, not from a timer — if a step ever takes
      longer the ring waits with it rather than lying. */
-  const setRing=n=>{ const f=n/L.length;
-    fill.style.strokeDashoffset=(CIRC*(1-f)).toFixed(1);
-    pct.textContent=Math.round(f*100)+'%'; };
+  /* One per cent at a time, and not at a constant rate — it hurries through
+     the middle of a step and hesitates near the end of one, the way something
+     working does. A bar that climbs perfectly evenly reads as a timer; this
+     reads as thinking. */
+  let shown=0, target=0, raf=0;
+  const paintRing=()=>{
+    const f=shown/100;
+    fill.style.strokeDashoffset=(CIRC*(1-f)).toFixed(2);
+    pct.textContent=shown+'%';
+    ring.style.setProperty('--glow', (4 + f*16).toFixed(1)+'px');
+  };
+  const creep=()=>{
+    if(shown>=target){ raf=0; return; }
+    shown++;
+    paintRing();
+    /* distance left to the current target decides the pace: far away it
+       moves, close in it drags */
+    const left=target-shown;
+    const wait = left>18 ? 14 : left>10 ? 26 : left>4 ? 55 : 110;
+    raf=setTimeout(creep, wait + (shown%7===0 ? 90 : 0));   // an occasional pause
+  };
+  const setRing=n=>{ target=Math.round((n/L.length)*100); if(!raf) creep(); };
   const tick=()=>{ if(k>0){ L[k-1].classList.add('done'); setRing(k); haptic(9); }
     if(k<L.length){L[k].classList.add('on');k++;setTimeout(tick,1500);}
-    else { ring.classList.add('full'); haptic(400); setTimeout(()=>{
+    else { setRing(L.length);
+      const waitFull=setInterval(()=>{ if(shown>=100){ clearInterval(waitFull);
+        ring.classList.add('full'); haptic(400); } },60);
+      setTimeout(()=>{
       d.innerHTML=`<div class="load"><h1 class="q">One decision left.</h1>
         <p class="sub">It changes every session for 4 weeks.</p>
         <div class="opts">
@@ -4431,7 +4385,7 @@ function loader(){
         </div></div>`;
       d.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{haptic(400);A.intensity=b.dataset.v;
         b.classList.add('on');later(next,400);});
-    },1100); } };
+    },2100); } };
   setTimeout(tick,400);
 }
 
@@ -4821,6 +4775,7 @@ document.getElementById('dev').onclick=()=>{
     hist=Array.isArray(dr.hist)?dr.hist:[];
     i=Math.min(dr.i||0, FLOW.length-1);
     stage.querySelectorAll('.screen').forEach(function(el){el.remove();});
+    screenBack = null;                       // the new screen claims it or does not
     render(); progress();
   };
   document.getElementById('rsNew').onclick=function(){

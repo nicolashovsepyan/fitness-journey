@@ -18,6 +18,12 @@ function hero(s){
   const BAR = {d:'M86 65 H174', w:7};
   const mirror=x=>260-x;
 
+  /* The light runs the outline itself. There was a version where it ran a
+     separate path carrying a PQRST complex in the top edge, so it deflected
+     into a heartbeat once a lap — removed. The mark is a neon sign, not a
+     monitor. */
+  const TRI_D = 'M100 16 H286 L150 252 L14 16 H60';
+
   const MARKS = {
     a:{ engine:'stroke', passes:[3,2,1],
         plates:[{x:86,   y1:38,    y2:92,    w:12.65},
@@ -125,9 +131,9 @@ function hero(s){
 
            Both ends of the break sit at y=16. They were stepped for a
            version and it read as a mistake rather than a choice. -->
-      <path class="tri-l" d="M100 16 H286 L150 252 L14 16 H60"/>
-      <path class="tri-glare" d="M100 16 H286 L150 252 L14 16 H60"/>
-      <path class="tri-spark" d="M100 16 H286 L150 252 L14 16 H60"/>
+      <path class="tri-l" d="${TRI_D}"/>
+      <path class="tri-glare" d="${TRI_D}"/>
+      <path class="tri-spark" d="${TRI_D}"/>
     </svg>
       <div class="dbglow"></div>
       <svg class="db${MARK.engine==='plate'?' mb':''}" viewBox="0 0 260 130" preserveAspectRatio="xMidYMid meet">
@@ -204,12 +210,27 @@ function hero(s){
   if(triL){
     triL.style.strokeDasharray=TRI_LEN;
     triL.style.strokeDashoffset=TRI_LEN;
+    /* MEASURED, not assumed. It resolves to TRI_LEN on today's path, but the
+       outline has been redrawn twice and a hard-coded length leaves the light
+       jumping at the seam of every lap when it is. */
+    const SPARK_LEN = triSpark.getTotalLength() || TRI_LEN;
     /* short bright dash, one long gap — the gap is the rest of the outline */
-    triSpark.style.strokeDasharray='54 '+(TRI_LEN-54);
-    triSpark.style.strokeDashoffset=0;
+    const DASH = 54;
+    triSpark.style.strokeDasharray = DASH+' '+(SPARK_LEN-DASH);
+    triSpark.style.strokeDashoffset = 0;
+    heroEl.style.setProperty('--sparklen', SPARK_LEN.toFixed(1)+'px');
+
+    /* THE PHASE. The glow behind the dumbbell peaks 2750ms into every cycle
+       (0.55 + 2.2). A -1650ms shift puts lap-position 0 at t=2750, so the
+       light starts its run along the top edge at the instant the mark is at
+       its brightest. That is the only coincidence left in the mark.
+
+       > If you change the beat, this moves with it: phase = beat - 2750. */
+    const beat = 4400;
     /* The dumbbell's clock, not theme.json's — the light is meant to travel
        at the speed of the mark, so it takes the rep animation's period. */
-    heroEl.style.setProperty('--beat','4400ms');
+    heroEl.style.setProperty('--beat', beat+'ms');
+    heroEl.style.setProperty('--lap-phase', '-'+(beat-2750)+'ms');
   }
   const paths=[].slice.call(d.querySelectorAll('.rep path.stroked'));
   const strokes=paths.map(function(el,k){
@@ -358,7 +379,14 @@ function hero(s){
     for(let i=0;i<10;i++){
       const t=tri.getBoundingClientRect();
       const apex=t.top+t.height*(252/268);          // the point, not the box
-      const mid=(apex+btn.getBoundingClientRect().top)/2;
+      /* The button flies in on translateY(8px), and a rect INCLUDES that
+         transform — so measuring it before the landing put it 8px low, and
+         the second pass after the landing moved the whole block by about a
+         pixel. That was the last of the opening glitch. foot has no
+         transform of its own, so its rect plus the button's offsetTop is
+         where the button actually lands. */
+      const btnTop=foot.getBoundingClientRect().top+btn.offsetTop;
+      const mid=(apex+btnTop)/2;
       /* offsetTop, not a rect: hcopy carries a transform on the way in and a
          rect would measure where it is flying from, not where it lands. */
       const at=lock.getBoundingClientRect().top+hcopy.offsetTop;
