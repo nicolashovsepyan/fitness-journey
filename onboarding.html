@@ -886,82 +886,66 @@ h1.q{text-align:center}
 .rxscale{font-size:11px;color:var(--ink3);text-align:right;margin:7px 2px 0}
 
 /* ---- the week page ----
-   The cells lost their status dot: a dot under the dumbbell said "selected"
-   a second time, and the mark already says it and says what it is. What sits
-   under the mark now is the one thing the cell cannot otherwise tell you —
-   how long that day is. */
-.wkhero{display:flex;align-items:baseline;justify-content:center;gap:8px;margin:2px 0 4px}
-.wkn{font-size:46px;font-weight:750;letter-spacing:-.035em;line-height:1;
-  background:linear-gradient(180deg,#fff,var(--accent));-webkit-background-clip:text;
-  background-clip:text;color:transparent}
-.wkn.sm{font-size:26px}
-.wku{font-size:13px;color:var(--ink3);font-weight:600;letter-spacing:.04em}
-.wkx{font-size:20px;color:var(--ink3);font-weight:300;padding:0 2px}
-.wksub{text-align:center;font-size:13.5px;color:var(--ink3);margin:0 0 18px}
-.wksub b{color:var(--ink2)}
+   Borrowed from the dashboard on purpose: the badge, the two-line info, the
+   mark on the right. Same geometry, this palette. Someone who finishes the
+   survey and opens the app should recognise the screen. */
+.rvq{margin:2px 0 4px;text-align:center;font-size:28px}
+.rvsub{text-align:center;margin-bottom:16px}
+.rvsub b{color:var(--ink2)}
 
-.wkpick button{position:relative;flex-direction:column;gap:0;padding-top:8px;
-  background:var(--card);transition:border-color .25s,box-shadow .25s,background .25s}
-.wkpick .wd{font-size:11.5px;font-weight:700;letter-spacing:.08em;opacity:.42;
-  transition:opacity .2s,color .2s}
-/* The box stays the same dark grey as every other day. Only the outline and
-   the glow change — a training day should read as lit, not as a filled tile. */
-.wkpick .wdb{margin-top:9px;width:26px;opacity:.14;transform:scale(.8);
-  transition:opacity .3s,transform .3s}
-.wkpick .wdb svg{width:26px;height:26px;display:block;fill:none;stroke:var(--ink3);
-  stroke-width:2;stroke-linecap:round;transition:stroke .25s}
-.wkpick button.on{border-color:var(--neon);
-  box-shadow:0 0 18px -3px var(--neon-line), inset 0 0 14px -6px var(--neon-line)}
-.wkpick button.on .wd{opacity:1;color:var(--neon)}
-.wkpick button.on .wdb{opacity:1;transform:none}
-.wkpick button.on .wdb svg{stroke:var(--neon)}
-/* the mark breathes on the training days, on the mark's own clock */
-.wkpick button.on .wdb{animation:wkPulse 4400ms ease-in-out infinite}
-.wkpick button.on:nth-child(2) .wdb{animation-delay:-500ms}
-.wkpick button.on:nth-child(3) .wdb{animation-delay:-1000ms}
-.wkpick button.on:nth-child(4) .wdb{animation-delay:-1500ms}
-.wkpick button.on:nth-child(5) .wdb{animation-delay:-2000ms}
-.wkpick button.on:nth-child(6) .wdb{animation-delay:-2500ms}
-.wkpick button.on:nth-child(7) .wdb{animation-delay:-3000ms}
-@keyframes wkPulse{0%,100%{filter:drop-shadow(0 0 0 transparent)}
-                   50%{filter:drop-shadow(0 0 7px var(--neon-line))}}
-.wkpick button.act{border-color:rgba(143,184,255,.6)}
-.wkpick button.act .wd{opacity:1;color:#8FB8FF}
-.wkpick button.act .wdb{opacity:.5;transform:scale(.86)}
-.wkpick button.act .wdb svg{stroke:#8FB8FF}
-.wkpick button.both{border-color:#F2C14E;
-  box-shadow:0 0 18px -3px rgba(242,193,78,.5), inset 0 0 14px -6px rgba(242,193,78,.5)}
-.wkpick button.both .wd{color:#F2C14E}
-.wkpick button.both .wdb{opacity:1;transform:none}
-.wkpick button.both .wdb svg{stroke:#F2C14E}
-.wkpick.actmode button.on:not(.act){opacity:.45}
-/* the row arrives, left to right */
-.wkpick button{animation:wkIn .42s cubic-bezier(.22,1,.36,1) both}
-.wkpick button:nth-child(1){animation-delay:.04s} .wkpick button:nth-child(2){animation-delay:.09s}
-.wkpick button:nth-child(3){animation-delay:.14s} .wkpick button:nth-child(4){animation-delay:.19s}
-.wkpick button:nth-child(5){animation-delay:.24s} .wkpick button:nth-child(6){animation-delay:.29s}
-.wkpick button:nth-child(7){animation-delay:.34s}
-@keyframes wkIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){
-  .wkpick button{animation:none}
-  .wkpick button.on .wdb{animation:none}
-}
-.wkcount b{color:var(--ink2)}
+/* the strip is a control, so it is small and quiet */
+.rvstrip{display:flex;gap:5px;margin-bottom:9px}
+.rvstrip button{flex:1;min-width:0;height:44px;border-radius:12px;cursor:pointer;
+  background:var(--card);border:1px solid var(--line);color:var(--ink3);
+  font:inherit;font-size:12.5px;font-weight:700;letter-spacing:.06em;
+  display:grid;place-items:center;transition:border-color .2s,color .2s,box-shadow .25s}
+.rvstrip button.on{border-color:var(--neon);color:var(--neon);
+  box-shadow:0 0 14px -4px var(--neon-line)}
+.rvstrip button.act{border-color:rgba(143,184,255,.55);color:#8FB8FF}
+.rvstrip button.on.act{border-color:#F2C14E;color:#F2C14E}
+.rvstrip.actmode button.on:not(.act){opacity:.45}
 
-/* the other sport on the same week, in its own colour */
-.wkmode{display:flex;gap:7px;margin-bottom:11px}
-.wkmode button{flex:1;background:var(--card);border:1px solid var(--line);border-radius:11px;
-  padding:8px 10px;color:var(--ink3);font:inherit;font-size:12.5px;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;gap:7px}
-.wkmode button i{width:8px;height:8px;border-radius:2px;background:var(--accent);flex:none}
-.wkmode button[data-m="act"] i{background:#8FB8FF}
-.wkmode button.on{color:var(--ink);border-color:var(--ink3);background:#20252b}
-.wkpick button.act{border-color:rgba(143,184,255,.5)}
-.wkpick button.both{border-color:#F2C14E}
-.wkpick.actmode button.on:not(.act){opacity:.55}
-.wkclash{display:block;margin-top:5px;font-size:11.5px;color:#F2C14E}
+.rvmode{display:flex;gap:6px;margin-bottom:16px}
+.rvmode button{flex:0 0 auto;padding:5px 11px;border-radius:99px;font:inherit;font-size:11.5px;
+  background:none;border:1px solid var(--line);color:var(--ink3);cursor:pointer}
+.rvmode button.on{border-color:var(--ink3);color:var(--ink);background:#20252b}
 
-.sendwhy{display:block;margin-top:5px;opacity:.72}
+/* the list — the dashboard's week, built from their answers */
+.rvlist{display:flex;flex-direction:column;gap:8px;margin-bottom:18px}
+.rvitem{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:15px;
+  background:var(--card);border:1px solid var(--line);cursor:pointer;
+  animation:rvIn .34s cubic-bezier(.22,1,.36,1) both}
+@keyframes rvIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+.rvitem:active{transform:scale(.99)}
+.rvnum{flex:0 0 auto;width:34px;height:34px;border-radius:11px;display:grid;place-items:center;
+  background:rgba(255,95,162,.12);border:1px solid rgba(255,95,162,.4);
+  color:var(--neon);font-weight:750;font-size:15px;font-variant-numeric:tabular-nums}
+.rvinfo{flex:1;min-width:0}
+.rvinfo b{display:block;font-size:15.5px;font-weight:650;letter-spacing:-.01em}
+.rvinfo small{display:block;font-size:12.5px;color:var(--ink3);margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rvmark{flex:0 0 auto;width:26px;height:26px;opacity:.85}
+.rvmark svg{width:26px;height:26px;fill:none;stroke:var(--neon);stroke-width:2;
+  stroke-linecap:round;filter:drop-shadow(0 0 6px var(--neon-line))}
+.rvitem.clash{border-color:rgba(242,193,78,.5)}
+.rvitem.clash .rvnum{background:rgba(242,193,78,.12);border-color:rgba(242,193,78,.45);color:#F2C14E}
+.rvitem.clash .rvmark svg{stroke:#F2C14E;filter:drop-shadow(0 0 6px rgba(242,193,78,.45))}
+.rvitem.act{cursor:default;border-style:dashed}
+.rvitem.act .rvnum{background:rgba(143,184,255,.1);border-color:rgba(143,184,255,.35);color:#8FB8FF}
+.rvempty{color:var(--ink3);font-size:13.5px;text-align:center;padding:18px 0}
+
+/* one line each, where there used to be two labelled blocks of big buttons */
+.rvctl{border-top:1px solid var(--line);padding-top:14px;margin-bottom:16px}
+.rvrow{padding:0 0 14px}
+.rvrow>span{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink3);font-weight:700;margin-bottom:7px}
+.rvchips{display:flex;gap:5px}
+.rvchips button{flex:1 1 0;min-width:0;padding:8px 4px;border-radius:11px;font:inherit;
+  font-size:12.5px;background:var(--card);border:1px solid var(--line);color:var(--ink3);
+  cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  transition:border-color .18s,color .18s,background .18s}
+.rvchips button.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+@media (prefers-reduced-motion:reduce){ .rvitem{animation:none} }
 
 /* first rep done — the line lands where something was actually produced */
 .firstrep{display:flex;align-items:center;gap:12px;margin:2px 0 20px;padding:12px 14px;
@@ -4395,19 +4379,22 @@ const DEFAULT_WEEK={1:[2],2:[0,3],3:[0,2,5],4:[0,1,3,5],5:[0,1,3,4,6],6:[0,1,2,3
 /* No clock times. "After work" is 4pm for one person and 8pm for another, and
    printing 5:45pm told half of them the plan was not for them. The slot is
    the shape of the day, not a time. */
-const SLOTS=[['early','Early morning'],['lunch','Midday'],
-             ['after','After work'],['evening','Evening']];
+const SLOTS=[['early','Early morning','Early'],['lunch','Midday','Midday'],
+             ['after','After work','After work'],['evening','Evening','Evening']];
 /* ================= THE WEEK =================
-   The page everything lands on. It is a proposal, not a question: the survey
-   already knows enough to say what the week should be, so it says it, and
-   then hands over every part of it.
+   The screen the whole survey has been walking towards, so it does one thing
+   the others do not: it shows them the product.
 
-   Two lines carry the whole idea — "based on your answers", then "our
-   suggestion, adjust anything" — because a plan someone can change is a plan
-   they will keep, and a plan handed down is one they will quietly drop.
+   The dashboard's week is a numbered list — a badge, the session, a line of
+   detail, a chevron. This page builds that same list out of their own
+   answers, so the last thing they see in the survey is the first thing they
+   will see in the app, already filled in. It stops being a form.
 
-   The day cells lost their status dot. A dot under the dumbbell said
-   "selected" twice; the mark already says it, and says what it is. */
+   The strip above it is the control; the list below is the consequence. Tap a
+   day and a row appears, numbered in order. Everything else on the page is
+   one line high, because the previous version stacked a stat band, a toggle,
+   seven tall tiles, two labelled button rows and a note, and it read as a
+   settings screen. */
 function reveal(){
   const r = A.rods||PRESETS[0].v;
   const load = A.otherLoad||{};
@@ -4418,9 +4405,9 @@ function reveal(){
   const sugDays = Math.max(2, Math.min(wanted, ceil) - (otherSessions>=3?1:0));
   const sugLen  = (r.work>=10.5 || r.people>=5.5) ? '35' : r.training>=0.8 ? '55' : '45';
 
-  const LEN=[['20','20 min'],['35','30–40'],['45','45 min'],['55','45–60'],['75','60–90']];
+  const LEN=[['20','20'],['35','35'],['45','45'],['55','50'],['75','75']];
   const LENNAME=Object.fromEntries(LEN);
-  const SHORT={'20':'20m','35':'35m','45':'45m','55':'50m','75':'75m'};
+  const FULL=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 
   let picked = (A.trainDays && A.trainDays.length)
     ? A.trainDays.slice()
@@ -4428,44 +4415,39 @@ function reveal(){
   let len  = A.length || sugLen;
   let slot = A.when || 'after';
 
-  const ACTS={run:'Running',team:'Your sport',yoga:'Yoga',hiit:'Classes',swim:'Swimming',
-              racket:'Racket',martial:'Martial arts',climb:'Climbing',other:'Other'};
+  const ACTS={run:'Running',team:'your sport',yoga:'yoga',hiit:'your classes',swim:'swimming',
+              racket:'racket',martial:'martial arts',climb:'climbing',other:'your other sport'};
   const actList=(A.otherAct||[]).filter(x=>x!=='none');
-  const actName=ACTS[actList[0]]||'Other sport';
-  const hasAct=actList.length>0;
+  const actName=ACTS[actList[0]]||'your other sport';
   let actDays=(A.actDays||[]).slice();
   let mode='train';
 
   const d=el(`
-    <div class="eyebrow ctr">Based on your answers</div>
-    <div class="wkhero">
-      <span class="wkn" id="wkD">${picked.length}</span>
-      <span class="wku">days</span>
-      <span class="wkx">&times;</span>
-      <span class="wkn sm" id="wkL">${LENNAME[len]}</span>
+    <div class="eyebrow ctr">Based on everything you told me</div>
+    <h1 class="q rvq">Your week.</h1>
+    <p class="sub rvsub">This is what I would build. <b>Change any of it.</b></p>
+
+    <div class="rvstrip" id="wk">${DAYNAME.map((n,k)=>
+      `<button data-k="${k}"><span>${n[0]}</span></button>`).join('')}</div>
+    <div class="rvmode" id="wkmode">
+      <button data-m="train" class="on">Training</button>
+      <button data-m="act">${actName.charAt(0).toUpperCase()+actName.slice(1)}</button>
     </div>
-    <p class="wksub">Our suggestion — <b>adjust anything</b>.</p>
 
-    <div class="wkmode" id="wkmode">
-      <button data-m="train" class="on"><i></i>Training</button>
-      <button data-m="act"><i></i>${hasAct?actName:'Anything else'}</button></div>
+    <div class="rvlist" id="rvlist"></div>
 
-    <div class="wkpick" id="wk">${DAYNAME.map((n,k)=>
-      `<button data-k="${k}"><span class="wd">${n[0]}</span>
-        <span class="wdb">${MARK}</span></button>`).join('')}</div>
-    <p class="wkcount" id="wkc"></p>
-
-    <div class="sillabel">How long each time</div>
-    <div class="segrow" id="lens">${LEN.map(o=>
-      `<button data-l="${o[0]}" style="flex:1 1 30%">${o[1]}</button>`).join('')}</div>
-
-    <div class="sillabel">When it usually happens</div>
-    <div class="segrow" id="slots">${SLOTS.map(t=>
-      `<button data-t="${t[0]}" style="flex:1 1 44%">${t[1]}</button>`).join('')}</div>
+    <div class="rvctl">
+      <div class="rvrow"><span>Minutes a session</span>
+        <div class="rvchips" id="lens">${LEN.map(o=>
+          `<button data-l="${o[0]}">${o[1]}</button>`).join('')}</div></div>
+      <div class="rvrow"><span>When it usually happens</span>
+        <div class="rvchips" id="slots">${SLOTS.map(t=>
+          `<button data-t="${t[0]}">${t[2]}</button>`).join('')}</div></div>
+    </div>
 
     <div class="wpnote" id="wpn"></div>`);
 
-  const wk=d.querySelector('#wk'), wkc=d.querySelector('#wkc'), note=d.querySelector('#wpn');
+  const wk=d.querySelector('#wk'), list=d.querySelector('#rvlist'), note=d.querySelector('#wpn');
   setFoot(`<button class="cta accent">This is my week</button>`);
   const cta=foot.querySelector('.cta');
 
@@ -4475,36 +4457,42 @@ function reveal(){
     if(picked.length<2) return ['warn','Below 2 days nothing compounds. 2 is the floor that still works.'];
     const clash=picked.filter(k=>actDays.indexOf(k)>-1).length;
     if(clash) return ['warn',
-      `<b>${clash} day${clash>1?'s':''}</b> doubled up with ${actName.toLowerCase()}. Not forbidden — just a hard day, and I will build it as one.`];
+      `<b>${clash} day${clash>1?'s':''}</b> doubled with ${actName}. Not forbidden — I will build it as a hard day.`];
     if(picked.length<wanted) return ['',
       `<b>${picked.length} days</b> is honest. Fewer days done properly beats more days missed.`];
-    if(picked.length===2) return ['',
-      '<b>2 days</b> is enough to get stronger. Not enough to get stronger fast — a fine trade if it is the one you can keep.'];
-    return ['', `<b>${picked.length} × ${LENNAME[len]}</b> is a real block of work. That is a programme, not a plan.`];
+    return ['', `<b>${picked.length} × ${LENNAME[len]} min</b> is a programme, not a plan.`];
+  }
+
+  /* The list is the dashboard's week, one row per day they picked. New rows
+     arrive rather than appearing, so adding a day feels like putting
+     something on the calendar. */
+  function paintList(){
+    const mins=len==='35'?35:len==='45'?45:len==='55'?52:len==='75'?75:20;
+    const rows=picked.map((k,n)=>{
+      const clash=actDays.indexOf(k)>-1;
+      return `<div class="rvitem${clash?' clash':''}" data-k="${k}">
+        <span class="rvnum">${n+1}</span>
+        <span class="rvinfo"><b>${FULL[k]}</b>
+          <small>${mins} min · ${(SLOTS.find(x=>x[0]===slot)||[])[1].toLowerCase()}${clash?' · with '+actName:''}</small></span>
+        <span class="rvmark">${MARK}</span></div>`;});
+    const extra=actDays.filter(k=>picked.indexOf(k)<0);
+    if(extra.length) rows.push(`<div class="rvitem act">
+      <span class="rvnum">·</span>
+      <span class="rvinfo"><b>${extra.map(k=>FULL[k]).join(', ')}</b><small>${actName}, already in your week</small></span></div>`);
+    list.innerHTML=rows.join('')||'<p class="rvempty">Tap a day above to start.</p>';
   }
 
   function paint(){
     picked.sort((a,b)=>a-b); actDays.sort((a,b)=>a-b);
     wk.querySelectorAll('button').forEach(b=>{
-      const k=+b.dataset.k, train=picked.indexOf(k)>-1, act=actDays.indexOf(k)>-1;
-      b.classList.toggle('on',train);
-      b.classList.toggle('act',act);
-      b.classList.toggle('both',train&&act);
-      /* The label under the mark carries the only thing the cell does not
-         already say: how long that day is. Sport days say what they are. */
-      /* Nothing under the mark. The duration is stated once, large, at the
-         top of the page — repeating it seven times was noise. */
+      const k=+b.dataset.k;
+      b.classList.toggle('on',picked.indexOf(k)>-1);
+      b.classList.toggle('act',actDays.indexOf(k)>-1);
     });
+    wk.classList.toggle('actmode', mode==='act');
     d.querySelectorAll('#lens button').forEach(b=>b.classList.toggle('on',b.dataset.l===len));
     d.querySelectorAll('#slots button').forEach(b=>b.classList.toggle('on',b.dataset.t===slot));
-
-    const mins=picked.length*(len==='35'?35:len==='45'?45:len==='55'?52:len==='75'?75:20);
-    d.querySelector('#wkD').textContent=picked.length;
-    d.querySelector('#wkL').textContent=LENNAME[len];
-
-    wkc.innerHTML = picked.length
-      ? `${picked.map(k=>DAYNAME[k]).join(' · ')} &nbsp;·&nbsp; <b>${(Math.round(mins/6)/10)} hours a week</b>`
-      : 'Pick at least one day.';
+    paintList();
     const [cls,txt]=verdict();
     note.className='wpnote'+(cls?' '+cls:''); note.innerHTML=txt;
     cta.disabled = picked.length===0;
@@ -4512,16 +4500,21 @@ function reveal(){
   }
 
   wk.querySelectorAll('button').forEach(b=>b.onclick=()=>{haptic(12);
-    const k=+b.dataset.k, list = mode==='act' ? actDays : picked;
-    const at=list.indexOf(k);
-    if(at>-1) list.splice(at,1); else list.push(k);
+    const k=+b.dataset.k, l = mode==='act' ? actDays : picked;
+    const at=l.indexOf(k);
+    if(at>-1) l.splice(at,1); else l.push(k);
     paint();});
   d.querySelectorAll('#wkmode button').forEach(b=>b.onclick=()=>{haptic(12);
     mode=b.dataset.m;
     d.querySelectorAll('#wkmode button').forEach(x=>x.classList.toggle('on',x===b));
-    wk.classList.toggle('actmode', mode==='act');});
+    paint();});
   d.querySelectorAll('#lens button').forEach(b=>b.onclick=()=>{haptic(12);len=b.dataset.l;paint();});
   d.querySelectorAll('#slots button').forEach(b=>b.onclick=()=>{haptic(12);slot=b.dataset.t;paint();});
+  /* tapping a row takes the day back out */
+  list.onclick=e=>{ const it=e.target.closest('.rvitem[data-k]'); if(!it) return;
+    haptic(12); const k=+it.dataset.k, at=picked.indexOf(k);
+    if(at>-1){ picked.splice(at,1); paint(); } };
+
   cta.onclick=()=>{ if(!picked.length) return; haptic(400);
     A.trainDays=picked.slice(); A.days=picked.length; A.length=len;
     A.when=slot; A.actDays=actDays.slice(); next(); };
