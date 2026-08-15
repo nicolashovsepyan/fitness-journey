@@ -248,33 +248,119 @@ body.opening #bars,body.opening #chapline{opacity:0;pointer-events:none}
 /* Two passes: a soft bloom and a tighter core, both fading out away from the
    bar. Together they read as light rather than as paint. */
 .heroA .tri-glare{stroke:url(#triGlare);stroke-width:5.5;opacity:0;
-  filter:blur(3.5px) drop-shadow(0 0 10px rgba(255,255,255,.55));
-  transition:opacity .5s ease}
-.heroA.lit .tri-glare{opacity:.9}
-/* One short bright dash chasing the perimeter. Hidden until the mark has
-   landed — a light running around an outline that is still being drawn
-   reads as two animations fighting. */
-.heroA .tri-spark{stroke:#fff;stroke-width:3.5;opacity:0;
+  filter:blur(3.5px) drop-shadow(0 0 10px rgba(255,255,255,.55))}
+/* ===== BEAT:START — mirrored into logo/LOGO PREVIEW.html by the build ===== */
+/* THE THIRD PEAK. This used to be a constant — opacity:.9 the moment the mark
+   lit, and never anything else — so the white glare was always there and the
+   beat had nothing to do with it. It runs on --lap-phase now, which means its
+   10.5% is the same instant as the outline's spike and the same instant as
+   the glow behind the dumbbell. Three things, one moment. */
+.heroA.lit .tri-glare{animation:triGlare var(--beat,4400ms) linear var(--lap-phase,-2112ms) infinite}
+/* THE TRACE. One bright dash chasing the perimeter — but the path it runs is
+   not the triangle. It is the triangle with a PQRST complex built into the
+   top edge, so as the light crosses the top it lifts off the line, spikes,
+   and settles back: a hospital monitor drawing one beat per lap. The outline
+   underneath stays a clean triangle; only the light deflects.
+
+   Hidden until the mark has landed — a light running around an outline that
+   is still being drawn reads as two animations fighting. */
+.heroA .tri-spark{stroke:#fff;stroke-width:3.2;opacity:0;
   filter:drop-shadow(0 0 9px #FF5FA2) drop-shadow(0 0 3px #fff)}
 .heroA.lit .tri-spark{opacity:1;
-  animation:triRun var(--beat,4400ms) linear -1650ms infinite}
-.heroA.lit .tri-l{animation:triBeat var(--beat,4400ms) ease-in-out -1650ms infinite}
-@keyframes triRun{ from{stroke-dashoffset:0} to{stroke-dashoffset:-777} }
-/* A real heartbeat — lub, then a smaller dub — and it only happens while the
-   light is on the long top edge. That window is the first 24% of the lap, so
-   the whole thump is over by 20% and the outline sits quiet for the three
-   sides where nothing is passing. One event per lap, in one place. */
+  animation:triRun var(--beat,4400ms) linear var(--lap-phase,-2112ms) infinite}
+/* linear, NOT ease-in-out. The easing is per-segment below, because a single
+   curve applied between every pair of keyframes is what made the old beat
+   mushy: it eased INTO the spike over 460ms, which is a swell, not a thump. */
+.heroA.lit .tri-l{animation:triBeat var(--beat,4400ms) linear var(--lap-phase,-2112ms) infinite}
+/* --sparklen is measured off the real path in hero.js. The complex adds 112
+   units to the plain triangle's 777, and a hard-coded number here would make
+   the light jump at the seam of every lap. */
+@keyframes triRun{ from{stroke-dashoffset:0}
+                   to{stroke-dashoffset:calc(-1 * var(--sparklen,888.8px))} }
+/* Lub and dub, fired at the two places the trace actually spikes. These are
+   NOT free numbers — every one is measured off the path:
+
+     P wave    3.27%   8 units tall
+     R spike  10.50%  34 units      <- lub
+     S trough 16.05%  15 units
+     T wave   24.67%  12 units      <- dub
+     corner   33.48%                <- quiet from here
+
+   so the whole event is over before the light turns the corner, and the
+   outline sits still for the three sides where nothing is passing. One
+   event per lap, in one place.
+
+   > Redraw the complex and these all move. hero.js measures the real path
+   > at runtime and the lab prints measured-vs-keyframe side by side. */
+/* THE THUMP. Flat, then a 48ms strike, then a 75ms fall — the shape of a
+   blip on a monitor rather than a swell. The old version spent 462ms rising
+   into its peak and 242ms coming off it, which is why it read as slow: at
+   that length the eye tracks it as a fade, and a fade cannot land on a beat.
+
+   The percentages are still the trace's own — 10.5% is the R apex, 24.7% the
+   T wave — but now almost all of the lap is spent at rest, and the two
+   strikes are the only things that happen. */
 @keyframes triBeat{
-  0%      {filter:drop-shadow(0 0 7px  rgba(255,95,162,.45)); stroke-width:2.6}
-  4%      {filter:drop-shadow(0 0 34px rgba(255,95,162,1))
-                  drop-shadow(0 0 9px rgba(255,255,255,.6));  stroke-width:3.5}
-  9%      {filter:drop-shadow(0 0 10px rgba(255,95,162,.5));  stroke-width:2.7}
-  14%     {filter:drop-shadow(0 0 24px rgba(255,95,162,.9));  stroke-width:3.1}
-  21%,100%{filter:drop-shadow(0 0 7px  rgba(255,95,162,.45)); stroke-width:2.6}
+  0%,9.4% {filter:drop-shadow(0 0 6px  rgba(255,95,162,.38)); stroke-width:2.6;
+           animation-timing-function:cubic-bezier(.15,.9,.3,1)}      /* strike */
+  10.5%   {filter:drop-shadow(0 0 44px rgba(255,95,162,1))
+                  drop-shadow(0 0 13px rgba(255,255,255,.9));  stroke-width:3.9;
+           animation-timing-function:cubic-bezier(.35,0,.7,.45)}     /* fall away */
+  12.2%   {filter:drop-shadow(0 0 9px  rgba(255,95,162,.42)); stroke-width:2.68}
+  23.9%   {filter:drop-shadow(0 0 7px  rgba(255,95,162,.40)); stroke-width:2.62;
+           animation-timing-function:cubic-bezier(.15,.9,.3,1)}
+  24.7%   {filter:drop-shadow(0 0 27px rgba(255,95,162,.95))
+                  drop-shadow(0 0 8px rgba(255,255,255,.5));   stroke-width:3.28;
+           animation-timing-function:cubic-bezier(.35,0,.7,.45)}
+  26.6%   {filter:drop-shadow(0 0 7px  rgba(255,95,162,.42)); stroke-width:2.6}
+  33.5%,100%{filter:drop-shadow(0 0 6px rgba(255,95,162,.38));stroke-width:2.6}
 }
+/* The glare rides the same shape. Kept below the outline's peak so the white
+   reads as light thrown ONTO the tube rather than as a second light source. */
+@keyframes triGlare{
+  0%,9.4% {opacity:.20; animation-timing-function:cubic-bezier(.15,.9,.3,1)}
+  10.5%   {opacity:1;   animation-timing-function:cubic-bezier(.35,0,.7,.45)}
+  12.6%   {opacity:.28}
+  23.9%   {opacity:.24; animation-timing-function:cubic-bezier(.15,.9,.3,1)}
+  24.7%   {opacity:.66; animation-timing-function:cubic-bezier(.35,0,.7,.45)}
+  26.8%   {opacity:.24}
+  33.5%,100%{opacity:.20}
+}
+
+/* THE THIRD THING, and the reason all of this is in one block. The glow
+   behind the dumbbell is on a different clock from the outline — it hangs
+   off .alive with a .55s delay rather than off --lap-phase — and the two
+   clocks only agree because .lit and .alive are set in the same statement in
+   finishNow(). That is fragile enough without the rules being 60 lines apart.
+
+   The glow fades up before it starts breathing, so it never pops in at full
+   strength the instant the mark finishes drawing. */
+.heroA .art.alive .dbglow{
+  animation:dbGlowIn .55s cubic-bezier(.22,1,.36,1) both,
+            dbGlow var(--beat,4400ms) linear .55s infinite}
+@keyframes dbGlowIn{from{opacity:0;transform:scale(.88)}to{opacity:.40;transform:scale(.95)}}
+/* The slow breath is still here — it is what the mark does between beats —
+   but it now arrives at 46% and is then STRUCK, so the peak is a hit rather
+   than the top of a sine wave. 46%->50% is 176ms up, 50%->55% is 220ms down.
+
+   > .55s delay + 50% of 4400ms = 2750ms. That is the number the outline's
+   > 10.5% and the glare's 10.5% both resolve to. Move any of the three and
+   > the mark stops landing on one beat. */
+@keyframes dbGlow{
+  0%   {opacity:.38;transform:scale(.95); animation-timing-function:cubic-bezier(.45,0,.55,1)}
+  46%  {opacity:.62;transform:scale(1.02);animation-timing-function:cubic-bezier(.15,.9,.3,1)}
+  50%  {opacity:1;  transform:scale(1.13);animation-timing-function:cubic-bezier(.35,0,.7,.45)}
+  55%  {opacity:.60;transform:scale(1.01);animation-timing-function:cubic-bezier(.45,0,.55,1)}
+  100% {opacity:.38;transform:scale(.95)}
+}
+/* ===== BEAT:END ===== */
 @media (prefers-reduced-motion:reduce){
   .heroA.lit .tri-spark{animation:none;opacity:.85}
   .heroA.lit .tri-l{animation:none}
+  /* The glare is animated now, so switching the animation off would leave it
+     on its .tri-glare base of opacity:0 — the white would vanish rather than
+     hold still. It gets an explicit resting value instead. */
+  .heroA.lit .tri-glare{animation:none;opacity:.55}
 }
 .heroA .art{z-index:2}
 .heroA .hcopy{z-index:3}
@@ -291,13 +377,8 @@ body.opening #bars,body.opening #chapline{opacity:0;pointer-events:none}
 .heroA .dbglow{position:absolute;width:210px;height:210px;border-radius:50%;z-index:1;
   background:radial-gradient(circle,rgba(62,203,168,.26),rgba(62,203,168,0) 66%);
   opacity:0;will-change:opacity,transform}
-/* The glow fades up before it starts breathing, so it never pops in at
-   full strength the instant the mark finishes drawing. */
-.heroA .art.alive .dbglow{
-  animation:dbGlowIn .55s cubic-bezier(.22,1,.36,1) both,
-            dbGlow 4.4s ease-in-out .55s infinite}
-@keyframes dbGlowIn{from{opacity:0;transform:scale(.88)}to{opacity:.40;transform:scale(.95)}}
-@keyframes dbGlow{0%,100%{opacity:.40;transform:scale(.95)}50%{opacity:.86;transform:scale(1.06)}}
+/* The glow's animation and keyframes live up in the BEAT block, with the two
+   things it has to peak alongside. */
 
 .heroA .db path.stroked{fill:none;stroke:url(#dbGrad);stroke-linecap:round}
 .heroA .db path.bar{stroke:url(#dbBar)}
@@ -442,6 +523,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:32px;heigh
 .nonechip.big{width:100%;min-height:60px;border-radius:14px;font-size:15.5px;margin:2px 0 0;
   border-color:var(--line);background:var(--card2);color:var(--ink)}
 .nonechip.big.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+/* a neutral marker, not a body part */
+.zoneopt .zmark{width:19px;height:19px;flex:none;border-radius:50%;
+  border:1.5px solid var(--line2);position:relative;transition:border-color .2s,background .2s}
+.zoneopt.on .zmark{border-color:var(--accent);background:var(--accent)}
+.zoneopt.on .zmark::after{content:'';position:absolute;left:6px;top:3px;width:4px;height:8px;
+  border:solid #0d1114;border-width:0 2px 2px 0;transform:rotate(45deg)}
 .painnote{width:100%;margin-top:12px;font-size:14px}
 .zmicro{margin-top:14px;text-align:center}
 .chips{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:14px}
@@ -449,7 +536,27 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:32px;heigh
 
 /* ---------- loader ---------- */
 .load{flex:1;display:flex;flex-direction:column;justify-content:center}
-.ring{width:60px;height:60px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--accent);animation:spin 1s linear infinite;margin-bottom:30px}
+/* A spinner says "wait". This says "here is how far through I am" — it fills
+   as each line lands and closes on the last one, then ticks. The four steps
+   are real work being reported, so the ring should be too. */
+.ring{position:relative;width:66px;height:66px;margin-bottom:28px}
+.ring svg{width:66px;height:66px;transform:rotate(-90deg);overflow:visible}
+.ring circle{fill:none;stroke-width:3.5;stroke-linecap:round}
+.ring .rtrack{stroke:var(--line)}
+.ring .rfill{stroke:var(--accent);stroke-dasharray:188.5;stroke-dashoffset:188.5;
+  transition:stroke-dashoffset .75s cubic-bezier(.22,1,.36,1);
+  filter:drop-shadow(0 0 6px rgba(123,227,196,.5))}
+.ring .rpct{position:absolute;inset:0;display:grid;place-items:center;
+  font-size:15px;font-weight:750;color:var(--accent);font-variant-numeric:tabular-nums;
+  transition:opacity .3s}
+.ring.full .rfill{filter:drop-shadow(0 0 14px rgba(123,227,196,.85))}
+.ring.full .rpct{opacity:0}
+.ring .rtick{position:absolute;inset:0;display:grid;place-items:center;opacity:0;
+  transform:scale(.5);transition:opacity .35s,transform .35s cubic-bezier(.34,1.56,.64,1)}
+.ring.full .rtick{opacity:1;transform:none}
+.ring .rtick svg{width:26px;height:26px;transform:none}
+.ring .rtick path{fill:none;stroke:var(--accent);stroke-width:3;
+  stroke-linecap:round;stroke-linejoin:round}
 .lline{display:flex;gap:11px;align-items:flex-start;font-size:14.5px;color:var(--ink3);margin-bottom:15px;opacity:0;line-height:1.45}
 .lline.on{opacity:1;color:var(--ink2);transition:opacity .4s}
 .lline .dot{width:16px;height:16px;flex:none;border-radius:50%;border:1.5px solid var(--line);margin-top:1px;position:relative;transition:all .3s}
@@ -917,6 +1024,20 @@ h1.q{text-align:center}
 .wkclash{display:block;margin-top:5px;font-size:11.5px;color:#F2C14E}
 
 .sendwhy{display:block;margin-top:5px;opacity:.72}
+
+/* first rep done — the line lands where something was actually produced */
+.firstrep{display:flex;align-items:center;gap:12px;margin:2px 0 20px;padding:12px 14px;
+  border-radius:14px;background:rgba(123,227,196,.08);
+  border:1px solid rgba(123,227,196,.32);
+  animation:frIn .5s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes frIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+.frmark{width:30px;height:30px;flex:none;display:grid;place-items:center}
+.frmark svg{width:30px;height:30px;fill:none;stroke:var(--accent);stroke-width:2;
+  stroke-linecap:round;filter:drop-shadow(0 0 8px rgba(123,227,196,.5))}
+.firstrep b{display:block;font-size:15px;color:var(--accent);font-weight:700}
+.firstrep small{display:block;font-size:12.5px;color:var(--ink3);margin-top:1px}
+.noteb{width:100%;resize:none;line-height:1.45;font-size:14px;margin-top:4px}
+.patcard .pn{font-size:24px}
 
 /* the add-to-home-screen card, and the logo on the last screen */
 .addbox{display:flex;align-items:center;gap:13px;margin-top:16px;padding:13px 15px;
@@ -1769,16 +1890,16 @@ function pattern(){
   const dl=Array.isArray(A.driver)?A.driver:(A.driver?[A.driver]:[]);
   const d=v=>dl.includes(v);
   if(b.includes('toohard')||b.includes('week3'))
-    return {n:'The Fast Starter', b:'Not a motivation problem — a pacing problem. You go too hard in week one and week three collects the bill. Your first fortnight will feel conservative. If you think "is this it?", that\'s the plan working.'};
+    return {n:'The Fast Starter', b:'Not a motivation problem — a pacing problem. You go too hard in week one and week three collects the bill. Your first fortnight will feel conservative. If you think "is this it?", that is the plan working.'};
   if(b.includes('life')||b.includes('time'))
-    return {n:'First Thing Dropped', b:'Training sits at the bottom of the list, so it goes first when the list gets long. The fix isn\'t discipline — it\'s making the session small enough that dropping it stops being a decision.'};
+    return {n:'First Thing Dropped', b:'Training sits at the bottom of the list, so it goes first when the list gets long. The fix is not discipline — it is making the session small enough that dropping it stops being a decision.'};
   if(b.includes('lost'))
-    return {n:'Needs to See the Map', b:'You stopped because you couldn\'t tell if it was working. You\'ll get the reason for every session before it, and a measure of whether it worked after.'};
+    return {n:'Needs to See the Map', b:'You stopped because you couldn\'t tell if it was working. You will get the reason for every session before it, and a measure of whether it worked after.'};
   if(d('doctor'))
     return {n:'Started by Someone Else', b:'Someone else set this in motion, which is a fine way to begin and a poor way to continue. Over 90 days my job is to hand you a reason of your own.'};
   if(d('event'))
     return {n:'Deadline-Driven', b:'Something is pulling you forward, which works right until the day it passes. Watch for what replaces it around week six.'};
-  return {n:'Quietly Consistent', b:'Nothing here suggests drama. You\'re building a habit, not chasing a transformation — and that profile outperforms almost everyone over two years. Your risk isn\'t quitting, it\'s plateauing politely.'};
+  return {n:'Quietly Consistent', b:'Nothing here suggests drama. You are building a habit, not chasing a transformation — and that profile outperforms almost everyone over two years. Your risk is not quitting, it is plateauing politely.'};
 }
 
 /* ================= TRACKER METRICS — per device ================= */
@@ -2081,6 +2202,11 @@ function deriveLevels(){
   A.patternsTotal = (function(){ const t={}; set.forEach(function(c){t[c.pat]=1;}); return Object.keys(t).length; })();
 }
 
+/* The browser offers to install exactly once, and usually long before the
+   screen that wants to ask. Caught here and parked; nextsteps() spends it. */
+const INSTALL_PROMPT = { evt:null };
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); INSTALL_PROMPT.evt = e; });
+
 /* ---------------- RENDER ---------------- */
 (function(){var n=document.getElementById('nojs'); if(n&&n.parentNode) n.parentNode.removeChild(n);})();
 const stage=document.getElementById('stage'), foot=document.getElementById('foot'),
@@ -2273,6 +2399,24 @@ function hero(s){
   const BAR = {d:'M86 65 H174', w:7};
   const mirror=x=>260-x;
 
+  /* THE ECG. The triangle, with the top edge replaced by one cardiac cycle.
+     Baseline is y=16 — the top edge itself — so the trace sits ON the line
+     everywhere except through the complex.
+
+       H118            baseline out of the break
+       Q125 0 132 16   P wave, a low rounded bump
+       L139 23         Q, a short dip below the line
+       L145 -18        R, the spike — 34 units, clearing the top of the box
+       L151 31         S, the overshoot below
+       H196            the flat segment that makes the spike read
+       Q212 -8 228 16  T wave, broader and softer than the P
+       H286            baseline into the corner
+
+     The R deliberately overshoots y=0. The .tri svg is overflow:visible, so
+     it renders; a static export has to pad its viewBox to keep it. */
+  const ECG_D = 'M100 16 H118 Q125 0 132 16 H136 L139 23 L145 -18 L151 31 '+
+                'L156 16 H196 Q212 -8 228 16 H286 L150 252 L14 16 H60';
+
   const MARKS = {
     a:{ engine:'stroke', passes:[3,2,1],
         plates:[{x:86,   y1:38,    y2:92,    w:12.65},
@@ -2382,7 +2526,13 @@ function hero(s){
            version and it read as a mistake rather than a choice. -->
       <path class="tri-l" d="M100 16 H286 L150 252 L14 16 H60"/>
       <path class="tri-glare" d="M100 16 H286 L150 252 L14 16 H60"/>
-      <path class="tri-spark" d="M100 16 H286 L150 252 L14 16 H60"/>
+      <!-- The trace runs a DIFFERENT path from the outline: same triangle,
+           but the top edge carries a PQRST complex. The light therefore
+           leaves the line, draws one beat, and rejoins — while the outline
+           behind it stays a clean triangle. P at 3% of the lap, R at 10%,
+           S at 16%, T at 24%; the top edge ends at 32.6%. Those four
+           numbers are what @keyframes triBeat is tuned to. -->
+      <path class="tri-spark" d="${ECG_D}"/>
     </svg>
       <div class="dbglow"></div>
       <svg class="db${MARK.engine==='plate'?' mb':''}" viewBox="0 0 260 130" preserveAspectRatio="xMidYMid meet">
@@ -2459,12 +2609,42 @@ function hero(s){
   if(triL){
     triL.style.strokeDasharray=TRI_LEN;
     triL.style.strokeDashoffset=TRI_LEN;
-    /* short bright dash, one long gap — the gap is the rest of the outline */
-    triSpark.style.strokeDasharray='54 '+(TRI_LEN-54);
-    triSpark.style.strokeDashoffset=0;
+    /* The trace's path is longer than the outline's — the complex adds about
+       a hundred units — so it is MEASURED rather than assumed. A hard-coded
+       length here would leave the light jumping at the seam of every lap. */
+    const SPARK_LEN = triSpark.getTotalLength() || 877;
+    /* A longer dash than the outline used to carry: at 54 units the complex
+       is only ever half visible, and a heartbeat you see in pieces does not
+       read as a heartbeat. */
+    const DASH = 110;
+    triSpark.style.strokeDasharray = DASH+' '+(SPARK_LEN-DASH);
+    triSpark.style.strokeDashoffset = 0;
+    heroEl.style.setProperty('--sparklen', SPARK_LEN.toFixed(1)+'px');
+
+    /* THE PHASE. The glow behind the dumbbell peaks 2750ms into every cycle.
+       The whole arrangement exists so that the R spike — the one moment the
+       trace jumps — lands on that peak. Solve for it rather than trusting a
+       constant: find the R apex by walking the path for its highest point,
+       then shift the lap so that position sits at t=2750.
+
+         phase = (R_fraction x beat - 2750) mod beat,  applied negative
+
+       At the plain triangle's R_fraction of 0 this returns the old -1650ms,
+       which is the check that the formula is the same one as before. */
+    let rPos=0, rY=1e9;
+    for(let s=0; s<SPARK_LEN*0.4; s+=0.5){
+      const pt=triSpark.getPointAtLength(s);
+      if(pt.x<200 && pt.y<rY){ rY=pt.y; rPos=s; }
+    }
+    const beat = 4400;
+    const phase = (((rPos/SPARK_LEN)*beat - 2750) % beat + beat) % beat;
     /* The dumbbell's clock, not theme.json's — the light is meant to travel
        at the speed of the mark, so it takes the rep animation's period. */
-    heroEl.style.setProperty('--beat','4400ms');
+    heroEl.style.setProperty('--beat', beat+'ms');
+    heroEl.style.setProperty('--lap-phase', '-'+Math.round(phase)+'ms');
+    /* What triBeat's percentages have to agree with. Read it off the console
+       if the complex is ever redrawn. */
+    heroEl.dataset.rAt = ((rPos/SPARK_LEN)*100).toFixed(2)+'%';
   }
   const paths=[].slice.call(d.querySelectorAll('.rep path.stroked'));
   const strokes=paths.map(function(el,k){
@@ -3003,6 +3183,11 @@ const BIG_AXIS   = [0,4,8,12];      // hours, for the three that share a scale
 /* A press is worth half an hour on the big rods and ten minutes on training,
    because ten minutes is a real decision there and half an hour is not. */
 const STEP = { big: 0.5, small: 1/6 };
+/* Dragging lands on a grain rather than on whatever pixel the finger was
+   over. Ten minutes is the right jump for a button press on training and too
+   coarse for a drag, so the drag is five — half a press, and never a value
+   like 37 minutes that nobody meant. */
+const GRAIN = { big: 0.25, small: 1/12 };
 const SMALL_AXIS = [0,30,60,90];    // minutes, for training
 
 /* Which of the four sentences a rod is saying, from its hours. */
@@ -3158,14 +3343,15 @@ function reactor(s){
 
   d.querySelectorAll('.rxrod').forEach(rod=>{
     const o=byK[rod.dataset.k], track=rod.querySelector('.rxtrack');
-    let id=null, last=-1;
+    let id=null, last=null;
     /* Drag position reads against the rod's OWN axis, so training is as easy
        to place at 40 minutes as work is at 9 hours. */
     const from = ev => {
       const box=track.getBoundingClientRect();
       const pct = 1 - (ev.clientY - box.top) / box.height;
       const top = o.axis==='big' ? BIG_AXIS[BIG_AXIS.length-1]+2 : SMALL_AXIS[SMALL_AXIS.length-1]/60+0.25;
-      return pct*top;
+      const g = GRAIN[o.axis];
+      return Math.round((pct*top)/g)*g;
     };
     let downY=0, moved=false;
     rod.addEventListener('pointerdown', ev=>{
@@ -3183,14 +3369,14 @@ function reactor(s){
         preset = preset===null ? '' : preset;
         d.querySelectorAll('.rxpre button').forEach(x=>x.classList.remove('on'));
       }
-      setRod(o.k, from(ev)); paint();
-      const band=rodBand(o, r[o.k]);
-      if(band!==last){ last=band; haptic(11); }
+      const want=from(ev);
+      if(want===last) return;                 // same notch, nothing to do
+      last=want; setRod(o.k, want); paint(); haptic(8);
     });
     ['pointerup','pointercancel'].forEach(e=>rod.addEventListener(e, ev=>{
       if(id===null) return;
       try{ rod.releasePointerCapture(id); }catch(err){}
-      id=null; last=-1; rod.classList.remove('drag');
+      id=null; last=null; rod.classList.remove('drag');
       if(!moved && e==='pointerup') toggleLock(o.k); else haptic(13);
     }));
   });
@@ -4121,19 +4307,20 @@ function body(s){
      right: that is a follow-up question, not an intake question. Front and
      back is the same. A coach needs to know "knees" to program around them;
      which side of the knee is a conversation, not a checkbox. */
-  /* Icons and one-line rows, the same as every other multi-select. It was a
-     two-column tile grid, which made the health chapter look like a different
-     app from the ten screens before it. */
+  /* One-line rows like every other multi-select. The icons are deliberately
+     NOT anatomical: nine little body parts drawn at 20px read as a diagram
+     that failed rather than as a set, and the word already says which part it
+     is. One neutral marker, and the selected state does the work. */
   const ZONES = [
-    ['neck',  'Neck',             'pOhp'],
-    ['shldr', 'Shoulders',        'pPush'],
-    ['arm',   'Elbows or wrists', 'pCarry'],
-    ['mid',   'Upper back',       'pPull'],
-    ['low',   'Lower back',       'pHinge'],
-    ['hip',   'Hips',             'pSquat'],
-    ['knee',  'Knees',            'squatI'],
-    ['ankle', 'Ankles or feet',   'stairs'],
-    ['other', 'Somewhere else',   'question'],
+    ['neck',  'Neck'],
+    ['shldr', 'Shoulders'],
+    ['arm',   'Elbows or wrists'],
+    ['mid',   'Upper back'],
+    ['low',   'Lower back'],
+    ['hip',   'Hips'],
+    ['knee',  'Knees'],
+    ['ankle', 'Ankles or feet'],
+    ['other', 'Somewhere else'],
   ];
   const names = {}; ZONES.forEach(z => names[z[0]] = z[1]);
   const sel = new Set(Array.isArray(A.pain) ? A.pain.filter(k => names[k]) : []);
@@ -4142,8 +4329,8 @@ function body(s){
     <div class="opts">
       <button class="opt none" id="nohurt"><span class="tx"><b>Nothing hurts, I am good</b></span></button>
       ${ZONES.map(z =>
-      `<button class="opt${sel.has(z[0]) ? ' on' : ''}" data-k="${z[0]}">
-         ${ico(z[2])}<span class="tx"><b>${z[1]}</b></span></button>`).join('')}
+      `<button class="opt zoneopt${sel.has(z[0]) ? ' on' : ''}" data-k="${z[0]}">
+         <i class="zmark"></i><span class="tx"><b>${z[1]}</b></span></button>`).join('')}
     </div>
     <input class="tin painnote" id="painNote" type="text"
       placeholder="In your words — which knee, what it stops you doing…"
@@ -4216,13 +4403,26 @@ function loader(){
     'Balancing "'+(FOCUS_LABEL[(A.focus||[])[0]]||'your goal')+'" against '+(A.days||3)+' days…',
     'Checking '+((A.blockers||[]).length)+' things that stopped you before…',
     'Locking movements you haven\'t earned the right to load…'];
-  const d=el(`<div class="load"><div class="ring"></div>
+  const d=el(`<div class="load"><div class="ring" id="ring">
+      <svg viewBox="0 0 66 66"><circle class="rtrack" cx="33" cy="33" r="30"/>
+        <circle class="rfill" cx="33" cy="33" r="30"/></svg>
+      <span class="rpct">0%</span>
+      <span class="rtick"><svg viewBox="0 0 24 24"><path d="M5 12.5 10 17.5 19 7"/></svg></span>
+    </div>
     <h1 class="q" style="text-align:left;margin-bottom:24px">Reading everything you told me${A.name?', '+A.name:''}.</h1>
     ${steps.map(t=>`<div class="lline"><span class="dot"></span><span>${t}</span></div>`).join('')}</div>`);
   const L=[...d.querySelectorAll('.lline')];let k=0;
-  const tick=()=>{ if(k>0)L[k-1].classList.add('done');
+  const ring=d.querySelector('#ring'), fill=ring.querySelector('.rfill'),
+        pct=ring.querySelector('.rpct');
+  const CIRC=188.5;
+  /* Filled from lines finished, not from a timer — if a step ever takes
+     longer the ring waits with it rather than lying. */
+  const setRing=n=>{ const f=n/L.length;
+    fill.style.strokeDashoffset=(CIRC*(1-f)).toFixed(1);
+    pct.textContent=Math.round(f*100)+'%'; };
+  const tick=()=>{ if(k>0){ L[k-1].classList.add('done'); setRing(k); haptic(9); }
     if(k<L.length){L[k].classList.add('on');k++;setTimeout(tick,1500);}
-    else setTimeout(()=>{
+    else { ring.classList.add('full'); haptic(400); setTimeout(()=>{
       d.innerHTML=`<div class="load"><h1 class="q">One decision left.</h1>
         <p class="sub">It changes every session for 4 weeks.</p>
         <div class="opts">
@@ -4231,7 +4431,7 @@ function loader(){
         </div></div>`;
       d.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{haptic(400);A.intensity=b.dataset.v;
         b.classList.add('on');later(next,400);});
-    },800); };
+    },1100); } };
   setTimeout(tick,400);
 }
 
@@ -4374,25 +4574,41 @@ function reveal(){
   paint();
 }
 
-/* pattern + roadmap */
+/* ---- what I think I know ----
+   It was a card, a disclaimer, a gate note and a five-row roadmap: four
+   blocks of reading at the point someone has just finished a survey. It is
+   three things now — the read, one thing being held back, and a box for
+   them to answer in their own words.
+
+   "First rep done" lands here rather than on the last screen. This is the
+   moment something was actually produced; the last screen is housekeeping. */
 function patternscreen(){
   const p=pattern();
-  const gate=(A.patterns||[]).includes('squat')?'':
-    `<div class="pred"><span class="pd">Note</span><span class="pt">You have not trained a <b>squat pattern</b> regularly, so I am not loading one yet. You will earn it — unassisted, then eccentric, then loaded.</span></div>`;
-  el(`<div class="eyebrow ctr">What I already think I know</div>
-    <div class="patcard"><div class="pl">Your pattern</div><div class="pn">${p.n}</div><div class="pb">${p.b}</div></div>
-    <button class="notme" id="notme">That is not me →</button>
-    ${gate}
-    <div class="later"><h4>And what I do not know yet.</h4>
-      <div class="li"><span>Day 3</span><span>Whether session one was the right load. One tap.</span></div>
-      <div class="li"><span>Week 2</span><span>What time you <em>really</em> train — from your logs.</span></div>
-      <div class="li"><span>Week 4</span><span>How much you recover from. Solved, never asked.</span></div>
-      <div class="li"><span>Month 2</span><span>Sleep, stress, food — once I have earned the right to ask.</span></div>
-      <div class="li"><span>Ongoing</span><span>Which exercises you quietly avoid.</span></div></div>`);
-  document.getElementById('notme').onclick=()=>{haptic(14);
-    toast('Good. Tell me what I got wrong and I rebuild it — the model changes, not the label.',3400);};
+  const gated=!(A.patterns||[]).includes('squat');
+  const d=el(`
+    <div class="firstrep"><span class="frmark">${MARK}</span>
+      <span><b>First rep done.</b><small>The hardest one, and it is behind you.</small></span></div>
+
+    <div class="eyebrow ctr">Here is what I read</div>
+    <div class="patcard"><div class="pn">${p.n}</div><div class="pb">${p.b}</div></div>
+    <button class="notme" id="notme">That is not me &rarr;</button>
+
+    ${gated?`<div class="wpnote warn"><b>One thing I am holding back.</b>
+      You have not trained a squat pattern regularly, so I am not loading one yet.
+      Unassisted, then eccentric, then loaded.</div>`:''}
+
+    <div class="sillabel">Anything I have got wrong?</div>
+    <textarea class="tin noteb" id="pnote" rows="3"
+      placeholder="Injuries, a sport I missed, something you hate, anything at all. It goes to me with the rest."></textarea>
+    <p class="micro">Optional. It reaches me exactly as you write it.</p>`);
+
+  d.querySelector('#notme').onclick=()=>{haptic(14);
+    const t=d.querySelector('#pnote');
+    t.focus();
+    toast('Tell me what I got wrong and I rebuild it — the model changes, not the label.',3200);};
   setFoot(`<button class="cta accent">This is right</button>`);
-  foot.querySelector('.cta').onclick=()=>{haptic(400);next();};
+  foot.querySelector('.cta').onclick=()=>{haptic(400);
+    A.note=(d.querySelector('#pnote').value||'').trim(); next();};
 }
 
 /* ---- the ending, as a thread ----
@@ -4403,10 +4619,25 @@ function patternscreen(){
    What happens now changed. Nothing is emailed. The page goes on the home
    screen, becomes the app, and the programme lands inside it. */
 function nextsteps(s){
+  /* Chrome and the Android browsers fire beforeinstallprompt, which lets a
+     button do the whole thing in one tap. iOS Safari does not — Apple has
+     never shipped it — so there the button cannot install and pretending
+     otherwise would be the worst possible moment to lie. It shows the two
+     taps instead, which is all iOS allows anyone.
+
+     The event fires early, often before this screen exists, so it is caught
+     at load and parked. See INSTALL_PROMPT. */
   const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-  const how = ios
-    ? 'Tap <b>Share</b>, then <b>Add to Home Screen</b>.'
-    : 'Open the browser menu, then <b>Add to Home screen</b> — or <b>Install</b>.';
+  const canInstall = !!INSTALL_PROMPT.evt;
+  const already = window.matchMedia('(display-mode: standalone)').matches
+               || window.navigator.standalone === true;
+  const how = already
+    ? 'You are already in the app. Nothing to do.'
+    : canInstall
+      ? 'One tap and it is on your home screen.'
+      : ios
+        ? 'Tap <b>Share</b>, then <b>Add to Home Screen</b>.'
+        : 'Open the browser menu, then <b>Add to Home screen</b> — or <b>Install</b>.';
 
   const d=el(`<div class="chatwrap">
     <div class="chathead"><i>${COACH.name[0]}</i><b>Coach ${COACH.name}</b><span>Online</span></div>
@@ -4437,8 +4668,20 @@ function nextsteps(s){
   function land(){
     addbox.classList.add('on');
     if(foot.querySelector('.cta')) return;
-    setFoot(`<button class="cta accent">${s.cta}</button>`);
-    foot.querySelector('.cta').onclick=()=>{haptic(400);next();};
+    const label = already ? 'Carry on' : canInstall ? s.cta : 'I have added it';
+    setFoot(`<button class="cta accent">${label}</button>`);
+    foot.querySelector('.cta').onclick=async()=>{
+      haptic(400);
+      if(canInstall && INSTALL_PROMPT.evt){
+        const e=INSTALL_PROMPT.evt; INSTALL_PROMPT.evt=null;
+        try{
+          e.prompt();
+          const {outcome}=await e.userChoice;
+          if(outcome==='accepted') toast('Added. Open it from your home screen when you are ready.',3000);
+        }catch(err){ /* dismissed, or the browser changed its mind */ }
+      }
+      next();
+    };
     syncFootPad();
   }
   function skip(){ clearPending(); typing.classList.remove('on');
@@ -4473,8 +4716,8 @@ function entry(){
       <span class="entrydb">${MARK}</span>
     </div>
     <div class="eyebrow">${A.name?A.name+"'s Log":'Your Log'} &middot; Entry 001</div>
-    <h1 style="font-size:30px">That is the<br><em>first rep.</em></h1>
-    <p style="font-size:15px">It counts, and it is logged. Everything from here is just the next one.</p>
+    <h1 style="font-size:28px">Your log is<br><em>open.</em></h1>
+    <p style="font-size:15px">Nothing here gets overwritten. Every answer and every session from now on is another entry.</p>
     <div class="logcard">
       <div class="lgrow"><span>Opened</span><b>${ds}</b></div>
       <div class="lgrow"><span>Horizon</span><b>Age ${horizonAge(A.age||38)}</b></div>
