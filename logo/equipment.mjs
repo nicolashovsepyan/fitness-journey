@@ -909,16 +909,21 @@ function sceneSVG(weight, o){
    card size the eye reads the join instantly. The honest fix was to stop
    drawing it.
 
-   WHAT THE ASSET IS
-   images/equipment/kettlebell.png — 358x512, GREY + ALPHA, 95 KB. It came in
-   as a 1254px render on a green screen; the green was keyed out with a
-   tolerance (it was noisy, #06EE05 give or take 8 levels) and despilled so
-   the black edges carry no green fringe.
+   WHAT THE ASSETS ARE — TWO LAYERS, NOT ONE PICTURE
+   images/equipment/kettlebell-ball.png    420x404, grey+alpha, 79 KB
+   images/equipment/kettlebell-handle.png  330x331, grey+alpha, 32 KB
 
-   IT IS GREYSCALE ON PURPOSE. Measured chroma across the whole object was 9
-   levels out of 255 — visually neutral already — and storing it as grey+alpha
-   rather than RGBA took it from 244 KB to 95 KB, which is what puts it under
-   build-sw.mjs's 150 KB precache cap and therefore into the offline shell.
+   They were cut from one 1254px render delivered on a green screen. The green
+   was keyed with a tolerance (it was noisy, #06EE05 give or take 8 levels) and
+   despilled, so the black edges carry no green fringe. Why they are two files
+   rather than one is the banner above kbBallScale — the short version is that
+   a real rack changes its balls enormously and its handles hardly at all, and
+   one bitmap cannot do both.
+
+   THEY ARE GREYSCALE ON PURPOSE. Measured chroma across the whole object was 9
+   levels out of 255 — visually neutral already — and storing grey+alpha rather
+   than RGBA cut it by about two thirds, which is what keeps each layer under
+   build-sw.mjs's 150 KB precache cap and therefore in the offline shell.
    Being grey is also what makes the tint below work predictably.
 
    HOW THE TINT WORKS, AND WHY THE OBVIOUS WAY FAILS
@@ -932,7 +937,6 @@ function sceneSVG(weight, o){
    range, and only then a 2-stop table maps black->`dark` and white->`light`.
    The facets survive because they are still a gradient when the colour is
    applied. Change the order and you are back to a silhouette. */
-var KB_ASPECT = 761 / 1088;      /* measured from the asset's alpha bbox */
 
 function kbDefs(id, o){
   var sl = o.stretch, it = -o.black;
@@ -959,13 +963,73 @@ function kbDefs(id, o){
       '<feGaussianBlur stdDeviation="2.4"/></filter>';
 }
 
-/* MASS -> LENGTH. Same cube-root law as the plates: 20x the weight is 2.71x
-   the bell, not 20x. Checked against a real rack — a 5 lb bell is about 14 cm
-   tall and a 100 lb about 34.5 cm, a ratio of 2.46, so cube root overshoots
-   by roughly a tenth. `growth` is exposed so that can be damped without
-   touching this function. */
-function kbScale(wt, o){
-  return Math.pow(Math.max(wt, 1) / KBMAX, o.growth == null ? 1/3 : o.growth);
+/* ============================================================
+   TWO LAYERS, BECAUSE A KETTLEBELL DOES NOT SCALE UNIFORMLY
+
+   Look at a real rack from 4 kg to 40 kg and the balls differ enormously
+   while the HANDLES barely change — they cannot, because every one of them
+   has to fit the same hand. Scaling one bitmap up and down gets this wrong at
+   both ends: the light bell gets a toy handle, the heavy one a handle you
+   could not grip.
+
+   So the artwork is split in two — images/equipment/kettlebell-ball.png and
+   kettlebell-handle.png — and each grows on its own law. The handle is drawn
+   FIRST and the ball ON TOP, which is the same order as the original render:
+   the ball occludes the legs where they enter it, so the join needs no
+   blending and the legs may safely run on underneath.
+
+   HOW THE SPLIT WAS CUT (tools notes, in case the artwork is ever re-exported)
+   A least-squares circle fit to the ball's outline gave centre (623.5, 813.3)
+   and radius 375.5 in the 1254px source, to 0.6% mean residual. The ball layer
+   is the run of pixels containing the centre line — its own silhouette, not
+   the fitted circle, so its facets keep their corners — except near the pole,
+   where the legs TOUCH the ball and merge into that run, and the circle is the
+   better boundary. The handle's legs were then carried ~130px further down, so
+   that a small ball under a relatively large handle still has something to
+   meet instead of a gap.
+
+   EVERY NUMBER BELOW IS IN UNITS OF THE BALL'S RADIUS, measured off the
+   artwork. That makes them resolution independent: change the PNG's pixel size
+   and nothing here moves.
+   ============================================================ */
+var KB_BALL   = { w: 2.0266, h: 1.9494, left: -1.0107, top: -1.0048 };
+var KB_HANDLE = { w: 1.5925, h: 1.5979, left: -0.8109, top: -1.9529 };
+var KB_MEDAL  = { dx: 0.6032, dy: 0.0844 };
+var KB_LEG_OUT = 0.71;   /* leg OUTER edge in ball radii, measured off the
+                            handle layer's lowest full rows. The outer edge is
+                            what has to be covered, not the leg's centre. */
+
+/* THE BALL CARRIES THE WEIGHT, AND THE HANDLE DOES NOT.
+   Cube root is right for the ball's own mass, but the number on the label
+   includes the handle, and the handle's share is nearly constant. On a 4 kg
+   bell the handle might be a quarter of the total; on a 40 kg it is a
+   twentieth. Subtracting it first is why the small balls in a real rack look
+   SMALLER than a naive cube root predicts, not larger.
+
+   handleWeight defaults to 0, which is exactly the old cube-root behaviour —
+   the correction is real but its size has to be fitted against the reference
+   rack photograph rather than guessed. */
+function kbBallScale(wt, o){
+  var hw = o.handleWeight || 0;
+  var g  = o.ballGrowth == null ? 1/3 : o.ballGrowth;
+  var num = Math.max(wt - hw, 0.1), den = Math.max(KBMAX - hw, 0.1);
+  return Math.pow(num / den, g);
+}
+/* The handle grows, but only just — and what this returns is RELATIVE TO THE
+   BALL, because every length in the renderer is measured in ball radii.
+
+   That division is not cosmetic. Returning the handle's absolute law here
+   multiplies it by the ball's radius, so the handle ends up growing as
+   W^(handleGrowth + ballGrowth) — FASTER than the ball, which is the exact
+   opposite of what a real rack does. Dividing by the ball's own scale is what
+   makes a light bell wear a proportionally BIGGER handle.
+
+   It divides by kbBallScale rather than by W^ballGrowth so that it stays
+   correct when the handleWeight correction is in play. */
+function kbHandleScale(wt, o){
+  var abs = Math.pow(Math.max(wt, 1) / KBMAX,
+                     o.handleGrowth == null ? 0.12 : o.handleGrowth);
+  return abs / kbBallScale(wt, o);
 }
 
 function kettlebellSceneSVG(weight, o){
@@ -975,25 +1039,64 @@ function kettlebellSceneSVG(weight, o){
   var over = weight > KBMAX, wt = Math.min(weight, KBMAX);
   var horizon = H * 0.24, baseY = H * 0.80;
 
-  var ih = o.size * sc * kbScale(wt, o);       /* drawn height */
-  var iw = ih * KB_ASPECT;
-  var x0 = W/2 - iw/2, y0 = baseY - ih;
+  /* Everything is derived from the ball's radius. */
+  var Rb = (o.size * sc / 2) * kbBallScale(wt, o);
+  var Sh = kbHandleScale(wt, o) * (o.handleScale == null ? 1 : o.handleScale);
+  var bcx = W/2;
+  var bcy = baseY - KB_BALL.h * Rb - KB_BALL.top * Rb;   /* base rests on baseY */
+
+  var bw = KB_BALL.w * Rb, bh = KB_BALL.h * Rb;
+  var bx = bcx + KB_BALL.left * Rb, by = bcy + KB_BALL.top * Rb;
+
+  /* WHERE THE HANDLE SITS IS SOLVED, NOT FIXED, AND THE SOLVE IS ABOUT THE
+     LEG TIPS.
+
+     The legs end in a flat cut — they were carried downward past the artwork
+     so they would always have ball to disappear into. That only works while
+     the ball is still WIDER than the legs at the depth the tips reach. Seat
+     the handle any higher and the tips hang in open air beside the ball,
+     which is exactly what a light bell did before this: a big handle on a
+     small ball, with two legs dangling past its sides.
+
+     So: take the leg's OUTER edge, find the shallowest depth at which the
+     sphere is at least that wide, and put the tips below it. As the handle
+     grows relative to the ball it settles lower by itself, the way a wide
+     handle straddles a small bell in a real rack.
+
+     `cover` = 0.349 is not arbitrary either: at Sh = 1 it reproduces the
+     original single-image render exactly. */
+  var GRIPMAX = o.gripMax == null ? 0.92 : o.gripMax;
+  /* Past this the legs are wider than the ball itself and NO depth can hide
+     them — the sphere has run out of shoulder. A real 4 kg solves it by
+     angling its legs inward; a rigid bitmap cannot, so the handle's relative
+     growth is capped here instead of drawing something impossible. */
+  Sh = Math.min(Sh, GRIPMAX / KB_LEG_OUT);
+
+  var hw = KB_HANDLE.w * Sh * Rb, hh = KB_HANDLE.h * Sh * Rb;
+  var xo = KB_LEG_OUT * Sh * Rb;                       /* leg outer edge */
+  var coverY = bcy - Math.sqrt(Math.max(Rb*Rb - xo*xo, 0));
+  var hby = coverY + (o.cover == null ? 0.349 : o.cover) * Rb;
+  var hx = bcx + (KB_HANDLE.left + KB_HANDLE.w/2) * Sh * Rb - hw/2;
+  var hy = hby - hh;
 
   /* Two shadows, same reasoning as the dumbbell: the wide soft one is ambient
      occlusion, the tight one is the contact patch that actually plants it. A
      kettlebell touches the floor on a small pad at the bottom of the sphere,
      so the tight one is much smaller here than under a dumbbell's two ends. */
   var dep = o.depth == null ? 0.36 : o.depth;
-  var cxS = W/2, ballW = iw * 0.97;
   var shadow =
-    '<ellipse cx="'+f2(cxS)+'" cy="'+f2(baseY)+'" rx="'+f2(ballW*0.50)+
-      '" ry="'+f2(ballW*0.50*dep)+'" fill="#000" opacity=".42" filter="url(#kbb'+o.id+')"/>' +
-    '<ellipse cx="'+f2(cxS)+'" cy="'+f2(baseY)+'" rx="'+f2(ballW*0.26)+
-      '" ry="'+f2(ballW*0.26*dep)+'" fill="#000" opacity=".60" filter="url(#kbbT'+o.id+')"/>';
+    '<ellipse cx="'+f2(bcx)+'" cy="'+f2(baseY)+'" rx="'+f2(Rb*0.98)+
+      '" ry="'+f2(Rb*0.98*dep)+'" fill="#000" opacity=".42" filter="url(#kbb'+o.id+')"/>' +
+    '<ellipse cx="'+f2(bcx)+'" cy="'+f2(baseY)+'" rx="'+f2(Rb*0.52)+
+      '" ry="'+f2(Rb*0.52*dep)+'" fill="#000" opacity=".60" filter="url(#kbbT'+o.id+')"/>';
 
-  var img = '<image href="'+o.src+'" x="'+f2(x0)+'" y="'+f2(y0)+'" width="'+f2(iw)+
-            '" height="'+f2(ih)+'" preserveAspectRatio="none"' +
-            (o.tint === false ? '' : ' filter="url(#kbt'+o.id+')"') + '/>';
+  /* Handle behind, ball in front — the ball is what hides the join. */
+  var tint = o.tint === false ? '' : ' filter="url(#kbt'+o.id+')"';
+  var img =
+    '<image href="'+o.srcHandle+'" x="'+f2(hx)+'" y="'+f2(hy)+'" width="'+f2(hw)+
+      '" height="'+f2(hh)+'"'+tint+'/>' +
+    '<image href="'+o.srcBall+'" x="'+f2(bx)+'" y="'+f2(by)+'" width="'+f2(bw)+
+      '" height="'+f2(bh)+'"'+tint+'/>';
 
   /* THE NUMBER IS LIVE TEXT ON A BLANK MEDALLION.
      The artwork ships with an empty octagon precisely so the gauge can put the
@@ -1006,15 +1109,22 @@ function kettlebellSceneSVG(weight, o){
      source, extent 226x312, ratio 0.724). The tilt is not measured because an
      octagon curving over a sphere has no unambiguous major axis — depending on
      which extremes you trust it reads anywhere from -9 to -24 degrees — so it
-     is a knob with a middling default rather than a false precision. */
+     is a knob with a middling default rather than a false precision.
+
+     THE MEDALLION BELONGS TO THE BALL, so it is placed off the ball's centre
+     and radius rather than off the whole object's box. That is not tidiness:
+     once the handle scales on its own law the object's box no longer has a
+     fixed relationship to the ball, and a number positioned against it would
+     drift up the sphere as the weight changed. */
   var num = '';
   if(o.numbers !== false){
-    var nx = x0 + iw * o.numX, ny = y0 + ih * o.numY;
+    var nx = bcx + (o.numX == null ? KB_MEDAL.dx : o.numX) * Rb;
+    var ny = bcy + (o.numY == null ? KB_MEDAL.dy : o.numY) * Rb;
     num = '<g transform="translate('+f2(nx)+' '+f2(ny)+') rotate('+f2(o.tilt)+
             ') scale('+f2(o.squash)+' 1)">' +
           '<text x="0" y="0" text-anchor="middle" dominant-baseline="central" ' +
             'font-family="ui-sans-serif,system-ui,sans-serif" font-weight="700" ' +
-            'font-size="'+f2(ih*o.numSize)+'" fill="'+o.numFill+
+            'font-size="'+f2(Rb*o.numSize)+'" fill="'+o.numFill+
             '" opacity="'+o.numOpacity+'">'+wt+'</text></g>';
   }
 
@@ -1042,16 +1152,26 @@ export var BELT     = { yaw: -18, depth: 0.56, spread: 0, plateScale: 0.92,
    cannot be turned. That is the trade for having a kettlebell that survives
    being looked at. Everything else about it IS adjustable.
 
-   `src` is relative, and it is relative TO THE PAGE, not to this module. The
-   app's pages sit at the site root so the default is right for them; the lab
-   lives in logo/ and passes '../images/equipment/kettlebell.png'. It is not
-   a root-relative '/images/...' because the site is served from a subpath and
-   that would 404 there. */
+   BOTH src PATHS ARE RELATIVE TO THE PAGE, not to this module. The app's
+   pages sit at the site root so the defaults are right for them; the lab
+   lives in logo/ and passes '../images/…'. They are not root-relative
+   '/images/…' because the site is served from a subpath and that would 404
+   there. A missing image does not throw — it draws nothing — so a page that
+   gets these wrong loses its kettlebell silently. */
 export var KETTLEBELL = {
-  src: 'images/equipment/kettlebell.png',
+  srcBall:   'images/equipment/kettlebell-ball.png',
+  srcHandle: 'images/equipment/kettlebell-handle.png',
   id: 'k',
-  size: 165,          /* drawn height in user units at KBMAX */
-  growth: 1/3,        /* mass -> length exponent; see kbScale */
+  size: 190,          /* drawn ball DIAMETER in user units at KBMAX */
+  ballGrowth: 1/3,    /* the ball is the mass — cube root */
+  handleWeight: 0,    /* lb of the label that is handle, not ball. 0 = the old
+                         plain cube root; see kbBallScale before changing it */
+  handleGrowth: 0.12, /* handles barely grow — they all fit one hand */
+  handleScale: 1,     /* flat multiplier on the handle, on top of its law */
+  cover: 0.349,       /* how far past 'just covered' the leg tips are pushed,
+                         in ball radii. 0.349 reproduces the original render */
+  gripMax: 0.92,      /* widest the legs may sit, in ball radii. Past 1.0 the
+                         ball cannot hide them at any depth — see the solve */
   depth: 0.36,        /* shadow foreshortening, matches the dumbbell's floor */
   tint: true,
   dark: '#20242a',    /* what black in the source becomes */
@@ -1059,9 +1179,12 @@ export var KETTLEBELL = {
   stretch: 2.96,      /* 255/(97-11): opens the crushed source back up */
   black: 0.128,       /* 11/255 * stretch: where the ramp starts */
   numbers: true,
-  numX: 0.7963,       /* medallion centre, fraction of the image box — measured */
-  numY: 0.7031,
-  numSize: 0.115,     /* digit height as a fraction of bell height */
+  /* All three are in BALL RADII from the ball's centre, measured off the
+     artwork — not fractions of the object's box, which no longer has a fixed
+     relationship to the ball now that the handle scales separately. */
+  numX: 0.6032,
+  numY: 0.0844,
+  numSize: 0.333,     /* digit height in ball radii */
   squash: 0.724,      /* measured: the medallion is turning away from us */
   tilt: -12,          /* NOT measured — see the note in kettlebellSceneSVG */
   numFill: '#DDE3EA',
@@ -1200,9 +1323,12 @@ export function gaugeOpts(g, size){
   for(var k in s) base[k] = s[k];
   if(g.kind === 'dumbbell' && g.count) base.count = g.count;
   /* A card may sit at a different directory depth than the app pages, so it
-     is allowed to override the one setting that is a PATH rather than a look.
+     is allowed to override the settings that are PATHS rather than looks.
      Nothing else about the kettlebell is a call site's business. */
-  if(g.kind === 'kettlebell' && size.src) base.src = size.src;
+  if(g.kind === 'kettlebell'){
+    if(size.srcBall)   base.srcBall   = size.srcBall;
+    if(size.srcHandle) base.srcHandle = size.srcHandle;
+  }
   return base;
 }
 

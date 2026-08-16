@@ -33,24 +33,41 @@ Barbell and belt also take numbers, numSize, plateScale.
 Belt also takes spread, fade, trim.
 Kettlebell takes no yaw — it is a fixed render, not geometry.
 
-THE KETTLEBELL SHIPS AN IMAGE AND THAT IS DELIBERATE.
-It draws images/equipment/kettlebell.png (358x512 grey+alpha, 95 KB) rather
-than paths. Four drawn kettlebells were built and all four were rejected — the
-shape is a sphere fused to a bent handle and the eye catches the join at card
-size. Do not try to "finish" it in code.
+THE KETTLEBELL SHIPS IMAGES AND THAT IS DELIBERATE.
+It draws TWO layers rather than paths:
 
-Two things follow that you must not get wrong:
+    images/equipment/kettlebell-ball.png     420x404 grey+alpha, 79 KB
+    images/equipment/kettlebell-handle.png   330x331 grey+alpha, 32 KB
 
-  · THE PNG MUST BE DEPLOYED. It is tracked and under build-sw.mjs's 150 KB
-    cap, so it is part of the offline shell. If a consumer of the gauges lives
-    somewhere that cannot reach images/equipment/, the bell renders as a blank
-    box and nothing throws.
+Four drawn kettlebells were built and all four were rejected — the shape is a
+sphere fused to a bent handle and the eye catches the join at card size. Do not
+try to "finish" it in code.
 
-  · `src` IS RELATIVE TO THE PAGE, NOT TO THE MODULE. The default suits pages
-    at the site root. A page at another depth passes its own path through
-    gaugeOpts' `src` — the lab does exactly this, with '../images/…'. Do NOT
-    change it to a root-relative '/images/…': the site is served from a
-    subpath and that 404s there.
+IT IS TWO FILES BECAUSE A KETTLEBELL DOES NOT SCALE UNIFORMLY. On a real rack
+the balls differ enormously from 4 kg to 40 kg while the handles barely change,
+because every one of them has to fit the same hand. The ball and the handle
+therefore grow on separate laws and are composed at draw time — handle behind,
+ball in front, the ball hiding the join. Do not "simplify" this back to one
+image; that is where it started.
+
+Three things follow that you must not get wrong:
+
+  · BOTH PNGs MUST BE DEPLOYED. A missing image does not throw — SVG just
+    draws nothing — so a page that cannot reach images/equipment/ loses its
+    kettlebell SILENTLY. Check it renders; do not check only that it compiles.
+
+  · THE PATHS ARE RELATIVE TO THE PAGE, NOT TO THE MODULE. The defaults suit
+    pages at the site root. A page at another depth passes its own paths
+    through gaugeOpts' `srcBall` / `srcHandle` — the lab does exactly this,
+    with '../images/…'. Do NOT change them to root-relative '/images/…': the
+    site is served from a subpath and that 404s there.
+
+  · THE LEGS ARE HIDDEN, NOT SHORT. The handle layer's legs were carried past
+    where the artwork ended so a small ball still has something to meet. They
+    are covered by the ball, and `gripMax` caps how wide the handle may grow
+    for exactly that reason: past a ball's own width no seating depth can hide
+    them and they hang past its sides. If you ever see a leg in open air, that
+    cap is the control — not the artwork.
 
 The weight is LIVE TEXT drawn onto a blank medallion in the artwork, so it is
 correct at every step of the range. An earlier asset had "20" baked into it,
@@ -134,12 +151,23 @@ reintroduce the pattern.
                numSize: 0.44, numbers: true }
   BELT     = { yaw: -18, depth: 0.56, spread: 0, plateScale: 0.92,
                numSize: 0.44, fade: 0.78, trim: 0.61, numbers: true }
-  KETTLEBELL = { src: 'images/equipment/kettlebell.png', size: 165,
-                 growth: 1/3, tint: true, dark: '#20242a', light: '#95A1AE',
+  KETTLEBELL = { srcBall:   'images/equipment/kettlebell-ball.png',
+                 srcHandle: 'images/equipment/kettlebell-handle.png',
+                 size: 190,            // BALL DIAMETER at the top of the range
+                 ballGrowth: 1/3, handleWeight: 0,
+                 handleGrowth: 0.12, handleScale: 1,
+                 cover: 0.349, gripMax: 0.92,
+                 tint: true, dark: '#20242a', light: '#95A1AE',
                  stretch: 2.96, black: 0.128, numbers: true,
-                 numX: 0.7963, numY: 0.7031, numSize: 0.115,
+                 numX: 0.6032, numY: 0.0844, numSize: 0.333,
                  squash: 0.724, tilt: -12, numFill: '#DDE3EA',
                  numOpacity: 0.92 }
+
+The kettlebell's `size` is the BALL'S DIAMETER, not the object's height — the
+object's height is not fixed, because the handle scales separately. For the
+same reason numX / numY / numSize are in BALL RADII from the ball's centre
+rather than fractions of a picture: the medallion is on the ball, and a number
+measured against anything else slides up the sphere as the weight changes.
 
   PALETTE  = { handle:'#A8B2BC',
                p20:'#2B3138', p10:'#2B3138', p5:'#2B3138',   // ONE tone
@@ -268,9 +296,9 @@ side and 225 is two — the gym numbers fall out of the arithmetic. Do not round
 4. Card integration: per-exercise gauge selection and a working stepper.
 5. A short note listing every loadable exercise that resolved to NO GAUGE, so the gaps
    are visible rather than silent.
-6. Confirmation that images/equipment/kettlebell.png is reachable from every page that
-   can draw a kettlebell. A missing image does not throw — it renders nothing — so this
-   is the one failure here that testing by reading the code will not catch.
+6. Confirmation that BOTH kettlebell layers are reachable from every page that can draw
+   one. A missing image does not throw — it renders nothing — so this is the one failure
+   here that testing by reading the code will not catch. Look at a rendered card.
 
 PROVE THE PROPAGATION WORKS before you call it done:
   - Run the build twice; the second run must report nothing to do.
