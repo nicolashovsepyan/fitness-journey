@@ -900,6 +900,131 @@ function sceneSVG(weight, o){
 }
 
 /* ============================================================
+   THE KETTLEBELL — A PHOTOGRAPH, NOT A DRAWING
+
+   Every other object on this floor is drawn from geometry. This one is a
+   rendered image, and that is a deliberate exception rather than a shortcut.
+   Four kettlebells were built from primitives and all four were rejected: the
+   shape is a sphere fused to a bent handle through a compound fillet, and at
+   card size the eye reads the join instantly. The honest fix was to stop
+   drawing it.
+
+   WHAT THE ASSET IS
+   images/equipment/kettlebell.png — 358x512, GREY + ALPHA, 95 KB. It came in
+   as a 1254px render on a green screen; the green was keyed out with a
+   tolerance (it was noisy, #06EE05 give or take 8 levels) and despilled so
+   the black edges carry no green fringe.
+
+   IT IS GREYSCALE ON PURPOSE. Measured chroma across the whole object was 9
+   levels out of 255 — visually neutral already — and storing it as grey+alpha
+   rather than RGBA took it from 244 KB to 95 KB, which is what puts it under
+   build-sw.mjs's 150 KB precache cap and therefore into the offline shell.
+   Being grey is also what makes the tint below work predictably.
+
+   HOW THE TINT WORKS, AND WHY THE OBVIOUS WAY FAILS
+   The source is crushed: the whole object lives between luminance 11 and 97.
+   The first attempt at recolouring used the alpha as a mask and filled it with
+   a flat colour, which produced a silhouette — every facet gone. Painting the
+   shading back over it did nothing, because a near-black image has almost no
+   tonal range for a blend to grab.
+
+   So: STRETCH FIRST, THEN MAP. A linear transfer pulls 11..97 out to the full
+   range, and only then a 2-stop table maps black->`dark` and white->`light`.
+   The facets survive because they are still a gradient when the colour is
+   applied. Change the order and you are back to a silhouette. */
+var KB_ASPECT = 761 / 1088;      /* measured from the asset's alpha bbox */
+
+function kbDefs(id, o){
+  var sl = o.stretch, it = -o.black;
+  var hx = function(h){ return [parseInt(h.slice(1,3),16)/255,
+                                parseInt(h.slice(3,5),16)/255,
+                                parseInt(h.slice(5,7),16)/255]; };
+  var d = hx(o.dark), l = hx(o.light);
+  var lin = '<feFuncR type="linear" slope="'+sl+'" intercept="'+f2(it)+'"/>' +
+            '<feFuncG type="linear" slope="'+sl+'" intercept="'+f2(it)+'"/>' +
+            '<feFuncB type="linear" slope="'+sl+'" intercept="'+f2(it)+'"/>';
+  var tab = '<feFuncR type="table" tableValues="'+f2(d[0])+' '+f2(l[0])+'"/>' +
+            '<feFuncG type="table" tableValues="'+f2(d[1])+' '+f2(l[1])+'"/>' +
+            '<feFuncB type="table" tableValues="'+f2(d[2])+' '+f2(l[2])+'"/>';
+  /* sRGB, not the linearRGB default — the stops above were picked by eye in
+     sRGB and linear interpolation washes them out by roughly a stop. */
+  return (o.tint === false ? '' :
+      '<filter id="kbt'+id+'" color-interpolation-filters="sRGB">' +
+        '<feComponentTransfer>' + lin + '</feComponentTransfer>' +
+        '<feComponentTransfer>' + tab + '</feComponentTransfer>' +
+      '</filter>') +
+    '<filter id="kbb'+id+'" x="-60%" y="-160%" width="220%" height="420%">' +
+      '<feGaussianBlur stdDeviation="7"/></filter>' +
+    '<filter id="kbbT'+id+'" x="-40%" y="-120%" width="180%" height="340%">' +
+      '<feGaussianBlur stdDeviation="2.4"/></filter>';
+}
+
+/* MASS -> LENGTH. Same cube-root law as the plates: 20x the weight is 2.71x
+   the bell, not 20x. Checked against a real rack — a 5 lb bell is about 14 cm
+   tall and a 100 lb about 34.5 cm, a ratio of 2.46, so cube root overshoots
+   by roughly a tenth. `growth` is exposed so that can be damped without
+   touching this function. */
+function kbScale(wt, o){
+  return Math.pow(Math.max(wt, 1) / KBMAX, o.growth == null ? 1/3 : o.growth);
+}
+
+function kettlebellSceneSVG(weight, o){
+  o = o || {};
+  for(var k in KETTLEBELL) if(o[k] === undefined) o[k] = KETTLEBELL[k];
+  var W = o.W || 420, H = o.H || 250, sc = o.sc || 1;
+  var over = weight > KBMAX, wt = Math.min(weight, KBMAX);
+  var horizon = H * 0.24, baseY = H * 0.80;
+
+  var ih = o.size * sc * kbScale(wt, o);       /* drawn height */
+  var iw = ih * KB_ASPECT;
+  var x0 = W/2 - iw/2, y0 = baseY - ih;
+
+  /* Two shadows, same reasoning as the dumbbell: the wide soft one is ambient
+     occlusion, the tight one is the contact patch that actually plants it. A
+     kettlebell touches the floor on a small pad at the bottom of the sphere,
+     so the tight one is much smaller here than under a dumbbell's two ends. */
+  var dep = o.depth == null ? 0.36 : o.depth;
+  var cxS = W/2, ballW = iw * 0.97;
+  var shadow =
+    '<ellipse cx="'+f2(cxS)+'" cy="'+f2(baseY)+'" rx="'+f2(ballW*0.50)+
+      '" ry="'+f2(ballW*0.50*dep)+'" fill="#000" opacity=".42" filter="url(#kbb'+o.id+')"/>' +
+    '<ellipse cx="'+f2(cxS)+'" cy="'+f2(baseY)+'" rx="'+f2(ballW*0.26)+
+      '" ry="'+f2(ballW*0.26*dep)+'" fill="#000" opacity=".60" filter="url(#kbbT'+o.id+')"/>';
+
+  var img = '<image href="'+o.src+'" x="'+f2(x0)+'" y="'+f2(y0)+'" width="'+f2(iw)+
+            '" height="'+f2(ih)+'" preserveAspectRatio="none"' +
+            (o.tint === false ? '' : ' filter="url(#kbt'+o.id+')"') + '/>';
+
+  /* THE NUMBER IS LIVE TEXT ON A BLANK MEDALLION.
+     The artwork ships with an empty octagon precisely so the gauge can put the
+     real weight there — an earlier asset had "20" baked in, which is right for
+     exactly one of the twenty steps in this range.
+
+     The medallion sits low and right on the sphere and is turning away from
+     the camera, so it is not a circle on screen. Centre and squash are
+     MEASURED off the asset (rim ridge detection: centre 850,845 in the 1254px
+     source, extent 226x312, ratio 0.724). The tilt is not measured because an
+     octagon curving over a sphere has no unambiguous major axis — depending on
+     which extremes you trust it reads anywhere from -9 to -24 degrees — so it
+     is a knob with a middling default rather than a false precision. */
+  var num = '';
+  if(o.numbers !== false){
+    var nx = x0 + iw * o.numX, ny = y0 + ih * o.numY;
+    num = '<g transform="translate('+f2(nx)+' '+f2(ny)+') rotate('+f2(o.tilt)+
+            ') scale('+f2(o.squash)+' 1)">' +
+          '<text x="0" y="0" text-anchor="middle" dominant-baseline="central" ' +
+            'font-family="ui-sans-serif,system-ui,sans-serif" font-weight="700" ' +
+            'font-size="'+f2(ih*o.numSize)+'" fill="'+o.numFill+
+            '" opacity="'+o.numOpacity+'">'+wt+'</text></g>';
+  }
+
+  return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+
+      weight+' pound kettlebell"><defs>' + kbDefs(o.id, o) + '</defs>' +
+    (o.floor === false ? '' : floorSVG(W, H, horizon)) +
+    shadow + img + num + (over ? plusGlyph(W-30, 32, 14) : '') + '</svg>';
+}
+
+/* ============================================================
    THE LOCKED SETTINGS
 
    Signed off in the lab. A card that needs a different size passes W/H/sc;
@@ -913,13 +1038,47 @@ export var BARBELL  = { yaw: 1,   depth: 0.19, shaftHalf: 120, sleeveLen: 72,
 export var BELT     = { yaw: -18, depth: 0.56, spread: 0, plateScale: 0.92,
                         numSize: 0.44, fade: 0.78, trim: 0.61, numbers: true };
 
+/* The kettlebell has no yaw because it is a fixed render, not geometry — it
+   cannot be turned. That is the trade for having a kettlebell that survives
+   being looked at. Everything else about it IS adjustable.
+
+   `src` is relative, and it is relative TO THE PAGE, not to this module. The
+   app's pages sit at the site root so the default is right for them; the lab
+   lives in logo/ and passes '../images/equipment/kettlebell.png'. It is not
+   a root-relative '/images/...' because the site is served from a subpath and
+   that would 404 there. */
+export var KETTLEBELL = {
+  src: 'images/equipment/kettlebell.png',
+  id: 'k',
+  size: 165,          /* drawn height in user units at KBMAX */
+  growth: 1/3,        /* mass -> length exponent; see kbScale */
+  depth: 0.36,        /* shadow foreshortening, matches the dumbbell's floor */
+  tint: true,
+  dark: '#20242a',    /* what black in the source becomes */
+  light: '#95A1AE',   /* what white becomes — the two ends of the facet ramp */
+  stretch: 2.96,      /* 255/(97-11): opens the crushed source back up */
+  black: 0.128,       /* 11/255 * stretch: where the ramp starts */
+  numbers: true,
+  numX: 0.7963,       /* medallion centre, fraction of the image box — measured */
+  numY: 0.7031,
+  numSize: 0.115,     /* digit height as a fraction of bell height */
+  squash: 0.724,      /* measured: the medallion is turning away from us */
+  tilt: -12,          /* NOT measured — see the note in kettlebellSceneSVG */
+  numFill: '#DDE3EA',
+  numOpacity: 0.92,
+};
+
+export var KBMAX  = 100;
+export var KBSTEP = 5;
+
 /* The ranges the steppers move through. Physical, not arbitrary: a barbell
    total moves in TENS because plates go on in pairs, which is why 135 is one
    45 a side and 225 is two — the gym numbers fall out of the arithmetic. */
 export var RANGE = {
-  dumbbell: { min: 5,  max: 100, step: 5  },   /* per hand */
-  barbell:  { min: 45, max: 405, step: 10 },   /* total, bar is 45 alone */
-  belt:     { min: 5,  max: 135, step: 5  },
+  dumbbell:   { min: 5,  max: 100, step: 5  },   /* per hand */
+  barbell:    { min: 45, max: 405, step: 10 },   /* total, bar is 45 alone */
+  belt:       { min: 5,  max: 135, step: 5  },
+  kettlebell: { min: 5,  max: 100, step: 5  },
 };
 
 /* ============================================================
@@ -954,12 +1113,11 @@ export function gaugeFor(row){
 
   if(has('vest') || loading === 'added-load')  return { kind:'belt' };
 
-  /* NO KETTLEBELL RENDERER. Several were built and none of them held up, so
-     the drawing was removed rather than left in half-right — a wrong object
-     on a card is worse than an honest number field. Do NOT substitute a
-     dumbbell: a kettlebell is a different shape and it will be spotted.
-     12 rows in the database land here. */
-  if(has('kb'))  return { kind:'none', why:'no kettlebell renderer' };
+  /* The kettlebell is an image rather than geometry — see the banner above
+     kettlebellSceneSVG. It is never a dumbbell wearing a different name:
+     four drawn ones were rejected and substituting the wrong object was
+     always the worse answer. */
+  if(has('kb'))  return { kind:'kettlebell' };
 
   return { kind:'none', why:'loadable but no gauge (' + (eq.join('/') || 'no equipment') + ')' };
 }
@@ -1018,18 +1176,24 @@ export function gaugeOpts(g, size){
                floor: size.floor !== false, C: PALETTE };
   var s = g.kind === 'barbell'    ? BARBELL
         : g.kind === 'belt'       ? BELT
+        : g.kind === 'kettlebell' ? KETTLEBELL
         : DUMBBELL;
   for(var k in s) base[k] = s[k];
   if(g.kind === 'dumbbell' && g.count) base.count = g.count;
+  /* A card may sit at a different directory depth than the app pages, so it
+     is allowed to override the one setting that is a PATH rather than a look.
+     Nothing else about the kettlebell is a call site's business. */
+  if(g.kind === 'kettlebell' && size.src) base.src = size.src;
   return base;
 }
 
 /* One entry point, so a card never chooses a scene function by hand. */
 export function gaugeSVG(g, weight, size){
   var o = gaugeOpts(g, size);
-  if(g.kind === 'barbell')  return barbellSceneSVG(weight, o);
-  if(g.kind === 'belt')     return beltSceneSVG(weight, o);
-  if(g.kind === 'dumbbell') return sceneSVG(weight, o);
+  if(g.kind === 'barbell')    return barbellSceneSVG(weight, o);
+  if(g.kind === 'belt')       return beltSceneSVG(weight, o);
+  if(g.kind === 'kettlebell') return kettlebellSceneSVG(weight, o);
+  if(g.kind === 'dumbbell')   return sceneSVG(weight, o);
   return '';
 }
 
@@ -1052,4 +1216,5 @@ export function getPlate(dn){
   return BARPLATE[dn] ? { r: BARPLATE[dn].r, t: BARPLATE[dn].t } : null;
 }
 
-export { sceneSVG, barbellSceneSVG, beltSceneSVG, decompose, barLoad, beltLoad };
+export { sceneSVG, barbellSceneSVG, beltSceneSVG, kettlebellSceneSVG,
+         decompose, barLoad, beltLoad };

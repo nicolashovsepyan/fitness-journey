@@ -438,6 +438,100 @@ footer code{font:400 12.5px/1.4 var(--mono);color:var(--ink-2)}
 
 <section>
   <div class="shead">
+    <div><h2>The kettlebell</h2>
+      <p>The one object here that is a photograph rather than geometry. Four
+        drawn ones were rejected, so this is the supplied render — keyed off
+        its green screen, reduced to grey so it can be tinted, and scaled by
+        the same cube-root law as the plates.</p></div>
+    <p class="eyebrow">5 → 100</p>
+  </div>
+  <div class="rig">
+    <div class="stagecard"><div class="stage" id="kstage"></div></div>
+    <div class="panel" id="kpanelBox">
+      <div class="grp">
+        <p class="eyebrow">Load</p>
+        <div class="ctl"><label for="kw">Bell</label><output id="kwV">20 lb</output>
+          <input type="range" id="kw" min="1" max="21" step="1" value="4"></div>
+      </div>
+      <div class="grp">
+        <p class="eyebrow">The bell</p>
+        <div class="ctl"><label for="ksz">Size at 100</label><output id="kszV">165</output>
+          <input type="range" id="ksz" min="80" max="240" step="5" value="165"></div>
+        <div class="ctl"><label for="kgr">Growth</label><output id="kgrV">0.333</output>
+          <input type="range" id="kgr" min="0.10" max="0.60" step="0.005" value="0.333"></div>
+        <p class="note" style="margin:0"><b>Growth</b> is how fast it gets
+          bigger with weight. <b>0.333</b> is cube root — mass to length, the
+          same law the plates use. A real rack is nearer <b>0.30</b>, because
+          a handle still has to fit a hand.</p>
+      </div>
+      <div class="grp">
+        <p class="eyebrow">Colour</p>
+        <div class="seg" id="segKTint">
+          <button data-v="on" aria-pressed="true">Tinted</button>
+          <button data-v="off" aria-pressed="false">As shot</button>
+        </div>
+        <div class="sw"><label for="kcD">Shadow end</label>
+          <input type="color" id="kcD" value="#20242a"><code id="kkD">#20242a</code></div>
+        <div class="sw"><label for="kcL">Lit end</label>
+          <input type="color" id="kcL" value="#95A1AE"><code id="kkL">#95A1AE</code></div>
+        <div class="ctl"><label for="kst">Contrast</label><output id="kstV">2.96</output>
+          <input type="range" id="kst" min="1.0" max="4.5" step="0.02" value="2.96"></div>
+        <p class="note" style="margin:0">The render arrived crushed — the whole
+          bell sits between luminance <b>11</b> and <b>97</b>. Contrast opens
+          that back out BEFORE the colour is applied, which is the only reason
+          the facets survive. Tint it flat and you get a silhouette.</p>
+        <p class="note" style="margin:0"><b>The handle cannot be coloured
+          separately.</b> It is one image, not parts — that is the trade for
+          using a render instead of geometry.</p>
+      </div>
+      <div class="grp">
+        <p class="eyebrow">The number</p>
+        <div class="seg" id="segKNum">
+          <button data-v="on" aria-pressed="true">Numbers on</button>
+          <button data-v="off" aria-pressed="false">Off</button>
+        </div>
+        <div class="sw"><label for="kcN">Digits</label>
+          <input type="color" id="kcN" value="#DDE3EA"><code id="kkN">#DDE3EA</code></div>
+        <div class="ctl"><label for="kns">Size</label><output id="knsV">11.5%</output>
+          <input type="range" id="kns" min="4" max="22" step="0.5" value="11.5"></div>
+        <div class="ctl"><label for="knx">Across</label><output id="knxV">0.796</output>
+          <input type="range" id="knx" min="0.30" max="1.00" step="0.002" value="0.796"></div>
+        <div class="ctl"><label for="kny">Down</label><output id="knyV">0.703</output>
+          <input type="range" id="kny" min="0.30" max="1.00" step="0.002" value="0.703"></div>
+        <div class="ctl"><label for="ksq">Squash</label><output id="ksqV">0.724</output>
+          <input type="range" id="ksq" min="0.30" max="1.20" step="0.004" value="0.724"></div>
+        <div class="ctl"><label for="ktl">Tilt</label><output id="ktlV">-12°</output>
+          <input type="range" id="ktl" min="-45" max="20" step="1" value="-12"></div>
+        <div class="ctl"><label for="kno">Strength</label><output id="knoV">92%</output>
+          <input type="range" id="kno" min="20" max="100" step="2" value="92"></div>
+        <p class="note" style="margin:0">The medallion came blank on purpose,
+          so the gauge writes the real weight into it. Its centre and
+          <b>squash</b> are measured off the artwork; <b>tilt</b> is not — an
+          octagon curving over a sphere has no one honest major axis, so that
+          one is yours to set by eye.</p>
+      </div>
+      <div class="grp">
+        <p class="eyebrow">On the floor</p>
+        <pre class="read" id="kread">…</pre>
+      </div>
+      <div class="grp lockbox">
+        <p class="eyebrow">Your settings</p>
+        <div class="seg">
+          <button id="kLockBtn">Lock these</button>
+          <button id="kResetBtn">Reset</button>
+        </div>
+        <textarea id="kcfg" class="cfg" readonly rows="14"></textarea>
+      </div>
+    </div>
+  </div>
+  <div style="height:14px"></div>
+  <div class="ladder"><div class="ladrow" id="kladder"></div></div>
+  <p class="note">One bell, always — a kettlebell is picked up on its own.
+    It moves in <b>fives</b>, and above 100 it shows <b>100+</b>.</p>
+</section>
+
+<section>
+  <div class="shead">
     <div><h2>On a card</h2>
       <p>At the size it will be drawn, with a working stepper.</p></div>
     <p class="eyebrow">Real size</p>
@@ -1359,6 +1453,131 @@ function sceneSVG(weight, o){
 }
 
 /* ============================================================
+   THE KETTLEBELL — A PHOTOGRAPH, NOT A DRAWING
+
+   Every other object on this floor is drawn from geometry. This one is a
+   rendered image, and that is a deliberate exception rather than a shortcut.
+   Four kettlebells were built from primitives and all four were rejected: the
+   shape is a sphere fused to a bent handle through a compound fillet, and at
+   card size the eye reads the join instantly. The honest fix was to stop
+   drawing it.
+
+   WHAT THE ASSET IS
+   images/equipment/kettlebell.png — 358x512, GREY + ALPHA, 95 KB. It came in
+   as a 1254px render on a green screen; the green was keyed out with a
+   tolerance (it was noisy, #06EE05 give or take 8 levels) and despilled so
+   the black edges carry no green fringe.
+
+   IT IS GREYSCALE ON PURPOSE. Measured chroma across the whole object was 9
+   levels out of 255 — visually neutral already — and storing it as grey+alpha
+   rather than RGBA took it from 244 KB to 95 KB, which is what puts it under
+   build-sw.mjs's 150 KB precache cap and therefore into the offline shell.
+   Being grey is also what makes the tint below work predictably.
+
+   HOW THE TINT WORKS, AND WHY THE OBVIOUS WAY FAILS
+   The source is crushed: the whole object lives between luminance 11 and 97.
+   The first attempt at recolouring used the alpha as a mask and filled it with
+   a flat colour, which produced a silhouette — every facet gone. Painting the
+   shading back over it did nothing, because a near-black image has almost no
+   tonal range for a blend to grab.
+
+   So: STRETCH FIRST, THEN MAP. A linear transfer pulls 11..97 out to the full
+   range, and only then a 2-stop table maps black->`dark` and white->`light`.
+   The facets survive because they are still a gradient when the colour is
+   applied. Change the order and you are back to a silhouette. */
+var KB_ASPECT = 761 / 1088;      /* measured from the asset's alpha bbox */
+
+function kbDefs(id, o){
+  var sl = o.stretch, it = -o.black;
+  var hx = function(h){ return [parseInt(h.slice(1,3),16)/255,
+                                parseInt(h.slice(3,5),16)/255,
+                                parseInt(h.slice(5,7),16)/255]; };
+  var d = hx(o.dark), l = hx(o.light);
+  var lin = '<feFuncR type="linear" slope="'+sl+'" intercept="'+f2(it)+'"/>' +
+            '<feFuncG type="linear" slope="'+sl+'" intercept="'+f2(it)+'"/>' +
+            '<feFuncB type="linear" slope="'+sl+'" intercept="'+f2(it)+'"/>';
+  var tab = '<feFuncR type="table" tableValues="'+f2(d[0])+' '+f2(l[0])+'"/>' +
+            '<feFuncG type="table" tableValues="'+f2(d[1])+' '+f2(l[1])+'"/>' +
+            '<feFuncB type="table" tableValues="'+f2(d[2])+' '+f2(l[2])+'"/>';
+  /* sRGB, not the linearRGB default — the stops above were picked by eye in
+     sRGB and linear interpolation washes them out by roughly a stop. */
+  return (o.tint === false ? '' :
+      '<filter id="kbt'+id+'" color-interpolation-filters="sRGB">' +
+        '<feComponentTransfer>' + lin + '</feComponentTransfer>' +
+        '<feComponentTransfer>' + tab + '</feComponentTransfer>' +
+      '</filter>') +
+    '<filter id="kbb'+id+'" x="-60%" y="-160%" width="220%" height="420%">' +
+      '<feGaussianBlur stdDeviation="7"/></filter>' +
+    '<filter id="kbbT'+id+'" x="-40%" y="-120%" width="180%" height="340%">' +
+      '<feGaussianBlur stdDeviation="2.4"/></filter>';
+}
+
+/* MASS -> LENGTH. Same cube-root law as the plates: 20x the weight is 2.71x
+   the bell, not 20x. Checked against a real rack — a 5 lb bell is about 14 cm
+   tall and a 100 lb about 34.5 cm, a ratio of 2.46, so cube root overshoots
+   by roughly a tenth. `growth` is exposed so that can be damped without
+   touching this function. */
+function kbScale(wt, o){
+  return Math.pow(Math.max(wt, 1) / KBMAX, o.growth == null ? 1/3 : o.growth);
+}
+
+function kettlebellSceneSVG(weight, o){
+  o = o || {};
+  for(var k in KETTLEBELL) if(o[k] === undefined) o[k] = KETTLEBELL[k];
+  var W = o.W || 420, H = o.H || 250, sc = o.sc || 1;
+  var over = weight > KBMAX, wt = Math.min(weight, KBMAX);
+  var horizon = H * 0.24, baseY = H * 0.80;
+
+  var ih = o.size * sc * kbScale(wt, o);       /* drawn height */
+  var iw = ih * KB_ASPECT;
+  var x0 = W/2 - iw/2, y0 = baseY - ih;
+
+  /* Two shadows, same reasoning as the dumbbell: the wide soft one is ambient
+     occlusion, the tight one is the contact patch that actually plants it. A
+     kettlebell touches the floor on a small pad at the bottom of the sphere,
+     so the tight one is much smaller here than under a dumbbell's two ends. */
+  var dep = o.depth == null ? 0.36 : o.depth;
+  var cxS = W/2, ballW = iw * 0.97;
+  var shadow =
+    '<ellipse cx="'+f2(cxS)+'" cy="'+f2(baseY)+'" rx="'+f2(ballW*0.50)+
+      '" ry="'+f2(ballW*0.50*dep)+'" fill="#000" opacity=".42" filter="url(#kbb'+o.id+')"/>' +
+    '<ellipse cx="'+f2(cxS)+'" cy="'+f2(baseY)+'" rx="'+f2(ballW*0.26)+
+      '" ry="'+f2(ballW*0.26*dep)+'" fill="#000" opacity=".60" filter="url(#kbbT'+o.id+')"/>';
+
+  var img = '<image href="'+o.src+'" x="'+f2(x0)+'" y="'+f2(y0)+'" width="'+f2(iw)+
+            '" height="'+f2(ih)+'" preserveAspectRatio="none"' +
+            (o.tint === false ? '' : ' filter="url(#kbt'+o.id+')"') + '/>';
+
+  /* THE NUMBER IS LIVE TEXT ON A BLANK MEDALLION.
+     The artwork ships with an empty octagon precisely so the gauge can put the
+     real weight there — an earlier asset had "20" baked in, which is right for
+     exactly one of the twenty steps in this range.
+
+     The medallion sits low and right on the sphere and is turning away from
+     the camera, so it is not a circle on screen. Centre and squash are
+     MEASURED off the asset (rim ridge detection: centre 850,845 in the 1254px
+     source, extent 226x312, ratio 0.724). The tilt is not measured because an
+     octagon curving over a sphere has no unambiguous major axis — depending on
+     which extremes you trust it reads anywhere from -9 to -24 degrees — so it
+     is a knob with a middling default rather than a false precision. */
+  var num = '';
+  if(o.numbers !== false){
+    var nx = x0 + iw * o.numX, ny = y0 + ih * o.numY;
+    num = '<g transform="translate('+f2(nx)+' '+f2(ny)+') rotate('+f2(o.tilt)+
+            ') scale('+f2(o.squash)+' 1)">' +
+          '<text x="0" y="0" text-anchor="middle" dominant-baseline="central" ' +
+            'font-family="ui-sans-serif,system-ui,sans-serif" font-weight="700" ' +
+            'font-size="'+f2(ih*o.numSize)+'" fill="'+o.numFill+
+            '" opacity="'+o.numOpacity+'">'+wt+'</text></g>';
+  }
+
+  return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+
+      weight+' pound kettlebell"><defs>' + kbDefs(o.id, o) + '</defs>' +
+    (o.floor === false ? '' : floorSVG(W, H, horizon)) +
+    shadow + img + num + (over ? plusGlyph(W-30, 32, 14) : '') + '</svg>';
+}
+
+/* ============================================================
    THE LOCKED SETTINGS
 
    Signed off in the lab. A card that needs a different size passes W/H/sc;
@@ -1372,13 +1591,46 @@ var BARBELL  = { yaw: 1,   depth: 0.19, shaftHalf: 120, sleeveLen: 72,
 var BELT     = { yaw: -18, depth: 0.56, spread: 0, plateScale: 0.92,
                         numSize: 0.44, fade: 0.78, trim: 0.61, numbers: true };
 
+/* The kettlebell has no yaw because it is a fixed render, not geometry — it
+   cannot be turned. That is the trade for having a kettlebell that survives
+   being looked at. Everything else about it IS adjustable.
+
+   `src` is relative, and it is relative TO THE PAGE, not to this module. The
+   app's pages sit at the site root so the default is right for them; the lab
+   lives in logo/ and passes '../images/equipment/kettlebell.png'. It is not
+   a root-relative '/images/...' because the site is served from a subpath and
+   that would 404 there. */
+var KETTLEBELL = {
+  src: 'images/equipment/kettlebell.png',
+  id: 'k',
+  size: 165,          /* drawn height in user units at KBMAX */
+  growth: 1/3,        /* mass -> length exponent; see kbScale */
+  depth: 0.36,        /* shadow foreshortening, matches the dumbbell's floor */
+  tint: true,
+  dark: '#20242a',    /* what black in the source becomes */
+  light: '#95A1AE',   /* what white becomes — the two ends of the facet ramp */
+  stretch: 2.96,      /* 255/(97-11): opens the crushed source back up */
+  black: 0.128,       /* 11/255 * stretch: where the ramp starts */
+  numbers: true,
+  numX: 0.7963,       /* medallion centre, fraction of the image box — measured */
+  numY: 0.7031,
+  numSize: 0.115,     /* digit height as a fraction of bell height */
+  squash: 0.724,      /* measured: the medallion is turning away from us */
+  tilt: -12,          /* NOT measured — see the note in kettlebellSceneSVG */
+  numFill: '#DDE3EA',
+  numOpacity: 0.92,
+};
+var KBMAX  = 100;
+var KBSTEP = 5;
+
 /* The ranges the steppers move through. Physical, not arbitrary: a barbell
    total moves in TENS because plates go on in pairs, which is why 135 is one
    45 a side and 225 is two — the gym numbers fall out of the arithmetic. */
 var RANGE = {
-  dumbbell: { min: 5,  max: 100, step: 5  },   /* per hand */
-  barbell:  { min: 45, max: 405, step: 10 },   /* total, bar is 45 alone */
-  belt:     { min: 5,  max: 135, step: 5  },
+  dumbbell:   { min: 5,  max: 100, step: 5  },   /* per hand */
+  barbell:    { min: 45, max: 405, step: 10 },   /* total, bar is 45 alone */
+  belt:       { min: 5,  max: 135, step: 5  },
+  kettlebell: { min: 5,  max: 100, step: 5  },
 };
 
 /* ============================================================
@@ -1413,12 +1665,11 @@ function gaugeFor(row){
 
   if(has('vest') || loading === 'added-load')  return { kind:'belt' };
 
-  /* NO KETTLEBELL RENDERER. Several were built and none of them held up, so
-     the drawing was removed rather than left in half-right — a wrong object
-     on a card is worse than an honest number field. Do NOT substitute a
-     dumbbell: a kettlebell is a different shape and it will be spotted.
-     12 rows in the database land here. */
-  if(has('kb'))  return { kind:'none', why:'no kettlebell renderer' };
+  /* The kettlebell is an image rather than geometry — see the banner above
+     kettlebellSceneSVG. It is never a dumbbell wearing a different name:
+     four drawn ones were rejected and substituting the wrong object was
+     always the worse answer. */
+  if(has('kb'))  return { kind:'kettlebell' };
 
   return { kind:'none', why:'loadable but no gauge (' + (eq.join('/') || 'no equipment') + ')' };
 }
@@ -1475,18 +1726,24 @@ function gaugeOpts(g, size){
                floor: size.floor !== false, C: PALETTE };
   var s = g.kind === 'barbell'    ? BARBELL
         : g.kind === 'belt'       ? BELT
+        : g.kind === 'kettlebell' ? KETTLEBELL
         : DUMBBELL;
   for(var k in s) base[k] = s[k];
   if(g.kind === 'dumbbell' && g.count) base.count = g.count;
+  /* A card may sit at a different directory depth than the app pages, so it
+     is allowed to override the one setting that is a PATH rather than a look.
+     Nothing else about the kettlebell is a call site's business. */
+  if(g.kind === 'kettlebell' && size.src) base.src = size.src;
   return base;
 }
 
 /* One entry point, so a card never chooses a scene function by hand. */
 function gaugeSVG(g, weight, size){
   var o = gaugeOpts(g, size);
-  if(g.kind === 'barbell')  return barbellSceneSVG(weight, o);
-  if(g.kind === 'belt')     return beltSceneSVG(weight, o);
-  if(g.kind === 'dumbbell') return sceneSVG(weight, o);
+  if(g.kind === 'barbell')    return barbellSceneSVG(weight, o);
+  if(g.kind === 'belt')       return beltSceneSVG(weight, o);
+  if(g.kind === 'kettlebell') return kettlebellSceneSVG(weight, o);
+  if(g.kind === 'dumbbell')   return sceneSVG(weight, o);
   return '';
 }
 
@@ -1509,7 +1766,7 @@ function getPlate(dn){
   return BARPLATE[dn] ? { r: BARPLATE[dn].r, t: BARPLATE[dn].t } : null;
 }
 
-return { ARM_PATTERNS, BAR, BARBELL, BARDENOM, BARMAX, BARPLATE, BARSTEP, BELT, BELTMAX, BELTSTEP, DUMBBELL, HELD, LOCK, MAXW, PALETTE, RANGE, STEP, barLoad, barbellSceneSVG, beltLoad, beltSceneSVG, decompose, gaugeFor, gaugeOpts, gaugeSVG, getPlate, heldCount, sceneSVG, setGrip, setPlate };
+return { ARM_PATTERNS, BAR, BARBELL, BARDENOM, BARMAX, BARPLATE, BARSTEP, BELT, BELTMAX, BELTSTEP, DUMBBELL, HELD, KBMAX, KBSTEP, KETTLEBELL, LOCK, MAXW, PALETTE, RANGE, STEP, barLoad, barbellSceneSVG, beltLoad, beltSceneSVG, decompose, gaugeFor, gaugeOpts, gaugeSVG, getPlate, heldCount, kettlebellSceneSVG, sceneSVG, setGrip, setPlate };
 })();
 /* ===== /EQUIP:JS ===== */
 
@@ -1524,7 +1781,9 @@ var sceneSVG = EQUIP.sceneSVG, barbellSceneSVG = EQUIP.barbellSceneSVG,
     MAXW = EQUIP.MAXW, STEP = EQUIP.STEP, LOCK = EQUIP.LOCK,
     BAR = EQUIP.BAR, BARDENOM = EQUIP.BARDENOM,
     BARMAX = EQUIP.BARMAX, BARSTEP = EQUIP.BARSTEP,
-    BELTMAX = EQUIP.BELTMAX, BELTSTEP = EQUIP.BELTSTEP;
+    BELTMAX = EQUIP.BELTMAX, BELTSTEP = EQUIP.BELTSTEP,
+    kettlebellSceneSVG = EQUIP.kettlebellSceneSVG,
+    KBMAX = EQUIP.KBMAX, KBSTEP = EQUIP.KBSTEP;
 
 
 /* ==========================================================================
@@ -2006,10 +2265,147 @@ function pSyncControls(){
   });
 }
 
-/* ---- the kettlebell rig ------------------------------------------------ */
-/* v2: the handle arch was reshaped and its default height moved 86 -> 95.
-   A stored v1 carries the old 86 back over the top and the new arch opens
-   at the wrong proportion — the same masking trap as everywhere else. */
+/* ---- the kettlebell rig ------------------------------------------------
+   THE KEY IS NAMED, NOT NUMBERED, AND THAT IS THE FIX FOR A REAL BUG.
+
+   The kettlebells that were built and rejected each had a panel, and between
+   them they burned through fj.kettlebell.v1 ... v5 — all five are still
+   sitting in the browser. Saved state is merged over the defaults below, so
+   this panel opened wearing a dead rig's numbers: numSize 0.52 where this one
+   wants 0.115, which drew the weight across half the bell. Nothing threw and
+   nothing looked broken; it just came up wrong, which is exactly what makes
+   this pattern dangerous.
+
+   Bumping to v6 would have worked until someone lost count again. Naming the
+   key after WHAT THE RIG IS cannot collide with a version sequence that has
+   already been consumed. The old keys are left alone rather than deleted —
+   they are dead, but they are the user's browser, not ours.
+
+   `src` is '../images/…' because the lab sits in logo/ while the app's pages
+   sit at the root. The module's default is the root-relative-to-page one; the
+   lab is the odd caller, so the lab is what passes the override. */
+var KKEY = 'fj.kettlebell.image.v1';
+var KDEF = { i: 4, size: 165, growth: 1/3, tint: true,
+             dark: '#20242a', light: '#95A1AE', stretch: 2.96,
+             numbers: true, numFill: '#DDE3EA', numSize: 0.115,
+             numX: 0.7963, numY: 0.7031, squash: 0.724, tilt: -12,
+             numOpacity: 0.92, locked: false };
+var KS = {};
+for(var k0 in KDEF) KS[k0] = KDEF[k0];
+try{
+  var ksaved = JSON.parse(localStorage.getItem(KKEY) || 'null');
+  if(ksaved) for(var k1 in ksaved) if(k1 in KS) KS[k1] = ksaved[k1];
+}catch(e){}
+function ksave(){ try{ localStorage.setItem(KKEY, JSON.stringify(KS)); }catch(e){} }
+
+var KB_SRC = '../images/equipment/kettlebell.png';
+function kwAt(i){ return i > KBMAX/KBSTEP ? KBMAX + KBSTEP : i*KBSTEP; }
+function kopts(extra){
+  var o = { src: KB_SRC, size: KS.size, growth: KS.growth,
+            tint: KS.tint, dark: KS.dark, light: KS.light, stretch: KS.stretch,
+            /* the ramp has to start where the source actually starts, so the
+               black point tracks contrast instead of being a second knob */
+            black: (11/255) * KS.stretch,
+            numbers: KS.numbers, numFill: KS.numFill, numSize: KS.numSize,
+            numX: KS.numX, numY: KS.numY, squash: KS.squash, tilt: KS.tilt,
+            numOpacity: KS.numOpacity };
+  for(var k in extra) o[k] = extra[k];
+  return o;
+}
+function drawKettle(){
+  var t = kwAt(KS.i), over = t > KBMAX;
+  $('kstage').innerHTML = kettlebellSceneSVG(t, kopts({ W:420, H:380, sc:1.0, id:'ks' }));
+  $('kwV').textContent  = (over ? KBMAX + '+' : t) + ' lb';
+  $('kszV').textContent = KS.size;
+  $('kgrV').textContent = KS.growth.toFixed(3);
+  $('kstV').textContent = KS.stretch.toFixed(2);
+  $('knsV').textContent = (KS.numSize*100).toFixed(1) + '%';
+  $('knxV').textContent = KS.numX.toFixed(3);
+  $('knyV').textContent = KS.numY.toFixed(3);
+  $('ksqV').textContent = KS.squash.toFixed(3);
+  $('ktlV').textContent = KS.tilt + '°';
+  $('knoV').textContent = Math.round(KS.numOpacity*100) + '%';
+  $('kkD').textContent  = KS.dark;
+  $('kkL').textContent  = KS.light;
+  $('kkN').textContent  = KS.numFill;
+
+  var rel = Math.pow(Math.min(t,KBMAX)/KBMAX, KS.growth);
+  $('kread').innerHTML =
+    'bell     <b>' + (over ? KBMAX + '+' : t) + ' lb</b>\n' +
+    'drawn    <b>' + (KS.size*rel).toFixed(0) + '</b> tall  (' +
+      (rel*100).toFixed(0) + '% of the 100)\n' +
+    'vs 5 lb  <b>' + (rel/Math.pow(5/KBMAX, KS.growth)).toFixed(2) + '×</b>\n' +
+    'artwork  358×512 grey+alpha, 95 KB';
+  $('kcfg').value =
+    'size at 100  ' + KS.size + '\n' +
+    'growth       ' + KS.growth.toFixed(3) + '\n' +
+    'tint         ' + (KS.tint ? 'on' : 'off') + '\n' +
+    'shadow end   ' + KS.dark + '\n' +
+    'lit end      ' + KS.light + '\n' +
+    'contrast     ' + KS.stretch.toFixed(2) + '\n' +
+    'numbers      ' + (KS.numbers ? 'on' : 'off') + '\n' +
+    'digits       ' + KS.numFill + '\n' +
+    'number size  ' + (KS.numSize*100).toFixed(1) + '%\n' +
+    'across       ' + KS.numX.toFixed(3) + '\n' +
+    'down         ' + KS.numY.toFixed(3) + '\n' +
+    'squash       ' + KS.squash.toFixed(3) + '\n' +
+    'tilt         ' + KS.tilt + '\n' +
+    'strength     ' + Math.round(KS.numOpacity*100) + '%';
+  ksave();
+}
+function drawKLadder(){
+  $('kladder').innerHTML = [5,15,30,45,60,80,100,105].map(function(t, ix){
+    return '<div class="rung"><div class="box">' +
+      kettlebellSceneSVG(t, kopts({ W:250, H:260, sc:0.62, id:'kl'+ix })) +
+      '</div><div class="cap">' + (t > KBMAX ? KBMAX + '+' : t) + ' lb</div>' +
+      '<div class="mk">one bell</div></div>';
+  }).join('');
+}
+function kettleAll(){ drawKettle(); drawKLadder(); }
+[['kw','i',1],['ksz','size',1],['kgr','growth',1],['kst','stretch',1],
+ ['kns','numSize',0.01],['knx','numX',1],['kny','numY',1],
+ ['ksq','squash',1],['ktl','tilt',1],['kno','numOpacity',0.01]].forEach(function(t){
+  $(t[0]).addEventListener('input', function(){ KS[t[1]] = +this.value * t[2]; kettleAll(); });
+});
+[['kcD','dark'],['kcL','light'],['kcN','numFill']].forEach(function(t){
+  $(t[0]).addEventListener('input', function(){ KS[t[1]] = this.value; kettleAll(); });
+});
+[['segKTint','tint'],['segKNum','numbers']].forEach(function(t){
+  $(t[0]).addEventListener('click', function(ev){
+    var b = ev.target.closest('button'); if(!b) return;
+    KS[t[1]] = b.dataset.v === 'on';
+    [].forEach.call(this.querySelectorAll('button'), function(o){
+      o.setAttribute('aria-pressed', o === b ? 'true' : 'false'); });
+    kettleAll();
+  });
+});
+function kApplyLock(){
+  $('kpanelBox').classList.toggle('locked', KS.locked);
+  $('kLockBtn').textContent = KS.locked ? 'Unlock' : 'Lock these';
+  $('kLockBtn').setAttribute('aria-pressed', KS.locked ? 'true' : 'false');
+}
+$('kLockBtn').addEventListener('click', function(){
+  KS.locked = !KS.locked; kApplyLock(); ksave();
+});
+$('kResetBtn').addEventListener('click', function(){
+  for(var k in KDEF) KS[k] = KDEF[k];
+  kSyncControls(); kApplyLock(); kettleAll();
+});
+function kSyncControls(){
+  $('kw').value = KS.i; $('ksz').value = KS.size; $('kgr').value = KS.growth;
+  $('kst').value = KS.stretch; $('kns').value = KS.numSize*100;
+  $('knx').value = KS.numX; $('kny').value = KS.numY;
+  $('ksq').value = KS.squash; $('ktl').value = KS.tilt;
+  $('kno').value = Math.round(KS.numOpacity*100);
+  $('kcD').value = KS.dark; $('kcL').value = KS.light; $('kcN').value = KS.numFill;
+  [['segKTint', KS.tint], ['segKNum', KS.numbers]].forEach(function(t){
+    [].forEach.call($(t[0]).querySelectorAll('button'), function(o){
+      o.setAttribute('aria-pressed',
+        o.dataset.v === (t[1] ? 'on' : 'off') ? 'true' : 'false'); });
+  });
+}
+
+/* ---- the barbell ladder ------------------------------------------------ */
 function drawBLadder(){
   $('bladder').innerHTML = [45,95,135,185,225,315,415].map(function(t){
     var L = barLoad(Math.min(t, BARMAX));
@@ -2027,6 +2423,9 @@ bSyncControls();
 bApplyLock();
 lSyncControls();
 lApplyLock();
+kSyncControls();
+kApplyLock();
 pSyncControls();
 drawAll();
+kettleAll();
 </script>
