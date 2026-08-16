@@ -33,51 +33,37 @@ Barbell and belt also take numbers, numSize, plateScale.
 Belt also takes spread, fade, trim.
 Kettlebell takes no yaw — it is a fixed render, not geometry.
 
-THE KETTLEBELL SHIPS IMAGES AND THAT IS DELIBERATE.
-It draws TWO layers rather than paths:
+THE KETTLEBELL SHIPS AN IMAGE AND THAT IS DELIBERATE.
+It draws images/equipment/kettlebell.png (358x512 grey+alpha, 95 KB) rather
+than paths. Four drawn kettlebells were built and all four were rejected — the
+shape is a sphere fused to a bent handle and the eye catches the join at card
+size. Do not try to "finish" it in code.
 
-    images/equipment/kettlebell-ball.png     420x404 grey+alpha, 79 KB
-    images/equipment/kettlebell-handle.png   330x331 grey+alpha, 32 KB
+IT WAS BRIEFLY TWO IMAGES AND IS DELIBERATELY BACK TO ONE. A real rack changes
+its balls enormously between 4 kg and 40 kg while its handles barely change, so
+the artwork was split and scaled on separate laws. It worked and it was not
+worth it: at card size the difference was very hard to see, and a light bell's
+oversized handle could run out of ball to hide its legs in. One picture scaled
+whole is the version with nothing to go wrong. The split is recoverable from
+git if that is ever revisited — look for kettlebell-ball.png and
+kettlebell-handle.png.
 
-Four drawn kettlebells were built and all four were rejected — the shape is a
-sphere fused to a bent handle and the eye catches the join at card size. Do not
-try to "finish" it in code.
+Two things follow that you must not get wrong:
 
-IT IS TWO FILES SO THAT IT CAN SCALE NON-UNIFORMLY, BUT BY DEFAULT IT DOES NOT.
-On a real rack the balls differ enormously from 4 kg to 40 kg while the handles
-barely change, because every one of them has to fit the same hand. The two
-layers make that possible: handle behind, ball in front, the ball hiding the
-join.
-
-Shipped default is handleGrowth === ballGrowth, which makes the handle's
-relative scale exactly 1 everywhere and redraws the original artwork — verified
-against it pixel for pixel, 0 mismatches in 1.57M. So OUT OF THE BOX THIS LOOKS
-LIKE ONE IMAGE. The non-uniform behaviour is one number away (try 0.12) but was
-not made the default: the difference is very hard to see at card size, and an
-over-large handle on a light bell can leave legs with no ball to hide in.
-
-Do not "simplify" this back to a single PNG. It would save nothing — the
-default already looks identical — and it would throw away the only mechanism
-that can ever make a 5 lb bell look like a 5 lb bell.
-
-Three things follow that you must not get wrong:
-
-  · BOTH PNGs MUST BE DEPLOYED. A missing image does not throw — SVG just
-    draws nothing — so a page that cannot reach images/equipment/ loses its
+  · THE PNG MUST BE DEPLOYED. A missing image does not throw — SVG just draws
+    nothing — so a page that cannot reach images/equipment/ loses its
     kettlebell SILENTLY. Check it renders; do not check only that it compiles.
 
-  · THE PATHS ARE RELATIVE TO THE PAGE, NOT TO THE MODULE. The defaults suit
-    pages at the site root. A page at another depth passes its own paths
-    through gaugeOpts' `srcBall` / `srcHandle` — the lab does exactly this,
-    with '../images/…'. Do NOT change them to root-relative '/images/…': the
-    site is served from a subpath and that 404s there.
+  · `src` IS RELATIVE TO THE PAGE, NOT TO THE MODULE. The default suits pages
+    at the site root. A page at another depth passes its own path through
+    gaugeOpts' `src` — the lab does exactly this, with '../images/…'. Do NOT
+    change it to a root-relative '/images/…': the site is served from a
+    subpath and that 404s there.
 
-  · THE LEGS ARE HIDDEN, NOT SHORT. The handle layer's legs were carried past
-    where the artwork ended so a small ball still has something to meet. They
-    are covered by the ball, and `gripMax` caps how wide the handle may grow
-    for exactly that reason: past a ball's own width no seating depth can hide
-    them and they hang past its sides. If you ever see a leg in open air, that
-    cap is the control — not the artwork.
+`wide` and `tall` are separate multipliers on the drawn box, both 1 at the
+artwork's own proportion, and they are the owner's to set. The shadow and the
+number are derived from the drawn size, so stretching the bell does not leave
+it standing on the wrong shadow or slide the weight off its medallion.
 
 The weight is LIVE TEXT drawn onto a blank medallion in the artwork, so it is
 correct at every step of the range. An earlier asset had "20" baked into it,
@@ -161,23 +147,17 @@ reintroduce the pattern.
                numSize: 0.44, numbers: true }
   BELT     = { yaw: -18, depth: 0.56, spread: 0, plateScale: 0.92,
                numSize: 0.44, fade: 0.78, trim: 0.61, numbers: true }
-  KETTLEBELL = { srcBall:   'images/equipment/kettlebell-ball.png',
-                 srcHandle: 'images/equipment/kettlebell-handle.png',
-                 size: 190,            // BALL DIAMETER at the top of the range
-                 ballGrowth: 1/3, handleWeight: 0,
-                 handleGrowth: 1/3, handleScale: 1,   // = ballGrowth: uniform by default
-                 cover: 0.349, gripMax: 0.92,
+  KETTLEBELL = { src: 'images/equipment/kettlebell.png', size: 165,
+                 growth: 1/3, wide: 1, tall: 1,
                  tint: true, dark: '#20242a', light: '#95A1AE',
                  stretch: 2.96, black: 0.128, numbers: true,
-                 numX: 0.6032, numY: 0.0844, numSize: 0.333,
+                 numX: 0.7963, numY: 0.7031, numSize: 0.115,
                  squash: 0.724, tilt: -12, numFill: '#DDE3EA',
                  numOpacity: 0.92 }
 
-The kettlebell's `size` is the BALL'S DIAMETER, not the object's height — the
-object's height is not fixed, because the handle scales separately. For the
-same reason numX / numY / numSize are in BALL RADII from the ball's centre
-rather than fractions of a picture: the medallion is on the ball, and a number
-measured against anything else slides up the sphere as the weight changes.
+The kettlebell's `size` is the drawn HEIGHT at the top of the range, and
+numX / numY / numSize are fractions of the drawn box — so the number rides
+along when `wide` or `tall` stretch the bell.
 
   PALETTE  = { handle:'#A8B2BC',
                p20:'#2B3138', p10:'#2B3138', p5:'#2B3138',   // ONE tone
@@ -306,9 +286,10 @@ side and 225 is two — the gym numbers fall out of the arithmetic. Do not round
 4. Card integration: per-exercise gauge selection and a working stepper.
 5. A short note listing every loadable exercise that resolved to NO GAUGE, so the gaps
    are visible rather than silent.
-6. Confirmation that BOTH kettlebell layers are reachable from every page that can draw
-   one. A missing image does not throw — it renders nothing — so this is the one failure
-   here that testing by reading the code will not catch. Look at a rendered card.
+6. Confirmation that images/equipment/kettlebell.png is reachable from every page that
+   can draw a kettlebell. A missing image does not throw — it renders nothing — so this
+   is the one failure here that testing by reading the code will not catch. Look at a
+   rendered card.
 
 PROVE THE PROPAGATION WORKS before you call it done:
   - Run the build twice; the second run must report nothing to do.

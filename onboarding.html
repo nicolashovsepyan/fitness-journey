@@ -1131,8 +1131,11 @@ h1.q{text-align:center}
 .dkbands .gb.art{flex:0 0 28%;display:flex;align-items:center;
   justify-content:center;padding:4px 0;overflow:hidden}
 .dkbands .gb.num{padding-top:2px;padding-bottom:4px}
+/* The arrows carry a glow that reaches ~10px past the button, and this band
+   clips. Without the gap the first scroller sat hard against the number
+   above it and its glow was sheared off along the join. */
 .dkbands .gb.dials{flex:0 0 24%;min-height:0;display:flex;flex-direction:column;
-  justify-content:space-evenly;overflow:hidden}
+  justify-content:space-evenly;overflow:hidden;padding-top:10px;padding-bottom:2px}
 .dkbands .gb.act{padding-top:4px}
 /* the remainder, so the proportions above hold on every card and every phone */
 .dkbands .gbfill{flex:1 1 auto;min-height:0;width:100%}
@@ -1145,7 +1148,17 @@ h1.q{text-align:center}
 .gval span{display:block;font-size:12.5px;color:var(--ink3);margin-top:3px;min-height:15px}
 /* ---- the dial: arrows, a sliding ruler, the number above ---- */
 .dial{display:flex;align-items:center;gap:6px;margin:0 -4px 10px}
-.dial .dlarrow{flex:0 0 38px;width:38px;min-width:38px;height:44px;border-radius:11px;
+/* MIN-HEIGHT BEATS HEIGHT, AND THE ARROW IS A BUTTON.
+   `.dkbands button{min-height:50px}` was winning over every `height` set on
+   the arrow here and in the tight steps, so a 38px dial drew a 50px arrow:
+   6px out the top, 6px out the bottom, the top 7px sliced off by the band's
+   overflow and the rest sitting on the number above it. That is the arrow
+   Nicolas could not see all of.
+
+   The width version of this exact bug was fixed once already (the generic
+   `width:100%` stretched an arrow to 304px). Same generic rule, second leak.
+   min-height:0 lets the dial's own height govern, at every step. */
+.dial .dlarrow{flex:0 0 38px;width:38px;min-width:38px;height:44px;min-height:0;border-radius:11px;
   border:1px solid rgba(123,227,196,.35);
   background:#20252b;color:var(--accent);font-size:13px;line-height:1;cursor:pointer;
   display:grid;place-items:center;padding:0;
@@ -1185,7 +1198,14 @@ h1.q{text-align:center}
 .gtier.t3{color:#F2C14E} .gtier.t4{color:var(--neon)}
 
 .reps{margin-top:2px;padding-top:12px;border-top:1px solid var(--line)}
-.reps .lbl{font-size:12.5px;color:var(--ink3);margin-bottom:6px}
+/* THE UNIT SWAP IS ITS OWN BAND, BECAUSE IT DID NOT FIT IN THE DIALS ONE.
+   It used to sit inside .reps, inside the dials band — a band with a fixed
+   share and overflow:hidden. There was never room for it, so on the carry
+   card it rendered 26px below the band's bottom edge and was clipped away
+   entirely: the one card with a choice of units, and the link offering it
+   was invisible. Out here it takes the spare space instead of competing for
+   the dials'. */
+.dkbands .gb.swapline{flex:0 0 auto;padding-top:2px;padding-bottom:2px}
 .dkbands .swapunit{display:block;width:100%;margin-top:2px;min-height:0;background:none;
   border:none;border-radius:0;font:inherit;font-size:12px;color:var(--ink3);
   cursor:pointer;padding:7px 4px;text-decoration:underline;text-underline-offset:3px}
@@ -1195,9 +1215,10 @@ h1.q{text-align:center}
 
 /* A real option, not a footnote — plenty of people genuinely do not know. */
 .dkbands .unsure{display:block;width:100%;margin-top:8px;min-height:0;
-  background:rgba(143,184,255,.07);border:1px solid rgba(143,184,255,.34);
-  border-radius:14px;font:inherit;font-size:14px;font-weight:600;
-  color:#8FB8FF;cursor:pointer;padding:14px 8px;text-decoration:none;
+  background:rgba(143,184,255,.07);border:1.5px solid rgba(143,184,255,.34);
+  border-radius:16px;font:inherit;font-size:14px;font-weight:600;
+  color:#8FB8FF;cursor:pointer;padding:15px 8px;text-align:center;
+  text-decoration:none;letter-spacing:-.01em;
   -webkit-tap-highlight-color:transparent}
 .dkbands .unsure:active{background:rgba(143,184,255,.16);border-color:#8FB8FF}
 .unsure:active{color:var(--ink2)}
@@ -1236,10 +1257,13 @@ h1.q{text-align:center}
 .dkbands.tight .dial{height:38px;margin:0 -4px 7px}
 .dkbands.tight .dial .dlarrow{height:38px}
 .dkbands.tight .dlwin{height:38px}
-.dkbands.tight .dial.small{margin-bottom:4px}
+/* .dial gets a height per step, and .dial.small is still a .dial — so the
+   small dial was drawing a 38px box around a 32px arrow, and the extra
+   height pushed its own arrow past the band and got it clipped. Give the
+   small dial the height its arrow actually is. */
+.dkbands.tight .dial.small{margin-bottom:4px;height:32px}
 .dkbands.tight .dial.small .dlarrow,.dkbands.tight .dial.small .dlwin{height:32px}
 .dkbands.tight .reps{padding-top:8px}
-.dkbands.tight .reps .lbl{margin-bottom:2px}
 .dkbands.tight .repval{margin-bottom:1px}
 .dkbands.tight .repval b{font-size:20px}
 .dkbands.tight .skgo{min-height:46px}
@@ -1259,11 +1283,16 @@ h1.q{text-align:center}
 .dkbands.tighter .gtier{margin:0 0 4px}
 .dkbands.tighter .dial{height:34px;margin:0 -4px 5px}
 .dkbands.tighter .dial .dlarrow,.dkbands.tighter .dlwin{height:34px}
+/* The 10px that lifts the first scroller clear of the number above it is
+   room the band no longer has down here — at a 460px panel it was the last
+   3px of clip. The gap it was buying is smaller at this size anyway. */
+.dkbands.tighter .gb.dials{padding-top:6px}
+.dkbands.tighter .dial.small{height:29px}
 .dkbands.tighter .dial.small .dlarrow,.dkbands.tighter .dial.small .dlwin{height:29px}
 .dkbands.tighter .reps{padding-top:5px}
 .dkbands.tighter .repval b{font-size:18px}
 .dkbands.tighter .skgo{min-height:44px;font-size:15px}
-.dkbands.tighter button{min-height:44px;margin-bottom:6px;padding:10px 14px}
+.dkbands.tighter button:not(.dlarrow):not(.swapunit):not(.unsure):not(.skgo){min-height:44px;margin-bottom:6px;padding:10px 14px}
 .dkbands.tighter .unsure{padding:8px;font-size:12.5px;margin-top:4px}
 .skreps{margin-bottom:14px}
 .skreps .lbl{font-size:12.5px;color:var(--ink3);margin-bottom:7px}
@@ -1271,14 +1300,36 @@ h1.q{text-align:center}
 .skreps button{flex:1;min-height:42px;border-radius:11px;border:1.5px solid var(--line);
   background:var(--card2);color:var(--ink);font:inherit;font-size:14px;font-weight:600;padding:0}
 .skreps button.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
-.dkbands .skgo{width:100%;min-height:52px;border-radius:13px;border:none;background:var(--accent);
-  color:#10120f;font:inherit;font-size:16px;font-weight:700;margin-top:2px}
+/* THE CARD'S TWO BUTTONS FOLLOW THE BASE DESIGN, LIKE EVERY OTHER SCREEN.
+   Both were reading left-aligned because the generic `.dkbands button` rule
+   sets `text-align:left` — correct for the feel panel, where the buttons are
+   a list of options and match .opt, but wrong for these two, which are the
+   deck's .cta and .skip. They now carry .cta's geometry: centred, 16px
+   radius, 17px padding, 16px/600 type. If .cta changes, change these with
+   it — they are the same button in a different panel, not a variant. */
+.dkbands .skgo{width:100%;min-height:52px;border-radius:16px;border:none;background:var(--accent);
+  color:#0C1512;font:inherit;font-size:16px;font-weight:600;letter-spacing:-.01em;
+  padding:17px;text-align:center;margin-top:2px}
 .dkbands .skgo[disabled]{opacity:.35}
-.dkbands button{width:100%;min-height:50px;border-radius:13px;border:1.5px solid var(--line);
+/* THE OPTION BUTTONS, AND ONLY THE OPTION BUTTONS.
+   `.dkbands button` is the feel panel's list of choices — full width, 50px
+   tall, left-aligned, the deck's version of .opt. It is NOT the arrows, the
+   unit swap, the "not sure" link or Continue, all of which are also buttons
+   inside .dkbands and all of which it kept capturing.
+
+   This has now leaked three times: `width:100%` stretched an arrow to 304px,
+   `min-height:50px` drew a 50px arrow in a 38px dial, and then the tighter
+   step's `min-height:44px` did the same thing again after the second fix,
+   because min-height beats height and a bare `button` under two classes
+   outranks `.dial .dlarrow`.
+
+   Excluding them by name ends the family rather than the symptom. A new
+   control inside .dkbands that is not a list option goes in this :not list. */
+.dkbands button:not(.dlarrow):not(.swapunit):not(.unsure):not(.skgo){width:100%;min-height:50px;border-radius:13px;border:1.5px solid var(--line);
   background:var(--bg2);color:var(--ink);font-size:15px;font-weight:550;font-family:inherit;
   margin-bottom:8px;padding:13px 15px;text-align:left;cursor:pointer}
-.dkbands button:active{transform:scale(.985)}
-.dkbands button.on{border-color:var(--accent);background:var(--accent-soft)}
+.dkbands button:not(.dlarrow):not(.swapunit):not(.unsure):not(.skgo):active{transform:scale(.985)}
+.dkbands button:not(.dlarrow):not(.swapunit):not(.unsure):not(.skgo).on{border-color:var(--accent);background:var(--accent-soft)}
 .dkbtns{display:flex;gap:10px;flex:0 0 auto;margin-top:12px}
 .dkbtn{flex:1;min-height:54px;border-radius:14px;border:1.5px solid var(--line2);
   background:var(--card);color:var(--ink2);font-size:14.5px;font-weight:600;font-family:inherit;cursor:pointer}
@@ -2467,22 +2518,27 @@ function sceneSVG(weight, o){
    card size the eye reads the join instantly. The honest fix was to stop
    drawing it.
 
-   WHAT THE ASSETS ARE — TWO LAYERS, NOT ONE PICTURE
-   images/equipment/kettlebell-ball.png    420x404, grey+alpha, 79 KB
-   images/equipment/kettlebell-handle.png  330x331, grey+alpha, 32 KB
+   WHAT THE ASSET IS
+   images/equipment/kettlebell.png — 358x512, GREY + ALPHA, 95 KB. It came in
+   as a 1254px render on a green screen; the green was keyed out with a
+   tolerance (it was noisy, #06EE05 give or take 8 levels) and despilled so
+   the black edges carry no green fringe.
 
-   They were cut from one 1254px render delivered on a green screen. The green
-   was keyed with a tolerance (it was noisy, #06EE05 give or take 8 levels) and
-   despilled, so the black edges carry no green fringe. Why they are two files
-   rather than one is the banner above kbBallScale — the short version is that
-   a real rack changes its balls enormously and its handles hardly at all, and
-   one bitmap cannot do both.
-
-   THEY ARE GREYSCALE ON PURPOSE. Measured chroma across the whole object was 9
-   levels out of 255 — visually neutral already — and storing grey+alpha rather
-   than RGBA cut it by about two thirds, which is what keeps each layer under
-   build-sw.mjs's 150 KB precache cap and therefore in the offline shell.
+   IT IS GREYSCALE ON PURPOSE. Measured chroma across the whole object was 9
+   levels out of 255 — visually neutral already — and storing it as grey+alpha
+   rather than RGBA took it from 244 KB to 95 KB, which is what puts it under
+   build-sw.mjs's 150 KB precache cap and therefore into the offline shell.
    Being grey is also what makes the tint below work predictably.
+
+   IT IS ONE IMAGE, AND IT WAS BRIEFLY TWO. A real rack changes its balls
+   enormously between 4 kg and 40 kg while its handles barely change, because
+   every one of them has to fit the same hand — so the artwork was split into
+   ball and handle and scaled on separate laws. It worked, and it was not
+   worth it: side by side at card size the difference was very hard to see,
+   while a light bell's oversized handle could run out of ball to hide its
+   legs in. One picture, scaled whole, is the version with nothing to go
+   wrong. If that decision is ever revisited, the split is recoverable from
+   git — look for kettlebell-ball.png and kettlebell-handle.png.
 
    HOW THE TINT WORKS, AND WHY THE OBVIOUS WAY FAILS
    The source is crushed: the whole object lives between luminance 11 and 97.
@@ -2495,6 +2551,7 @@ function sceneSVG(weight, o){
    range, and only then a 2-stop table maps black->`dark` and white->`light`.
    The facets survive because they are still a gradient when the colour is
    applied. Change the order and you are back to a silhouette. */
+var KB_ASPECT = 761 / 1088;      /* measured from the asset's alpha bbox */
 
 function kbDefs(id, o){
   var sl = o.stretch, it = -o.black;
@@ -2521,73 +2578,12 @@ function kbDefs(id, o){
       '<feGaussianBlur stdDeviation="2.4"/></filter>';
 }
 
-/* ============================================================
-   TWO LAYERS, BECAUSE A KETTLEBELL DOES NOT SCALE UNIFORMLY
-
-   Look at a real rack from 4 kg to 40 kg and the balls differ enormously
-   while the HANDLES barely change — they cannot, because every one of them
-   has to fit the same hand. Scaling one bitmap up and down gets this wrong at
-   both ends: the light bell gets a toy handle, the heavy one a handle you
-   could not grip.
-
-   So the artwork is split in two — images/equipment/kettlebell-ball.png and
-   kettlebell-handle.png — and each grows on its own law. The handle is drawn
-   FIRST and the ball ON TOP, which is the same order as the original render:
-   the ball occludes the legs where they enter it, so the join needs no
-   blending and the legs may safely run on underneath.
-
-   HOW THE SPLIT WAS CUT (tools notes, in case the artwork is ever re-exported)
-   A least-squares circle fit to the ball's outline gave centre (623.5, 813.3)
-   and radius 375.5 in the 1254px source, to 0.6% mean residual. The ball layer
-   is the run of pixels containing the centre line — its own silhouette, not
-   the fitted circle, so its facets keep their corners — except near the pole,
-   where the legs TOUCH the ball and merge into that run, and the circle is the
-   better boundary. The handle's legs were then carried ~130px further down, so
-   that a small ball under a relatively large handle still has something to
-   meet instead of a gap.
-
-   EVERY NUMBER BELOW IS IN UNITS OF THE BALL'S RADIUS, measured off the
-   artwork. That makes them resolution independent: change the PNG's pixel size
-   and nothing here moves.
-   ============================================================ */
-var KB_BALL   = { w: 2.0266, h: 1.9494, left: -1.0107, top: -1.0048 };
-var KB_HANDLE = { w: 1.5925, h: 1.5979, left: -0.8109, top: -1.9529 };
-var KB_MEDAL  = { dx: 0.6032, dy: 0.0844 };
-var KB_LEG_OUT = 0.71;   /* leg OUTER edge in ball radii, measured off the
-                            handle layer's lowest full rows. The outer edge is
-                            what has to be covered, not the leg's centre. */
-
-/* THE BALL CARRIES THE WEIGHT, AND THE HANDLE DOES NOT.
-   Cube root is right for the ball's own mass, but the number on the label
-   includes the handle, and the handle's share is nearly constant. On a 4 kg
-   bell the handle might be a quarter of the total; on a 40 kg it is a
-   twentieth. Subtracting it first is why the small balls in a real rack look
-   SMALLER than a naive cube root predicts, not larger.
-
-   handleWeight defaults to 0, which is exactly the old cube-root behaviour —
-   the correction is real but its size has to be fitted against the reference
-   rack photograph rather than guessed. */
-function kbBallScale(wt, o){
-  var hw = o.handleWeight || 0;
-  var g  = o.ballGrowth == null ? 1/3 : o.ballGrowth;
-  var num = Math.max(wt - hw, 0.1), den = Math.max(KBMAX - hw, 0.1);
-  return Math.pow(num / den, g);
-}
-/* The handle grows, but only just — and what this returns is RELATIVE TO THE
-   BALL, because every length in the renderer is measured in ball radii.
-
-   That division is not cosmetic. Returning the handle's absolute law here
-   multiplies it by the ball's radius, so the handle ends up growing as
-   W^(handleGrowth + ballGrowth) — FASTER than the ball, which is the exact
-   opposite of what a real rack does. Dividing by the ball's own scale is what
-   makes a light bell wear a proportionally BIGGER handle.
-
-   It divides by kbBallScale rather than by W^ballGrowth so that it stays
-   correct when the handleWeight correction is in play. */
-function kbHandleScale(wt, o){
-  var abs = Math.pow(Math.max(wt, 1) / KBMAX,
-                     o.handleGrowth == null ? 0.12 : o.handleGrowth);
-  return abs / kbBallScale(wt, o);
+/* MASS -> LENGTH. Same cube-root law as the plates: 20x the weight is 2.71x
+   the bell, not 20x. `growth` is exposed so it can be damped — a real rack
+   runs a little under cube root, because the number on the label includes a
+   handle whose weight barely changes. */
+function kbScale(wt, o){
+  return Math.pow(Math.max(wt, 1) / KBMAX, o.growth == null ? 1/3 : o.growth);
 }
 
 function kettlebellSceneSVG(weight, o){
@@ -2597,69 +2593,42 @@ function kettlebellSceneSVG(weight, o){
   var over = weight > KBMAX, wt = Math.min(weight, KBMAX);
   var horizon = H * 0.24, baseY = H * 0.80;
 
-  /* Everything is derived from the ball's radius. */
-  var Rb = (o.size * sc / 2) * kbBallScale(wt, o);
-  var Sh = kbHandleScale(wt, o) * (o.handleScale == null ? 1 : o.handleScale);
-  var bcx = W/2;
-  var bcy = baseY - KB_BALL.h * Rb - KB_BALL.top * Rb;   /* base rests on baseY */
-
-  var bw = KB_BALL.w * Rb, bh = KB_BALL.h * Rb;
-  var bx = bcx + KB_BALL.left * Rb, by = bcy + KB_BALL.top * Rb;
-
-  /* WHERE THE HANDLE SITS IS SOLVED, NOT FIXED, AND THE SOLVE IS ABOUT THE
-     LEG TIPS.
-
-     The legs end in a flat cut — they were carried downward past the artwork
-     so they would always have ball to disappear into. That only works while
-     the ball is still WIDER than the legs at the depth the tips reach. Seat
-     the handle any higher and the tips hang in open air beside the ball,
-     which is exactly what a light bell did before this: a big handle on a
-     small ball, with two legs dangling past its sides.
-
-     So: take the leg's OUTER edge, find the shallowest depth at which the
-     sphere is at least that wide, and put the tips below it. As the handle
-     grows relative to the ball it settles lower by itself, the way a wide
-     handle straddles a small bell in a real rack.
-
-     `cover` = 0.349 is not arbitrary either: at Sh = 1 it reproduces the
-     original single-image render exactly. */
-  var GRIPMAX = o.gripMax == null ? 0.92 : o.gripMax;
-  /* Past this the legs are wider than the ball itself and NO depth can hide
-     them — the sphere has run out of shoulder. A real 4 kg solves it by
-     angling its legs inward; a rigid bitmap cannot, so the handle's relative
-     growth is capped here instead of drawing something impossible. */
-  Sh = Math.min(Sh, GRIPMAX / KB_LEG_OUT);
-
-  var hw = KB_HANDLE.w * Sh * Rb, hh = KB_HANDLE.h * Sh * Rb;
-  var xo = KB_LEG_OUT * Sh * Rb;                       /* leg outer edge */
-  var coverY = bcy - Math.sqrt(Math.max(Rb*Rb - xo*xo, 0));
-  var hby = coverY + (o.cover == null ? 0.349 : o.cover) * Rb;
-  var hx = bcx + (KB_HANDLE.left + KB_HANDLE.w/2) * Sh * Rb - hw/2;
-  var hy = hby - hh;
+  /* `wide` and `tall` are a deliberate pair of separate multipliers rather
+     than one aspect knob, because the two fix different complaints: a bell
+     that reads too narrow for its height, and a bell that reads too small
+     for its slot. Both at 1 is the artwork's own proportion. */
+  var base = o.size * sc * kbScale(wt, o);
+  var ih = base * (o.tall == null ? 1 : o.tall);
+  var iw = base * KB_ASPECT * (o.wide == null ? 1 : o.wide);
+  var x0 = W/2 - iw/2, y0 = baseY - ih;
 
   /* Two shadows, same reasoning as the dumbbell: the wide soft one is ambient
      occlusion, the tight one is the contact patch that actually plants it. A
      kettlebell touches the floor on a small pad at the bottom of the sphere,
-     so the tight one is much smaller here than under a dumbbell's two ends. */
+     so the tight one is much smaller here than under a dumbbell's two ends.
+     Both track the drawn WIDTH, so stretching the bell does not leave it
+     standing on a shadow that belongs to a different object. */
   var dep = o.depth == null ? 0.36 : o.depth;
+  var cxS = W/2, ballW = iw * 0.97;
   var shadow =
-    '<ellipse cx="'+f2(bcx)+'" cy="'+f2(baseY)+'" rx="'+f2(Rb*0.98)+
-      '" ry="'+f2(Rb*0.98*dep)+'" fill="#000" opacity=".42" filter="url(#kbb'+o.id+')"/>' +
-    '<ellipse cx="'+f2(bcx)+'" cy="'+f2(baseY)+'" rx="'+f2(Rb*0.52)+
-      '" ry="'+f2(Rb*0.52*dep)+'" fill="#000" opacity=".60" filter="url(#kbbT'+o.id+')"/>';
+    '<ellipse cx="'+f2(cxS)+'" cy="'+f2(baseY)+'" rx="'+f2(ballW*0.50)+
+      '" ry="'+f2(ballW*0.50*dep)+'" fill="#000" opacity=".42" filter="url(#kbb'+o.id+')"/>' +
+    '<ellipse cx="'+f2(cxS)+'" cy="'+f2(baseY)+'" rx="'+f2(ballW*0.26)+
+      '" ry="'+f2(ballW*0.26*dep)+'" fill="#000" opacity=".60" filter="url(#kbbT'+o.id+')"/>';
 
-  /* Handle behind, ball in front — the ball is what hides the join. */
-  var tint = o.tint === false ? '' : ' filter="url(#kbt'+o.id+')"';
-  var img =
-    '<image href="'+o.srcHandle+'" x="'+f2(hx)+'" y="'+f2(hy)+'" width="'+f2(hw)+
-      '" height="'+f2(hh)+'"'+tint+'/>' +
-    '<image href="'+o.srcBall+'" x="'+f2(bx)+'" y="'+f2(by)+'" width="'+f2(bw)+
-      '" height="'+f2(bh)+'"'+tint+'/>';
+  /* preserveAspectRatio="none" is what lets wide/tall actually stretch the
+     picture instead of letterboxing it inside the box. */
+  var img = '<image href="'+o.src+'" x="'+f2(x0)+'" y="'+f2(y0)+'" width="'+f2(iw)+
+            '" height="'+f2(ih)+'" preserveAspectRatio="none"' +
+            (o.tint === false ? '' : ' filter="url(#kbt'+o.id+')"') + '/>';
 
   /* THE NUMBER IS LIVE TEXT ON A BLANK MEDALLION.
      The artwork ships with an empty octagon precisely so the gauge can put the
      real weight there — an earlier asset had "20" baked in, which is right for
      exactly one of the twenty steps in this range.
+
+     Its position is a FRACTION OF THE DRAWN BOX, so it rides along when the
+     bell is stretched rather than sliding off the medallion.
 
      The medallion sits low and right on the sphere and is turning away from
      the camera, so it is not a circle on screen. Centre and squash are
@@ -2667,22 +2636,15 @@ function kettlebellSceneSVG(weight, o){
      source, extent 226x312, ratio 0.724). The tilt is not measured because an
      octagon curving over a sphere has no unambiguous major axis — depending on
      which extremes you trust it reads anywhere from -9 to -24 degrees — so it
-     is a knob with a middling default rather than a false precision.
-
-     THE MEDALLION BELONGS TO THE BALL, so it is placed off the ball's centre
-     and radius rather than off the whole object's box. That is not tidiness:
-     once the handle scales on its own law the object's box no longer has a
-     fixed relationship to the ball, and a number positioned against it would
-     drift up the sphere as the weight changed. */
+     is a knob with a middling default rather than a false precision. */
   var num = '';
   if(o.numbers !== false){
-    var nx = bcx + (o.numX == null ? KB_MEDAL.dx : o.numX) * Rb;
-    var ny = bcy + (o.numY == null ? KB_MEDAL.dy : o.numY) * Rb;
+    var nx = x0 + iw * o.numX, ny = y0 + ih * o.numY;
     num = '<g transform="translate('+f2(nx)+' '+f2(ny)+') rotate('+f2(o.tilt)+
             ') scale('+f2(o.squash)+' 1)">' +
           '<text x="0" y="0" text-anchor="middle" dominant-baseline="central" ' +
             'font-family="ui-sans-serif,system-ui,sans-serif" font-weight="700" ' +
-            'font-size="'+f2(Rb*o.numSize)+'" fill="'+o.numFill+
+            'font-size="'+f2(ih*o.numSize)+'" fill="'+o.numFill+
             '" opacity="'+o.numOpacity+'">'+wt+'</text></g>';
   }
 
@@ -2710,40 +2672,19 @@ var BELT     = { yaw: -18, depth: 0.56, spread: 0, plateScale: 0.92,
    cannot be turned. That is the trade for having a kettlebell that survives
    being looked at. Everything else about it IS adjustable.
 
-   BOTH src PATHS ARE RELATIVE TO THE PAGE, not to this module. The app's
-   pages sit at the site root so the defaults are right for them; the lab
-   lives in logo/ and passes '../images/…'. They are not root-relative
-   '/images/…' because the site is served from a subpath and that would 404
-   there. A missing image does not throw — it draws nothing — so a page that
-   gets these wrong loses its kettlebell silently. */
+   `src` IS RELATIVE TO THE PAGE, not to this module. The app's pages sit at
+   the site root so the default is right for them; the lab lives in logo/ and
+   passes '../images/…'. It is not root-relative '/images/…' because the site
+   is served from a subpath and that would 404 there. A missing image does not
+   throw — it draws nothing — so a page that gets this wrong loses its
+   kettlebell silently. */
 var KETTLEBELL = {
-  srcBall:   'images/equipment/kettlebell-ball.png',
-  srcHandle: 'images/equipment/kettlebell-handle.png',
+  src: 'images/equipment/kettlebell.png',
   id: 'k',
-  size: 190,          /* drawn ball DIAMETER in user units at KBMAX */
-  ballGrowth: 1/3,    /* the ball is the mass — cube root */
-  handleWeight: 0,    /* lb of the label that is handle, not ball. 0 = the old
-                         plain cube root; see kbBallScale before changing it */
-  /* SET EQUAL TO ballGrowth ON PURPOSE, WHICH MEANS UNIFORM SCALING.
-
-     When these two match, the handle's relative scale is exactly 1 at every
-     weight and the two layers redraw the original artwork — verified against
-     it pixel for pixel, 0 mismatches in 1.57M. So the default look is the
-     plain one-image look, and nothing about the split is visible until
-     somebody asks for it.
-
-     It is a default, not a verdict. A real rack does hold its handles nearly
-     constant (try 0.12) and the machinery is here to do that. But side by side
-     at card size the difference is very hard to see, while an over-large
-     handle on a light bell has a real failure mode — legs with no ball left to
-     hide in. Uniform is the version with nothing to go wrong, so it is what
-     ships until the rack photo is measured and says otherwise. */
-  handleGrowth: 1/3,
-  handleScale: 1,     /* flat multiplier on the handle, on top of its law */
-  cover: 0.349,       /* how far past 'just covered' the leg tips are pushed,
-                         in ball radii. 0.349 reproduces the original render */
-  gripMax: 0.92,      /* widest the legs may sit, in ball radii. Past 1.0 the
-                         ball cannot hide them at any depth — see the solve */
+  size: 165,          /* drawn height in user units at KBMAX */
+  growth: 1/3,        /* mass -> length exponent; see kbScale */
+  wide: 1,            /* horizontal stretch, 1 = the artwork's own proportion */
+  tall: 1,            /* vertical stretch */
   depth: 0.36,        /* shadow foreshortening, matches the dumbbell's floor */
   tint: true,
   dark: '#20242a',    /* what black in the source becomes */
@@ -2751,12 +2692,9 @@ var KETTLEBELL = {
   stretch: 2.96,      /* 255/(97-11): opens the crushed source back up */
   black: 0.128,       /* 11/255 * stretch: where the ramp starts */
   numbers: true,
-  /* All three are in BALL RADII from the ball's centre, measured off the
-     artwork — not fractions of the object's box, which no longer has a fixed
-     relationship to the ball now that the handle scales separately. */
-  numX: 0.6032,
-  numY: 0.0844,
-  numSize: 0.333,     /* digit height in ball radii */
+  numX: 0.7963,       /* medallion centre, fraction of the drawn box — measured */
+  numY: 0.7031,
+  numSize: 0.115,     /* digit height as a fraction of drawn height */
   squash: 0.724,      /* measured: the medallion is turning away from us */
   tilt: -12,          /* NOT measured — see the note in kettlebellSceneSVG */
   numFill: '#DDE3EA',
@@ -2894,10 +2832,7 @@ function gaugeOpts(g, size){
   /* A card may sit at a different directory depth than the app pages, so it
      is allowed to override the settings that are PATHS rather than looks.
      Nothing else about the kettlebell is a call site's business. */
-  if(g.kind === 'kettlebell'){
-    if(size.srcBall)   base.srcBall   = size.srcBall;
-    if(size.srcHandle) base.srcHandle = size.srcHandle;
-  }
+  if(g.kind === 'kettlebell' && size.src) base.src = size.src;
   return base;
 }
 
@@ -5576,12 +5511,11 @@ function deck(s){
             <div class="gb dials">
               <div class="dial" id="gdial"></div>
               ${S2 ? `<div class="reps">
-                <div class="lbl">${S2.q}</div>
                 <div class="repval"><b>${S2.value}</b><span>${S2.unit}</span></div>
                 <div class="dial small" id="rdial"></div>
-                ${c.second==='distance'?`<button class="swapunit" id="swapunit">Rather answer in seconds</button>`:''}
                 </div>` : ''}
             </div>
+            ${c.second==='distance'?`<div class="gb swapline"><button class="swapunit" id="swapunit">Rather answer in seconds</button></div>`:''}
             <div class="gbfill"></div>
             <div class="gb act">
               <button class="skgo">Continue</button>
@@ -5748,6 +5682,10 @@ function deck(s){
           const mount=function(kind){
             secKind=kind;
             const S2=SECOND[kind];
+            /* The unit beside the number is the only thing naming this dial
+               now that the question line above it is gone, so it has to be
+               right the instant the dial is swapped — not on first drag. */
+            rv.innerHTML='<b>'+S2.value+'</b><span>'+S2.unit+'</span>';
             Rp = makeDial(rEl, { min:S2.min, max:S2.max, step:S2.step, over:true,
               value:S2.value,
               onChange:function(n, over){
@@ -5760,7 +5698,8 @@ function deck(s){
           if(sw) sw.onclick=function(){
             const to = secKind==='distance' ? 'seconds' : 'distance';
             sw.textContent = to==='distance' ? 'Rather answer in seconds' : 'Rather answer in metres';
-            bandsEl.querySelector('.reps .lbl').textContent = SECOND[to].q;
+            /* The question line above the second dial is gone — the unit
+               beside the number says it. mount() re-labels that. */
             haptic(12); mount(to);
           };
         }
