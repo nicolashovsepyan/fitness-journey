@@ -1,6 +1,6 @@
 {
  "version": 1,
- "built": "2026-08-13",
+ "built": "2026-08-15",
  "art": {
   "bodyweight_squat": {
    "name": "Bodyweight Squat",
@@ -29,8 +29,8 @@
   },
   "horse_stance": {
    "name": "Horse Stance",
-   "file": null,
-   "status": "missing"
+   "file": "images/exercises/horse_stance.png",
+   "status": "drawn"
   },
   "jump_squat": {
    "name": "Jump Squats",
@@ -59,8 +59,8 @@
   },
   "deadlift": {
    "name": "Deadlift",
-   "file": null,
-   "status": "missing"
+   "file": "images/exercises/deadlift.png",
+   "status": "drawn"
   },
   "db_swing": {
    "name": "Dumbbell Swing",
@@ -84,8 +84,8 @@
   },
   "banded_sidewalk": {
    "name": "Banded Lateral Walks",
-   "file": null,
-   "status": "missing"
+   "file": "images/exercises/banded_sidewalk.png",
+   "status": "drawn"
   },
   "hip_thrust": {
    "name": "Hip Thrust",
@@ -214,8 +214,8 @@
   },
   "full_burpee": {
    "name": "Full Burpee",
-   "file": null,
-   "status": "missing"
+   "file": "images/exercises/full_burpee.png",
+   "status": "drawn"
   },
   "hindu_push_up": {
    "name": "Hindu Push-Up",
@@ -239,8 +239,8 @@
   },
   "straight_bar_push_up": {
    "name": "Straight Bar Push-Up",
-   "file": null,
-   "status": "missing"
+   "file": "images/exercises/straight_bar_push_up.png",
+   "status": "drawn"
   },
   "bottoms_up_kb_hold": {
    "name": "Bottoms-Up KB Hold",
@@ -374,8 +374,8 @@
   },
   "navy_seal_burpee": {
    "name": "Navy Seal Burpee",
-   "file": null,
-   "status": "missing"
+   "file": "images/exercises/navy_seal_burpee.png",
+   "status": "drawn"
   },
   "pike_lean_on_parallettes": {
    "name": "Pike Lean on Parallettes",
@@ -459,8 +459,8 @@
   },
   "man_maker": {
    "name": "Man-Maker",
-   "file": null,
-   "status": "missing"
+   "file": "images/exercises/man_maker.png",
+   "status": "drawn"
   },
   "one_arm_push_up": {
    "name": "One-Arm Push-Up",
@@ -544,8 +544,8 @@
   },
   "active_hang": {
    "name": "Active Hang",
-   "file": null,
-   "status": "missing"
+   "file": "images/exercises/active_hang.png",
+   "status": "drawn"
   },
   "banded_pullapart": {
    "name": "Banded Pull-Aparts",
@@ -604,8 +604,8 @@
   },
   "chin_up": {
    "name": "Chin-up",
-   "file": null,
-   "status": "missing"
+   "file": "images/exercises/chin_up.png",
+   "status": "drawn"
   },
   "neutral_pullup": {
    "name": "Neutral-Grip Pull-Up",
@@ -864,8 +864,8 @@
   },
   "bird_dog": {
    "name": "Bird Dog",
-   "file": null,
-   "status": "missing"
+   "file": "images/exercises/bird_dog.png",
+   "status": "drawn"
   },
   "dead_bug": {
    "name": "Dead Bug",
@@ -1034,13 +1034,13 @@
   },
   "bird_dog_crunch": {
    "name": "Bird Dog Crunch",
-   "file": null,
-   "status": "missing"
+   "file": "images/exercises/bird_dog_crunch.png",
+   "status": "drawn"
   },
   "dragon_flag": {
    "name": "Dragon Flag (Tuck)",
-   "file": null,
-   "status": "missing"
+   "file": "images/exercises/dragon_flag.png",
+   "status": "drawn"
   },
   "elevated_feet_plank": {
    "name": "Elevated Feet Plank",
@@ -1235,8 +1235,8 @@
   },
   "cat_cow": {
    "name": "Cat–Cow",
-   "file": null,
-   "status": "missing"
+   "file": "images/exercises/cat_cow.png",
+   "status": "drawn"
   },
   "deep_squat_rock": {
    "name": "Deep Squat Rocks",
@@ -1365,8 +1365,8 @@
   },
   "down_dog_up_dog": {
    "name": "Down Dog to Up Dog",
-   "file": null,
-   "status": "missing"
+   "file": "images/exercises/down_dog_up_dog.png",
+   "status": "drawn"
   },
   "down_dog_up_dog_bar": {
    "name": "Down Dog to Up Dog (hands on bar)",
@@ -1495,8 +1495,8 @@
   },
   "back_extension_45": {
    "name": "45-Degree Back Extension",
-   "file": null,
-   "status": "missing"
+   "file": "images/exercises/back_extension_45.png",
+   "status": "drawn"
   },
   "kb_swing": {
    "name": "Kettlebell Swing",

@@ -1,0 +1,614 @@
+<title>Movement Library Rebuild</title>
+<style>
+:root{
+  --ground:#EDF0F2; --panel:#FFFFFF; --panel-2:#F5F8F9; --sunk:#E3E9EC;
+  --ink:#0E1418; --ink-2:#53616A; --ink-3:#8A969C;
+  --rule:#D2DADF; --rule-2:#E4EAED;
+  --accent:#1B5B70; --on-accent:#FFFFFF;
+  --ok:#2C6A52;   --ok-bg:#DFEDE6;
+  --warn:#8E6209; --warn-bg:#F6ECD6;
+  --crit:#A02D25; --crit-bg:#F6DEDB;
+  --display:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --body:ui-serif,Georgia,"Times New Roman",serif;
+  --data:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0D1215; --panel:#151C20; --panel-2:#1B2327; --sunk:#101619;
+    --ink:#E7EDF0; --ink-2:#94A2A9; --ink-3:#68767D;
+    --rule:#2A353B; --rule-2:#212A2F;
+    --accent:#63AAC1; --on-accent:#0D1215;
+    --ok:#63B692;   --ok-bg:#17302A;
+    --warn:#D8A344; --warn-bg:#33280F;
+    --crit:#E4756D; --crit-bg:#37201E;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0D1215; --panel:#151C20; --panel-2:#1B2327; --sunk:#101619;
+  --ink:#E7EDF0; --ink-2:#94A2A9; --ink-3:#68767D;
+  --rule:#2A353B; --rule-2:#212A2F;
+  --accent:#63AAC1; --on-accent:#0D1215;
+  --ok:#63B692;   --ok-bg:#17302A;
+  --warn:#D8A344; --warn-bg:#33280F;
+  --crit:#E4756D; --crit-bg:#37201E;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:var(--body); font-size:16px; line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1120px; margin:0 auto; padding:0 24px 96px}
+
+/* ---------- type ---------- */
+h1,h2,h3{font-family:var(--display); font-weight:800; letter-spacing:-.028em; text-wrap:balance; margin:0}
+h1{font-size:clamp(34px,5.4vw,54px); line-height:1.02}
+h2{font-size:clamp(21px,2.5vw,27px); line-height:1.15}
+h3{font-size:16px; letter-spacing:-.01em; font-weight:700}
+p{margin:0; max-width:66ch}
+.lede{font-size:18px; color:var(--ink-2); max-width:62ch}
+.eyebrow{
+  font-family:var(--data); font-size:10.5px; font-weight:600;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--ink-3);
+}
+.num{font-family:var(--data); font-variant-numeric:tabular-nums}
+
+/* ---------- shell ---------- */
+header.top{
+  border-bottom:1px solid var(--rule); padding:52px 0 30px;
+  display:flex; flex-direction:column; gap:16px;
+}
+section{padding:52px 0; border-bottom:1px solid var(--rule-2)}
+section:last-of-type{border-bottom:0}
+.sechead{display:flex; flex-direction:column; gap:9px; margin-bottom:26px}
+
+.panel{background:var(--panel); border:1px solid var(--rule); border-radius:4px}
+
+/* ---------- headline figures ---------- */
+.figs{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1px;
+      background:var(--rule); border:1px solid var(--rule); border-radius:4px; overflow:hidden}
+.fig{background:var(--panel); padding:18px 20px; display:flex; flex-direction:column; gap:5px}
+.fig .v{font-family:var(--data); font-size:33px; font-weight:600; line-height:1;
+        letter-spacing:-.02em; font-variant-numeric:tabular-nums}
+.fig .k{font-size:13.5px; color:var(--ink-2); font-family:var(--display); line-height:1.35}
+.fig.is-crit .v{color:var(--crit)} .fig.is-warn .v{color:var(--warn)}
+
+/* ---------- gap finder ---------- */
+.finder{display:grid; grid-template-columns:minmax(0,300px) minmax(0,1fr); gap:0;
+        background:var(--rule); border:1px solid var(--rule); border-radius:4px; overflow:hidden}
+@media (max-width:820px){.finder{grid-template-columns:1fr}}
+.controls{background:var(--panel-2); padding:20px; display:flex; flex-direction:column; gap:20px}
+.results{background:var(--panel); padding:20px 22px; display:flex; flex-direction:column; gap:18px}
+.ctlgroup{display:flex; flex-direction:column; gap:9px}
+
+.chips{display:flex; flex-wrap:wrap; gap:6px}
+.chip{
+  font-family:var(--data); font-size:11px; letter-spacing:.02em;
+  padding:5px 10px; border:1px solid var(--rule); border-radius:2px;
+  background:var(--panel); color:var(--ink-2); cursor:pointer;
+  transition:background .12s,color .12s,border-color .12s;
+}
+.chip:hover{border-color:var(--accent); color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--on-accent); font-weight:600}
+.chip:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.chip.preset{border-style:dashed}
+.chip.locked{opacity:.55; cursor:default}
+.chip.locked:hover{border-color:var(--rule)}
+
+/* bars */
+.bars{display:flex; flex-direction:column; gap:11px}
+.bar{display:grid; grid-template-columns:92px minmax(0,1fr) 62px; align-items:center; gap:12px}
+.bar .lbl{font-family:var(--data); font-size:11px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-2)}
+.track{position:relative; height:20px; background:var(--sunk); border-radius:2px; overflow:hidden}
+.fill{position:absolute; inset:0 auto 0 0; border-radius:2px; transition:width .3s cubic-bezier(.4,0,.2,1)}
+.fill.ok{background:var(--ok)} .fill.warn{background:var(--warn)} .fill.crit{background:var(--crit)}
+.floor{position:absolute; top:0; bottom:0; width:1px; background:var(--ink-3); opacity:.7}
+.bar .val{font-family:var(--data); font-size:14px; font-weight:600; text-align:right; font-variant-numeric:tabular-nums}
+.val.crit{color:var(--crit)} .val.warn{color:var(--warn)} .val.ok{color:var(--ok)}
+.verdict{
+  font-family:var(--display); font-size:14px; line-height:1.5;
+  padding:12px 14px; border-radius:3px; border-left:3px solid;
+}
+.verdict.crit{background:var(--crit-bg); border-color:var(--crit); color:var(--crit)}
+.verdict.warn{background:var(--warn-bg); border-color:var(--warn); color:var(--warn)}
+.verdict.ok{background:var(--ok-bg); border-color:var(--ok); color:var(--ok)}
+.footnote{font-family:var(--display); font-size:12px; color:var(--ink-3); line-height:1.5}
+
+/* ---------- tables ---------- */
+.tblwrap{overflow-x:auto; border:1px solid var(--rule); border-radius:4px; background:var(--panel)}
+table{border-collapse:collapse; width:100%; min-width:600px}
+th{
+  font-family:var(--data); font-size:10px; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--ink-3); text-align:left; font-weight:600;
+  padding:11px 14px; border-bottom:1px solid var(--rule); white-space:nowrap;
+}
+td{padding:11px 14px; border-bottom:1px solid var(--rule-2); font-family:var(--display); font-size:14px; vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.n{font-family:var(--data); font-variant-numeric:tabular-nums; text-align:right; white-space:nowrap}
+td.note{color:var(--ink-2); font-size:13px}
+.pill{
+  display:inline-block; font-family:var(--data); font-size:10px; font-weight:600;
+  letter-spacing:.09em; text-transform:uppercase; padding:3px 8px; border-radius:2px; white-space:nowrap;
+}
+.pill.ok{background:var(--ok-bg); color:var(--ok)}
+.pill.todo{background:var(--warn-bg); color:var(--warn)}
+.pill.crit{background:var(--crit-bg); color:var(--crit)}
+
+/* progress cell */
+.prog{display:flex; align-items:center; gap:8px; min-width:132px}
+.prog .t{position:relative; flex:1; height:6px; background:var(--sunk); border-radius:3px; overflow:hidden}
+.prog .f{position:absolute; inset:0 auto 0 0; background:var(--accent); border-radius:3px}
+.prog .p{font-family:var(--data); font-size:11px; color:var(--ink-2); font-variant-numeric:tabular-nums; min-width:34px; text-align:right}
+
+/* ---------- taxonomy ---------- */
+.tax{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px}
+.tax .card{background:var(--panel); border:1px solid var(--rule); border-radius:4px;
+           padding:18px; display:flex; flex-direction:column; gap:11px}
+.tax .card .top{display:flex; align-items:baseline; justify-content:space-between; gap:10px}
+.tax .card .cnt{font-family:var(--data); font-size:22px; font-weight:600; font-variant-numeric:tabular-nums; color:var(--accent)}
+.tax .card p{font-size:13.5px; color:var(--ink-2); font-family:var(--display); line-height:1.5}
+.tax .ex{font-family:var(--data); font-size:11px; color:var(--ink-3); line-height:1.7}
+.nested{background:var(--panel-2); border:1px dashed var(--rule); border-radius:3px; padding:11px 13px;
+        display:flex; flex-direction:column; gap:5px}
+.nested .h{font-family:var(--data); font-size:10px; letter-spacing:.13em; text-transform:uppercase; color:var(--ink-3)}
+.nested .b{font-family:var(--display); font-size:13px; color:var(--ink-2); line-height:1.5}
+
+/* ---------- fundamentals ---------- */
+.tiers{display:grid; grid-template-columns:repeat(auto-fit,minmax(268px,1fr)); gap:14px}
+.tier{background:var(--panel); border:1px solid var(--rule); border-radius:4px; overflow:hidden}
+.tier .hd{padding:14px 16px; border-bottom:1px solid var(--rule); display:flex;
+          align-items:baseline; justify-content:space-between; gap:10px; background:var(--panel-2)}
+.tier .hd b{font-family:var(--display); font-size:15px; font-weight:800; letter-spacing:-.01em}
+.tier .hd .c{font-family:var(--data); font-size:11px; color:var(--ink-3)}
+.tier ol{margin:0; padding:6px 0; list-style:none; display:flex; flex-direction:column}
+.tier li{display:grid; grid-template-columns:14px 22px minmax(0,1fr) auto; align-items:baseline;
+         gap:8px; padding:5px 16px; font-family:var(--display); font-size:13.5px; line-height:1.35}
+.tier li .dot{width:7px; height:7px; border-radius:50%; align-self:center}
+.tier li .no{font-family:var(--data); font-size:10.5px; color:var(--ink-3); font-variant-numeric:tabular-nums}
+.tier li .fm{font-family:var(--data); font-size:9.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); white-space:nowrap}
+.tier li.gone{color:var(--crit); font-weight:600}
+.tier li.noart{color:var(--ink-2)}
+
+/* ---------- schema groups ---------- */
+.groups{display:grid; grid-template-columns:repeat(auto-fit,minmax(232px,1fr)); gap:12px}
+.grp{background:var(--panel); border:1px solid var(--rule); border-radius:4px; padding:16px;
+     display:flex; flex-direction:column; gap:9px; border-top:3px solid var(--accent)}
+.grp h3{font-size:14px}
+.grp .q{font-size:13px; color:var(--ink-2); font-family:var(--display); line-height:1.5}
+.grp ul{margin:0; padding:0; list-style:none; display:flex; flex-wrap:wrap; gap:4px}
+.grp li{font-family:var(--data); font-size:10.5px; color:var(--ink-2);
+        background:var(--panel-2); border:1px solid var(--rule-2); border-radius:2px; padding:2px 6px}
+.grp li.new{color:var(--accent); border-color:var(--accent); font-weight:600}
+
+.key{display:flex; flex-wrap:wrap; gap:16px; align-items:center; margin-top:14px}
+.key span{display:flex; align-items:center; gap:6px; font-family:var(--data); font-size:11px; color:var(--ink-2)}
+.key i{width:11px; height:11px; border-radius:2px; display:block}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important; animation:none!important}}
+</style>
+
+<div class="wrap">
+
+<header class="top">
+  <div class="eyebrow">Fitness Journey · exercise database · 15 August 2026</div>
+  <h1>The library, and the holes in it</h1>
+  <p class="lede">307 movements audited against what a session generator actually needs. Here is what is there, what is missing, and the four things that are yours to decide.</p>
+</header>
+
+<section>
+  <div class="figs">
+    <div class="fig"><span class="v num">307</span><span class="k">movements in the database</span></div>
+    <div class="fig is-warn"><span class="v num">101</span><span class="k">rows where I guessed and want your eyes</span></div>
+    <div class="fig is-crit"><span class="v num">0</span><span class="k">calibration numbers — the table doesn't exist here</span></div>
+    <div class="fig is-crit"><span class="v num">0</span><span class="k">pulling movements Ozzy's kit can reach</span></div>
+    <div class="fig is-warn"><span class="v num">57</span><span class="k">of 307 movements have a picture</span></div>
+    <div class="fig is-warn"><span class="v num">13</span><span class="k">of the 50 fundamentals are missing from the database</span></div>
+  </div>
+</section>
+
+<!-- ============ GAP FINDER ============ -->
+<section>
+  <div class="sechead">
+    <div class="eyebrow">Try it</div>
+    <h2>What can the database actually give this person?</h2>
+    <p class="lede">Tick the kit they own. The bars are how many trainable movements exist for each pattern — the marker is the floor of twelve, below which every session repeats itself.</p>
+  </div>
+
+  <div class="finder">
+    <div class="controls">
+      <div class="ctlgroup">
+        <span class="eyebrow">Start from</span>
+        <div class="chips" id="presets"></div>
+      </div>
+      <div class="ctlgroup">
+        <span class="eyebrow">Equipment</span>
+        <div class="chips" id="kit"></div>
+      </div>
+      <div class="ctlgroup">
+        <span class="eyebrow">Level</span>
+        <div class="chips" id="levels"></div>
+      </div>
+      <div class="ctlgroup">
+        <span class="eyebrow">Count</span>
+        <div class="chips" id="opts"></div>
+      </div>
+    </div>
+
+    <div class="results">
+      <div class="bars" id="bars"></div>
+      <div id="verdict"></div>
+      <div class="footnote" id="fnote"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CURATION ============ -->
+<section>
+  <div class="sechead">
+    <div class="eyebrow">Where we are</div>
+    <h2>Core and Push are curated. The rest is not.</h2>
+    <p class="lede">"Curated" means a movement has a level, a difficulty, and a place in a progression chain. Without those three the generator cannot pick a level-appropriate variant, which is the whole mechanism behind scaling a session.</p>
+  </div>
+  <div class="tblwrap">
+    <table>
+      <thead><tr>
+        <th>Area</th><th>Movements</th><th>Has level + difficulty</th><th>In a progression chain</th><th>Calibrated</th><th>State</th>
+      </tr></thead>
+      <tbody id="curation"></tbody>
+    </table>
+  </div>
+  <div class="key">
+    <span><i style="background:var(--accent)"></i> filled</span>
+    <span><i style="background:var(--sunk)"></i> empty</span>
+  </div>
+</section>
+
+<!-- ============ TAXONOMY ============ -->
+<section>
+  <div class="sechead">
+    <div class="eyebrow">The new axis you asked for</div>
+    <h2>Three disciplines, and skills sit inside one of them</h2>
+    <p class="lede">Every movement now carries a discipline. It is a separate question from the mechanical pattern — a hinge can be a barbell deadlift or a kettlebell swing, and those belong in different worlds even though the body does the same thing.</p>
+  </div>
+  <div class="tax" id="tax"></div>
+</section>
+
+<!-- ============ FUNDAMENTALS ============ -->
+<section>
+  <div class="sechead">
+    <div class="eyebrow">What we promise to teach</div>
+    <h2>The 15 / 30 / 50, and where the cards and pictures attach</h2>
+    <p class="lede">Cumulative &mdash; advanced means all fifty, including the fifteen. The number is what you have <em>mastered</em>; about twelve is what you train in any given week at any level. Every one of these needs a card and a picture, so this list is where that work is tracked.</p>
+  </div>
+  <div class="tiers" id="tiers"></div>
+  <div class="key">
+    <span><i style="background:var(--ok)"></i> in the database, drawn</span>
+    <span><i style="background:var(--warn)"></i> in the database, no picture</span>
+    <span><i style="background:var(--crit)"></i> not in the database at all</span>
+  </div>
+</section>
+
+<!-- ============ SCHEMA ============ -->
+<section>
+  <div class="sechead">
+    <div class="eyebrow">The shape of a record</div>
+    <h2>Six groups per movement</h2>
+    <p class="lede">Highlighted fields are new. They exist because a specific decision is impossible without them — routing around a bad knee, prescribing a percentage of a real max, or knowing that a movement takes eight seconds a rep and so cannot carry a Death-By.</p>
+  </div>
+  <div class="groups" id="schema"></div>
+</section>
+
+<!-- ============ TASKS ============ -->
+<section>
+  <div class="sechead">
+    <div class="eyebrow">Over to you</div>
+    <h2>Four things only you can answer</h2>
+    <p class="lede">All of it lives in <span class="num">EXERCISE DATABASE / workbook / EXERCISES.xlsx</span>. Yellow cells are the ones waiting on you.</p>
+  </div>
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th>Task</th><th>Sheet</th><th>Size</th><th>Why it matters</th></tr></thead>
+      <tbody id="tasks"></tbody>
+    </table>
+  </div>
+</section>
+
+</div>
+
+<script id="mv" type="application/json">__DATA__</script>
+<script id="fd" type="application/json">__FUND__</script>
+<script>
+(function(){
+const DATA = JSON.parse(document.getElementById('mv').textContent);
+
+/* pattern groups — primary pattern decides the bucket, same as the workbook */
+const GROUPS = [
+  ['Push',  ['h-push','v-push','straight-arm-push']],
+  ['Pull',  ['h-pull','v-pull','straight-arm-pull']],
+  ['Lower', ['squat','hinge','lunge','calf','shin']],
+  ['Core',  ['anti-extension','anti-rotation','anti-lateral-flexion','flexion','extension','compression']],
+  ['Carry / jump', ['carry','jump','locomotion']],
+];
+const FLOOR = 12;
+
+const KIT = [
+  ['bw','bodyweight'],['mat','mat'],['bench','bench'],['band','bands'],
+  ['pullupbar','pull-up bar'],['rings','rings'],['dipbars','dip bars'],['parallettes','parallettes'],
+  ['db','dumbbells'],['kb','kettlebell'],['bb','barbell'],['rack','rack'],
+  ['machine','machines'],['cable','cables'],['vest','weight vest'],
+  ['slantboard','slant board'],['sliders','sliders'],['abwheel','ab wheel'],
+];
+const PRESETS = {
+  'Ozzy':            ['bw','mat','kb','bench'],
+  'Bodyweight only': ['bw','mat'],
+  'Home + dumbbells':['bw','mat','db','bench','band'],
+  'Bar at home':     ['bw','mat','pullupbar','band','bench'],
+  'Full gym':        KIT.map(k=>k[0]),
+};
+
+let state = { kit:new Set(PRESETS['Ozzy']), level:'all', workingOnly:true, preset:'Ozzy' };
+
+/* ---------- controls ---------- */
+function chip(label, pressed, onClick, cls){
+  const b=document.createElement('button');
+  b.className='chip'+(cls?' '+cls:''); b.type='button'; b.textContent=label;
+  b.setAttribute('aria-pressed', pressed?'true':'false');
+  b.addEventListener('click',onClick);
+  return b;
+}
+function renderControls(){
+  const P=document.getElementById('presets'); P.textContent='';
+  Object.keys(PRESETS).forEach(name=>{
+    P.appendChild(chip(name, state.preset===name, ()=>{
+      state.kit=new Set(PRESETS[name]); state.preset=name; render();
+    },'preset'));
+  });
+
+  const K=document.getElementById('kit'); K.textContent='';
+  KIT.forEach(([id,label])=>{
+    const locked = id==='bw';
+    K.appendChild(chip(label, state.kit.has(id), ()=>{
+      if(locked) return;
+      state.kit.has(id)?state.kit.delete(id):state.kit.add(id);
+      state.preset=null; render();
+    }, locked?'locked':''));
+  });
+
+  const L=document.getElementById('levels'); L.textContent='';
+  [['all','any level'],['beg','beginner'],['int','intermediate'],['adv','advanced']].forEach(([v,label])=>{
+    L.appendChild(chip(label, state.level===v, ()=>{ state.level=v; render(); }));
+  });
+
+  const O=document.getElementById('opts'); O.textContent='';
+  O.appendChild(chip('working sets only', state.workingOnly, ()=>{
+    state.workingOnly=!state.workingOnly; render();
+  }));
+}
+
+/* ---------- the count ---------- */
+function reachable(){
+  return DATA.filter(m=>{
+    if(!m.e.every(e=>state.kit.has(e))) return false;
+    if(state.level!=='all' && m.l && m.l!==state.level) return false;
+    if(state.workingOnly && !m.r.includes('working-set')) return false;
+    return true;
+  });
+}
+function render(){
+  renderControls();
+  const pool = reachable();
+  const max = Math.max(FLOOR+4, ...GROUPS.map(([,ps])=>
+    DATA.filter(m=>m.p[0]&&ps.includes(m.p[0])).length));
+
+  const B=document.getElementById('bars'); B.textContent='';
+  const counts={};
+  GROUPS.forEach(([name,ps])=>{
+    const n = pool.filter(m=>m.p[0]&&ps.includes(m.p[0])).length;
+    counts[name]=n;
+    const cls = n===0?'crit' : n<FLOOR?'warn':'ok';
+    const row=document.createElement('div'); row.className='bar';
+    row.innerHTML =
+      '<span class="lbl"></span>'+
+      '<div class="track"><div class="fill '+cls+'"></div><div class="floor"></div></div>'+
+      '<span class="val '+cls+'"></span>';
+    row.querySelector('.lbl').textContent=name;
+    row.querySelector('.fill').style.width=Math.max(n?1.5:0,(n/max)*100)+'%';
+    row.querySelector('.floor').style.left=((FLOOR/max)*100)+'%';
+    row.querySelector('.val').textContent=n;
+    B.appendChild(row);
+  });
+
+  const zeros = GROUPS.filter(([n])=>counts[n]===0).map(([n])=>n);
+  const thin  = GROUPS.filter(([n])=>counts[n]>0&&counts[n]<FLOOR).map(([n])=>n);
+  const V=document.getElementById('verdict');
+  let cls,msg;
+  if(zeros.length){
+    cls='crit';
+    msg='Nothing at all for '+list(zeros)+'. Any session built for this person silently drops '+
+        (zeros.length>1?'those patterns':'that pattern')+' — the generator has nothing to offer, and today nothing tells you so.';
+  } else if(thin.length){
+    cls='warn';
+    msg=list(thin)+' '+(thin.length>1?'are':'is')+' below the floor of twelve. Sessions will repeat the same handful of movements within a fortnight.';
+  } else {
+    cls='ok';
+    msg='Every pattern clears the floor. This profile can be programmed without repeating itself.';
+  }
+  V.className='verdict '+cls; V.textContent=msg;
+
+  document.getElementById('fnote').textContent =
+    pool.length+' of 307 movements reachable'+
+    (state.workingOnly?' · warm-up and joint-prep movements excluded':' · including warm-up and joint-prep')+
+    (state.level!=='all'?' · '+state.level+' only':'');
+}
+function list(a){
+  return a.length===1?a[0]:a.slice(0,-1).join(', ')+' and '+a[a.length-1];
+}
+
+/* ---------- curation table ---------- */
+const AREAS = [
+  ['Core',  ['anti-extension','anti-rotation','anti-lateral-flexion','flexion','extension','compression'], 'done'],
+  ['Push',  ['h-push','v-push','straight-arm-push'], 'done'],
+  ['Pull',  ['h-pull','v-pull','straight-arm-pull'], 'todo'],
+  ['Lower body', ['squat','hinge','lunge','calf','shin'], 'todo'],
+  ['Full body / conditioning', ['carry','jump','locomotion'], 'todo'],
+  ['Mobility / prep', [], 'todo'],
+];
+function progCell(a,b){
+  const pct = b? Math.round(100*a/b):0;
+  return '<div class="prog"><div class="t"><div class="f" style="width:'+pct+'%"></div></div>'+
+         '<span class="p">'+a+'/'+b+'</span></div>';
+}
+(function curation(){
+  const tb=document.getElementById('curation');
+  AREAS.forEach(([name,ps,state])=>{
+    const sub = ps.length? DATA.filter(m=>m.p[0]&&ps.includes(m.p[0]))
+                         : DATA.filter(m=>!m.p.length);
+    const lvl = sub.filter(m=>m.l&&m.x!==null).length;
+    const trk = sub.filter(m=>m.t).length;
+    const tr=document.createElement('tr');
+    tr.innerHTML =
+      '<td><strong></strong></td><td class="n"></td><td></td><td></td><td></td>'+
+      '<td><span class="pill '+(state==='done'?'ok':'todo')+'">'+(state==='done'?'done':'to do')+'</span></td>';
+    tr.children[0].querySelector('strong').textContent=name;
+    tr.children[1].textContent=sub.length;
+    tr.children[2].innerHTML=progCell(lvl,sub.length);
+    tr.children[3].innerHTML=progCell(trk,sub.length);
+    tr.children[4].innerHTML=progCell(0,sub.length);
+    tb.appendChild(tr);
+  });
+})();
+
+/* ---------- taxonomy ---------- */
+const TAX = [
+  ['calisthenics','Calisthenics','c',
+   'Bodyweight strength. The only discipline that also contains skills — movements you practise rather than simply perform.',
+   'push-up · dip · pull-up · muscle-up · planche · front lever'],
+  ['functional','Functional','f',
+   'Loaded movement patterns that mirror real life. Kettlebells, carries, get-ups, complexes.',
+   'kettlebell swing · Turkish get-up · farmer carry · burpee'],
+  ['gym','Gym','g',
+   'The classic barbell, dumbbell, cable and machine lifts. Predictable load, easy to progress in small steps.',
+   'bench press · lat pulldown · leg press · lateral raise'],
+];
+(function taxonomy(){
+  const T=document.getElementById('tax');
+  TAX.forEach(([id,title,code,desc,ex])=>{
+    const n = DATA.filter(m=>m.d===code).length;
+    const card=document.createElement('div'); card.className='card';
+    card.innerHTML='<div class="top"><h3></h3><span class="cnt num"></span></div><p></p><div class="ex"></div>';
+    card.querySelector('h3').textContent=title;
+    card.querySelector('.cnt').textContent=n;
+    card.querySelector('p').textContent=desc;
+    card.querySelector('.ex').textContent=ex;
+    if(code==='c'){
+      const skills = DATA.filter(m=>m.d==='c'&&m.k).length;
+      const nest=document.createElement('div'); nest.className='nested';
+      nest.innerHTML='<span class="h">contains · skills</span><span class="b"></span>';
+      nest.querySelector('.b').textContent =
+        skills+' of these are skills — handstand, planche, lever, muscle-up, L-sit. '+
+        'They get their own placement rule: practise them fresh, but their strength work belongs anywhere.';
+      card.appendChild(nest);
+    }
+    T.appendChild(card);
+  });
+})();
+
+/* ---------- fundamentals ---------- */
+const FUND = JSON.parse(document.getElementById('fd').textContent);
+(function tiers(){
+  const T=document.getElementById('tiers');
+  const art={}; DATA.forEach(m=>{art[m.n]=m.a;});
+  const LABEL={15:'Beginner \u2014 15',30:'Intermediate \u2014 30',50:'Advanced \u2014 50'};
+  const SUB={15:'every one stays in the programme forever',
+             30:'the fifteen above, plus these fifteen',
+             50:'all thirty above, plus these twenty'};
+  [15,30,50].forEach(tier=>{
+    const rows=FUND.filter(f=>f[3]===tier);
+    const box=document.createElement('div'); box.className='tier';
+    box.innerHTML='<div class="hd"><b></b><span class="c"></span></div><ol></ol>';
+    box.querySelector('b').textContent=LABEL[tier];
+    const gone=rows.filter(f=>!f[4]).length;
+    box.querySelector('.c').textContent = gone? gone+' missing' : 'all present';
+    const ol=box.querySelector('ol');
+    rows.forEach(([no,name,family,,exid,dbname])=>{
+      const li=document.createElement('li');
+      const state = !exid? 'crit' : (art[dbname]==='drawn'? 'ok':'warn');
+      li.className = !exid?'gone':(state==='warn'?'noart':'');
+      li.innerHTML='<span class="dot"></span><span class="no"></span><span class="nm"></span><span class="fm"></span>';
+      li.querySelector('.dot').style.background='var(--'+state+')';
+      li.querySelector('.no').textContent=no;
+      li.querySelector('.nm').textContent=name;
+      li.querySelector('.fm').textContent=family;
+      ol.appendChild(li);
+    });
+    box.title=SUB[tier];
+    T.appendChild(box);
+  });
+})();
+
+/* ---------- schema groups ---------- */
+const SCHEMA = [
+  ['Identity','Which movement is this, and which world does it belong to?',
+   [['id',0],['name',0],['discipline',1],['skill?',1]]],
+  ['Mechanics','What does the body actually do?',
+   [['patterns',1],['muscles · primary',1],['muscles · secondary',1],['laterality',0]]],
+  ['Prescription','How is it measured, and how is it loaded?',
+   [['measure',0],['reps or hold',0],['loading',1],['takes weight',1],['sec / rep',1],['plyo',1]]],
+  ['Placement','Where in a session may it land?',
+   [['role',1],['level',0],['difficulty',0],['CNS cost',1],['essential',0]]],
+  ['Relations','What does it connect to?',
+   [['track',1],['rank',1],['families',0],['substitutes',1]]],
+  ['Constraints','What does it need, and what does it punish?',
+   [['equipment',0],['space',1],['demands',1],['hard on joints',1]]],
+  ['Mastery','Is this one of the fifty, and does it have a card and a picture?',
+   [['fundamental tier',1],['number',1],['family',1],['card',1],['artwork',1]]],
+  ['Calibration','How many can this person do?',
+   [['max · beginner',1],['max · intermediate',1],['max · advanced',1],['unit',1]]],
+  ['Teaching','How is it explained, and what counts?',
+   [['cue',0],['what counts as a rep',1],['no PR',0]]],
+];
+(function schema(){
+  const S=document.getElementById('schema');
+  SCHEMA.forEach(([title,q,fields])=>{
+    const g=document.createElement('div'); g.className='grp';
+    g.innerHTML='<h3></h3><span class="q"></span><ul></ul>';
+    g.querySelector('h3').textContent=title;
+    g.querySelector('.q').textContent=q;
+    const ul=g.querySelector('ul');
+    fields.forEach(([f,isNew])=>{
+      const li=document.createElement('li');
+      li.textContent=f; if(isNew) li.className='new';
+      ul.appendChild(li);
+    });
+    S.appendChild(g);
+  });
+})();
+
+/* ---------- tasks ---------- */
+const TASKS = [
+  ['Say yes or no to the gym list','GYM LIBRARY','110 lines',
+   '110 classic gym movements proposed; 15 already exist. One column, three answers. This is the fastest one and it unblocks the parallel build.'],
+  ['Fill in max reps per level','CALIBRATION','267 rows · batch 25 at a time',
+   'The only thing nobody but you can supply. Every prescription in the app is a percentage of these numbers, and right now there are none.'],
+  ['Curate Pull, then Lower, then Full body','MOVEMENTS','119 rows',
+   'Core and Push are done. Lower body was never curated at all — two hamstring movements exist in the entire database.'],
+  ['Check the rows I guessed on','MOVEMENTS · filter Status','101 rows',
+   'Muscles, patterns and roles I inferred from names. Mostly right, and the wrong ones are quick to spot.'],
+];
+(function tasks(){
+  const tb=document.getElementById('tasks');
+  TASKS.forEach(([t,sheet,size,why])=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td><strong></strong></td><td class="num" style="font-size:12px"></td><td class="n"></td><td class="note"></td>';
+    tr.children[0].querySelector('strong').textContent=t;
+    tr.children[1].textContent=sheet;
+    tr.children[2].textContent=size;
+    tr.children[3].textContent=why;
+    tb.appendChild(tr);
+  });
+})();
+
+render();
+})();
+</script>

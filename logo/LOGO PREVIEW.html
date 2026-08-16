@@ -102,6 +102,11 @@ section{padding-top:clamp(48px,7vh,76px)}
 .screen{position:absolute;top:74px;left:20px;right:20px;bottom:0;
   display:flex;flex-direction:column;overflow:hidden}
 
+/* The hero in this frame carries no words — the mark IS the logo — so the
+   gap hero.css reserves for them would push it off centre. Overridden here
+   rather than there, because the survey's opening screen still has copy. */
+#phone .heroA .art{margin-bottom:0}
+
 /* ---------- control rail ---------- */
 .rail{flex:1 1 300px;min-width:280px;display:flex;flex-direction:column;gap:14px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 17px}
@@ -177,6 +182,22 @@ button.ui:focus-visible,input:focus-visible,a:focus-visible{
 .pick[aria-pressed="true"]{border-color:rgba(255,95,162,.5);background:#20191E}
 .pick[aria-pressed="true"] .stamp{opacity:1;transform:scale(1)}
 
+/* ---------- the wordmark lockups ---------- */
+.lockups{display:grid;grid-template-columns:repeat(auto-fit,minmax(268px,1fr));gap:14px}
+.lockup{
+  background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  padding:30px 22px 18px;display:flex;flex-direction:column;align-items:center;gap:22px;
+  text-align:center;
+}
+.lockup .set{display:flex;flex-direction:column;align-items:center}
+.lockup .nm{font-size:29px;line-height:1.12;letter-spacing:-.022em;font-weight:550;
+  color:var(--ink);white-space:nowrap}
+.lockup .tl{margin-top:13px;font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;
+  font-weight:600;color:var(--jade);opacity:.9}
+.lockup .why{margin:0;font-size:12.8px;line-height:1.5;color:var(--ink-3);
+  padding-top:16px;border-top:1px solid var(--line);width:100%}
+.lockup .why b{color:var(--ink-2);font-weight:550}
+
 /* ---------- app icon ---------- */
 .icons{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
 .iconcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px 20px 18px;
@@ -193,6 +214,18 @@ button.ui:focus-visible,input:focus-visible,a:focus-visible{
 .tagline .dot{width:6px;height:6px;border-radius:50%;background:var(--off)}
 .tagline.now .dot{background:var(--jade)}
 .tagline.now{color:var(--jade)}
+
+/* ---------- stroke weight comparison ---------- */
+.weights{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px}
+.weights .note{max-width:64ch}
+.wrow{display:flex;gap:clamp(14px,3vw,30px);flex-wrap:wrap;align-items:flex-end;
+  padding:16px 0 4px}
+.w{display:flex;flex-direction:column;align-items:center;gap:9px}
+.w .lab{font:500 11px/1.35 var(--mono);color:var(--ink-3);text-align:center}
+.w .lab b{display:block;color:var(--ink);font-weight:600;font-size:12px}
+.w.pick .lab b{color:var(--jade)}
+.w.pick .tileWrap{box-shadow:0 0 0 2px var(--jade)}
+.tileWrap{border-radius:22px;line-height:0}
 
 /* ---------- deploy map ---------- */
 .mapwrap{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:14px}
@@ -240,25 +273,49 @@ footer code{font:400 12.5px/1.4 var(--mono);color:var(--ink-2)}
 .heroA .tri path{fill:none;stroke-width:2.6;stroke-linejoin:round;stroke-linecap:round}
 .heroA .tri-l{stroke:url(#triGrad);filter:drop-shadow(0 0 7px rgba(255,95,162,.45))}
 .heroA .tri-glare{stroke:url(#triGlare);stroke-width:5.5;opacity:0;
-  filter:blur(3.5px) drop-shadow(0 0 10px rgba(255,255,255,.55));
-  transition:opacity .5s ease}
-.heroA.lit .tri-glare{opacity:.9}
-.heroA .tri-spark{stroke:#fff;stroke-width:3.5;opacity:0;
+  filter:blur(3.5px) drop-shadow(0 0 10px rgba(255,255,255,.55))}
+/* ===== BEAT:START — generated from logo/hero.css, do not edit here ===== */
+/* THE GLARE. Light coming off the dumbbell and landing on the tube. It holds
+   at a steady value once the mark is lit — it is a reflection, and a
+   reflection does not flash. */
+.heroA.lit .tri-glare{opacity:.9;transition:opacity .5s ease}
+/* THE LIGHT. One short bright dash chasing the perimeter, and the only thing
+   that moves on the outline. Hidden until the mark has landed — a light
+   running around an outline that is still being drawn reads as two
+   animations fighting.
+
+   THE OUTLINE ITSELF DOES NOT PULSE. It used to carry a lub-dub, and for a
+   while it carried a full PQRST complex with the light deflecting into a
+   heartbeat as it crossed the top edge. Both are gone. The mark is a neon
+   sign, not a monitor: the tube is lit, the light travels, and that is all
+   that happens. Anything reinstating a beat has to earn it against how
+   quiet this reads. */
+.heroA .tri-spark{stroke:#fff;stroke-width:3.2;opacity:0;
   filter:drop-shadow(0 0 9px #FF5FA2) drop-shadow(0 0 3px #fff)}
 .heroA.lit .tri-spark{opacity:1;
-  animation:triRun var(--beat,4400ms) linear -1650ms infinite}
-.heroA.lit .tri-l{animation:triBeat var(--beat,4400ms) ease-in-out -1650ms infinite}
-@keyframes triRun{ from{stroke-dashoffset:0} to{stroke-dashoffset:-777} }
-/* A real heartbeat — lub, then a smaller dub — and it only happens while the
-   light is on the long top edge. One event per lap, in one place. */
-@keyframes triBeat{
-  0%      {filter:drop-shadow(0 0 7px  rgba(255,95,162,.45)); stroke-width:2.6}
-  4%      {filter:drop-shadow(0 0 34px rgba(255,95,162,1))
-                  drop-shadow(0 0 9px rgba(255,255,255,.6));  stroke-width:3.5}
-  9%      {filter:drop-shadow(0 0 10px rgba(255,95,162,.5));  stroke-width:2.7}
-  14%     {filter:drop-shadow(0 0 24px rgba(255,95,162,.9));  stroke-width:3.1}
-  21%,100%{filter:drop-shadow(0 0 7px  rgba(255,95,162,.45)); stroke-width:2.6}
+  animation:triRun var(--beat,4400ms) linear var(--lap-phase,-1650ms) infinite}
+/* --sparklen is measured off the real path in hero.js rather than assumed, so
+   the light cannot jump at the seam of a lap if the outline is ever redrawn.
+   On today's path it resolves to the plain perimeter, 777. */
+@keyframes triRun{ from{stroke-dashoffset:0}
+                   to{stroke-dashoffset:calc(-1 * var(--sparklen,777px))} }
+
+/* THE BREATH. The glow behind the dumbbell, on the same 4400ms rep as the
+   mark's bob. A slow sine — it swells and falls and never strikes.
+
+   The .55s delay puts its peak at 2750ms, and --lap-phase of -1650ms puts
+   the light at the start of the top edge at that same moment. That is the
+   one coincidence left in the mark, and it is a quiet one: the light begins
+   its run along the top edge just as the mark is at its brightest. */
+.heroA .art.alive .dbglow{
+  animation:dbGlowIn .55s cubic-bezier(.22,1,.36,1) both,
+            dbGlow var(--beat,4400ms) ease-in-out .55s infinite}
+@keyframes dbGlowIn{from{opacity:0;transform:scale(.88)}to{opacity:.40;transform:scale(.95)}}
+@keyframes dbGlow{
+  0%,100%{opacity:.40;transform:scale(.95)}
+  50%    {opacity:.86;transform:scale(1.06)}
 }
+/* ===== BEAT:END ===== */
 .heroA .art{z-index:2}
 .heroA .hcopy{z-index:3}
 .heroA .art{position:relative;display:flex;align-items:center;justify-content:center;
@@ -268,11 +325,7 @@ footer code{font:400 12.5px/1.4 var(--mono);color:var(--ink-2)}
 .heroA .dbglow{position:absolute;width:210px;height:210px;border-radius:50%;z-index:1;
   background:radial-gradient(circle,rgba(62,203,168,.26),rgba(62,203,168,0) 66%);
   opacity:0;will-change:opacity,transform}
-.heroA .art.alive .dbglow{
-  animation:dbGlowIn .55s cubic-bezier(.22,1,.36,1) both,
-            dbGlow 4.4s ease-in-out .55s infinite}
-@keyframes dbGlowIn{from{opacity:0;transform:scale(.88)}to{opacity:.40;transform:scale(.95)}}
-@keyframes dbGlow{0%,100%{opacity:.40;transform:scale(.95)}50%{opacity:.86;transform:scale(1.06)}}
+/* the glow's animation and keyframes arrive in the BEAT block above */
 
 .heroA .db path.stroked{fill:none;stroke:url(#dbGrad);stroke-linecap:round}
 .heroA .db path.bar{stroke:url(#dbBar)}
@@ -305,15 +358,15 @@ footer code{font:400 12.5px/1.4 var(--mono);color:var(--ink-2)}
     <h1>An inverted neon triangle, with a dumbbell centred in it.</h1>
     <p class="lede">Drawn from an 80s album cover. The outline is an open
       polyline with a dead segment in the top-left, the way a real neon tube
-      has one. Everything you see hangs off a single <b>4400&nbsp;ms</b> rep —
-      the light finishes its lap along the top edge at the exact instant the
-      glow behind the dumbbell swells, and the outline thumps once, there,
-      and nowhere else.</p>
+      has one. <b>No words are part of it.</b> Everything hangs off a single
+      <b>4400&nbsp;ms</b> rep: the tube is lit, one short light runs the
+      perimeter, and the mark breathes. Nothing pulses, flashes or thumps —
+      it is a neon sign, and a neon sign is simply on.</p>
     <div class="credits">
       <span><em>outline</em>&nbsp; #FF5FA2</span>
       <span><em>mark</em>&nbsp; #3ECBA8</span>
-      <span><em>beat</em>&nbsp; 4400ms</span>
-      <span><em>perimeter</em>&nbsp; 777</span>
+      <span><em>rep</em>&nbsp; 4400ms</span>
+      <span><em>perimeter</em>&nbsp; 777 units</span>
       <span><em>break</em>&nbsp; 40 units</span>
     </div>
   </header>
@@ -323,8 +376,8 @@ footer code{font:400 12.5px/1.4 var(--mono);color:var(--ink-2)}
     <div class="shead">
       <div class="lhs">
         <h2>In motion</h2>
-        <p>The opening screen at true size, running the shipping engine —
-          one <code>requestAnimationFrame</code> clock driving every stroke.</p>
+        <p>The mark at true size, running the shipping engine — one
+          <code>requestAnimationFrame</code> clock driving every stroke.</p>
       </div>
       <p class="eyebrow">375 &times; 812 · iPhone</p>
     </div>
@@ -338,16 +391,17 @@ footer code{font:400 12.5px/1.4 var(--mono);color:var(--ink-2)}
           <div class="btnrow">
             <button class="ui" id="replay">Replay the draw</button>
             <button class="ui" id="play" aria-pressed="true">Pause</button>
-            <button class="ui" id="edge">Jump to the thump</button>
+            <button class="ui" id="edge">Jump to the top edge</button>
           </div>
           <div class="slider">
             <label for="scrub">Position in the lap</label>
             <output id="scrubV">live</output>
-            <input type="range" id="scrub" min="0" max="4400" step="20" value="0">
+            <input type="range" id="scrub" min="0" max="4400" step="10" value="0">
           </div>
-          <p class="note">The heartbeat lasts a fifth of a second. Scrubbing is
-            the only way to actually see it — it pauses everything and steps
-            the animation by hand.</p>
+          <p class="note">Scrubbing pauses everything and steps the light
+            round by hand. At <b>2750&nbsp;ms</b> it is entering the top edge
+            just as the glow behind the dumbbell reaches its brightest —
+            the one thing in the mark that is timed to anything else.</p>
         </div>
 
         <div class="card">
@@ -501,19 +555,50 @@ footer code{font:400 12.5px/1.4 var(--mono);color:var(--ink-2)}
       than a logo parked in a corner.</p>
   </section>
 
-  <!-- ================= 4. THE APP ICON ================= -->
+  <!-- ================= 4. THE SECOND LOGO ================= -->
+  <section>
+    <div class="shead">
+      <div class="lhs">
+        <h2>The second logo</h2>
+        <p>The name, set as its own lockup — used where the mark alone
+          wouldn't identify anything. The line under it is the open
+          question: it has to carry intent, not describe a product.</p>
+      </div>
+      <p class="eyebrow">Wordmark · undecided</p>
+    </div>
+
+    <div class="lockups" id="lockups"></div>
+    <p class="note" style="max-width:62ch">Set at the real size, in the app's
+      own face. <b>Pick one</b> and it becomes a one-line change at
+      <code>onboarding.html:1513</code>, where the opening screen's copy
+      actually lives.</p>
+  </section>
+
+  <!-- ================= 5. THE APP ICON ================= -->
   <section>
     <div class="shead">
       <div class="lhs">
         <h2>The app icon</h2>
-        <p>Two candidates on the same tile. What ships today is the dumbbell
-          alone — drawn by hand in <code>icon.svg</code>, not generated from
-          the mark, and so already out of step with it.</p>
+        <p>The whole mark on the tile — decided. What ships today is the
+          dumbbell alone, drawn by hand in <code>icon.svg</code> and never
+          generated from the mark, which is why it has no pink in it.</p>
       </div>
       <p class="eyebrow">Home screen</p>
     </div>
 
     <div class="icons" id="icons"></div>
+
+    <div style="height:14px"></div>
+    <div class="weights">
+      <p class="eyebrow">Outline weight against the plates</p>
+      <div class="wrow" id="weights"></div>
+      <p class="note">The hero's own proportion works out at <b>2.86 px</b> —
+        measured against the outer plate, the widest plate and the bar, it
+        gives the same answer all three ways. That is too thin for a tile
+        drawn at 60&nbsp;px, so <b>4.5</b> is the compromise in use. The number
+        under each is its ratio to the outermost plate; the hero's is
+        <b>0.36</b>.</p>
+    </div>
   </section>
 
   <!-- ================= 5. WHERE IT LIVES ================= -->
@@ -538,23 +623,28 @@ footer code{font:400 12.5px/1.4 var(--mono);color:var(--ink-2)}
           </tr>
           <tr>
             <td><code>icon.svg</code></td>
-            <td class="what">Favicon, PWA icon. Dumbbell only, no triangle</td>
-            <td><span class="state drift"><span class="d"></span>By hand</span></td>
+            <td class="what">Favicon, PWA icon — now the whole mark</td>
+            <td><span class="state wired"><span class="d"></span>Wired</span></td>
+          </tr>
+          <tr>
+            <td><code>images/stamp-{triangle,dumbbell}.svg</code></td>
+            <td class="what">The selection mark, in <code>currentColor</code></td>
+            <td><span class="state wired"><span class="d"></span>Wired</span></td>
           </tr>
           <tr>
             <td><code>icon-{180,192,512}.png</code></td>
             <td class="what">Home screen, install prompt, share card</td>
-            <td><span class="state drift"><span class="d"></span>Stale</span></td>
+            <td><span class="state drift"><span class="d"></span>Needs a rasteriser</span></td>
+          </tr>
+          <tr>
+            <td><code>onboarding.html:1513</code></td>
+            <td class="what">The line under the name — still <code>starts here</code></td>
+            <td><span class="state drift"><span class="d"></span>Awaiting a pick</span></td>
           </tr>
           <tr>
             <td><code>dashboard.html</code>, <code>coach.html</code></td>
             <td class="what">Favicon only — no mark inside the interface</td>
             <td><span class="state none"><span class="d"></span>Absent</span></td>
-          </tr>
-          <tr>
-            <td>Stamp assets</td>
-            <td class="what">The selection mark shown above</td>
-            <td><span class="state none"><span class="d"></span>Not built</span></td>
           </tr>
         </tbody>
       </table>
@@ -563,11 +653,12 @@ footer code{font:400 12.5px/1.4 var(--mono);color:var(--ink-2)}
 
   <footer>
     <b>To change the mark:</b> edit <code>logo/hero.css</code> and
-    <code>logo/hero.js</code>, then run <code>node tools/build-logo.mjs</code>.
-    That is the only road back into the survey — it replaces two marked blocks
-    in <code>onboarding.html</code> and refuses to run if a marker is missing.
-    The rows above marked <b>By hand</b>, <b>Stale</b> and <b>Not built</b> have
-    no such road yet.
+    <code>logo/hero.js</code> for the moving version, <code>logo/mark.mjs</code>
+    for the still ones, then run <code>node tools/build-logo.mjs</code>. One
+    command now feeds the survey, the app icon and both stamps. It refuses
+    rather than guesses: it stops if a marker is missing, if the two files
+    disagree about where a plate is, or if the icon's plates come within
+    8&nbsp;px of the neon.
   </footer>
 </div>
 
@@ -595,6 +686,9 @@ var TRI_D  = 'M100 16 H286 L150 252 L14 16 H60';
 var TRI_LEN = 777;
 var BEAT = 4400;
 var mirror = function(x){ return 260-x; };
+
+/* The light runs the outline itself. There was a version where it ran a
+   separate path carrying a PQRST complex in the top edge — removed. */
 
 /* the shared gradient block — one copy, referenced by every svg on the page */
 var DEFS =
@@ -674,13 +768,11 @@ screen.innerHTML =
              q.w.toFixed(2)+'" d="'+q.d+'"/>';
     }).join('') +'</g>'+
   '</svg>'+
-'</div><div class="hcopy"><h1>Fitness Journey</h1>'+
-'<div class="hsub">Your training, dialed in</div></div></div></div>';
+'</div></div></div>';   /* no words: the mark is the logo */
 stage.appendChild(screen);
 
 var heroEl = screen.querySelector('.heroA');
 var art    = screen.querySelector('.art');
-var hcopy  = screen.querySelector('.hcopy');
 var triL   = screen.querySelector('.tri-l');
 var triSpark = screen.querySelector('.tri-spark');
 var db     = screen.querySelector('.db');
@@ -688,10 +780,24 @@ var tri    = screen.querySelector('.tri');
 
 triL.style.strokeDasharray  = TRI_LEN;
 triL.style.strokeDashoffset = TRI_LEN;
+
+/* MEASURED, not assumed — it resolves to TRI_LEN on today's path, but the
+   outline has been redrawn twice and a hard-coded length leaves the light
+   jumping at the seam of every lap when it is. */
+var SPARK_LEN = triSpark.getTotalLength() || TRI_LEN;
 /* short bright dash, one long gap — the gap is the rest of the outline */
-triSpark.style.strokeDasharray = '54 ' + (TRI_LEN-54);
+var DASH = 54;
+triSpark.style.strokeDasharray = DASH + ' ' + (SPARK_LEN-DASH);
 triSpark.style.strokeDashoffset = 0;
+heroEl.style.setProperty('--sparklen', SPARK_LEN.toFixed(1)+'px');
+
+/* THE PHASE. The glow behind the dumbbell peaks 2750 ms into every cycle
+   (0.55 + 2.2). A -1650 ms shift puts lap-position 0 at t=2750, so the light
+   begins its run along the top edge at the instant the mark is at its
+   brightest. The only coincidence left in the mark. */
+var PHASE = BEAT - 2750;
 heroEl.style.setProperty('--beat', BEAT+'ms');
+heroEl.style.setProperty('--lap-phase', '-'+PHASE+'ms');
 
 /* ---- prime every stroke ------------------------------------------------ */
 var paths = [].slice.call(screen.querySelectorAll('.rep path.stroked'));
@@ -734,12 +840,10 @@ function paint(t){
     var o = clamp01((st.len*e)/st.fade);
     st.el.style.opacity = (o*o).toFixed(3);
   }
+  /* The outline closes across the same window the plates finish in, so the
+     triangle lands with the mark rather than after it. */
   var q = clamp01((t-T3A)/Math.max(.35, T3B-T3A));
   var e2 = 1-Math.pow(1-q,3);
-  hcopy.style.opacity = e2.toFixed(3);
-  hcopy.style.transform = 'translateY('+(12*(1-e2)).toFixed(2)+'px)';
-  /* The triangle is drawn on the SAME clock as the words, so the outline
-     closes as the name lands. */
   triL.style.strokeDashoffset = (TRI_LEN*(1-e2)).toFixed(1);
   if(!landedArt && t>=DONE){ landedArt=true; art.classList.add('alive'); }
 }
@@ -757,7 +861,6 @@ function finishNow(){
   paint(DONE+1);
   /* hand the strokes back to the stylesheet */
   for(var k=0;k<strokes.length;k++){ strokes[k].el.style.opacity=''; }
-  hcopy.style.opacity=''; hcopy.style.transform='';
   triL.style.strokeDashoffset = 0;
   heroEl.classList.add('ready');
   heroEl.classList.add('lit');   /* only now does the light start running */
@@ -788,8 +891,8 @@ var playBtn = document.getElementById('play');
 var playing = true;
 
 function loopAnims(){
-  /* every looping animation on the mark: the light, the heartbeat, the glow,
-     the rep. They all share one period, so one currentTime drives all four. */
+  /* every looping animation on the mark: the light, the glow, the rep. They
+     share one period, so one currentTime drives all of them. */
   return heroEl.getAnimations({subtree:true}).filter(function(a){
     return a.effect && a.effect.getTiming().iterations === Infinity;
   });
@@ -806,8 +909,8 @@ function setPlaying(on){
 function seek(ms){
   setPlaying(false);
   loopAnims().forEach(function(a){
-    /* the light and the heartbeat carry a -1650ms delay, so their own
-       timeline is offset from the lap position by exactly that much */
+    /* the light carries a -1650ms delay, so its own timeline is offset from
+       the lap position by exactly that much */
     a.currentTime = ms;
   });
   scrubV.textContent = ms + ' ms';
@@ -819,12 +922,9 @@ playBtn.onclick = function(){
   if(!heroEl.classList.contains('lit')) return replay();
   setPlaying(!playing);
 };
-/* The peak of the lub sits at 4% of triBeat's active cycle. That animation
-   carries a -1650 ms delay, so active time = currentTime + 1650: to land on
-   4% of 4400 (176 ms) the clock has to read 176 - 1650 + 4400 = 2926. Which
-   is also 2750 + 176 — the thump firing a beat after the glow peaks and the
-   light enters the top edge, which is the whole point of the arrangement. */
-var THUMP = 2926;
+/* Lap-position 0 is the left end of the top edge, and the phase puts it at
+   t=2750 — the instant the glow behind the dumbbell peaks. */
+var THUMP = 2750;
 document.getElementById('edge').onclick = function(){
   if(!heroEl.classList.contains('lit')) finishNow();
   scrub.value = THUMP; seek(THUMP);
@@ -860,9 +960,11 @@ function measure(){
       clearance.toFixed(1) + ' px</span> each side\n' +
     'triangle       <b>' + t.width.toFixed(0) + '</b> × ' + t.height.toFixed(0) + ' px\n' +
     'dumbbell       <b>' + b.width.toFixed(0) + '</b> × ' + b.height.toFixed(0) + ' px\n' +
-    'perimeter      <b>' + TRI_LEN + '</b> units\n' +
+    'perimeter      <b>' + SPARK_LEN.toFixed(0) + '</b> units\n' +
     'draw completes <b>' + DONE.toFixed(2) + ' s</b>\n' +
-    'rep            <b>' + BEAT + ' ms</b>, light offset −1650 ms';
+    '\n' +
+    'rep            <b>' + BEAT + ' ms</b>, lap phase −' + PHASE + ' ms\n' +
+    'light reaches  <b>' + THUMP + ' ms</b> — the top edge, as the glow peaks';
 }
 addEventListener('resize', measure);
 
@@ -874,12 +976,13 @@ setInterval(measure, 900);
 /* ==========================================================================
    The stamp — the same two halves, rendered small.
    ========================================================================== */
-/* A stamp is not the hero scaled down. At 2.6 units the outline vanishes by
-   28 px, and at a fixed pixel weight it looks bloated at 64. So the stroke
-   grows with the mark but far more slowly than it does — 2.5 px at 16, about
-   5 px at 64 — and is converted back into the 300-unit box each time. */
+/* A stamp is not the hero scaled down — at 2.6 units the outline is a
+   quarter of a pixel by 28px. But the first correction went too far and the
+   mark came out as a thick chevron, so this is about a third lighter:
+   1.6px at 16, 2.1px at 28, 3.5px at 64. Grows with the stamp, far more
+   slowly than the stamp does, converted back into the 300-unit box. */
 function triStamp(px, flat){
-  var px_stroke = 1.6 + px*0.055;
+  var px_stroke = 0.95 + px*0.04;
   return '<svg viewBox="0 0 300 268" width="'+px+'" height="'+(px*268/300).toFixed(1)+'"'+
     ' style="overflow:visible" aria-hidden="true">'+
     '<path d="'+TRI_D+'" fill="none" stroke="'+(flat?'currentColor':'url(#triGrad)')+'"'+
@@ -925,12 +1028,16 @@ document.getElementById('sizes').innerHTML = SIZES.map(function(px){
 /* ==========================================================================
    The app icon — two candidates, at the sizes iOS actually draws them.
    ========================================================================== */
-function tile(px, withTri){
+function tile(px, withTri, striW){
   var r = px * (112/512);          /* the squircle radius the current icon uses */
   var s = px/512;
+  striW = striW || 4.5;
   var g = withTri
-    /* dumbbell shrinks and rises so the triangle has room to close beneath it */
-    ? '<g transform="translate(256,214) scale(1.30) translate(-130,-65)"'
+    /* 1.115, not 1.30. The triangle narrows as it descends and the plates
+       hang BELOW the bar, so the tightest point is the bottom corner of the
+       smallest plate — sized by eye at the bar line it lands 3.8px off the
+       neon. Measured in logo/mark.mjs; the build refuses anything under 8. */
+    ? '<g transform="translate(256,214) scale(1.115) translate(-130,-65)"'
     : '<g transform="translate(256,256) scale(2.03) translate(-130,-65)"';
   var out = '<svg viewBox="0 0 512 512" width="'+px+'" height="'+px+'" aria-hidden="true"'+
             ' style="display:block;border-radius:'+r.toFixed(1)+'px">'+
@@ -938,7 +1045,7 @@ function tile(px, withTri){
   if(withTri){
     out += '<g transform="translate(256,268) scale(1.42) translate(-150,-134)">'+
            '<path d="'+TRI_D+'" fill="none" stroke="url(#triGrad)" stroke-width="'+
-           (9/1.42).toFixed(2)+'" stroke-linejoin="round" stroke-linecap="round"/></g>';
+           (striW/1.42).toFixed(2)+'" stroke-linejoin="round" stroke-linecap="round"/></g>';
   }
   out += g + ' fill="none" stroke="url(#dbGrad)" stroke-linecap="round">'+
     '<path d="M86 65 H174" stroke="url(#dbBar)" stroke-width="7"/>'+
@@ -954,10 +1061,9 @@ var ICON_SIZES = [
   {px:29,  cap:'settings'},
   {px:20,  cap:'notification'}
 ];
-function iconCard(withTri, title, blurb, isNow){
+function iconCard(withTri, title, blurb, tag, isNow){
   return '<div class="iconcard">'+
-    '<span class="tagline'+(isNow?' now':'')+'"><span class="dot"></span>'+
-      (isNow?'Ships today':'Candidate')+'</span>'+
+    '<span class="tagline'+(isNow?' now':'')+'"><span class="dot"></span>'+tag+'</span>'+
     '<div class="big">'+tile(148, withTri)+'</div>'+
     '<div><h3>'+title+'</h3><p>'+blurb+'</p></div>'+
     '<div class="scale">'+ICON_SIZES.map(function(s){
@@ -965,12 +1071,60 @@ function iconCard(withTri, title, blurb, isNow){
     }).join('')+'</div></div>';
 }
 document.getElementById('icons').innerHTML =
-  iconCard(false, 'The dumbbell alone',
-    'Survives to 20 px and reads as one object. Gives up the pink entirely, '+
-    'so nothing on the home screen connects the icon to the opening screen.', true) +
   iconCard(true, 'The whole mark',
-    'Carries the neon, so the icon and the app agree. The dumbbell has to '+
-    'shrink to clear the outline, which costs it at the smallest sizes.', false);
+    'The logo on the tile. The dumbbell sits at 1.115 scale — 18.4 px clear '+
+    'of the neon at its tightest, with the bar 33.9% down the outline.',
+    'Now in icon.svg', true) +
+  iconCard(false, 'The dumbbell alone',
+    'What was in <code>icon.svg</code> until now: drawn by hand, no pink in '+
+    'it, so nothing linked the home screen to the app.',
+    'Replaced', false);
+
+/* The same tile at a range of outline weights. The outermost plate is
+   7.13 x 1.115 = 7.95px, so the ratio under each is stroke / 7.95. */
+var OUTER_PLATE = 7.13 * 1.115;
+var WEIGHTS = [
+  {w:2.86, tag:'hero-true'},
+  {w:3.5,  tag:''},
+  {w:4.5,  tag:'in use'},
+  {w:5.5,  tag:''},
+  {w:9,    tag:'was'}
+];
+document.getElementById('weights').innerHTML = WEIGHTS.map(function(o){
+  return '<div class="w'+(o.tag==='in use'?' pick':'')+'">'+
+    '<div class="tileWrap">'+tile(100, true, o.w)+'</div>'+
+    '<div class="lab"><b>'+o.w+' px</b>'+
+    (o.tag ? o.tag+'<br>' : '')+
+    'ratio '+(o.w/OUTER_PLATE).toFixed(2)+'</div></div>';
+}).join('');
+
+/* ==========================================================================
+   The second logo. Four lines under the same name, set at the size the
+   opening screen actually uses, so they can be judged as type rather than
+   as suggestions in a list.
+   ========================================================================== */
+var LINES = [
+  { t:'Precision · Purpose · Progress',
+    why:'<b>Yours.</b> The rhythm is good and the three words are the right '+
+        'three. Longest of the four, and a triad has to fight hardest not to '+
+        'read as decoration.' },
+  { t:'Train with intent',
+    why:'<b>The through-line.</b> Three words, and it is the thing the whole '+
+        'engine is built on — the session is chosen, not filled.' },
+  { t:'Not how long. How well.',
+    why:'<b>The sharpest.</b> Says the quiet part out loud and argues with '+
+        'every other fitness app on the phone. The full stop mid-line is the '+
+        'risk and the reason it lands.' },
+  { t:'Every rep has a reason',
+    why:'<b>Closest to the product.</b> The survey already promises exactly '+
+        'this — nothing is filler — so the line is a claim you can check.' }
+];
+document.getElementById('lockups').innerHTML = LINES.map(function(l){
+  return '<div class="lockup"><div class="set">'+
+    '<div class="nm">Fitness Journey</div>'+
+    '<div class="tl">'+l.t+'</div></div>'+
+    '<p class="why">'+l.why+'</p></div>';
+}).join('');
 
 })();
 </script>

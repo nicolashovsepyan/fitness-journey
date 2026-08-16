@@ -18,33 +18,53 @@ body.opening #bars,body.opening #chapline{opacity:0;pointer-events:none}
 /* Two passes: a soft bloom and a tighter core, both fading out away from the
    bar. Together they read as light rather than as paint. */
 .heroA .tri-glare{stroke:url(#triGlare);stroke-width:5.5;opacity:0;
-  filter:blur(3.5px) drop-shadow(0 0 10px rgba(255,255,255,.55));
-  transition:opacity .5s ease}
-.heroA.lit .tri-glare{opacity:.9}
-/* One short bright dash chasing the perimeter. Hidden until the mark has
-   landed — a light running around an outline that is still being drawn
-   reads as two animations fighting. */
-.heroA .tri-spark{stroke:#fff;stroke-width:3.5;opacity:0;
+  filter:blur(3.5px) drop-shadow(0 0 10px rgba(255,255,255,.55))}
+/* ===== BEAT:START — mirrored into logo/LOGO PREVIEW.html by the build ===== */
+/* THE GLARE. Light coming off the dumbbell and landing on the tube. It holds
+   at a steady value once the mark is lit — it is a reflection, and a
+   reflection does not flash. */
+.heroA.lit .tri-glare{opacity:.9;transition:opacity .5s ease}
+/* THE LIGHT. One short bright dash chasing the perimeter, and the only thing
+   that moves on the outline. Hidden until the mark has landed — a light
+   running around an outline that is still being drawn reads as two
+   animations fighting.
+
+   THE OUTLINE ITSELF DOES NOT PULSE. It used to carry a lub-dub, and for a
+   while it carried a full PQRST complex with the light deflecting into a
+   heartbeat as it crossed the top edge. Both are gone. The mark is a neon
+   sign, not a monitor: the tube is lit, the light travels, and that is all
+   that happens. Anything reinstating a beat has to earn it against how
+   quiet this reads. */
+.heroA .tri-spark{stroke:#fff;stroke-width:3.2;opacity:0;
   filter:drop-shadow(0 0 9px #FF5FA2) drop-shadow(0 0 3px #fff)}
 .heroA.lit .tri-spark{opacity:1;
-  animation:triRun var(--beat,4400ms) linear -1650ms infinite}
-.heroA.lit .tri-l{animation:triBeat var(--beat,4400ms) ease-in-out -1650ms infinite}
-@keyframes triRun{ from{stroke-dashoffset:0} to{stroke-dashoffset:-777} }
-/* A real heartbeat — lub, then a smaller dub — and it only happens while the
-   light is on the long top edge. That window is the first 24% of the lap, so
-   the whole thump is over by 20% and the outline sits quiet for the three
-   sides where nothing is passing. One event per lap, in one place. */
-@keyframes triBeat{
-  0%      {filter:drop-shadow(0 0 7px  rgba(255,95,162,.45)); stroke-width:2.6}
-  4%      {filter:drop-shadow(0 0 34px rgba(255,95,162,1))
-                  drop-shadow(0 0 9px rgba(255,255,255,.6));  stroke-width:3.5}
-  9%      {filter:drop-shadow(0 0 10px rgba(255,95,162,.5));  stroke-width:2.7}
-  14%     {filter:drop-shadow(0 0 24px rgba(255,95,162,.9));  stroke-width:3.1}
-  21%,100%{filter:drop-shadow(0 0 7px  rgba(255,95,162,.45)); stroke-width:2.6}
+  animation:triRun var(--beat,4400ms) linear var(--lap-phase,-1650ms) infinite}
+/* --sparklen is measured off the real path in hero.js rather than assumed, so
+   the light cannot jump at the seam of a lap if the outline is ever redrawn.
+   On today's path it resolves to the plain perimeter, 777. */
+@keyframes triRun{ from{stroke-dashoffset:0}
+                   to{stroke-dashoffset:calc(-1 * var(--sparklen,777px))} }
+
+/* THE BREATH. The glow behind the dumbbell, on the same 4400ms rep as the
+   mark's bob. A slow sine — it swells and falls and never strikes.
+
+   The .55s delay puts its peak at 2750ms, and --lap-phase of -1650ms puts
+   the light at the start of the top edge at that same moment. That is the
+   one coincidence left in the mark, and it is a quiet one: the light begins
+   its run along the top edge just as the mark is at its brightest. */
+.heroA .art.alive .dbglow{
+  animation:dbGlowIn .55s cubic-bezier(.22,1,.36,1) both,
+            dbGlow var(--beat,4400ms) ease-in-out .55s infinite}
+@keyframes dbGlowIn{from{opacity:0;transform:scale(.88)}to{opacity:.40;transform:scale(.95)}}
+@keyframes dbGlow{
+  0%,100%{opacity:.40;transform:scale(.95)}
+  50%    {opacity:.86;transform:scale(1.06)}
 }
+/* ===== BEAT:END ===== */
+/* Only the light moves on the outline now, so this is the only thing to stop.
+   The glare and the outline are static values already. */
 @media (prefers-reduced-motion:reduce){
   .heroA.lit .tri-spark{animation:none;opacity:.85}
-  .heroA.lit .tri-l{animation:none}
 }
 .heroA .art{z-index:2}
 .heroA .hcopy{z-index:3}
@@ -61,13 +81,8 @@ body.opening #bars,body.opening #chapline{opacity:0;pointer-events:none}
 .heroA .dbglow{position:absolute;width:210px;height:210px;border-radius:50%;z-index:1;
   background:radial-gradient(circle,rgba(62,203,168,.26),rgba(62,203,168,0) 66%);
   opacity:0;will-change:opacity,transform}
-/* The glow fades up before it starts breathing, so it never pops in at
-   full strength the instant the mark finishes drawing. */
-.heroA .art.alive .dbglow{
-  animation:dbGlowIn .55s cubic-bezier(.22,1,.36,1) both,
-            dbGlow 4.4s ease-in-out .55s infinite}
-@keyframes dbGlowIn{from{opacity:0;transform:scale(.88)}to{opacity:.40;transform:scale(.95)}}
-@keyframes dbGlow{0%,100%{opacity:.40;transform:scale(.95)}50%{opacity:.86;transform:scale(1.06)}}
+/* The glow's animation and keyframes live up in the BEAT block, with the two
+   things it has to peak alongside. */
 
 .heroA .db path.stroked{fill:none;stroke:url(#dbGrad);stroke-linecap:round}
 .heroA .db path.bar{stroke:url(#dbBar)}

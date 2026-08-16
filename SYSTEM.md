@@ -255,3 +255,58 @@ These exist so the theme and motion work can't rot the system.
 
 **Do not build the visual layer before the spine.** A colour system retro-fitted
 across ten screens is a week of work that should have been an afternoon.
+
+---
+
+# THE HANDOFF — survey → app
+*Added 15 Aug 2026, when the dashboard stopped being one person's.*
+
+## The contract
+
+Two keys. That is the whole interface between the survey and the app.
+
+| Key | Written by | Read by | Shape |
+|---|---|---|---|
+| `fj.v1.profile.<uid>` | onboarding.html | dashboard.html | `{v:6, at, uid, a:{…answers}}` |
+| `fj.v1.current` | onboarding.html | dashboard.html | `<uid>` |
+| `fj.v1.people` | onboarding.html | *(nothing yet)* | `[{uid,name,at}]` — an index for a future switcher |
+
+`uid` is derived from the email the survey collects, via `uidFor()`. **That
+function is duplicated in both files and the two copies must stay identical** —
+it is the join. If they drift, a person finishes the survey and opens someone
+else's dashboard, or a blank one. It is eight lines; keep it that way.
+
+Everything the app owns afterwards is scoped the same way:
+`fj.v1.<uid>.dash`, `fj.v1.<uid>.coach`. Two people on one phone get two
+dashboards.
+
+## What still gets read from the old world
+
+`fj_current` (no id, single profile) is read once on boot, given an id, and
+promoted to the new keys. A survey filled in before today still lands
+somewhere sensible. This can be deleted once nobody has an old draft.
+
+## What the profile drives, today
+
+- name, age, height, weight, units
+- kit → `OWNED` → every movement filter and the whole Equipment section
+- training days → `WEEKPLAN` → the week strip, what "today" is, rest days
+- check-in day → the weigh-in day and its countdown
+- session length, experience, intensity, when-they-train → the info section
+
+## What it does NOT drive yet — read this before promising anything
+
+- **The program itself.** `SESSIONS` is still four sessions written for one
+  man with a kettlebell, a bench, a mat and three sore joints. A different
+  person gets *their* agenda, *their* kit filter and *their* days, but the
+  sessions inside are the same four. This is the single biggest gap.
+- **The coach thread.** `MESSAGES` is hardcoded prose.
+- **Country.** Never asked, so buy links and currency default to CA.
+- **Benchmarks and habits.** Same lists for everyone.
+
+## The rule this cost us
+
+Four separate bugs this week came from short, generic class names colliding
+in one global stylesheet: `.ring`, `.bar`, `.rx`, `.tb`. Each one silently
+restyled a component built weeks earlier. **A new class gets a prefix unless
+it is genuinely global.** The audit script is `tools/audit-classes.mjs`.

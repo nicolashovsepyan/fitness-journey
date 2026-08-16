@@ -1,0 +1,1542 @@
+{
+ "version": 1,
+ "built": "2026-08-13",
+ "art": {
+  "bodyweight_squat": {
+   "name": "Bodyweight Squat",
+   "file": "images/exercises/bodyweight_squat.png",
+   "status": "drawn"
+  },
+  "back_squat": {
+   "name": "Back Squat",
+   "file": "images/exercises/back_squat.png",
+   "status": "drawn"
+  },
+  "reverse_nordic": {
+   "name": "Assisted Reverse Nordic Curl",
+   "file": null,
+   "status": "missing"
+  },
+  "bulgarian_split": {
+   "name": "Bulgarian Split Squat",
+   "file": "images/exercises/bulgarian_split.png",
+   "status": "drawn"
+  },
+  "goblet_squat": {
+   "name": "Goblet Squat",
+   "file": null,
+   "status": "missing"
+  },
+  "horse_stance": {
+   "name": "Horse Stance",
+   "file": null,
+   "status": "missing"
+  },
+  "jump_squat": {
+   "name": "Jump Squats",
+   "file": "images/exercises/jump_squat.png",
+   "status": "drawn"
+  },
+  "sissy_squat": {
+   "name": "Sissy Squat",
+   "file": null,
+   "status": "missing"
+  },
+  "slant_pulse": {
+   "name": "Slant Squat Pulses",
+   "file": null,
+   "status": "missing"
+  },
+  "slant_board_squat": {
+   "name": "Slant-Board Squat",
+   "file": null,
+   "status": "missing"
+  },
+  "touchdown_squat": {
+   "name": "Touchdown Squat",
+   "file": null,
+   "status": "missing"
+  },
+  "deadlift": {
+   "name": "Deadlift",
+   "file": null,
+   "status": "missing"
+  },
+  "db_swing": {
+   "name": "Dumbbell Swing",
+   "file": "images/exercises/db_swing.png",
+   "status": "drawn"
+  },
+  "romanian_deadlift": {
+   "name": "Romanian Deadlift",
+   "file": null,
+   "status": "missing"
+  },
+  "single_leg_rdl": {
+   "name": "Single-Leg RDL",
+   "file": "images/exercises/single_leg_rdl.png",
+   "status": "drawn"
+  },
+  "banded_glute_bridge": {
+   "name": "Banded Glute Bridge",
+   "file": "images/exercises/banded_glute_bridge.png",
+   "status": "drawn"
+  },
+  "banded_sidewalk": {
+   "name": "Banded Lateral Walks",
+   "file": null,
+   "status": "missing"
+  },
+  "hip_thrust": {
+   "name": "Hip Thrust",
+   "file": "images/exercises/hip_thrust.png",
+   "status": "drawn"
+  },
+  "single_leg_bridge": {
+   "name": "Single-Leg Bridge",
+   "file": null,
+   "status": "missing"
+  },
+  "nordic_curl": {
+   "name": "Nordic Curl",
+   "file": null,
+   "status": "missing"
+  },
+  "sliding_ham_curl": {
+   "name": "Sliding Hamstring Curl",
+   "file": null,
+   "status": "missing"
+  },
+  "kot_calf": {
+   "name": "KOT Calf Raise",
+   "file": null,
+   "status": "missing"
+  },
+  "tibialis_raise": {
+   "name": "Tibialis Raise",
+   "file": null,
+   "status": "missing"
+  },
+  "bench_press": {
+   "name": "Bench Press",
+   "file": "images/exercises/bench_press.png",
+   "status": "drawn"
+  },
+  "overhead_press": {
+   "name": "Overhead Press",
+   "file": "images/exercises/overhead_press.png",
+   "status": "drawn"
+  },
+  "wall_push_up": {
+   "name": "Wall Push-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "incline_push_up": {
+   "name": "Incline Push-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "knee_push_up": {
+   "name": "Knee Push-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "pike_hold": {
+   "name": "Pike Hold",
+   "file": null,
+   "status": "missing"
+  },
+  "shorties": {
+   "name": "Shorties",
+   "file": null,
+   "status": "missing"
+  },
+  "bench_dip": {
+   "name": "Bench Dip",
+   "file": null,
+   "status": "missing"
+  },
+  "dip_support_hold": {
+   "name": "Dip Support Hold",
+   "file": "images/exercises/dip_support_hold.png",
+   "status": "drawn"
+  },
+  "frog_stand": {
+   "name": "Frog Stand",
+   "file": null,
+   "status": "missing"
+  },
+  "pike_pulses": {
+   "name": "Pike Pulses",
+   "file": null,
+   "status": "missing"
+  },
+  "pushup": {
+   "name": "Push-ups",
+   "file": "images/exercises/pushup.png",
+   "status": "drawn"
+  },
+  "seated_knee_tuck_raises": {
+   "name": "Seated Knee Tuck Raises",
+   "file": null,
+   "status": "missing"
+  },
+  "banded_dip": {
+   "name": "Banded Dip",
+   "file": null,
+   "status": "missing"
+  },
+  "db_preacher_curl": {
+   "name": "DB Preacher Curl",
+   "file": null,
+   "status": "missing"
+  },
+  "decline_push_up": {
+   "name": "Decline Push-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "dip_bottom_hold": {
+   "name": "Dip Bottom Hold",
+   "file": null,
+   "status": "missing"
+  },
+  "dip_negative": {
+   "name": "Dip Negative",
+   "file": null,
+   "status": "missing"
+  },
+  "feet_on_wall_90_degree": {
+   "name": "Feet on Wall 90 Degree",
+   "file": null,
+   "status": "missing"
+  },
+  "full_burpee": {
+   "name": "Full Burpee",
+   "file": null,
+   "status": "missing"
+  },
+  "hindu_push_up": {
+   "name": "Hindu Push-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "pike_lean": {
+   "name": "Pike Lean",
+   "file": null,
+   "status": "missing"
+  },
+  "pike_push_up": {
+   "name": "Pike Push-Up",
+   "file": "images/exercises/pike_push_up.png",
+   "status": "drawn"
+  },
+  "ring_support_hold": {
+   "name": "Ring Support Hold",
+   "file": null,
+   "status": "missing"
+  },
+  "straight_bar_push_up": {
+   "name": "Straight Bar Push-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "bottoms_up_kb_hold": {
+   "name": "Bottoms-Up KB Hold",
+   "file": null,
+   "status": "missing"
+  },
+  "chest_to_wall_handstand_hold": {
+   "name": "Chest-to-Wall Handstand Hold",
+   "file": null,
+   "status": "missing"
+  },
+  "deadstop_pushup": {
+   "name": "Dead-Stop Push-up",
+   "file": "images/exercises/deadstop_pushup.png",
+   "status": "drawn"
+  },
+  "deep_pike_pushup": {
+   "name": "Deep Parallette Pike Push-Up",
+   "file": "images/exercises/deep_pike_pushup.png",
+   "status": "drawn"
+  },
+  "diamond_push_up": {
+   "name": "Diamond Push-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "dip": {
+   "name": "Dip",
+   "file": "images/exercises/dip.png",
+   "status": "drawn"
+  },
+  "elephant_walk": {
+   "name": "Elephant Walk",
+   "file": null,
+   "status": "missing"
+  },
+  "elevated_pike_lean": {
+   "name": "Elevated Pike Lean",
+   "file": null,
+   "status": "missing"
+  },
+  "elevated_pike_push_up": {
+   "name": "Elevated Pike Push-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "handstand_kick_ups": {
+   "name": "Handstand Kick-Ups",
+   "file": null,
+   "status": "missing"
+  },
+  "navy_seal_push_up_3_pump": {
+   "name": "Navy Seal Push-Up (3 pump)",
+   "file": null,
+   "status": "missing"
+  },
+  "planche_lean": {
+   "name": "Planche Lean",
+   "file": null,
+   "status": "missing"
+  },
+  "ring_push_up": {
+   "name": "Ring Push-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "seated_straight_leg_raises": {
+   "name": "Seated Straight Leg Raises",
+   "file": null,
+   "status": "missing"
+  },
+  "straddle_leg_lifts": {
+   "name": "Straddle Leg Lifts",
+   "file": null,
+   "status": "missing"
+  },
+  "straight_arm_db_fly": {
+   "name": "Straight-Arm DB Fly",
+   "file": null,
+   "status": "missing"
+  },
+  "t_rotation_push_up": {
+   "name": "T-Rotation Push-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "wall_walk": {
+   "name": "Wall Walk",
+   "file": null,
+   "status": "missing"
+  },
+  "ring_pushup": {
+   "name": "Weighted Deep Ring Push-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "weighted_dip": {
+   "name": "Weighted Dip",
+   "file": null,
+   "status": "missing"
+  },
+  "zanetti_db_press": {
+   "name": "Zanetti DB Press",
+   "file": null,
+   "status": "missing"
+  },
+  "archer_complex": {
+   "name": "Archer Complex",
+   "file": null,
+   "status": "missing"
+  },
+  "back_to_wall_handstand_hold": {
+   "name": "Back-to-Wall Handstand Hold",
+   "file": null,
+   "status": "missing"
+  },
+  "burpee_pull_up": {
+   "name": "Burpee Pull-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "diamond_push_up_on_kettlebell": {
+   "name": "Diamond Push-Up on Kettlebell",
+   "file": null,
+   "status": "missing"
+  },
+  "frog_planche": {
+   "name": "Frog Planche",
+   "file": null,
+   "status": "missing"
+  },
+  "navy_seal_burpee": {
+   "name": "Navy Seal Burpee",
+   "file": null,
+   "status": "missing"
+  },
+  "pike_lean_on_parallettes": {
+   "name": "Pike Lean on Parallettes",
+   "file": null,
+   "status": "missing"
+  },
+  "turkish_get_up": {
+   "name": "Turkish Get-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "wall_handstand": {
+   "name": "Wall Handstand",
+   "file": null,
+   "status": "missing"
+  },
+  "archer_push_up": {
+   "name": "Archer Push-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "devil_s_press": {
+   "name": "Devil's Press",
+   "file": null,
+   "status": "missing"
+  },
+  "half_one_arm_push_up": {
+   "name": "Half One-Arm Push-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "open_tuck_planche": {
+   "name": "Open Tuck Planche",
+   "file": null,
+   "status": "missing"
+  },
+  "planche_lean_raises": {
+   "name": "Planche Lean Raises",
+   "file": null,
+   "status": "missing"
+  },
+  "ring_dip": {
+   "name": "Ring Dip",
+   "file": "images/exercises/ring_dip.png",
+   "status": "drawn"
+  },
+  "ring_dip_knee_raise": {
+   "name": "Ring Dip + Knee Raise",
+   "file": null,
+   "status": "missing"
+  },
+  "tuck_planche_hold": {
+   "name": "Tuck Planche Hold",
+   "file": null,
+   "status": "missing"
+  },
+  "adv_tuck_planche": {
+   "name": "Adv. Tuck Planche",
+   "file": null,
+   "status": "missing"
+  },
+  "assisted_one_arm_push_up": {
+   "name": "Assisted One-Arm Push-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "bulgarian_dip": {
+   "name": "Bulgarian Dip",
+   "file": null,
+   "status": "missing"
+  },
+  "chest_to_wall_deficit_hspu": {
+   "name": "Chest-to-Wall Deficit HSPU",
+   "file": null,
+   "status": "missing"
+  },
+  "l_sit_push_back_to_planche": {
+   "name": "L-Sit Push-Back to Planche",
+   "file": null,
+   "status": "missing"
+  },
+  "man_maker": {
+   "name": "Man-Maker",
+   "file": null,
+   "status": "missing"
+  },
+  "one_arm_push_up": {
+   "name": "One-Arm Push-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "pseudo_planche_push_up": {
+   "name": "Pseudo Planche Push-Up",
+   "file": "images/exercises/pseudo_planche_push_up.png",
+   "status": "drawn"
+  },
+  "russian_dip": {
+   "name": "Russian Dip",
+   "file": null,
+   "status": "missing"
+  },
+  "semi_straddle_planche": {
+   "name": "Semi-Straddle Planche",
+   "file": null,
+   "status": "missing"
+  },
+  "single_leg_planche": {
+   "name": "Single-Leg Planche",
+   "file": null,
+   "status": "missing"
+  },
+  "straight_arm_dip_rings": {
+   "name": "Straight-Arm Dip (Rings)",
+   "file": null,
+   "status": "missing"
+  },
+  "wall_hspu": {
+   "name": "Wall HSPU",
+   "file": null,
+   "status": "missing"
+  },
+  "x90_degree_hspu_negative": {
+   "name": "90-Degree HSPU Negative",
+   "file": null,
+   "status": "missing"
+  },
+  "freestanding_hs": {
+   "name": "Freestanding HS",
+   "file": null,
+   "status": "missing"
+  },
+  "handstand_push_up": {
+   "name": "Handstand Push-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "handstand_to_planche_negative": {
+   "name": "Handstand to Planche Negative",
+   "file": null,
+   "status": "missing"
+  },
+  "straddle_planche": {
+   "name": "Straddle Planche",
+   "file": null,
+   "status": "missing"
+  },
+  "full_90_degree_hspu": {
+   "name": "Full 90-Degree HSPU",
+   "file": null,
+   "status": "missing"
+  },
+  "full_planche": {
+   "name": "Full Planche",
+   "file": null,
+   "status": "missing"
+  },
+  "planche_push_up": {
+   "name": "Planche Push-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "press_to_handstand": {
+   "name": "Press to Handstand",
+   "file": null,
+   "status": "missing"
+  },
+  "active_hang": {
+   "name": "Active Hang",
+   "file": null,
+   "status": "missing"
+  },
+  "banded_pullapart": {
+   "name": "Banded Pull-Aparts",
+   "file": "images/exercises/banded_pullapart.png",
+   "status": "drawn"
+  },
+  "dead_hang": {
+   "name": "Dead Hang",
+   "file": "images/exercises/dead_hang.png",
+   "status": "drawn"
+  },
+  "incline_row": {
+   "name": "Incline Row",
+   "file": null,
+   "status": "missing"
+  },
+  "scap_pullup": {
+   "name": "Scapular Pull-ups",
+   "file": null,
+   "status": "missing"
+  },
+  "australian_pullup": {
+   "name": "Australian Pull-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "band_assisted_pullup": {
+   "name": "Band-Assisted Pull-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "jumping_pullup": {
+   "name": "Jumping Pull-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "negative_pullup": {
+   "name": "Negative Pull-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "ring_row": {
+   "name": "Ring Row",
+   "file": null,
+   "status": "missing"
+  },
+  "straight_arm_lat_raise": {
+   "name": "Straight-Arm Lat Raise",
+   "file": null,
+   "status": "missing"
+  },
+  "band_front_lever": {
+   "name": "Band-Assisted Front Lever",
+   "file": null,
+   "status": "missing"
+  },
+  "chin_up": {
+   "name": "Chin-up",
+   "file": null,
+   "status": "missing"
+  },
+  "neutral_pullup": {
+   "name": "Neutral-Grip Pull-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "seal_row": {
+   "name": "Seal Row",
+   "file": null,
+   "status": "missing"
+  },
+  "wide_inverted_row": {
+   "name": "Wide Inverted Row",
+   "file": "images/exercises/wide_inverted_row.png",
+   "status": "drawn"
+  },
+  "bent_over_row": {
+   "name": "Bent-Over Row",
+   "file": "images/exercises/bent_over_row.png",
+   "status": "drawn"
+  },
+  "feet_elevated_ring_row": {
+   "name": "Feet-Elevated Ring Row",
+   "file": null,
+   "status": "missing"
+  },
+  "pullup": {
+   "name": "Pull-Up",
+   "file": "images/exercises/pullup.png",
+   "status": "drawn"
+  },
+  "single_arm_row": {
+   "name": "Single-Arm Row",
+   "file": null,
+   "status": "missing"
+  },
+  "skin_the_cat": {
+   "name": "Skin the Cat",
+   "file": null,
+   "status": "missing"
+  },
+  "towel_hang": {
+   "name": "Towel Hang",
+   "file": null,
+   "status": "missing"
+  },
+  "tuck_fl_raise": {
+   "name": "Tuck Front Lever Raise",
+   "file": null,
+   "status": "missing"
+  },
+  "wide_pullup": {
+   "name": "Wide-Grip Pull-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "adv_tuck_fl_raise": {
+   "name": "Adv-Tuck FL Raise",
+   "file": null,
+   "status": "missing"
+  },
+  "adv_tuck_front_lever": {
+   "name": "Advanced-Tuck Front Lever",
+   "file": null,
+   "status": "missing"
+  },
+  "archer_row": {
+   "name": "Archer Row",
+   "file": null,
+   "status": "missing"
+  },
+  "commando_pullup": {
+   "name": "Commando Pull-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "explosive_chinup": {
+   "name": "Explosive Chin-up",
+   "file": "images/exercises/explosive_chinup.png",
+   "status": "drawn"
+  },
+  "explosive_pullup": {
+   "name": "Explosive Pull-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "german_hang": {
+   "name": "German Hang",
+   "file": null,
+   "status": "missing"
+  },
+  "high_pullup": {
+   "name": "High Pull-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "pull_over": {
+   "name": "Pull-Over",
+   "file": null,
+   "status": "missing"
+  },
+  "single_arm_ring_row": {
+   "name": "Single-Arm Ring Row",
+   "file": null,
+   "status": "missing"
+  },
+  "towel_pullup": {
+   "name": "Towel Pull-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "band_muscle_up": {
+   "name": "Band-Assisted Muscle-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "chest_to_bar": {
+   "name": "Chest-to-Bar Pull-Up",
+   "file": "images/exercises/chest_to_bar.png",
+   "status": "drawn"
+  },
+  "l_sit_pullup": {
+   "name": "L-Sit Pull-up",
+   "file": "images/exercises/l_sit_pullup.png",
+   "status": "drawn"
+  },
+  "negative_muscle_up_bar": {
+   "name": "Negative Muscle-Up (Bar)",
+   "file": null,
+   "status": "missing"
+  },
+  "one_arm_hang": {
+   "name": "One-Arm Hang",
+   "file": null,
+   "status": "missing"
+  },
+  "single_leg_fl_raise": {
+   "name": "Single-Leg FL Raise",
+   "file": null,
+   "status": "missing"
+  },
+  "single_leg_front_lever": {
+   "name": "Single-Leg Front Lever",
+   "file": null,
+   "status": "missing"
+  },
+  "skin_cat_front_support": {
+   "name": "Skin the Cat to Front Support",
+   "file": null,
+   "status": "missing"
+  },
+  "weighted_chinup": {
+   "name": "Weighted Chin-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "archer_pullup": {
+   "name": "Archer Pull-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "around_world_pullup": {
+   "name": "Around-the-World Pull-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "false_grip_pullup": {
+   "name": "False-Grip Pull-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "front_lever_row": {
+   "name": "Front Lever Row",
+   "file": null,
+   "status": "missing"
+  },
+  "ice_cream_maker": {
+   "name": "Ice Cream Maker",
+   "file": null,
+   "status": "missing"
+  },
+  "straddle_fl_raise": {
+   "name": "Straddle FL Raise",
+   "file": null,
+   "status": "missing"
+  },
+  "straddle_front_lever": {
+   "name": "Straddle Front Lever",
+   "file": null,
+   "status": "missing"
+  },
+  "typewriter_pullup": {
+   "name": "Typewriter Pull-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "front_lever_pullup": {
+   "name": "Front Lever Pull-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "full_fl_raise": {
+   "name": "Full FL Raise",
+   "file": null,
+   "status": "missing"
+  },
+  "full_front_lever": {
+   "name": "Full Front Lever",
+   "file": null,
+   "status": "missing"
+  },
+  "muscle_up_bar": {
+   "name": "Muscle-Up (Bar)",
+   "file": "images/exercises/muscle_up_bar.png",
+   "status": "drawn"
+  },
+  "muscle_up_rings": {
+   "name": "Muscle-Up (Rings)",
+   "file": null,
+   "status": "missing"
+  },
+  "one_arm_negative": {
+   "name": "One-Arm Negative Pull-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "one_arm_pullup": {
+   "name": "One-Arm Pull-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "crunch": {
+   "name": "Crunch",
+   "file": null,
+   "status": "missing"
+  },
+  "incline_plank": {
+   "name": "Incline Plank",
+   "file": null,
+   "status": "missing"
+  },
+  "lying_knee_tuck": {
+   "name": "Lying Knee Tuck",
+   "file": null,
+   "status": "missing"
+  },
+  "bear_hold": {
+   "name": "Bear Hold",
+   "file": null,
+   "status": "missing"
+  },
+  "bent_knee_hollow_hold": {
+   "name": "Bent-Knee Hollow Hold",
+   "file": null,
+   "status": "missing"
+  },
+  "bird_dog": {
+   "name": "Bird Dog",
+   "file": null,
+   "status": "missing"
+  },
+  "dead_bug": {
+   "name": "Dead Bug",
+   "file": "images/exercises/dead_bug.png",
+   "status": "drawn"
+  },
+  "flutter_kicks": {
+   "name": "Flutter Kicks",
+   "file": null,
+   "status": "missing"
+  },
+  "foot_supported_l_sit": {
+   "name": "Foot-Supported L-Sit",
+   "file": null,
+   "status": "missing"
+  },
+  "reverse_crunch": {
+   "name": "Reverse Crunch",
+   "file": null,
+   "status": "missing"
+  },
+  "scissor_kicks": {
+   "name": "Scissor Kicks",
+   "file": null,
+   "status": "missing"
+  },
+  "sit_up": {
+   "name": "Sit-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "superman": {
+   "name": "Superman",
+   "file": null,
+   "status": "missing"
+  },
+  "toe_touch_crunch": {
+   "name": "Toe Touch Crunch",
+   "file": null,
+   "status": "missing"
+  },
+  "alternating_single_leg_l_sit": {
+   "name": "Alternating Single-Leg L-Sit",
+   "file": null,
+   "status": "missing"
+  },
+  "bear_hold_taps": {
+   "name": "Bear Hold Taps",
+   "file": null,
+   "status": "missing"
+  },
+  "bicycle_crunch": {
+   "name": "Bicycle Crunch",
+   "file": null,
+   "status": "missing"
+  },
+  "bodyline_drill": {
+   "name": "Bodyline Drill",
+   "file": null,
+   "status": "missing"
+  },
+  "forearm_plank": {
+   "name": "Forearm Plank",
+   "file": "images/exercises/forearm_plank.png",
+   "status": "drawn"
+  },
+  "hanging_knee_raise": {
+   "name": "Hanging Knee Raise",
+   "file": "images/exercises/hanging_knee_raise.png",
+   "status": "drawn"
+  },
+  "high_plank": {
+   "name": "High Plank",
+   "file": null,
+   "status": "missing"
+  },
+  "hollow_body_crunch": {
+   "name": "Hollow Body Crunch",
+   "file": null,
+   "status": "missing"
+  },
+  "hollow_hold": {
+   "name": "Hollow Hold",
+   "file": "images/exercises/hollow_hold.png",
+   "status": "drawn"
+  },
+  "lying_leg_raise": {
+   "name": "Lying Leg Raise",
+   "file": null,
+   "status": "missing"
+  },
+  "russian_twist": {
+   "name": "Russian Twist",
+   "file": null,
+   "status": "missing"
+  },
+  "side_plank": {
+   "name": "Side Plank",
+   "file": null,
+   "status": "missing"
+  },
+  "tuck_up": {
+   "name": "Tuck-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "bear_limb_lift": {
+   "name": "Bear Limb Lift",
+   "file": null,
+   "status": "missing"
+  },
+  "bear_opposing_limb_lift": {
+   "name": "Bear Opposing Limb Lift",
+   "file": null,
+   "status": "missing"
+  },
+  "dragon_flag_candlestick": {
+   "name": "Dragon Flag Candlestick",
+   "file": null,
+   "status": "missing"
+  },
+  "pike_compression": {
+   "name": "Pike Compression Lifts",
+   "file": null,
+   "status": "missing"
+  },
+  "plank_leg_lift": {
+   "name": "Plank Leg Lift",
+   "file": null,
+   "status": "missing"
+  },
+  "plank_opposite_arm_leg": {
+   "name": "Plank Opposite Arm + Leg",
+   "file": null,
+   "status": "missing"
+  },
+  "shoulder_tap": {
+   "name": "Plank Shoulder Taps",
+   "file": null,
+   "status": "missing"
+  },
+  "single_leg_v_up": {
+   "name": "Single-Leg V-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "straddle_v_up": {
+   "name": "Straddle V-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "tuck_l_sit": {
+   "name": "Tuck L-Sit",
+   "file": null,
+   "status": "missing"
+  },
+  "tuck_v_sit_hold": {
+   "name": "Tuck V-Sit Hold",
+   "file": null,
+   "status": "missing"
+  },
+  "v_up": {
+   "name": "V-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "bird_dog_crunch": {
+   "name": "Bird Dog Crunch",
+   "file": null,
+   "status": "missing"
+  },
+  "dragon_flag": {
+   "name": "Dragon Flag (Tuck)",
+   "file": null,
+   "status": "missing"
+  },
+  "elevated_feet_plank": {
+   "name": "Elevated Feet Plank",
+   "file": null,
+   "status": "missing"
+  },
+  "hanging_leg_raise": {
+   "name": "Hanging Leg Raise",
+   "file": null,
+   "status": "missing"
+  },
+  "hollow_rocks": {
+   "name": "Hollow Rocks",
+   "file": "images/exercises/hollow_rocks.png",
+   "status": "drawn"
+  },
+  "long_lever_plank": {
+   "name": "Long-Lever Plank",
+   "file": null,
+   "status": "missing"
+  },
+  "plank_updown": {
+   "name": "Plank Up-Downs",
+   "file": null,
+   "status": "missing"
+  },
+  "rkc_plank": {
+   "name": "RKC Plank",
+   "file": null,
+   "status": "missing"
+  },
+  "side_plank_hip_dip": {
+   "name": "Side Plank Hip Dip",
+   "file": null,
+   "status": "missing"
+  },
+  "side_plank_leg_raise": {
+   "name": "Side Plank Leg Raise",
+   "file": null,
+   "status": "missing"
+  },
+  "walk_up_plank": {
+   "name": "Walk-Up Planks",
+   "file": null,
+   "status": "missing"
+  },
+  "ab_wheel_rollout": {
+   "name": "Ab Wheel Rollout",
+   "file": null,
+   "status": "missing"
+  },
+  "copenhagen_plank": {
+   "name": "Copenhagen Plank",
+   "file": null,
+   "status": "missing"
+  },
+  "hollow_to_v_sit_snap_up": {
+   "name": "Hollow-to-V-Sit Snap-Up",
+   "file": null,
+   "status": "missing"
+  },
+  "l_sit": {
+   "name": "L-Sit Hold",
+   "file": null,
+   "status": "missing"
+  },
+  "one_leg_l_sit": {
+   "name": "One-Leg L-Sit",
+   "file": null,
+   "status": "missing"
+  },
+  "plank_bodysaw": {
+   "name": "Plank Bodysaw",
+   "file": null,
+   "status": "missing"
+  },
+  "squeeze_loaded_hollow_hold": {
+   "name": "Squeeze-Loaded Hollow Hold",
+   "file": null,
+   "status": "missing"
+  },
+  "straddle_l_sit": {
+   "name": "Straddle L-Sit",
+   "file": null,
+   "status": "missing"
+  },
+  "toes_to_bar": {
+   "name": "Toes-to-Bar",
+   "file": null,
+   "status": "missing"
+  },
+  "tuck_dragon_flag_hold": {
+   "name": "Tuck Dragon Flag Hold",
+   "file": null,
+   "status": "missing"
+  },
+  "hanging_inverted_hold": {
+   "name": "Hanging Inverted Hold",
+   "file": null,
+   "status": "missing"
+  },
+  "jamaican_plank": {
+   "name": "Jamaican Plank",
+   "file": null,
+   "status": "missing"
+  },
+  "one_leg_v_sit": {
+   "name": "One-Leg V-Sit",
+   "file": null,
+   "status": "missing"
+  },
+  "ring_l_sit": {
+   "name": "Ring L-Sit",
+   "file": null,
+   "status": "missing"
+  },
+  "single_arm_plank": {
+   "name": "Single Arm Plank",
+   "file": null,
+   "status": "missing"
+  },
+  "single_leg_dragon_flag": {
+   "name": "Single-Leg Dragon Flag",
+   "file": null,
+   "status": "missing"
+  },
+  "star_side_plank": {
+   "name": "Star Side Plank",
+   "file": null,
+   "status": "missing"
+  },
+  "straddle_v_sit": {
+   "name": "Straddle V-Sit",
+   "file": null,
+   "status": "missing"
+  },
+  "windshield_wipers": {
+   "name": "Windshield Wipers",
+   "file": null,
+   "status": "missing"
+  },
+  "single_arm_leg_plank": {
+   "name": "Single Arm + Leg Plank",
+   "file": null,
+   "status": "missing"
+  },
+  "v_sit": {
+   "name": "V-Sit",
+   "file": null,
+   "status": "missing"
+  },
+  "inverted_candle": {
+   "name": "Inverted Candle",
+   "file": null,
+   "status": "missing"
+  },
+  "handstand": {
+   "name": "Freestanding Attempts",
+   "file": "images/exercises/handstand.png",
+   "status": "drawn"
+  },
+  "front_lever_tuck": {
+   "name": "Front Lever Tuck",
+   "file": null,
+   "status": "missing"
+  },
+  "kick_up_practice": {
+   "name": "Kick-Up Practice",
+   "file": null,
+   "status": "missing"
+  },
+  "wall_handstand_hold": {
+   "name": "Wall Handstand Hold",
+   "file": null,
+   "status": "missing"
+  },
+  "mountain_climber": {
+   "name": "Mountain Climbers",
+   "file": "images/exercises/mountain_climber.png",
+   "status": "drawn"
+  },
+  "burpee": {
+   "name": "Burpee",
+   "file": null,
+   "status": "source",
+   "source": "burpee-five-stage-transparent.png"
+  },
+  "ankle_mobility": {
+   "name": "Ankle Mobility",
+   "file": null,
+   "status": "missing"
+  },
+  "cat_cow": {
+   "name": "Cat–Cow",
+   "file": null,
+   "status": "missing"
+  },
+  "deep_squat_rock": {
+   "name": "Deep Squat Rocks",
+   "file": "images/exercises/deep_squat_rock.png",
+   "status": "drawn"
+  },
+  "chest_stretch": {
+   "name": "Doorway Chest Stretch",
+   "file": null,
+   "status": "missing"
+  },
+  "hip_cars": {
+   "name": "Hip CARs",
+   "file": "images/exercises/hip_cars.png",
+   "status": "drawn"
+  },
+  "hip_flexor_stretch": {
+   "name": "Hip-Flexor Stretch",
+   "file": null,
+   "status": "missing"
+  },
+  "leg_swings": {
+   "name": "Leg Swings",
+   "file": null,
+   "status": "missing"
+  },
+  "shoulder_stretch": {
+   "name": "Overhead Shoulder Stretch",
+   "file": null,
+   "status": "missing"
+  },
+  "thoracic_open": {
+   "name": "Thoracic Opener",
+   "file": null,
+   "status": "missing"
+  },
+  "thoracic_rotation": {
+   "name": "Thoracic Rotations",
+   "file": null,
+   "status": "missing"
+  },
+  "kb_deadlift": {
+   "name": "Kettlebell Deadlift",
+   "file": null,
+   "status": "missing"
+  },
+  "kb_rdl": {
+   "name": "Kettlebell Romanian Deadlift",
+   "file": null,
+   "status": "missing"
+  },
+  "kb_floor_press": {
+   "name": "Kettlebell Floor Press",
+   "file": null,
+   "status": "missing"
+  },
+  "kb_press": {
+   "name": "Kettlebell Overhead Press",
+   "file": null,
+   "status": "missing"
+  },
+  "kb_high_pull": {
+   "name": "Kettlebell High Pull",
+   "file": null,
+   "status": "missing"
+  },
+  "kb_halo": {
+   "name": "Kettlebell Halo",
+   "file": null,
+   "status": "missing"
+  },
+  "goblet_march": {
+   "name": "Goblet March",
+   "file": null,
+   "status": "missing"
+  },
+  "suitcase_carry": {
+   "name": "Suitcase Carry",
+   "file": null,
+   "status": "missing"
+  },
+  "turkish_getup": {
+   "name": "Turkish Get-Up",
+   "file": "images/exercises/turkish_getup.png",
+   "status": "drawn"
+  },
+  "prying_goblet": {
+   "name": "Prying Goblet Squat",
+   "file": null,
+   "status": "missing"
+  },
+  "glute_bridge": {
+   "name": "Glute Bridge",
+   "file": null,
+   "status": "missing"
+  },
+  "box_squat": {
+   "name": "Bench Squat",
+   "file": null,
+   "status": "missing"
+  },
+  "march_in_place": {
+   "name": "Fast March",
+   "file": null,
+   "status": "missing"
+  },
+  "straight_bar_dip": {
+   "name": "Straight Bar Dip",
+   "file": "images/exercises/straight_bar_dip.png",
+   "status": "drawn"
+  },
+  "ring_dip_support_hold": {
+   "name": "Ring Dip Support Hold",
+   "file": "images/exercises/ring_dip_support_hold.png",
+   "status": "drawn"
+  },
+  "wrist_prep": {
+   "name": "Wrist Prep Rocks",
+   "file": null,
+   "status": "missing"
+  },
+  "arm_circles": {
+   "name": "Arm Circles",
+   "file": null,
+   "status": "missing"
+  },
+  "down_dog_up_dog": {
+   "name": "Down Dog to Up Dog",
+   "file": null,
+   "status": "missing"
+  },
+  "down_dog_up_dog_bar": {
+   "name": "Down Dog to Up Dog (hands on bar)",
+   "file": null,
+   "status": "missing"
+  },
+  "deep_squat_thoracic": {
+   "name": "Deep Squat Hold + Chest Opening",
+   "file": null,
+   "status": "missing"
+  },
+  "high_knee_march": {
+   "name": "Standing High-Knee March",
+   "file": null,
+   "status": "missing"
+  },
+  "hip_90_90": {
+   "name": "90/90 Hip Switches",
+   "file": null,
+   "status": "missing"
+  },
+  "worlds_greatest_stretch": {
+   "name": "World's Greatest Stretch",
+   "file": null,
+   "status": "missing"
+  },
+  "lat_pulldown": {
+   "name": "Lat Pulldown",
+   "file": null,
+   "status": "missing"
+  },
+  "seated_cable_row": {
+   "name": "Seated Cable Row",
+   "file": null,
+   "status": "missing"
+  },
+  "chest_supported_row": {
+   "name": "Chest-Supported Row",
+   "file": null,
+   "status": "missing"
+  },
+  "face_pull": {
+   "name": "Face Pull",
+   "file": null,
+   "status": "missing"
+  },
+  "reverse_fly": {
+   "name": "Reverse Fly (chest-supported)",
+   "file": null,
+   "status": "missing"
+  },
+  "rear_delt_row": {
+   "name": "Chest-Supported Rear-Delt Row",
+   "file": null,
+   "status": "missing"
+  },
+  "cable_rear_delt_fly": {
+   "name": "Cable Rear-Delt Fly",
+   "file": null,
+   "status": "missing"
+  },
+  "prone_ytw": {
+   "name": "Prone Y-T-W Raise",
+   "file": null,
+   "status": "missing"
+  },
+  "barbell_curl": {
+   "name": "Barbell Curl",
+   "file": null,
+   "status": "missing"
+  },
+  "assisted_chinup_top_hold": {
+   "name": "Chin-Up Top Hold (assisted machine)",
+   "file": null,
+   "status": "missing"
+  },
+  "db_pullover": {
+   "name": "DB Pullover (on bench)",
+   "file": null,
+   "status": "missing"
+  },
+  "db_shoulder_press": {
+   "name": "DB Shoulder Press",
+   "file": null,
+   "status": "missing"
+  },
+  "farmers_carry": {
+   "name": "Farmer's Carry (no straps)",
+   "file": "images/exercises/farmers_carry.png",
+   "status": "drawn"
+  },
+  "chest_press_machine": {
+   "name": "Chest Press Machine",
+   "file": null,
+   "status": "missing"
+  },
+  "shoulder_press_machine": {
+   "name": "Shoulder Press Machine",
+   "file": null,
+   "status": "missing"
+  },
+  "assisted_dip": {
+   "name": "Assisted Dip (machine)",
+   "file": null,
+   "status": "missing"
+  },
+  "lateral_raise": {
+   "name": "Lateral Raise",
+   "file": null,
+   "status": "missing"
+  },
+  "triceps_pushdown": {
+   "name": "Triceps Pushdown",
+   "file": null,
+   "status": "missing"
+  },
+  "pushup_on_dumbbells": {
+   "name": "Push-Ups on Dumbbells",
+   "file": null,
+   "status": "missing"
+  },
+  "db_rdl": {
+   "name": "Dumbbell Romanian Deadlift",
+   "file": null,
+   "status": "missing"
+  },
+  "back_extension_45": {
+   "name": "45-Degree Back Extension",
+   "file": null,
+   "status": "missing"
+  },
+  "kb_swing": {
+   "name": "Kettlebell Swing",
+   "file": "images/exercises/kb_swing.png",
+   "status": "drawn"
+  },
+  "wall_sit": {
+   "name": "Wall Sit",
+   "file": "images/exercises/wall_sit.png",
+   "status": "drawn"
+  },
+  "spanish_squat": {
+   "name": "Spanish Squat",
+   "file": null,
+   "status": "missing"
+  },
+  "banded_tke": {
+   "name": "Banded Terminal Knee Extension",
+   "file": null,
+   "status": "missing"
+  },
+  "hip_abduction_machine": {
+   "name": "Hip Abduction Machine",
+   "file": null,
+   "status": "missing"
+  },
+  "hip_adduction_machine": {
+   "name": "Hip Adduction Machine",
+   "file": null,
+   "status": "missing"
+  },
+  "hollow_heels_down": {
+   "name": "Hollow Hold (heels down)",
+   "file": null,
+   "status": "missing"
+  },
+  "incline_side_plank": {
+   "name": "Side Plank (hand on bar)",
+   "file": null,
+   "status": "missing"
+  }
+ }
+}

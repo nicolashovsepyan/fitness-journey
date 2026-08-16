@@ -1,0 +1,215 @@
+{
+ "version": 1,
+ "built": "2026-08-13",
+ "benchmarks": {
+  "pushup": {
+   "mech": "REPS",
+   "unit": "reps",
+   "standard": "",
+   "ranks": {
+    "m": [
+     20,
+     40,
+     60,
+     80
+    ],
+    "f": [
+     6,
+     18,
+     30,
+     50
+    ]
+   }
+  },
+  "dip": {
+   "mech": "REPS",
+   "unit": "reps",
+   "standard": "",
+   "ranks": {
+    "m": [
+     10,
+     20,
+     35,
+     50
+    ],
+    "f": [
+     2,
+     8,
+     18,
+     30
+    ]
+   }
+  },
+  "pullup": {
+   "mech": "REPS",
+   "unit": "reps",
+   "standard": "",
+   "ranks": {
+    "m": [
+     8,
+     15,
+     25,
+     35
+    ],
+    "f": [
+     1,
+     6,
+     12,
+     20
+    ]
+   }
+  },
+  "forearm_plank": {
+   "mech": "HOLD",
+   "unit": "secs",
+   "standard": "hollow body; no hip sag",
+   "ranks": {
+    "m": [
+     60,
+     180,
+     300,
+     600
+    ],
+    "f": [
+     60,
+     180,
+     240,
+     480
+    ]
+   }
+  },
+  "dead_hang": {
+   "mech": "HOLD",
+   "unit": "secs",
+   "standard": "passive hang; full extension; no kipping",
+   "ranks": {
+    "m": [
+     45,
+     90,
+     150,
+     240
+    ],
+    "f": [
+     30,
+     60,
+     120,
+     180
+    ]
+   }
+  },
+  "bulgarian_split": {
+   "mech": "REPS",
+   "unit": "reps_per_side",
+   "standard": "",
+   "ranks": {
+    "m": [
+     8,
+     15,
+     25,
+     40
+    ],
+    "f": [
+     6,
+     12,
+     20,
+     32
+    ]
+   }
+  },
+  "jump_squat": {
+   "mech": "REPS",
+   "unit": "reps",
+   "standard": "",
+   "ranks": {
+    "m": [
+     10,
+     20,
+     35,
+     60
+    ],
+    "f": [
+     8,
+     15,
+     28,
+     45
+    ]
+   }
+  },
+  "single_leg_rdl": {
+   "mech": "REPS",
+   "unit": "reps_per_side",
+   "standard": "",
+   "ranks": {
+    "m": [
+     8,
+     15,
+     25,
+     40
+    ],
+    "f": [
+     10,
+     16,
+     26,
+     40
+    ]
+   }
+  },
+  "pike_push_up": {
+   "mech": "REPS",
+   "unit": "reps",
+   "standard": "",
+   "ranks": {
+    "m": [
+     5,
+     15,
+     25,
+     40
+    ],
+    "f": [
+     2,
+     8,
+     15,
+     25
+    ]
+   }
+  },
+  "wall_sit": {
+   "mech": "HOLD",
+   "unit": "secs",
+   "standard": "thighs parallel; back flat on the wall; hands off the thighs",
+   "ranks": {
+    "m": [
+     45,
+     90,
+     150,
+     240
+    ],
+    "f": [
+     45,
+     90,
+     150,
+     240
+    ]
+   }
+  },
+  "mountain_climber": {
+   "mech": "HOLD",
+   "unit": "secs",
+   "standard": "hips level; continuous knee drive; no piking",
+   "ranks": {
+    "m": [
+     30,
+     60,
+     120,
+     180
+    ],
+    "f": [
+     30,
+     60,
+     100,
+     160
+    ]
+   }
+  }
+ }
+}

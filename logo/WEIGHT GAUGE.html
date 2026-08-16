@@ -1,0 +1,632 @@
+<meta charset="utf-8">
+<title>Loading The Bar</title>
+
+<style>
+/* ==========================================================================
+   WEIGHT GAUGE — the logo's dumbbell, turned into a weight selector.
+
+   Two graphics: a pair of dumbbells and a barbell. Both are the mark's own
+   geometry, scaled by weight. Nothing here is decided yet — this file exists
+   so the decisions can be made by looking rather than by describing.
+
+   Same palette and type as LOGO PREVIEW.html, deliberately: this is the same
+   workshop, and the gauge has to sit next to the mark without arguing.
+   ========================================================================== */
+:root{
+  --ground:#101317; --panel:#171B20; --panel-2:#1D2229;
+  --line:#262C34; --line-2:#333B45;
+  --ink:#E8EDF2; --ink-2:#9AA5B1; --ink-3:#6B7681;
+  --neon:#FF5FA2; --jade:#3ECBA8; --ok:#3ECBA8; --warn:#E8B04B;
+  --sans:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Roboto,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace;
+  --gut:clamp(20px,4vw,40px);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font:400 15.5px/1.55 var(--sans);letter-spacing:-.006em}
+.wrap{max-width:1080px;margin:0 auto;padding:0 var(--gut) 96px}
+.eyebrow{font:600 10.5px/1 var(--mono);letter-spacing:.22em;text-transform:uppercase;
+  color:var(--ink-3);margin:0}
+
+/* masthead */
+.mast{padding:clamp(44px,8vh,84px) 0 0;display:flex;flex-direction:column;gap:18px}
+.mast h1{margin:0;font-size:clamp(30px,5.2vw,46px);line-height:1.05;
+  letter-spacing:-.03em;font-weight:600;text-wrap:balance}
+.mast .lede{margin:0;max-width:62ch;color:var(--ink-2);font-size:16.5px;line-height:1.6}
+.mast .lede b{color:var(--ink);font-weight:550}
+.credits{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.credits span{font:500 11px/1 var(--mono);letter-spacing:.08em;color:var(--ink-2);
+  background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:7px 11px}
+.credits span em{font-style:normal;color:var(--ink-3)}
+
+/* sections */
+section{padding-top:clamp(48px,7vh,76px)}
+.shead{display:flex;align-items:baseline;justify-content:space-between;gap:20px;
+  flex-wrap:wrap;border-top:1px solid var(--line);padding-top:20px;margin-bottom:26px}
+.shead h2{margin:0;font-size:21px;letter-spacing:-.02em;font-weight:600}
+.shead p{margin:6px 0 0;color:var(--ink-2);font-size:14.5px;max-width:58ch}
+.shead .lhs{min-width:0}
+
+/* the live rig */
+.rig{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;align-items:start}
+@media(max-width:860px){.rig{grid-template-columns:1fr}}
+.stagecard{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  padding:24px;display:flex;flex-direction:column;gap:18px}
+.stage{display:flex;align-items:center;justify-content:center;background:#131619;
+  border-radius:11px;padding:22px 18px;min-height:210px}
+.stage svg{width:100%;height:auto;max-width:420px;display:block}
+.stage.bar svg{max-width:560px}
+.stagelabel{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.stagelabel .nm{font-size:15px;font-weight:600;letter-spacing:-.012em}
+.stagelabel .val{font:600 15px/1 var(--mono);color:var(--jade);
+  font-variant-numeric:tabular-nums}
+
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  padding:18px;display:flex;flex-direction:column;gap:18px;position:sticky;top:20px}
+.ctl{display:grid;grid-template-columns:1fr auto;gap:7px 12px;align-items:center}
+.ctl label{font:600 10.5px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink-3)}
+.ctl output{font:500 12px/1 var(--mono);color:var(--jade);font-variant-numeric:tabular-nums}
+.ctl input[type=range]{grid-column:1/-1;width:100%;margin:0;accent-color:var(--jade)}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{font:550 12px/1 var(--sans);color:var(--ink-2);background:var(--panel-2);
+  border:1px solid var(--line-2);border-radius:8px;padding:9px 11px;cursor:pointer;
+  transition:border-color .15s,color .15s,background .15s}
+.seg button:hover{background:#252B33}
+.seg button[aria-pressed="true"]{border-color:var(--jade);color:var(--jade);background:#16241F}
+button:focus-visible,input:focus-visible{outline:2px solid var(--jade);outline-offset:2px}
+.grp{display:flex;flex-direction:column;gap:9px}
+.grp > .eyebrow{margin-bottom:1px}
+.read{margin:0;font:400 11.5px/1.7 var(--mono);color:var(--ink-2);
+  font-variant-numeric:tabular-nums;white-space:pre}
+.read b{color:var(--ink);font-weight:500}
+.read .g{color:var(--ok)}
+.note{margin:12px 0 0;font-size:13px;line-height:1.55;color:var(--ink-3);max-width:64ch}
+.note b{color:var(--ink-2);font-weight:550}
+
+/* the ladder */
+.ladder{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  padding:22px 20px;overflow-x:auto}
+.ladrow{display:flex;align-items:flex-end;gap:clamp(8px,1.6vw,20px);min-width:min-content}
+.rung{display:flex;flex-direction:column;align-items:center;gap:10px;flex:0 0 auto}
+.rung svg{display:block;height:64px;width:auto}
+.rung .cap{font:500 10.5px/1 var(--mono);color:var(--ink-3);white-space:nowrap}
+.rung.ref .cap{color:var(--jade)}
+
+/* A/B decisions */
+.ab{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.opt{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  padding:22px 20px 18px;display:flex;flex-direction:column;gap:16px}
+.opt.win{border-color:rgba(62,203,168,.45)}
+.opt .plate{display:flex;align-items:center;justify-content:center;background:#131619;
+  border-radius:10px;padding:18px;min-height:130px}
+.opt .plate svg{width:100%;height:auto;max-width:300px}
+.opt h3{margin:0;font-size:15px;font-weight:600;letter-spacing:-.012em}
+.opt p{margin:5px 0 0;font-size:13.2px;line-height:1.5;color:var(--ink-3)}
+.tag{display:inline-flex;align-items:center;gap:7px;font:600 10px/1 var(--mono);
+  letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.tag .dot{width:6px;height:6px;border-radius:50%;background:var(--ink-3)}
+.tag.rec{color:var(--jade)} .tag.rec .dot{background:var(--jade)}
+
+/* card context */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(268px,1fr));gap:14px}
+.xcard{background:var(--panel);border:1px solid var(--line);border-radius:16px;
+  padding:16px;display:flex;flex-direction:column;gap:13px}
+.xcard .top{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.xcard .top b{font-size:15.5px;font-weight:600;letter-spacing:-.014em}
+.xcard .top span{font:500 11px/1 var(--mono);color:var(--ink-3);
+  letter-spacing:.1em;text-transform:uppercase}
+.xcard .gauge{display:flex;align-items:center;justify-content:center;
+  background:#131619;border-radius:11px;padding:14px 10px;min-height:96px}
+.xcard .gauge svg{width:100%;height:auto;max-width:200px}
+.xcard .pickrow{display:flex;align-items:center;gap:10px}
+.xcard .stepper{display:flex;align-items:center;gap:2px;background:var(--panel-2);
+  border:1px solid var(--line-2);border-radius:10px;overflow:hidden}
+.xcard .stepper button{background:none;border:none;color:var(--ink-2);
+  font:500 17px/1 var(--sans);padding:9px 14px;cursor:pointer}
+.xcard .stepper button:hover{background:#252B33;color:var(--ink)}
+.xcard .stepper .n{font:600 14px/1 var(--mono);color:var(--ink);min-width:62px;
+  text-align:center;font-variant-numeric:tabular-nums}
+.xcard .hint{font-size:12.5px;color:var(--ink-3)}
+
+footer{margin-top:72px;padding-top:22px;border-top:1px solid var(--line);
+  color:var(--ink-3);font-size:13px;max-width:70ch}
+footer b{color:var(--ink-2);font-weight:550}
+footer code{font:400 12.5px/1.4 var(--mono);color:var(--ink-2)}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.001ms!important}}
+</style>
+
+<div class="wrap">
+
+<header class="mast">
+  <p class="eyebrow">Fitness Journey — the weight gauge</p>
+  <h1>The mark's dumbbell, loaded.</h1>
+  <p class="lede">A weight selector built out of the logo rather than beside
+    it. Five pounds to a hundred and twenty is a <b>24&times;</b> range — far
+    too much for thickness alone, which is why the plates gain
+    <b>diameter and thickness together</b>. A plate's mass is its volume, so
+    scaling both means weight rises with the <b>cube</b> of the size: 24&times;
+    the weight is only <b>2.88&times;</b> the plate. Physically true, and it
+    fits in a card.</p>
+  <div class="credits">
+    <span><em>range</em>&nbsp; 5–120 lb</span>
+    <span><em>reference</em>&nbsp; 45 lb = the logo</span>
+    <span><em>law</em>&nbsp; k = (W/45)<sup>1/3</sup></span>
+    <span><em>size range</em>&nbsp; 2.88×</span>
+  </div>
+</header>
+
+<!-- ============ 1. LIVE ============ -->
+<section>
+  <div class="shead">
+    <div class="lhs">
+      <h2>Load it</h2>
+      <p>Both graphics off one weight. Drag the load and watch the plates
+        take it — everything else on this page is a still from this rig.</p>
+    </div>
+    <p class="eyebrow">Live</p>
+  </div>
+
+  <div class="rig">
+    <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+      <div class="stagecard">
+        <div class="stagelabel"><span class="nm">The pair</span>
+          <span class="val" id="vA">45 lb</span></div>
+        <div class="stage" id="stageDb"></div>
+      </div>
+      <div class="stagecard">
+        <div class="stagelabel"><span class="nm">The barbell</span>
+          <span class="val" id="vB">45 lb</span></div>
+        <div class="stage bar" id="stageBb"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="grp">
+        <p class="eyebrow">Load</p>
+        <div class="ctl">
+          <label for="w">Weight</label><output id="wV">45 lb</output>
+          <input type="range" id="w" min="0" max="20" step="1" value="8">
+        </div>
+      </div>
+
+      <div class="grp">
+        <p class="eyebrow">Scaling law</p>
+        <div class="ctl">
+          <label for="ex">Exponent</label><output id="exV">0.333</output>
+          <input type="range" id="ex" min="0.28" max="0.50" step="0.005" value="0.3333">
+        </div>
+        <p class="note" style="margin:0">
+          <b>1/3 is physical</b> — mass is volume. Higher spreads the top of
+          the range and makes heavy weights read louder, at the cost of the
+          plates no longer being honest about their mass.</p>
+      </div>
+
+      <div class="grp">
+        <p class="eyebrow">The handle</p>
+        <div class="seg" id="segGap">
+          <button data-v="solid" aria-pressed="true">Solid</button>
+          <button data-v="gap" aria-pressed="false">Dissolved centre</button>
+        </div>
+      </div>
+
+      <div class="grp">
+        <p class="eyebrow">Plates</p>
+        <div class="seg" id="segPlates">
+          <button data-v="three" aria-pressed="true">Always three</button>
+          <button data-v="reveal" aria-pressed="false">Load them on</button>
+        </div>
+      </div>
+
+      <div class="grp">
+        <p class="eyebrow">Pair layout</p>
+        <div class="seg" id="segPair">
+          <button data-v="side" aria-pressed="true">Side by side</button>
+          <button data-v="stack" aria-pressed="false">Staggered</button>
+        </div>
+      </div>
+
+      <div class="grp">
+        <p class="eyebrow">Measured</p>
+        <pre class="read" id="read">…</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2. THE LADDER ============ -->
+<section>
+  <div class="shead">
+    <div class="lhs">
+      <h2>The whole range at once</h2>
+      <p>Every rung the selector will stop on. The step between rungs is what
+        decides whether this reads as a gauge or as decoration.</p>
+    </div>
+    <p class="eyebrow">5 → 120+</p>
+  </div>
+  <div class="ladder"><div class="ladrow" id="ladder"></div></div>
+  <p class="note">The cube root compresses the top: 5→10&nbsp;lb is a bigger
+    visual step than 110→120&nbsp;lb, because doubling five pounds is a
+    bigger change than adding nine percent. That is honest, and it is also
+    why <b>the plus matters</b> — past 120 the graphic stops growing and says
+    so, instead of pretending to keep scaling.</p>
+</section>
+
+<!-- ============ 3. DECISIONS ============ -->
+<section>
+  <div class="shead">
+    <div class="lhs">
+      <h2>Two things to decide</h2>
+      <p>Both shown at the same weight so only the variable changes.</p>
+    </div>
+    <p class="eyebrow">Your call</p>
+  </div>
+
+  <div class="ab" id="abGap"></div>
+  <div style="height:14px"></div>
+  <div class="ab" id="abPair"></div>
+</section>
+
+<!-- ============ 4. IN CONTEXT ============ -->
+<section>
+  <div class="shead">
+    <div class="lhs">
+      <h2>On a card</h2>
+      <p>At the size it will actually be drawn, with a working stepper.
+        This is the only test that counts.</p>
+    </div>
+    <p class="eyebrow">Real size</p>
+  </div>
+  <div class="cards" id="cards"></div>
+</section>
+
+<footer>
+  <b>Nothing here is wired into the app yet.</b> Once the two designs are
+  settled they become a generator alongside <code>logo/mark.mjs</code>, so the
+  exercise cards and this page draw from one source — the same arrangement
+  that keeps the mark and the app icon from drifting apart.
+</footer>
+</div>
+
+<script>
+'use strict';
+/* ==========================================================================
+   THE GEOMETRY. Straight off the logo's dumbbell.
+
+   The mark's plates sit at x = 86, 66.8, 52.4 in a 260-wide box centred on
+   130, with the bar spanning 86 to 174. So the handle is +/-44 from centre,
+   the innermost plate sits exactly at the bar's end, and the other two step
+   outward by 19.2 and 33.6.
+
+   Those offsets, the thicknesses and the diameters are the only numbers
+   here. Everything else is a consequence of the weight.
+   ========================================================================== */
+var CX = 130, CY = 65;
+var HANDLE0 = 44;                /* half the grip, at the reference weight */
+var BAR_W  = 7;
+
+/* THE HANDLE MOVES A LITTLE, TOO. Holding it fixed was the obvious call — a
+   hand is a hand — but it made light dumbbells spindly: an 88-unit bar with
+   6-unit plates on the ends reads as a stick, not as five pounds. Real light
+   dumbbells are compact objects, handle included.
+
+   So the grip takes a heavily damped share of the scale: at 5lb it is 80% of
+   the reference, at 120lb 115%. Enough to keep the silhouette compact when
+   there is nothing on it, nowhere near enough to look like a different tool. */
+function handleOf(k){ return HANDLE0 * (0.62 + 0.38 * k); }
+var PLATES = [                   /* d = distance outward from the bar's end */
+  { d: 0,    w: 12.65, dia: 54.0 },
+  { d: 19.2, w:  9.90, dia: 48.6 },
+  { d: 33.6, w:  7.13, dia: 35.0 }
+];
+
+var REF = 45;                    /* the weight at which the plates ARE the logo's */
+var LADDER = [5,10,15,20,25,30,35,40,45,50,60,70,80,90,100,110,120];
+var MAXW = 120;
+
+/* THE LAW. Mass is volume: scale a plate's radius and thickness together and
+   its mass goes with the cube. So the size factor is the cube root of the
+   weight ratio — 24x the weight is 2.88x the plate. An exponent above 1/3
+   exaggerates for legibility and stops being true. */
+function kOf(weight, ex){ return Math.pow(weight/REF, ex==null ? 1/3 : ex); }
+
+/* Which plates are on the bar. "Load them on" brings the outer two in as the
+   weight climbs, which buys extra perceptual steps at the light end where
+   the cube root is doing the least work — at the cost of the mark's three
+   plates not always being three. */
+function plateCount(weight, mode){
+  if(mode !== 'reveal') return 3;
+  if(weight < 12) return 1;
+  if(weight < 30) return 2;
+  return 3;
+}
+
+var NS = 'http://www.w3.org/2000/svg';
+var uid = 0;
+
+/* One dumbbell, drawn into whatever local box it is handed. Returns markup
+   plus the extents, because the caller needs to know how wide it came out. */
+function dumbbell(weight, o){
+  o = o || {};
+  var ex = o.ex, gap = o.gap, mode = o.plates, id = 'g' + (++uid);
+  var k = kOf(weight, ex);
+  var HANDLE = handleOf(k);
+  var n = plateCount(weight, mode);
+  var rows = '', outer = CX - HANDLE;
+
+  for(var i = 0; i < n; i++){
+    var p = PLATES[i];
+    var off = HANDLE + p.d * k;
+    var half = (p.dia * k) / 2;
+    var t = (p.w * k);
+    outer = Math.min(outer, CX - off - t/2);
+    [CX - off, CX + off].forEach(function(x){
+      rows += '<path d="M' + x.toFixed(2) + ' ' + (CY-half).toFixed(2) +
+              ' V' + (CY+half).toFixed(2) + '" stroke-width="' + t.toFixed(2) + '"/>';
+    });
+  }
+  /* The ramp follows the mark's real extent rather than a fixed 52..208, so
+     the light stays on the inner plates at every weight instead of sliding
+     off the ends as the stack grows. */
+  var x1 = outer, x2 = 260 - outer;
+  var defs =
+    '<linearGradient id="db' + id + '" gradientUnits="userSpaceOnUse" x1="' + x1.toFixed(1) +
+      '" y1="0" x2="' + x2.toFixed(1) + '" y2="0">' +
+      '<stop offset="0%" stop-color="#34B396"/><stop offset="22%" stop-color="#93EAD7"/>' +
+      '<stop offset="50%" stop-color="#A8F5E1"/><stop offset="78%" stop-color="#93EAD7"/>' +
+      '<stop offset="100%" stop-color="#34B396"/></linearGradient>';
+  var barStroke = 'url(#db' + id + ')';
+  if(gap){
+    /* the mark's dissolving centre, spanning the grip */
+    defs +=
+      '<linearGradient id="bb' + id + '" gradientUnits="userSpaceOnUse" x1="' + (CX-HANDLE) +
+        '" y1="0" x2="' + (CX+HANDLE) + '" y2="0">' +
+        '<stop offset="0%" stop-color="#93EAD7"/><stop offset="32%" stop-color="#8FE6D3"/>' +
+        '<stop offset="36%" stop-color="#89DFCC" stop-opacity=".60"/>' +
+        '<stop offset="39%" stop-color="#83D9C6" stop-opacity=".22"/>' +
+        '<stop offset="41%" stop-color="#7FD5C2" stop-opacity="0"/>' +
+        '<stop offset="59%" stop-color="#7FD5C2" stop-opacity="0"/>' +
+        '<stop offset="61%" stop-color="#83D9C6" stop-opacity=".22"/>' +
+        '<stop offset="64%" stop-color="#89DFCC" stop-opacity=".60"/>' +
+        '<stop offset="68%" stop-color="#8FE6D3"/><stop offset="100%" stop-color="#93EAD7"/>' +
+      '</linearGradient>';
+    barStroke = 'url(#bb' + id + ')';
+  }
+  var body =
+    '<g fill="none" stroke="url(#db' + id + ')" stroke-linecap="round">' +
+      '<path d="M' + (CX-HANDLE) + ' ' + CY + ' H' + (CX+HANDLE) + '" stroke="' +
+        barStroke + '" stroke-width="' + BAR_W + '"/>' + rows +
+    '</g>';
+  return { defs: defs, body: body, outer: outer, halfH: (PLATES[0].dia * k) / 2, k: k };
+}
+
+/* The plus. Past the top of the scale the graphic stops growing and says so
+   — a mark that kept scaling would be lying about a weight it cannot show. */
+function plusGlyph(x, y, r){
+  return '<g stroke="#FF5FA2" stroke-width="' + (r*0.42).toFixed(2) +
+    '" stroke-linecap="round" fill="none" opacity=".95">' +
+    '<path d="M' + (x-r) + ' ' + y + ' H' + (x+r) + '"/>' +
+    '<path d="M' + x + ' ' + (y-r) + ' V' + (y+r) + '"/></g>';
+}
+
+/* ---- the pair ---------------------------------------------------------- */
+function pairSVG(weight, o){
+  o = o || {};
+  var over = weight > MAXW, w = Math.min(weight, MAXW);
+  var layout = o.layout || 'stack';
+  var a = dumbbell(w, o), b = dumbbell(w, o);
+  var VB = layout === 'side' ? [0,0,430,180] : [0,0,360,230];
+  var g;
+  if(layout === 'side'){
+    /* Both on the same angle, clear of one another — two dumbbells set down
+       next to each other. 13 degrees, not 10: below about 12 the tilt stops
+       reading as a decision and starts looking like the artwork is crooked. */
+    g = '<g transform="translate(112,90) rotate(-13) scale(.80) translate(-130,-65)">' + a.body + '</g>' +
+        '<g transform="translate(318,90) rotate(-13) scale(.80) translate(-130,-65)">' + b.body + '</g>';
+  } else {
+    /* One set behind and above the other. THE OFFSET SCALES WITH THE LOAD —
+       a fixed offset looked right at 45lb and fell apart at both ends, the
+       two sitting clean apart at 5 and piling up at 120. Tying it to k keeps
+       the same overlap at every weight, which is the only way the pair reads
+       as one object being loaded rather than two unrelated ones. */
+    var dx = 54 * a.k, dy = 44 * a.k;
+    g = '<g opacity=".62" transform="translate(' + (180+dx).toFixed(1) + ',' + (124-dy).toFixed(1) +
+          ') rotate(-11) scale(.84) translate(-130,-65)">' + b.body + '</g>' +
+        '<g transform="translate(' + (180-dx*0.42).toFixed(1) + ',' + (124+dy*0.62).toFixed(1) +
+          ') rotate(-11) scale(.96) translate(-130,-65)">' + a.body + '</g>';
+  }
+  /* The plus sits clear of the artwork. In the staggered layout the back
+     dumbbell climbs as the load grows, so at 120 it was arriving underneath
+     the glyph — it gets pushed out of the way rather than overlapping. */
+  var plus = over
+    ? (layout === 'side'
+        ? plusGlyph(404, 30, 15)
+        : plusGlyph(336, 208, 15))
+    : '';
+  return '<svg viewBox="' + VB.join(' ') + '" role="img" aria-label="' +
+    weight + ' pounds">' +
+    '<defs>' + a.defs + b.defs + '</defs>' +
+    '<g style="filter:drop-shadow(0 0 ' + (5 + a.k*7).toFixed(1) +
+      'px rgba(62,203,168,' + (0.16 + a.k*0.14).toFixed(2) + '))">' + g + '</g>' +
+    plus + '</svg>';
+}
+
+/* ---- the barbell ------------------------------------------------------- */
+/* A barbell is one long fixed bar with the plates crowded at the ends, so it
+   gauges differently from the dumbbell: the bar never changes and you read
+   the load off how much of the sleeve is full. The grip is the one place the
+   mark's dissolving centre earns its keep — that IS the knurl. */
+/* anchor is where the INNERMOST plate sits — the shoulder, the collar plates
+   slide up against. On a real bar the sleeve is about a fifth of the length
+   at each end, so the shoulder sits well out and plates stack from there
+   toward the end. At 168 they were stranded halfway along the bar with more
+   bare steel outboard of them than the stack itself. */
+var BB = { w: 470, h: 150, cy: 75, x0: 24, x1: 446, anchor: 105 };
+
+function barbellSVG(weight, o){
+  o = o || {};
+  var over = weight > MAXW, wt = Math.min(weight, MAXW);
+  var ex = o.ex, gap = o.gap, id = 'bx' + (++uid);
+  var k = kOf(wt, ex);
+  var n = plateCount(wt, o.plates);
+  var mid = BB.w / 2, rows = '', outer = BB.anchor;
+
+  for(var i = 0; i < n; i++){
+    var p = PLATES[i];
+    var off = (mid - BB.anchor) + p.d * k;
+    var half = (p.dia * k) / 2 * 1.18;   /* barbell plates read bigger than a dumbbell's */
+    var t = p.w * k;
+    outer = Math.min(outer, mid - off - t/2);
+    [mid - off, mid + off].forEach(function(x){
+      rows += '<path d="M' + x.toFixed(2) + ' ' + (BB.cy-half).toFixed(2) +
+              ' V' + (BB.cy+half).toFixed(2) + '" stroke-width="' + t.toFixed(2) + '"/>';
+    });
+  }
+  var defs =
+    '<linearGradient id="g' + id + '" gradientUnits="userSpaceOnUse" x1="' + outer.toFixed(1) +
+      '" y1="0" x2="' + (BB.w - outer).toFixed(1) + '" y2="0">' +
+      '<stop offset="0%" stop-color="#34B396"/><stop offset="22%" stop-color="#93EAD7"/>' +
+      '<stop offset="50%" stop-color="#A8F5E1"/><stop offset="78%" stop-color="#93EAD7"/>' +
+      '<stop offset="100%" stop-color="#34B396"/></linearGradient>';
+  var barStroke = 'url(#g' + id + ')';
+  if(gap){
+    var gx0 = mid - 96, gx1 = mid + 96;
+    defs +=
+      '<linearGradient id="k' + id + '" gradientUnits="userSpaceOnUse" x1="' + gx0 +
+        '" y1="0" x2="' + gx1 + '" y2="0">' +
+        '<stop offset="0%" stop-color="#93EAD7"/><stop offset="30%" stop-color="#8FE6D3"/>' +
+        '<stop offset="35%" stop-color="#89DFCC" stop-opacity=".55"/>' +
+        '<stop offset="40%" stop-color="#7FD5C2" stop-opacity="0"/>' +
+        '<stop offset="60%" stop-color="#7FD5C2" stop-opacity="0"/>' +
+        '<stop offset="65%" stop-color="#89DFCC" stop-opacity=".55"/>' +
+        '<stop offset="70%" stop-color="#8FE6D3"/><stop offset="100%" stop-color="#93EAD7"/>' +
+      '</linearGradient>';
+    barStroke = 'url(#k' + id + ')';
+  }
+  return '<svg viewBox="0 0 ' + BB.w + ' ' + BB.h + '" role="img" aria-label="barbell ' +
+    weight + ' pounds"><defs>' + defs + '</defs>' +
+    '<g fill="none" stroke="url(#g' + id + ')" stroke-linecap="round" ' +
+      'style="filter:drop-shadow(0 0 ' + (5 + k*7).toFixed(1) +
+      'px rgba(62,203,168,' + (0.16 + k*0.14).toFixed(2) + '))">' +
+      '<path d="M' + BB.x0 + ' ' + BB.cy + ' H' + BB.x1 + '" stroke="' + barStroke +
+        '" stroke-width="' + BAR_W + '"/>' + rows + '</g>' +
+    (over ? plusGlyph(BB.w - 26, 26, 15) : '') + '</svg>';
+}
+
+/* ==========================================================================
+   The rig
+   ========================================================================== */
+var S = { i: 8, ex: 1/3, gap: false, plates: 'three', pair: 'side' };
+var el = function(id){ return document.getElementById(id); };
+function weightAt(i){ return i >= LADDER.length ? MAXW + 1 : LADDER[i]; }
+function labelAt(i){ return i >= LADDER.length ? '120+ lb' : LADDER[i] + ' lb'; }
+
+function draw(){
+  var w = weightAt(S.i);
+  var o = { ex: S.ex, gap: S.gap, plates: S.plates, layout: S.pair };
+  el('stageDb').innerHTML = pairSVG(w, o);
+  el('stageBb').innerHTML = barbellSVG(w, o);
+  el('vA').textContent = labelAt(S.i);
+  el('vB').textContent = labelAt(S.i);
+  el('wV').textContent = labelAt(S.i);
+  el('exV').textContent = S.ex.toFixed(3) + (Math.abs(S.ex-1/3) < 0.004 ? '  physical' : '');
+
+  var k = kOf(Math.min(w, MAXW), S.ex);
+  var kMin = kOf(5, S.ex), kMax = kOf(MAXW, S.ex);
+  var big = PLATES[0];
+  el('read').innerHTML =
+    'weight      <b>' + labelAt(S.i) + '</b>\n' +
+    'scale k     <b>' + k.toFixed(3) + '</b>\n' +
+    'plate thick <b>' + (big.w * k).toFixed(1) + '</b> units\n' +
+    'plate dia   <b>' + (big.dia * k).toFixed(1) + '</b> units\n' +
+    'plates on   <b>' + plateCount(Math.min(w,MAXW), S.plates) + '</b> a side\n' +
+    '\n' +
+    'range 5→120 <span class="g">' + (kMax/kMin).toFixed(2) + '×</span> for 24× the weight\n' +
+    'at 45 lb    k = 1.000, the logo exactly';
+  drawCards();
+}
+
+function bindSeg(id, key){
+  var box = el(id);
+  box.addEventListener('click', function(ev){
+    var b = ev.target.closest('button'); if(!b) return;
+    S[key] = b.dataset.v;
+    if(key === 'gap') S.gap = (b.dataset.v === 'gap');
+    [].forEach.call(box.querySelectorAll('button'), function(o){
+      o.setAttribute('aria-pressed', o === b ? 'true' : 'false');
+    });
+    draw();
+  });
+}
+bindSeg('segGap','gapMode'); bindSeg('segPlates','plates'); bindSeg('segPair','pair');
+el('w').max = LADDER.length;            /* one past the end is the plus */
+el('w').addEventListener('input', function(){ S.i = +this.value; draw(); });
+el('ex').addEventListener('input', function(){ S.ex = +this.value; draw(); });
+
+/* ---- the ladder -------------------------------------------------------- */
+var RUNGS = [5,10,20,30,45,60,80,100,120,MAXW+1];
+el('ladder').innerHTML = RUNGS.map(function(w){
+  var ref = (w === REF);
+  return '<div class="rung' + (ref ? ' ref' : '') + '">' +
+    pairSVG(w, { layout:'side' }) +
+    '<div class="cap">' + (w > MAXW ? '120+' : w) + (ref ? ' · logo' : '') + '</div></div>';
+}).join('');
+
+/* ---- the two decisions ------------------------------------------------- */
+el('abGap').innerHTML =
+  [{ gap:false, t:'Solid handle', rec:true,
+     p:'One continuous bar with the plates loaded onto it. At card size this is unambiguous, and it is the reading the gauge depends on — these plates are on this bar.' },
+   { gap:true, t:'Dissolved centre', rec:false,
+     p:'The logo\'s own device. Elegant at 277&nbsp;px; at 90&nbsp;px on a card the dumbbell starts to read as two objects rather than one being loaded.' }
+  ].map(function(o){
+    return '<div class="opt' + (o.rec?' win':'') + '">' +
+      '<span class="tag' + (o.rec?' rec':'') + '"><span class="dot"></span>' +
+        (o.rec ? 'Recommended — dumbbell' : 'The alternative') + '</span>' +
+      '<div class="plate">' + pairSVG(45, { gap:o.gap, layout:'side' }) + '</div>' +
+      '<div><h3>' + o.t + '</h3><p>' + o.p + '</p></div></div>';
+  }).join('');
+
+el('abPair').innerHTML =
+  [{ v:'side', t:'Side by side', rec:true,
+     p:'Both on the same 13&deg; angle, clear of each other. Unambiguous at every weight and at every size — you can count the plates on both. Wider, which costs a little plate size in a narrow card.' },
+   { v:'stack', t:'Staggered', rec:false,
+     p:'One behind and above the other. More dynamic, and the offset now scales with the load so the overlap holds — but the dimmed back dumbbell reads as a ghost at small sizes rather than as depth.' }
+  ].map(function(o){
+    return '<div class="opt' + (o.rec?' win':'') + '">' +
+      '<span class="tag' + (o.rec?' rec':'') + '"><span class="dot"></span>' +
+        (o.rec ? 'Recommended — layout' : 'The alternative') + '</span>' +
+      '<div class="plate">' + pairSVG(60, { layout:o.v }) + '</div>' +
+      '<div><h3>' + o.t + '</h3><p>' + o.p + '</p></div></div>';
+  }).join('');
+
+/* ---- cards ------------------------------------------------------------- */
+var CARDS = [
+  { name:'Goblet squat',    kind:'dumbbell', i: 6 },
+  { name:'Bench press',     kind:'barbell',  i: 12 },
+  { name:'Lateral raise',   kind:'dumbbell', i: 1 }
+];
+function drawCards(){
+  el('cards').innerHTML = CARDS.map(function(c, n){
+    var w = weightAt(c.i);
+    var o = { ex:S.ex, gap:S.gap, plates:S.plates, layout:S.pair };
+    return '<div class="xcard"><div class="top"><b>' + c.name + '</b><span>' +
+      (c.kind === 'barbell' ? 'Barbell' : 'Dumbbells') + '</span></div>' +
+      '<div class="gauge">' +
+        (c.kind === 'barbell' ? barbellSVG(w, o) : pairSVG(w, o)) + '</div>' +
+      '<div class="pickrow"><div class="stepper">' +
+        '<button data-c="' + n + '" data-s="-1" aria-label="less">−</button>' +
+        '<span class="n">' + labelAt(c.i) + '</span>' +
+        '<button data-c="' + n + '" data-s="1" aria-label="more">+</button>' +
+      '</div><span class="hint">3 × 10</span></div></div>';
+  }).join('');
+}
+el('cards').addEventListener('click', function(ev){
+  var b = ev.target.closest('button[data-c]'); if(!b) return;
+  var c = CARDS[+b.dataset.c];
+  c.i = Math.max(0, Math.min(LADDER.length, c.i + (+b.dataset.s)));
+  drawCards();
+});
+
+draw();
+</script>
