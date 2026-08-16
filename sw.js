@@ -15,7 +15,7 @@
    Training data lives in localStorage, not here, so an update never
    touches a logged session.
    ============================================================ */
-const VERSION = 'e8d18e40ba';
+const VERSION = 'e3a9488765';
 const CACHE = 'fj-' + VERSION;
 const ASSETS = [
   "./ EXERCISE LIBRARY/Exercise_Illustration_Collection/03_Lower_Body_Glutes_Posterior_Chain/019_bodyweight_squat.png",

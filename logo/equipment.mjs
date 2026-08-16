@@ -408,8 +408,8 @@ export var BAR = {
 
    Diameter is what a lifter reads across a room. It wins. */
 export var BARPLATE = {
-  45:{r:55,t:8.8}, 35:{r:49,t:7.8}, 25:{r:34,t:7.8},
-  10:{r:28,t:6.1},  5:{r:24,t:5.3}
+  45:{r:55,t:11.0}, 35:{r:46,t:10.0}, 25:{r:36,t:10.0},
+  10:{r:30,t: 7.1},  5:{r:21,t: 6.0}
 };
 export var BARDENOM = [45,35,25,10,5];
 export var BARMAX = 405;
@@ -907,7 +907,7 @@ function sceneSVG(weight, o){
    what would let two screens disagree.
    ============================================================ */
 export var DUMBBELL = { yaw: 9,   depth: 0.36, gap: 50, grip: 23, count: 'pair' };
-export var BARBELL  = { yaw: 1,   depth: 0.19, shaftHalf: 130, sleeveLen: 72,
+export var BARBELL  = { yaw: 1,   depth: 0.19, shaftHalf: 120, sleeveLen: 72,
                         shaftR: 3.40, sleeveR: 6.07, plateScale: 1.00,
                         numSize: 0.44, numbers: true };
 export var BELT     = { yaw: -18, depth: 0.56, spread: 0, plateScale: 0.92,
@@ -918,148 +918,11 @@ export var BELT     = { yaw: -18, depth: 0.56, spread: 0, plateScale: 0.92,
    and forcing them onto one swatch set would mean a change to a plate
    colour silently repainting a kettlebell. */
 export var KETTLEBELL = { yaw: 0, depth: 0.42, bell: 1.00,
-                          handleH: 0.95, handleT: 0.20, numSize: 0.52,
+                          handleW: 0.77, handleH: 2.03, handleT: 0.24, chamfer: 0.26, base: 0.32,
+                          numSize: 0.30, wire: true,
                           numbers: true };
 export var KBPAL = { bell:'#2B3138', handle:'#A8B2BC', num:'#FFFFFF',
                      numOp:0.72, neon:'#EFF1EF', neonOn:true, glow:0.32 };
-
-/* ==========================================================================
-   THE KETTLEBELL
-
-   Nothing else here is built like this one. A dumbbell, a bar and a belt are
-   all ASSEMBLIES — you read their weight by counting plates. A kettlebell is
-   a single cast object, so there is nothing to count: the weight IS the size
-   of the thing, and the gauge is the silhouette itself.
-
-   Which makes the sizing law the whole design. Solid iron means mass is
-   volume, so the bell grows with the CUBE ROOT of the weight — the same law
-   as a plate, and for the same reason. 5 to 100lb is 20x the weight and only
-   2.71x the bell, which is a range that fits on a card.
-
-   THE HANDLE BARELY MOVES. It is sized by the hand that goes through it, not
-   by the iron hanging off it, so it takes a heavily damped share of the
-   scale: 1.29x across a range where the bell does 2.71x. Let the handle
-   scale with the bell and a 100lb kettlebell gets a grip you could put your
-   head through.
-
-   Note this is CAST IRON sizing. Competition bells are all one size whatever
-   they weigh — true, and useless as a gauge, since the whole job here is to
-   show weight as size.
-   ========================================================================== */
-export var KBREF = 35;      /* the weight the reference bell radius belongs to */
-var KBR0  = 34;      /* bell radius at KBREF */
-export var KBMAX = 100;
-export var KBSTEP = 5;
-
-export function kbScale(w){ return Math.pow(Math.min(w, KBMAX) / KBREF, 1/3); }
-/* damped: the grip is a hand's width, not a share of the load */
-function kbHandleScale(k){ return 0.72 + 0.28 * k; }
-
-export function kettlebellSceneSVG(weight, o){
-  o = o || {};
-  var W = o.W || 420, H = o.H || 340;
-  var yaw = o.yaw == null ? 0 : o.yaw;
-  var dep = o.depth == null ? 0.42 : o.depth;
-  var B = basis(yaw, dep);
-  var sc = o.sc || 1;
-  var C = o.C || KBPAL;
-  var over = weight > KBMAX;
-  var k = kbScale(weight) * (o.bell == null ? 1 : o.bell);
-  var hk = kbHandleScale(kbScale(weight));
-  var R  = KBR0 * k * sc;
-  var id = 'kb';
-
-  /* THE BELL IS A SPHERE, so it projects as a circle whatever the camera is
-     doing — no ellipse, no foreshortening. Only the handle turns with yaw.
-     It is truncated where it meets the floor: a real bell has a flat base,
-     and a full circle would have it balancing on a point. */
-  var groundY = H * 0.80;
-  var baseHalf = 0.42 * R;
-  var h = Math.sqrt(Math.max(0.0001, R*R - baseHalf*baseHalf));   /* 0.907R */
-  var cx = W/2, cy = groundY - h;
-
-  var bell =
-    '<path d="M' + f2(cx-baseHalf) + ' ' + f2(groundY) +
-      'A' + f2(R) + ' ' + f2(R) + ' 0 1 1 ' + f2(cx+baseHalf) + ' ' + f2(groundY) +
-      'Z" fill="url(#kbBell' + id + ')" stroke="' + sh(C.bell, -22) +
-      '" stroke-opacity=".7" stroke-width="' + f2(0.9*sc) + '"/>';
-
-  /* THE HANDLE lives in a vertical plane that the yaw turns. Its span runs
-     along the bar axis and its height straight up, so at yaw 0 you see the
-     full arch and by 90 it has folded to an edge — exactly the behaviour the
-     plates have, driven by the same basis. */
-  /* THE ARCH HAS A FLAT TOP. Sweeping one curve from shoulder to shoulder
-     gives a pointed dome with no window — which is what this was, a nub on
-     the head of the bell rather than something you could get a hand through.
-     A kettlebell handle rises, turns, runs flat across, turns and drops. The
-     flat run IS the grip, and the gap under it is the whole point. */
-  var hw = 0.52 * R * hk;                 /* half the span at the shoulders */
-  var HH = (o.handleH == null ? 0.95 : o.handleH) * R * hk;
-  var v0 = 0.62 * R;                      /* where it enters the shoulders */
-  var top = v0 + HH, flat = hw * 0.44;
-  var P = function(u, v){
-    return { x: cx + u*B.d.x + v*B.up.x, y: cy + u*B.d.y + v*B.up.y };
-  };
-  var q0 = P(-hw, v0),          q1 = P(-hw, v0 + HH*0.62),
-      q2 = P(-hw*0.86, top),    q3 = P(-flat, top),
-      q4 = P( flat, top),       q5 = P( hw*0.86, top),
-      q6 = P( hw, v0 + HH*0.62), q7 = P( hw, v0);
-  var handle =
-    '<path d="M' + f2(q0.x) + ' ' + f2(q0.y) +
-      'C' + f2(q1.x) + ' ' + f2(q1.y) + ' ' + f2(q2.x) + ' ' + f2(q2.y) + ' ' +
-            f2(q3.x) + ' ' + f2(q3.y) +
-      'L' + f2(q4.x) + ' ' + f2(q4.y) +
-      'C' + f2(q5.x) + ' ' + f2(q5.y) + ' ' + f2(q6.x) + ' ' + f2(q6.y) + ' ' +
-            f2(q7.x) + ' ' + f2(q7.y) +
-      '" fill="none" stroke="url(#kbGrip' + id + ')" stroke-linecap="round" ' +
-      'stroke-linejoin="round" stroke-width="' +
-      f2((o.handleT == null ? 0.20 : o.handleT) * R * hk) + '"/>';
-
-  /* the number sits on the front of the bell, where it is cast. The bell
-     always faces the viewer, so unlike a plate this needs no foreshortening
-     — a sphere has no angle to lie at. */
-  var num = (o.numbers === false || over) ? '' :
-    '<text x="' + f2(cx) + '" y="' + f2(cy + R*0.16) + '" text-anchor="middle" ' +
-      'dominant-baseline="central" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" ' +
-      'font-weight="700" font-size="' + f2(R * (o.numSize == null ? 0.52 : o.numSize)) +
-      '" fill="' + C.num + '" fill-opacity="' + (C.numOp == null ? 0.72 : C.numOp) +
-      '">' + Math.min(weight, KBMAX) + '</text>';
-
-  var body = handle + bell + num;
-  if(C.neonOn) body = '<g filter="url(#neon' + id + ')">' + body + '</g>';
-
-  var shadow = '<path d="' + ellipsePath({x:cx, y:groundY},
-      mul(B.d, R*1.02), mul(B.perp, R*0.30)) +
-    '" fill="#000" opacity=".50" filter="url(#blur' + id + ')"/>';
-
-  return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="kettlebell ' +
-      weight + ' pounds"><defs>' +
-      /* upper-left key light, so it reads as cast iron rather than a disc */
-      '<radialGradient id="kbBell' + id + '" cx="34%" cy="28%" r="76%">' +
-        '<stop offset="0%"   stop-color="' + sh(C.bell, +26) + '"/>' +
-        '<stop offset="42%"  stop-color="' + sh(C.bell, +6)  + '"/>' +
-        '<stop offset="78%"  stop-color="' + sh(C.bell, -12) + '"/>' +
-        '<stop offset="100%" stop-color="' + sh(C.bell, -26) + '"/></radialGradient>' +
-      '<linearGradient id="kbGrip' + id + '" x1="0" y1="0" x2="0" y2="1">' +
-        '<stop offset="0%"   stop-color="' + sh(C.handle, +22) + '"/>' +
-        '<stop offset="45%"  stop-color="' + C.handle + '"/>' +
-        '<stop offset="100%" stop-color="' + sh(C.handle, -28) + '"/></linearGradient>' +
-      '<filter id="blur' + id + '" x="-45%" y="-160%" width="190%" height="420%">' +
-        '<feGaussianBlur stdDeviation="4"/></filter>' +
-      (C.neonOn ?
-        '<filter id="neon' + id + '" x="-55%" y="-55%" width="210%" height="210%">' +
-          '<feDropShadow dx="0" dy="0" stdDeviation="' + f2(1.8*(0.45+0.55*C.glow)) +
-            '" flood-color="' + C.neon + '" flood-opacity="' + (0.95*C.glow).toFixed(3) + '"/>' +
-          '<feDropShadow dx="0" dy="0" stdDeviation="' + f2(6*(0.45+0.55*C.glow)) +
-            '" flood-color="' + C.neon + '" flood-opacity="' + (0.72*C.glow).toFixed(3) + '"/>' +
-          '<feDropShadow dx="0" dy="0" stdDeviation="' + f2(16*(0.45+0.55*C.glow)) +
-            '" flood-color="' + C.neon + '" flood-opacity="' + (0.44*C.glow).toFixed(3) + '"/>' +
-        '</filter>' : '') +
-    '</defs>' +
-    (o.floor === false ? '' : floorSVG(W, H, H*0.24)) +
-    shadow + body +
-    (over ? plusGlyph(W-30, 30, 14) : '') + '</svg>';
-}
 
 /* The ranges the steppers move through. Physical, not arbitrary: a barbell
    total moves in TENS because plates go on in pairs, which is why 135 is one
@@ -1099,8 +962,7 @@ export function gaugeFor(row){
      If a movement can be loaded by holding something, it is held.
      One row in the database has both (Bulgarian Split Squat) and it is the
      one that was wrong. */
-  if(has('db'))  return { kind:'dumbbell',
-    count: String(row.laterality||'') === 'unilateral' ? 'one' : 'pair' };
+  if(has('db'))  return { kind:'dumbbell', count: heldCount(row) };
 
   if(has('vest') || loading === 'added-load')  return { kind:'belt' };
 
@@ -1110,6 +972,52 @@ export function gaugeFor(row){
   if(has('kb'))  return { kind:'kettlebell' };
 
   return { kind:'none', why:'loadable but no gauge (' + (eq.join('/') || 'no equipment') + ')' };
+}
+
+/* ============================================================
+   HOW MANY IMPLEMENTS ARE HELD
+
+   THE DATABASE CANNOT ANSWER THIS AND IT IS WORTH SAYING WHY.
+   `laterality` describes which LIMB works, not how many things are held, and
+   it is wrong in both directions:
+
+     Bulgarian split squat   unilateral (one LEG)   — held with TWO dumbbells
+     Goblet squat            bilateral              — held with ONE
+
+   Driving count off laterality put a single dumbbell on the split squat when
+   the card's own artwork shows two, which is the mistake that has to not
+   happen again.
+
+   So: a principled default, then an explicit table for what the default
+   cannot reach. The default reads `patterns` — if the working pattern is an
+   ARM pattern then "unilateral" means one arm and therefore one implement;
+   if it is a LEG pattern the hands are free and take one each.
+
+   HELD is the exceptions, and every one of them is a fact about the movement
+   rather than a preference. tools/build-equipment.mjs prints the resolved
+   count for every loadable movement so this table can be checked at a glance
+   instead of discovered on a card.
+
+   The real fix is a field in the database — `implements: 1 | 2`. Until that
+   exists this is the honest version. */
+export var ARM_PATTERNS = ['h-pull','h-push','v-pull','v-push','straight-arm-push','carry'];
+
+export var HELD = {
+  /* one bell, both hands on it */
+  goblet_squat: 'one',
+  /* one dumbbell, opposite hand to the standing leg — which is what our own
+     artwork shows */
+  single_leg_rdl: 'one',
+  /* one leg working, a dumbbell in each hand — the card shows two */
+  bulgarian_split: 'pair',
+};
+
+export function heldCount(row){
+  if(HELD[row.id]) return HELD[row.id];
+  if(String(row.laterality||'') !== 'unilateral') return 'pair';
+  var pats = String(row.patterns||'').split(',').map(function(x){ return x.trim(); });
+  var arm = pats.some(function(p){ return ARM_PATTERNS.indexOf(p) > -1; });
+  return arm ? 'one' : 'pair';
 }
 
 /* The options a call site passes into the scene function for a given gauge.
