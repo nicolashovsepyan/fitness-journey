@@ -93,6 +93,22 @@ const wanted = '\n' + toPlainScript(source) + '\n';
 /* A generated block that still contains `export` would be a syntax error in
    a classic script, and the page would die on load with the gauge nowhere
    near the stack trace. Cheaper to catch here. */
+/* REFUSE A MULTI-DECLARATOR EXPORT. `export var A = 1, B = 2;` is valid ESM and
+   exports both, but the reader above captures only the first name — so B would
+   be dropped from the generated object while the module itself still looked
+   correct. That failure is invisible until something calls B at runtime and
+   gets undefined. Caught here instead: one name per export statement. */
+{
+  const multi = [...source.matchAll(/^\s*export\s+(?:var|let|const)\s+[A-Za-z_$][\w$]*\s*=[^;\n]*,\s*[A-Za-z_$][\w$]*\s*=/gm)];
+  if (multi.length) {
+    console.error('\n  MULTI-DECLARATOR EXPORT in logo/equipment.mjs:');
+    for (const m of multi) console.error('    ' + m[0].trim().slice(0, 70) + '…');
+    console.error('  Only the first name would reach the generated block.');
+    console.error('  Split it into one `export var` per line.\n');
+    process.exit(1);
+  }
+}
+
 if (/^\s*export\b/m.test(wanted)) {
   console.error('\n  STRIP FAILED: an `export` survived into the generated block.');
   console.error('  logo/equipment.mjs uses an export form this script does not know.\n');

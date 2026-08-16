@@ -89,6 +89,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--jade);outline-o
 .panel.locked .ctl input,.panel.locked .sw input,
 .panel.locked .seg button:not(#bLockBtn):not(#bResetBtn),
 .panel.locked .seg button:not(#lLockBtn):not(#lResetBtn),
+.panel.locked .seg button:not(#kLockBtn):not(#kResetBtn),
 .panel.locked .seg button:not(#lockBtn):not(#resetBtn){opacity:.4;pointer-events:none}
 #lockBtn[aria-pressed="true"]{border-color:var(--jade);color:var(--jade);background:#16241F}
 .note{margin:12px 0 0;font-size:13px;line-height:1.55;color:var(--ink-3);max-width:64ch}
@@ -316,6 +317,34 @@ footer code{font:400 12.5px/1.4 var(--mono);color:var(--ink-2)}
           interpolate. One palette, both pieces.</p>
       </div>
 
+
+      <div class="grp">
+        <p class="eyebrow">The plates — shared with the belt</p>
+        <div class="ctl"><label for="pr45">45 lb — size</label><output id="pr45V">55</output>
+          <input type="range" id="pr45" min="10" max="80" step="1" value="55"></div>
+        <div class="ctl"><label for="pt45">45 lb — thickness</label><output id="pt45V">8.8</output>
+          <input type="range" id="pt45" min="1.5" max="20" step="0.1" value="8.8"></div>
+        <div class="ctl"><label for="pr35">35 lb — size</label><output id="pr35V">49</output>
+          <input type="range" id="pr35" min="10" max="80" step="1" value="49"></div>
+        <div class="ctl"><label for="pt35">35 lb — thickness</label><output id="pt35V">7.8</output>
+          <input type="range" id="pt35" min="1.5" max="20" step="0.1" value="7.8"></div>
+        <div class="ctl"><label for="pr25">25 lb — size</label><output id="pr25V">34</output>
+          <input type="range" id="pr25" min="10" max="80" step="1" value="34"></div>
+        <div class="ctl"><label for="pt25">25 lb — thickness</label><output id="pt25V">7.8</output>
+          <input type="range" id="pt25" min="1.5" max="20" step="0.1" value="7.8"></div>
+        <div class="ctl"><label for="pr10">10 lb — size</label><output id="pr10V">28</output>
+          <input type="range" id="pr10" min="10" max="80" step="1" value="28"></div>
+        <div class="ctl"><label for="pt10">10 lb — thickness</label><output id="pt10V">6.1</output>
+          <input type="range" id="pt10" min="1.5" max="20" step="0.1" value="6.1"></div>
+        <div class="ctl"><label for="pr5">5 lb — size</label><output id="pr5V">24</output>
+          <input type="range" id="pr5" min="10" max="80" step="1" value="24"></div>
+        <div class="ctl"><label for="pt5">5 lb — thickness</label><output id="pt5V">5.3</output>
+          <input type="range" id="pt5" min="1.5" max="20" step="0.1" value="5.3"></div>
+        <p class="note" style="margin:0">These are the <b>same plates</b> the
+          dip belt loads from, so a change here shows on both. Sizes start at
+          real spec diameters — a 25 is 280&nbsp;mm, noticeably smaller than a
+          35.</p>
+      </div>
       <div class="grp">
         <p class="eyebrow">Loaded</p>
         <pre class="read" id="bread">…</pre>
@@ -405,6 +434,85 @@ footer code{font:400 12.5px/1.4 var(--mono);color:var(--ink-2)}
   <div class="ladder"><div class="ladrow" id="lladder"></div></div>
   <p class="note">Plates thread on one at a time here, not in pairs — so this
     moves in <b>fives</b>, unlike the bar. Three 45s is the top of it.</p>
+</section>
+
+<section>
+  <div class="shead">
+    <div><h2>The kettlebell</h2>
+      <p>One cast object, so there is nothing to count — the weight is the
+        size of the bell. Everything here is adjustable.</p></div>
+    <p class="eyebrow">5 → 100</p>
+  </div>
+  <div class="rig">
+    <div class="stagecard"><div class="stage" id="kstage"></div></div>
+    <div class="panel" id="kpanelBox">
+      <div class="grp">
+        <p class="eyebrow">Load</p>
+        <div class="ctl"><label for="kw">Weight</label><output id="kwV">35 lb</output>
+          <input type="range" id="kw" min="1" max="21" step="1" value="7"></div>
+      </div>
+      <div class="grp">
+        <p class="eyebrow">The camera</p>
+        <div class="ctl"><label for="kyaw">Yaw</label><output id="kyawV">0°</output>
+          <input type="range" id="kyaw" min="-90" max="90" step="1" value="0"></div>
+        <div class="ctl"><label for="kpit">Height of eye</label><output id="kpitV">0.42</output>
+          <input type="range" id="kpit" min="0.10" max="0.85" step="0.01" value="0.42"></div>
+        <p class="note" style="margin:0">The bell is a sphere and never
+          changes shape. Yaw turns the <b>handle</b> only — at 0 you see the
+          full arch, by 90 it has folded to an edge.</p>
+      </div>
+      <div class="grp">
+        <p class="eyebrow">The bell</p>
+        <div class="ctl"><label for="kbell">Bell size</label><output id="kbellV">100%</output>
+          <input type="range" id="kbell" min="60" max="150" step="2" value="100"></div>
+        <div class="ctl"><label for="khh">Handle height</label><output id="khhV">95%</output>
+          <input type="range" id="khh" min="40" max="160" step="2" value="95"></div>
+        <div class="ctl"><label for="kht">Handle thickness</label><output id="khtV">20%</output>
+          <input type="range" id="kht" min="8" max="38" step="1" value="20"></div>
+      </div>
+      <div class="grp">
+        <p class="eyebrow">Colour</p>
+        <div class="sw"><label for="kcb">Bell</label>
+          <input type="color" id="kcb" value="#2B3138"><code id="kkb">#2B3138</code></div>
+        <div class="sw"><label for="kch">Handle</label>
+          <input type="color" id="kch" value="#A8B2BC"><code id="kkh">#A8B2BC</code></div>
+        <div class="sw"><label for="kcn">Numbers</label>
+          <input type="color" id="kcn" value="#FFFFFF"><code id="kkn">#FFFFFF</code></div>
+        <div class="ctl"><label for="kno">Number opacity</label><output id="knoV">72%</output>
+          <input type="range" id="kno" min="0" max="100" step="2" value="72"></div>
+        <div class="ctl"><label for="kns">Number size</label><output id="knsV">52%</output>
+          <input type="range" id="kns" min="20" max="90" step="2" value="52"></div>
+        <div class="seg" id="segKNum">
+          <button data-v="on" aria-pressed="true">Numbers on</button>
+          <button data-v="off" aria-pressed="false">Off</button>
+        </div>
+      </div>
+      <div class="grp">
+        <p class="eyebrow">Neon</p>
+        <div class="seg" id="segKNeon">
+          <button data-v="off" aria-pressed="false">Off</button>
+          <button data-v="on" aria-pressed="true">On</button>
+        </div>
+        <div class="ctl"><label for="kgl">Glow</label><output id="kglV">32%</output>
+          <input type="range" id="kgl" min="0" max="100" step="2" value="32"></div>
+        <div class="sw"><label for="kcg">Colour</label>
+          <input type="color" id="kcg" value="#EFF1EF"><code id="kkg">#EFF1EF</code></div>
+      </div>
+      <div class="grp lockbox">
+        <p class="eyebrow">Your settings</p>
+        <div class="seg">
+          <button id="kLockBtn">Lock these</button>
+          <button id="kResetBtn">Reset</button>
+        </div>
+        <textarea id="kcfg" class="cfg" readonly rows="12"></textarea>
+      </div>
+    </div>
+  </div>
+  <div style="height:14px"></div>
+  <div class="ladder"><div class="ladrow" id="kladder"></div></div>
+  <p class="note">Cube root, like a plate — <b>20× the weight is 2.71× the
+    bell</b>. The handle takes a damped share and moves only 1.29× across the
+    whole range, because it is sized by the hand going through it.</p>
 </section>
 
 <section>
@@ -842,7 +950,8 @@ var BARPLATE = {
   10:{r:28,t:6.1},  5:{r:24,t:5.3}
 };
 var BARDENOM = [45,35,25,10,5];
-var BARMAX = 405, BARSTEP = 10;
+var BARMAX = 405;
+var BARSTEP = 10;
 
 /* The dumbbell's ladder only names three plates, so the barbell's five are
    interpolated across the same two ends of it — heaviest takes the 20's
@@ -927,9 +1036,26 @@ function drawBarbell(total, B, sc, gx, gy, opt){
   }
   /* sleeves first, then the shaft over them — the step between the two is
      the whole point, so it must not be smoothed by a round cap */
+  /* THE SHOULDER. The sleeve really is 1.79x the shaft at every load — that
+     was measured, not assumed — but on a BARE bar the step was invisible:
+     both parts carry the same bright ramp and the glow bleeds straight over
+     the junction, so a 45 read as one thin rod end to end. Loaded, the plates
+     sit against that junction and their dark mass gives the eye the edge for
+     free, which is why it only ever looked wrong empty.
+
+     A real bar has a shoulder there — the collar face the plates rest
+     against. Drawing it restores the step on the bare bar and costs nothing
+     when loaded, because the plates cover it. */
+  function shoulder(sgn){
+    var C0 = pt(sgn * BAR.shaftHalf);
+    var a = mul(B.perp, BAR.sleeveR * sc), b = mul(B.up, BAR.sleeveR * sc);
+    return '<path d="' + ellipsePath(C0, a, b) + '" fill="' + sh(C.handle, -34) +
+      '" stroke="' + sh(C.handle, -46) + '" stroke-width="' + f2(0.5*sc) + '"/>';
+  }
   var barMk =
     tube(-half, -BAR.shaftHalf, BAR.sleeveR, 'url(#slv' + id + ')') +
     tube( BAR.shaftHalf, half,  BAR.sleeveR, 'url(#slv' + id + ')') +
+    shoulder(-1) + shoulder(1) +
     tube(-BAR.shaftHalf, BAR.shaftHalf, BAR.shaftR, 'url(#bar' + id + ')');
 
   var out = barMk;
@@ -1078,7 +1204,8 @@ function barbellSceneSVG(total, o){
    The bore is 50mm on a real plate, which is the same 6.07 units as the
    barbell's sleeve — the hole and the sleeve are the same fit.
    ========================================================================== */
-var BELTMAX = 135, BELTSTEP = 5;
+var BELTMAX = 135;
+var BELTSTEP = 5;
 var BORE = 6.07;
 
 function beltLoad(total){
@@ -1324,6 +1451,152 @@ var BARBELL  = { yaw: 1,   depth: 0.19, shaftHalf: 130, sleeveLen: 72,
 var BELT     = { yaw: -18, depth: 0.56, spread: 0, plateScale: 0.92,
                         numSize: 0.44, fade: 0.78, trim: 0.61, numbers: true };
 
+/* The kettlebell keeps its own palette. Its bell, its grip and its cast
+   numbers have nothing to do with the plate ladder the other three share,
+   and forcing them onto one swatch set would mean a change to a plate
+   colour silently repainting a kettlebell. */
+var KETTLEBELL = { yaw: 0, depth: 0.42, bell: 1.00,
+                          handleH: 0.95, handleT: 0.20, numSize: 0.52,
+                          numbers: true };
+var KBPAL = { bell:'#2B3138', handle:'#A8B2BC', num:'#FFFFFF',
+                     numOp:0.72, neon:'#EFF1EF', neonOn:true, glow:0.32 };
+
+/* ==========================================================================
+   THE KETTLEBELL
+
+   Nothing else here is built like this one. A dumbbell, a bar and a belt are
+   all ASSEMBLIES — you read their weight by counting plates. A kettlebell is
+   a single cast object, so there is nothing to count: the weight IS the size
+   of the thing, and the gauge is the silhouette itself.
+
+   Which makes the sizing law the whole design. Solid iron means mass is
+   volume, so the bell grows with the CUBE ROOT of the weight — the same law
+   as a plate, and for the same reason. 5 to 100lb is 20x the weight and only
+   2.71x the bell, which is a range that fits on a card.
+
+   THE HANDLE BARELY MOVES. It is sized by the hand that goes through it, not
+   by the iron hanging off it, so it takes a heavily damped share of the
+   scale: 1.29x across a range where the bell does 2.71x. Let the handle
+   scale with the bell and a 100lb kettlebell gets a grip you could put your
+   head through.
+
+   Note this is CAST IRON sizing. Competition bells are all one size whatever
+   they weigh — true, and useless as a gauge, since the whole job here is to
+   show weight as size.
+   ========================================================================== */
+var KBREF = 35;      /* the weight the reference bell radius belongs to */
+var KBR0  = 34;      /* bell radius at KBREF */
+var KBMAX = 100;
+var KBSTEP = 5;
+function kbScale(w){ return Math.pow(Math.min(w, KBMAX) / KBREF, 1/3); }
+/* damped: the grip is a hand's width, not a share of the load */
+function kbHandleScale(k){ return 0.72 + 0.28 * k; }
+function kettlebellSceneSVG(weight, o){
+  o = o || {};
+  var W = o.W || 420, H = o.H || 340;
+  var yaw = o.yaw == null ? 0 : o.yaw;
+  var dep = o.depth == null ? 0.42 : o.depth;
+  var B = basis(yaw, dep);
+  var sc = o.sc || 1;
+  var C = o.C || KBPAL;
+  var over = weight > KBMAX;
+  var k = kbScale(weight) * (o.bell == null ? 1 : o.bell);
+  var hk = kbHandleScale(kbScale(weight));
+  var R  = KBR0 * k * sc;
+  var id = 'kb';
+
+  /* THE BELL IS A SPHERE, so it projects as a circle whatever the camera is
+     doing — no ellipse, no foreshortening. Only the handle turns with yaw.
+     It is truncated where it meets the floor: a real bell has a flat base,
+     and a full circle would have it balancing on a point. */
+  var groundY = H * 0.80;
+  var baseHalf = 0.42 * R;
+  var h = Math.sqrt(Math.max(0.0001, R*R - baseHalf*baseHalf));   /* 0.907R */
+  var cx = W/2, cy = groundY - h;
+
+  var bell =
+    '<path d="M' + f2(cx-baseHalf) + ' ' + f2(groundY) +
+      'A' + f2(R) + ' ' + f2(R) + ' 0 1 1 ' + f2(cx+baseHalf) + ' ' + f2(groundY) +
+      'Z" fill="url(#kbBell' + id + ')" stroke="' + sh(C.bell, -22) +
+      '" stroke-opacity=".7" stroke-width="' + f2(0.9*sc) + '"/>';
+
+  /* THE HANDLE lives in a vertical plane that the yaw turns. Its span runs
+     along the bar axis and its height straight up, so at yaw 0 you see the
+     full arch and by 90 it has folded to an edge — exactly the behaviour the
+     plates have, driven by the same basis. */
+  /* THE ARCH HAS A FLAT TOP. Sweeping one curve from shoulder to shoulder
+     gives a pointed dome with no window — which is what this was, a nub on
+     the head of the bell rather than something you could get a hand through.
+     A kettlebell handle rises, turns, runs flat across, turns and drops. The
+     flat run IS the grip, and the gap under it is the whole point. */
+  var hw = 0.52 * R * hk;                 /* half the span at the shoulders */
+  var HH = (o.handleH == null ? 0.95 : o.handleH) * R * hk;
+  var v0 = 0.62 * R;                      /* where it enters the shoulders */
+  var top = v0 + HH, flat = hw * 0.44;
+  var P = function(u, v){
+    return { x: cx + u*B.d.x + v*B.up.x, y: cy + u*B.d.y + v*B.up.y };
+  };
+  var q0 = P(-hw, v0),          q1 = P(-hw, v0 + HH*0.62),
+      q2 = P(-hw*0.86, top),    q3 = P(-flat, top),
+      q4 = P( flat, top),       q5 = P( hw*0.86, top),
+      q6 = P( hw, v0 + HH*0.62), q7 = P( hw, v0);
+  var handle =
+    '<path d="M' + f2(q0.x) + ' ' + f2(q0.y) +
+      'C' + f2(q1.x) + ' ' + f2(q1.y) + ' ' + f2(q2.x) + ' ' + f2(q2.y) + ' ' +
+            f2(q3.x) + ' ' + f2(q3.y) +
+      'L' + f2(q4.x) + ' ' + f2(q4.y) +
+      'C' + f2(q5.x) + ' ' + f2(q5.y) + ' ' + f2(q6.x) + ' ' + f2(q6.y) + ' ' +
+            f2(q7.x) + ' ' + f2(q7.y) +
+      '" fill="none" stroke="url(#kbGrip' + id + ')" stroke-linecap="round" ' +
+      'stroke-linejoin="round" stroke-width="' +
+      f2((o.handleT == null ? 0.20 : o.handleT) * R * hk) + '"/>';
+
+  /* the number sits on the front of the bell, where it is cast. The bell
+     always faces the viewer, so unlike a plate this needs no foreshortening
+     — a sphere has no angle to lie at. */
+  var num = (o.numbers === false || over) ? '' :
+    '<text x="' + f2(cx) + '" y="' + f2(cy + R*0.16) + '" text-anchor="middle" ' +
+      'dominant-baseline="central" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" ' +
+      'font-weight="700" font-size="' + f2(R * (o.numSize == null ? 0.52 : o.numSize)) +
+      '" fill="' + C.num + '" fill-opacity="' + (C.numOp == null ? 0.72 : C.numOp) +
+      '">' + Math.min(weight, KBMAX) + '</text>';
+
+  var body = handle + bell + num;
+  if(C.neonOn) body = '<g filter="url(#neon' + id + ')">' + body + '</g>';
+
+  var shadow = '<path d="' + ellipsePath({x:cx, y:groundY},
+      mul(B.d, R*1.02), mul(B.perp, R*0.30)) +
+    '" fill="#000" opacity=".50" filter="url(#blur' + id + ')"/>';
+
+  return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="kettlebell ' +
+      weight + ' pounds"><defs>' +
+      /* upper-left key light, so it reads as cast iron rather than a disc */
+      '<radialGradient id="kbBell' + id + '" cx="34%" cy="28%" r="76%">' +
+        '<stop offset="0%"   stop-color="' + sh(C.bell, +26) + '"/>' +
+        '<stop offset="42%"  stop-color="' + sh(C.bell, +6)  + '"/>' +
+        '<stop offset="78%"  stop-color="' + sh(C.bell, -12) + '"/>' +
+        '<stop offset="100%" stop-color="' + sh(C.bell, -26) + '"/></radialGradient>' +
+      '<linearGradient id="kbGrip' + id + '" x1="0" y1="0" x2="0" y2="1">' +
+        '<stop offset="0%"   stop-color="' + sh(C.handle, +22) + '"/>' +
+        '<stop offset="45%"  stop-color="' + C.handle + '"/>' +
+        '<stop offset="100%" stop-color="' + sh(C.handle, -28) + '"/></linearGradient>' +
+      '<filter id="blur' + id + '" x="-45%" y="-160%" width="190%" height="420%">' +
+        '<feGaussianBlur stdDeviation="4"/></filter>' +
+      (C.neonOn ?
+        '<filter id="neon' + id + '" x="-55%" y="-55%" width="210%" height="210%">' +
+          '<feDropShadow dx="0" dy="0" stdDeviation="' + f2(1.8*(0.45+0.55*C.glow)) +
+            '" flood-color="' + C.neon + '" flood-opacity="' + (0.95*C.glow).toFixed(3) + '"/>' +
+          '<feDropShadow dx="0" dy="0" stdDeviation="' + f2(6*(0.45+0.55*C.glow)) +
+            '" flood-color="' + C.neon + '" flood-opacity="' + (0.72*C.glow).toFixed(3) + '"/>' +
+          '<feDropShadow dx="0" dy="0" stdDeviation="' + f2(16*(0.45+0.55*C.glow)) +
+            '" flood-color="' + C.neon + '" flood-opacity="' + (0.44*C.glow).toFixed(3) + '"/>' +
+        '</filter>' : '') +
+    '</defs>' +
+    (o.floor === false ? '' : floorSVG(W, H, H*0.24)) +
+    shadow + body +
+    (over ? plusGlyph(W-30, 30, 14) : '') + '</svg>';
+}
+
 /* The ranges the steppers move through. Physical, not arbitrary: a barbell
    total moves in TENS because plates go on in pairs, which is why 135 is one
    45 a side and 225 is two — the gym numbers fall out of the arithmetic. */
@@ -1331,6 +1604,7 @@ var RANGE = {
   dumbbell: { min: 5,  max: 100, step: 5  },   /* per hand */
   barbell:  { min: 45, max: 405, step: 10 },   /* total, bar is 45 alone */
   belt:     { min: 5,  max: 135, step: 5  },
+  kettlebell:{min: 5,  max: 100, step: 5  },
 };
 
 /* ============================================================
@@ -1352,15 +1626,24 @@ function gaugeFor(row){
   var has = function(t){ return eq.indexOf(t) > -1; };
   var loading = String(row.loading || '');
 
-  if(has('bb'))                                return { kind:'barbell' };
-  if(has('vest') || loading === 'added-load')  return { kind:'belt' };
-  if(has('db'))                                return { kind:'dumbbell',
+  if(has('bb'))  return { kind:'barbell' };
+
+  /* DUMBBELLS BEAT A VEST WHEN A ROW LISTS BOTH.
+     The brief put vest/added-load ahead of db, and that put a dip belt on the
+     Bulgarian split squat — which is done holding dumbbells. The belt exists
+     for movements where the HANDS ARE OCCUPIED: pull-ups, dips, ring work.
+     If a movement can be loaded by holding something, it is held.
+     One row in the database has both (Bulgarian Split Squat) and it is the
+     one that was wrong. */
+  if(has('db'))  return { kind:'dumbbell',
     count: String(row.laterality||'') === 'unilateral' ? 'one' : 'pair' };
 
-  /* A kettlebell is a different object and there is no renderer for one.
-     Substituting a dumbbell would be a lie the owner would spot, so this
-     falls back to a plain number and says why. 12 rows. */
-  if(has('kb'))  return { kind:'none', why:'no kettlebell renderer' };
+  if(has('vest') || loading === 'added-load')  return { kind:'belt' };
+
+  /* A kettlebell is a single cast object, not an assembly — there is
+     nothing to count, so its gauge is the size of the bell itself. It has
+     its own renderer and its own palette; do NOT fall back to a dumbbell. */
+  if(has('kb'))  return { kind:'kettlebell' };
 
   return { kind:'none', why:'loadable but no gauge (' + (eq.join('/') || 'no equipment') + ')' };
 }
@@ -1371,8 +1654,13 @@ function gaugeOpts(g, size){
   size = size || {};
   var base = { W:size.W||300, H:size.H||150, sc:size.sc||1,
                floor: size.floor !== false, C: PALETTE };
-  var s = g.kind === 'barbell' ? BARBELL : g.kind === 'belt' ? BELT : DUMBBELL;
+  var s = g.kind === 'barbell'    ? BARBELL
+        : g.kind === 'belt'       ? BELT
+        : g.kind === 'kettlebell' ? KETTLEBELL
+        : DUMBBELL;
   for(var k in s) base[k] = s[k];
+  /* the kettlebell draws from its own swatches, not the plate palette */
+  if(g.kind === 'kettlebell') base.C = KBPAL;
   if(g.kind === 'dumbbell' && g.count) base.count = g.count;
   return base;
 }
@@ -1382,6 +1670,7 @@ function gaugeSVG(g, weight, size){
   var o = gaugeOpts(g, size);
   if(g.kind === 'barbell')  return barbellSceneSVG(weight, o);
   if(g.kind === 'belt')     return beltSceneSVG(weight, o);
+  if(g.kind === 'kettlebell') return kettlebellSceneSVG(weight, o);
   if(g.kind === 'dumbbell') return sceneSVG(weight, o);
   return '';
 }
@@ -1390,7 +1679,22 @@ function gaugeSVG(g, weight, size){
    a door rather than a global. */
 function setGrip(v){ GRIP = v; }
 
-return { BARBELL, BELT, DUMBBELL, PALETTE, RANGE, barLoad, barbellSceneSVG, beltLoad, beltSceneSVG, decompose, gaugeFor, gaugeOpts, gaugeSVG, sceneSVG, setGrip };
+/* ONE PLATE TABLE, TWO PIECES OF EQUIPMENT. The barbell and the belt load
+   from the same iron — they are the same plates in the same gym — so this is
+   deliberately a single mutable table rather than a copy each. Change a 25
+   here and it changes on the bar AND on the chain, which is the whole point.
+   A door rather than a global, because the module is an IIFE once built. */
+function setPlate(dn, r, t){
+  if(!BARPLATE[dn]) return false;
+  if(r != null) BARPLATE[dn].r = r;
+  if(t != null) BARPLATE[dn].t = t;
+  return true;
+}
+function getPlate(dn){
+  return BARPLATE[dn] ? { r: BARPLATE[dn].r, t: BARPLATE[dn].t } : null;
+}
+
+return { BAR, BARBELL, BARDENOM, BARMAX, BARPLATE, BARSTEP, BELT, BELTMAX, BELTSTEP, DUMBBELL, KBMAX, KBPAL, KBREF, KBSTEP, KETTLEBELL, LOCK, MAXW, PALETTE, RANGE, STEP, barLoad, barbellSceneSVG, beltLoad, beltSceneSVG, decompose, gaugeFor, gaugeOpts, gaugeSVG, getPlate, kbScale, kettlebellSceneSVG, sceneSVG, setGrip, setPlate };
 })();
 /* ===== /EQUIP:JS ===== */
 
@@ -1398,7 +1702,16 @@ return { BARBELL, BELT, DUMBBELL, PALETTE, RANGE, barLoad, barbellSceneSVG, belt
    collide with this rig. These are the names the rig uses. */
 var sceneSVG = EQUIP.sceneSVG, barbellSceneSVG = EQUIP.barbellSceneSVG,
     beltSceneSVG = EQUIP.beltSceneSVG, decompose = EQUIP.decompose,
-    barLoad = EQUIP.barLoad, beltLoad = EQUIP.beltLoad, PALETTE = EQUIP.PALETTE;
+    barLoad = EQUIP.barLoad, beltLoad = EQUIP.beltLoad, PALETTE = EQUIP.PALETTE,
+    kettlebellSceneSVG = EQUIP.kettlebellSceneSVG, kbScale = EQUIP.kbScale,
+    KBMAX = EQUIP.KBMAX, KBSTEP = EQUIP.KBSTEP,
+    /* The module is an IIFE, so anything it declares is invisible out here.
+       These are constants the rig genuinely needs — the ladders, the ranges
+       and the locked camera — and without them the lab throws on load. */
+    MAXW = EQUIP.MAXW, STEP = EQUIP.STEP, LOCK = EQUIP.LOCK,
+    BAR = EQUIP.BAR, BARDENOM = EQUIP.BARDENOM,
+    BARMAX = EQUIP.BARMAX, BARSTEP = EQUIP.BARSTEP,
+    BELTMAX = EQUIP.BELTMAX, BELTSTEP = EQUIP.BELTSTEP;
 
 
 /* ==========================================================================
@@ -1565,7 +1878,7 @@ function drawLadder(){
       '<div class="mk">' + p.join(' + ') + '</div></div>';
   }).join('');
 }
-function drawAll(){ draw(); drawLadder(); drawBar(); drawBLadder(); beltAll(); }
+function drawAll(){ syncPlates(); draw(); drawLadder(); drawBar(); drawBLadder(); beltAll(); kbAll(); }
 
 /* ---- cards ------------------------------------------------------------- */
 /* qty is per exercise, because the movement decides it: a goblet squat is
@@ -1672,7 +1985,8 @@ function drawBar(){
     'sleeve r     ' + BS.sleeveR.toFixed(2) + '  (' + ratio.toFixed(2) + '\u00D7)\n' +
     'plate size   ' + Math.round(BS.plateScale*100) + '%\n' +
     'number size  ' + Math.round(BS.numSize*100) + '%\n' +
-    'numbers      ' + (BS.numbers ? 'on' : 'off');
+    'numbers      ' + (BS.numbers ? 'on' : 'off') + '\n' +
+    '\nplates (shared with the belt)\n' + plateCfg();
   bsave();
   var L = barLoad(Math.min(t, BARMAX));
   var tally = {};
@@ -1783,7 +2097,8 @@ function drawBelt(){
     'spread       ' + LS.spread + '\n' +
     'chain fade   ' + Math.round(LS.fade*100) + '%\n' +
     'links trim   ' + Math.round(LS.trim*100) + '%\n' +
-    'numbers      ' + (LS.numbers ? 'on' : 'off');
+    'numbers      ' + (LS.numbers ? 'on' : 'off') + '\n' +
+    '\nplates (shared with the bar)\n' + plateCfg();
   lsave();
 }
 function drawLLadder(){
@@ -1836,6 +2151,170 @@ function lSyncControls(){
   });
 }
 
+/* ---- the plate table --------------------------------------------------
+   Its own state, deliberately NOT folded into the barbell's. The barbell and
+   the belt load from one set of iron, so the plates belong to neither of
+   them — parking them under the barbell would mean the belt's settings block
+   silently omitted geometry the belt actually draws with. */
+var PKEY = 'fj.plates.v1';
+var PDENOM = [45,35,25,10,5];
+var PDEF = { 45:{r:55,t:8.8}, 35:{r:49,t:7.8}, 25:{r:34,t:7.8},
+             10:{r:28,t:6.1},  5:{r:24,t:5.3} };
+var PS = JSON.parse(JSON.stringify(PDEF));
+try{
+  var psaved = JSON.parse(localStorage.getItem(PKEY) || 'null');
+  if(psaved) PDENOM.forEach(function(d){
+    if(psaved[d]){ PS[d].r = psaved[d].r; PS[d].t = psaved[d].t; }
+  });
+}catch(e){}
+function psave(){ try{ localStorage.setItem(PKEY, JSON.stringify(PS)); }catch(e){} }
+/* push the table into the module before anything draws from it */
+function syncPlates(){
+  PDENOM.forEach(function(d){ EQUIP.setPlate(d, PS[d].r, PS[d].t); });
+}
+function plateCfg(){
+  return PDENOM.map(function(d){
+    return '  ' + String(d).padStart(2) + ' lb  r ' + String(PS[d].r).padStart(2) +
+           '  t ' + PS[d].t.toFixed(1);
+  }).join('\n');
+}
+PDENOM.forEach(function(d){
+  $('pr'+d).addEventListener('input', function(){
+    PS[d].r = +this.value; $('pr'+d+'V').textContent = this.value; psave(); plateAll(); });
+  $('pt'+d).addEventListener('input', function(){
+    PS[d].t = +this.value; $('pt'+d+'V').textContent = (+this.value).toFixed(1); psave(); plateAll(); });
+});
+/* both consumers of the table redraw, never just the one being looked at */
+function plateAll(){ syncPlates(); drawBar(); drawBLadder(); beltAll(); }
+function pSyncControls(){
+  PDENOM.forEach(function(d){
+    $('pr'+d).value = PS[d].r; $('pr'+d+'V').textContent = PS[d].r;
+    $('pt'+d).value = PS[d].t; $('pt'+d+'V').textContent = PS[d].t.toFixed(1);
+  });
+}
+
+/* ---- the kettlebell rig ------------------------------------------------ */
+/* v2: the handle arch was reshaped and its default height moved 86 -> 95.
+   A stored v1 carries the old 86 back over the top and the new arch opens
+   at the wrong proportion — the same masking trap as everywhere else. */
+var KKEY = 'fj.kettlebell.v2';
+var KDEF = { i: 7, yaw: 0, depth: 0.42, bell: 1.00, handleH: 0.95, handleT: 0.20,
+             cbell: '#2B3138', chandle: '#A8B2BC', cnum: '#FFFFFF',
+             numOp: 0.72, numSize: 0.52, numbers: true,
+             neon: '#EFF1EF', neonOn: true, glow: 0.32, locked: false };
+var KS = {};
+for(var q0 in KDEF) KS[q0] = KDEF[q0];
+try{
+  var ksaved = JSON.parse(localStorage.getItem(KKEY) || 'null');
+  if(ksaved) for(var q1 in ksaved) if(q1 in KS) KS[q1] = ksaved[q1];
+}catch(e){}
+function ksave(){ try{ localStorage.setItem(KKEY, JSON.stringify(KS)); }catch(e){} }
+
+/* the kettlebell carries its own palette: its bell, grip and cast numbers are
+   nothing to do with the plate ladder the other three share */
+/* the module owns the kettlebell's swatches; the lab only mutates them */
+var KBPAL = EQUIP.KBPAL;
+
+function kwAt(i){ return i > KBMAX/KBSTEP ? KBMAX + KBSTEP : i*KBSTEP; }
+function kopts(extra){
+  KBPAL.bell = KS.cbell; KBPAL.handle = KS.chandle; KBPAL.num = KS.cnum;
+  KBPAL.numOp = KS.numOp; KBPAL.neon = KS.neon;
+  KBPAL.neonOn = KS.neonOn; KBPAL.glow = KS.glow;
+  var o = { C:KBPAL, yaw:KS.yaw, depth:KS.depth, bell:KS.bell,
+            handleH:KS.handleH, handleT:KS.handleT,
+            numbers:KS.numbers, numSize:KS.numSize };
+  for(var k in extra) o[k] = extra[k];
+  return o;
+}
+function drawKb(){
+  var w = kwAt(KS.i), over = w > KBMAX;
+  $('kstage').innerHTML = kettlebellSceneSVG(w, kopts({ W:560, H:360, sc:1.0 }));
+  $('kwV').textContent   = (over ? KBMAX + '+' : w) + ' lb';
+  $('kyawV').textContent = KS.yaw + '°';
+  $('kpitV').textContent = KS.depth.toFixed(2);
+  $('kbellV').textContent = Math.round(KS.bell*100) + '%';
+  $('khhV').textContent  = Math.round(KS.handleH*100) + '%';
+  $('khtV').textContent  = Math.round(KS.handleT*100) + '%';
+  $('knoV').textContent  = Math.round(KS.numOp*100) + '%';
+  $('knsV').textContent  = Math.round(KS.numSize*100) + '%';
+  $('kglV').textContent  = Math.round(KS.glow*100) + '%';
+  $('kcfg').value =
+    'yaw          ' + KS.yaw + '\n' +
+    'eye          ' + KS.depth.toFixed(2) + '\n' +
+    'bell size    ' + Math.round(KS.bell*100) + '%\n' +
+    'handle h     ' + Math.round(KS.handleH*100) + '%\n' +
+    'handle t     ' + Math.round(KS.handleT*100) + '%\n' +
+    'col:bell     ' + KS.cbell.toUpperCase() + '\n' +
+    'col:handle   ' + KS.chandle.toUpperCase() + '\n' +
+    'col:numbers  ' + KS.cnum.toUpperCase() + '\n' +
+    'number op    ' + Math.round(KS.numOp*100) + '%\n' +
+    'number size  ' + Math.round(KS.numSize*100) + '%\n' +
+    'numbers      ' + (KS.numbers ? 'on' : 'off') + '\n' +
+    'neon         ' + KS.neon.toUpperCase() + ' · ' +
+      (KS.neonOn ? Math.round(KS.glow*100) + '%' : 'off');
+  ksave();
+}
+function drawKLadder(){
+  $('kladder').innerHTML = [5,15,30,50,70,100,105].map(function(w){
+    return '<div class="rung"><div class="box">' +
+      kettlebellSceneSVG(w, kopts({ W:250, H:250, sc:0.62 })) +
+      '</div><div class="cap">' + (w > KBMAX ? KBMAX + '+' : w + ' lb') + '</div>' +
+      '<div class="mk">×' + kbScale(w).toFixed(2) + '</div></div>';
+  }).join('');
+}
+function kbAll(){ drawKb(); drawKLadder(); }
+[['kw','i',1],['kyaw','yaw',1],['kpit','depth',1],
+ ['kbell','bell',0.01],['khh','handleH',0.01],['kht','handleT',0.01],
+ ['kno','numOp',0.01],['kns','numSize',0.01],['kgl','glow',0.01]
+].forEach(function(t){
+  $(t[0]).addEventListener('input', function(){ KS[t[1]] = +this.value * t[2]; kbAll(); });
+});
+[['kcb','cbell','kkb'],['kch','chandle','kkh'],
+ ['kcn','cnum','kkn'],['kcg','neon','kkg']].forEach(function(t){
+  $(t[0]).addEventListener('input', function(){
+    KS[t[1]] = this.value; $(t[2]).textContent = this.value.toUpperCase(); kbAll();
+  });
+});
+[['segKNum','numbers'],['segKNeon','neonOn']].forEach(function(t){
+  $(t[0]).addEventListener('click', function(ev){
+    var b = ev.target.closest('button'); if(!b) return;
+    KS[t[1]] = b.dataset.v === 'on';
+    [].forEach.call(this.querySelectorAll('button'), function(o){
+      o.setAttribute('aria-pressed', o === b ? 'true' : 'false'); });
+    kbAll();
+  });
+});
+function kApplyLock(){
+  $('kpanelBox').classList.toggle('locked', KS.locked);
+  $('kLockBtn').textContent = KS.locked ? 'Unlock' : 'Lock these';
+  $('kLockBtn').setAttribute('aria-pressed', KS.locked ? 'true' : 'false');
+}
+$('kLockBtn').addEventListener('click', function(){
+  KS.locked = !KS.locked; kApplyLock(); ksave();
+});
+$('kResetBtn').addEventListener('click', function(){
+  for(var k in KDEF) KS[k] = KDEF[k];
+  kSyncControls(); kApplyLock(); kbAll();
+});
+function kSyncControls(){
+  $('kw').value = KS.i; $('kyaw').value = KS.yaw; $('kpit').value = KS.depth;
+  $('kbell').value = Math.round(KS.bell*100);
+  $('khh').value = Math.round(KS.handleH*100);
+  $('kht').value = Math.round(KS.handleT*100);
+  $('kno').value = Math.round(KS.numOp*100);
+  $('kns').value = Math.round(KS.numSize*100);
+  $('kgl').value = Math.round(KS.glow*100);
+  [['kcb','cbell','kkb'],['kch','chandle','kkh'],
+   ['kcn','cnum','kkn'],['kcg','neon','kkg']].forEach(function(t){
+    $(t[0]).value = KS[t[1]]; $(t[2]).textContent = KS[t[1]].toUpperCase();
+  });
+  [['segKNum', KS.numbers],['segKNeon', KS.neonOn]].forEach(function(t){
+    [].forEach.call($(t[0]).querySelectorAll('button'), function(o){
+      o.setAttribute('aria-pressed',
+        o.dataset.v === (t[1] ? 'on' : 'off') ? 'true' : 'false'); });
+  });
+}
+
 function drawBLadder(){
   $('bladder').innerHTML = [45,95,135,185,225,315,415].map(function(t){
     var L = barLoad(Math.min(t, BARMAX));
@@ -1853,5 +2332,8 @@ bSyncControls();
 bApplyLock();
 lSyncControls();
 lApplyLock();
+kSyncControls();
+kApplyLock();
+pSyncControls();
 drawAll();
 </script>
