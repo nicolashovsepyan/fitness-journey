@@ -470,18 +470,22 @@ footer code{font:400 12.5px/1.4 var(--mono);color:var(--ink-2)}
       </div>
       <div class="grp">
         <p class="eyebrow">The handle</p>
-        <div class="ctl"><label for="khg">Handle growth</label><output id="khgV">0.120</output>
-          <input type="range" id="khg" min="0" max="0.40" step="0.005" value="0.120"></div>
+        <div class="ctl"><label for="khg">Handle growth</label><output id="khgV">0.333</output>
+          <input type="range" id="khg" min="0" max="0.40" step="0.005" value="0.333"></div>
         <div class="ctl"><label for="khs">Handle size</label><output id="khsV">100%</output>
           <input type="range" id="khs" min="70" max="140" step="2" value="100"></div>
         <div class="ctl"><label for="kcv">Seat depth</label><output id="kcvV">0.349</output>
           <input type="range" id="kcv" min="0.10" max="0.70" step="0.005" value="0.349"></div>
         <div class="ctl"><label for="kgm">Widest grip</label><output id="kgmV">0.92</output>
           <input type="range" id="kgm" min="0.60" max="0.99" step="0.01" value="0.92"></div>
-        <p class="note" style="margin:0"><b>Handle growth</b> near <b>0</b>
-          means one handle size for every bell, which is very nearly what a
-          real rack does — they all have to fit the same hand. Below the ball's
-          own <b>0.333</b> the light bells get proportionally bigger handles.</p>
+        <p class="note" style="margin:0">At <b>0.333</b> — where it sits now —
+          the handle scales with the ball and the two layers redraw the
+          original artwork exactly. That is the <b>one-image</b> look, and it
+          is the default because it has nothing to go wrong.</p>
+        <p class="note" style="margin:0">Lower it and the light bells get
+          proportionally bigger handles, which is what a real rack does — they
+          all fit the same hand. <b>0.12</b> is close to the real thing. The
+          difference is subtle at card size, so this is taste, not correctness.</p>
         <p class="note" style="margin:0"><b>Widest grip</b> is a guard, not a
           look. The legs end in a flat cut and hide inside the ball; past about
           <b>1.0</b> they are wider than the ball itself and no depth can hide
@@ -1755,7 +1759,21 @@ var KETTLEBELL = {
   ballGrowth: 1/3,    /* the ball is the mass — cube root */
   handleWeight: 0,    /* lb of the label that is handle, not ball. 0 = the old
                          plain cube root; see kbBallScale before changing it */
-  handleGrowth: 0.12, /* handles barely grow — they all fit one hand */
+  /* SET EQUAL TO ballGrowth ON PURPOSE, WHICH MEANS UNIFORM SCALING.
+
+     When these two match, the handle's relative scale is exactly 1 at every
+     weight and the two layers redraw the original artwork — verified against
+     it pixel for pixel, 0 mismatches in 1.57M. So the default look is the
+     plain one-image look, and nothing about the split is visible until
+     somebody asks for it.
+
+     It is a default, not a verdict. A real rack does hold its handles nearly
+     constant (try 0.12) and the machinery is here to do that. But side by side
+     at card size the difference is very hard to see, while an over-large
+     handle on a light bell has a real failure mode — legs with no ball left to
+     hide in. Uniform is the version with nothing to go wrong, so it is what
+     ships until the rack photo is measured and says otherwise. */
+  handleGrowth: 1/3,
   handleScale: 1,     /* flat multiplier on the handle, on top of its law */
   cover: 0.349,       /* how far past 'just covered' the leg tips are pushed,
                          in ball radii. 0.349 reproduces the original render */
@@ -2465,9 +2483,9 @@ function pSyncControls(){
    `src` is '../images/…' because the lab sits in logo/ while the app's pages
    sit at the root. The module's default is the root-relative-to-page one; the
    lab is the odd caller, so the lab is what passes the override. */
-var KKEY = 'fj.kettlebell.split.v1';
+var KKEY = 'fj.kettlebell.split.v2';
 var KDEF = { i: 4, size: 190, ballGrowth: 1/3, handleWeight: 0,
-             handleGrowth: 0.12, handleScale: 1, cover: 0.349, gripMax: 0.92,
+             handleGrowth: 1/3, handleScale: 1, cover: 0.349, gripMax: 0.92,
              tint: true, dark: '#20242a', light: '#95A1AE', stretch: 2.96,
              numbers: true, numFill: '#DDE3EA', numSize: 0.333,
              numX: 0.6032, numY: 0.0844, squash: 0.724, tilt: -12,

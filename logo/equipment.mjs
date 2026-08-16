@@ -1166,7 +1166,21 @@ export var KETTLEBELL = {
   ballGrowth: 1/3,    /* the ball is the mass — cube root */
   handleWeight: 0,    /* lb of the label that is handle, not ball. 0 = the old
                          plain cube root; see kbBallScale before changing it */
-  handleGrowth: 0.12, /* handles barely grow — they all fit one hand */
+  /* SET EQUAL TO ballGrowth ON PURPOSE, WHICH MEANS UNIFORM SCALING.
+
+     When these two match, the handle's relative scale is exactly 1 at every
+     weight and the two layers redraw the original artwork — verified against
+     it pixel for pixel, 0 mismatches in 1.57M. So the default look is the
+     plain one-image look, and nothing about the split is visible until
+     somebody asks for it.
+
+     It is a default, not a verdict. A real rack does hold its handles nearly
+     constant (try 0.12) and the machinery is here to do that. But side by side
+     at card size the difference is very hard to see, while an over-large
+     handle on a light bell has a real failure mode — legs with no ball left to
+     hide in. Uniform is the version with nothing to go wrong, so it is what
+     ships until the rack photo is measured and says otherwise. */
+  handleGrowth: 1/3,
   handleScale: 1,     /* flat multiplier on the handle, on top of its law */
   cover: 0.349,       /* how far past 'just covered' the leg tips are pushed,
                          in ball radii. 0.349 reproduces the original render */

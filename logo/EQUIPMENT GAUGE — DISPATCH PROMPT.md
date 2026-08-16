@@ -43,12 +43,22 @@ Four drawn kettlebells were built and all four were rejected — the shape is a
 sphere fused to a bent handle and the eye catches the join at card size. Do not
 try to "finish" it in code.
 
-IT IS TWO FILES BECAUSE A KETTLEBELL DOES NOT SCALE UNIFORMLY. On a real rack
-the balls differ enormously from 4 kg to 40 kg while the handles barely change,
-because every one of them has to fit the same hand. The ball and the handle
-therefore grow on separate laws and are composed at draw time — handle behind,
-ball in front, the ball hiding the join. Do not "simplify" this back to one
-image; that is where it started.
+IT IS TWO FILES SO THAT IT CAN SCALE NON-UNIFORMLY, BUT BY DEFAULT IT DOES NOT.
+On a real rack the balls differ enormously from 4 kg to 40 kg while the handles
+barely change, because every one of them has to fit the same hand. The two
+layers make that possible: handle behind, ball in front, the ball hiding the
+join.
+
+Shipped default is handleGrowth === ballGrowth, which makes the handle's
+relative scale exactly 1 everywhere and redraws the original artwork — verified
+against it pixel for pixel, 0 mismatches in 1.57M. So OUT OF THE BOX THIS LOOKS
+LIKE ONE IMAGE. The non-uniform behaviour is one number away (try 0.12) but was
+not made the default: the difference is very hard to see at card size, and an
+over-large handle on a light bell can leave legs with no ball to hide in.
+
+Do not "simplify" this back to a single PNG. It would save nothing — the
+default already looks identical — and it would throw away the only mechanism
+that can ever make a 5 lb bell look like a 5 lb bell.
 
 Three things follow that you must not get wrong:
 
@@ -155,7 +165,7 @@ reintroduce the pattern.
                  srcHandle: 'images/equipment/kettlebell-handle.png',
                  size: 190,            // BALL DIAMETER at the top of the range
                  ballGrowth: 1/3, handleWeight: 0,
-                 handleGrowth: 0.12, handleScale: 1,
+                 handleGrowth: 1/3, handleScale: 1,   // = ballGrowth: uniform by default
                  cover: 0.349, gripMax: 0.92,
                  tint: true, dark: '#20242a', light: '#95A1AE',
                  stretch: 2.96, black: 0.128, numbers: true,

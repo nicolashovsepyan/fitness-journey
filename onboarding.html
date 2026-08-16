@@ -2724,7 +2724,21 @@ var KETTLEBELL = {
   ballGrowth: 1/3,    /* the ball is the mass — cube root */
   handleWeight: 0,    /* lb of the label that is handle, not ball. 0 = the old
                          plain cube root; see kbBallScale before changing it */
-  handleGrowth: 0.12, /* handles barely grow — they all fit one hand */
+  /* SET EQUAL TO ballGrowth ON PURPOSE, WHICH MEANS UNIFORM SCALING.
+
+     When these two match, the handle's relative scale is exactly 1 at every
+     weight and the two layers redraw the original artwork — verified against
+     it pixel for pixel, 0 mismatches in 1.57M. So the default look is the
+     plain one-image look, and nothing about the split is visible until
+     somebody asks for it.
+
+     It is a default, not a verdict. A real rack does hold its handles nearly
+     constant (try 0.12) and the machinery is here to do that. But side by side
+     at card size the difference is very hard to see, while an over-large
+     handle on a light bell has a real failure mode — legs with no ball left to
+     hide in. Uniform is the version with nothing to go wrong, so it is what
+     ships until the rack photo is measured and says otherwise. */
+  handleGrowth: 1/3,
   handleScale: 1,     /* flat multiplier on the handle, on top of its law */
   cover: 0.349,       /* how far past 'just covered' the leg tips are pushed,
                          in ball radii. 0.349 reproduces the original render */
@@ -3621,10 +3635,37 @@ function gaugeBox(g){
 
      Only W/H/sc — never a different yaw or palette. Those stay in the module
      where every screen reads the same ones. */
-  /* sc is set so the LOADED implement fills about 92% of the canvas width —
-     measured, not guessed; past that it clips. The canvas height is then cut
-     down to roughly what the object needs, because empty canvas is dead space
-     once the svg is fitted to the band. */
+  /* sc is set so the implement fills about 92% of the canvas ON ITS BINDING
+     AXIS — measured, not guessed; past that it clips.
+
+     TUNE AT THE HEAVIEST WEIGHT IN RANGE, NEVER AT A MIDDLE ONE.
+     These were tuned at 50 lb and the range runs to 100, so they were right
+     in the middle of the dial and wrong at the end of it:
+
+         at 50 lb            at 100 lb (max)
+         pair   95.4% wide   120.6% wide   ← 20% out the sides
+         one    90.3% wide   120.4% wide
+         bell  116.8% tall   142.0% tall
+
+     The barbell never showed this because its width is the bar, which does
+     not change — 90.6% at every weight from 45 to 405. The others grow with
+     the load, so the only weight that can clip is the top one.
+
+     The binding axis is whichever the object runs out of first, and it is
+     not the same for all three: the dumbbells are wide and short so width
+     binds, the kettlebell is tall and narrow so height does. Tuning the
+     bell on width is what let it grow to 142% of its band unnoticed.
+
+     AND THE HEAVIEST WEIGHT IS NOT THE WIDEST ONE. Retuned at 100 lb, the
+     dumbbells still came out at 98.8% — because the plate layout is not
+     monotonic. 95 lb is drawn with more, smaller plates than 100 lb, which
+     packs into fewer big ones, so the widest picture on the dial is one
+     notch short of the end of it.
+
+     So these are not tuned at a weight at all. Every notch in RANGE is
+     scanned and the PEAK is what 92% refers to. If you change RANGE, a
+     plate size, or the layout, rescan — do not reason about which weight
+     ought to be the biggest. */
   if(g.kind==='barbell') return {W:660, H:190, sc:1.15, floor:false};
   if(g.kind==='belt')    return {W:430, H:330, sc:1.20, floor:false};
   /* ONE dumbbell is a much smaller object than a mirrored pair, so it needs
@@ -3633,9 +3674,9 @@ function gaugeBox(g){
      land the drawn object at about 90% of the canvas either way. */
   /* A kettlebell is a single compact object — it was falling through to the
      mirrored pair's canvas and drawing far too large. */
-  if(g.kind==='kettlebell') return {W:300, H:250, sc:1.15, floor:false};
-  if(g.count==='one')       return {W:300, H:210, sc:2.80, floor:false};
-  return {W:600, H:230, sc:2.35, floor:false};
+  if(g.kind==='kettlebell') return {W:300, H:250, sc:0.745, floor:false};
+  if(g.count==='one')       return {W:300, H:210, sc:1.99, floor:false};
+  return {W:600, H:230, sc:1.69, floor:false};
 }
 /* THE SECOND NUMBER ON A CARD — reps, distance or seconds.
    One shape, so every card asks its follow-up on the same control. A carry
