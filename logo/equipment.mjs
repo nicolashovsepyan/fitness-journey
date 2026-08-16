@@ -913,17 +913,6 @@ export var BARBELL  = { yaw: 1,   depth: 0.19, shaftHalf: 120, sleeveLen: 72,
 export var BELT     = { yaw: -18, depth: 0.56, spread: 0, plateScale: 0.92,
                         numSize: 0.44, fade: 0.78, trim: 0.61, numbers: true };
 
-/* The kettlebell keeps its own palette. Its bell, its grip and its cast
-   numbers have nothing to do with the plate ladder the other three share,
-   and forcing them onto one swatch set would mean a change to a plate
-   colour silently repainting a kettlebell. */
-export var KETTLEBELL = { yaw: 0, depth: 0.42, bell: 1.00,
-                          handleW: 0.77, handleH: 2.03, handleT: 0.24, chamfer: 0.26, base: 0.32,
-                          numSize: 0.30, wire: true,
-                          numbers: true };
-export var KBPAL = { bell:'#2B3138', handle:'#A8B2BC', num:'#FFFFFF',
-                     numOp:0.72, neon:'#EFF1EF', neonOn:true, glow:0.32 };
-
 /* The ranges the steppers move through. Physical, not arbitrary: a barbell
    total moves in TENS because plates go on in pairs, which is why 135 is one
    45 a side and 225 is two — the gym numbers fall out of the arithmetic. */
@@ -931,7 +920,6 @@ export var RANGE = {
   dumbbell: { min: 5,  max: 100, step: 5  },   /* per hand */
   barbell:  { min: 45, max: 405, step: 10 },   /* total, bar is 45 alone */
   belt:     { min: 5,  max: 135, step: 5  },
-  kettlebell:{min: 5,  max: 100, step: 5  },
 };
 
 /* ============================================================
@@ -966,10 +954,12 @@ export function gaugeFor(row){
 
   if(has('vest') || loading === 'added-load')  return { kind:'belt' };
 
-  /* A kettlebell is a single cast object, not an assembly — there is
-     nothing to count, so its gauge is the size of the bell itself. It has
-     its own renderer and its own palette; do NOT fall back to a dumbbell. */
-  if(has('kb'))  return { kind:'kettlebell' };
+  /* NO KETTLEBELL RENDERER. Several were built and none of them held up, so
+     the drawing was removed rather than left in half-right — a wrong object
+     on a card is worse than an honest number field. Do NOT substitute a
+     dumbbell: a kettlebell is a different shape and it will be spotted.
+     12 rows in the database land here. */
+  if(has('kb'))  return { kind:'none', why:'no kettlebell renderer' };
 
   return { kind:'none', why:'loadable but no gauge (' + (eq.join('/') || 'no equipment') + ')' };
 }
@@ -1028,11 +1018,8 @@ export function gaugeOpts(g, size){
                floor: size.floor !== false, C: PALETTE };
   var s = g.kind === 'barbell'    ? BARBELL
         : g.kind === 'belt'       ? BELT
-        : g.kind === 'kettlebell' ? KETTLEBELL
         : DUMBBELL;
   for(var k in s) base[k] = s[k];
-  /* the kettlebell draws from its own swatches, not the plate palette */
-  if(g.kind === 'kettlebell') base.C = KBPAL;
   if(g.kind === 'dumbbell' && g.count) base.count = g.count;
   return base;
 }
@@ -1042,7 +1029,6 @@ export function gaugeSVG(g, weight, size){
   var o = gaugeOpts(g, size);
   if(g.kind === 'barbell')  return barbellSceneSVG(weight, o);
   if(g.kind === 'belt')     return beltSceneSVG(weight, o);
-  if(g.kind === 'kettlebell') return kettlebellSceneSVG(weight, o);
   if(g.kind === 'dumbbell') return sceneSVG(weight, o);
   return '';
 }
