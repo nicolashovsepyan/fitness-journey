@@ -991,7 +991,8 @@ h1.q{text-align:center}
 @media (prefers-reduced-motion:reduce){ .entrymark .tri path{animation:none} }
 
 /* ---------- the deck ---------- */
-.deckwrap{flex:1;display:flex;flex-direction:column;min-height:0}
+.deckwrap{flex:1;display:flex;flex-direction:column;min-height:0;
+  padding-bottom:calc(10px + env(safe-area-inset-bottom))}
 .dkdots{display:flex;gap:4px;justify-content:center;margin-bottom:14px;flex:0 0 auto}
 .dkdots i{width:6px;height:6px;border-radius:50%;background:var(--line2)}
 .dkdots i.done{background:var(--accent)}
@@ -1017,8 +1018,8 @@ h1.q{text-align:center}
 .dkcap span{display:block;margin-top:3px;font-size:12.5px;color:var(--ink3)}
 .dkstamp{position:absolute;top:16px;padding:7px 11px;border-radius:9px;border:2px solid;
   font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:0;pointer-events:none}
-.dkstamp.yes{right:14px;color:var(--accent);border-color:var(--accent);transform:rotate(8deg)}
-.dkstamp.no{left:14px;color:#8FB8FF;border-color:#8FB8FF;transform:rotate(-8deg)}
+.dkstamp.yes{left:14px;color:var(--accent);border-color:var(--accent);transform:rotate(-8deg)}
+.dkstamp.no{right:14px;color:#8FB8FF;border-color:#8FB8FF;transform:rotate(8deg)}
 
 /* WHICH WAY IS WHICH, PERMANENTLY.
    The stamps only appear once a swipe is already under way, which is too
@@ -3616,6 +3617,11 @@ function checkMore(d){
 }
 function setFoot(h){
   foot.innerHTML=h;
+  /* Measure NOW as well as next frame. Deferring it entirely meant a screen
+     with no footer — the deck — kept the previous screen's padding for its
+     whole life, because nothing ever recomputed while the footer was empty.
+     That cost the deck 119px of card height. */
+  syncFootPad();
   requestAnimationFrame(function(){ foot.classList.add('on'); syncFootPad(); });
 }
 /* Measured synchronously, not a frame later. --footpad drives the bottom
@@ -3625,11 +3631,24 @@ function setFoot(h){
    the block is vertically centred, that was the glitch on the opening. One
    forced layout per screen is a fair price for never showing a wrong one. */
 function syncFootPad(){
-  var h=foot.offsetHeight||0;
-  if(h) document.documentElement.style.setProperty('--footpad',(h+28)+'px');
+  /* AN EMPTY FOOTER MEANS ZERO, NOT "SKIP".
+     The guard here used to be `if(h)`, which is false for an empty footer —
+     so a screen with no button (the deck) kept the PREVIOUS screen's padding.
+     The deck was losing 119px of card height to a footer that was not there,
+     which is why its card was short and its content had to scroll. */
+  var set=function(){
+    if(foot.children.length){
+      document.documentElement.style.setProperty('--footpad', ((foot.offsetHeight||0)+28)+'px');
+    } else {
+      /* No footer still needs the home indicator's room — otherwise the card
+         runs under it. Small, but not zero. */
+      document.documentElement.style.setProperty('--footpad',
+        'calc(14px + env(safe-area-inset-bottom))');
+    }
+  };
+  set();
   requestAnimationFrame(function(){
-    var hh=foot.offsetHeight||0;
-    if(hh) document.documentElement.style.setProperty('--footpad',(hh+28)+'px');
+    set();
     var sc=stage.querySelector('.screen'); if(sc) checkMore(sc);
   });
 }
@@ -5087,6 +5106,10 @@ function deck(s){
     e.innerHTML=`<div class="dkvid">${deckArt(c.id)
         ? `<img class="dkart" src="${deckArt(c.id)}" alt="">`
         : poseSvg(c.a)}
+        <!-- The stamp sits OPPOSITE the direction of travel. Swipe left and
+             the card uncovers its right edge, so that is where the word for
+             a left swipe has to be — under the old arrangement your own hand
+             covered the label you were trying to read. -->
         <div class="dkstamp yes">I know it</div>
         <div class="dkstamp no">Added to learn</div></div>
       <div class="dkcap"><b>${c.n}</b><span>${c.hint}</span></div>
