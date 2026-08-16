@@ -1034,7 +1034,7 @@ h1.q{text-align:center}
 .dkway .r.hot{color:var(--accent);opacity:1}
 .dkbands{position:absolute;top:0;right:0;bottom:0;left:0;background:var(--card);
   border-radius:inherit;
-  display:none;flex-direction:column;justify-content:center;padding:18px 18px 14px;
+  display:none;flex-direction:column;justify-content:center;padding:18px 0 14px;
   /* Content taller than the card was being centred, which pushes the overflow
      out of BOTH ends at once — the heading off the top and the button off the
      bottom, with no way to reach either. Scroll it, and stop centring the
@@ -1115,15 +1115,20 @@ h1.q{text-align:center}
 
    head and act size to their content; art and dials take the rest in a 30/30
    split, with the number band a fixed sliver between them. */
-.dkbands .gb{flex:0 0 auto;width:100%}
-/* The art bleeds to the card's edges. The panel's 18px of side padding is
-   right for text and wrong for a barbell — it was costing the widest object
-   on the card about a tenth of its length for no reason. */
-.dkbands .gb.art{flex:1 1 30%;min-height:0;display:flex;align-items:center;
-  justify-content:center;padding:2px 0;width:auto;margin:0 -18px;align-self:stretch}
-.dkbands .gb.num{flex:0 0 auto;padding:2px 0 4px}
-.dkbands .gb.dials{flex:1 1 30%;min-height:0;display:flex;flex-direction:column;
-  justify-content:center}
+/* ONLY THE ART FLEXES. Everything else is its own height and cannot be
+   squeezed — when the number band and the dials band were both flexible they
+   shrank below their own content and drew straight over each other: the
+   weight sat on top of the scroller, the scroller on top of Continue.
+   flex-shrink is 0 on all of them now, and the art absorbs the slack. */
+.dkbands .gb{flex:0 0 auto;width:100%;padding-left:18px;padding-right:18px}
+.dkbands .gb.art{flex:1 1 auto;min-height:64px;display:flex;align-items:center;
+  justify-content:center;padding:4px 0;overflow:hidden}
+.dkbands .gb.num{padding-top:2px;padding-bottom:4px}
+.dkbands .gb.dials{display:flex;flex-direction:column;justify-content:center}
+/* A card with no implement has no art band, so the dials take the slack. */
+.dkbands:not(:has(.gb.art)) .gb.dials{flex:1 1 auto;min-height:0}
+.dkbands:not(:has(.gb.art)) .gb.num{margin-top:auto}
+.dkbands:not(:has(.gb.art)) .gb.act{margin-top:auto}
 .dkbands .gb.act{padding-top:4px}
 
 .gwrap{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
@@ -1137,7 +1142,11 @@ h1.q{text-align:center}
 .dial .dlarrow{flex:0 0 38px;width:38px;min-width:38px;height:44px;border-radius:11px;
   border:1px solid rgba(123,227,196,.35);
   background:#20252b;color:var(--accent);font-size:13px;line-height:1;cursor:pointer;
-  display:grid;place-items:center;padding:0;touch-action:none;
+  display:grid;place-items:center;padding:0;
+  /* manipulation, not none: `none` still let iOS double-tap-zoom fire on a
+     fast repeat, which is the "zoom in on the arrow" in the recording. */
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+  user-select:none;-webkit-user-select:none;
   box-shadow:0 0 10px -3px rgba(123,227,196,.5);
   transition:background .15s,color .15s,opacity .15s,box-shadow .15s}
 .dial .dlarrow:active{background:var(--accent);color:#0d1114;border-color:transparent;
@@ -1179,11 +1188,12 @@ h1.q{text-align:center}
 .repval span{font-size:12px;color:var(--ink3);margin-left:4px}
 
 /* A real option, not a footnote — plenty of people genuinely do not know. */
-.dkbands .unsure{display:block;width:100%;margin-top:7px;min-height:0;
-  background:none;border:1px solid var(--line);border-radius:13px;
-  font:inherit;font-size:14px;font-weight:550;color:var(--ink2);cursor:pointer;
-  padding:13px 8px;text-decoration:none}
-.dkbands .unsure:active{border-color:var(--accent);color:var(--accent)}
+.dkbands .unsure{display:block;width:100%;margin-top:8px;min-height:0;
+  background:rgba(143,184,255,.07);border:1px solid rgba(143,184,255,.34);
+  border-radius:14px;font:inherit;font-size:14px;font-weight:600;
+  color:#8FB8FF;cursor:pointer;padding:14px 8px;text-decoration:none;
+  -webkit-tap-highlight-color:transparent}
+.dkbands .unsure:active{background:rgba(143,184,255,.16);border-color:#8FB8FF}
 .unsure:active{color:var(--ink2)}
 
 /* SHORT PHONES. The card is what is left after the header, the dots and the
@@ -1191,7 +1201,8 @@ h1.q{text-align:center}
    under the fold. The illustration already shrinks first; this takes the
    rest out of the spacing rather than out of anything you need to read. */
 @media (max-height:740px){
-  .dkbands{padding:14px 16px 10px}
+  .dkbands{padding:14px 0 10px}
+  .dkbands .gb{padding-left:16px;padding-right:16px}
   .dkbands .bq{font-size:16px;margin-bottom:3px}
   .dkbands .bh{margin-bottom:8px}
   .gwrap{min-height:38px;margin:0}
@@ -1217,7 +1228,8 @@ h1.q{text-align:center}
    under the fold. The illustration already shrinks first; this takes the
    rest out of the spacing rather than out of anything you need to read. */
 @media (max-height:740px){
-  .dkbands{padding:14px 16px 10px}
+  .dkbands{padding:14px 0 10px}
+  .dkbands .gb{padding-left:16px;padding-right:16px}
   .dkbands .bq{font-size:16px;margin-bottom:3px}
   .dkbands .bh{margin-bottom:8px}
   .gwrap{min-height:38px;margin:0}
@@ -2630,6 +2642,25 @@ function gaugeFor(row){
   var has = function(t){ return eq.indexOf(t) > -1; };
   var loading = String(row.loading || '');
 
+  /* EQUIPMENT YOU TOUCH IS NOT ALWAYS EQUIPMENT YOU LOAD.
+     Three rows list a bell or a dumbbell and are marked loadable, but their
+     `loading` is bodyweight — the iron is a SURFACE, not the resistance:
+
+       pushup_on_dumbbells             hands on the handles
+       diamond_push_up_on_kettlebell   hands on the bell
+       prone_ytw                       marked bodyweight in the database
+
+     Without this they get a weight stepper, which asks the user to choose how
+     heavy their push-up is. `loadable` alone cannot catch it; the field that
+     actually answers the question is `loading`, so that is the field to ask.
+
+     If one of these SHOULD carry a weight — prone Y-T-W is often done with
+     light dumbbells — the fix is its `loading` value in the database, not an
+     exception here. A name-based exception list is what this resolver exists
+     to avoid. */
+  if(loading === 'bodyweight')
+    return { kind:'none', why:'equipment is a surface, not the load' };
+
   if(has('bb'))  return { kind:'barbell' };
 
   /* DUMBBELLS BEAT A VEST WHEN A ROW LISTS BOTH.
@@ -3459,7 +3490,10 @@ function gaugeBox(g){
      its own canvas and its own scale. Sharing the pair's numbers drew a
      goblet squat at a quarter of the card's width. Measured at 50 lb: these
      land the drawn object at about 90% of the canvas either way. */
-  if(g.count==='one')    return {W:300, H:210, sc:2.80, floor:false};
+  /* A kettlebell is a single compact object — it was falling through to the
+     mirrored pair's canvas and drawing far too large. */
+  if(g.kind==='kettlebell') return {W:300, H:250, sc:1.15, floor:false};
+  if(g.count==='one')       return {W:300, H:210, sc:2.80, floor:false};
   return {W:600, H:230, sc:2.35, floor:false};
 }
 /* THE SECOND NUMBER ON A CARD — reps, distance or seconds.
@@ -5340,16 +5374,24 @@ function deck(s){
             </div>`;
         }
         const sc=scaleFor(c);
-        if(!sc) return `<div class="bq">${bandQ(c)}</div><div class="bh">${c.n} — rough is fine.</div>
-          ${bandsFor(c).map(v=>`<button data-v="${v}">${v}</button>`).join('')}`;
-        return `<div class="bq">${sc.q}</div><div class="bh">${c.n} — a rough number is fine.</div>
-          <div class="skval"><b>0</b><span>${sc.unit}</span></div>
-          <div class="sktier" data-t="0">${TIER_NAME[0]}</div>
-          <input class="skrange" type="range" min="0" max="${sc.max}" step="${sc.step}" value="0">
-          <button class="skmore" hidden>More than that →</button>
-          ${sc.weight?`<div class="skreps"><div class="lbl">For about how many reps?</div>
-            <div class="chips">${[1,3,5,8,'12+'].map(r=>`<button data-r="${r}">${r}</button>`).join('')}</div></div>`:''}
-          <button class="skgo" disabled>Continue</button>`;
+        if(!sc) return `<div class="gb head"><div class="bq">${bandQ(c)}</div>
+            <div class="bh"><b>${c.n}</b> — rough is fine.</div></div>
+          <div class="gb dials">${bandsFor(c).map(v=>`<button data-v="${v}">${v}</button>`).join('')}</div>`;
+        /* THE SAME SCROLLER, on the cards measured in reps or seconds.
+           These were the last thing still using a range input, which is the
+           control the dial replaced everywhere else. Same bands too, so a
+           bodyweight card and a loaded one are the same object. */
+        return `<div class="gb head"><div class="bq">${sc.q}</div>
+            <div class="bh"><b>${c.n}</b> — a rough number is fine.</div></div>
+          <div class="gb num">
+            <div class="gval"><b>0</b><span>${sc.unit}</span></div>
+            <div class="gtier"></div>
+          </div>
+          <div class="gb dials"><div class="dial" id="gdial"></div></div>
+          <div class="gb act">
+            <button class="skgo">Continue</button>
+            <button class="unsure" id="unsure">Not sure? That is ok, we will test it</button>
+          </div>`;
       })()}</div>
       <div class="dkfeel">
         <div class="bq">Honestly — how do you feel about it?</div>
@@ -5525,54 +5567,36 @@ function deck(s){
         return;
       }
 
-      const range=bandsEl.querySelector('.skrange');
-      if(range){
-        let sc=scaleFor(c);
-        const moreEl=bandsEl.querySelector('.skmore');
-        const valEl=bandsEl.querySelector('.skval b'), unitEl=bandsEl.querySelector('.skval span');
-        const tierEl=bandsEl.querySelector('.sktier'), go=bandsEl.querySelector('.skgo');
-        const repEls=[].slice.call(bandsEl.querySelectorAll('.skreps button'));
-        let reps=null, touched=false, lastT=-1;
+      /* ---- reps / seconds, on the same dial ---- */
+      const rangeHost=bandsEl.querySelector('#gdial');
+      const sc2=scaleFor(c);
+      if(rangeHost && sc2){
+        const sc=sc2;
+        const valEl=bandsEl.querySelector('.gval'), tierEl=bandsEl.querySelector('.gtier'),
+              goEl=bandsEl.querySelector('.skgo'), unsureEl=bandsEl.querySelector('#unsure');
+        const top=Math.max(sc.step*4, sc.max);
+        let D=makeDial(rangeHost, {
+          min:0, max:top, step:sc.step, over:true, value:0,
+          onChange:function(v, over){
+            valEl.innerHTML='<b>'+fmtVal(Math.min(v,top),sc)+(over?'+':'')+'</b><span>'
+              + ((sc.mech==='HOLD'&&v>=60)?'min':sc.unit) + '</span>';
+            if(sc.marks){ const t=tierOf(v,sc.marks);
+              tierEl.textContent=TIER_NAME[t]||''; tierEl.className='gtier t'+t; }
+          }});
+        goEl.onclick=function(){ haptic(14);
+          res[c.id]={does:true, value:Math.min(D.get(),top), over:D.over(),
+                     unit:sc.unit, tier:sc.marks?tierOf(D.get(),sc.marks):null};
+          toFeel(); };
+        unsureEl.onclick=function(){ haptic(14);
+          res[c.id]={does:true, unsure:true, toTest:true};
+          A.toTest=(A.toTest||[]); if(A.toTest.indexOf(c.id)<0) A.toTest.push(c.id);
+          toFeel(); };
+        return;
+      }
+      {
 
-        const ready=function(){ return touched && (!sc.weight || reps!==null); };
-        const sync=function(){
-          const v=+range.value;
-          valEl.textContent=fmtVal(v,sc);
-          /* Past a minute the number is shown as 2:05, so the label has to
-             follow it — "2:05 sec" reads as nonsense. */
-          unitEl.textContent=(sc.mech==='HOLD'&&v>=60)?'min':sc.unit;
-          const t=tierOf(v,sc.marks);
-          tierEl.textContent=TIER_NAME[t]; tierEl.dataset.t=t;
-          /* one tap of feedback as they cross into a new level — the moment
-             the number stops being a guess and starts meaning something */
-          if(t!==lastT && touched){ haptic(t>lastT?12:8); lastT=t; }
-          /* Only offered once they have actually run out of room. */
-          if(moreEl) moreEl.hidden = !(sc.canOpen && touched && v>=sc.max);
-          go.disabled=!ready();
-        };
-        range.addEventListener('input',function(){ touched=true; sync(); });
-        if(moreEl) moreEl.onclick=function(){
-          haptic(13);
-          const keep=+range.value;
-          sc=scaleFor(c, sc.cap+1);
-          range.max=sc.max; range.value=keep;
-          moreEl.hidden=true; sync();
-        };
-        repEls.forEach(function(b){ b.onclick=function(){ haptic(11);
-          repEls.forEach(x=>x.classList.remove('on')); b.classList.add('on');
-          reps=b.dataset.r; sync(); }; });
-        go.onclick=function(){
-          if(!ready()) return;
-          haptic(14);
-          const v=+range.value;
-          res[c.id]={does:true, value:v, unit:sc.unit, tier:tierOf(v,sc.marks)};
-          if(sc.weight) res[c.id].reps=reps;
-          toFeel();
-        };
-        sync();
-      } else {
         /* no benchmark for this movement — the old bands still work */
-        bandsEl.querySelectorAll('button').forEach(function(b){
+        bandsEl.querySelectorAll('.gb.dials button').forEach(function(b){
           b.onclick=function(){ haptic(14); b.classList.add('on');
             res[c.id]={does:true, band:b.dataset.v};
             toFeel();

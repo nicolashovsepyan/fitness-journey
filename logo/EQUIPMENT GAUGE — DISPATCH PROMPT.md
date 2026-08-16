@@ -20,16 +20,42 @@ dumbbell, an Olympic barbell and a dip-belt load, in one-point perspective on th
 dashboard's sunset floor. The visual design is LOCKED AND APPROVED — extract and wire
 it, do not restyle it.
 
-Three entry points, each returning a complete <svg> string:
+Four entry points, each returning a complete <svg> string:
 
-  sceneSVG(weightPerHand, opts)   // dumbbell — one or a mirrored pair
-  barbellSceneSVG(total, opts)    // olympic barbell, total incl. the 45lb bar
-  beltSceneSVG(total, opts)       // plates hanging from a dip belt on a chain
+  sceneSVG(weightPerHand, opts)     // dumbbell — one or a mirrored pair
+  barbellSceneSVG(total, opts)      // olympic barbell, total incl. the 45lb bar
+  beltSceneSVG(total, opts)         // plates hanging from a dip belt on a chain
+  kettlebellSceneSVG(weight, opts)  // one bell — see the asset note below
 
 Shared opts: { W, H, sc, yaw, depth, floor, C } where C is the palette.
 Dumbbell also takes count:'pair'|'one' and gap.
 Barbell and belt also take numbers, numSize, plateScale.
 Belt also takes spread, fade, trim.
+Kettlebell takes no yaw — it is a fixed render, not geometry.
+
+THE KETTLEBELL SHIPS AN IMAGE AND THAT IS DELIBERATE.
+It draws images/equipment/kettlebell.png (358x512 grey+alpha, 95 KB) rather
+than paths. Four drawn kettlebells were built and all four were rejected — the
+shape is a sphere fused to a bent handle and the eye catches the join at card
+size. Do not try to "finish" it in code.
+
+Two things follow that you must not get wrong:
+
+  · THE PNG MUST BE DEPLOYED. It is tracked and under build-sw.mjs's 150 KB
+    cap, so it is part of the offline shell. If a consumer of the gauges lives
+    somewhere that cannot reach images/equipment/, the bell renders as a blank
+    box and nothing throws.
+
+  · `src` IS RELATIVE TO THE PAGE, NOT TO THE MODULE. The default suits pages
+    at the site root. A page at another depth passes its own path through
+    gaugeOpts' `src` — the lab does exactly this, with '../images/…'. Do NOT
+    change it to a root-relative '/images/…': the site is served from a
+    subpath and that 404s there.
+
+The weight is LIVE TEXT drawn onto a blank medallion in the artwork, so it is
+correct at every step of the range. An earlier asset had "20" baked into it,
+which is right for exactly one of the twenty steps. If the artwork is ever
+re-exported, it must come back with that medallion still empty.
 
 =====================================================================
 2. THE PROPAGATION RULE — THIS IS THE POINT OF THE TASK
@@ -108,6 +134,12 @@ reintroduce the pattern.
                numSize: 0.44, numbers: true }
   BELT     = { yaw: -18, depth: 0.56, spread: 0, plateScale: 0.92,
                numSize: 0.44, fade: 0.78, trim: 0.61, numbers: true }
+  KETTLEBELL = { src: 'images/equipment/kettlebell.png', size: 165,
+                 growth: 1/3, tint: true, dark: '#20242a', light: '#95A1AE',
+                 stretch: 2.96, black: 0.128, numbers: true,
+                 numX: 0.7963, numY: 0.7031, numSize: 0.115,
+                 squash: 0.724, tilt: -12, numFill: '#DDE3EA',
+                 numOpacity: 0.92 }
 
   PALETTE  = { handle:'#A8B2BC',
                p20:'#2B3138', p10:'#2B3138', p5:'#2B3138',   // ONE tone
@@ -136,24 +168,37 @@ own fields — do NOT hard-code exercise names.
 
 Resolution order — FIRST MATCH WINS:
   1. loadable !== "TRUE"                                  -> no gauge
-  2. equipment contains "bb"                              -> BARBELL
-  3. equipment contains "vest", or loading = "added-load" -> BELT
+  2. loading = "bodyweight"                               -> no gauge
+  3. equipment contains "bb"                              -> BARBELL
   4. equipment contains "db"                              -> DUMBBELL
-       laterality "unilateral" -> count:'one', else count:'pair'
-  5. equipment contains "kb"                              -> see the gap below
-  6. anything else (machine, cable, band)                 -> no gauge, plain number field
+       count comes from heldCount(row), NOT from laterality
+  5. equipment contains "vest", or loading = "added-load" -> BELT
+  6. equipment contains "kb"                              -> KETTLEBELL
+  7. anything else (machine, cable, band)                 -> no gauge, plain number field
+
+RULE 2 IS NOT REDUNDANT WITH RULE 1. Three rows list iron, are marked
+loadable, and are loaded by BODYWEIGHT — the equipment is a surface rather
+than the resistance:
+
+  pushup_on_dumbbells             hands on the handles
+  diamond_push_up_on_kettlebell   hands on the bell
+  prone_ytw                       marked bodyweight in the database
+
+Without rule 2 each gets a weight stepper, which asks the user to choose how
+heavy their push-up is. If one of these should in fact carry a weight, change
+its `loading` value in the database — do not add a name-based exception, which
+is the thing this resolver exists to avoid.
 
 Put this resolver IN logo/equipment.mjs too, as one exported function
 (e.g. gaugeFor(exerciseRow)). If the rule lives in the module it propagates like
 everything else; if it is written inline in a card it will be copied and will drift.
 
-Sanity-check against the real counts: bb 3 rows plus 5 in combinations, db 12 plus 10
-in combinations, kb 10, vest 5. Total loadable = 61.
+Sanity-check against the resolved counts over the 307 rows — if yours differ, something
+is wrong before you start:
 
-GAP TO RAISE, DO NOT INVENT: "kb" (kettlebell) is the second most common loadable
-equipment at 10 rows and THERE IS NO KETTLEBELL RENDERER. Do not substitute a dumbbell
-— a kettlebell is a different object and the owner will notice. Fall back to a plain
-number field and flag it.
+  barbell 9 · dumbbell 20 · belt 6 · kettlebell 11 · none 261
+
+There is no longer a kettlebell gap. Every loadable row now resolves to a real object.
 
 =====================================================================
 5. LOADING RULES — PHYSICAL, KEEP EXACT
@@ -165,6 +210,12 @@ number field and flag it.
              bar is 45 on its own; per side = (total - 45) / 2
   Belt       plates 45/35/25/10/5  5–135             step 5
              threaded one at a time, max 3 x 45
+  Kettlebell no plates              5–100             step 5
+             one bell, always — a kettlebell is picked up on its own, so
+             there is no pair form and no per-hand/total distinction
+
+The kettlebell has no decomposition because it is a single cast object. It grows by
+the SAME cube-root law as the plates — 20x the weight is 2.71x the bell, not 20x.
 
 Decomposition is greedy, largest first — how a collar is actually loaded, and it keeps
 the silhouette stable as weight climbs. Use the exported decompose / barLoad / beltLoad;
@@ -216,7 +267,10 @@ side and 225 is two — the gym numbers fall out of the arithmetic. Do not round
 3. Marked EQUIP:JS blocks in every consuming page, including logo/DUMBBELL.html.
 4. Card integration: per-exercise gauge selection and a working stepper.
 5. A short note listing every loadable exercise that resolved to NO GAUGE, so the gaps
-   (kettlebell especially) are visible rather than silent.
+   are visible rather than silent.
+6. Confirmation that images/equipment/kettlebell.png is reachable from every page that
+   can draw a kettlebell. A missing image does not throw — it renders nothing — so this
+   is the one failure here that testing by reading the code will not catch.
 
 PROVE THE PROPAGATION WORKS before you call it done:
   - Run the build twice; the second run must report nothing to do.

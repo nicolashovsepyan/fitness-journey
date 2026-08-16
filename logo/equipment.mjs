@@ -1100,6 +1100,25 @@ export function gaugeFor(row){
   var has = function(t){ return eq.indexOf(t) > -1; };
   var loading = String(row.loading || '');
 
+  /* EQUIPMENT YOU TOUCH IS NOT ALWAYS EQUIPMENT YOU LOAD.
+     Three rows list a bell or a dumbbell and are marked loadable, but their
+     `loading` is bodyweight — the iron is a SURFACE, not the resistance:
+
+       pushup_on_dumbbells             hands on the handles
+       diamond_push_up_on_kettlebell   hands on the bell
+       prone_ytw                       marked bodyweight in the database
+
+     Without this they get a weight stepper, which asks the user to choose how
+     heavy their push-up is. `loadable` alone cannot catch it; the field that
+     actually answers the question is `loading`, so that is the field to ask.
+
+     If one of these SHOULD carry a weight — prone Y-T-W is often done with
+     light dumbbells — the fix is its `loading` value in the database, not an
+     exception here. A name-based exception list is what this resolver exists
+     to avoid. */
+  if(loading === 'bodyweight')
+    return { kind:'none', why:'equipment is a surface, not the load' };
+
   if(has('bb'))  return { kind:'barbell' };
 
   /* DUMBBELLS BEAT A VEST WHEN A ROW LISTS BOTH.
