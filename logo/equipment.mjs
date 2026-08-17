@@ -977,12 +977,50 @@ function kbScale(wt, o){
   return Math.pow(Math.max(wt, 1) / KBMAX, o.growth == null ? 1/3 : o.growth);
 }
 
+/* ONE BELL, DRAWN AT A GIVEN CENTRE. Split out of the scene so the pair does
+   not become a second copy of the drawing code with its own quiet drift.
+
+   MIRRORING IS A TRANSFORM ON THE PICTURE AND NOT ON THE NUMBER. Two things
+   would go wrong if the whole group were flipped:
+
+     · the digits would read backwards — the same reflected-frame problem the
+       plates have, where a negative determinant prints the number in mirror
+       writing;
+     · the medallion is off centre, so on the flipped bell it lands on the
+       LEFT, and a number placed at the original fraction would sit in open
+       space on the ball's blank side.
+
+   So the image is mirrored, the text is not, and its position is mirrored
+   with it: the fraction across becomes 1 - numX and the tilt negates, which
+   is what keeps it lying on the medallion's face instead of against it. */
+function kbBell(cx, baseY, iw, ih, o, wt, mirror){
+  var x0 = cx - iw/2, y0 = baseY - ih;
+  var img = '<image href="'+o.src+'" x="'+f2(x0)+'" y="'+f2(y0)+'" width="'+f2(iw)+
+            '" height="'+f2(ih)+'" preserveAspectRatio="none"' +
+            (o.tint === false ? '' : ' filter="url(#kbt'+o.id+')"') + '/>';
+  if(mirror) img = '<g transform="matrix(-1 0 0 1 '+f2(2*cx)+' 0)">' + img + '</g>';
+
+  var num = '';
+  if(o.numbers !== false){
+    var fx = mirror ? (1 - o.numX) : o.numX;
+    var nx = x0 + iw * fx, ny = y0 + ih * o.numY;
+    num = '<g transform="translate('+f2(nx)+' '+f2(ny)+') rotate('+
+            f2(mirror ? -o.tilt : o.tilt)+') scale('+f2(o.squash)+' 1)">' +
+          '<text x="0" y="0" text-anchor="middle" dominant-baseline="central" ' +
+            'font-family="ui-sans-serif,system-ui,sans-serif" font-weight="700" ' +
+            'font-size="'+f2(ih*o.numSize)+'" fill="'+o.numFill+
+            '" opacity="'+o.numOpacity+'">'+wt+'</text></g>';
+  }
+  return { img: img, num: num };
+}
+
 function kettlebellSceneSVG(weight, o){
   o = o || {};
   for(var k in KETTLEBELL) if(o[k] === undefined) o[k] = KETTLEBELL[k];
   var W = o.W || 420, H = o.H || 250, sc = o.sc || 1;
   var over = weight > KBMAX, wt = Math.min(weight, KBMAX);
   var horizon = H * 0.24, baseY = H * 0.80;
+  var pair = o.count === 'pair';
 
   /* `wide` and `tall` are a deliberate pair of separate multipliers rather
      than one aspect knob, because the two fix different complaints: a bell
@@ -991,58 +1029,42 @@ function kettlebellSceneSVG(weight, o){
   var base = o.size * sc * kbScale(wt, o);
   var ih = base * (o.tall == null ? 1 : o.tall);
   var iw = base * KB_ASPECT * (o.wide == null ? 1 : o.wide);
-  var x0 = W/2 - iw/2, y0 = baseY - ih;
 
-  /* Two shadows, same reasoning as the dumbbell: the wide soft one is ambient
-     occlusion, the tight one is the contact patch that actually plants it. A
-     kettlebell touches the floor on a small pad at the bottom of the sphere,
-     so the tight one is much smaller here than under a dumbbell's two ends.
-     Both track the drawn WIDTH, so stretching the bell does not leave it
-     standing on a shadow that belongs to a different object. */
+  /* THE GAP IS FLOOR BETWEEN THEM, not centre to centre, so it stays the same
+     apparent distance as the bells grow — which is what the dumbbell's gap
+     does too. Centre-to-centre would have them overlap at 100 and drift apart
+     at 5. */
+  var sep = pair ? (iw + (o.gap == null ? 40 : o.gap) * sc) / 2 : 0;
+  var mirror = o.mirror !== false;
+
+  var A = kbBell(W/2 - sep, baseY, iw, ih, o, wt, false);
+  var B = pair ? kbBell(W/2 + sep, baseY, iw, ih, o, wt, mirror) : null;
+
+  /* Two shadows per bell, same reasoning as the dumbbell: the wide soft one
+     is ambient occlusion, the tight one is the contact patch that actually
+     plants it. A kettlebell touches the floor on a small pad at the bottom of
+     the sphere, so the tight one is much smaller here than under a dumbbell's
+     two ends. Both track the drawn WIDTH, so stretching the bell does not
+     leave it standing on a shadow that belongs to a different object. */
   var dep = o.depth == null ? 0.36 : o.depth;
-  var cxS = W/2, ballW = iw * 0.97;
-  var shadow =
-    '<ellipse cx="'+f2(cxS)+'" cy="'+f2(baseY)+'" rx="'+f2(ballW*0.50)+
-      '" ry="'+f2(ballW*0.50*dep)+'" fill="#000" opacity=".42" filter="url(#kbb'+o.id+')"/>' +
-    '<ellipse cx="'+f2(cxS)+'" cy="'+f2(baseY)+'" rx="'+f2(ballW*0.26)+
-      '" ry="'+f2(ballW*0.26*dep)+'" fill="#000" opacity=".60" filter="url(#kbbT'+o.id+')"/>';
-
-  /* preserveAspectRatio="none" is what lets wide/tall actually stretch the
-     picture instead of letterboxing it inside the box. */
-  var img = '<image href="'+o.src+'" x="'+f2(x0)+'" y="'+f2(y0)+'" width="'+f2(iw)+
-            '" height="'+f2(ih)+'" preserveAspectRatio="none"' +
-            (o.tint === false ? '' : ' filter="url(#kbt'+o.id+')"') + '/>';
-
-  /* THE NUMBER IS LIVE TEXT ON A BLANK MEDALLION.
-     The artwork ships with an empty octagon precisely so the gauge can put the
-     real weight there — an earlier asset had "20" baked in, which is right for
-     exactly one of the twenty steps in this range.
-
-     Its position is a FRACTION OF THE DRAWN BOX, so it rides along when the
-     bell is stretched rather than sliding off the medallion.
-
-     The medallion sits low and right on the sphere and is turning away from
-     the camera, so it is not a circle on screen. Centre and squash are
-     MEASURED off the asset (rim ridge detection: centre 850,845 in the 1254px
-     source, extent 226x312, ratio 0.724). The tilt is not measured because an
-     octagon curving over a sphere has no unambiguous major axis — depending on
-     which extremes you trust it reads anywhere from -9 to -24 degrees — so it
-     is a knob with a middling default rather than a false precision. */
-  var num = '';
-  if(o.numbers !== false){
-    var nx = x0 + iw * o.numX, ny = y0 + ih * o.numY;
-    num = '<g transform="translate('+f2(nx)+' '+f2(ny)+') rotate('+f2(o.tilt)+
-            ') scale('+f2(o.squash)+' 1)">' +
-          '<text x="0" y="0" text-anchor="middle" dominant-baseline="central" ' +
-            'font-family="ui-sans-serif,system-ui,sans-serif" font-weight="700" ' +
-            'font-size="'+f2(ih*o.numSize)+'" fill="'+o.numFill+
-            '" opacity="'+o.numOpacity+'">'+wt+'</text></g>';
+  var ballW = iw * 0.97;
+  function shadowAt(cx){
+    return '<ellipse cx="'+f2(cx)+'" cy="'+f2(baseY)+'" rx="'+f2(ballW*0.50)+
+        '" ry="'+f2(ballW*0.50*dep)+'" fill="#000" opacity=".42" filter="url(#kbb'+o.id+')"/>' +
+      '<ellipse cx="'+f2(cx)+'" cy="'+f2(baseY)+'" rx="'+f2(ballW*0.26)+
+        '" ry="'+f2(ballW*0.26*dep)+'" fill="#000" opacity=".60" filter="url(#kbbT'+o.id+')"/>';
   }
+  var shadow = shadowAt(W/2 - sep) + (pair ? shadowAt(W/2 + sep) : '');
 
-  return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+
-      weight+' pound kettlebell"><defs>' + kbDefs(o.id, o) + '</defs>' +
+  /* Shadows first, then every picture, then every number — rather than bell,
+     bell. At a tight gap the near bell's soft shadow reaches under the far
+     one, and interleaving would lay it back over a bell already drawn. */
+  var label = (pair ? '2 kettlebells of ' : '') + weight + ' pound' + (pair ? ' each' : ' kettlebell');
+  return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+label+'"><defs>' +
+      kbDefs(o.id, o) + '</defs>' +
     (o.floor === false ? '' : floorSVG(W, H, horizon)) +
-    shadow + img + num + (over ? plusGlyph(W-30, 32, 14) : '') + '</svg>';
+    shadow + A.img + (B ? B.img : '') + A.num + (B ? B.num : '') +
+    (over ? plusGlyph(W-30, 32, 14) : '') + '</svg>';
 }
 
 /* ============================================================
@@ -1074,6 +1096,9 @@ export var KETTLEBELL = {
   id: 'k',
   size: 165,          /* drawn height in user units at KBMAX */
   growth: 1/3,        /* mass -> length exponent; see kbScale */
+  count: 'one',       /* 'one' | 'pair' — a kettlebell is usually alone */
+  gap: 40,            /* floor between a pair, in user units */
+  mirror: true,       /* flip the second one, as the dumbbell pair does */
   wide: 1,            /* horizontal stretch, 1 = the artwork's own proportion */
   tall: 1,            /* vertical stretch */
   depth: 0.36,        /* shadow foreshortening, matches the dumbbell's floor */
@@ -1088,7 +1113,7 @@ export var KETTLEBELL = {
   numSize: 0.115,     /* digit height as a fraction of drawn height */
   squash: 0.724,      /* measured: the medallion is turning away from us */
   tilt: -12,          /* NOT measured — see the note in kettlebellSceneSVG */
-  numFill: '#DDE3EA',
+  numFill: '#FFFFFF',   /* the plates' numbers are white too — one family */
   numOpacity: 0.92,
 };
 
@@ -1159,8 +1184,19 @@ export function gaugeFor(row){
   /* The kettlebell is an image rather than geometry — see the banner above
      kettlebellSceneSVG. It is never a dumbbell wearing a different name:
      four drawn ones were rejected and substituting the wrong object was
-     always the worse answer. */
-  if(has('kb'))  return { kind:'kettlebell' };
+     always the worse answer.
+
+     A KETTLEBELL DEFAULTS TO ONE, WHERE A DUMBBELL DEFAULTS TO A PAIR, AND
+     THAT IS NOT AN OVERSIGHT. heldCount() reads `laterality`, which for a
+     dumbbell gets it right: bilateral means one in each hand. Kettlebells
+     break that rule constantly — a swing, a goblet squat and a halo are all
+     bilateral and all held with BOTH HANDS ON ONE BELL. Running them through
+     heldCount would put two bells on nearly every kettlebell card.
+
+     So the default is one, and taking two is stated per movement in HELD.
+     Doubles exist (double front squat, double press) but they are the
+     exception, and an exception is the thing you write down. */
+  if(has('kb'))  return { kind:'kettlebell', count: HELD[row.id] || 'one' };
 
   return { kind:'none', why:'loadable but no gauge (' + (eq.join('/') || 'no equipment') + ')' };
 }
@@ -1222,7 +1258,7 @@ export function gaugeOpts(g, size){
         : g.kind === 'kettlebell' ? KETTLEBELL
         : DUMBBELL;
   for(var k in s) base[k] = s[k];
-  if(g.kind === 'dumbbell' && g.count) base.count = g.count;
+  if((g.kind === 'dumbbell' || g.kind === 'kettlebell') && g.count) base.count = g.count;
   /* A card may sit at a different directory depth than the app pages, so it
      is allowed to override the settings that are PATHS rather than looks.
      Nothing else about the kettlebell is a call site's business. */

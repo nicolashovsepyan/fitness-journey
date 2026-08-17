@@ -86,11 +86,17 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--jade);outline-o
 .lockbox{border-top:1px solid var(--line);padding-top:16px}
 .cfg{width:100%;background:#0C0F12;color:var(--jade);border:1px solid var(--line-2);
   border-radius:8px;padding:9px 10px;font:400 10.5px/1.55 var(--mono);resize:vertical}
-.panel.locked .ctl input,.panel.locked .sw input,
-.panel.locked .seg button:not(#bLockBtn):not(#bResetBtn),
-.panel.locked .seg button:not(#lLockBtn):not(#lResetBtn),
-.panel.locked .seg button:not(#kLockBtn):not(#kResetBtn),
-.panel.locked .seg button:not(#lockBtn):not(#resetBtn){opacity:.4;pointer-events:none}
+/* LOCKING USED TO BE ONE-WAY, AND THIS IS WHY.
+   There were four comma-separated selectors, one per panel, each excluding
+   only its own two buttons — so #kLockBtn matched the BARBELL's rule (it is
+   not #bLockBtn and not #bResetBtn), got pointer-events:none, and could never
+   be clicked again. Every Unlock button disabled itself the moment its panel
+   locked. The settings were not lost, but they were unreachable.
+   One rule, and the exemption is a CLASS rather than a list of ids, so a
+   fifth panel cannot reintroduce this by being forgotten. */
+.panel.locked .ctl input,
+.panel.locked .sw input,
+.panel.locked .seg button:not(.lockbtn){opacity:.4;pointer-events:none}
 #lockBtn[aria-pressed="true"]{border-color:var(--jade);color:var(--jade);background:#16241F}
 .note{margin:12px 0 0;font-size:13px;line-height:1.55;color:var(--ink-3);max-width:64ch}
 .note b{color:var(--ink-2);font-weight:550}
@@ -232,8 +238,8 @@ footer code{font:400 12.5px/1.4 var(--mono);color:var(--ink-2)}
       <div class="grp lockbox">
         <p class="eyebrow">Your settings</p>
         <div class="seg">
-          <button id="lockBtn">Lock these</button>
-          <button id="resetBtn">Reset</button>
+          <button class="lockbtn" id="lockBtn">Lock these</button>
+          <button class="lockbtn" id="resetBtn">Reset</button>
         </div>
         <textarea id="cfg" class="cfg" readonly rows="9"></textarea>
         <p class="note" style="margin:0">These survive a reload. <b>Copy this
@@ -353,8 +359,8 @@ footer code{font:400 12.5px/1.4 var(--mono);color:var(--ink-2)}
       <div class="grp lockbox">
         <p class="eyebrow">Your settings</p>
         <div class="seg">
-          <button id="bLockBtn">Lock these</button>
-          <button id="bResetBtn">Reset</button>
+          <button class="lockbtn" id="bLockBtn">Lock these</button>
+          <button class="lockbtn" id="bResetBtn">Reset</button>
         </div>
         <textarea id="bcfg" class="cfg" readonly rows="9"></textarea>
         <p class="note" style="margin:0">Saved on every change. <b>Copy this
@@ -423,8 +429,8 @@ footer code{font:400 12.5px/1.4 var(--mono);color:var(--ink-2)}
       <div class="grp lockbox">
         <p class="eyebrow">Your settings</p>
         <div class="seg">
-          <button id="lLockBtn">Lock these</button>
-          <button id="lResetBtn">Reset</button>
+          <button class="lockbtn" id="lLockBtn">Lock these</button>
+          <button class="lockbtn" id="lResetBtn">Reset</button>
         </div>
         <textarea id="lcfg" class="cfg" readonly rows="8"></textarea>
       </div>
@@ -452,6 +458,30 @@ footer code{font:400 12.5px/1.4 var(--mono);color:var(--ink-2)}
         <p class="eyebrow">Load</p>
         <div class="ctl"><label for="kw">Bell</label><output id="kwV">20 lb</output>
           <input type="range" id="kw" min="1" max="21" step="1" value="4"></div>
+      </div>
+      <div class="grp">
+        <p class="eyebrow">Scene</p>
+        <div class="seg" id="segKCount">
+          <button data-v="one" aria-pressed="true">Just one</button>
+          <button data-v="pair" aria-pressed="false">A pair</button>
+        </div>
+        <div class="ctl"><label for="kgp">Gap</label><output id="kgpV">40</output>
+          <input type="range" id="kgp" min="0" max="140" step="2" value="40"></div>
+        <div class="seg" id="segKMirror">
+          <button data-v="on" aria-pressed="true">Mirrored</button>
+          <button data-v="off" aria-pressed="false">Identical</button>
+        </div>
+        <p class="note" style="margin:0"><b>One</b> is the default, and it is
+          the right default: a swing, a goblet squat and a halo are all held
+          with both hands on a single bell. Doubles exist, so the pair is
+          here — but it is the exception.</p>
+        <p class="note" style="margin:0"><b>Mirrored</b> flips the second
+          bell, so the two face each other and the medallions sit inboard, the
+          way the dumbbell pair works. The picture is flipped; the number is
+          not, or the digits would read backwards. <b>Identical</b> is two
+          straight copies, both lit from the same side.</p>
+        <p class="note" style="margin:0"><b>Gap</b> is floor between them, not
+          centre to centre, so it holds as the bells grow.</p>
       </div>
       <div class="grp">
         <p class="eyebrow">The bell</p>
@@ -501,7 +531,7 @@ footer code{font:400 12.5px/1.4 var(--mono);color:var(--ink-2)}
           <button data-v="off" aria-pressed="false">Off</button>
         </div>
         <div class="sw"><label for="kcN">Digits</label>
-          <input type="color" id="kcN" value="#DDE3EA"><code id="kkN">#DDE3EA</code></div>
+          <input type="color" id="kcN" value="#FFFFFF"><code id="kkN">#FFFFFF</code></div>
         <div class="ctl"><label for="kns">Size</label><output id="knsV">11.5%</output>
           <input type="range" id="kns" min="4" max="22" step="0.5" value="11.5"></div>
         <div class="ctl"><label for="knx">Across</label><output id="knxV">0.796</output>
@@ -530,8 +560,8 @@ footer code{font:400 12.5px/1.4 var(--mono);color:var(--ink-2)}
       <div class="grp lockbox">
         <p class="eyebrow">Your settings</p>
         <div class="seg">
-          <button id="kLockBtn">Lock these</button>
-          <button id="kResetBtn">Reset</button>
+          <button class="lockbtn" id="kLockBtn">Lock these</button>
+          <button class="lockbtn" id="kResetBtn">Reset</button>
         </div>
         <textarea id="kcfg" class="cfg" readonly rows="14"></textarea>
       </div>
@@ -1551,12 +1581,50 @@ function kbScale(wt, o){
   return Math.pow(Math.max(wt, 1) / KBMAX, o.growth == null ? 1/3 : o.growth);
 }
 
+/* ONE BELL, DRAWN AT A GIVEN CENTRE. Split out of the scene so the pair does
+   not become a second copy of the drawing code with its own quiet drift.
+
+   MIRRORING IS A TRANSFORM ON THE PICTURE AND NOT ON THE NUMBER. Two things
+   would go wrong if the whole group were flipped:
+
+     · the digits would read backwards — the same reflected-frame problem the
+       plates have, where a negative determinant prints the number in mirror
+       writing;
+     · the medallion is off centre, so on the flipped bell it lands on the
+       LEFT, and a number placed at the original fraction would sit in open
+       space on the ball's blank side.
+
+   So the image is mirrored, the text is not, and its position is mirrored
+   with it: the fraction across becomes 1 - numX and the tilt negates, which
+   is what keeps it lying on the medallion's face instead of against it. */
+function kbBell(cx, baseY, iw, ih, o, wt, mirror){
+  var x0 = cx - iw/2, y0 = baseY - ih;
+  var img = '<image href="'+o.src+'" x="'+f2(x0)+'" y="'+f2(y0)+'" width="'+f2(iw)+
+            '" height="'+f2(ih)+'" preserveAspectRatio="none"' +
+            (o.tint === false ? '' : ' filter="url(#kbt'+o.id+')"') + '/>';
+  if(mirror) img = '<g transform="matrix(-1 0 0 1 '+f2(2*cx)+' 0)">' + img + '</g>';
+
+  var num = '';
+  if(o.numbers !== false){
+    var fx = mirror ? (1 - o.numX) : o.numX;
+    var nx = x0 + iw * fx, ny = y0 + ih * o.numY;
+    num = '<g transform="translate('+f2(nx)+' '+f2(ny)+') rotate('+
+            f2(mirror ? -o.tilt : o.tilt)+') scale('+f2(o.squash)+' 1)">' +
+          '<text x="0" y="0" text-anchor="middle" dominant-baseline="central" ' +
+            'font-family="ui-sans-serif,system-ui,sans-serif" font-weight="700" ' +
+            'font-size="'+f2(ih*o.numSize)+'" fill="'+o.numFill+
+            '" opacity="'+o.numOpacity+'">'+wt+'</text></g>';
+  }
+  return { img: img, num: num };
+}
+
 function kettlebellSceneSVG(weight, o){
   o = o || {};
   for(var k in KETTLEBELL) if(o[k] === undefined) o[k] = KETTLEBELL[k];
   var W = o.W || 420, H = o.H || 250, sc = o.sc || 1;
   var over = weight > KBMAX, wt = Math.min(weight, KBMAX);
   var horizon = H * 0.24, baseY = H * 0.80;
+  var pair = o.count === 'pair';
 
   /* `wide` and `tall` are a deliberate pair of separate multipliers rather
      than one aspect knob, because the two fix different complaints: a bell
@@ -1565,58 +1633,42 @@ function kettlebellSceneSVG(weight, o){
   var base = o.size * sc * kbScale(wt, o);
   var ih = base * (o.tall == null ? 1 : o.tall);
   var iw = base * KB_ASPECT * (o.wide == null ? 1 : o.wide);
-  var x0 = W/2 - iw/2, y0 = baseY - ih;
 
-  /* Two shadows, same reasoning as the dumbbell: the wide soft one is ambient
-     occlusion, the tight one is the contact patch that actually plants it. A
-     kettlebell touches the floor on a small pad at the bottom of the sphere,
-     so the tight one is much smaller here than under a dumbbell's two ends.
-     Both track the drawn WIDTH, so stretching the bell does not leave it
-     standing on a shadow that belongs to a different object. */
+  /* THE GAP IS FLOOR BETWEEN THEM, not centre to centre, so it stays the same
+     apparent distance as the bells grow — which is what the dumbbell's gap
+     does too. Centre-to-centre would have them overlap at 100 and drift apart
+     at 5. */
+  var sep = pair ? (iw + (o.gap == null ? 40 : o.gap) * sc) / 2 : 0;
+  var mirror = o.mirror !== false;
+
+  var A = kbBell(W/2 - sep, baseY, iw, ih, o, wt, false);
+  var B = pair ? kbBell(W/2 + sep, baseY, iw, ih, o, wt, mirror) : null;
+
+  /* Two shadows per bell, same reasoning as the dumbbell: the wide soft one
+     is ambient occlusion, the tight one is the contact patch that actually
+     plants it. A kettlebell touches the floor on a small pad at the bottom of
+     the sphere, so the tight one is much smaller here than under a dumbbell's
+     two ends. Both track the drawn WIDTH, so stretching the bell does not
+     leave it standing on a shadow that belongs to a different object. */
   var dep = o.depth == null ? 0.36 : o.depth;
-  var cxS = W/2, ballW = iw * 0.97;
-  var shadow =
-    '<ellipse cx="'+f2(cxS)+'" cy="'+f2(baseY)+'" rx="'+f2(ballW*0.50)+
-      '" ry="'+f2(ballW*0.50*dep)+'" fill="#000" opacity=".42" filter="url(#kbb'+o.id+')"/>' +
-    '<ellipse cx="'+f2(cxS)+'" cy="'+f2(baseY)+'" rx="'+f2(ballW*0.26)+
-      '" ry="'+f2(ballW*0.26*dep)+'" fill="#000" opacity=".60" filter="url(#kbbT'+o.id+')"/>';
-
-  /* preserveAspectRatio="none" is what lets wide/tall actually stretch the
-     picture instead of letterboxing it inside the box. */
-  var img = '<image href="'+o.src+'" x="'+f2(x0)+'" y="'+f2(y0)+'" width="'+f2(iw)+
-            '" height="'+f2(ih)+'" preserveAspectRatio="none"' +
-            (o.tint === false ? '' : ' filter="url(#kbt'+o.id+')"') + '/>';
-
-  /* THE NUMBER IS LIVE TEXT ON A BLANK MEDALLION.
-     The artwork ships with an empty octagon precisely so the gauge can put the
-     real weight there — an earlier asset had "20" baked in, which is right for
-     exactly one of the twenty steps in this range.
-
-     Its position is a FRACTION OF THE DRAWN BOX, so it rides along when the
-     bell is stretched rather than sliding off the medallion.
-
-     The medallion sits low and right on the sphere and is turning away from
-     the camera, so it is not a circle on screen. Centre and squash are
-     MEASURED off the asset (rim ridge detection: centre 850,845 in the 1254px
-     source, extent 226x312, ratio 0.724). The tilt is not measured because an
-     octagon curving over a sphere has no unambiguous major axis — depending on
-     which extremes you trust it reads anywhere from -9 to -24 degrees — so it
-     is a knob with a middling default rather than a false precision. */
-  var num = '';
-  if(o.numbers !== false){
-    var nx = x0 + iw * o.numX, ny = y0 + ih * o.numY;
-    num = '<g transform="translate('+f2(nx)+' '+f2(ny)+') rotate('+f2(o.tilt)+
-            ') scale('+f2(o.squash)+' 1)">' +
-          '<text x="0" y="0" text-anchor="middle" dominant-baseline="central" ' +
-            'font-family="ui-sans-serif,system-ui,sans-serif" font-weight="700" ' +
-            'font-size="'+f2(ih*o.numSize)+'" fill="'+o.numFill+
-            '" opacity="'+o.numOpacity+'">'+wt+'</text></g>';
+  var ballW = iw * 0.97;
+  function shadowAt(cx){
+    return '<ellipse cx="'+f2(cx)+'" cy="'+f2(baseY)+'" rx="'+f2(ballW*0.50)+
+        '" ry="'+f2(ballW*0.50*dep)+'" fill="#000" opacity=".42" filter="url(#kbb'+o.id+')"/>' +
+      '<ellipse cx="'+f2(cx)+'" cy="'+f2(baseY)+'" rx="'+f2(ballW*0.26)+
+        '" ry="'+f2(ballW*0.26*dep)+'" fill="#000" opacity=".60" filter="url(#kbbT'+o.id+')"/>';
   }
+  var shadow = shadowAt(W/2 - sep) + (pair ? shadowAt(W/2 + sep) : '');
 
-  return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+
-      weight+' pound kettlebell"><defs>' + kbDefs(o.id, o) + '</defs>' +
+  /* Shadows first, then every picture, then every number — rather than bell,
+     bell. At a tight gap the near bell's soft shadow reaches under the far
+     one, and interleaving would lay it back over a bell already drawn. */
+  var label = (pair ? '2 kettlebells of ' : '') + weight + ' pound' + (pair ? ' each' : ' kettlebell');
+  return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+label+'"><defs>' +
+      kbDefs(o.id, o) + '</defs>' +
     (o.floor === false ? '' : floorSVG(W, H, horizon)) +
-    shadow + img + num + (over ? plusGlyph(W-30, 32, 14) : '') + '</svg>';
+    shadow + A.img + (B ? B.img : '') + A.num + (B ? B.num : '') +
+    (over ? plusGlyph(W-30, 32, 14) : '') + '</svg>';
 }
 
 /* ============================================================
@@ -1648,6 +1700,9 @@ var KETTLEBELL = {
   id: 'k',
   size: 165,          /* drawn height in user units at KBMAX */
   growth: 1/3,        /* mass -> length exponent; see kbScale */
+  count: 'one',       /* 'one' | 'pair' — a kettlebell is usually alone */
+  gap: 40,            /* floor between a pair, in user units */
+  mirror: true,       /* flip the second one, as the dumbbell pair does */
   wide: 1,            /* horizontal stretch, 1 = the artwork's own proportion */
   tall: 1,            /* vertical stretch */
   depth: 0.36,        /* shadow foreshortening, matches the dumbbell's floor */
@@ -1662,7 +1717,7 @@ var KETTLEBELL = {
   numSize: 0.115,     /* digit height as a fraction of drawn height */
   squash: 0.724,      /* measured: the medallion is turning away from us */
   tilt: -12,          /* NOT measured — see the note in kettlebellSceneSVG */
-  numFill: '#DDE3EA',
+  numFill: '#FFFFFF',   /* the plates' numbers are white too — one family */
   numOpacity: 0.92,
 };
 var KBMAX  = 100;
@@ -1732,8 +1787,19 @@ function gaugeFor(row){
   /* The kettlebell is an image rather than geometry — see the banner above
      kettlebellSceneSVG. It is never a dumbbell wearing a different name:
      four drawn ones were rejected and substituting the wrong object was
-     always the worse answer. */
-  if(has('kb'))  return { kind:'kettlebell' };
+     always the worse answer.
+
+     A KETTLEBELL DEFAULTS TO ONE, WHERE A DUMBBELL DEFAULTS TO A PAIR, AND
+     THAT IS NOT AN OVERSIGHT. heldCount() reads `laterality`, which for a
+     dumbbell gets it right: bilateral means one in each hand. Kettlebells
+     break that rule constantly — a swing, a goblet squat and a halo are all
+     bilateral and all held with BOTH HANDS ON ONE BELL. Running them through
+     heldCount would put two bells on nearly every kettlebell card.
+
+     So the default is one, and taking two is stated per movement in HELD.
+     Doubles exist (double front squat, double press) but they are the
+     exception, and an exception is the thing you write down. */
+  if(has('kb'))  return { kind:'kettlebell', count: HELD[row.id] || 'one' };
 
   return { kind:'none', why:'loadable but no gauge (' + (eq.join('/') || 'no equipment') + ')' };
 }
@@ -1793,7 +1859,7 @@ function gaugeOpts(g, size){
         : g.kind === 'kettlebell' ? KETTLEBELL
         : DUMBBELL;
   for(var k in s) base[k] = s[k];
-  if(g.kind === 'dumbbell' && g.count) base.count = g.count;
+  if((g.kind === 'dumbbell' || g.kind === 'kettlebell') && g.count) base.count = g.count;
   /* A card may sit at a different directory depth than the app pages, so it
      is allowed to override the settings that are PATHS rather than looks.
      Nothing else about the kettlebell is a call site's business. */
@@ -2350,8 +2416,9 @@ function pSyncControls(){
    lab is the odd caller, so the lab is what passes the override. */
 var KKEY = 'fj.kettlebell.single.v1';
 var KDEF = { i: 4, size: 165, growth: 1/3, wide: 1, tall: 1,
+             count: 'one', gap: 40, mirror: true,
              tint: true, dark: '#20242a', light: '#95A1AE', stretch: 2.96,
-             numbers: true, numFill: '#DDE3EA', numSize: 0.115,
+             numbers: true, numFill: '#FFFFFF', numSize: 0.115,
              numX: 0.7963, numY: 0.7031, squash: 0.724, tilt: -12,
              numOpacity: 0.92, locked: false };
 var KS = {};
@@ -2360,6 +2427,12 @@ try{
   var ksaved = JSON.parse(localStorage.getItem(KKEY) || 'null');
   if(ksaved) for(var k1 in ksaved) if(k1 in KS) KS[k1] = ksaved[k1];
 }catch(e){}
+/* ONE-TIME NUDGE, NOT A KEY BUMP. The digits' default moved from #DDE3EA to
+   white. Bumping the key would have delivered that by resetting EVERYTHING,
+   which is how a set of locked-in settings was destroyed once before. This
+   moves anyone still carrying the old default and leaves any deliberate
+   choice — including a lock — untouched. */
+if(KS.numFill === '#DDE3EA') KS.numFill = KDEF.numFill;
 function ksave(){ try{ localStorage.setItem(KKEY, JSON.stringify(KS)); }catch(e){} }
 
 var KB_SRC = '../images/equipment/kettlebell.png';
@@ -2367,6 +2440,7 @@ function kwAt(i){ return i > KBMAX/KBSTEP ? KBMAX + KBSTEP : i*KBSTEP; }
 function kopts(extra){
   var o = { src: KB_SRC, size: KS.size, growth: KS.growth,
             wide: KS.wide, tall: KS.tall,
+            count: KS.count, gap: KS.gap, mirror: KS.mirror,
             tint: KS.tint, dark: KS.dark, light: KS.light, stretch: KS.stretch,
             /* the ramp has to start where the source actually starts, so the
                black point tracks contrast instead of being a second knob */
@@ -2383,6 +2457,7 @@ function drawKettle(){
   $('kwV').textContent  = (over ? KBMAX + '+' : t) + ' lb';
   $('kszV').textContent = KS.size;
   $('kgrV').textContent = KS.growth.toFixed(3);
+  $('kgpV').textContent = KS.gap;
   $('kwdV').textContent = Math.round(KS.wide*100) + '%';
   $('ktallV').textContent = Math.round(KS.tall*100) + '%';
   $('kstV').textContent = KS.stretch.toFixed(2);
@@ -2403,7 +2478,8 @@ function drawKettle(){
   var dw = dm ? +dm[1] : 0, dh = dm ? +dm[2] : 0;
   var rel = Math.pow(Math.min(t,KBMAX)/KBMAX, KS.growth);
   $('kread').innerHTML =
-    'bell     <b>' + (over ? KBMAX + '+' : t) + ' lb</b>\n' +
+    'bell     <b>' + (KS.count === 'pair' ? '2 × ' : '') + (over ? KBMAX + '+' : t) +
+      ' lb</b>' + (KS.count === 'pair' ? '   (' + (t*2) + ' lb total)' : '') + '\n' +
     'drawn    <b>' + dw.toFixed(0) + '</b> x <b>' + dh.toFixed(0) + '</b>  (' +
       (rel*100).toFixed(0) + '% of the 100)\n' +
     'aspect   <b>' + (dh ? (dw/dh).toFixed(3) : '—') + '</b>  (artwork is 0.699)\n' +
@@ -2412,6 +2488,8 @@ function drawKettle(){
   $('kcfg').value =
     'size at 100  ' + KS.size + '\n' +
     'growth       ' + KS.growth.toFixed(3) + '\n' +
+    'bells        ' + (KS.count === 'pair' ? '2, ' + (KS.mirror ? 'mirrored' : 'identical') : '1') + '\n' +
+    'gap          ' + KS.gap + '\n' +
     'width        ' + Math.round(KS.wide*100) + '%\n' +
     'height       ' + Math.round(KS.tall*100) + '%\n' +
     'tint         ' + (KS.tint ? 'on' : 'off') + '\n' +
@@ -2437,7 +2515,7 @@ function drawKLadder(){
   }).join('');
 }
 function kettleAll(){ drawKettle(); drawKLadder(); }
-[['kw','i',1],['ksz','size',1],['kgr','growth',1],
+[['kw','i',1],['ksz','size',1],['kgr','growth',1],['kgp','gap',1],
  ['kwd','wide',0.01],['ktall','tall',0.01],['kst','stretch',1],
  ['kns','numSize',0.01],['knx','numX',1],['kny','numY',1],
  ['ksq','squash',1],['ktl','tilt',1],['kno','numOpacity',0.01]].forEach(function(t){
@@ -2446,7 +2524,7 @@ function kettleAll(){ drawKettle(); drawKLadder(); }
 [['kcD','dark'],['kcL','light'],['kcN','numFill']].forEach(function(t){
   $(t[0]).addEventListener('input', function(){ KS[t[1]] = this.value; kettleAll(); });
 });
-[['segKTint','tint'],['segKNum','numbers']].forEach(function(t){
+[['segKTint','tint'],['segKNum','numbers'],['segKMirror','mirror']].forEach(function(t){
   $(t[0]).addEventListener('click', function(ev){
     var b = ev.target.closest('button'); if(!b) return;
     KS[t[1]] = b.dataset.v === 'on';
@@ -2454,6 +2532,13 @@ function kettleAll(){ drawKettle(); drawKLadder(); }
       o.setAttribute('aria-pressed', o === b ? 'true' : 'false'); });
     kettleAll();
   });
+});
+$('segKCount').addEventListener('click', function(ev){
+  var b = ev.target.closest('button'); if(!b) return;
+  KS.count = b.dataset.v;
+  [].forEach.call(this.querySelectorAll('button'), function(o){
+    o.setAttribute('aria-pressed', o === b ? 'true' : 'false'); });
+  kettleAll();
 });
 function kApplyLock(){
   $('kpanelBox').classList.toggle('locked', KS.locked);
@@ -2470,13 +2555,16 @@ $('kResetBtn').addEventListener('click', function(){
 function kSyncControls(){
   $('kw').value = KS.i; $('ksz').value = KS.size;
   $('kgr').value = KS.growth;
+  $('kgp').value = KS.gap;
   $('kwd').value = Math.round(KS.wide*100); $('ktall').value = Math.round(KS.tall*100);
   $('kst').value = KS.stretch; $('kns').value = KS.numSize*100;
   $('knx').value = KS.numX; $('kny').value = KS.numY;
   $('ksq').value = KS.squash; $('ktl').value = KS.tilt;
   $('kno').value = Math.round(KS.numOpacity*100);
   $('kcD').value = KS.dark; $('kcL').value = KS.light; $('kcN').value = KS.numFill;
-  [['segKTint', KS.tint], ['segKNum', KS.numbers]].forEach(function(t){
+  [].forEach.call($('segKCount').querySelectorAll('button'), function(o){
+    o.setAttribute('aria-pressed', o.dataset.v === KS.count ? 'true' : 'false'); });
+  [['segKTint', KS.tint], ['segKNum', KS.numbers], ['segKMirror', KS.mirror]].forEach(function(t){
     [].forEach.call($(t[0]).querySelectorAll('button'), function(o){
       o.setAttribute('aria-pressed',
         o.dataset.v === (t[1] ? 'on' : 'off') ? 'true' : 'false'); });

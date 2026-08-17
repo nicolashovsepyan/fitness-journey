@@ -60,6 +60,15 @@ Two things follow that you must not get wrong:
     change it to a root-relative '/images/…': the site is served from a
     subpath and that 404s there.
 
+THE PAIR IS MIRRORED, AND THE MIRROR IS ON THE PICTURE ONLY. Flipping the whole
+group would reverse the digits — the same reflected-frame problem the plates
+have — and would leave the number at the original fraction, which on a flipped
+bell is the ball's blank side rather than the medallion. So the image is
+mirrored, the text is not, and the text's position mirrors with it: the
+fraction across becomes 1 - numX and the tilt negates. `mirror: false` draws
+two straight copies instead. `gap` is FLOOR between them, not centre to centre,
+so it holds as the bells grow.
+
 `wide` and `tall` are separate multipliers on the drawn box, both 1 at the
 artwork's own proportion, and they are the owner's to set. The shadow and the
 number are derived from the drawn size, so stretching the bell does not leave
@@ -149,6 +158,7 @@ reintroduce the pattern.
                numSize: 0.44, fade: 0.78, trim: 0.61, numbers: true }
   KETTLEBELL = { src: 'images/equipment/kettlebell.png', size: 165,
                  growth: 1/3, wide: 1, tall: 1,
+                 count: 'one', gap: 40, mirror: true,
                  tint: true, dark: '#20242a', light: '#95A1AE',
                  stretch: 2.96, black: 0.128, numbers: true,
                  numX: 0.7963, numY: 0.7031, numSize: 0.115,
@@ -192,7 +202,17 @@ Resolution order — FIRST MATCH WINS:
        count comes from heldCount(row), NOT from laterality
   5. equipment contains "vest", or loading = "added-load" -> BELT
   6. equipment contains "kb"                              -> KETTLEBELL
+       count is HELD[row.id] || 'one'  — NOT heldCount()
   7. anything else (machine, cable, band)                 -> no gauge, plain number field
+
+A KETTLEBELL DEFAULTS TO ONE WHERE A DUMBBELL DEFAULTS TO A PAIR, AND THAT IS
+DELIBERATE. heldCount() reads `laterality`, which is right for a dumbbell —
+bilateral means one in each hand. Kettlebells break it constantly: a swing, a
+goblet squat and a halo are all bilateral and all held with BOTH HANDS ON ONE
+BELL, so running them through heldCount puts two bells on nearly every
+kettlebell card. Doubles are real but they are the exception, so they are named
+in HELD rather than inferred. Today every one of the 11 kb rows resolves to a
+single bell; add an id to HELD with 'pair' to change one.
 
 RULE 2 IS NOT REDUNDANT WITH RULE 1. Three rows list iron, are marked
 loadable, and are loaded by BODYWEIGHT — the equipment is a surface rather
@@ -229,8 +249,9 @@ There is no longer a kettlebell gap. Every loadable row now resolves to a real o
   Belt       plates 45/35/25/10/5  5–135             step 5
              threaded one at a time, max 3 x 45
   Kettlebell no plates              5–100             step 5
-             one bell, always — a kettlebell is picked up on its own, so
-             there is no pair form and no per-hand/total distinction
+             usually ONE bell; a mirrored pair is available for the doubles
+             (see the resolver note). A pair reads "2 x 20 lb" with
+             "40 lb total" secondary, exactly like the dumbbell.
 
 The kettlebell has no decomposition because it is a single cast object. It grows by
 the SAME cube-root law as the plates — 20x the weight is 2.71x the bell, not 20x.
