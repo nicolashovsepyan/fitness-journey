@@ -42,7 +42,7 @@ export function renderWeek(host, { onOpenDay, onOpenHistory }) {
 
   host.innerHTML = `
     <div class="screen fade-in">
-      <img class="logo-img" src="images/logo.png" alt="Fitness Journey" />
+      <img class="logo-img" src="images/logo-mark.svg" alt="Fitness Journey" />
 
       <div class="topbar" style="margin-bottom:10px;">
         <div><h1>This week</h1><div class="sub">${PROGRAM.name} · ${PROGRAM.phases[0]} phase</div></div>

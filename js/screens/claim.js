@@ -14,7 +14,7 @@ export function renderClaim(host, { onDone }) {
   const people = Object.values(USERS);
   host.innerHTML = `
     <div class="screen fade-in claim">
-      <img class="logo-img" src="images/logo.png" alt="Fitness Journey" />
+      <img class="logo-img" src="images/logo-mark.svg" alt="Fitness Journey" />
       <div class="claim-inner">
         <h1>Whose phone is this?</h1>
         <p class="muted">Pick once and this phone remembers. Your training is kept separate from anyone else's.</p>

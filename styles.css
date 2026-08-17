@@ -273,7 +273,12 @@ body {
 .bnote { color:var(--faint); font-size:12px; margin-top:8px; }
 
 /* home/week — logo, progress, image day-cards */
-.logo-img { display:block; height:108px; margin:10px auto 22px; opacity:0.97; object-fit:contain; max-width:94%; }
+/* The mark, not the old wordmark. images/logo-mark.svg is generated from
+   logo/mark.mjs by tools/build-logo.mjs, so the app's screens and the
+   home-screen icon are the same drawing and cannot drift apart. It is
+   square where the old logo was a wide band, so the height is the whole
+   size now and max-width only guards very narrow phones. */
+.logo-img { display:block; height:104px; width:auto; margin:14px auto 22px; opacity:0.97; object-fit:contain; max-width:70%; }
 /* day sections — color-coded name + line to the time */
 .sec-head { display:flex; align-items:center; gap:12px; margin:24px 2px 12px; }
 .sec-name { font-size:14px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--sc, var(--text)); }

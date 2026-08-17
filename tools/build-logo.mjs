@@ -25,7 +25,7 @@ import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, rmSync, copyFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { appIconSVG, maskableIconSVG, triStampSVG, dbStampSVG, iconClearance,
+import { appIconSVG, maskableIconSVG, markSVG, triStampSVG, dbStampSVG, iconClearance,
          TRI_D, PLATES, BAR } from '../logo/mark.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
@@ -125,6 +125,7 @@ if (existsSync(PREVIEW)) {
 const ASSETS = [
   { name: 'icon.svg',           out: 'icon.svg',                  make: appIconSVG },
   { name: 'icon-maskable.svg',  out: 'icon-maskable.svg',         make: maskableIconSVG },
+  { name: 'logo-mark.svg',      out: 'images/logo-mark.svg',      make: markSVG },
   { name: 'stamp-triangle.svg', out: 'images/stamp-triangle.svg', make: triStampSVG },
   { name: 'stamp-dumbbell.svg', out: 'images/stamp-dumbbell.svg', make: dbStampSVG },
 ];

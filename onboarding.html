@@ -6137,6 +6137,19 @@ function profileLink(){
   const base=location.href.split('#')[0].replace(/onboarding\.html.*$/,'');
   return base+'profile.html#'+encodeProfile(payload());
 }
+/* THE WAY INTO THE APP.
+
+   Same encoded payload, pointed at the app instead of the coach's copy of
+   it. js/intake.js reads it on first open, writes a User and an Intake,
+   and claims the device — see the long note at the top of that file for
+   why this travels in the URL rather than in localStorage (the installed
+   app on iOS cannot see what Safari wrote) and why it is a FRAGMENT rather
+   than a query string (this is health data; a fragment never reaches a
+   server log). */
+function appLink(){
+  const base=location.href.split('#')[0].replace(/onboarding\.html.*$/,'');
+  return base+'index.html#fj='+encodeProfile(payload());
+}
 function saveLocal(){
   try{
     const all=JSON.parse(localStorage.getItem('fj_profiles')||'[]');
@@ -6670,8 +6683,11 @@ function entry(){
     }
   };
 
-  setFoot(`<button class="cta accent">Open my Log</button>`);
-  foot.querySelector('.cta').onclick=()=>{haptic(400);toast('This is where the app opens. End of prototype.',4000);};
+  setFoot(`<button class="cta accent">Open my app</button>`);
+  /* Was a toast reading "This is where the app opens. End of prototype."
+     It is not a prototype any more: this carries everything just answered
+     into the app, which creates the account and opens on it. */
+  foot.querySelector('.cta').onclick=()=>{ haptic(400); location.href=appLink(); };
 }
 
 /* dev index */

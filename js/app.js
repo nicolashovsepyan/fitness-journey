@@ -20,6 +20,7 @@ import { LocalAdapter } from './adapters/local.js';
 import { loadStore, flushStore } from './store.js';
 import { loadVoicePref } from './timer.js';
 import { renderClaim } from './screens/claim.js';
+import { consumeSurveyHandoff } from './intake.js';
 import { applyUserManifest } from './manifest-user.js';
 
 const app = document.getElementById('app');
@@ -135,7 +136,16 @@ if (navigator.storage?.persist) {
 async function boot() {
   setAdapter(new LocalAdapter());
 
-  const uid = await loadUsers();          // also runs the one-time key move
+  let uid = await loadUsers();            // also runs the one-time key move
+
+  /* THE SURVEY'S WAY IN. A finished onboarding arrives as #fj=… on the
+     first open; this turns it into a User and an Intake and claims the
+     device to them. Runs AFTER loadUsers because it needs the roster to
+     exist before it can add to it, and BEFORE the claim screen because a
+     person who just finished the survey must never be asked whose phone
+     this is — they have only this second told us. */
+  const fromSurvey = await consumeSurveyHandoff();
+  if (fromSurvey) uid = fromSurvey;
 
   if (!uid) {                             // never guess whose phone this is
     return renderClaim(app, { onDone: async () => { await boot(); } });
