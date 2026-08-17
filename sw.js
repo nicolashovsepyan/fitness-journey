@@ -15,7 +15,7 @@
    Training data lives in localStorage, not here, so an update never
    touches a logged session.
    ============================================================ */
-const VERSION = 'e793cb99bc';
+const VERSION = '639269aacc';
 const CACHE = 'fj-' + VERSION;
 const ASSETS = [
   "./ EXERCISE LIBRARY/Exercise_Illustration_Collection/03_Lower_Body_Glutes_Posterior_Chain/019_bodyweight_squat.png",
@@ -45,6 +45,7 @@ const ASSETS = [
   "./images/icon-192.png",
   "./images/icon-512-maskable.png",
   "./images/icon-512.png",
+  "./images/logo-mark.svg",
   "./images/logo-onboarding.png",
   "./images/logo.png",
   "./images/stamp-dumbbell.svg",
@@ -68,6 +69,7 @@ const ASSETS = [
   "./js/data/sessions-beginner.js",
   "./js/data/sessions.js",
   "./js/install.js",
+  "./js/intake.js",
   "./js/manifest-user.js",
   "./js/runner.js",
   "./js/runner/runstate.js",
@@ -208,11 +210,13 @@ const ASSETS = [
   "./site/spine/art.manifest.json",
   "./site/spine/benchmarks.json",
   "./site/spine/catalog.json",
+  "./site/spine/program.default.json",
   "./site/spine/theme.json",
   "./spine/aliases.json",
   "./spine/art.manifest.json",
   "./spine/benchmarks.json",
   "./spine/catalog.json",
+  "./spine/program.default.json",
   "./spine/theme.json",
   "./styles.css",
   "./tools/audit-classes.mjs",
@@ -226,6 +230,7 @@ const ASSETS = [
   "./tools/build-exercise-images.mjs",
   "./tools/build-logo.mjs",
   "./tools/build-spine.mjs",
+  "./tools/export-program.mjs",
   "./tools/fix-progression-links.mjs"
 ];
 

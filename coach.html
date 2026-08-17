@@ -350,7 +350,10 @@ select.pin{appearance:none;cursor:pointer}
     <div class="panel">
       <div class="who">
         <div class="av">O</div>
-        <div><b id="whoName">Ozzy</b><small>45 · male · Canada · survey v6, 10 Aug</small></div>
+        <div class="grow"><b id="whoName">Ozzy</b><small id="whoSub">45 · male · Canada · survey v6, 10 Aug</small>
+          <select id="clientPick" style="margin-top:7px;width:100%;font:inherit;font-size:12.5px;
+            background:#181D23;color:inherit;border:1px solid rgba(255,255,255,.14);
+            border-radius:8px;padding:6px 7px"></select></div>
       </div>
       <div class="pad" style="padding-top:0" id="facts"></div>
     </div>
@@ -388,6 +391,19 @@ select.pin{appearance:none;cursor:pointer}
         time that day is released — there is no second copy anywhere.</p>
     </div>
     <div id="prog"></div>
+
+    <!-- RELEASE. The switches above put a SECTION in front of the client on
+         this device. This puts the whole program on their PHONE, which is a
+         different problem: an installed iOS app has its own storage
+         container, so nothing written here is visible to it. Until the
+         backend lands, the program travels in a link the person opens. -->
+    <div class="lead" style="margin-top:30px">
+      <h2>Send it to their phone</h2>
+      <p>The switches above decide what is visible. This is how it gets there. Their installed app
+        cannot read this browser, so the program travels in a link — open it on the phone once and
+        the app takes it in, sets them to active and opens on their week.</p>
+    </div>
+    <div class="panel" id="releasePanel"><div class="pad"></div></div>
   </main>
 </div>
 
@@ -983,7 +999,132 @@ document.getElementById('btnCopy').onclick=async()=>{
     toast('Selected — press Cmd+C'); }
 };
 
-drawRail(); drawInbox(); drawLayers(); drawDock(); loadProgram();
+
+/* ============================================================
+   WHO THIS PROGRAM IS FOR, AND HOW IT REACHES THEM
+
+   The console was written around one person: `A` above is Ozzy's answers,
+   typed in, and USER defaulted to 'ozzy'. That was right while there was
+   exactly one client and no way for a real survey to arrive. Now the survey
+   writes an Intake, so the console can read who has actually onboarded.
+
+   WHAT THIS DOES AND DOES NOT DO. It picks the client the program is FOR and
+   releases to them. It does NOT rewrite the ten Galpin layers — that prose is
+   authored against Ozzy's specific numbers, and swapping the name in would
+   produce confident sentences about the wrong person, which is worse than an
+   obviously stale panel. Generalising those is its own job.
+
+   Intakes are read from this device, and imported from a link when the
+   survey was filled in on another one — same carrier as everything else
+   here, and it is stripped from the address bar once read because an intake
+   is a PAR-Q and a body map.
+   ============================================================ */
+const INTAKES_LS = 'fj.intakes', USERS_LS = 'fj.users';
+const lsGet = k => { try { return JSON.parse(localStorage.getItem(k) || '[]'); } catch (e) { return []; } };
+
+function b64urlDecode(x){
+  const b = String(x).replace(/-/g,'+').replace(/_/g,'/');
+  return JSON.parse(decodeURIComponent(escape(atob(b + '='.repeat((4 - b.length % 4) % 4)))));
+}
+function b64urlEncode(o){
+  return btoa(unescape(encodeURIComponent(JSON.stringify(o))))
+    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+
+/* A survey filled in on another device, handed over as a link. Written into
+   the same store the app uses, so an imported client and a local one are the
+   same record afterwards. */
+function importIntakeFromUrl(){
+  const m = String(location.hash||'').match(/[#&]fj=([A-Za-z0-9_\-]+)/);
+  if(!m) return null;
+  let p; try{ p = b64urlDecode(m[1]); }catch(e){ toast('That link could not be read'); return null; }
+  const a = p.a || {};
+  const uid = 'me';
+  const users = lsGet(USERS_LS).filter(u => u.id !== uid);
+  users.push({ id:uid, role:'client', status:'pending', displayName:a.name||'', email:a.email||null,
+    ui:'pro', programId:null, trainerId:null, accent:'#3ECBA8',
+    createdAt:new Date().toISOString(), updatedAt:new Date().toISOString() });
+  localStorage.setItem(USERS_LS, JSON.stringify(users));
+  const itk = lsGet(INTAKES_LS);
+  itk.unshift({ id:'itk_'+Date.now(), userId:uid, version:p.v||6, answers:a,
+    derived:{tier:a.tier??null, levels:a.levels??null},
+    submittedAt:p.at||new Date().toISOString() });
+  localStorage.setItem(INTAKES_LS, JSON.stringify(itk));
+  try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){ location.hash=''; }
+  toast('Imported ' + (a.name || 'the client'));
+  return uid;
+}
+
+function clientList(){
+  const users = lsGet(USERS_LS), itk = lsGet(INTAKES_LS);
+  const seen = new Set();
+  const out = [];
+  itk.forEach(i => { if(seen.has(i.userId)) return; seen.add(i.userId);
+    const u = users.find(x => x.id === i.userId);
+    out.push({ id:i.userId, name:(u && u.displayName) || (i.answers && i.answers.name) || i.userId,
+      intake:i, user:u }); });
+  /* Ozzy is not an intake — he is the console's built-in example, and he
+     stays listed so the ten layers still have their subject. */
+  out.push({ id:'ozzy', name:'Ozzy (built in)', intake:null, user:null });
+  return out;
+}
+
+let PICKED = null;
+function drawClients(){
+  const sel = document.getElementById('clientPick'); if(!sel) return;
+  const list = clientList();
+  const want = new URLSearchParams(location.search).get('client')
+    || localStorage.getItem('fj.coach.client') || list[0].id;
+  PICKED = list.find(c => c.id === want) || list[0];
+  sel.innerHTML = list.map(c =>
+    `<option value="${esc(c.id)}" ${c.id===PICKED.id?'selected':''}>${esc(c.name)}</option>`).join('');
+  sel.onchange = () => { localStorage.setItem('fj.coach.client', sel.value); drawClients(); drawRelease2(); };
+
+  const nameEl = document.getElementById('whoName'), subEl = document.getElementById('whoSub');
+  if(PICKED.intake){
+    const a = PICKED.intake.answers || {};
+    nameEl.textContent = PICKED.name;
+    subEl.textContent = [a.age && a.age+'', a.sex==='f'?'female':a.sex==='m'?'male':null,
+      a.tierName || (a.levels && 'level '+(a.levels.gym??'?')),
+      'survey v'+(PICKED.intake.version||6)].filter(Boolean).join(' · ');
+    document.querySelector('.who .av').textContent = (PICKED.name.trim()[0]||'?').toUpperCase();
+  }
+}
+
+function drawRelease2(){
+  const host = document.querySelector('#releasePanel .pad'); if(!host) return;
+  if(!PICKED || !PICKED.intake){
+    host.innerHTML = `<p class="micro">Pick a client who has completed onboarding. Ozzy is the built-in
+      example and has no app to send to.</p>`;
+    return;
+  }
+  const base = location.href.split('#')[0].replace(/coach\.html.*$/,'');
+  const payload = { v:1, at:new Date().toISOString(), userId:PICKED.id, name:PICKED.name,
+    program: PROG || {days:{}} };
+  const link = base + 'index.html#prg=' + b64urlEncode(payload);
+  const days = Object.keys((PROG&&PROG.days)||{}).length;
+  host.innerHTML = `
+    <p style="margin:0 0 10px">Sending <b>${days} day${days===1?'':'s'}</b> to <b>${esc(PICKED.name)}</b>.
+      Opening this on their phone sets them to <b>active</b> and their app opens on this program.</p>
+    <textarea id="relLink" readonly style="width:100%;height:74px;font:inherit;font-size:11px;
+      background:#181D23;color:inherit;border:1px solid rgba(255,255,255,.14);border-radius:8px;
+      padding:8px;resize:vertical">${esc(link)}</textarea>
+    <div style="display:flex;gap:8px;margin-top:9px">
+      <button class="btn" id="relCopy">Copy the link</button>
+      <button class="btn" id="relOpen">Open it here</button>
+    </div>
+    <p class="micro" style="margin-top:9px">Message or AirDrop it to yourself. It carries the program,
+      so it is long — that is the trade for not having a server yet.</p>`;
+  document.getElementById('relCopy').onclick = async () => {
+    try { await navigator.clipboard.writeText(link); toast('Link copied'); }
+    catch(e){ const t=document.getElementById('relLink'); t.select(); toast('Selected — press Cmd+C'); }
+  };
+  document.getElementById('relOpen').onclick = () => { location.href = link; };
+}
+
+importIntakeFromUrl();
+drawRail(); drawInbox(); drawLayers(); drawDock();
+loadProgram().then(() => { drawClients(); drawRelease2(); });
 </script>
 </body>
 </html>

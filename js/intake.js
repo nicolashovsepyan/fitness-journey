@@ -32,16 +32,7 @@
 import { storage } from './core/storage.js';
 import { makeUser, makeIntake } from './core/schema.js';
 import { addUser, claimDevice } from './users.js';
-
-/* The survey encodes with btoa over UTF-8, then makes it URL-safe. Same
-   transform backwards. Kept here rather than imported because the survey
-   is a single file with no module boundary to import from — if the
-   encoding ever changes, these two are the pair to change together. */
-function decodePayload(s) {
-  const b = s.replace(/-/g, '+').replace(/_/g, '/');
-  const pad = b + '='.repeat((4 - (b.length % 4)) % 4);
-  return JSON.parse(decodeURIComponent(escape(atob(pad))));
-}
+import { decode, readFragment, clearFragment } from './carrier.js';
 
 /* ONE PERSON PER PHONE, AND THE SAME ONE EACH TIME.
    A fresh newId() per completed survey would be more literal, but running
@@ -69,12 +60,12 @@ function uiFor(a) {
  * was nothing to consume — so boot() can carry on exactly as before.
  */
 export async function consumeSurveyHandoff() {
-  const m = String(location.hash || '').match(/[#&]fj=([A-Za-z0-9_\-]+)/);
-  if (!m) return null;
+  const raw = readFragment('fj');
+  if (!raw) return null;
 
   let payload;
   try {
-    payload = decodePayload(m[1]);
+    payload = decode(raw);
   } catch (e) {
     /* A truncated or mangled link. Say nothing and boot normally — the
        alternative is a dead app on the one screen a new person sees. */
@@ -124,12 +115,8 @@ export async function consumeSurveyHandoff() {
 
   /* Take it out of the address bar. It has been read, it is health data,
      and leaving it there puts it in the back button and in any screenshot
-     of the app. replaceState so there is no extra history entry. */
-  try {
-    history.replaceState(null, '', location.pathname + location.search);
-  } catch (e) {
-    location.hash = '';
-  }
+     of the app. */
+  clearFragment();
 
   return SELF;
 }

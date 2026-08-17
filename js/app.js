@@ -21,6 +21,7 @@ import { loadStore, flushStore } from './store.js';
 import { loadVoicePref } from './timer.js';
 import { renderClaim } from './screens/claim.js';
 import { consumeSurveyHandoff } from './intake.js';
+import { consumeReleaseHandoff } from './release.js';
 import { applyUserManifest } from './manifest-user.js';
 
 const app = document.getElementById('app');
@@ -146,6 +147,12 @@ async function boot() {
      this is — they have only this second told us. */
   const fromSurvey = await consumeSurveyHandoff();
   if (fromSurvey) uid = fromSurvey;
+
+  /* A program released from the console. After the intake, because a link
+     may carry a program for somebody this device has not met yet — the
+     Program is kept either way and attaches when they onboard. */
+  const fromRelease = await consumeReleaseHandoff();
+  if (fromRelease && !uid) uid = fromRelease;
 
   if (!uid) {                             // never guess whose phone this is
     return renderClaim(app, { onDone: async () => { await boot(); } });
