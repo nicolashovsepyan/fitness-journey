@@ -15,18 +15,21 @@
    Training data lives in localStorage, not here, so an update never
    touches a logged session.
    ============================================================ */
-const VERSION = 'f9f52d9641';
+const VERSION = '16fdfd56a8';
 const CACHE = 'fj-' + VERSION;
 const ASSETS = [
   "./ EXERCISE LIBRARY/Exercise_Illustration_Collection/03_Lower_Body_Glutes_Posterior_Chain/019_bodyweight_squat.png",
   "./ FOR NICOLAS/EXERCISE CLASSIFIER.html",
   "./.claude/launch.json",
   "./EXERCISE DATABASE/DASHBOARD.html",
+  "./EXERCISE DATABASE/tools/build-kettlebell.mjs",
   "./EXERCISE DATABASE/tools/dashboard.template.html",
   "./EXERCISE DATABASE/tools/derive.mjs",
   "./EXERCISE DATABASE/tools/fundamentals.json",
   "./EXERCISE DATABASE/tools/gym-library-seed.json",
+  "./EXERCISE DATABASE/tools/kettlebell-library.json",
   "./EXERCISE DATABASE/workbook/_derived.json",
+  "./EXERCISE DATABASE/workbook/_kettlebell_merge.json",
   "./coach.html",
   "./dashboard.html",
   "./feed.html",
