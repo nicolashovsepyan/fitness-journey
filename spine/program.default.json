@@ -1,0 +1,241 @@
+{
+  "version": 1,
+  "built": "2026-08-17",
+  "note": "Exported from dashboard.html. The console owns this now.",
+  "days": {
+    "d1": {
+      "name": "Ground Floor",
+      "tag": "Full body",
+      "why": "First session. We find your numbers, we do not chase them.",
+      "blocks": [
+        {
+          "role": "Prime",
+          "mins": 4,
+          "items": [
+            {
+              "ex": "cat_cow",
+              "pres": "8 slow",
+              "note": ""
+            },
+            {
+              "ex": "deep_squat_rock",
+              "pres": "8 rocks",
+              "note": ""
+            },
+            {
+              "ex": "glute_bridge",
+              "pres": "12 reps",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "mins": 13,
+          "items": [
+            {
+              "ex": "kb_deadlift",
+              "pres": "3 × 8",
+              "note": "the whole program starts here"
+            },
+            {
+              "ex": "pushup",
+              "pres": "3 × 8",
+              "note": "hands on the bench"
+            },
+            {
+              "ex": "single_arm_row",
+              "pres": "3 × 8",
+              "note": "each side, hand on the bench"
+            }
+          ]
+        },
+        {
+          "role": "Finish",
+          "mins": 3,
+          "items": [
+            {
+              "ex": "forearm_plank",
+              "pres": "3 × 20s",
+              "note": ""
+            }
+          ]
+        }
+      ]
+    },
+    "d2": {
+      "name": "Hinge & Carry",
+      "tag": "Posterior",
+      "why": "The back of the body, and the walk that comes after it. This is the kettlebell session.",
+      "blocks": [
+        {
+          "role": "Prime",
+          "mins": 4,
+          "items": [
+            {
+              "ex": "hip_90_90",
+              "pres": "6 each way",
+              "note": ""
+            },
+            {
+              "ex": "glute_bridge",
+              "pres": "15 reps",
+              "note": ""
+            },
+            {
+              "ex": "kb_halo",
+              "pres": "5 each way",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "mins": 13,
+          "items": [
+            {
+              "ex": "kb_rdl",
+              "pres": "3 × 10",
+              "note": ""
+            },
+            {
+              "ex": "goblet_squat",
+              "pres": "3 × 8",
+              "note": "sit to the bench"
+            },
+            {
+              "ex": "suitcase_carry",
+              "pres": "4 × 30s",
+              "note": "swap hands each round"
+            }
+          ]
+        },
+        {
+          "role": "Finish",
+          "mins": 3,
+          "items": [
+            {
+              "ex": "side_plank",
+              "pres": "3 × 20s",
+              "note": "each side"
+            }
+          ]
+        }
+      ]
+    },
+    "d3": {
+      "name": "Press & Pull",
+      "tag": "Upper",
+      "why": "Twenty minutes for the arm and shoulder — floor press only, so nothing goes overhead yet.",
+      "blocks": [
+        {
+          "role": "Prime",
+          "mins": 4,
+          "items": [
+            {
+              "ex": "kb_halo",
+              "pres": "5 each way",
+              "note": ""
+            },
+            {
+              "ex": "cat_cow",
+              "pres": "8 slow",
+              "note": ""
+            },
+            {
+              "ex": "dead_bug",
+              "pres": "8 each side",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "mins": 13,
+          "items": [
+            {
+              "ex": "kb_floor_press",
+              "pres": "3 × 8",
+              "note": "each side"
+            },
+            {
+              "ex": "single_arm_row",
+              "pres": "3 × 10",
+              "note": "each side"
+            },
+            {
+              "ex": "goblet_march",
+              "pres": "3 × 40s",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "role": "Finish",
+          "mins": 3,
+          "items": [
+            {
+              "ex": "mountain_climber",
+              "pres": "3 × 30s",
+              "note": ""
+            }
+          ]
+        }
+      ]
+    },
+    "d4": {
+      "name": "Reset & Move",
+      "tag": "Mobility",
+      "why": "The session that makes the other three possible. On the mat, in front of the TV, and it counts on the strip.",
+      "blocks": [
+        {
+          "role": "Move",
+          "mins": 11,
+          "items": [
+            {
+              "ex": "cat_cow",
+              "pres": "3 × 10",
+              "note": ""
+            },
+            {
+              "ex": "hip_90_90",
+              "pres": "3 × 8",
+              "note": ""
+            },
+            {
+              "ex": "prying_goblet",
+              "pres": "3 × 45s",
+              "note": ""
+            },
+            {
+              "ex": "deep_squat_rock",
+              "pres": "3 × 10",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "role": "Hold",
+          "mins": 7,
+          "items": [
+            {
+              "ex": "wall_sit",
+              "pres": "3 × 30s",
+              "note": ""
+            },
+            {
+              "ex": "forearm_plank",
+              "pres": "3 × 25s",
+              "note": ""
+            },
+            {
+              "ex": "hollow_hold",
+              "pres": "2 × 20s",
+              "note": ""
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

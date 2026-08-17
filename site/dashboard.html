@@ -887,6 +887,78 @@ h2.h{font-size:23px;line-height:1.2;letter-spacing:-.022em;font-weight:550}
 .ctry.on{border-color:var(--accent);background:var(--accent-soft)}
 .ctry.on span{color:var(--accent)}
 
+/* ---------- a rest day that has something in it -------------------------
+   Not a hero with a photo and a shrug. A short brief, then three doors with
+   the minutes on them, because the reason anyone skips mobility is never
+   the drill — it is not knowing how long it will take.
+   ------------------------------------------------------------------- */
+.restwrap{border:1px solid var(--line2);border-radius:var(--r);padding:15px;
+  background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.012))}
+.restwrap.done{border-color:var(--accent-line)}
+.rest-hd .tag{display:inline-flex;align-items:center;gap:7px;font-size:10.5px;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--ink3)}
+.rest-hd .tag i{width:6px;height:6px;border-radius:50%;background:var(--ink3)}
+.restwrap.done .rest-hd .tag,.restwrap.done .rest-hd .tag i{color:var(--accent);background:var(--accent)}
+.rest-hd h3{font-size:23px;font-weight:650;letter-spacing:-.03em;margin:9px 0 6px}
+.rest-hd p{font-size:12.5px;line-height:1.5;color:var(--ink2);margin-bottom:14px}
+
+.rec{display:flex;align-items:center;gap:13px;width:100%;margin-bottom:8px;
+  border:1px solid var(--line);border-radius:14px;padding:12px 14px;cursor:pointer;
+  background:rgba(255,255,255,.028);font-family:inherit;color:var(--ink);text-align:left;
+  transition:border-color .2s,background .2s}
+.rec:active{transform:scale(.985)}
+.rec-m{flex:none;width:46px;display:flex;flex-direction:column;align-items:center;line-height:1}
+.rec-m b{font-size:23px;font-weight:600;letter-spacing:-.035em;color:var(--neon)}
+.rec-m i{font-style:normal;font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink3);margin-top:3px}
+.rec-tx{flex:1;min-width:0}
+.rec-tx b{display:block;font-size:14.5px;font-weight:600;letter-spacing:-.012em}
+.rec-tx small{display:block;font-size:11.5px;color:var(--ink3);margin-top:3px;line-height:1.4}
+.rec-c{width:14px;height:14px;flex:none;stroke:var(--ink3);fill:none;stroke-width:2.2;
+  stroke-linecap:round;stroke-linejoin:round}
+.restalt{display:flex;gap:8px;margin-top:12px}
+.restalt .go{flex:1;margin-top:0;font-size:13px;padding:12px 8px}
+
+/* the drill itself, in the sheet */
+.reclist{margin-top:4px}
+.recrow{display:flex;align-items:center;gap:12px;padding:10px 0;
+  border-bottom:1px solid var(--line)}
+.recrow:last-child{border-bottom:none}
+.recart{width:52px;height:40px;flex:none;display:flex;align-items:center;justify-content:center}
+.recart img{max-width:100%;max-height:100%;object-fit:contain}
+.recart .noart{height:100%;padding:8%}
+.rectx b{display:block;font-size:14.5px;font-weight:600}
+.rectx small{display:block;font-size:12px;color:var(--ink3);margin-top:2px}
+
+/* ---------- build your own -------------------------------------------- */
+.blist{margin:4px 0 12px}
+.brow,.prow{display:flex;align-items:center;gap:12px;width:100%;padding:10px 0;
+  border-bottom:1px solid var(--line);background:none;border-left:none;border-right:none;
+  border-top:none;font-family:inherit;color:var(--ink);text-align:left}
+.prow{cursor:pointer}
+.prow:active{opacity:.6}
+.bart{width:52px;height:40px;flex:none;display:flex;align-items:center;justify-content:center}
+.bart img{max-width:100%;max-height:100%;object-fit:contain}
+.bart .noart{height:100%;padding:8%}
+.btx{flex:1;min-width:0}
+.btx b{display:block;font-size:14.5px;font-weight:600}
+.btx small{display:block;font-size:11.5px;color:var(--ink3);margin-top:2px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bpres{margin-top:5px;width:110px;font:inherit;font-size:13px;color:var(--ink);
+  background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:6px 9px}
+.bpres:focus{outline:none;border-color:var(--accent)}
+.bdel{flex:none;width:28px;height:28px;border-radius:50%;border:1px solid var(--line);
+  background:none;color:var(--ink3);font-size:16px;line-height:1;cursor:pointer}
+.bempty{padding:18px 0;text-align:center;font-size:13px;color:var(--ink3)}
+.psec{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);
+  font-weight:700;margin:16px 0 2px}
+
+/* saved workouts, on the rest day */
+.mineblk{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.minehd{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);
+  font-weight:700;margin-bottom:9px}
+.rec.mine .rec-m b{color:var(--accent);font-size:20px}
+
 /* ---------- the vibe controls ---------- */
 .vgrp{margin-bottom:16px}
 .vlbl{font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:8px}
@@ -2072,6 +2144,46 @@ const A = Object.assign({}, DEMO, LOADED ? LOADED.a : {});
    answers. Until it is, every buy link points at one market. */
 if(!A.country) A.country = 'CA';
 
+/* Declared HERE, above the program, and not further down where it used to
+   live: SESSIONS merges whatever the console saved, and a `const` read
+   before its declaration throws into a catch that quietly returns null —
+   so the edits were being dropped in silence. Identity resolves first.
+
+   ONE APP, MANY USERS
+   Every record is scoped by user id, never by a name baked into a key.
+   `fj.v1.<user>.<record>` is the shape. The id is the one the survey
+   wrote, so two people filling the survey on one phone get two separate
+   dashboards rather than overwriting each other. */
+const USER = LOADED ? LOADED.uid : 'demo';
+const k = rec => `fj.v1.${USER}.${rec}`;
+
+const COACH_KEY = k('coach');
+/* THE PROGRAM COMES FROM THE CONSOLE.
+   The sessions below are the shipped first draft. The moment the coach
+   console saves a program for this person it replaces them wholesale —
+   same shape, edited by a human. One source of truth, and it is the one
+   with a person's judgement in it. */
+function coachProgram(){
+  try{
+    const p = JSON.parse(localStorage.getItem(COACH_KEY)||'{}').program;
+    if(!p || !p.days || !Object.keys(p.days).length) return null;
+    const out = {};
+    for(const [id,d] of Object.entries(p.days)){
+      out[id] = {name:d.name, tag:d.tag, why:d.why,
+        blocks:(d.blocks||[]).map(b=>({role:b.role, mins:+b.mins||0,
+          items:(b.items||[]).map(it=>[it.ex, it.pres, it.note].filter(x=>x!==''&&x!=null))}))};
+    }
+    return out;
+  }catch(e){ return null; }
+}
+function released(id){
+  try{
+    const r=JSON.parse(localStorage.getItem(COACH_KEY)||'{}').released||{shape:true};
+    return !!r[id];
+  }catch(e){ return id==='shape'; }
+}
+
+
 const U = A.unit;
 const disp = kg => Math.round((U==='lb' ? kg*2.20462 : kg)*10)/10;
 const toKg = v => { const n=parseFloat(v); if(isNaN(n)||n<=0) return null;
@@ -2171,7 +2283,7 @@ const KIT_UNLOCKS = {"bar":{"count":44,"sample":["Active Hang","Dead Hang","Incl
    · No jumping and no deep loaded knee bend anywhere in phase 1,
      because he told us about the knee and the ankle.
    ------------------------------------------------------------ */
-const SESSIONS = {
+let SESSIONS = {
   d1:{name:'Ground Floor',tag:'Full body',why:'First session. We find your numbers, we do not chase them.',
     blocks:[
       {role:'Prime',mins:4,items:[
@@ -2210,6 +2322,8 @@ const SESSIONS = {
         ['wall_sit','3 × 30s'],['forearm_plank','3 × 25s'],['hollow_hold','2 × 20s']]}
     ]}
 };
+/* whatever the console last saved wins */
+Object.assign(SESSIONS, coachProgram() || {})
 
 /* ============================================================
    2b · THE GAP, AND WHAT CLOSES IT
@@ -2548,25 +2662,9 @@ function dayScore(){
    it says a person is still working on it, which is true and is
    the entire premise of "built by AI and a human".
    ------------------------------------------------------------ */
-/* ONE APP, MANY USERS
-   Every record is scoped by user id, never by a name baked into a key.
-   `fj.v1.<user>.<record>` is the shape. The id is the one the survey
-   wrote, so two people filling the survey on one phone get two separate
-   dashboards rather than overwriting each other. */
-const USER = LOADED ? LOADED.uid : 'demo';
-const k = rec => `fj.v1.${USER}.${rec}`;
-
-const COACH_KEY = k('coach');
-function released(id){
-  try{
-    const r=JSON.parse(localStorage.getItem(COACH_KEY)||'{}').released||{shape:true};
-    return !!r[id];
-  }catch(e){ return id==='shape'; }
-}
-
 const KEY = k('dash');
 const seed = {
-  tab:'today', sawIntro:0, glow:'normal', markStyle:'square', readiness:null, habits:{}, todos:{}, flip:{}, done:{}, queued:[],
+  tab:'today', sawIntro:0, mine:[], glow:'normal', markStyle:'square', readiness:null, habits:{}, todos:{}, flip:{}, done:{}, queued:[],
   seen:[],
   /* ONE reading — the number he typed into onboarding this morning. There is no
      trend yet and inventing one would be a lie the very first time he opens the
@@ -2747,6 +2845,31 @@ function stamp(ms){
 /* Sunday, because that is where his four training days start. Days before it
    in the strip are not "missed" — the program had not begun. */
 const PROGRAM_START_DOW = Math.min(...WEEKPLAN.map((x,i)=>x?i:9));
+
+/* ---- REST DAYS HAVE A JOB ---------------------------------------------
+   "Nothing today" is neither true nor useful. A rest day is when the joints
+   get their work and the nervous system gets its break, and someone who
+   opens the app on one should be handed something that takes five minutes
+   and is obviously not training.
+
+   Three lengths, because the reason people skip these is never the drill,
+   it is the clock. Everything uses a mat and a wall at most, so it holds
+   for anyone whatever their kit, and nothing loads a joint.              */
+const RECOVERY = [
+  {id:'r5',  mins:5,  name:'Loosen off',
+   why:'The five minutes that make tomorrow easier. Hips and spine, nothing else.',
+   items:[['cat_cow','8 slow'],['hip_90_90','6 each way'],['deep_squat_rock','8 rocks']]},
+  {id:'r10', mins:10, name:'Hips and spine',
+   why:'Longer holds, and the glutes wake up at the end so the hinge has something to pull with.',
+   items:[['cat_cow','10 slow'],['hip_90_90','8 each way'],['deep_squat_rock','10 rocks'],
+          ['glute_bridge','15 reps'],['dead_bug','8 each side']]},
+  {id:'r15', mins:15, name:'Full reset',
+   why:'Everything above, plus a walk. This is the one that shows up in how week three feels.',
+   items:[['cat_cow','10 slow'],['hip_90_90','8 each way'],['deep_squat_rock','12 rocks'],
+          ['glute_bridge','2 × 15'],['dead_bug','2 × 8 each side'],
+          ['side_plank','2 × 20s each side'],['march_in_place','3 min easy']]}
+];
+const recoveryDone = () => todayItems(S.freestyle).some(f => (f.h||'').indexOf('Recovery') === 0);
 
 /* ---- FREESTYLE ---------------------------------------------------------
    The program owns four days. It does not own the other three, and a person
@@ -3282,18 +3405,32 @@ function paneToday(){
       </div>
     </div>`;
   } else {
-    const nx = nextDay();
-    h += `<div class="hero rest" data-act="openday" data-day="${nx.id}">
-      <div class="art" style="background-image:url('images/exercises/dead_hang.png')"></div>
-      <div class="veil"></div>
-      <div class="in">
+    const nx = nextDay(), rDone = recoveryDone();
+    h += `<div class="restwrap ${rDone?'done':''}">
+      <div class="rest-hd">
         <div class="tag"><i></i>Rest day</div>
-        <h3>Nothing today</h3>
-        <div class="why">Next up is ${SESSIONS[nx.id].name}, ${nx.when}. Did something anyway? Log it and the day counts.</div>
-        <div class="restcta">
-          <button class="go ghost">Look at ${nx.when}'s session</button>
-          <button class="go" data-act="logsheet:session">Log what you did</button>
-        </div>
+        <h3>${rDone ? 'Recovery done' : 'Give it five minutes'}</h3>
+        <p class="just">Next session is ${SESSIONS[nx.id].name}, ${nx.when}. Today is for the
+          joints \u2014 pick a length and it counts on your week.</p>
+      </div>
+      ${RECOVERY.map(r=>`<button class="rec" data-recov="${r.id}">
+        <span class="rec-m"><b class="tnum">${r.mins}</b><i>min</i></span>
+        <span class="rec-tx"><b>${r.name}</b><small>${r.why}</small></span>
+        ${svg(I.arrow,'rec-c')}
+      </button>`).join('')}
+      ${myWorkouts().length ? `<div class="mineblk">
+        <div class="minehd">Your own</div>
+        ${myWorkouts().slice(0,3).map(w=>`<button class="rec mine" data-mine="${w.id}">
+          <span class="rec-m"><b class="tnum">${w.items.length}</b><i>mv</i></span>
+          <span class="rec-tx"><b>${esc(w.name)}</b><small>${
+            w.items.map(it=>(EX[it.ex]||{n:it.ex}).n).slice(0,3).join(', ')}${
+            w.items.length>3?'\u2026':''}</small></span>
+          ${svg(I.arrow,'rec-c')}
+        </button>`).join('')}
+      </div>` : ''}
+      <div class="restalt">
+        <button class="go ghost" data-act="openday" data-day="${nx.id}">${nx.when}'s session</button>
+        <button class="go ghost" data-act="buildadd2">Build a workout</button>
       </div>
     </div>`;
   }
@@ -3349,13 +3486,30 @@ function paneToday(){
   </div>
   ${nextSlot?`<div class="micro" style="margin:11px 2px 0">Seven clean days unlocks <b style="color:var(--ink)">${nextSlot.t}</b>.</div>`:''}`;
 
+  /* ---- YOUR OWN, EVERY DAY ----
+     These were only on the rest-day card, which is the one day a person is
+     least likely to be looking for a workout they built. They live here
+     too, on every day, next to the other things you can log. */
+  if(myWorkouts().length){
+    h += `<div class="sect"><b>Your workouts</b><a data-act="buildadd2">Build another</a></div>
+    <div class="minelist">
+      ${myWorkouts().map(w=>`<button class="rec mine" data-mine="${w.id}">
+        <span class="rec-m"><b class="tnum">${w.items.length}</b><i>mv</i></span>
+        <span class="rec-tx"><b>${esc(w.name)}</b><small>${
+          w.items.map(it=>(EX[it.ex]||{n:it.ex}).n).slice(0,3).join(', ')}${
+          w.items.length>3?'\u2026':''}</small></span>
+        ${svg(I.arrow,'rec-c')}
+      </button>`).join('')}
+    </div>`;
+  }
+
   /* --- quick log --- */
   h += `<div class="sect" id="sec-note"><b>Log something</b><span class="micro pay-t">a note is +${payFor('note')}%</span></div>
   <div class="rail">
     <button class="ql" data-act="log:weight">${svg(I.scale)}<span>Weight</span></button>
     <button class="ql" data-act="log:note">${svg(I.pen)}<span>Note</span></button>
     <button class="ql" data-act="log:photo">${svg(I.cam)}<span>Photo</span></button>
-    <button class="ql" data-act="log:session">${svg(I.plus)}<span>Freestyle</span></button>
+    <button class="ql" data-act="buildadd2">${svg(I.plus)}<span>Build one</span></button>
   </div>`;
 
 
@@ -4643,6 +4797,122 @@ function sheetLog(kind){
     <button class="go ghost" style="margin-top:9px" data-act="close">Cancel</button>`);
 }
 
+/* A recovery drill laid out like a session, because it is one — a short one
+   that loads nothing. Logging it writes a freestyle entry, so the day counts
+   on the strip and in the week total rather than reading as a blank. */
+/* ============================================================
+   BUILD YOUR OWN
+   Freestyle used to mean "type what you did afterwards". That is a
+   diary, not a workout. This is the other half: pick movements,
+   say how many, name it, keep it — and it is there next time
+   without being rebuilt.
+
+   The picker only offers what he owns. Being shown a barbell
+   movement you cannot do is the app not listening.
+   ============================================================ */
+const myWorkouts = () => S.mine || (S.mine = []);
+const newWid = () => 'w' + Date.now().toString(36);
+
+function sheetBuild(id){
+  const w = id ? myWorkouts().find(x=>x.id===id) : null;
+  const draft = w ? JSON.parse(JSON.stringify(w))
+                  : {id:newWid(), name:'', items:[], at:nowMs()};
+  BUILD = draft;
+  drawBuild();
+}
+let BUILD = null;
+
+function drawBuild(){
+  const d = BUILD; if(!d) return;
+  const mins = Math.max(5, d.items.length * 4);
+  openSheet(`<div class="sh-hd">
+      <div class="eyebrow">Your own workout</div>
+      <h3>${d.items.length ? esc(d.name || 'Untitled') : 'Build a workout'}</h3>
+      <p class="micro just">Pick the movements, say how many. It is saved to your list and you can
+        run it whenever you like \u2014 it counts on your week the same as anything else.</p>
+    </div>
+    <div class="fld"><label>Call it something</label>
+      <input id="bname" type="text" placeholder="Saturday shoulders" value="${esc(d.name||'')}"></div>
+
+    <div class="blist">
+      ${d.items.length ? d.items.map((it,i)=>{
+        const e = EX[it.ex] || {n:it.ex};
+        return `<div class="brow">
+          <span class="bart">${art(it.ex)}</span>
+          <span class="btx"><b>${esc(e.n)}</b>
+            <input class="bpres" data-i="${i}" placeholder="3 \u00d7 8" value="${esc(it.pres||'')}"></span>
+          <button class="bdel" data-bdel="${i}">&times;</button>
+        </div>`;
+      }).join('') : `<div class="bempty">Nothing in it yet. Add your first movement.</div>`}
+    </div>
+
+    <button class="go ghost" data-act="buildadd">+ Add a movement</button>
+
+    <div class="sheetcta">
+      ${d.items.length?`<div class="micro" style="margin-bottom:10px">About ${mins} minutes.</div>`:''}
+      <button class="go" data-act="buildsave">Save it</button>
+      ${myWorkouts().some(x=>x.id===d.id)?`<button class="go ghost" data-act="builddel">Delete</button>`:''}
+    </div>`);
+
+  sBody.querySelectorAll('.bpres').forEach(el=>el.onchange=()=>{
+    BUILD.items[+el.dataset.i].pres = el.value; });
+  sBody.querySelectorAll('[data-bdel]').forEach(b=>b.onclick=()=>{
+    const n = sBody.querySelector('#bname'); if(n) BUILD.name = n.value;
+    BUILD.items.splice(+b.dataset.bdel,1); drawBuild(); });
+}
+
+/* the picker — only what he owns, grouped by pattern */
+function sheetPick(){
+  const n = sBody.querySelector('#bname'); if(n) BUILD.name = n.value;
+  const ok = Object.entries(EX).filter(([,e]) =>
+    !(e.kit||[]).length || (e.kit||[]).every(k=>OWNED.has(k)));
+  const byPat = {};
+  ok.forEach(([id,e])=>{ (byPat[e.pat||'Other'] ||= []).push([id,e]); });
+  openSheet(`<div class="sh-hd"><div class="eyebrow">Add a movement</div>
+      <h3>What do you want in it?</h3>
+      <p class="micro just">Only what your kit can actually do \u2014 ${esc(KIT_LABEL)}.</p></div>
+    ${Object.keys(byPat).sort().map(pt=>`
+      <div class="psec">${esc(pt)}</div>
+      ${byPat[pt].sort((a,b)=>a[1].n.localeCompare(b[1].n)).map(([id,e])=>
+        `<button class="prow" data-pick="${id}">
+          <span class="bart">${art(id)}</span>
+          <span class="btx"><b>${esc(e.n)}</b><small>${esc(e.why||'')}</small></span>
+        </button>`).join('')}`).join('')}`);
+  sBody.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{
+    BUILD.items.push({ex:b.dataset.pick, pres:''}); drawBuild(); });
+}
+
+/* a saved workout, ready to run or change */
+function sheetMine(id){
+  const w = myWorkouts().find(x=>x.id===id); if(!w) return;
+  openSheet(`<div class="sh-hd"><div class="eyebrow">Your workout</div>
+      <h3>${esc(w.name)}</h3></div>
+    <div class="reclist">
+      ${w.items.map(it=>{const e=EX[it.ex]||{n:it.ex};
+        return `<div class="recrow"><span class="recart">${art(it.ex)}</span>
+          <span class="rectx"><b>${esc(e.n)}</b><small>${esc(it.pres||'\u2014')}</small></span></div>`;
+      }).join('')}
+    </div>
+    <div class="sheetcta">
+      <button class="go" data-act="buildrun:${w.id}">Did it \u2014 log it</button>
+      <button class="go ghost" data-act="buildedit:${w.id}">Change it</button>
+    </div>`);
+}
+
+function sheetRecovery(id){
+  const r = RECOVERY.find(x=>x.id===id); if(!r) return;
+  openSheet(`<div class="sh-hd"><div class="eyebrow">Recovery · ${r.mins} min</div>
+      <h3>${r.name}</h3><p class="micro just">${r.why}</p></div>
+    <div class="reclist">
+      ${r.items.map(([k,pres])=>{
+        const e = EX[k] || {n:k};
+        return `<div class="recrow"><span class="recart">${art(k)}</span>
+          <span class="rectx"><b>${e.n}</b><small>${pres}</small></span></div>`;
+      }).join('')}
+    </div>
+    <div class="sheetcta"><button class="go" data-act="dorecov:${r.id}">Done — log it</button></div>`);
+}
+
 function sheetTodo(k){
   const t=PTODO.find(x=>x[0]===k) || ['test','Push-up test','Get your first rank','90 sec',12];
   const extra={
@@ -4734,6 +5004,8 @@ function wire(){
     if(!S.habits[b.dataset.habit]) JUST_HABIT = b.dataset.habit;
   }, true));
 
+  view.querySelectorAll('[data-recov]').forEach(b=>b.onclick=()=>sheetRecovery(b.dataset.recov));
+  view.querySelectorAll('[data-mine]').forEach(b=>b.onclick=()=>sheetMine(b.dataset.mine));
   view.querySelectorAll('[data-todo1]').forEach(b=>b.onclick=()=>{
     /* Needs a number? Open the sheet and remember what it was for; the save
        handler ticks it. Otherwise it is its own confirmation. */
@@ -4803,6 +5075,38 @@ function act(a,el){
   }
   if(cmd==='log'||cmd==='logsheet') return sheetLog(arg);
   if(cmd==='fold'){ S.folds=S.folds||{}; S.folds[arg]=!S.folds[arg]; save(); return go(S.tab,true); }
+  if(cmd==='buildadd') return sheetPick();
+  if(cmd==='buildadd2'){ sheetBuild(); return; }
+  if(cmd==='buildedit'){ sheetBuild(arg); return; }
+  if(cmd==='buildsave'){
+    const n = sBody.querySelector('#bname'); if(n) BUILD.name = n.value;
+    if(!BUILD.items.length) return toast('Add at least one movement');
+    if(!BUILD.name.trim()) BUILD.name = 'My workout';
+    const list = myWorkouts(), i = list.findIndex(x=>x.id===BUILD.id);
+    if(i>=0) list[i] = BUILD; else list.unshift(BUILD);
+    save(); closeSheet(); go(S.tab, true);
+    return toast('Saved to your workouts');
+  }
+  if(cmd==='builddel'){
+    S.mine = myWorkouts().filter(x=>x.id!==BUILD.id);
+    save(); closeSheet(); go(S.tab, true); return toast('Deleted');
+  }
+  if(cmd==='buildrun'){
+    const w = myWorkouts().find(x=>x.id===arg); if(!w) return;
+    S.freestyle = S.freestyle || [];
+    S.freestyle.unshift({at:nowMs(), h:w.name, mins:String(Math.max(5,w.items.length*4)),
+      rpe:'', b:w.items.map(it=>`${(EX[it.ex]||{n:it.ex}).n}${it.pres?' '+it.pres:''}`).join(', ')});
+    save(); closeSheet(); go('today');
+    return toast('Logged \u2014 that is your week');
+  }
+  if(cmd==='dorecov'){
+    const r = RECOVERY.find(x=>x.id===arg); if(!r) return;
+    S.freestyle = S.freestyle || [];
+    S.freestyle.unshift({at:nowMs(), h:`Recovery · ${r.name}`, mins:String(r.mins),
+      rpe:'easy', b:r.items.map(i=>(EX[i[0]]||{n:i[0]}).n).join(', ')});
+    save(); closeSheet(); go('today');
+    return toast('Logged — that is the day that makes week three easier');
+  }
   if(cmd==='daysty'){  S.dayStyle=arg;  save(); return go('me',true); }
   if(cmd==='profsty'){ S.profStyle=arg; save(); return go('me',true); }
   if(cmd==='marksty'){ S.markStyle=arg; save(); return go('me',true); }

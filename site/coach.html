@@ -265,6 +265,59 @@ textarea::placeholder{color:var(--ink3)}
   background:var(--card2);border:1px solid var(--line2);border-radius:999px;padding:11px 18px;
   font-size:13px;opacity:0;pointer-events:none;transition:all .26s;box-shadow:var(--shadow)}
 #toast.on{opacity:1;transform:translateX(-50%)}
+
+/* ---------- THE PROGRAM EDITOR ----------------------------------------
+   Everything edits in place. A coach changing one rep count should not
+   have to enter and leave an "edit mode" to do it.
+   ------------------------------------------------------------------- */
+.ptabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.ptab{font:inherit;font-size:13px;font-weight:550;padding:9px 14px;border-radius:10px;
+  border:1px solid var(--line);background:var(--card);color:var(--ink2);cursor:pointer}
+.ptab.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.ptab.add{color:var(--ink3);padding:9px 12px}
+
+.pgrid{display:grid;grid-template-columns:2fr 1fr;gap:10px}
+.pfull{display:block;margin-top:10px}
+.pgrid label,.pfull{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink3);font-weight:650}
+.pin{display:block;width:100%;margin-top:5px;font:inherit;font-size:14px;color:var(--ink);
+  background:var(--bg2);border:1px solid var(--line);border-radius:9px;padding:9px 11px}
+.pin:focus{outline:none;border-color:var(--accent)}
+textarea.pin{resize:vertical;line-height:1.45;text-transform:none;letter-spacing:0}
+.pmeta{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;
+  font-size:12.5px;color:var(--ink3)}
+.pmeta .over{color:var(--gold)}
+.btn.sm{font-size:12px;padding:6px 10px}
+.btn.wide{width:100%;margin-top:4px}
+
+.panel.blk{margin-top:10px}
+.blkhd{display:flex;align-items:flex-end;gap:10px;margin-bottom:10px}
+.blkhd .role{flex:1;font-weight:600}
+.blkhd .mins{flex:none;width:74px;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink3);font-weight:650}
+.blkbtns{display:flex;gap:5px;flex:none}
+
+/* one movement per row: what, how much, and why — in that order */
+.itrow{display:grid;grid-template-columns:1.5fr .8fr 1.4fr auto;gap:8px;margin-bottom:7px;
+  align-items:center}
+.itrow .pin{margin-top:0}
+select.pin{appearance:none;cursor:pointer}
+.btn.sm.add{margin-top:3px;color:var(--ink3)}
+
+/* the rules, checked rather than remembered */
+.pwarn{margin-top:12px;padding:12px 14px;border-radius:10px;font-size:13px;line-height:1.5}
+.pwarn.good{border:1px solid var(--line);color:var(--ink3)}
+.pwarn.good .ok{color:var(--accent)}
+.pwarn.bad{border:1px solid var(--gold);background:var(--gold-soft);color:var(--ink2)}
+.pwarn b{display:block;color:var(--gold);font-size:11px;letter-spacing:.13em;
+  text-transform:uppercase;margin-bottom:6px}
+.pwarn ul{margin:0;padding-left:18px}
+.pwarn li{margin:3px 0}
+
+@media (max-width:820px){
+  .itrow{grid-template-columns:1fr auto;grid-auto-rows:min-content}
+  .itrow .note{grid-column:1 / -1}
+}
 </style>
 </head>
 <body>
@@ -327,6 +380,14 @@ textarea::placeholder{color:var(--ink3)}
         reverse-engineering a rationale.</p>
     </div>
     <div id="layers"></div>
+
+    <div class="lead" style="margin-top:30px">
+      <h2>The program, day by day</h2>
+      <p>The layers above are the reasoning. This is the thing itself: every session, every block,
+        every movement, editable. Change anything here and it is what lands in the app the next
+        time that day is released — there is no second copy anywhere.</p>
+    </div>
+    <div id="prog"></div>
   </main>
 </div>
 
@@ -570,7 +631,7 @@ const RELEASE = [
    takes to open somebody else's program. */
 const USER = new URLSearchParams(location.search).get('client') || 'ozzy';
 const KEY = `fj.v1.${USER}.coach`;
-const blank={decisions:{},notes:{},released:{shape:true},open:{},inbox:[]};
+const blank={decisions:{},notes:{},released:{shape:true},open:{},inbox:[],program:null};
 let S=load();
 function load(){ try{const r=localStorage.getItem(KEY);return r?Object.assign({},structuredClone(blank),JSON.parse(r)):structuredClone(blank);}catch(e){return structuredClone(blank);} }
 function save(quiet){ try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){} if(!quiet)toast('Saved'); }
@@ -685,6 +746,183 @@ function drawLayers(){
   });
 }
 
+/* ============================================================
+   THE PROGRAM EDITOR
+   The sessions used to live inside dashboard.html as a hand-written
+   object, which meant this console could talk about the program at
+   length and change none of it. They are data now — spine/program.default.json
+   is the first draft, this panel owns it after that, and the client
+   reads whatever is saved here.
+
+   Everything edits in place and saves on blur. No modal, no "edit
+   mode": a coach adjusting one rep count should not have to enter
+   and leave a state to do it.
+   ============================================================ */
+let CAT = {};           /* the movement catalogue, for the pickers */
+let PROG = null;        /* {days:{d1:{name,tag,why,blocks:[…]}}}   */
+let PDAY = null;        /* which day is open                        */
+
+async function loadProgram(){
+  try{
+    const r = await fetch('spine/catalog.json', {cache:'no-cache'});
+    if(r.ok) CAT = (await r.json()).movements || {};
+  }catch(e){ /* offline: the pickers fall back to free text */ }
+
+  if(S.program && S.program.days){ PROG = S.program; }
+  else{
+    try{
+      const r = await fetch('spine/program.default.json', {cache:'no-cache'});
+      if(r.ok) PROG = await r.json();
+    }catch(e){}
+  }
+  if(!PROG) PROG = {days:{}};
+  PDAY = PDAY || Object.keys(PROG.days)[0] || null;
+  drawProgram();
+}
+
+const mvName = id => (CAT[id] && CAT[id].name) || id;
+/* grouped by movement pattern, because that is how a coach reaches for one */
+function mvOptions(sel){
+  const byPat = {};
+  Object.values(CAT).forEach(m=>{ (byPat[m.pattern||'other'] ||= []).push(m); });
+  const pats = Object.keys(byPat).sort();
+  const opts = pats.map(pt=>`<optgroup label="${esc(pt)}">${
+    byPat[pt].sort((a,b)=>a.name.localeCompare(b.name))
+      .map(m=>`<option value="${esc(m.id)}" ${m.id===sel?'selected':''}>${esc(m.name)}</option>`)
+      .join('')}</optgroup>`).join('');
+  const orphan = sel && !CAT[sel]
+    ? `<option value="${esc(sel)}" selected>${esc(sel)} — not in the catalogue</option>` : '';
+  return orphan + opts;
+}
+
+function drawProgram(){
+  const host = document.getElementById('prog');
+  if(!host) return;
+  const days = Object.keys(PROG.days || {});
+  if(!days.length){ host.innerHTML = `<div class="panel"><div class="pad">
+    <p class="mut">No program yet. Run the generator, or add a day.</p>
+    <button class="btn" onclick="addDay()">Add a day</button></div></div>`; return; }
+
+  const d = PROG.days[PDAY] || PROG.days[days[0]];
+  const totalMins = (d.blocks||[]).reduce((t,b)=>t+(+b.mins||0),0);
+
+  host.innerHTML = `
+    <div class="ptabs">
+      ${days.map(k=>`<button class="ptab ${k===PDAY?'on':''}" data-pday="${k}">
+        ${esc(PROG.days[k].name || k)}</button>`).join('')}
+      <button class="ptab add" onclick="addDay()">+</button>
+    </div>
+
+    <div class="panel">
+      <div class="pad">
+        <div class="pgrid">
+          <label>Name<input class="pin" data-f="name" value="${esc(d.name||'')}"></label>
+          <label>Tag<input class="pin" data-f="tag" value="${esc(d.tag||'')}"></label>
+        </div>
+        <label class="pfull">Why this session exists
+          <textarea class="pin" data-f="why" rows="2">${esc(d.why||'')}</textarea></label>
+        <div class="pmeta">
+          <span class="${totalMins>+(A.length||20)?'over':''}">${totalMins} min planned
+            &middot; ${A.length||20} asked for</span>
+          <button class="btn sm" onclick="delDay()">Delete this day</button>
+        </div>
+      </div>
+    </div>
+
+    ${(d.blocks||[]).map((b,bi)=>`
+      <div class="panel blk">
+        <div class="pad">
+          <div class="blkhd">
+            <input class="pin role" data-b="${bi}" data-f="role" value="${esc(b.role||'')}">
+            <label class="mins">min<input class="pin" type="number" min="0"
+              data-b="${bi}" data-f="mins" value="${+b.mins||0}"></label>
+            <div class="blkbtns">
+              <button class="btn sm" onclick="moveBlock(${bi},-1)" title="Up">&uarr;</button>
+              <button class="btn sm" onclick="moveBlock(${bi},1)" title="Down">&darr;</button>
+              <button class="btn sm" onclick="delBlock(${bi})">Remove</button>
+            </div>
+          </div>
+          ${(b.items||[]).map((it,ii)=>`
+            <div class="itrow">
+              <select class="pin ex" data-b="${bi}" data-i="${ii}" data-f="ex">${mvOptions(it.ex)}</select>
+              <input class="pin pres" data-b="${bi}" data-i="${ii}" data-f="pres"
+                placeholder="3 &times; 8" value="${esc(it.pres||'')}">
+              <input class="pin note" data-b="${bi}" data-i="${ii}" data-f="note"
+                placeholder="a cue, or why this one" value="${esc(it.note||'')}">
+              <button class="btn sm" onclick="delItem(${bi},${ii})">&times;</button>
+            </div>`).join('')}
+          <button class="btn sm add" onclick="addItem(${bi})">+ movement</button>
+        </div>
+      </div>`).join('')}
+
+    <button class="btn wide" onclick="addBlock()">+ block</button>
+    <div class="pwarn" id="pwarn"></div>`;
+
+  host.querySelectorAll('[data-pday]').forEach(b=>b.onclick=()=>{ PDAY=b.dataset.pday; drawProgram(); });
+  host.querySelectorAll('.pin').forEach(el=>{
+    el.onchange = () => {
+      const f = el.dataset.f, bi = el.dataset.b, ii = el.dataset.i;
+      const day = PROG.days[PDAY];
+      if(bi == null)      day[f] = el.value;
+      else if(ii == null) day.blocks[+bi][f] = (f==='mins' ? +el.value : el.value);
+      else                day.blocks[+bi].items[+ii][f] = el.value;
+      S.program = PROG; save(1); checkProgram();
+      if(f==='name' || f==='mins') drawProgram();
+    };
+  });
+  checkProgram();
+}
+
+/* The rules we wrote down, enforced instead of remembered. Warnings, not
+   blocks: a coach overriding a guideline on purpose is the job. */
+function checkProgram(){
+  const el = document.getElementById('pwarn'); if(!el) return;
+  const d = PROG.days[PDAY]; if(!d) return;
+  const out = [];
+  const mins = (d.blocks||[]).reduce((t,b)=>t+(+b.mins||0),0);
+  const want = +(A.length||20);
+  if(mins > want)      out.push(`${mins} minutes planned against ${want} asked for.`);
+  if(mins && mins < want-4) out.push(`Only ${mins} of the ${want} minutes are used.`);
+
+  const kit = new Set(A.kit||[]);
+  const all = (d.blocks||[]).flatMap(b=>b.items||[]);
+  all.forEach(it=>{
+    const m = CAT[it.ex]; if(!m) return;
+    const need = (m.equipment||[]).filter(k=>k!=='bw');
+    if(need.length && !need.some(k=>kit.has(k)))
+      out.push(`${m.name} needs ${need.join(' or ')} — not in his kit.`);
+  });
+  const seen = {};
+  all.forEach(it=>{ const m=CAT[it.ex]; if(!m) return;
+    seen[m.pattern] = (seen[m.pattern]||0)+1; });
+  Object.entries(seen).forEach(([pt,n])=>{ if(n>3)
+    out.push(`${n} ${pt} movements in one session — that is a lot for one pattern.`); });
+  if(!all.length) out.push('No movements in this session yet.');
+
+  el.innerHTML = out.length
+    ? `<b>${out.length} thing${out.length===1?'':'s'} to look at</b><ul>${
+        out.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`
+    : `<span class="ok">Nothing flagged. Kit, volume and length all check out.</span>`;
+  el.className = 'pwarn' + (out.length ? ' bad' : ' good');
+}
+
+const nextDayKey = () => { let n=1; while(PROG.days['d'+n]) n++; return 'd'+n; };
+function addDay(){ const k=nextDayKey();
+  PROG.days[k]={name:'New session',tag:'',why:'',blocks:[{role:'Work',mins:15,items:[]}]};
+  PDAY=k; S.program=PROG; save(1); drawProgram(); }
+function delDay(){ if(!confirm('Delete this session?')) return;
+  delete PROG.days[PDAY]; PDAY=Object.keys(PROG.days)[0]||null; S.program=PROG; save(1); drawProgram(); }
+function addBlock(){ (PROG.days[PDAY].blocks ||= []).push({role:'Work',mins:5,items:[]});
+  S.program=PROG; save(1); drawProgram(); }
+function delBlock(i){ PROG.days[PDAY].blocks.splice(i,1); S.program=PROG; save(1); drawProgram(); }
+function moveBlock(i,dir){ const b=PROG.days[PDAY].blocks, j=i+dir;
+  if(j<0||j>=b.length) return; [b[i],b[j]]=[b[j],b[i]]; S.program=PROG; save(1); drawProgram(); }
+function addItem(bi){ const first=Object.keys(CAT)[0]||'';
+  (PROG.days[PDAY].blocks[bi].items ||= []).push({ex:first,pres:'',note:''});
+  S.program=PROG; save(1); drawProgram(); }
+function delItem(bi,ii){ PROG.days[PDAY].blocks[bi].items.splice(ii,1);
+  S.program=PROG; save(1); drawProgram(); }
+
 function drawDock(){
   const ok=LAYERS.filter(L=>S.decisions[L.id]==='ok').length;
   const work=LAYERS.filter(L=>S.decisions[L.id]==='work').length;
@@ -745,7 +983,7 @@ document.getElementById('btnCopy').onclick=async()=>{
     toast('Selected — press Cmd+C'); }
 };
 
-drawRail(); drawInbox(); drawLayers(); drawDock();
+drawRail(); drawInbox(); drawLayers(); drawDock(); loadProgram();
 </script>
 </body>
 </html>
