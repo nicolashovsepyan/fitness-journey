@@ -62,7 +62,21 @@ export async function consumeReleaseHandoff() {
   }
 
   const s = storage();
-  const uid = payload.userId || 'me';
+
+  /* WHOSE PROGRAM THIS BECOMES, ON THIS DEVICE.
+
+     The id in the payload is the CONSOLE's id for this person — derived
+     there from their email so one coach can hold many clients without
+     collisions. This phone has its own idea of who it belongs to, and the
+     two were never going to match. They do not need to: a phone has one
+     person on it, and a link addressed to them is for whoever is here.
+
+     So the device's own active user wins, and the payload's id is only the
+     fallback for a phone that has not been claimed yet. Getting this
+     backwards writes the program against an id nothing else reads, which
+     looks like a successful release and shows an empty week. */
+  const active = await s.getActiveUserId();
+  const uid = active || payload.userId || 'me';
 
   const program = makeProgram({
     id: 'prg_' + uid,
@@ -75,7 +89,10 @@ export async function consumeReleaseHandoff() {
        key order it wrote them in. */
     days: Object.entries((payload.program && payload.program.days) || {})
       .map(([id, d], k) => ({ id, weekday: k, sessionId: id, label: d.name || null })),
-    profile: { source: 'console', raw: payload.program || {} },
+    /* raw is the console's day map, carried whole; released is its switch
+       map. The client has no console to ask, so both travel. */
+    profile: { source: 'console', raw: payload.program || {},
+               released: payload.released || null },
   });
   await s.savePrograms([program]);
 

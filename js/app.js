@@ -22,6 +22,8 @@ import { loadVoicePref } from './timer.js';
 import { renderClaim } from './screens/claim.js';
 import { consumeSurveyHandoff } from './intake.js';
 import { consumeReleaseHandoff } from './release.js';
+import { adaptDay } from './program-adapter.js';
+import { storage } from './core/storage.js';
 import { applyUserManifest } from './manifest-user.js';
 
 const app = document.getElementById('app');
@@ -30,6 +32,51 @@ let view = { name: 'home', sessionId: null };
 function go(name, sessionId) { view = { name, sessionId }; render(); }
 
 const runCb = { onExit: () => go('home'), onFinish: () => go('home') };
+
+/* ---- the workout day, coming from the dashboard --------------------------
+   The spine is onboarding, dashboard, program, workout day: the dashboard is
+   where a session is started from, and it is a separate page, so it starts
+   one by sending the person here as index.html?run=<dayId>.
+
+   The day it names is a day of THEIR released program — the one the coach
+   wrote — not an entry in the built-in library. That is the whole point:
+   before this, a released program was stored correctly and the app ran
+   somebody else's week, because currentProgram() looked the id up in a
+   static map and quietly fell back when it did not recognise it.
+
+   Returns false when there is nothing to run, so boot() can fall through to
+   a normal render rather than leaving a blank screen. */
+async function startFromProgram(dayId) {
+  try {
+    const uid = activeUserId();
+    const prg = (await storage().getProgram(uid)) || null;
+    const raw = prg && prg.profile && prg.profile.raw;
+    const day = raw && raw.days && raw.days[dayId];
+    if (!day) return false;
+
+    /* two of the console's movements are not in the app's library; the
+       catalogue is what gives them a name instead of an id */
+    let catalog = {};
+    try {
+      const r = await fetch('spine/catalog.json', { cache: 'no-cache' });
+      if (r.ok) catalog = (await r.json()).movements || {};
+    } catch (e) { /* offline: names fall back to ids, nothing breaks */ }
+
+    const { plan, warnings } = adaptDay(dayId, day, catalog);
+    if (!plan.blocks.length) return false;
+    /* Loud on purpose. A prescription the adapter could not read is carried
+       through with its text intact rather than guessed at, and this is the
+       breadcrumb for why a set count looks odd. */
+    if (warnings.length) {
+      console.warn('[program] prescriptions not understood:', warnings);
+    }
+    startWorkout(plan, runCb);
+    return true;
+  } catch (e) {
+    console.warn('[program] could not start the released day', e);
+    return false;
+  }
+}
 
 function render() {
   // Never guess whose phone this is — ask once if we were never told.
@@ -167,7 +214,32 @@ async function boot() {
   applyUserManifest();                    // home-screen icon opens THEIR program
 
   // If a workout was left running, go straight back into it — never to home.
-  if (!bootIntoActiveRun()) render();
+  if (bootIntoActiveRun()) return;
+
+  /* THE SPINE: onboarding, dashboard, program, workout day.
+
+     The user lives in the dashboard. It is where they come back every day,
+     where they see their program, and where a session is started from — so
+     the app opening straight onto the week was skipping the room the whole
+     product happens in.
+
+     The dashboard is its own page rather than a screen in this router, so
+     landing on it is a redirect. index.html stays the entry point because it
+     is the only thing that can consume a hand-off and resolve identity —
+     the dashboard needs both to have happened before it can draw anything.
+
+     ?view=week and ?run=<id> come back here for the program and the runner,
+     which is why this is a redirect and not a rewrite of the manifest. */
+  const q = new URLSearchParams(location.search);
+  if (!q.has('view') && !q.has('run')) {
+    location.replace('dashboard.html');
+    return;
+  }
+  if (q.has('run')) {
+    const started = await startFromProgram(q.get('run'));
+    if (started) return;
+  }
+  render();
 }
 
 /* A write that has not reached disk when the tab goes away is a lost set.

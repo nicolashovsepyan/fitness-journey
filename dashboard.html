@@ -2090,7 +2090,37 @@ function fromHash(){
   }catch(e){ return null; }
 }
 
+/* ONE SET OF RECORDS, NOT TWO.
+
+   This file grew its own identity store — fj.v1.profile.<uid> and
+   fj.v1.current — at the same time as js/ grew the documented one in
+   core/schema.js: fj.users, fj.intakes, fj.programs. Two systems, same
+   information, no conversation between them. The survey wrote to one and
+   the dashboard read the other, so a person who had just onboarded still
+   opened on the demo.
+
+   The schema records win, for two reasons: they are the shape docs/BACKEND.md
+   commits to for Supabase, so aligning now means the backend swap is a change
+   of adapter rather than a rewrite; and they are what the app's runner
+   already reads, which is where a workout has to come from.
+
+   The old keys are still read, below, so anything already on a device keeps
+   working. Nothing writes them any more. */
+function fromRecords(){
+  try{
+    const uid = localStorage.getItem('fj.user');
+    if(!uid) return null;
+    const itk = JSON.parse(localStorage.getItem('fj.intakes')||'[]')
+      .filter(i => i.userId === uid)
+      .sort((x,y)=>String(y.submittedAt).localeCompare(String(x.submittedAt)))[0];
+    if(!itk || !itk.answers) return null;
+    return {uid, a:itk.answers, at:itk.submittedAt};
+  }catch(e){ return null; }
+}
+
 function loadProfile(){
+  const viaRecords = fromRecords();
+  if(viaRecords) return viaRecords;
   try{
     const viaLink = fromHash();
     if(viaLink){
@@ -2144,6 +2174,21 @@ const A = Object.assign({}, DEMO, LOADED ? LOADED.a : {});
    answers. Until it is, every buy link points at one market. */
 if(!A.country) A.country = 'CA';
 
+/* THE SURVEY AND THIS PAGE DISAGREED ABOUT WHAT `kit` IS, and it took the
+   whole dashboard down the first time a real profile arrived: the survey
+   writes {have:[…], other:[…]} — it asks what you own AND what you own that
+   it did not list — and everything here expects a flat array, because the
+   demo profile was written by hand as one.
+
+   Normalised here, at the boundary, rather than in the twenty places that
+   read it. `other` is folded in because a person who typed "sandbag" owns a
+   sandbag, and dropping it would silently narrow what we think they have. */
+if(A.kit && !Array.isArray(A.kit)){
+  A.kit = [].concat(A.kit.have || [], A.kit.other || []).filter(Boolean);
+}
+/* Same shape problem, same fix: the survey answers "where" as a list. */
+if(A.where && !Array.isArray(A.where)) A.where = [A.where].filter(Boolean);
+
 /* Declared HERE, above the program, and not further down where it used to
    live: SESSIONS merges whatever the console saved, and a `const` read
    before its declaration throws into a catch that quietly returns null —
@@ -2163,9 +2208,28 @@ const COACH_KEY = k('coach');
    console saves a program for this person it replaces them wholesale —
    same shape, edited by a human. One source of truth, and it is the one
    with a person's judgement in it. */
+/* THE RELEASED PROGRAM, FROM THE RECORD THE COACH ACTUALLY RELEASED.
+
+   COACH_KEY is this browser's console state. It is the right source when the
+   coach and the client are the same tab, and useless the moment the app is
+   installed — an installed iOS app has its own storage container, so it
+   cannot see what the console wrote. The Program record is what the release
+   link carries across that gap (js/release.js), so it is checked first and
+   the console's local copy is the fallback for same-device work. */
+function releasedProgram(){
+  try{
+    const uid = localStorage.getItem('fj.user'); if(!uid) return null;
+    const prg = JSON.parse(localStorage.getItem('fj.programs')||'[]')
+      .find(p => p.assignedTo === uid);
+    const raw = prg && prg.profile && prg.profile.raw;
+    return (raw && raw.days && Object.keys(raw.days).length) ? raw : null;
+  }catch(e){ return null; }
+}
+
 function coachProgram(){
   try{
-    const p = JSON.parse(localStorage.getItem(COACH_KEY)||'{}').program;
+    const p = releasedProgram()
+      || JSON.parse(localStorage.getItem(COACH_KEY)||'{}').program;
     if(!p || !p.days || !Object.keys(p.days).length) return null;
     const out = {};
     for(const [id,d] of Object.entries(p.days)){
@@ -2178,6 +2242,14 @@ function coachProgram(){
 }
 function released(id){
   try{
+    /* A program that arrived by link was released by the act of sending it —
+       the coach does not get to press the switches again on someone else's
+       phone. Its own release map rides along inside the record. */
+    const prg = JSON.parse(localStorage.getItem('fj.programs')||'[]')
+      .find(p => p.assignedTo === localStorage.getItem('fj.user'));
+    const carried = prg && prg.profile && prg.profile.released;
+    if(carried) return !!carried[id];
+    if(prg) return true;
     const r=JSON.parse(localStorage.getItem(COACH_KEY)||'{}').released||{shape:true};
     return !!r[id];
   }catch(e){ return id==='shape'; }
@@ -5051,6 +5123,18 @@ function act(a,el){
   if(cmd==='close') return closeSheet();
   if(cmd==='parq'){ S.dismissed.parq=1; save(); go('today'); return toast('Noted — I will ask again before week 5'); }
   if(cmd==='openday') return released(el.dataset.day)?sheetDay(el.dataset.day):toast('Still in review');
+  /* THE END OF THE SPINE: onboarding, dashboard, program, workout day.
+     "Start the session" has been on the day sheet all along with nothing
+     listening for it — the runner lives in the app shell, not in this page,
+     so this is the hand-off to it. index.html?run=<dayId> boots, resolves
+     who this is, reads the day out of THEIR released program and starts it.
+     The session is marked done here when they come back. */
+  if(cmd==='start'){
+    S.queued = (S.queued||[]).filter(x=>x!==arg);
+    save(1);
+    location.href = 'index.html?run=' + encodeURIComponent(arg);
+    return;
+  }
   if(cmd==='pending') return toast("You'll get a nudge the moment it unlocks");
   if(cmd==='openweek') return sheetWeek();
   if(cmd==='swap') return toast('Swap coming — three alternatives for today');

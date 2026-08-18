@@ -432,7 +432,42 @@ select.pin{appearance:none;cursor:pointer}
 /* ============================================================
    1 · THE CLIENT — straight off the survey, nothing invented.
    ============================================================ */
-const A = {
+/* WHOSE CONSOLE THIS IS — resolved before anything reads it.
+
+   The console was written for one person and keyed everything to him:
+   `USER` defaulted to 'ozzy' and KEY/COACH_KEY hung off it, so the program
+   draft, the release switches and the layer decisions all lived in one
+   drawer. Picking a different client from the rail changed the name on the
+   release panel and nothing else — edits for Nicolas were being written into
+   Ozzy's drawer.
+
+   Now the client is resolved FIRST, from ?client= or the last pick, and
+   every key derives from it. Two clients are two drawers. Changing the pick
+   reloads, because half this file reads these constants at parse time and
+   re-keying live would leave the older half pointing at the previous person.
+
+   Ozzy stays as the built-in example — the ten layers are written about his
+   answers and are worth keeping as the worked example — but he is now one
+   entry among the real ones rather than the only shape the console knows. */
+const OZZY_ID = 'ozzy';
+function coachIntakes(){
+  try{ return JSON.parse(localStorage.getItem('fj.intakes')||'[]'); }catch(e){ return []; }
+}
+function pickedClientId(){
+  const q = new URLSearchParams(location.search).get('client');
+  if(q) return q;
+  const saved = localStorage.getItem('fj.coach.client');
+  if(saved) return saved;
+  const first = coachIntakes()[0];
+  return (first && first.userId) || OZZY_ID;
+}
+const CLIENT_ID = pickedClientId();
+
+/* The built-in example. Kept verbatim: it is the subject of every worked
+   number in the ten layers below, and a real client's answers are read over
+   it rather than merged into it — a half-Ozzy half-someone-else profile
+   would be worse than either. */
+const OZZY_A = {
   name:'Ozzy', sex:'m', age:45, heightCm:180, weightKg:88.6, unit:'lb', country:'CA',
   horizon:['kids','nopain','sport'], focus:['lean','strong'],
   activity:'light', tracker:'none', shape:{now:3}, weightTend:'gains',
@@ -443,6 +478,26 @@ const A = {
   parq:['joint','other'], pain:['arm','knee','ankle'],
   intensity:'push', checkin:'mon'
 };
+
+/* A real client's answers come from their intake, verbatim, exactly as the
+   dashboard reads them. Ozzy is the fallback and only the fallback. */
+function clientAnswers(id){
+  const itk = coachIntakes()
+    .filter(i => i.userId === id)
+    .sort((x,y)=>String(y.submittedAt).localeCompare(String(x.submittedAt)))[0];
+  if(itk && itk.answers){
+    const a = Object.assign({}, itk.answers);
+    /* the survey writes kit as {have,other}; everything here expects a list —
+       same normalisation the dashboard does, at the same boundary */
+    if(a.kit && !Array.isArray(a.kit)) a.kit = [].concat(a.kit.have||[], a.kit.other||[]).filter(Boolean);
+    if(a.where && !Array.isArray(a.where)) a.where = [a.where].filter(Boolean);
+    return a;
+  }
+  return null;
+}
+const CLIENT_A = clientAnswers(CLIENT_ID);
+const IS_OZZY = !CLIENT_A;
+const A = CLIENT_A || OZZY_A;
 
 const FACTS = [
   ['Goal, 90 days','Lean out, <em>then</em> get stronger'],
@@ -645,7 +700,7 @@ const RELEASE = [
 /* Same key scheme as the client app: fj.v1.<user>.<record>. The console is
    pointed at a client rather than built for one — swapping USER is all it
    takes to open somebody else's program. */
-const USER = new URLSearchParams(location.search).get('client') || 'ozzy';
+const USER = CLIENT_ID;   /* resolved at the top of this script — see CLIENT_ID */
 const KEY = `fj.v1.${USER}.coach`;
 const blank={decisions:{},notes:{},released:{shape:true},open:{},inbox:[],program:null};
 let S=load();
@@ -1034,12 +1089,43 @@ function b64urlEncode(o){
 /* A survey filled in on another device, handed over as a link. Written into
    the same store the app uses, so an imported client and a local one are the
    same record afterwards. */
+function coachUidFor(a){
+  const e = String((a && a.email) || '').trim().toLowerCase();
+  const n = String((a && a.name) || '').trim().toLowerCase();
+
+  /* ALREADY HERE? USE THE ID THEY ALREADY HAVE.
+     A coach who does the survey on the same machine as the console ends up
+     with two records for one person: the app writes 'me', then the import
+     mints its own id and the picker lists them twice. Matching on the email
+     first, then the name, means an import UPDATES the person the device
+     already knows — including the 'me' the app created — rather than
+     shadowing them. */
+  const match = coachIntakes().find(i => {
+    const ia = i.answers || {};
+    const ie = String(ia.email || '').trim().toLowerCase();
+    if(e && ie) return ie === e;
+    return !!n && String(ia.name || '').trim().toLowerCase() === n;
+  });
+  if(match && match.userId) return match.userId;
+
+  if(e){ let h=0; for(let i=0;i<e.length;i++) h=(h*31+e.charCodeAt(i))|0; return 'c'+(h>>>0).toString(36); }
+  const slug = n.replace(/[^a-z0-9]+/g,'') || 'client';
+  return 'c' + slug.slice(0,12);
+}
+
 function importIntakeFromUrl(){
   const m = String(location.hash||'').match(/[#&]fj=([A-Za-z0-9_\-]+)/);
   if(!m) return null;
   let p; try{ p = b64urlDecode(m[1]); }catch(e){ toast('That link could not be read'); return null; }
   const a = p.a || {};
-  const uid = 'me';
+  /* A DISTINCT ID PER PERSON, and this matters more here than on a phone.
+     js/intake.js uses the fixed id 'me' because a phone belongs to one
+     person and a second survey on it is that person correcting themselves.
+     A console holds everybody — importing two clients under 'me' would have
+     the second quietly overwrite the first. Derived from the email when
+     there is one so re-importing the same person updates rather than
+     duplicates, and from the name plus a stamp when there is not. */
+  const uid = coachUidFor(a);
   const users = lsGet(USERS_LS).filter(u => u.id !== uid);
   users.push({ id:uid, role:'client', status:'pending', displayName:a.name||'', email:a.email||null,
     ui:'pro', programId:null, trainerId:null, accent:'#3ECBA8',
@@ -1069,43 +1155,80 @@ function clientList(){
   return out;
 }
 
-let PICKED = null;
+function clientOptions(){
+  const users = lsGet(USERS_LS);
+  const seen = new Set(), out = [];
+  coachIntakes().forEach(i => {
+    if(seen.has(i.userId)) return; seen.add(i.userId);
+    const u = users.find(x => x.id === i.userId);
+    out.push({ id:i.userId,
+      name:(u && u.displayName) || (i.answers && i.answers.name) || i.userId });
+  });
+  out.push({ id:OZZY_ID, name:'Ozzy — built-in example' });
+  return out;
+}
+
 function drawClients(){
   const sel = document.getElementById('clientPick'); if(!sel) return;
-  const list = clientList();
-  const want = new URLSearchParams(location.search).get('client')
-    || localStorage.getItem('fj.coach.client') || list[0].id;
-  PICKED = list.find(c => c.id === want) || list[0];
+  const list = clientOptions();
   sel.innerHTML = list.map(c =>
-    `<option value="${esc(c.id)}" ${c.id===PICKED.id?'selected':''}>${esc(c.name)}</option>`).join('');
-  sel.onchange = () => { localStorage.setItem('fj.coach.client', sel.value); drawClients(); drawRelease2(); };
+    `<option value="${esc(c.id)}" ${c.id===CLIENT_ID?'selected':''}>${esc(c.name)}</option>`).join('');
+
+  /* A RELOAD, NOT A REDRAW. USER, KEY and COACH_KEY are consts read at parse
+     time by half this file; swapping the client live would leave the other
+     half writing into the previous person's drawer, which is the bug this
+     whole change exists to fix. */
+  sel.onchange = () => {
+    localStorage.setItem('fj.coach.client', sel.value);
+    location.search = '?client=' + encodeURIComponent(sel.value);
+  };
 
   const nameEl = document.getElementById('whoName'), subEl = document.getElementById('whoSub');
-  if(PICKED.intake){
-    const a = PICKED.intake.answers || {};
-    nameEl.textContent = PICKED.name;
-    subEl.textContent = [a.age && a.age+'', a.sex==='f'?'female':a.sex==='m'?'male':null,
-      a.tierName || (a.levels && 'level '+(a.levels.gym??'?')),
-      'survey v'+(PICKED.intake.version||6)].filter(Boolean).join(' · ');
-    document.querySelector('.who .av').textContent = (PICKED.name.trim()[0]||'?').toUpperCase();
+  if(nameEl) nameEl.textContent = A.name || CLIENT_ID;
+  if(subEl){
+    subEl.textContent = IS_OZZY
+      ? '45 · male · Canada · the console\'s worked example'
+      : [A.age && A.age+'', A.sex==='f'?'female':A.sex==='m'?'male':null,
+         A.tierName || (A.levels && A.levels.gym!=null ? 'level '+A.levels.gym : null),
+         'from their survey'].filter(Boolean).join(' · ');
+  }
+  const av = document.querySelector('.who .av');
+  if(av) av.textContent = ((A.name||'?').trim()[0]||'?').toUpperCase();
+  const h1 = document.querySelector('header h1');
+  if(h1) h1.textContent = IS_OZZY
+    ? "Building Ozzy's first program"
+    : `Building ${A.name}'s program`;
+  document.title = 'Coach Console — ' + (A.name || CLIENT_ID);
+
+  /* The ten layers are written about Ozzy's numbers. Say so rather than let
+     them read as if they were about whoever is selected. */
+  const lead = document.querySelector('.lead .sub, header .sub');
+  if(lead && !IS_OZZY && !lead.dataset.warned){
+    lead.dataset.warned = '1';
+    lead.insertAdjacentHTML('beforeend',
+      `<b style="display:block;margin-top:8px;color:var(--warn,#F2C14E)">The ten layers below are still
+       written against Ozzy's answers — they have not been re-reasoned for ${esc(A.name||'this client')}.
+       The program editor and the release are correctly theirs.</b>`);
   }
 }
 
 function drawRelease2(){
   const host = document.querySelector('#releasePanel .pad'); if(!host) return;
-  if(!PICKED || !PICKED.intake){
-    host.innerHTML = `<p class="micro">Pick a client who has completed onboarding. Ozzy is the built-in
-      example and has no app to send to.</p>`;
+  if(IS_OZZY){
+    host.innerHTML = `<p class="micro">Ozzy is the built-in example and has no app to send to.
+      Pick a client who has completed onboarding.</p>`;
     return;
   }
   const base = location.href.split('#')[0].replace(/coach\.html.*$/,'');
-  const payload = { v:1, at:new Date().toISOString(), userId:PICKED.id, name:PICKED.name,
-    program: PROG || {days:{}} };
+  const payload = { v:1, at:new Date().toISOString(), userId:CLIENT_ID, name:A.name||CLIENT_ID,
+    program: PROG || {days:{}}, released: S.released || {} };
   const link = base + 'index.html#prg=' + b64urlEncode(payload);
   const days = Object.keys((PROG&&PROG.days)||{}).length;
+  const live = Object.keys(S.released||{}).filter(k=>S.released[k] && k!=='shape').length;
   host.innerHTML = `
-    <p style="margin:0 0 10px">Sending <b>${days} day${days===1?'':'s'}</b> to <b>${esc(PICKED.name)}</b>.
-      Opening this on their phone sets them to <b>active</b> and their app opens on this program.</p>
+    <p style="margin:0 0 10px">Sending <b>${days} day${days===1?'':'s'}</b> to <b>${esc(A.name||CLIENT_ID)}</b>,
+      <b>${live}</b> of them released. Opening this on their phone sets them to <b>active</b> and their
+      dashboard opens on this program.</p>
     <textarea id="relLink" readonly style="width:100%;height:74px;font:inherit;font-size:11px;
       background:#181D23;color:inherit;border:1px solid rgba(255,255,255,.14);border-radius:8px;
       padding:8px;resize:vertical">${esc(link)}</textarea>
