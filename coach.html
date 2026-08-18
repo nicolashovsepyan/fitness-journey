@@ -318,6 +318,19 @@ select.pin{appearance:none;cursor:pointer}
   .itrow{grid-template-columns:1fr auto;grid-auto-rows:min-content}
   .itrow .note{grid-column:1 / -1}
 }
+
+/* the jump bar — sticky, quiet, and the program is the one that is lit */
+#jump{position:sticky;top:0;z-index:40;display:flex;gap:4px;align-items:center;
+  padding:8px 14px;background:rgba(16,19,23,.92);backdrop-filter:blur(10px);
+  border-bottom:1px solid rgba(255,255,255,.09);overflow-x:auto}
+#jump a{flex:none;font:inherit;font-size:12.5px;font-weight:600;letter-spacing:-.01em;
+  color:var(--dim,#8B949E);text-decoration:none;padding:7px 11px;border-radius:9px;
+  border:1px solid transparent;white-space:nowrap}
+#jump a:hover{color:#fff;background:rgba(255,255,255,.06)}
+#jump a.hot{color:#0F1417;background:var(--ok,#3ECBA8);border-color:transparent}
+#jump a.on{color:#fff;border-color:rgba(255,255,255,.2)}
+/* anything jumped to must clear the sticky bar */
+#prog,#releasePanel,#layers{scroll-margin-top:64px}
 </style>
 </head>
 <body>
@@ -343,6 +356,18 @@ select.pin{appearance:none;cursor:pointer}
   </div>
 </header>
 
+<!-- WHERE THINGS ARE. The program editor sits about 3,600px down this page,
+     under ten essay-length layers, and there was no way to get to it except
+     scrolling past all of them — which is exactly how you end up asking
+     where the program section is. The layers are the reasoning and they are
+     worth keeping; they are just not what you open the console to do. -->
+<nav id="jump">
+  <a href="#top" data-j="top">Client</a>
+  <a href="#layers" data-j="layers">Layers</a>
+  <a href="#prog" data-j="prog" class="hot">The program</a>
+  <a href="#releasePanel" data-j="releasePanel">Send it</a>
+</nav>
+
 <div class="wrap">
 
   <!-- ================= THE CLIENT ================= -->
@@ -353,7 +378,13 @@ select.pin{appearance:none;cursor:pointer}
         <div class="grow"><b id="whoName">Ozzy</b><small id="whoSub">45 · male · Canada · survey v6, 10 Aug</small>
           <select id="clientPick" style="margin-top:7px;width:100%;font:inherit;font-size:12.5px;
             background:#181D23;color:inherit;border:1px solid rgba(255,255,255,.14);
-            border-radius:8px;padding:6px 7px"></select></div>
+            border-radius:8px;padding:6px 7px"></select>
+          <!-- HOW A CLIENT GETS IN ON A MACHINE THAT HAS NEVER SEEN THEM.
+               The import only worked by opening a #fj= link, which is fine on
+               the phone that filled the survey and useless on a coach's
+               laptop, where the link arrives in a message and has to be
+               pasted somewhere. This is that somewhere. -->
+          <div id="addClient" style="margin-top:8px"></div></div>
       </div>
       <div class="pad" style="padding-top:0" id="facts"></div>
     </div>
@@ -384,7 +415,7 @@ select.pin{appearance:none;cursor:pointer}
     </div>
     <div id="layers"></div>
 
-    <div class="lead" style="margin-top:30px">
+    <div class="lead" id="progLead" style="margin-top:30px">
       <h2>The program, day by day</h2>
       <p>The layers above are the reasoning. This is the thing itself: every session, every block,
         every movement, editable. Change anything here and it is what lands in the app the next
@@ -1168,6 +1199,31 @@ function clientOptions(){
   return out;
 }
 
+function drawAddClient(){
+  const host = document.getElementById('addClient'); if(!host) return;
+  const none = !coachIntakes().length;
+  host.innerHTML = `
+    ${none ? `<p class="micro" style="margin:0 0 7px">No clients yet. Ozzy is the built-in example —
+      paste a client's link to add a real one.</p>` : ''}
+    <details ${none?'open':''}><summary style="cursor:pointer;font-size:12px;color:var(--dim,#8B949E)">
+      Add a client from their link</summary>
+      <textarea id="addLink" placeholder="Paste the link from the end of their onboarding"
+        style="width:100%;height:56px;margin-top:7px;font:inherit;font-size:11px;background:#181D23;
+        color:inherit;border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:7px;
+        resize:vertical"></textarea>
+      <button class="btn" id="addGo" style="margin-top:6px;width:100%">Add them</button>
+    </details>`;
+  const go = document.getElementById('addGo');
+  if(go) go.onclick = () => {
+    const v = (document.getElementById('addLink').value||'').trim();
+    const m = v.match(/[#&]fj=([A-Za-z0-9_\-]+)/) || v.match(/^([A-Za-z0-9_\-]{40,})$/);
+    if(!m) return toast('That does not look like an onboarding link');
+    /* reuse the one importer, by handing it the fragment it expects */
+    location.hash = 'fj=' + m[1];
+    location.reload();
+  };
+}
+
 function drawClients(){
   const sel = document.getElementById('clientPick'); if(!sel) return;
   const list = clientOptions();
@@ -1247,7 +1303,21 @@ function drawRelease2(){
 
 importIntakeFromUrl();
 drawRail(); drawInbox(); drawLayers(); drawDock();
-loadProgram().then(() => { drawClients(); drawRelease2(); });
+loadProgram().then(() => { drawClients(); drawAddClient(); drawRelease2(); });
+
+/* the jump bar lights whichever section is on screen */
+(function(){
+  const links = [...document.querySelectorAll('#jump a')];
+  const targets = links.map(a => document.getElementById(a.dataset.j)).filter(Boolean);
+  if(!targets.length || !('IntersectionObserver' in window)) return;
+  const io = new IntersectionObserver(es => {
+    es.forEach(e => {
+      const a = links.find(x => x.dataset.j === e.target.id);
+      if(a && !a.classList.contains('hot')) a.classList.toggle('on', e.isIntersecting);
+    });
+  }, { rootMargin: '-60px 0px -70% 0px' });
+  targets.forEach(t => io.observe(t));
+})();
 </script>
 </body>
 </html>
