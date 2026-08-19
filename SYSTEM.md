@@ -57,8 +57,10 @@ Supporting, not surfaces in their own right:
 | **Exercise Library** | Both | `library.html`, Learn tab | A *view* of `catalog.json`, not its own data |
 | **Client Profile** | You | `profile.html` | Printable read of a PROFILE; superseded by the console's rail |
 
-Also in the repo and outside this map: `js/` (the older module app — see Break 4),
-`feed.html`, `hero.html`, `preview.html`, `mark-compare.html` (marketing/dev).
+Also in the repo and outside this map: `js/` (the older module app — see Break 4).
+`feed.html`, `hero.html`, `preview.html` and `mark-compare.html` were prototypes
+and comparisons; they are in `ARCHIVE/` now, along with `onboarding.v5.bak` and
+the unused hero photograph. Nothing links to any of them — see `ARCHIVE/README.md`.
 
 ---
 
