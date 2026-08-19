@@ -6,7 +6,7 @@ waiting on you.
 
 ---
 
-## 1. There were three folders called "Fitness Journey". Only one is real.
+## 1. There were four folders with fitness names. Only one is the app.
 
 | Folder | What it actually is |
 |---|---|
@@ -14,12 +14,20 @@ waiting on you.
 | `COWORK/Fitness Journey` | Your **original** project from spring — the WOD editor, the big Excel system, the benchmark spreadsheets, 240 saved prompts. Finished with, but 360 of its 372 files exist nowhere else, so it is not going anywhere. |
 | `Dropbox (2026-04-04 10:30)/…/Fitness Journey` | An **old copy of the app**, from a backup version of your whole Dropbox. Only 5 files in it are unique. **This is the one your Claude sessions have been opening into** — which is why you kept opening "Fitness Journey" and not finding the app. |
 
-**What I am doing:** renaming the two old ones so this can never happen again.
+There is also a fourth, `COWORK/Fitness`, which is not the app at all — it
+holds one spreadsheet, `Cousin Program/Cousin - 6-Week Program.xlsx`. Left
+exactly as it is; you just now know what it is.
 
-- `Fitness Journey` → `Fitness Journey (OLD - v1 spring 2026)`
-- the backup one → `Fitness Journey (OLD - backup copy, do not use)`
+**Done:** both old ones are renamed, so this can never happen again.
 
-Nothing is deleted. Nothing moves. Both folders keep every file they have.
+- `Fitness Journey` → **`Fitness Journey (OLD - v1 spring 2026)`**
+- the backup one → **`Fitness Journey (OLD - backup copy, do not use)`**
+
+Nothing was deleted. Nothing moved. Both folders keep every file they had.
+
+**One side effect to expect:** any Claude session you had pointed at the old
+backup folder will say it cannot find it. That is the rename working. Point it
+at `Fitness Journey - 2.0` instead — that is the app.
 
 The five things that exist ONLY in the backup copy, in case you want them:
 `VIDEO-TODO.md`, `Yates_HIT_Hybrid_Protocol.md`, `MEMORY.md`, `devserver.py`,
@@ -146,6 +154,27 @@ to three megabytes each. Nothing in the app uses them any more; it uses the
 shrunk versions in `images/exercises/`.
 
 I have not touched them. Say the word and they go to `ARCHIVE/`.
+
+---
+
+## 7. I proved the app still works before any of this was kept
+
+You said this must not affect where the system goes to find its information.
+Nothing shipped until the whole thing had been walked end to end:
+
+- the logo check and the gauge check both pass — every copy still agrees
+- all three test files pass
+- the survey opens, takes a name, and reaches the last screen
+- **Open my app** hands over to the app, which works out who it is and lands
+  on the dashboard, with the right name on it
+- the console opens, picks up that same client, loads the movement catalogue
+  and the programme, and the release link puts a four-day programme into the
+  app
+- a session opens and the runner runs — set 1 of 1, Cat–Cow, rep counter,
+  timer, *Set done*
+- not a single missing file, on any page, at any step
+- and every one of the 102 files in the offline download was fetched to prove
+  it exists
 
 ---
 
