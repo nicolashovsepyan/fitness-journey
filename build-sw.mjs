@@ -27,8 +27,15 @@ const KEEP_EXT = /\.(html|css|js|mjs|png|svg|webmanifest|json|woff2?)$/i;
 /* Committed, published, but NOT part of the app. Tests are .mjs and would
    otherwise match KEEP_EXT and be downloaded onto every user's phone as part
    of the offline shell. The shell is what the app needs to run without a
-   connection; nothing else belongs in it. */
-const SKIP_PREFIX = ['test/', 'docs/'];
+   connection; nothing else belongs in it.
+
+   ARCHIVE/ is finished work kept for reference — see ARCHIVE/README.md.
+   site/ is the separate Netlify copy of the app: it is published from its
+   own folder by Netlify and has nothing to do with this shell. Both were
+   in the shell, and site/ alone was 111 of the 217 files a phone had to
+   download before the app would open — every one of them a stale duplicate
+   of a file sitting at the root. */
+const SKIP_PREFIX = ['test/', 'docs/', 'ARCHIVE/', 'site/'];
 
 /* The file list comes from GIT, not from the disk.
 
