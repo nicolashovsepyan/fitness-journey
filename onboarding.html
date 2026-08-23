@@ -3118,7 +3118,7 @@ const FLOW = [
     "I ask you a short set of questions. Every one of them is there for a reason — nothing is filler.",
     "You answer honestly. <b>These are for you, not for me.</b> There is no answer here that makes you look bad.",
     "<b>Stage 1</b> — the answers get read and processed. Every one of them, against what the training actually says.",
-    "<b>Stage 2</b> — then I go through it myself and build the programme. A person, not a template.",
+    "<b>Stage 2</b> — then I go through it myself and build the program. A person, not a template.",
     "<b>4 minutes.</b> No typing. Then it is your log, your data, your journey.<small>Every answer and every session, yours, forever.</small>"
   ]},
 
@@ -3310,7 +3310,7 @@ const FLOW = [
     "Last part, and it is the important one. <b>Add this page to your home screen.</b>",
     "It stops being a link and becomes <b>your app</b> — it opens full screen, it works with no signal, and everything you just told me is already in it.",
     "Open it and you land on <b>your dashboard</b>. Have a look around: your log, your movements, your week — all of it is yours from the first day.",
-    "I build the programme from here and it appears <b>inside the app</b>. <b>You will get a message the moment it is ready.</b><small>Nothing to check. Nothing to wait for in an inbox.</small>"
+    "I build the program from here and it appears <b>inside the app</b>. <b>You will get a message the moment it is ready.</b><small>Nothing to check. Nothing to wait for in an inbox.</small>"
   ]},
 /* Still asked, but not as a delivery address any more — the programme
    arrives in the app. This is only so the account can be found again from
@@ -5181,7 +5181,7 @@ function weekplan(s){
     if(days<2)    return ['warn', 'Below 2 days nothing compounds. Two is the floor that still works.'];
     if(days<wanted) return ['', `<b>${days} days</b> is honest. Fewer days done properly beats more days missed.`];
     if(days===2)  return ['', '<b>2 days</b> is enough to get stronger. Not enough to get stronger fast — a fine trade if it is the one you can keep.'];
-    return ['', `<b>${days} × ${LEN[len]}</b> is a real block of work. That is a programme, not a plan.`];
+    return ['', `<b>${days} × ${LEN[len]}</b> is a real block of work. That is a program, not a plan.`];
   }
   function paint(){
     d.querySelector('#wpd').textContent=days;
@@ -5782,7 +5782,7 @@ function deck(s){
           const sw=bandsEl.querySelector('#swapunit');
           if(sw) sw.onclick=function(){
             const to = secKind==='distance' ? 'seconds' : 'distance';
-            sw.textContent = to==='distance' ? 'Rather answer in seconds' : 'Rather answer in metres';
+            sw.textContent = to==='distance' ? 'Rather answer in seconds' : 'Rather answer in meters';
             /* The question line above the second dial is gone — the unit
                beside the number says it. mount() re-labels that. */
             haptic(12); mount(to);
@@ -6419,7 +6419,7 @@ function reveal(){
       `<b>${clash} day${clash>1?'s':''}</b> doubled with ${actName}. Not forbidden — I will build it as a hard day.`];
     if(picked.length<wanted) return ['',
       `<b>${picked.length} days</b> is honest. Fewer days done properly beats more days missed.`];
-    return ['', `<b>${picked.length} × ${LENNAME[len]} min</b> is a programme, not a plan.`];
+    return ['', `<b>${picked.length} × ${LENNAME[len]} min</b> is a program, not a plan.`];
   }
 
   /* The list is the dashboard's week, one row per day they picked. New rows
@@ -6476,6 +6476,11 @@ function reveal(){
 
   cta.onclick=()=>{ if(!picked.length) return; haptic(400);
     A.trainDays=picked.slice(); A.days=picked.length; A.length=len;
+    /* This screen counts Monday as 0 because that is how a training week
+       reads to a person. Everything downstream uses JavaScript's own
+       Sunday-as-0, so the convention is stamped on the answer rather than
+       assumed — the dashboard was reading Mon/Wed/Fri as Sun/Tue/Thu. */
+    A.dayBase='mon';
     A.when=slot; A.actDays=actDays.slice(); next(); };
   paint();
 }
@@ -6637,7 +6642,7 @@ function entry(){
     <div class="sendbox">
       <div class="coachtag"><i>N</i>Coach ${COACH.name}</div>
       <h4>One last tap</h4>
-      <p>This sends me everything you just answered, in one link. I read it, build the programme,
+      <p>This sends me everything you just answered, in one link. I read it, build the program,
          and <b>it appears in your app</b> — you will get a message there when it is ready.</p>
       <div class="sendrow">
         <button class="pri" id="sendBtn">Send to ${COACH.name}</button>
