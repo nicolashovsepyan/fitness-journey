@@ -1,140 +1,152 @@
-# The chat opening — v2
+# The chat opening, v3
 
 Still nothing built. This is the script.
 
-Niko's bubbles land on the left, one at a time. Your answers land on the right.
-**TYPE** = keyboard · **TAP** = one tap, no Continue · **DIAL** = the scroller
-from the exercise cards, inside the thread.
+Niko's bubbles land on the left, one at a time. Answers land on the right.
+**TYPE** is a keyboard. **TAP** is one tap, no Continue. **DIAL** is the
+scroller from the exercise cards, inside the thread.
+
+House rules now in force: no long dashes anywhere a client reads, numerals
+instead of written numbers, and a "write your own" option is always the same
+size as the buttons next to it.
 
 ---
 
-### 1 · Hello
-> What's up — I'm Coach Niko.
+### 1. Hello
+> What's up, I'm Coach Niko.
 >
 > Welcome to your Fitness Journey. This is your app now, not mine.
 >
 > What should I call you?
 
-**TYPE** → `name`
+**TYPE** to `name`
 
 ---
 
-### 2 · Age
+### 2. Age
 > Good to meet you, {name}. How old are you?
 
-**TYPE** (number pad) → `age`
+**TYPE**, number pad, to `age`
 
 ---
 
-### 3 · Gender
-> Man or woman? Strength standards differ — this keeps your numbers honest.
+### 3. Gender
+> Man or woman? Strength standards differ, so this keeps your numbers honest.
 
-**TAP** — Man · Woman · Rather not say → `sex`
+**TAP**: Man / Woman, to `sex`
 
 ---
 
-### 4 · Height and weight
-> Two quick ones. How tall are you?
+### 4. Height and weight
+> 2 quick ones. How tall are you?
 
-**DIAL** → `heightCm` — swaps **ft/in ↔ cm**
+**DIAL** to `heightCm`, swaps ft/in and cm
 
 > And roughly what do you weigh?
 
-**DIAL** → `weightKg` — swaps **lb ↔ kg**
+**DIAL** to `weightKg`, swaps lb and kg
 
 ---
 
-### 5 · Why now
-> So — what made you open this today?
+### 5. Why now
+> So, what made you open this today?
 
-**TAP one** → `driver`
+**TAP one**, to `driver`
 
-- I've let it slide. Time to get back
-- I train already — I need a real program
-- I want to lose weight
-- I want to get stronger
+1. I've let it slide. Time to get back on track
+2. I'm active, but stuck. I need help past this plateau
+3. I want to lose weight
+4. I want to get stronger
 
-*Under the options, small:* **or say it your own way** → text box
+Then, full width and the same size as the 4 above:
+
+5. **Say it your own way**, which opens a text box
 
 ---
 
-### 6 · How long
+### 6. How long
 > How long have you been at it, on and off?
 
-**TAP** → `trained`
+**TAP** to `trained`
 
-- Just starting
-- Under a year
-- A few years
-- Ten years or more
+1. Just starting
+2. Under 1 year
+3. 1 to 5 years
+4. 5 years or more
 
 ---
 
-### 7 · What their training looks like
+### 7. What their training looks like
 > And when you train, what does it look like?
 
-**TAP** → `style` *(new — nothing like it exists today)*
+**TAP** to `style`. This is a new answer, nothing like it exists today.
 
-- Weights, sets and reps
-- Classes or HIIT
-- CrossFit
-- Calisthenics
-- Functional, mixed
-- Running or cycling
+1. Weights, sets and reps
+2. Classes or HIIT
+3. CrossFit
+4. Calisthenics
+5. Functional, mixed
+6. Running or cycling
 
 ---
 
-### 8 · Days a week
+### 8. Days a week
 > How many days a week can you actually give me? Realistic beats ambitious.
 
-**TAP** → `days` — 2 · 3 · 4 · 5+
+**TAP** to `days`: 2 / 3 / 4 / 5+
 
 ---
 
-### 9 · Anything hurt
+### 9. Anything hurt
 > Last one. Anything hurt? Bad knee, cranky shoulder, anything.
 
-**TAP one** → `painNote`
+**TAP one**, to `painNote`. Both buttons the same size.
 
-- Nothing right now
-- Yeah — let me tell you → text box
+1. Nothing right now
+2. **Yeah, let me tell you**, which opens a text box
 
-*Not the medical form. That comes later. This is the honest version.*
+This is not the medical form. That comes later. This is the honest version.
 
 ---
 
-### 10 · Into the next part
+### 10. Into the next part
 > That's you. Now let's see what you've got to work with.
 
-**Continue** → the visual section: body shape, where you train, your kit.
+**Continue** to the visual section: body shape, where you train, your kit.
 
 ---
 
-## What changed from v1
+## Changed in v3
 
-- Cut "Two minutes of questions and then we get to the good part"
-- Gender question cut to one line
-- **Cut "how active are you right now" entirely** — see the warning below
-- Why-now trimmed to 4 answers, and now covers the two you named:
-  someone who already trains and needs a real program, and someone
-  getting back on track
-- Everything shortened and loosened
-- Hand-off is one line
+1. "Rather not say" removed from gender.
+2. Q5 second option reworked. "I train, I need a program" is gone. It now
+   reads "I'm active, but stuck. I need help past this plateau", which is the
+   person who already trains hard and wants a way through, not a beginner
+   looking for structure.
+3. Every text option is now full width, the same size as the buttons beside it.
+4. No long dashes anywhere in this script.
+5. Numerals throughout: "2 quick ones", "Under 1 year", "5 years or more".
+6. 6 training styles confirmed.
 
-## Spelling
+## The dash cleanup is its own job
 
-"programme" was British. Fixed in the 5 places a client reads it, plus
-"metres" → "meters". Code comments left alone — nobody reads those.
+The rule is easy. Applying it to what is already written is not:
 
-## ⚠ One consequence of cutting "how active"
+| File | Long dashes a client reads |
+|---|---|
+| dashboard.html | about 96 |
+| onboarding.html | about 56 |
 
-`activity` is the **only** thing that currently sets how far the sliders reach
-on the exercise cards — how good an answer someone is allowed to claim. Cut it
-and something has to take over. That is fine, and arguably better: **how long
-they've trained** (Q6) plus what the deck actually measures is a truer read
-than a self-rating. But it has to be rewired, not just deleted.
+That is roughly 150 sentences, and each needs a decision: comma, period,
+colon, or a rewrite. A blind find and replace produces sentences that limp.
+Worth one deliberate pass rather than folding it into a feature.
 
-## Still open
+Code comments are left alone. No client reads them, and rewriting 450 of them
+would bury every real change in noise.
 
-1. Six training styles in Q7 — right list?
-2. "Rather not say" on gender — keep? It costs fair benchmarks.
+## Still true from v2
+
+"How active are you right now" is cut, and that answer is currently the only
+thing setting how far the sliders reach on the exercise cards. Something has
+to take over: Q6, plus what the deck actually measures. It needs rewiring,
+not just deleting.
