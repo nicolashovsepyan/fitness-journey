@@ -1,0 +1,463 @@
+{
+  "id": "beginner_return",
+  "version": 1,
+  "name": "Come Back Strong",
+  "who": "Training partner",
+  "source": "ported from js/data/sessions.js — the program this person is actually on",
+  "duration": 45,
+  "fixed": true,
+  "trainDays": [
+    1,
+    3,
+    5
+  ],
+  "units": "lb",
+  "equipment": [
+    "bw",
+    "db",
+    "bb",
+    "band",
+    "bench",
+    "rack",
+    "pullupbar",
+    "machine",
+    "cable",
+    "kb",
+    "mat"
+  ],
+  "constraints": {
+    "knee": "no running, no jumping, no deep knee flexion under load"
+  },
+  "goals": [
+    "Show up three times a week",
+    "Build muscle, armour the joints",
+    "Lose weight over time"
+  ],
+  "habits": [
+    {
+      "id": "walk",
+      "label": "20 min walk after a meal",
+      "daily": true
+    },
+    {
+      "id": "no8pm",
+      "label": "No eating after 8pm",
+      "daily": true
+    },
+    {
+      "id": "protein",
+      "label": "First meal was high protein",
+      "daily": true
+    },
+    {
+      "id": "sport",
+      "label": "Sport session",
+      "daily": false,
+      "note": "weekly — tick it on the day you do it"
+    }
+  ],
+  "days": {
+    "d1": {
+      "name": "Day 1 · Upper",
+      "tag": "upper",
+      "why": "",
+      "blocks": [
+        {
+          "role": "Prime",
+          "name": "Warm-up A · Loosen up",
+          "note": "Never rushed, but no stopping — flow straight through. This is the part that protects the joints.",
+          "mins": 3,
+          "items": [
+            {
+              "ex": "arm_circles",
+              "pres": "20",
+              "note": ""
+            },
+            {
+              "ex": "down_dog_up_dog",
+              "pres": "5",
+              "note": ""
+            },
+            {
+              "ex": "hip_90_90",
+              "pres": "8",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "role": "Prime",
+          "name": "Warm-up A · Circuit",
+          "note": "3 rounds, continuous — no rest inside a round",
+          "mins": 3,
+          "items": [
+            {
+              "ex": "pushup",
+              "pres": "3-5 reps",
+              "note": "Hands under your shoulders, body in one straight line."
+            },
+            {
+              "ex": "dead_hang",
+              "pres": "20s",
+              "note": "Just hang from the bar with straight arms and let your shoulders stretch out."
+            },
+            {
+              "ex": "banded_pullapart",
+              "pres": "10-15 reps",
+              "note": "Band in both hands, arms straight out in front."
+            },
+            {
+              "ex": "mountain_climber",
+              "pres": "10",
+              "note": "Push-up position."
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "A · Push-Ups + Lat Pulldown",
+          "note": "A1 straight into A2 with no rest, then rest 75 sec, then go again.",
+          "mins": 9,
+          "items": [
+            {
+              "ex": "straight_bar_push_up",
+              "pres": "10-15 reps",
+              "note": "Straight Bar Push-Up · superset A1 · Set a bar in the rack about waist height."
+            },
+            {
+              "ex": "lat_pulldown",
+              "pres": "10",
+              "note": "superset A2"
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "B · Assisted Dip + Cable Row",
+          "note": "B1 straight into B2 with no rest, then rest 75 sec.",
+          "mins": 9,
+          "items": [
+            {
+              "ex": "assisted_dip",
+              "pres": "8",
+              "note": "superset B1"
+            },
+            {
+              "ex": "seated_cable_row",
+              "pres": "10",
+              "note": "superset B2"
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "C · Lateral Raise + Pushdown",
+          "note": "C1 into C2, no rest, then 75 sec.",
+          "mins": 9,
+          "items": [
+            {
+              "ex": "lateral_raise",
+              "pres": "12",
+              "note": "superset C1"
+            },
+            {
+              "ex": "triceps_pushdown",
+              "pres": "12",
+              "note": "superset C2"
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "D · Reverse Fly + Curl",
+          "note": "D1 into D2, no rest, then 75 sec. Reverse fly is never heavy — light and slow.",
+          "mins": 9,
+          "items": [
+            {
+              "ex": "reverse_fly",
+              "pres": "12-15 reps",
+              "note": "superset D1 · Chest flat on an incline bench, light dumbbells hanging."
+            },
+            {
+              "ex": "barbell_curl",
+              "pres": "12",
+              "note": "superset D2"
+            }
+          ]
+        },
+        {
+          "role": "Finish",
+          "name": "Finisher · Kettlebell Swings",
+          "note": "3 rounds of 12, rest 20 sec between rounds.",
+          "mins": 3,
+          "items": [
+            {
+              "ex": "kb_swing",
+              "pres": "12",
+              "note": ""
+            }
+          ]
+        }
+      ]
+    },
+    "d2": {
+      "name": "Day 2 · Upper",
+      "tag": "upper",
+      "why": "",
+      "blocks": [
+        {
+          "role": "Prime",
+          "name": "Warm-up A · Loosen up",
+          "note": "Never rushed, but no stopping — flow straight through. This is the part that protects the joints.",
+          "mins": 4,
+          "items": [
+            {
+              "ex": "arm_circles",
+              "pres": "20",
+              "note": ""
+            },
+            {
+              "ex": "down_dog_up_dog",
+              "pres": "5",
+              "note": ""
+            },
+            {
+              "ex": "hip_90_90",
+              "pres": "8",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "role": "Prime",
+          "name": "Warm-up A · Circuit",
+          "note": "3 rounds, continuous — no rest inside a round",
+          "mins": 4,
+          "items": [
+            {
+              "ex": "pushup",
+              "pres": "3-5 reps",
+              "note": "Hands under your shoulders, body in one straight line."
+            },
+            {
+              "ex": "dead_hang",
+              "pres": "20s",
+              "note": "Just hang from the bar with straight arms and let your shoulders stretch out."
+            },
+            {
+              "ex": "banded_pullapart",
+              "pres": "10-15 reps",
+              "note": "Band in both hands, arms straight out in front."
+            },
+            {
+              "ex": "mountain_climber",
+              "pres": "10",
+              "note": "Push-up position."
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "A · Chest Press + Row",
+          "note": "A1 into A2, no rest, then rest 75 sec.",
+          "mins": 11,
+          "items": [
+            {
+              "ex": "chest_press_machine",
+              "pres": "10",
+              "note": "superset A1"
+            },
+            {
+              "ex": "chest_supported_row",
+              "pres": "12",
+              "note": "superset A2"
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "B · Shoulder Press + Pullover",
+          "note": "B1 into B2, no rest, then rest 75 sec.",
+          "mins": 11,
+          "items": [
+            {
+              "ex": "shoulder_press_machine",
+              "pres": "10",
+              "note": "superset B1"
+            },
+            {
+              "ex": "db_pullover",
+              "pres": "12",
+              "note": "superset B2 · Lie on the bench, elbows slightly bent and fixed."
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "C · Back Extension + Dip Hold",
+          "note": "C1 into C2, no rest, then rest 75 sec.",
+          "mins": 11,
+          "items": [
+            {
+              "ex": "back_extension_45",
+              "pres": "12",
+              "note": "superset C1"
+            },
+            {
+              "ex": "dip_support_hold",
+              "pres": "20s",
+              "note": "superset C2 · Hold yourself up on the dip bars with your arms locked straight."
+            }
+          ]
+        },
+        {
+          "role": "Finish",
+          "name": "Finisher · Farmer's Carry",
+          "note": "4 rounds · walk 30-40 m · rest 45-60 sec between rounds. No straps — grip is the point. Start 40-50 lb per hand.",
+          "mins": 4,
+          "items": [
+            {
+              "ex": "farmers_carry",
+              "pres": "40s",
+              "note": "Farmer's Carry · A dumbbell in each hand, no straps."
+            }
+          ]
+        }
+      ]
+    },
+    "d3": {
+      "name": "Day 3 · Full Body",
+      "tag": "full body",
+      "why": "",
+      "blocks": [
+        {
+          "role": "Prime",
+          "name": "Warm-up B · Sequence 1",
+          "note": "Flow straight through, no stopping.",
+          "mins": 8,
+          "items": [
+            {
+              "ex": "arm_circles",
+              "pres": "20",
+              "note": ""
+            },
+            {
+              "ex": "down_dog_up_dog",
+              "pres": "5",
+              "note": ""
+            },
+            {
+              "ex": "hip_90_90",
+              "pres": "8",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "role": "Prime",
+          "name": "Warm-up B · Sequence 2",
+          "note": "2 rounds, continuous — no rest inside a round",
+          "mins": 8,
+          "items": [
+            {
+              "ex": "banded_sidewalk",
+              "pres": "60s",
+              "note": "Banded Side-Step March · Band around your legs, stay low in a quarter-squat, step sideways without letting your feet click together."
+            },
+            {
+              "ex": "pushup",
+              "pres": "3-5 reps",
+              "note": "Hands under your shoulders, body in one straight line."
+            },
+            {
+              "ex": "dead_hang",
+              "pres": "20s",
+              "note": "Just hang from the bar with straight arms and let your shoulders stretch out."
+            },
+            {
+              "ex": "superman",
+              "pres": "10-15 reps",
+              "note": "Superman · Lie face down, arms stretched out in front, thumbs pointing up."
+            },
+            {
+              "ex": "mountain_climber",
+              "pres": "10",
+              "note": "Push-up position."
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "Full Body Circuit",
+          "note": "Straight through, 3-5 rounds. Rest 90 sec between rounds ONLY — no rest between exercises. One pair of dumbbells: start 25-30 lb per hand (the shoulder press is the limiter). The RDL and row will feel light on purpose for now — that is fine for the first month.",
+          "mins": 21,
+          "items": [
+            {
+              "ex": "db_rdl",
+              "pres": "8",
+              "note": "DB Romanian Deadlift · Push your hips back, slide the dumbbells down the front of your legs, knees almost straight."
+            },
+            {
+              "ex": "db_shoulder_press",
+              "pres": "6",
+              "note": "Sit or stand tall, dumbbells at shoulder height."
+            },
+            {
+              "ex": "bent_over_row",
+              "pres": "6",
+              "note": "DB Bent-Over Row · Hinge at the hips, flat back, dumbbells hanging."
+            },
+            {
+              "ex": "pushup_on_dumbbells",
+              "pres": "6",
+              "note": "DB Push-Ups · Hands gripping the two dumbbells on the floor so your wrists stay straight."
+            },
+            {
+              "ex": "forearm_plank",
+              "pres": "30s",
+              "note": "Plank Hold · Elbows under your shoulders, body in one straight line."
+            },
+            {
+              "ex": "wall_sit",
+              "pres": "30s",
+              "note": "Wall Sit · Back flat on the wall, slide down until your thighs are somewhere comfortable — the higher you stay, the easier on the knee."
+            }
+          ]
+        },
+        {
+          "role": "Finish",
+          "name": "Finisher · Core Circuit",
+          "note": "30 sec each, no rest between exercises. 2-3 rounds, 45 sec between rounds.",
+          "mins": 8,
+          "items": [
+            {
+              "ex": "dead_bug",
+              "pres": "30s",
+              "note": "On your back, arms up, knees over hips."
+            },
+            {
+              "ex": "side_plank",
+              "pres": "30s each side",
+              "note": "On your side, elbow under your shoulder, knees bent at 90°."
+            },
+            {
+              "ex": "side_plank",
+              "pres": "30s each side",
+              "note": "On your side, elbow under your shoulder, knees bent at 90°."
+            },
+            {
+              "ex": "bird_dog",
+              "pres": "30s",
+              "note": "On hands and knees."
+            },
+            {
+              "ex": "lying_leg_raise",
+              "pres": "30s",
+              "note": "Leg Raises · On your back, hands under your hips."
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,491 @@
+{
+  "id": "main",
+  "version": 1,
+  "name": "Foundation Block",
+  "who": "Nicolas",
+  "source": "ported from js/data/sessions.js — the program this person is actually on",
+  "duration": 30,
+  "fixed": false,
+  "trainDays": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "units": "lb",
+  "equipment": [
+    "bw",
+    "db",
+    "bb",
+    "rings",
+    "parallettes",
+    "band",
+    "vest",
+    "slantboard",
+    "rack",
+    "pullupbar",
+    "bench",
+    "sliders"
+  ],
+  "constraints": {
+    "forearm": "supinated_neutral"
+  },
+  "goals": [
+    "Lower-body size",
+    "Strength (upper + lower)",
+    "Rep-max endurance",
+    "Zone-5 conditioning",
+    "Skills (handstand / front lever)",
+    "Mobility / into the stretch"
+  ],
+  "habits": [],
+  "days": {
+    "d1": {
+      "name": "Quads & Knees",
+      "tag": "hypertrophy",
+      "why": "",
+      "blocks": [
+        {
+          "role": "Prime",
+          "name": "Knee Armor Circuit",
+          "note": "2 rounds, controlled",
+          "mins": 3,
+          "items": [
+            {
+              "ex": "touchdown_squat",
+              "pres": "25 each side",
+              "note": ""
+            },
+            {
+              "ex": "tibialis_raise",
+              "pres": "25",
+              "note": ""
+            },
+            {
+              "ex": "kot_calf",
+              "pres": "50",
+              "note": ""
+            },
+            {
+              "ex": "slant_pulse",
+              "pres": "20",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "Bulgarian Split Squat",
+          "note": "To failure, per side · 3 sets base (up to 4 on strong days)",
+          "mins": 8,
+          "items": [
+            {
+              "ex": "bulgarian_split",
+              "pres": "10 reps to failure each side",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "Slant-Board Squat",
+          "note": "Strength, tempo 3-1-1",
+          "mins": 8,
+          "items": [
+            {
+              "ex": "slant_board_squat",
+              "pres": "3 × 6 · tempo 3-1-1",
+              "note": "90s rest"
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "Assisted Reverse Nordic Curl",
+          "note": "Quad eccentric · limited rest · 3rd anchor",
+          "mins": 8,
+          "items": [
+            {
+              "ex": "reverse_nordic",
+              "pres": "3 × 8",
+              "note": "45s rest"
+            }
+          ]
+        },
+        {
+          "role": "Finish",
+          "name": "Iso Burner — Horse Stance + Side Plank",
+          "note": "3 rounds, continuous (no rest)",
+          "mins": 3,
+          "items": [
+            {
+              "ex": "horse_stance",
+              "pres": "40s",
+              "note": ""
+            },
+            {
+              "ex": "side_plank",
+              "pres": "30s each side",
+              "note": ""
+            },
+            {
+              "ex": "side_plank",
+              "pres": "30s each side",
+              "note": ""
+            }
+          ]
+        }
+      ]
+    },
+    "d2": {
+      "name": "Push & Handstand",
+      "tag": "push",
+      "why": "",
+      "blocks": [
+        {
+          "role": "Prime",
+          "name": "Core + Compression Prep",
+          "note": "2 rounds · handstand-ready",
+          "mins": 3,
+          "items": [
+            {
+              "ex": "long_lever_plank",
+              "pres": "30s",
+              "note": ""
+            },
+            {
+              "ex": "walk_up_plank",
+              "pres": "8",
+              "note": ""
+            },
+            {
+              "ex": "side_plank",
+              "pres": "30s each side",
+              "note": ""
+            },
+            {
+              "ex": "shoulder_tap",
+              "pres": "20",
+              "note": ""
+            },
+            {
+              "ex": "pike_compression",
+              "pres": "10",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "Handstand Practice",
+          "note": "Fresh — quality over fatigue",
+          "mins": 8,
+          "items": [
+            {
+              "ex": "kick_up_practice",
+              "pres": "2 min",
+              "note": ""
+            },
+            {
+              "ex": "wall_handstand_hold",
+              "pres": "30s",
+              "note": "45s rest"
+            },
+            {
+              "ex": "handstand",
+              "pres": "2 min",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "Deep Parallette Pike Push-Up",
+          "note": "To failure",
+          "mins": 8,
+          "items": [
+            {
+              "ex": "deep_pike_pushup",
+              "pres": "8 reps to failure",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "Weighted Dip",
+          "note": "Strength · 1 warm-up (8-10) → 3 × 5",
+          "mins": 8,
+          "items": [
+            {
+              "ex": "weighted_dip",
+              "pres": "3 × 5",
+              "note": "150s rest"
+            }
+          ]
+        },
+        {
+          "role": "Finish",
+          "name": "Push-Up AMRAP",
+          "note": "Volume",
+          "mins": 3,
+          "items": [
+            {
+              "ex": "pushup",
+              "pres": "—",
+              "note": ""
+            }
+          ]
+        }
+      ]
+    },
+    "d3": {
+      "name": "Hinge & Posterior",
+      "tag": "strength",
+      "why": "",
+      "blocks": [
+        {
+          "role": "Prime",
+          "name": "Glute Activation",
+          "note": "Sidewalks (continuous) + bird dogs",
+          "mins": 3,
+          "items": [
+            {
+              "ex": "banded_sidewalk",
+              "pres": "120s",
+              "note": "15s rest"
+            },
+            {
+              "ex": "bird_dog_crunch",
+              "pres": "2 × 8 each side",
+              "note": "20s rest"
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "Hip Thrust",
+          "note": "Strength loader — add load weekly",
+          "mins": 8,
+          "items": [
+            {
+              "ex": "hip_thrust",
+              "pres": "4 × 5",
+              "note": "150s rest"
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "Single-Leg RDL",
+          "note": "Size — per side, progress load/reps · alternating sides = built-in rest",
+          "mins": 8,
+          "items": [
+            {
+              "ex": "single_leg_rdl",
+              "pres": "3 × 8 each side",
+              "note": "90s rest"
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "Nordic Curl",
+          "note": "Hamstring eccentric — progress ROM → load · 3rd anchor",
+          "mins": 8,
+          "items": [
+            {
+              "ex": "nordic_curl",
+              "pres": "3 × 6",
+              "note": "90s rest"
+            }
+          ]
+        },
+        {
+          "role": "Finish",
+          "name": "Tabata — Swing + Jump Squat",
+          "note": "20/10, 5 cycles (~5 min)",
+          "mins": 3,
+          "items": [
+            {
+              "ex": "db_swing",
+              "pres": "—",
+              "note": ""
+            },
+            {
+              "ex": "jump_squat",
+              "pres": "—",
+              "note": ""
+            }
+          ]
+        }
+      ]
+    },
+    "d4": {
+      "name": "Pull & Front Lever",
+      "tag": "pull",
+      "why": "",
+      "blocks": [
+        {
+          "role": "Prime",
+          "name": "Pulling Prep",
+          "note": "Forearm-light",
+          "mins": 3,
+          "items": [
+            {
+              "ex": "banded_pullapart",
+              "pres": "1 × 20",
+              "note": "10s rest"
+            },
+            {
+              "ex": "scap_pullup",
+              "pres": "1 × 15",
+              "note": ""
+            },
+            {
+              "ex": "active_hang",
+              "pres": "30s",
+              "note": "20s rest"
+            },
+            {
+              "ex": "dragon_flag",
+              "pres": "30s",
+              "note": "15s rest"
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "Front Lever",
+          "note": "TUT holds · advanced-tuck or banded straddle (set Week 1)",
+          "mins": 8,
+          "items": [
+            {
+              "ex": "front_lever_tuck",
+              "pres": "10s",
+              "note": "60s rest"
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "Weighted Chin-Up",
+          "note": "Strength · supinated · 1 warm-up (8-10) → 3 × 5",
+          "mins": 8,
+          "items": [
+            {
+              "ex": "weighted_chinup",
+              "pres": "3 × 5",
+              "note": "150s rest"
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "Single-Arm Row",
+          "note": "Horizontal · unilateral · per side · alternating sides = built-in rest",
+          "mins": 8,
+          "items": [
+            {
+              "ex": "single_arm_row",
+              "pres": "3 × 8 each side",
+              "note": "90s rest"
+            }
+          ]
+        },
+        {
+          "role": "Finish",
+          "name": "L-Sit Pull-ups + Skin the Cat",
+          "note": "5 min, minimal rest",
+          "mins": 3,
+          "items": [
+            {
+              "ex": "l_sit_pullup",
+              "pres": "5 reps",
+              "note": ""
+            },
+            {
+              "ex": "skin_the_cat",
+              "pres": "5 reps",
+              "note": ""
+            }
+          ]
+        }
+      ]
+    },
+    "d5": {
+      "name": "Full Body Engine",
+      "tag": "conditioning",
+      "why": "",
+      "blocks": [
+        {
+          "role": "Work",
+          "name": "Block 1 · Tempo AMRAP",
+          "note": "15 min, target ~4 rounds — all 5 patterns",
+          "mins": 15,
+          "items": [
+            {
+              "ex": "chin_up",
+              "pres": "5 reps · 5s hold / 5s down / 5s dead-hang",
+              "note": ""
+            },
+            {
+              "ex": "dip",
+              "pres": "5 reps",
+              "note": ""
+            },
+            {
+              "ex": "goblet_squat",
+              "pres": "8 reps · slow + pause",
+              "note": ""
+            },
+            {
+              "ex": "banded_glute_bridge",
+              "pres": "30s",
+              "note": ""
+            },
+            {
+              "ex": "l_sit",
+              "pres": "20s",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "Block 2 · Explosive Intervals",
+          "note": "40s on / 20s off · ~3 rounds · all 5 patterns",
+          "mins": 15,
+          "items": [
+            {
+              "ex": "explosive_chinup",
+              "pres": "—",
+              "note": ""
+            },
+            {
+              "ex": "deadstop_pushup",
+              "pres": "—",
+              "note": ""
+            },
+            {
+              "ex": "jump_squat",
+              "pres": "—",
+              "note": ""
+            },
+            {
+              "ex": "db_swing",
+              "pres": "—",
+              "note": ""
+            },
+            {
+              "ex": "mountain_climber",
+              "pres": "—",
+              "note": ""
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

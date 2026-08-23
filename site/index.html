@@ -2,7 +2,9 @@
 <meta charset="utf-8">
 <title>Fitness Journey</title>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0B0F14">
 <link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icon-180.png">
 <style>
   html,body{margin:0;height:100%;background:#0B0F14;color:#ECEFF3;
     font:16px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text",Inter,system-ui,sans-serif;
@@ -13,8 +15,27 @@
   .s{border:1px solid #2F3640;color:#A9B2BC}
   h1{font-size:22px;letter-spacing:-.02em;margin:0 0 4px}
   p{color:#858E99;font-size:13.5px;margin:0 0 22px}
+  #wait{display:none}
 </style>
-<div>
+<script>
+/* THE FRONT DOOR FORWARDS.
+
+   Links have been sent in three shapes — index.html#fj=…, index.html#prg=…
+   and a bare #payload — and this page has never been able to read any of
+   them, so every one of them opened a menu and threw the profile away.
+
+   It is not this page's job to understand a payload. It is its job not to
+   lose one. Anything in the fragment goes straight to the app, unchanged,
+   before a single pixel of the menu is drawn. */
+(function(){
+  var h = location.hash || '';
+  if (h.length > 1) {
+    document.write('<style>div.menu{display:none}</style>');
+    location.replace('dashboard.html' + h);
+  }
+})();
+</script>
+<div class="menu">
   <h1>Fitness Journey</h1>
   <p>Start with the survey. It builds the app.</p>
   <a class="p" href="/onboarding.html">Fill in the survey</a>

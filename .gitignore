@@ -14,3 +14,7 @@ dist/
 # tools/build-avatars.mjs. Keeping it out of the shell and out of git.
 EXERCISE LIBRARY/
 fitness-journey-update/
+
+# Handoff links carry a person's answers and their program. Minted on demand
+# with tools/make-link.mjs; never committed.
+spine/programs/link.*.txt

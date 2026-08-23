@@ -292,7 +292,10 @@ textarea.pin{resize:vertical;line-height:1.45;text-transform:none;letter-spacing
 
 .panel.blk{margin-top:10px}
 .blkhd{display:flex;align-items:flex-end;gap:10px;margin-bottom:10px}
-.blkhd .role{flex:1;font-weight:600}
+.blkhd .role{flex:none;width:96px;font-weight:600}
+/* the role is the category; the name is what the person reads on their phone */
+.blkhd .bname{flex:1;font-weight:600}
+.bnote{width:100%;margin-bottom:9px;font-size:11.5px;color:var(--ink3)}
 .blkhd .mins{flex:none;width:74px;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
   color:var(--ink3);font-weight:650}
 .blkbtns{display:flex;gap:5px;flex:none}
@@ -318,6 +321,19 @@ select.pin{appearance:none;cursor:pointer}
   .itrow{grid-template-columns:1fr auto;grid-auto-rows:min-content}
   .itrow .note{grid-column:1 / -1}
 }
+
+/* the jump bar — sticky, quiet, and the program is the one that is lit */
+#jump{position:sticky;top:0;z-index:40;display:flex;gap:4px;align-items:center;
+  padding:8px 14px;background:rgba(16,19,23,.92);backdrop-filter:blur(10px);
+  border-bottom:1px solid rgba(255,255,255,.09);overflow-x:auto}
+#jump a{flex:none;font:inherit;font-size:12.5px;font-weight:600;letter-spacing:-.01em;
+  color:var(--dim,#8B949E);text-decoration:none;padding:7px 11px;border-radius:9px;
+  border:1px solid transparent;white-space:nowrap}
+#jump a:hover{color:#fff;background:rgba(255,255,255,.06)}
+#jump a.hot{color:#0F1417;background:var(--ok,#3ECBA8);border-color:transparent}
+#jump a.on{color:#fff;border-color:rgba(255,255,255,.2)}
+/* anything jumped to must clear the sticky bar */
+#prog,#releasePanel,#layers{scroll-margin-top:64px}
 </style>
 </head>
 <body>
@@ -343,6 +359,18 @@ select.pin{appearance:none;cursor:pointer}
   </div>
 </header>
 
+<!-- WHERE THINGS ARE. The program editor sits about 3,600px down this page,
+     under ten essay-length layers, and there was no way to get to it except
+     scrolling past all of them — which is exactly how you end up asking
+     where the program section is. The layers are the reasoning and they are
+     worth keeping; they are just not what you open the console to do. -->
+<nav id="jump">
+  <a href="#top" data-j="top">Client</a>
+  <a href="#layers" data-j="layers">Layers</a>
+  <a href="#prog" data-j="prog" class="hot">The program</a>
+  <a href="#releasePanel" data-j="releasePanel">Send it</a>
+</nav>
+
 <div class="wrap">
 
   <!-- ================= THE CLIENT ================= -->
@@ -350,7 +378,16 @@ select.pin{appearance:none;cursor:pointer}
     <div class="panel">
       <div class="who">
         <div class="av">O</div>
-        <div><b id="whoName">Ozzy</b><small>45 · male · Canada · survey v6, 10 Aug</small></div>
+        <div class="grow"><b id="whoName">Ozzy</b><small id="whoSub">45 · male · Canada · survey v6, 10 Aug</small>
+          <select id="clientPick" style="margin-top:7px;width:100%;font:inherit;font-size:12.5px;
+            background:#181D23;color:inherit;border:1px solid rgba(255,255,255,.14);
+            border-radius:8px;padding:6px 7px"></select>
+          <!-- HOW A CLIENT GETS IN ON A MACHINE THAT HAS NEVER SEEN THEM.
+               The import only worked by opening a #fj= link, which is fine on
+               the phone that filled the survey and useless on a coach's
+               laptop, where the link arrives in a message and has to be
+               pasted somewhere. This is that somewhere. -->
+          <div id="addClient" style="margin-top:8px"></div></div>
       </div>
       <div class="pad" style="padding-top:0" id="facts"></div>
     </div>
@@ -381,13 +418,26 @@ select.pin{appearance:none;cursor:pointer}
     </div>
     <div id="layers"></div>
 
-    <div class="lead" style="margin-top:30px">
+    <div class="lead" id="progLead" style="margin-top:30px">
       <h2>The program, day by day</h2>
       <p>The layers above are the reasoning. This is the thing itself: every session, every block,
         every movement, editable. Change anything here and it is what lands in the app the next
         time that day is released — there is no second copy anywhere.</p>
     </div>
     <div id="prog"></div>
+
+    <!-- RELEASE. The switches above put a SECTION in front of the client on
+         this device. This puts the whole program on their PHONE, which is a
+         different problem: an installed iOS app has its own storage
+         container, so nothing written here is visible to it. Until the
+         backend lands, the program travels in a link the person opens. -->
+    <div class="lead" style="margin-top:30px">
+      <h2>Send it to their phone</h2>
+      <p>The switches above decide what is visible. This is how it gets there. Their installed app
+        cannot read this browser, so the program travels in a link — open it on the phone once and
+        the app takes it in, sets them to active and opens on their week.</p>
+    </div>
+    <div class="panel" id="releasePanel"><div class="pad"></div></div>
   </main>
 </div>
 
@@ -416,7 +466,69 @@ select.pin{appearance:none;cursor:pointer}
 /* ============================================================
    1 · THE CLIENT — straight off the survey, nothing invented.
    ============================================================ */
-const A = {
+/* WHOSE CONSOLE THIS IS — resolved before anything reads it.
+
+   The console was written for one person and keyed everything to him:
+   `USER` defaulted to 'ozzy' and KEY/COACH_KEY hung off it, so the program
+   draft, the release switches and the layer decisions all lived in one
+   drawer. Picking a different client from the rail changed the name on the
+   release panel and nothing else — edits for Nicolas were being written into
+   Ozzy's drawer.
+
+   Now the client is resolved FIRST, from ?client= or the last pick, and
+   every key derives from it. Two clients are two drawers. Changing the pick
+   reloads, because half this file reads these constants at parse time and
+   re-keying live would leave the older half pointing at the previous person.
+
+   Ozzy stays as the built-in example — the ten layers are written about his
+   answers and are worth keeping as the worked example — but he is now one
+   entry among the real ones rather than the only shape the console knows. */
+const OZZY_ID = 'ozzy';
+const PAYLOAD_V = 6;   /* matches PROFILE_V in dashboard.html — same record */
+/* TWO SURVEYS WROTE TWO DIFFERENT DRAWERS.
+   One build of onboarding appends to `fj.intakes`; another writes
+   `fj.v1.profile.<uid>` and indexes them in `fj.v1.people`. Both are real
+   people who filled the thing in, so the console reads both and stops
+   caring which build they used. Newest wins on a clash. */
+function coachIntakes(){
+  const out = [];
+  try{
+    JSON.parse(localStorage.getItem('fj.intakes')||'[]').forEach(i=>out.push(i));
+  }catch(e){}
+  try{
+    JSON.parse(localStorage.getItem('fj.v1.people')||'[]').forEach(pp=>{
+      const raw = localStorage.getItem('fj.v1.profile.' + pp.uid);
+      if(!raw) return;
+      const rec = JSON.parse(raw);
+      if(rec && rec.a) out.push({userId: pp.uid, submittedAt: rec.at || pp.at, answers: rec.a});
+    });
+  }catch(e){}
+  /* and the one this device is currently signed in as, even if no index
+     mentions it — a profile that arrived by link never touches the index */
+  try{
+    const cur = localStorage.getItem('fj.v1.current');
+    if(cur && !out.some(o=>o.userId===cur)){
+      const rec = JSON.parse(localStorage.getItem('fj.v1.profile.'+cur)||'null');
+      if(rec && rec.a) out.push({userId:cur, submittedAt:rec.at, answers:rec.a});
+    }
+  }catch(e){}
+  return out;
+}
+function pickedClientId(){
+  const q = new URLSearchParams(location.search).get('client');
+  if(q) return q;
+  const saved = localStorage.getItem('fj.coach.client');
+  if(saved) return saved;
+  const first = coachIntakes()[0];
+  return (first && first.userId) || OZZY_ID;
+}
+const CLIENT_ID = pickedClientId();
+
+/* The built-in example. Kept verbatim: it is the subject of every worked
+   number in the ten layers below, and a real client's answers are read over
+   it rather than merged into it — a half-Ozzy half-someone-else profile
+   would be worse than either. */
+const OZZY_A = {
   name:'Ozzy', sex:'m', age:45, heightCm:180, weightKg:88.6, unit:'lb', country:'CA',
   horizon:['kids','nopain','sport'], focus:['lean','strong'],
   activity:'light', tracker:'none', shape:{now:3}, weightTend:'gains',
@@ -427,6 +539,26 @@ const A = {
   parq:['joint','other'], pain:['arm','knee','ankle'],
   intensity:'push', checkin:'mon'
 };
+
+/* A real client's answers come from their intake, verbatim, exactly as the
+   dashboard reads them. Ozzy is the fallback and only the fallback. */
+function clientAnswers(id){
+  const itk = coachIntakes()
+    .filter(i => i.userId === id)
+    .sort((x,y)=>String(y.submittedAt).localeCompare(String(x.submittedAt)))[0];
+  if(itk && itk.answers){
+    const a = Object.assign({}, itk.answers);
+    /* the survey writes kit as {have,other}; everything here expects a list —
+       same normalisation the dashboard does, at the same boundary */
+    if(a.kit && !Array.isArray(a.kit)) a.kit = [].concat(a.kit.have||[], a.kit.other||[]).filter(Boolean);
+    if(a.where && !Array.isArray(a.where)) a.where = [a.where].filter(Boolean);
+    return a;
+  }
+  return null;
+}
+const CLIENT_A = clientAnswers(CLIENT_ID);
+const IS_OZZY = !CLIENT_A;
+const A = CLIENT_A || OZZY_A;
 
 const FACTS = [
   ['Goal, 90 days','Lean out, <em>then</em> get stronger'],
@@ -629,7 +761,7 @@ const RELEASE = [
 /* Same key scheme as the client app: fj.v1.<user>.<record>. The console is
    pointed at a client rather than built for one — swapping USER is all it
    takes to open somebody else's program. */
-const USER = new URLSearchParams(location.search).get('client') || 'ozzy';
+const USER = CLIENT_ID;   /* resolved at the top of this script — see CLIENT_ID */
 const KEY = `fj.v1.${USER}.coach`;
 const blank={decisions:{},notes:{},released:{shape:true},open:{},inbox:[],program:null};
 let S=load();
@@ -758,6 +890,13 @@ function drawLayers(){
    mode": a coach adjusting one rep count should not have to enter
    and leave a state to do it.
    ============================================================ */
+/* >>> GENERATED PROGRAM LIBRARY — do not edit by hand.
+   Regenerate with:  node tools/port-programs.mjs && node tools/build-coach-library.mjs
+   Source of truth:  spine/programs/*.json
+   2 programs, built 2026-08-23. */
+const LIBRARY = {"beginner_return":{"id":"beginner_return","version":1,"name":"Come Back Strong","who":"Training partner","source":"ported from js/data/sessions.js — the program this person is actually on","duration":45,"fixed":true,"trainDays":[1,3,5],"units":"lb","equipment":["bw","db","bb","band","bench","rack","pullupbar","machine","cable","kb","mat"],"constraints":{"knee":"no running, no jumping, no deep knee flexion under load"},"goals":["Show up three times a week","Build muscle, armour the joints","Lose weight over time"],"habits":[{"id":"walk","label":"20 min walk after a meal","daily":true},{"id":"no8pm","label":"No eating after 8pm","daily":true},{"id":"protein","label":"First meal was high protein","daily":true},{"id":"sport","label":"Sport session","daily":false,"note":"weekly — tick it on the day you do it"}],"days":{"d1":{"name":"Day 1 · Upper","tag":"upper","why":"","blocks":[{"role":"Prime","name":"Warm-up A · Loosen up","note":"Never rushed, but no stopping — flow straight through. This is the part that protects the joints.","mins":3,"items":[{"ex":"arm_circles","pres":"20","note":""},{"ex":"down_dog_up_dog","pres":"5","note":""},{"ex":"hip_90_90","pres":"8","note":""}]},{"role":"Prime","name":"Warm-up A · Circuit","note":"3 rounds, continuous — no rest inside a round","mins":3,"items":[{"ex":"pushup","pres":"3-5 reps","note":"Hands under your shoulders, body in one straight line."},{"ex":"dead_hang","pres":"20s","note":"Just hang from the bar with straight arms and let your shoulders stretch out."},{"ex":"banded_pullapart","pres":"10-15 reps","note":"Band in both hands, arms straight out in front."},{"ex":"mountain_climber","pres":"10","note":"Push-up position."}]},{"role":"Work","name":"A · Push-Ups + Lat Pulldown","note":"A1 straight into A2 with no rest, then rest 75 sec, then go again.","mins":9,"items":[{"ex":"straight_bar_push_up","pres":"10-15 reps","note":"Straight Bar Push-Up · superset A1 · Set a bar in the rack about waist height."},{"ex":"lat_pulldown","pres":"10","note":"superset A2"}]},{"role":"Work","name":"B · Assisted Dip + Cable Row","note":"B1 straight into B2 with no rest, then rest 75 sec.","mins":9,"items":[{"ex":"assisted_dip","pres":"8","note":"superset B1"},{"ex":"seated_cable_row","pres":"10","note":"superset B2"}]},{"role":"Work","name":"C · Lateral Raise + Pushdown","note":"C1 into C2, no rest, then 75 sec.","mins":9,"items":[{"ex":"lateral_raise","pres":"12","note":"superset C1"},{"ex":"triceps_pushdown","pres":"12","note":"superset C2"}]},{"role":"Work","name":"D · Reverse Fly + Curl","note":"D1 into D2, no rest, then 75 sec. Reverse fly is never heavy — light and slow.","mins":9,"items":[{"ex":"reverse_fly","pres":"12-15 reps","note":"superset D1 · Chest flat on an incline bench, light dumbbells hanging."},{"ex":"barbell_curl","pres":"12","note":"superset D2"}]},{"role":"Finish","name":"Finisher · Kettlebell Swings","note":"3 rounds of 12, rest 20 sec between rounds.","mins":3,"items":[{"ex":"kb_swing","pres":"12","note":""}]}]},"d2":{"name":"Day 2 · Upper","tag":"upper","why":"","blocks":[{"role":"Prime","name":"Warm-up A · Loosen up","note":"Never rushed, but no stopping — flow straight through. This is the part that protects the joints.","mins":4,"items":[{"ex":"arm_circles","pres":"20","note":""},{"ex":"down_dog_up_dog","pres":"5","note":""},{"ex":"hip_90_90","pres":"8","note":""}]},{"role":"Prime","name":"Warm-up A · Circuit","note":"3 rounds, continuous — no rest inside a round","mins":4,"items":[{"ex":"pushup","pres":"3-5 reps","note":"Hands under your shoulders, body in one straight line."},{"ex":"dead_hang","pres":"20s","note":"Just hang from the bar with straight arms and let your shoulders stretch out."},{"ex":"banded_pullapart","pres":"10-15 reps","note":"Band in both hands, arms straight out in front."},{"ex":"mountain_climber","pres":"10","note":"Push-up position."}]},{"role":"Work","name":"A · Chest Press + Row","note":"A1 into A2, no rest, then rest 75 sec.","mins":11,"items":[{"ex":"chest_press_machine","pres":"10","note":"superset A1"},{"ex":"chest_supported_row","pres":"12","note":"superset A2"}]},{"role":"Work","name":"B · Shoulder Press + Pullover","note":"B1 into B2, no rest, then rest 75 sec.","mins":11,"items":[{"ex":"shoulder_press_machine","pres":"10","note":"superset B1"},{"ex":"db_pullover","pres":"12","note":"superset B2 · Lie on the bench, elbows slightly bent and fixed."}]},{"role":"Work","name":"C · Back Extension + Dip Hold","note":"C1 into C2, no rest, then rest 75 sec.","mins":11,"items":[{"ex":"back_extension_45","pres":"12","note":"superset C1"},{"ex":"dip_support_hold","pres":"20s","note":"superset C2 · Hold yourself up on the dip bars with your arms locked straight."}]},{"role":"Finish","name":"Finisher · Farmer's Carry","note":"4 rounds · walk 30-40 m · rest 45-60 sec between rounds. No straps — grip is the point. Start 40-50 lb per hand.","mins":4,"items":[{"ex":"farmers_carry","pres":"40s","note":"Farmer's Carry · A dumbbell in each hand, no straps."}]}]},"d3":{"name":"Day 3 · Full Body","tag":"full body","why":"","blocks":[{"role":"Prime","name":"Warm-up B · Sequence 1","note":"Flow straight through, no stopping.","mins":8,"items":[{"ex":"arm_circles","pres":"20","note":""},{"ex":"down_dog_up_dog","pres":"5","note":""},{"ex":"hip_90_90","pres":"8","note":""}]},{"role":"Prime","name":"Warm-up B · Sequence 2","note":"2 rounds, continuous — no rest inside a round","mins":8,"items":[{"ex":"banded_sidewalk","pres":"60s","note":"Banded Side-Step March · Band around your legs, stay low in a quarter-squat, step sideways without letting your feet click together."},{"ex":"pushup","pres":"3-5 reps","note":"Hands under your shoulders, body in one straight line."},{"ex":"dead_hang","pres":"20s","note":"Just hang from the bar with straight arms and let your shoulders stretch out."},{"ex":"superman","pres":"10-15 reps","note":"Superman · Lie face down, arms stretched out in front, thumbs pointing up."},{"ex":"mountain_climber","pres":"10","note":"Push-up position."}]},{"role":"Work","name":"Full Body Circuit","note":"Straight through, 3-5 rounds. Rest 90 sec between rounds ONLY — no rest between exercises. One pair of dumbbells: start 25-30 lb per hand (the shoulder press is the limiter). The RDL and row will feel light on purpose for now — that is fine for the first month.","mins":21,"items":[{"ex":"db_rdl","pres":"8","note":"DB Romanian Deadlift · Push your hips back, slide the dumbbells down the front of your legs, knees almost straight."},{"ex":"db_shoulder_press","pres":"6","note":"Sit or stand tall, dumbbells at shoulder height."},{"ex":"bent_over_row","pres":"6","note":"DB Bent-Over Row · Hinge at the hips, flat back, dumbbells hanging."},{"ex":"pushup_on_dumbbells","pres":"6","note":"DB Push-Ups · Hands gripping the two dumbbells on the floor so your wrists stay straight."},{"ex":"forearm_plank","pres":"30s","note":"Plank Hold · Elbows under your shoulders, body in one straight line."},{"ex":"wall_sit","pres":"30s","note":"Wall Sit · Back flat on the wall, slide down until your thighs are somewhere comfortable — the higher you stay, the easier on the knee."}]},{"role":"Finish","name":"Finisher · Core Circuit","note":"30 sec each, no rest between exercises. 2-3 rounds, 45 sec between rounds.","mins":8,"items":[{"ex":"dead_bug","pres":"30s","note":"On your back, arms up, knees over hips."},{"ex":"side_plank","pres":"30s each side","note":"On your side, elbow under your shoulder, knees bent at 90°."},{"ex":"side_plank","pres":"30s each side","note":"On your side, elbow under your shoulder, knees bent at 90°."},{"ex":"bird_dog","pres":"30s","note":"On hands and knees."},{"ex":"lying_leg_raise","pres":"30s","note":"Leg Raises · On your back, hands under your hips."}]}]}}},"main":{"id":"main","version":1,"name":"Foundation Block","who":"Nicolas","source":"ported from js/data/sessions.js — the program this person is actually on","duration":30,"fixed":false,"trainDays":[1,2,3,4,5],"units":"lb","equipment":["bw","db","bb","rings","parallettes","band","vest","slantboard","rack","pullupbar","bench","sliders"],"constraints":{"forearm":"supinated_neutral"},"goals":["Lower-body size","Strength (upper + lower)","Rep-max endurance","Zone-5 conditioning","Skills (handstand / front lever)","Mobility / into the stretch"],"habits":[],"days":{"d1":{"name":"Quads & Knees","tag":"hypertrophy","why":"","blocks":[{"role":"Prime","name":"Knee Armor Circuit","note":"2 rounds, controlled","mins":3,"items":[{"ex":"touchdown_squat","pres":"25 each side","note":""},{"ex":"tibialis_raise","pres":"25","note":""},{"ex":"kot_calf","pres":"50","note":""},{"ex":"slant_pulse","pres":"20","note":""}]},{"role":"Work","name":"Bulgarian Split Squat","note":"To failure, per side · 3 sets base (up to 4 on strong days)","mins":8,"items":[{"ex":"bulgarian_split","pres":"10 reps to failure each side","note":""}]},{"role":"Work","name":"Slant-Board Squat","note":"Strength, tempo 3-1-1","mins":8,"items":[{"ex":"slant_board_squat","pres":"3 × 6 · tempo 3-1-1","note":"90s rest"}]},{"role":"Work","name":"Assisted Reverse Nordic Curl","note":"Quad eccentric · limited rest · 3rd anchor","mins":8,"items":[{"ex":"reverse_nordic","pres":"3 × 8","note":"45s rest"}]},{"role":"Finish","name":"Iso Burner — Horse Stance + Side Plank","note":"3 rounds, continuous (no rest)","mins":3,"items":[{"ex":"horse_stance","pres":"40s","note":""},{"ex":"side_plank","pres":"30s each side","note":""},{"ex":"side_plank","pres":"30s each side","note":""}]}]},"d2":{"name":"Push & Handstand","tag":"push","why":"","blocks":[{"role":"Prime","name":"Core + Compression Prep","note":"2 rounds · handstand-ready","mins":3,"items":[{"ex":"long_lever_plank","pres":"30s","note":""},{"ex":"walk_up_plank","pres":"8","note":""},{"ex":"side_plank","pres":"30s each side","note":""},{"ex":"shoulder_tap","pres":"20","note":""},{"ex":"pike_compression","pres":"10","note":""}]},{"role":"Work","name":"Handstand Practice","note":"Fresh — quality over fatigue","mins":8,"items":[{"ex":"kick_up_practice","pres":"2 min","note":""},{"ex":"wall_handstand_hold","pres":"30s","note":"45s rest"},{"ex":"handstand","pres":"2 min","note":""}]},{"role":"Work","name":"Deep Parallette Pike Push-Up","note":"To failure","mins":8,"items":[{"ex":"deep_pike_pushup","pres":"8 reps to failure","note":""}]},{"role":"Work","name":"Weighted Dip","note":"Strength · 1 warm-up (8-10) → 3 × 5","mins":8,"items":[{"ex":"weighted_dip","pres":"3 × 5","note":"150s rest"}]},{"role":"Finish","name":"Push-Up AMRAP","note":"Volume","mins":3,"items":[{"ex":"pushup","pres":"—","note":""}]}]},"d3":{"name":"Hinge & Posterior","tag":"strength","why":"","blocks":[{"role":"Prime","name":"Glute Activation","note":"Sidewalks (continuous) + bird dogs","mins":3,"items":[{"ex":"banded_sidewalk","pres":"120s","note":"15s rest"},{"ex":"bird_dog_crunch","pres":"2 × 8 each side","note":"20s rest"}]},{"role":"Work","name":"Hip Thrust","note":"Strength loader — add load weekly","mins":8,"items":[{"ex":"hip_thrust","pres":"4 × 5","note":"150s rest"}]},{"role":"Work","name":"Single-Leg RDL","note":"Size — per side, progress load/reps · alternating sides = built-in rest","mins":8,"items":[{"ex":"single_leg_rdl","pres":"3 × 8 each side","note":"90s rest"}]},{"role":"Work","name":"Nordic Curl","note":"Hamstring eccentric — progress ROM → load · 3rd anchor","mins":8,"items":[{"ex":"nordic_curl","pres":"3 × 6","note":"90s rest"}]},{"role":"Finish","name":"Tabata — Swing + Jump Squat","note":"20/10, 5 cycles (~5 min)","mins":3,"items":[{"ex":"db_swing","pres":"—","note":""},{"ex":"jump_squat","pres":"—","note":""}]}]},"d4":{"name":"Pull & Front Lever","tag":"pull","why":"","blocks":[{"role":"Prime","name":"Pulling Prep","note":"Forearm-light","mins":3,"items":[{"ex":"banded_pullapart","pres":"1 × 20","note":"10s rest"},{"ex":"scap_pullup","pres":"1 × 15","note":""},{"ex":"active_hang","pres":"30s","note":"20s rest"},{"ex":"dragon_flag","pres":"30s","note":"15s rest"}]},{"role":"Work","name":"Front Lever","note":"TUT holds · advanced-tuck or banded straddle (set Week 1)","mins":8,"items":[{"ex":"front_lever_tuck","pres":"10s","note":"60s rest"}]},{"role":"Work","name":"Weighted Chin-Up","note":"Strength · supinated · 1 warm-up (8-10) → 3 × 5","mins":8,"items":[{"ex":"weighted_chinup","pres":"3 × 5","note":"150s rest"}]},{"role":"Work","name":"Single-Arm Row","note":"Horizontal · unilateral · per side · alternating sides = built-in rest","mins":8,"items":[{"ex":"single_arm_row","pres":"3 × 8 each side","note":"90s rest"}]},{"role":"Finish","name":"L-Sit Pull-ups + Skin the Cat","note":"5 min, minimal rest","mins":3,"items":[{"ex":"l_sit_pullup","pres":"5 reps","note":""},{"ex":"skin_the_cat","pres":"5 reps","note":""}]}]},"d5":{"name":"Full Body Engine","tag":"conditioning","why":"","blocks":[{"role":"Work","name":"Block 1 · Tempo AMRAP","note":"15 min, target ~4 rounds — all 5 patterns","mins":15,"items":[{"ex":"chin_up","pres":"5 reps · 5s hold / 5s down / 5s dead-hang","note":""},{"ex":"dip","pres":"5 reps","note":""},{"ex":"goblet_squat","pres":"8 reps · slow + pause","note":""},{"ex":"banded_glute_bridge","pres":"30s","note":""},{"ex":"l_sit","pres":"20s","note":""}]},{"role":"Work","name":"Block 2 · Explosive Intervals","note":"40s on / 20s off · ~3 rounds · all 5 patterns","mins":15,"items":[{"ex":"explosive_chinup","pres":"—","note":""},{"ex":"deadstop_pushup","pres":"—","note":""},{"ex":"jump_squat","pres":"—","note":""},{"ex":"db_swing","pres":"—","note":""},{"ex":"mountain_climber","pres":"—","note":""}]}]}}}};
+/* <<< END GENERATED PROGRAM LIBRARY */
+
 let CAT = {};           /* the movement catalogue, for the pickers */
 let PROG = null;        /* {days:{d1:{name,tag,why,blocks:[…]}}}   */
 let PDAY = null;        /* which day is open                        */
@@ -795,18 +934,62 @@ function mvOptions(sel){
   return orphan + opts;
 }
 
+/* ---- the library row ----------------------------------------------
+   Two real programs already exist — they were written before this console
+   did, in the older app, and they are the only programs anyone is actually
+   on. Loading one here makes it this person's, editable, and it is what the
+   link then carries to their phone. Loading REPLACES; it does not merge,
+   because a half-swapped program is worse than either whole one. */
+function libRow(){
+  const ids = Object.keys(LIBRARY);
+  if(!ids.length) return '';
+  return `<div class="panel"><div class="pad">
+    <div class="pgrid">
+      <label>Start from a program
+        <select class="pin" id="libPick">
+          <option value="">— pick one —</option>
+          ${ids.map(id=>`<option value="${esc(id)}">${esc(LIBRARY[id].name)} · ${
+            Object.keys(LIBRARY[id].days).length} days · written for ${esc(LIBRARY[id].who)}</option>`).join('')}
+        </select></label>
+      <label style="align-self:end">
+        <button class="btn" id="libGo" style="width:100%">Give it to ${esc(A.name||CLIENT_ID)}</button></label>
+    </div>
+    <p class="micro" style="margin:8px 0 0">This replaces whatever is below with a copy that belongs to
+      ${esc(A.name||CLIENT_ID)}. Edit it freely — the library file is not touched.</p>
+  </div></div>`;
+}
+function libWire(){
+  const go = document.getElementById('libGo'), pick = document.getElementById('libPick');
+  if(!go || !pick) return;
+  go.onclick = () => {
+    const id = pick.value; if(!id) return toast('Pick a program first');
+    const src = LIBRARY[id];
+    if(Object.keys(PROG.days||{}).length &&
+       !confirm(`Replace ${A.name||CLIENT_ID}'s current program with "${src.name}"?`)) return;
+    PROG = structuredClone({ from:id, version:src.version, days:src.days });
+    PDAY = Object.keys(PROG.days)[0] || null;
+    S.program = PROG;
+    /* a program handed over is a program to run — release every day of it,
+       otherwise the phone shows a plan it is not allowed to open */
+    S.released = Object.assign({shape:true}, ...Object.keys(PROG.days).map(k=>({[k]:true})));
+    save(1); drawProgram(); if(typeof drawRelease2==='function') drawRelease2();
+    toast(`${src.name} is now ${A.name||CLIENT_ID}'s`);
+  };
+}
+
 function drawProgram(){
   const host = document.getElementById('prog');
   if(!host) return;
   const days = Object.keys(PROG.days || {});
-  if(!days.length){ host.innerHTML = `<div class="panel"><div class="pad">
-    <p class="mut">No program yet. Run the generator, or add a day.</p>
-    <button class="btn" onclick="addDay()">Add a day</button></div></div>`; return; }
+  if(!days.length){ host.innerHTML = libRow() + `<div class="panel"><div class="pad">
+    <p class="mut">No program yet. Start from one above, or build a day.</p>
+    <button class="btn" onclick="addDay()">Add a day</button></div></div>`;
+    libWire(); return; }
 
   const d = PROG.days[PDAY] || PROG.days[days[0]];
   const totalMins = (d.blocks||[]).reduce((t,b)=>t+(+b.mins||0),0);
 
-  host.innerHTML = `
+  host.innerHTML = libRow() + `
     <div class="ptabs">
       ${days.map(k=>`<button class="ptab ${k===PDAY?'on':''}" data-pday="${k}">
         ${esc(PROG.days[k].name || k)}</button>`).join('')}
@@ -834,6 +1017,8 @@ function drawProgram(){
         <div class="pad">
           <div class="blkhd">
             <input class="pin role" data-b="${bi}" data-f="role" value="${esc(b.role||'')}">
+            <input class="pin bname" data-b="${bi}" data-f="name"
+              placeholder="what this block is called" value="${esc(b.name||'')}">
             <label class="mins">min<input class="pin" type="number" min="0"
               data-b="${bi}" data-f="mins" value="${+b.mins||0}"></label>
             <div class="blkbtns">
@@ -842,6 +1027,8 @@ function drawProgram(){
               <button class="btn sm" onclick="delBlock(${bi})">Remove</button>
             </div>
           </div>
+          <input class="pin bnote" data-b="${bi}" data-f="note"
+            placeholder="how to run it — rounds, rest, what to watch" value="${esc(b.note||'')}">
           ${(b.items||[]).map((it,ii)=>`
             <div class="itrow">
               <select class="pin ex" data-b="${bi}" data-i="${ii}" data-f="ex">${mvOptions(it.ex)}</select>
@@ -858,6 +1045,7 @@ function drawProgram(){
     <button class="btn wide" onclick="addBlock()">+ block</button>
     <div class="pwarn" id="pwarn"></div>`;
 
+  libWire();
   host.querySelectorAll('[data-pday]').forEach(b=>b.onclick=()=>{ PDAY=b.dataset.pday; drawProgram(); });
   host.querySelectorAll('.pin').forEach(el=>{
     el.onchange = () => {
@@ -983,7 +1171,247 @@ document.getElementById('btnCopy').onclick=async()=>{
     toast('Selected — press Cmd+C'); }
 };
 
-drawRail(); drawInbox(); drawLayers(); drawDock(); loadProgram();
+
+/* ============================================================
+   WHO THIS PROGRAM IS FOR, AND HOW IT REACHES THEM
+
+   The console was written around one person: `A` above is Ozzy's answers,
+   typed in, and USER defaulted to 'ozzy'. That was right while there was
+   exactly one client and no way for a real survey to arrive. Now the survey
+   writes an Intake, so the console can read who has actually onboarded.
+
+   WHAT THIS DOES AND DOES NOT DO. It picks the client the program is FOR and
+   releases to them. It does NOT rewrite the ten Galpin layers — that prose is
+   authored against Ozzy's specific numbers, and swapping the name in would
+   produce confident sentences about the wrong person, which is worse than an
+   obviously stale panel. Generalising those is its own job.
+
+   Intakes are read from this device, and imported from a link when the
+   survey was filled in on another one — same carrier as everything else
+   here, and it is stripped from the address bar once read because an intake
+   is a PAR-Q and a body map.
+   ============================================================ */
+const INTAKES_LS = 'fj.intakes', USERS_LS = 'fj.users';
+const lsGet = k => { try { return JSON.parse(localStorage.getItem(k) || '[]'); } catch (e) { return []; } };
+
+function b64urlDecode(x){
+  const b = String(x).replace(/-/g,'+').replace(/_/g,'/');
+  return JSON.parse(decodeURIComponent(escape(atob(b + '='.repeat((4 - b.length % 4) % 4)))));
+}
+function b64urlEncode(o){
+  return btoa(unescape(encodeURIComponent(JSON.stringify(o))))
+    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+
+/* A survey filled in on another device, handed over as a link. Written into
+   the same store the app uses, so an imported client and a local one are the
+   same record afterwards. */
+function coachUidFor(a){
+  const e = String((a && a.email) || '').trim().toLowerCase();
+  const n = String((a && a.name) || '').trim().toLowerCase();
+
+  /* ALREADY HERE? USE THE ID THEY ALREADY HAVE.
+     A coach who does the survey on the same machine as the console ends up
+     with two records for one person: the app writes 'me', then the import
+     mints its own id and the picker lists them twice. Matching on the email
+     first, then the name, means an import UPDATES the person the device
+     already knows — including the 'me' the app created — rather than
+     shadowing them. */
+  const match = coachIntakes().find(i => {
+    const ia = i.answers || {};
+    const ie = String(ia.email || '').trim().toLowerCase();
+    if(e && ie) return ie === e;
+    return !!n && String(ia.name || '').trim().toLowerCase() === n;
+  });
+  if(match && match.userId) return match.userId;
+
+  if(e){ let h=0; for(let i=0;i<e.length;i++) h=(h*31+e.charCodeAt(i))|0; return 'c'+(h>>>0).toString(36); }
+  const slug = n.replace(/[^a-z0-9]+/g,'') || 'client';
+  return 'c' + slug.slice(0,12);
+}
+
+function importIntakeFromUrl(){
+  const m = String(location.hash||'').match(/[#&]fj=([A-Za-z0-9_\-]+)/);
+  if(!m) return null;
+  let p; try{ p = b64urlDecode(m[1]); }catch(e){ toast('That link could not be read'); return null; }
+  const a = p.a || {};
+  /* A DISTINCT ID PER PERSON, and this matters more here than on a phone.
+     js/intake.js uses the fixed id 'me' because a phone belongs to one
+     person and a second survey on it is that person correcting themselves.
+     A console holds everybody — importing two clients under 'me' would have
+     the second quietly overwrite the first. Derived from the email when
+     there is one so re-importing the same person updates rather than
+     duplicates, and from the name plus a stamp when there is not. */
+  const uid = coachUidFor(a);
+  const users = lsGet(USERS_LS).filter(u => u.id !== uid);
+  users.push({ id:uid, role:'client', status:'pending', displayName:a.name||'', email:a.email||null,
+    ui:'pro', programId:null, trainerId:null, accent:'#3ECBA8',
+    createdAt:new Date().toISOString(), updatedAt:new Date().toISOString() });
+  localStorage.setItem(USERS_LS, JSON.stringify(users));
+  const itk = lsGet(INTAKES_LS);
+  itk.unshift({ id:'itk_'+Date.now(), userId:uid, version:p.v||6, answers:a,
+    derived:{tier:a.tier??null, levels:a.levels??null},
+    submittedAt:p.at||new Date().toISOString() });
+  localStorage.setItem(INTAKES_LS, JSON.stringify(itk));
+  try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){ location.hash=''; }
+  toast('Imported ' + (a.name || 'the client'));
+  return uid;
+}
+
+function clientList(){
+  const users = lsGet(USERS_LS), itk = lsGet(INTAKES_LS);
+  const seen = new Set();
+  const out = [];
+  itk.forEach(i => { if(seen.has(i.userId)) return; seen.add(i.userId);
+    const u = users.find(x => x.id === i.userId);
+    out.push({ id:i.userId, name:(u && u.displayName) || (i.answers && i.answers.name) || i.userId,
+      intake:i, user:u }); });
+  /* Ozzy is not an intake — he is the console's built-in example, and he
+     stays listed so the ten layers still have their subject. */
+  out.push({ id:'ozzy', name:'Ozzy (built in)', intake:null, user:null });
+  return out;
+}
+
+function clientOptions(){
+  const users = lsGet(USERS_LS);
+  const seen = new Set(), out = [];
+  coachIntakes().forEach(i => {
+    if(seen.has(i.userId)) return; seen.add(i.userId);
+    const u = users.find(x => x.id === i.userId);
+    out.push({ id:i.userId,
+      name:(u && u.displayName) || (i.answers && i.answers.name) || i.userId });
+  });
+  out.push({ id:OZZY_ID, name:'Ozzy — built-in example' });
+  return out;
+}
+
+function drawAddClient(){
+  const host = document.getElementById('addClient'); if(!host) return;
+  const none = !coachIntakes().length;
+  host.innerHTML = `
+    ${none ? `<p class="micro" style="margin:0 0 7px">No clients yet. Ozzy is the built-in example —
+      paste a client's link to add a real one.</p>` : ''}
+    <details ${none?'open':''}><summary style="cursor:pointer;font-size:12px;color:var(--dim,#8B949E)">
+      Add a client from their link</summary>
+      <textarea id="addLink" placeholder="Paste the link from the end of their onboarding"
+        style="width:100%;height:56px;margin-top:7px;font:inherit;font-size:11px;background:#181D23;
+        color:inherit;border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:7px;
+        resize:vertical"></textarea>
+      <button class="btn" id="addGo" style="margin-top:6px;width:100%">Add them</button>
+    </details>`;
+  const go = document.getElementById('addGo');
+  if(go) go.onclick = () => {
+    const v = (document.getElementById('addLink').value||'').trim();
+    const m = v.match(/[#&]fj=([A-Za-z0-9_\-]+)/) || v.match(/^([A-Za-z0-9_\-]{40,})$/);
+    if(!m) return toast('That does not look like an onboarding link');
+    /* reuse the one importer, by handing it the fragment it expects */
+    location.hash = 'fj=' + m[1];
+    location.reload();
+  };
+}
+
+function drawClients(){
+  const sel = document.getElementById('clientPick'); if(!sel) return;
+  const list = clientOptions();
+  sel.innerHTML = list.map(c =>
+    `<option value="${esc(c.id)}" ${c.id===CLIENT_ID?'selected':''}>${esc(c.name)}</option>`).join('');
+
+  /* A RELOAD, NOT A REDRAW. USER, KEY and COACH_KEY are consts read at parse
+     time by half this file; swapping the client live would leave the other
+     half writing into the previous person's drawer, which is the bug this
+     whole change exists to fix. */
+  sel.onchange = () => {
+    localStorage.setItem('fj.coach.client', sel.value);
+    location.search = '?client=' + encodeURIComponent(sel.value);
+  };
+
+  const nameEl = document.getElementById('whoName'), subEl = document.getElementById('whoSub');
+  if(nameEl) nameEl.textContent = A.name || CLIENT_ID;
+  if(subEl){
+    subEl.textContent = IS_OZZY
+      ? '45 · male · Canada · the console\'s worked example'
+      : [A.age && A.age+'', A.sex==='f'?'female':A.sex==='m'?'male':null,
+         A.tierName || (A.levels && A.levels.gym!=null ? 'level '+A.levels.gym : null),
+         'from their survey'].filter(Boolean).join(' · ');
+  }
+  const av = document.querySelector('.who .av');
+  if(av) av.textContent = ((A.name||'?').trim()[0]||'?').toUpperCase();
+  const h1 = document.querySelector('header h1');
+  if(h1) h1.textContent = IS_OZZY
+    ? "Building Ozzy's first program"
+    : `Building ${A.name}'s program`;
+  document.title = 'Coach Console — ' + (A.name || CLIENT_ID);
+
+  /* The ten layers are written about Ozzy's numbers. Say so rather than let
+     them read as if they were about whoever is selected. */
+  const lead = document.querySelector('.lead .sub, header .sub');
+  if(lead && !IS_OZZY && !lead.dataset.warned){
+    lead.dataset.warned = '1';
+    lead.insertAdjacentHTML('beforeend',
+      `<b style="display:block;margin-top:8px;color:var(--warn,#F2C14E)">The ten layers below are still
+       written against Ozzy's answers — they have not been re-reasoned for ${esc(A.name||'this client')}.
+       The program editor and the release are correctly theirs.</b>`);
+  }
+}
+
+function drawRelease2(){
+  const host = document.querySelector('#releasePanel .pad'); if(!host) return;
+  if(IS_OZZY){
+    host.innerHTML = `<p class="micro">Ozzy is the built-in example and has no app to send to.
+      Pick a client who has completed onboarding.</p>`;
+    return;
+  }
+  const base = location.href.split('#')[0].replace(/coach\.html.*$/,'');
+  /* dashboard.html, not index.html. index.html is a landing page — it has
+     never been able to read this payload, so every link this panel produced
+     opened a page that ignored it.
+
+     And it carries `a` (the answers) as well as the program. A phone that
+     has never seen this person needs both: the profile makes it theirs, the
+     program gives it something to show. One link provisions a device from
+     nothing, which is also what makes it survive a reinstall. */
+  const payload = { v:PAYLOAD_V, at:new Date().toISOString(), uid:CLIENT_ID, userId:CLIENT_ID,
+    name:A.name||CLIENT_ID, a:A, program: PROG || {days:{}}, released: S.released || {} };
+  const link = base + 'dashboard.html#' + b64urlEncode(payload);
+  const days = Object.keys((PROG&&PROG.days)||{}).length;
+  const live = Object.keys(S.released||{}).filter(k=>S.released[k] && k!=='shape').length;
+  host.innerHTML = `
+    <p style="margin:0 0 10px">Sending <b>${days} day${days===1?'':'s'}</b> to <b>${esc(A.name||CLIENT_ID)}</b>,
+      <b>${live}</b> of them released. Opening this on their phone sets them to <b>active</b> and their
+      dashboard opens on this program.</p>
+    <textarea id="relLink" readonly style="width:100%;height:74px;font:inherit;font-size:11px;
+      background:#181D23;color:inherit;border:1px solid rgba(255,255,255,.14);border-radius:8px;
+      padding:8px;resize:vertical">${esc(link)}</textarea>
+    <div style="display:flex;gap:8px;margin-top:9px">
+      <button class="btn" id="relCopy">Copy the link</button>
+      <button class="btn" id="relOpen">Open it here</button>
+    </div>
+    <p class="micro" style="margin-top:9px">Message or AirDrop it to yourself. It carries the program,
+      so it is long — that is the trade for not having a server yet.</p>`;
+  document.getElementById('relCopy').onclick = async () => {
+    try { await navigator.clipboard.writeText(link); toast('Link copied'); }
+    catch(e){ const t=document.getElementById('relLink'); t.select(); toast('Selected — press Cmd+C'); }
+  };
+  document.getElementById('relOpen').onclick = () => { location.href = link; };
+}
+
+importIntakeFromUrl();
+drawRail(); drawInbox(); drawLayers(); drawDock();
+loadProgram().then(() => { drawClients(); drawAddClient(); drawRelease2(); });
+
+/* the jump bar lights whichever section is on screen */
+(function(){
+  const links = [...document.querySelectorAll('#jump a')];
+  const targets = links.map(a => document.getElementById(a.dataset.j)).filter(Boolean);
+  if(!targets.length || !('IntersectionObserver' in window)) return;
+  const io = new IntersectionObserver(es => {
+    es.forEach(e => {
+      const a = links.find(x => x.dataset.j === e.target.id);
+      if(a && !a.classList.contains('hot')) a.classList.toggle('on', e.isIntersecting);
+    });
+  }, { rootMargin: '-60px 0px -70% 0px' });
+  targets.forEach(t => io.observe(t));
+})();
 </script>
 </body>
 </html>

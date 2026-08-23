@@ -17,7 +17,7 @@
    copy in spine/coaching.json, run the two build steps. Never edit
    the block in dashboard.html — it is overwritten.
    ============================================================ */
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -31,9 +31,12 @@ const spine = JSON.parse(readFileSync(p('spine/catalog.json'), 'utf8')).movement
 let html = readFileSync(p('dashboard.html'), 'utf8');
 
 /* ---- ids the app actually uses, canonical ---------------------------- */
-/* Ozzy's program plus the locked pool behind kit he does not own. Ordered
-   so the Learn tab reads sensibly rather than alphabetically. */
-const USED = [
+/* The built-in kettlebell draft plus the locked pool behind kit he does not
+   own. Ordered so the Learn tab reads sensibly rather than alphabetically.
+   This is the FLOOR, not the whole list: every movement used by a program
+   in spine/programs/ is added below, because a person whose program names a
+   movement the app never shipped gets a blank row. */
+const DRAFT = [
   /* prime */
   'cat_cow', 'hip_90_90', 'deep_squat_rock', 'glute_bridge', 'dead_bug',
   'kb_halo', 'prying_goblet',
@@ -58,6 +61,23 @@ const USED = [
 /* Which kit each one needs, in the app's own vocabulary. The database
    equipment tags are close but not identical (it says 'db' where the app
    needs to say 'dumbbells you do not own'), so this stays explicit. */
+/* Every movement any real program uses. Ported programs come from the older
+   app, where the coaching was written; without this the dashboard can render
+   Ozzy's draft and nothing else. */
+const PROGRAM_IDS = [];
+const progDir = p('spine/programs');
+if (existsSync(progDir)) {
+  for (const f of readdirSync(progDir)) {
+    if (!f.endsWith('.json') || f === 'index.json') continue;
+    const prog = JSON.parse(readFileSync(join(progDir, f), 'utf8'));
+    for (const day of Object.values(prog.days || {}))
+      for (const b of day.blocks || [])
+        for (const it of b.items || [])
+          if (!PROGRAM_IDS.includes(it.ex)) PROGRAM_IDS.push(it.ex);
+  }
+}
+const USED = [...DRAFT, ...PROGRAM_IDS.filter(id => !DRAFT.includes(id))];
+
 const KIT = {
   cat_cow:['mat'], hip_90_90:['mat'], deep_squat_rock:[], glute_bridge:['mat'],
   dead_bug:['mat'], kb_halo:['kb'], prying_goblet:['kb'],
@@ -86,6 +106,16 @@ const PAT = {
   conditioning:'Conditioning', grip:'Grip'
 };
 
+/* A movement ported from a program has no hand-written KIT entry. Fall back
+   to the catalogue's own equipment tags, translated into the app's shorter
+   vocabulary, so the "needs" line and the locking still work. */
+const TAG_TO_KIT = { pullupbar:'bar', band:'band', db:'db', rings:'rings', kb:'kb',
+                     bench:'bench', mat:'mat', bb:'bb', machine:'machine', cable:'cable',
+                     slantboard:'slantboard', parallettes:'parallettes', sliders:'sliders',
+                     rack:'rack', vest:'vest', box:'bench' };
+const kitFromSpine = m => [...new Set((m.equipment || [])
+  .filter(e => e !== 'bw').map(e => TAG_TO_KIT[e] || e))];
+
 const q = s => "'" + String(s ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, ' ') + "'";
 const arr = a => '[' + (a || []).map(q).join(',') + ']';
 
@@ -103,7 +133,7 @@ for (const id of USED) {
     `n:${q(m.name)}`,
     `pat:${q(pat)}`,
     `img:${m.art.status === 'drawn' ? q(m.art.file) : 'null'}`,
-    `kit:${arr(KIT[id] || [])}`,
+    `kit:${arr(KIT[id] || kitFromSpine(m))}`,
     PHASE[id] ? `phase:${PHASE[id]}` : null,
     `why:${q(why)}`,
     `cues:${arr(cues)}`,

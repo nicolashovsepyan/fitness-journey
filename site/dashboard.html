@@ -887,6 +887,67 @@ h2.h{font-size:23px;line-height:1.2;letter-spacing:-.022em;font-weight:550}
 .ctry.on{border-color:var(--accent);background:var(--accent-soft)}
 .ctry.on span{color:var(--accent)}
 
+.unitbtn{font:inherit;font-size:12.5px;font-weight:600;padding:5px 12px;margin-left:6px;
+  border-radius:999px;border:1px solid var(--line);background:none;color:var(--ink3);cursor:pointer}
+.unitbtn.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.go.danger{border-color:rgba(240,133,122,.45);color:var(--red)}
+
+/* ---------- a real photo ---------- */
+.shot{display:block;margin-top:14px;cursor:pointer}
+.shot-in{display:flex;flex-direction:column;align-items:center;gap:7px;padding:26px 16px;
+  border:1px dashed var(--line2);border-radius:15px;text-align:center}
+.shot-in svg{width:26px;height:26px;stroke:var(--ink3);fill:none;stroke-width:1.6;
+  stroke-linecap:round;stroke-linejoin:round}
+.shot-in b{font-size:14.5px;font-weight:600}
+.shot-in small{font-size:11.5px;color:var(--ink3)}
+.shotimg{display:block;width:100%;margin-top:12px;border-radius:14px;border:1px solid var(--line)}
+.shotrail{display:flex;gap:9px;overflow-x:auto;padding-bottom:4px;
+  scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.shotrail::-webkit-scrollbar{display:none}
+.shotcard{flex:0 0 122px;margin:0}
+.shotcard img{width:100%;height:162px;object-fit:cover;border-radius:13px;
+  border:1px solid var(--line);display:block}
+.shotcard figcaption{font-size:10.5px;color:var(--ink3);margin-top:5px;text-align:center}
+
+/* their own sport, on the day it lands */
+.sportcard{border:1px solid var(--neon-line);border-radius:var(--r);padding:15px;
+  margin-bottom:12px;background:linear-gradient(180deg,var(--neon-soft),rgba(255,255,255,.012))}
+.sportcard.done{border-color:var(--accent-line);background:var(--accent-soft)}
+.sportcard .tag{color:var(--neon)}
+.sportcard .tag i{background:var(--neon)}
+.sportcard.done .tag,.sportcard.done .tag i{color:var(--accent);background:var(--accent)}
+
+/* ---------- change your answers ---------- */
+.anstabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.anstab{flex:1 1 auto;padding:9px 6px;border-radius:11px;border:1px solid var(--line);
+  background:rgba(255,255,255,.03);font-family:inherit;font-size:12.5px;font-weight:550;
+  color:var(--ink2);cursor:pointer;white-space:nowrap}
+.anstab.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.daygrid{display:flex;flex-direction:column;gap:7px;margin-top:12px}
+.dayopt{display:flex;align-items:baseline;gap:12px;padding:12px 14px;border-radius:12px;
+  border:1px solid var(--line);background:rgba(255,255,255,.028);font-family:inherit;
+  color:var(--ink);cursor:pointer;text-align:left}
+.dayopt b{font-size:14px;font-weight:650;width:38px;flex:none}
+.dayopt small{font-size:12px;color:var(--ink3)}
+.dayopt.on{border-color:var(--accent);background:var(--accent-soft)}
+.dayopt.on small{color:var(--accent)}
+.kitgrid{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.kitopt{flex:1 1 30%;min-width:96px;padding:12px 8px;border-radius:12px;
+  border:1px solid var(--line);background:rgba(255,255,255,.028);font-family:inherit;
+  font-size:13px;font-weight:550;color:var(--ink2);cursor:pointer}
+.kitopt.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+
+/* the sample, saying so — same shape as the health alert because it is the
+   same kind of message: something you need to know before you trust what is
+   under it */
+.demobar{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;
+  background:var(--neon-soft);border:1px solid var(--neon-line);
+  border-radius:14px;padding:13px 15px}
+.demobar .ic{width:19px;height:19px;stroke:var(--neon);fill:none;stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round;flex:none;margin-top:1px}
+.demobar b{font-size:13.5px;font-weight:600;display:block;margin-bottom:3px}
+.demobar p{font-size:12.5px;line-height:1.5;color:var(--ink2)}
+
 /* ---------- a rest day that has something in it -------------------------
    Not a hero with a photo and a shrug. A short brief, then three doors with
    the minutes on them, because the reason anyone skips mobility is never
@@ -971,17 +1032,32 @@ h2.h{font-size:23px;line-height:1.2;letter-spacing:-.022em;font-weight:550}
 
 /* ---------- the profile wearing the sun ---------- */
 .prof{position:relative;overflow:hidden}
-.prof.sty-sunset .prof-rx{position:relative;width:112px;height:88px;flex:none;
-  overflow:visible;display:block}
+.prof.sty-sunset .prof-rx{position:relative;flex:1;min-width:0;height:88px;
+  overflow:visible;display:block;margin-bottom:14px}
+.prof.sty-sunset .prof-tx{width:auto;flex:1}
 .prof.sty-sunset .sunbox{position:absolute;left:0;right:0;top:0;bottom:0;overflow:hidden}
-.prof.sty-sunset .prof-n{position:absolute;left:17px;bottom:14px;z-index:2}
-.prof.sty-sunset .prof-tx{padding-left:6px}
-.prof.sty-sunset .sev{width:19px;height:34px}
-.prof.sty-sunset .bpc{font-size:11px;padding-bottom:4px}
+/* THE NUMBER RIDES THE SUN.
+   It was a column beside the disc, which meant it moved when the card
+   opened and sat over the ground lines when it did. It is on the disc now,
+   tracking the same --suny the circle uses, so it cannot drift from it.
+
+   White, and it comes up WITH the sun: barely there under the horizon,
+   full strength and glowing once the whole thing is clear. The number is
+   the light rather than a label stuck on it. */
+.prof.sty-sunset .sunnum{position:absolute;left:50%;top:calc(var(--suny,1) * 100%);
+  transform:translate(-50%,-52%);display:flex;align-items:baseline;gap:1px;z-index:3;
+  pointer-events:none;transition:top .9s cubic-bezier(.22,1,.36,1)}
+.prof.sty-sunset .sunnum b{font-size:27px;font-weight:600;letter-spacing:-.04em;color:#fff;
+  text-shadow:0 1px 10px rgba(0,0,0,.55), 0 0 calc(14px * var(--pf)) #fff}
+.prof.sty-sunset .sunnum i{font-style:normal;font-size:11px;font-weight:600;color:#fff;
+  opacity:.75;align-self:center;margin-top:6px}
+.prof.sty-sunset .sunnum{opacity:calc(.45 + var(--pf) * .55)}
+.prof.sty-sunset .prof-tx{flex:none;width:118px}
+
 .prof.sty-sunset:after{content:"";position:absolute;left:0;right:0;bottom:30px;height:1px;
   background:linear-gradient(90deg,transparent,var(--ink) 22%,var(--ink) 78%,transparent);
   opacity:.28;pointer-events:none;z-index:1}
-.prof.sty-sunset .prof-hd{padding-bottom:38px}
+.prof.sty-sunset .prof-hd{padding-bottom:40px;gap:11px}
 
 /* ---------- the reactor, on the day card ---------- */
 .dayrx{display:block;width:88px;height:88px;flex:none}
@@ -1946,6 +2022,10 @@ h2.h{font-size:23px;line-height:1.2;letter-spacing:-.022em;font-weight:550}
 .blkh{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:9px}
 .blkh b{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600}
 .blkh small{font-size:11.5px;color:var(--ink3)}
+/* A ported program names its blocks and says why. The role stays the eyebrow;
+   the name is the line a person actually reads. */
+.blkt{font-size:14.5px;font-weight:600;letter-spacing:-.01em;color:var(--ink);margin:-3px 0 3px}
+.blkn{font-size:11.5px;line-height:1.45;color:var(--ink3);margin:0 0 9px}
 .mv{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.030);
   border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:7px;
   cursor:pointer;transition:transform .16s}
@@ -2056,6 +2136,7 @@ h2.h{font-size:23px;line-height:1.2;letter-spacing:-.022em;font-weight:550}
    a stranger's dashboard.
    ============================================================ */
 const PROFILE_V = 6;
+const BUILD_STAMP = '23 Aug 2026, 17:24';
 
 /* A stable id per person. Email is the only thing the survey collects
    that is unique to a human, so it seeds the id; anyone who skipped it
@@ -2080,17 +2161,72 @@ function uidFor(a){
    to their own phone. On arrival it is written to storage and the hash is
    stripped, so a refresh does not re-import and the URL stops carrying
    somebody's health answers around. */
+/* THREE LINK SHAPES, ONE READER.
+   This project grew two lineages at once and they invented different links:
+
+     #<payload>   this build — the profile, base64url
+     #fj=<...>    the other onboarding — the same profile, prefixed
+     #prg=<...>   the other console — a program, sometimes with answers
+
+   Rather than pick a winner and break whoever is holding the other kind of
+   link, all three are read. The prefix is stripped, the payload is decoded,
+   and whatever it turns out to contain — answers, a program, or both — is
+   used. A person should never be told their link is the wrong sort. */
 function fromHash(){
-  const h = (location.hash || '').replace(/^#/, '');
+  let h = (location.hash || '').replace(/^#/, '');
+  if(!h) return null;
+  const m = h.match(/^(fj|prg|p)=(.*)$/);
+  if(m) h = m[2];
   if(h.length < 24) return null;
   try{
     const b = h.replace(/-/g,'+').replace(/_/g,'/');
     const p = JSON.parse(decodeURIComponent(escape(atob(b))));
-    return (p && p.a) ? p : null;
+    if(!p) return null;
+    /* the other lineage nests answers under `answers`, and names the id
+       `userId`; normalise both so the rest of this file sees one shape */
+    if(!p.a && p.answers) p.a = p.answers;
+    if(!p.uid && p.userId) p.uid = p.userId;
+    /* a program-only link still has to know who it is for */
+    if(!p.a && p.program){
+      const cur = localStorage.getItem('fj.v1.current');
+      const rec = cur && JSON.parse(localStorage.getItem('fj.v1.profile.'+cur)||'null');
+      if(rec && rec.a && (!p.uid || p.uid === cur)) p.a = rec.a, p.uid = cur;
+    }
+    return p.a ? p : null;
+  }catch(e){ return null; }
+}
+
+/* ONE SET OF RECORDS, NOT TWO.
+
+   This file grew its own identity store — fj.v1.profile.<uid> and
+   fj.v1.current — at the same time as js/ grew the documented one in
+   core/schema.js: fj.users, fj.intakes, fj.programs. Two systems, same
+   information, no conversation between them. The survey wrote to one and
+   the dashboard read the other, so a person who had just onboarded still
+   opened on the demo.
+
+   The schema records win, for two reasons: they are the shape docs/BACKEND.md
+   commits to for Supabase, so aligning now means the backend swap is a change
+   of adapter rather than a rewrite; and they are what the app's runner
+   already reads, which is where a workout has to come from.
+
+   The old keys are still read, below, so anything already on a device keeps
+   working. Nothing writes them any more. */
+function fromRecords(){
+  try{
+    const uid = localStorage.getItem('fj.user');
+    if(!uid) return null;
+    const itk = JSON.parse(localStorage.getItem('fj.intakes')||'[]')
+      .filter(i => i.userId === uid)
+      .sort((x,y)=>String(y.submittedAt).localeCompare(String(x.submittedAt)))[0];
+    if(!itk || !itk.answers) return null;
+    return {uid, a:itk.answers, at:itk.submittedAt};
   }catch(e){ return null; }
 }
 
 function loadProfile(){
+  const viaRecords = fromRecords();
+  if(viaRecords) return viaRecords;
   try{
     const viaLink = fromHash();
     if(viaLink){
@@ -2098,6 +2234,26 @@ function loadProfile(){
       localStorage.setItem('fj.v1.profile.' + uid,
         JSON.stringify({v:PROFILE_V, at:viaLink.at, uid, a:viaLink.a}));
       localStorage.setItem('fj.v1.current', uid);
+
+      /* THE PROGRAM TRAVELS WITH THE PERSON.
+         A program written in the console lived in that browser's storage and
+         nowhere else, so it could not reach the phone it was written for and
+         it died with a reinstall. If the link carries one, it is written into
+         this device's coach record — which is exactly where the dashboard
+         already looks. Sending someone their program is now sending them a
+         link, and re-opening that link restores it. */
+      if(viaLink.program && viaLink.program.days){
+        try{
+          const key = 'fj.v1.' + uid + '.coach';
+          const cur = JSON.parse(localStorage.getItem(key) || '{}');
+          cur.program = viaLink.program;
+          if(viaLink.released) cur.released = viaLink.released;
+          localStorage.setItem(key, JSON.stringify(cur));
+        }catch(e){}
+      }
+
+      /* the record is on the device now, so the URL stops carrying somebody's
+         health answers and their program around */
       try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){}
       return {uid, a:viaLink.a, at:viaLink.at};
     }
@@ -2128,21 +2284,97 @@ function loadProfile(){
    person — the app knows the difference, says so on screen, and offers the
    survey. It exists so the file still opens on its own. */
 const DEMO = {
-  name:'Sample', sex:'m', age:38, heightCm:178, weightKg:82, unit:'kg',
+  name:'Sample', sex:'m', age:38, heightCm:178, weightKg:82, unit:'lb',
   horizon:['nopain'], focus:['strong'], activity:'light', tracker:'none',
   shape:{now:2}, weightTend:'steady', where:['homekit'], kit:['kb','bench','mat'],
-  country:'CA', levels:{gym:'New',body:'New'},
+  levels:{gym:'New',body:'New'},
   when:'flex', days:4, length:'20', trainDays:[0,1,3,5],
   driver:['strong'], blockers:['time'], parq:[], pain:[],
-  intensity:'steady', checkin:'mon', email:''
+  intensity:'steady', email:''
+  /* No `checkin` and no `country` on purpose. The survey does not ask
+     either, and putting a value here made the app answer them on the
+     person's behalf — the weigh-in day was silently Monday for everyone,
+     whatever week they had chosen. Absent means derived, or asked. */
 };
 
+/* ONE WEEK, ONE CONVENTION.
+   The survey's day picker counts Monday as 0, because that is how a training
+   week reads to a person. Every date function in this file counts Sunday as
+   0, because that is what Date.getDay() returns. Nothing converted between
+   them, so a person choosing Mon/Wed/Fri was given Sun/Tue/Thu — the answer
+   was right and the agenda was wrong.
+
+   Converted once, on the way in, and never thought about again. `dayBase`
+   says which convention the answer was written in; profiles saved before
+   that field existed were all Monday-based, so they convert too. */
+/* THE ANSWERS ARE EDITABLE, SO THEY HAVE TO BE WRITABLE.
+   Everything downstream reads A. Until now A was assembled at boot and
+   never written back, so "change this" could only ever change the screen
+   until the next reload. This puts it back where it came from. */
+function saveProfile(){
+  try{
+    const uid = (typeof USER !== 'undefined' && USER !== 'demo') ? USER : null;
+    if(!uid) return;                      /* the sample is not somebody's record */
+    localStorage.setItem('fj.v1.profile.' + uid,
+      JSON.stringify({v:PROFILE_V, at:new Date().toISOString(), uid, a:A}));
+  }catch(e){}
+}
+
+/* The week is derived from the days, so moving a day has to rebuild it —
+   otherwise the strip and "what is today" disagree until a reload. */
+function rebuildWeek(){
+  /* one placement rule, used here and at boot — see layWeek() */
+  const week = layWeek();
+  for(let i=0;i<7;i++) WEEKPLAN[i] = week[i];
+  todayId = WEEKPLAN[DOW];
+}
+
+function normaliseDays(a){
+  if(!a || !Array.isArray(a.trainDays)) return a;
+  if(a.dayBase === 'sun') return a;                    /* already ours */
+  a.trainDays = a.trainDays.map(d => (d + 1) % 7).sort((x,y)=>x-y);
+  a.dayBase = 'sun';
+  return a;
+}
+
+/* A LINK OPENED WHILE THE APP IS ALREADY OPEN.
+   Tapping a handoff link when the app is on screen changes the fragment
+   and nothing else — same document, no reload, so loadProfile() never runs
+   again and the new program is silently ignored. It looks exactly like the
+   link not working, which is the report that started this.
+
+   A payload arriving after boot means "become this person now", so reload
+   once and let the normal path do the work. */
+addEventListener('hashchange', function(){
+  const h = (location.hash || '').replace(/^#/, '');
+  if(h.length > 40) location.reload();
+});
+
 const LOADED = loadProfile();
+if(LOADED) normaliseDays(LOADED.a);
 const IS_DEMO = !LOADED;
 const A = Object.assign({}, DEMO, LOADED ? LOADED.a : {});
 /* Onboarding does not ask where a person lives, so this is not in the
    answers. Until it is, every buy link points at one market. */
-if(!A.country) A.country = 'CA';
+/* Deliberately NOT defaulted. An unanswered country keeps Equipment locked,
+   which is the honest state — prices and shop links are wrong without it.
+   MARKET falls back to CA only so the currency symbol has something to be
+   until the question is answered. */
+
+/* THE SURVEY AND THIS PAGE DISAGREED ABOUT WHAT `kit` IS, and it took the
+   whole dashboard down the first time a real profile arrived: the survey
+   writes {have:[…], other:[…]} — it asks what you own AND what you own that
+   it did not list — and everything here expects a flat array, because the
+   demo profile was written by hand as one.
+
+   Normalised here, at the boundary, rather than in the twenty places that
+   read it. `other` is folded in because a person who typed "sandbag" owns a
+   sandbag, and dropping it would silently narrow what we think they have. */
+if(A.kit && !Array.isArray(A.kit)){
+  A.kit = [].concat(A.kit.have || [], A.kit.other || []).filter(Boolean);
+}
+/* Same shape problem, same fix: the survey answers "where" as a list. */
+if(A.where && !Array.isArray(A.where)) A.where = [A.where].filter(Boolean);
 
 /* Declared HERE, above the program, and not further down where it used to
    live: SESSIONS merges whatever the console saved, and a `const` read
@@ -2163,14 +2395,36 @@ const COACH_KEY = k('coach');
    console saves a program for this person it replaces them wholesale —
    same shape, edited by a human. One source of truth, and it is the one
    with a person's judgement in it. */
+/* THE RELEASED PROGRAM, FROM THE RECORD THE COACH ACTUALLY RELEASED.
+
+   COACH_KEY is this browser's console state. It is the right source when the
+   coach and the client are the same tab, and useless the moment the app is
+   installed — an installed iOS app has its own storage container, so it
+   cannot see what the console wrote. The Program record is what the release
+   link carries across that gap (js/release.js), so it is checked first and
+   the console's local copy is the fallback for same-device work. */
+function releasedProgram(){
+  try{
+    const uid = localStorage.getItem('fj.user'); if(!uid) return null;
+    const prg = JSON.parse(localStorage.getItem('fj.programs')||'[]')
+      .find(p => p.assignedTo === uid);
+    const raw = prg && prg.profile && prg.profile.raw;
+    return (raw && raw.days && Object.keys(raw.days).length) ? raw : null;
+  }catch(e){ return null; }
+}
+
 function coachProgram(){
   try{
-    const p = JSON.parse(localStorage.getItem(COACH_KEY)||'{}').program;
+    const p = releasedProgram()
+      || JSON.parse(localStorage.getItem(COACH_KEY)||'{}').program;
     if(!p || !p.days || !Object.keys(p.days).length) return null;
     const out = {};
     for(const [id,d] of Object.entries(p.days)){
       out[id] = {name:d.name, tag:d.tag, why:d.why,
         blocks:(d.blocks||[]).map(b=>({role:b.role, mins:+b.mins||0,
+          /* a real program names its blocks — "Knee Armor Circuit", not "Prime".
+             Carry the name and the coach's note or the session reads generic. */
+          name:b.name||'', note:b.note||'',
           items:(b.items||[]).map(it=>[it.ex, it.pres, it.note].filter(x=>x!==''&&x!=null))}))};
     }
     return out;
@@ -2178,6 +2432,14 @@ function coachProgram(){
 }
 function released(id){
   try{
+    /* A program that arrived by link was released by the act of sending it —
+       the coach does not get to press the switches again on someone else's
+       phone. Its own release map rides along inside the record. */
+    const prg = JSON.parse(localStorage.getItem('fj.programs')||'[]')
+      .find(p => p.assignedTo === localStorage.getItem('fj.user'));
+    const carried = prg && prg.profile && prg.profile.released;
+    if(carried) return !!carried[id];
+    if(prg) return true;
     const r=JSON.parse(localStorage.getItem(COACH_KEY)||'{}').released||{shape:true};
     return !!r[id];
   }catch(e){ return id==='shape'; }
@@ -2186,6 +2448,31 @@ function released(id){
 
 const U = A.unit;
 const disp = kg => Math.round((U==='lb' ? kg*2.20462 : kg)*10)/10;
+/* A WEIGHT, IN THEIR UNIT, WITH THE UNIT ON IT.
+   The equipment advice was written as prose with both units baked in and
+   kilos first — so someone who told us they think in pounds was reading
+   "20 kg / 44 lb" and doing the conversion in their head, in an app that
+   already knows the answer. Weights are numbers now and this renders them.
+   Rounded to something you can actually buy: kettlebells and plates come in
+   steps, not decimals. */
+const STEP_KG = [4,6,8,10,12,16,20,24,28,32,36,40];
+/* Real sizes people can buy, not arithmetic. Kettlebells come in 26/35/44/53,
+   dumbbells and plates in 10/15/20/25/45 — so both are in the list and the
+   nearest one wins. Telling someone to get a 44 lb bell finds a shop;
+   telling them 44.1 finds nothing. */
+const STEP_LB = [10,15,18,20,25,26,30,35,40,44,45,50,53,55,60,62,70,80,90];
+function wt(kg, opts){
+  const o = opts || {};
+  if(U === 'lb'){
+    const raw = kg * 2.20462;
+    const n = o.exact ? Math.round(raw) : STEP_LB.reduce((b,x)=>
+      Math.abs(x-raw) < Math.abs(b-raw) ? x : b, STEP_LB[0]);
+    return n + ' lb';
+  }
+  const n = o.exact ? Math.round(kg) : STEP_KG.reduce((b,x)=>
+    Math.abs(x-kg) < Math.abs(b-kg) ? x : b, STEP_KG[0]);
+  return n + ' kg';
+}
 const toKg = v => { const n=parseFloat(v); if(isNaN(n)||n<=0) return null;
   return Math.round((U==='lb' ? n/2.20462 : n)*10)/10; };
 
@@ -2228,9 +2515,9 @@ let MARKET = MARKETS[A.country] || MARKETS.CA;
 /* >>> GENERATED MOVEMENTS — do not edit by hand.
    Regenerate with:  node tools/build-spine.mjs && node tools/build-app-data.mjs
    Source of truth:  js/data/exercises.js -> spine/catalog.json
-   38 movements, built 2026-08-13. */
+   93 movements, built 2026-08-23. */
 const EX = {
-  cat_cow:{n:'Cat–Cow',pat:'Mobility',img:null,kit:['mat'],why:'Thirty seconds that decides whether your back joins in for the rest of the session.',cues:['On hands and knees. Wrists under shoulders, knees under hips.','Breathe out and round the spine up. Breathe in and let it sag.','Move one vertebra at a time. Slower is the whole point.'],bad:['Rushing it like a warm-up you have to get through. It is the session, not the queue for it.']},
+  cat_cow:{n:'Cat–Cow',pat:'Mobility',img:'images/exercises/cat_cow.png',kit:['mat'],why:'Thirty seconds that decides whether your back joins in for the rest of the session.',cues:['On hands and knees. Wrists under shoulders, knees under hips.','Breathe out and round the spine up. Breathe in and let it sag.','Move one vertebra at a time. Slower is the whole point.'],bad:['Rushing it like a warm-up you have to get through. It is the session, not the queue for it.']},
   hip_90_90:{n:'90/90 Hip Switches',pat:'Mobility',img:null,kit:['mat'],why:'Opens the hip so the hinge comes from the hip and not the lower back.',cues:['Sit with one shin in front at 90°, the other out to the side at 90°.','Keep the chest tall and rotate both knees to the other side.','Go slowly. Stop where it gets sharp, not where it gets hard.'],bad:['Falling onto the hands to get across. Hands on the floor for balance is fine, throwing yourself over is not.']},
   deep_squat_rock:{n:'Deep Squat Rocks',pat:'Mobility',img:'images/exercises/deep_squat_rock.png',kit:[],why:'Opens the ankle and the hip before anything asks them to work.',cues:['Heels down. Put them on a book if they lift — that is the ankle, not a failure.','Hold the deepest squat you own and rock gently side to side.','Chest tall. You are opening the hip, not folding over it.'],bad:['Bouncing at the bottom. Slow rocking beats bounce every time, and your knee will agree.']},
   glute_bridge:{n:'Glute Bridge',pat:'Glutes',img:null,kit:['mat'],why:'Wakes the glutes so your knee stops doing their job.',cues:['On your back, heels close to your bum, toes up.','Drive through the heels and squeeze hard at the top for one full second.','Ribs down. The lift comes from the glutes, not the lower back.'],bad:['Arching the back at the top and calling it height. Less range, more squeeze.']},
@@ -2267,9 +2554,64 @@ const EX = {
   banded_pullapart:{n:'Banded Pull-Aparts',pat:'Pull',img:'images/exercises/banded_pullapart.png',kit:['band'],why:'Two minutes of this is why your shoulder stops aching at a desk.',cues:['Arms straight, band at chest height.','Pull apart until the hands are wide, squeeze the shoulder blades.','Return slowly — the way back is the half that counts.'],bad:['Shrugging. Shoulders down and away from the ears.']},
   banded_glute_bridge:{n:'Banded Glute Bridge',pat:'Glutes',img:'images/exercises/banded_glute_bridge.png',kit:['band'],why:'The glute bridge with the bit that actually makes the outer glute work.',cues:['Band above the knees. Press out into it the whole time.','Squeeze hard at the top for one second.'],bad:[]},
   band_assisted_pullup:{n:'Band-Assisted Pull-Up',pat:'Pull',img:null,kit:['bar','band'],why:'The bridge between hanging and a real pull-up. Needs both the bar and a band.',cues:['Loop the band over the bar and put one foot in it.','Thinner band each time you get comfortable.'],bad:[]},
-  bent_over_row:{n:'Bent-Over Row',pat:'Pull',img:'images/exercises/bent_over_row.png',kit:['db'],why:'Both sides at once, once one bell stops being enough load.',cues:['Hinge, flat back, bells hanging straight down.','Lead with the elbows, pull to the hips.'],bad:[]}
+  bent_over_row:{n:'Bent-Over Row',pat:'Pull',img:'images/exercises/bent_over_row.png',kit:['db'],why:'Both sides at once, once one bell stops being enough load.',cues:['Hinge, flat back, bells hanging straight down.','Lead with the elbows, pull to the hips.'],bad:[]},
+  arm_circles:{n:'Arm Circles',pat:'Mobility',img:null,kit:[],why:'One arm at a time. Ten big slow circles forward, ten backward. Wakes the shoulder up before you load it.',cues:['One arm at a time. Ten big slow circles forward, ten backward. Wakes the shoulder up before you load it.'],bad:[]},
+  down_dog_up_dog:{n:'Down Dog to Up Dog',pat:'Mobility',img:'images/exercises/down_dog_up_dog.png',kit:[],why:'Hips high in an upside-down V, then sweep the chest through and forward until the arms are straight. Hold five seconds at each end.',cues:['Hips high in an upside-down V, then sweep the chest through and forward until the arms are straight. Hold five seconds at each end.'],bad:[]},
+  straight_bar_push_up:{n:'Straight Bar Push-Up',pat:'Push',img:'images/exercises/straight_bar_push_up.png',kit:['bb','parallettes'],why:'Hands on parallettes or a fixed barbell. Greater depth than floor — chest drops well below hand level. Full scapular protraction at top. Narrow grip, elbows at 45°. Excellent shoulder health and chest stimulus.',cues:['Hands on parallettes or a fixed barbell. Greater depth than floor — chest drops well below hand level. Full scapular protraction at top. Narrow grip, elbows at 45°. Excellent shoulder health and chest stimulus.'],bad:[]},
+  lat_pulldown:{n:'Lat Pulldown',pat:'Pull',img:null,kit:['machine'],why:'Sit tall, pull the bar to your upper chest and lead with your elbows, not your hands. Let it back up slowly.',cues:['Sit tall, pull the bar to your upper chest and lead with your elbows, not your hands. Let it back up slowly.'],bad:[]},
+  assisted_dip:{n:'Assisted Dip (machine)',pat:'Push',img:null,kit:['machine'],why:'Kneel or stand on the pad — the machine takes weight off you. Lean forward a little, lower until your upper arms are level with the floor, press back up. Log the ASSIST weight: lower is stronger.',cues:['Kneel or stand on the pad — the machine takes weight off you. Lean forward a little, lower until your upper arms are level with the floor, press back up. Log the ASSIST weight: lower is stronger.'],bad:[]},
+  seated_cable_row:{n:'Seated Cable Row',pat:'Pull',img:null,kit:['cable'],why:'Chest up, pull the handle to your belly and squeeze your shoulder blades together. Do not lean back to move the weight.',cues:['Chest up, pull the handle to your belly and squeeze your shoulder blades together. Do not lean back to move the weight.'],bad:[]},
+  lateral_raise:{n:'Lateral Raise',pat:'Push',img:null,kit:['db'],why:'Light dumbbells. Raise them out to the sides up to shoulder height, elbows soft. Lower slowly. This one is never heavy.',cues:['Light dumbbells. Raise them out to the sides up to shoulder height, elbows soft. Lower slowly. This one is never heavy.'],bad:[]},
+  triceps_pushdown:{n:'Triceps Pushdown',pat:'Push',img:null,kit:['cable'],why:'Elbows glued to your sides. Push the bar or rope down until your arms are straight, then let it come back up slowly.',cues:['Elbows glued to your sides. Push the bar or rope down until your arms are straight, then let it come back up slowly.'],bad:[]},
+  reverse_fly:{n:'Reverse Fly (chest-supported)',pat:'Pull',img:null,kit:['db','bench'],why:'Chest flat on an incline bench, a light dumbbell in each hand hanging down. Arms almost straight, raise them out to the sides like opening your arms wide. Squeeze the back of your shoulders at the top, lower slowly. Light weight — this is never a heavy movement.',cues:['Chest flat on an incline bench, a light dumbbell in each hand hanging down. Arms almost straight, raise them out to the sides like opening your arms wide. Squeeze the back of your shoulders at the top, lower slowly. Light weight — this is never a heavy movement.'],bad:[]},
+  barbell_curl:{n:'Barbell Curl',pat:'Pull',img:null,kit:['bb'],why:'Elbows pinned to your sides. Curl up, lower all the way down under control. If your back is swinging, the bar is too heavy.',cues:['Elbows pinned to your sides. Curl up, lower all the way down under control. If your back is swinging, the bar is too heavy.'],bad:[]},
+  chest_press_machine:{n:'Chest Press Machine',pat:'Push',img:null,kit:['machine'],why:'Set the seat so the handles sit level with the middle of your chest. Press out, control the way back. Do not lock out hard.',cues:['Set the seat so the handles sit level with the middle of your chest. Press out, control the way back. Do not lock out hard.'],bad:[]},
+  chest_supported_row:{n:'Chest-Supported Row',pat:'Pull',img:null,kit:['machine'],why:'Chest stays flat on the pad the whole set. Row to your ribs, pause a beat, lower slowly. The pad does the cheating for you.',cues:['Chest stays flat on the pad the whole set. Row to your ribs, pause a beat, lower slowly. The pad does the cheating for you.'],bad:[]},
+  shoulder_press_machine:{n:'Shoulder Press Machine',pat:'Push',img:null,kit:['machine'],why:'Press straight overhead, ribs down so you do not arch your back. Lower until your hands are about ear height.',cues:['Press straight overhead, ribs down so you do not arch your back. Lower until your hands are about ear height.'],bad:[]},
+  db_pullover:{n:'DB Pullover (on bench)',pat:'Pull',img:null,kit:['db','bench'],why:'Lie back on the bench holding one dumbbell over your chest, elbows slightly bent and fixed. Lower the dumbbell back to about head level only — feel the stretch across your lats and ribs, not deep in the shoulder. Pull it back over your chest. Start light, 20-25 lb.',cues:['Lie back on the bench holding one dumbbell over your chest, elbows slightly bent and fixed. Lower the dumbbell back to about head level only — feel the stretch across your lats and ribs, not deep in the shoulder. Pull it back over your chest. Start light, 20-25 lb.'],bad:[]},
+  back_extension_45:{n:'45-Degree Back Extension',pat:'Hinge',img:'images/exercises/back_extension_45.png',kit:['machine'],why:'Pad just below your hip bones. Bend at the hips and come back up until your body is one straight line — do not arch past that.',cues:['Pad just below your hip bones. Bend at the hips and come back up until your body is one straight line — do not arch past that.'],bad:[]},
+  dip_support_hold:{n:'Dip Support Hold',pat:'Push',img:'images/exercises/dip_support_hold.png',kit:['dipbars'],why:'Top of the dip position — arms locked, shoulders depressed and packed, body upright. Hold full bodyweight without bending arms. The entry test for dip work. Build 30-60s before attempting reps.',cues:['Top of the dip position — arms locked, shoulders depressed and packed, body upright. Hold full bodyweight without bending arms. The entry test for dip work. Build 30-60s before attempting reps.'],bad:[]},
+  banded_sidewalk:{n:'Banded Lateral Walks',pat:'Glutes',img:'images/exercises/banded_sidewalk.png',kit:['band'],why:'Band at knees, stay low, continuous side-steps.',cues:['Band at knees, stay low, continuous side-steps.'],bad:[]},
+  superman:{n:'Superman',pat:'Core',img:null,kit:[],why:'Prone on floor. Simultaneously raise arms, chest, and legs off the ground. Hold 2 sec. Lower with control. Great lower back and posterior chain activation.',cues:['Prone on floor. Simultaneously raise arms, chest, and legs off the ground. Hold 2 sec. Lower with control. Great lower back and posterior chain activation.'],bad:[]},
+  db_rdl:{n:'Dumbbell Romanian Deadlift',pat:'Hinge',img:null,kit:['db'],why:'Push your hips back and slide the dumbbells down the front of your legs. Knees stay almost straight. Stop when you feel the stretch behind your thighs, then stand tall.',cues:['Push your hips back and slide the dumbbells down the front of your legs. Knees stay almost straight. Stop when you feel the stretch behind your thighs, then stand tall.'],bad:[]},
+  db_shoulder_press:{n:'DB Shoulder Press',pat:'Push',img:null,kit:['db','bench'],why:'Sit tall, a dumbbell in each hand at shoulder height. Press straight overhead, ribs down so you do not arch your back. Lower back to ear height under control.',cues:['Sit tall, a dumbbell in each hand at shoulder height. Press straight overhead, ribs down so you do not arch your back. Lower back to ear height under control.'],bad:[]},
+  pushup_on_dumbbells:{n:'Push-Ups on Dumbbells',pat:'Push',img:null,kit:['db'],why:'Hands gripping two dumbbells set on the floor so your wrists stay straight. Body in one line, chest down between them, press back up.',cues:['Hands gripping two dumbbells set on the floor so your wrists stay straight. Body in one line, chest down between them, press back up.'],bad:[]},
+  bird_dog:{n:'Bird Dog',pat:'Core',img:'images/exercises/bird_dog.png',kit:[],why:'On all fours. Extend the right arm forward and the left leg straight back at the same time. Hold 2 sec without letting the hips rotate, then switch sides. Anti-rotation control.',cues:['On all fours. Extend the right arm forward and the left leg straight back at the same time. Hold 2 sec without letting the hips rotate, then switch sides. Anti-rotation control.'],bad:[]},
+  lying_leg_raise:{n:'Lying Leg Raise',pat:'Core',img:null,kit:[],why:'Lie flat, legs straight. Raise the legs to vertical keeping them straight, then lower slowly without letting the heels touch. Hands under the glutes to protect the low back.',cues:['Lie flat, legs straight. Raise the legs to vertical keeping them straight, then lower slowly without letting the heels touch. Hands under the glutes to protect the low back.'],bad:[]},
+  touchdown_squat:{n:'Touchdown Squat',pat:'Legs',img:null,kit:[],why:'Knees-over-toes, controlled reach.',cues:['Knees-over-toes, controlled reach.'],bad:[]},
+  tibialis_raise:{n:'Tibialis Raise',pat:'Shin',img:null,kit:[],why:'Toes up against wall, full ROM.',cues:['Toes up against wall, full ROM.'],bad:[]},
+  kot_calf:{n:'KOT Calf Raise',pat:'Calf',img:null,kit:[],why:'Knees-over-toes calf, deep stretch.',cues:['Knees-over-toes calf, deep stretch.'],bad:[]},
+  slant_pulse:{n:'Slant Squat Pulses',pat:'Legs',img:null,kit:['slantboard'],why:'Heels elevated, small quad pulses.',cues:['Heels elevated, small quad pulses.'],bad:[]},
+  slant_board_squat:{n:'Slant-Board Squat',pat:'Legs',img:null,kit:['slantboard','vest'],why:'Tempo 311, full depth, heels raised.',cues:['Tempo 311, full depth, heels raised.'],bad:[]},
+  reverse_nordic:{n:'Assisted Reverse Nordic Curl',pat:'Legs',img:null,kit:['band'],why:'Knees-over-toes eccentric; assist with band or hands.',cues:['Knees-over-toes eccentric; assist with band or hands.'],bad:[]},
+  horse_stance:{n:'Horse Stance',pat:'Legs',img:'images/exercises/horse_stance.png',kit:[],why:'Thighs parallel, isometric hold.',cues:['Thighs parallel, isometric hold.'],bad:[]},
+  long_lever_plank:{n:'Long-Lever Plank',pat:'Core',img:null,kit:[],why:'Forearm plank but hands extended further forward. Increases the lever arm dramatically. Pure anti-extension strength.',cues:['Forearm plank but hands extended further forward. Increases the lever arm dramatically. Pure anti-extension strength.'],bad:[]},
+  walk_up_plank:{n:'Walk-Up Planks',pat:'Core',img:null,kit:[],why:'Walk hands out to plank and back; long body.',cues:['Walk hands out to plank and back; long body.'],bad:[]},
+  shoulder_tap:{n:'Plank Shoulder Taps',pat:'Core',img:null,kit:[],why:'High plank. Tap opposite shoulder — fight the rotation. Wider foot stance for more stability.',cues:['High plank. Tap opposite shoulder — fight the rotation. Wider foot stance for more stability.'],bad:[]},
+  pike_compression:{n:'Pike Compression Lifts',pat:'Core',img:null,kit:[],why:'Seated on floor, legs straight. Actively flex hip flexors to fold chest toward legs. Each rep is a muscular contraction — not gravity. THE L-sit/V-sit builder.',cues:['Seated on floor, legs straight. Actively flex hip flexors to fold chest toward legs. Each rep is a muscular contraction — not gravity. THE L-sit/V-sit builder.'],bad:[]},
+  kick_up_practice:{n:'Kick-Up Practice',pat:'Skill',img:null,kit:[],why:'Freestanding entries — find the balance point, bail to a cartwheel.',cues:['Freestanding entries — find the balance point, bail to a cartwheel.'],bad:[]},
+  wall_handstand_hold:{n:'Wall Handstand Hold',pat:'Skill',img:null,kit:[],why:'Chest to wall version: hands ~6in from wall. Hollow body, active shoulders. Chest-to-wall is harder than back-to-wall — less arch, more true handstand position.',cues:['Chest to wall version: hands ~6in from wall. Hollow body, active shoulders. Chest-to-wall is harder than back-to-wall — less arch, more true handstand position.'],bad:[]},
+  handstand:{n:'Freestanding Attempts',pat:'Skill',img:'images/exercises/handstand.png',kit:[],why:'Kick to balance, ride it as long as you can, bail safely.',cues:['Kick to balance, ride it as long as you can, bail safely.'],bad:[]},
+  deep_pike_pushup:{n:'Deep Parallette Pike Push-Up',pat:'Push',img:'images/exercises/deep_pike_pushup.png',kit:['parallettes','vest'],why:'Hips stacked, deep ROM off parallettes.',cues:['Hips stacked, deep ROM off parallettes.'],bad:[]},
+  weighted_dip:{n:'Weighted Dip',pat:'Push',img:null,kit:['parallettes','vest'],why:'Full depth, controlled, lean forward.',cues:['Full depth, controlled, lean forward.'],bad:[]},
+  bird_dog_crunch:{n:'Bird Dog Crunch',pat:'Core',img:'images/exercises/bird_dog_crunch.png',kit:[],why:'Extend, then draw elbow-to-knee under body.',cues:['Extend, then draw elbow-to-knee under body.'],bad:[]},
+  hip_thrust:{n:'Hip Thrust',pat:'Glutes',img:'images/exercises/hip_thrust.png',kit:['bb','bench'],why:'Chin tucked, full lockout, glute squeeze.',cues:['Chin tucked, full lockout, glute squeeze.'],bad:[]},
+  nordic_curl:{n:'Nordic Curl',pat:'Hamstring',img:null,kit:['band'],why:'Control the eccentric; progress ROM → load.',cues:['Control the eccentric; progress ROM → load.'],bad:[]},
+  db_swing:{n:'Dumbbell Swing',pat:'Hinge',img:'images/exercises/db_swing.png',kit:['db'],why:'Hip snap, not a squat. (KB→DB)',cues:['Hip snap, not a squat. (KB→DB)'],bad:[]},
+  jump_squat:{n:'Jump Squats',pat:'Legs',img:'images/exercises/jump_squat.png',kit:[],why:'Explode up, soft landing, reset.',cues:['Explode up, soft landing, reset.'],bad:[]},
+  active_hang:{n:'Active Hang',pat:'Pull',img:'images/exercises/active_hang.png',kit:['bar'],why:'Shoulders packed, ribs down.',cues:['Shoulders packed, ribs down.'],bad:[]},
+  dragon_flag:{n:'Dragon Flag (Tuck)',pat:'Core',img:'images/exercises/dragon_flag.png',kit:['bench'],why:'From the vertical candlestick, knees tucked, lock the hips so torso and thighs are one rigid line and lower slowly (5-sec negative) until the lower back touches. Slow negatives (reps) OR hold parallel.',cues:['From the vertical candlestick, knees tucked, lock the hips so torso and thighs are one rigid line and lower slowly (5-sec negative) until the lower back touches. Slow negatives (reps) OR hold parallel.'],bad:[]},
+  front_lever_tuck:{n:'Front Lever Tuck',pat:'Skill',img:null,kit:['bar','rings'],why:'Gentle while forearm heals. Posterior tilt.',cues:['Gentle while forearm heals. Posterior tilt.'],bad:[]},
+  weighted_chinup:{n:'Weighted Chin-Up',pat:'Pull',img:null,kit:['bar','vest'],why:'Supinated (forearm-smart). Full ROM.',cues:['Supinated (forearm-smart). Full ROM.'],bad:[]},
+  l_sit_pullup:{n:'L-Sit Pull-up',pat:'Pull',img:'images/exercises/l_sit_pullup.png',kit:['bar'],why:'Hold the L, full pull — back + core.',cues:['Hold the L, full pull — back + core.'],bad:[]},
+  skin_the_cat:{n:'Skin the Cat',pat:'Pull',img:null,kit:['rings'],why:'Controlled German-hang rotation; decompress.',cues:['Controlled German-hang rotation; decompress.'],bad:[]},
+  chin_up:{n:'Chin-up',pat:'Pull',img:'images/exercises/chin_up.png',kit:['bar'],why:'Supinated, full ROM.',cues:['Supinated, full ROM.'],bad:[]},
+  dip:{n:'Dip',pat:'Push',img:'images/exercises/dip.png',kit:['parallettes'],why:'Slight lean for chest, upright for triceps. Full depth. No shoulder shrug.',cues:['Slight lean for chest, upright for triceps. Full depth. No shoulder shrug.'],bad:[]},
+  l_sit:{n:'L-Sit Hold',pat:'Core',img:null,kit:['parallettes'],why:'Arm lockout, depress scapulae, legs parallel to floor. Build tuck first.',cues:['Arm lockout, depress scapulae, legs parallel to floor. Build tuck first.'],bad:[]},
+  explosive_chinup:{n:'Explosive Chin-up',pat:'Pull',img:'images/exercises/explosive_chinup.png',kit:['bar'],why:'Pull fast — chest toward bar.',cues:['Pull fast — chest toward bar.'],bad:[]},
+  deadstop_pushup:{n:'Dead-Stop Push-up',pat:'Push',img:'images/exercises/deadstop_pushup.png',kit:[],why:'Lower all the way to the floor. Lift hands off — full tension release. Reset. Press from zero. No stretch reflex, no momentum. Every rep is a fresh max effort. Brutally effective for pure chest strength.',cues:['Lower all the way to the floor. Lift hands off — full tension release. Reset. Press from zero. No stretch reflex, no momentum. Every rep is a fresh max effort. Brutally effective for pure chest strength.'],bad:[]}
 };
-const KIT_UNLOCKS = {"bar":{"count":44,"sample":["Active Hang","Dead Hang","Incline Row"]},"band":{"count":6,"sample":["Banded Pull-Aparts","Assisted Reverse Nordic Curl","Banded Glute Bridge"]},"db":{"count":20,"sample":["Reverse Fly (chest-supported)","Prone Y-T-W Raise","Lateral Raise"]},"rings":{"count":15,"sample":["Ring Support Hold","Ring Push-Up","Feet-Elevated Ring Row"]}};
+const KIT_UNLOCKS = {"bar":{"count":45,"sample":["Active Hang","Dead Hang","Incline Row"]},"band":{"count":6,"sample":["Banded Pull-Aparts","Assisted Reverse Nordic Curl","Banded Glute Bridge"]},"db":{"count":20,"sample":["Reverse Fly (chest-supported)","Prone Y-T-W Raise","Lateral Raise"]},"rings":{"count":16,"sample":["Ring Support Hold","Ring Push-Up","Feet-Elevated Ring Row"]}};
 /* <<< END GENERATED MOVEMENTS */
 
 /* ------------------------------------------------------------
@@ -2322,8 +2664,11 @@ let SESSIONS = {
         ['wall_sit','3 × 30s'],['forearm_plank','3 × 25s'],['hollow_hold','2 × 20s']]}
     ]}
 };
-/* whatever the console last saved wins */
-Object.assign(SESSIONS, coachProgram() || {})
+/* A real program REPLACES the draft, it does not merge with it. Merging
+   left a person on a three-day program looking at a fourth day borrowed
+   from someone else's plan — days are keyed d1, d2, d3, so anything the
+   draft had beyond that simply survived. */
+{ const cp = coachProgram(); if(cp) SESSIONS = cp; }
 
 /* ============================================================
    2b · THE GAP, AND WHAT CLOSES IT
@@ -2370,15 +2715,15 @@ const GEAR = [
     blurb:'One adjustable pair beats a rack.',
     gap:'Two hands loaded instead of one.',
     without:'Nothing in your twelve weeks needs these.',
-    load:'Adjustable to 20 kg / 45 lb a side is plenty for year one',
+    loadKg:20, loadWhy:'a side is plenty for year one',
     alt:'bench',
     search:'adjustable dumbbells'},
   {id:'kbheavy', name:'Second kettlebell', kit:null, rank:4, price:'60–110', when:'week 8',
     blurb:'One size up. Nothing new to learn.',
     gap:'One bell has one weight. Progress needs a second.',
     without:'Slower tempo and more reps carry you to week eight.',
-    load:'20 kg / 44 lb — one step up from the 16 you own',
-    search:'kettlebell 20kg'}
+    loadKg:20, loadWhy:'one step up from the one you own',
+    search:'kettlebell'}
 ];
 
 /* What is actually on offer right now: everything not already owned, three
@@ -2435,14 +2780,45 @@ const UNLOCKS = [
    days the person picked in the survey: their chosen weekdays, in order,
    each given the next session the program has. Someone training Tue/Thu
    sees Tue/Thu, not Sun/Mon/Wed/Fri. */
-const WEEKPLAN = (function(){
+/* ---- LAYING A PROGRAM ONTO A WEEK ---------------------------------
+   Sessions are placed onto training days in order. Two cases the first
+   version got wrong, both of which lose a person's actual program:
+
+   · MORE DAYS THAN SESSIONS — a three-session program on five training
+     days. Cycling is right: the sessions repeat.
+   · MORE SESSIONS THAN DAYS — a five-session program on three training
+     days. Cycling is NOT right, because it would show sessions 1,2,3
+     forever and 4 and 5 never. The program has to ROTATE: where this
+     week stopped is where next week starts, so every session comes
+     round. Rotation is a function of the week number, not of state, so
+     it survives a reload and cannot drift.
+
+   The offset counts whole weeks since the program arrived. A program
+   with no arrival date starts this week, offset zero. */
+function programOffset(ids, days){
+  if(ids.length <= days.length) return 0;
+  const at = (LOADED && LOADED.at) ? Date.parse(LOADED.at) : NaN;
+  if(!at) return 0;
+  /* self-contained on purpose: this runs while the app is still being set
+     up, above NOW, DOW and weekStart(). Reaching forward to them would
+     throw into a catch and take the whole program with it. */
+  const mon = new Date(); mon.setHours(0,0,0,0);
+  mon.setDate(mon.getDate() - ((mon.getDay() + 6) % 7));
+  const wk = Math.floor((mon.getTime() - at) / 604800000);
+  return ((wk * days.length) % ids.length + ids.length) % ids.length;
+}
+function layWeek(){
   const week = [null,null,null,null,null,null,null];
   const ids  = Object.keys(SESSIONS);
+  if(!ids.length) return week;
   const days = (A.trainDays && A.trainDays.length ? A.trainDays : [0,1,3,5])
-    .slice().sort((x,y)=>x-y);
-  days.forEach((d,i)=>{ if(d>=0 && d<7) week[d] = ids[i % ids.length]; });
+    .slice().sort((x,y)=>x-y).filter(d => d>=0 && d<7);
+  const off = programOffset(ids, days);
+  days.forEach((d,i)=>{ week[d] = ids[(off + i) % ids.length]; });
   return week;
-})();
+}
+
+const WEEKPLAN = layWeek();
 
 /* Every message from a human, in one list. They all wear the coach colour
    because that is what the colour MEANS — not "important", but "a person
@@ -2452,8 +2828,16 @@ const WEEKPLAN = (function(){
    random Tuesday is a number; the same number every Monday is a line on a
    chart. So the app names the day, counts down to it, and on the day the
    coach asks for it rather than the app nagging for it. */
-const WEIGH_DOW = Math.max(0, ['sun','mon','tue','wed','thu','fri','sat']
-  .indexOf(A.checkin || 'mon'));      /* the day they picked to check in */
+/* The survey never asks this, so it must not pretend it did. Derived from
+   the week they DID choose: the day before their first training day, which
+   is the natural reset — you weigh in, then you start. Overridable the
+   moment there is a screen to override it on. */
+const WEIGH_DOW = (function(){
+  const named = ['sun','mon','tue','wed','thu','fri','sat'].indexOf(A.checkin||'');
+  if(named >= 0) return named;
+  const first = (A.trainDays||[]).slice().sort((a,b)=>a-b)[0];
+  return first == null ? 1 : (first + 6) % 7;
+})();
 function weighIn(){
   const days = (WEIGH_DOW - DOW + 7) % 7;
   const last = S.weights[S.weights.length-1];
@@ -2626,6 +3010,15 @@ const todayItems = arr => (arr||[]).filter(x => (x.at||0) >= startOfToday());
 function dayScore(){
   const isTraining = !!todayId;
   const parts = (isTraining ? SCORE_TRAIN : SCORE_REST).map(x=>({...x}));
+  /* On a day their own sport lands, it takes the session's place in the
+     scoring — the hundred still has to add up to a hundred, so the points
+     move rather than being invented. */
+  if(!isTraining && sportToday() && mySports().length){
+    const habits = parts.find(p=>p.id==='habits');
+    const todo   = parts.find(p=>p.id==='todo');
+    habits.pts = 25; todo.pts = 10;
+    parts.unshift({id:'sport', label:sportName(), pts:35});
+  }
   const HABITS = HABITS_FOR();
   const habDone = HABITS.filter(h=>S.habits[h.id]).length;
   /* Notes carried a `t` day-index that nothing writes any more — every note
@@ -2638,9 +3031,13 @@ function dayScore(){
     open:    1,
     ready:   S.readiness ? 1 : 0,
     habits:  HABITS.length ? habDone / HABITS.length : 0,
-    note:    (notesToday.length || freeToday.length) ? 1 : 0,
+    /* Notes only. Logging a sport or a recovery drill was quietly ticking
+       "Wrote a note" as well, which paid twice for one action and put a
+       label on the receipt that had not happened. */
+    note:    notesToday.length ? 1 : 0,
     session: todayDone() ? 1 : 0,
-    todo:    (S.todos||{})[todayTodo().id] ? 1 : 0
+    todo:    (S.todos||{})[todayTodo().id] ? 1 : 0,
+    sport:   sportDone() ? 1 : 0
   };
   const earned = parts.reduce((t,p)=>t + p.pts*(got[p.id]||0), 0);
 
@@ -2819,6 +3216,16 @@ async function loadTheme(){
 const NOW = new Date();
 const DOW = NOW.getDay();
 const DAYNM = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+/* THE WEEK STARTS ON MONDAY.
+   Date.getDay() returns Sunday as 0 and that stays the internal index —
+   every date calculation in the file depends on it. What changes is the
+   ORDER things are drawn in. The survey shows a Monday-first week, so a
+   strip that opened on Sunday put the training days one column left of
+   where the person had just placed them; the data was right and the row
+   was lying about it.
+
+   Anything that draws seven days iterates this. Nothing calculates with it. */
+const WEEK_ORDER = [1,2,3,4,5,6,0];
 function greet(){ const h=NOW.getHours(); return h<5?'Still up':h<12?'Morning':h<17?'Afternoon':h<21?'Evening':'Late one'; }
 function dstr(){ return NOW.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'}); }
 /* THE CLOCK
@@ -2855,6 +3262,26 @@ const PROGRAM_START_DOW = Math.min(...WEEKPLAN.map((x,i)=>x?i:9));
    Three lengths, because the reason people skip these is never the drill,
    it is the clock. Everything uses a mat and a wall at most, so it holds
    for anyone whatever their kit, and nothing loads a joint.              */
+/* ---- THE SPORT THEY ALREADY DO ----------------------------------------
+   The survey asks what else is in the week — running, five-a-side, yoga —
+   and which days it lands on, and then the app forgot about it entirely.
+   Someone who plays football on Thursday was shown a rest day and offered
+   mobility, which tells them the app is not paying attention.
+
+   It counts. Same as training, because it IS training.                  */
+const SPORTS = {run:'Running or cycling', team:'Your team sport', yoga:'Yoga or pilates',
+  hiit:'HIIT or a class', swim:'Swimming', racket:'Racket sport',
+  martial:'Martial arts or boxing', climb:'Climbing', other:'Your other sport'};
+const mySports = () => (A.otherAct||[]).filter(x=>x && x!=='none');
+/* actDays is written in the survey's Monday-based week, like trainDays */
+const sportDays = () => {
+  const raw = A.actDays || [];
+  return (A.dayBase === 'sun' ? raw : raw.map(d=>(d+1)%7));
+};
+const sportToday = () => sportDays().includes(DOW);
+const sportName  = () => SPORTS[mySports()[0]] || 'Your sport';
+const sportDone  = () => todayItems(S.freestyle).some(f => (f.h||'').indexOf('Sport') === 0);
+
 const RECOVERY = [
   {id:'r5',  mins:5,  name:'Loosen off',
    why:'The five minutes that make tomorrow easier. Hips and spine, nothing else.',
@@ -2880,8 +3307,11 @@ const recoveryDone = () => todayItems(S.freestyle).some(f => (f.h||'').indexOf('
    It is kept distinct from a program day rather than merged: the coach needs
    to know the difference between "did what I wrote" and "did his own thing",
    because only one of those tells him the plan is working. */
+/* Monday, to match the strip. A week that displays Mon–Sun but totals
+   Sun–Sat disagrees with itself every Sunday. */
 const weekStart = () => {
-  const d = new Date(NOW); d.setHours(0,0,0,0); d.setDate(d.getDate() - DOW);
+  const d = new Date(NOW); d.setHours(0,0,0,0);
+  d.setDate(d.getDate() - ((DOW + 6) % 7));
   return d.getTime();
 };
 function freeOn(i){
@@ -2891,7 +3321,7 @@ function freeOn(i){
 const freeThisWeek = () => (S.freestyle||[]).filter(f => f.at >= weekStart()).length;
 const freeMins = () => (S.freestyle||[]).filter(f => f.at >= weekStart())
   .reduce((t,f) => t + (parseInt(f.mins,10) || 20), 0);
-const todayId = WEEKPLAN[DOW];
+let todayId = WEEKPLAN[DOW];
 /* A function, not a constant. As a constant it was read once at load, so
    finishing the session left the day score reading 40% until a reload. */
 const todayDone = () => !!S.done[DAYNM[DOW]];
@@ -3214,9 +3644,9 @@ function dayArt(st, pct){
    training day that is almost always the session, which is the point:
    the card should keep saying "train" until he has.               */
 /* where each line of the receipt lives on the screen */
-const GOTO = {session:'sec-session', habits:'sec-habits', todo:'sec-todo',
+const GOTO = {session:'sec-session', sport:'sec-session', habits:'sec-habits', todo:'sec-todo',
               ready:'sec-ready', note:'sec-note'};
-const PRIZE = {session:'the session', habits:'your habits', ready:'the check-in',
+const PRIZE = {session:'the session', sport:'your sport', habits:'your habits', ready:'the check-in',
                note:'a note', open:'opening the app'};
 function dayLine(sc){
   const left = sc.parts.filter(p=>p.pts>0 && (sc.got[p.id]||0) < 1).sort((x,y)=>y.pts-x.pts);
@@ -3296,8 +3726,23 @@ function paneToday(){
 
   let h = `<div class="pane">${header()}`;
 
+  /* THE SAMPLE SAYS SO, EVERY TIME.
+     The demo profile trains Sun/Mon/Wed/Fri and weighs 82kg. Once the intro
+     was dismissed nothing on screen admitted that, so a person whose survey
+     had not reached this device saw a week they never chose and concluded
+     the app was wrong. It was — about who it was talking to. */
+  if(IS_DEMO){
+    h += `<div class="demobar">
+      ${svg(I.alert,'ic')}
+      <div><b>This is the sample, not you</b>
+      <p class="just">Your answers have not reached this device, so the week, the weight and the
+        kit below all belong to a made-up person. Open the <b>Open my dashboard</b> link at the
+        end of the survey and it becomes yours.</p></div>
+    </div>`;
+  }
+
   /* --- clearance, because the PAR-Q said so. Not dismissible until acted on. --- */
-  if(!S.dismissed.parq){
+  if(!S.dismissed.parq && (A.parq||[]).some(x=>x && x!=='none')){
     h += `<div class="alert">
       ${svg(I.alert,'ic')}
       <div><b>One thing before we load up</b>
@@ -3327,17 +3772,21 @@ function paneToday(){
       </div>
     </div>
     <div class="week">
-      ${DAYNM.map((d,i)=>{
+      ${WEEK_ORDER.map(i=>{
+        const d = DAYNM[i];
         /* the mark itself marks a training day — the app's own symbol doing
            a job rather than decorating one */
         const plan = WEEKPLAN[i], free = freeOn(i);
         const dn = !!S.done[d] || free, now = i===DOW;
-        const past = i<DOW && i>=PROGRAM_START_DOW;
+        /* how far through a Monday-first week each day sits, so "past" is
+           still past once Sunday is the last column rather than the first */
+        const pos = (i + 6) % 7, posNow = (DOW + 6) % 7;
+        const past = pos < posNow;
         /* You cannot miss a session that was never handed to you. A day only
            counts as missed if it was released and the day has passed —
            otherwise it stays a plain planned day, which is what it is. */
         const missed = plan && past && released(plan);
-        const cls = (dn?'done':(missed?'miss':(plan&&i>=PROGRAM_START_DOW?'plan':'')))
+        const cls = (dn?'done':(missed?'miss':(plan?'plan':'')))
                   + (free && !S.done[d] ? ' free' : '')
                   + (now && (S.markStyle||'square')!=='stamp' ? ' box' : '');
         return `<div class="wd ${cls} ${now?'now':''}">
@@ -3406,6 +3855,18 @@ function paneToday(){
     </div>`;
   } else {
     const nx = nextDay(), rDone = recoveryDone();
+    if(sportToday() && mySports().length){
+      const sDone = sportDone();
+      h += `<div class="sportcard ${sDone?'done':''}">
+        <div class="rest-hd">
+          <div class="tag"><i></i>Your own sport</div>
+          <h3>${sDone ? sportName() + ' \u2014 logged' : sportName() + ' today'}</h3>
+          <p class="just">You told me this is already in your week, so it is not a rest day and
+            the app is not going to pretend it is. Log it and it counts like a session.</p>
+        </div>
+        ${sDone ? '' : `<button class="go" data-act="dosport">Did it \u2014 log it</button>`}
+      </div>`;
+    }
     h += `<div class="restwrap ${rDone?'done':''}">
       <div class="rest-hd">
         <div class="tag"><i></i>Rest day</div>
@@ -3441,6 +3902,11 @@ function paneToday(){
      into a row the size of a habit, keeps the face he picked as its icon,
      and drops down next to the other things you log. A question you have
      already answered should not hold the best real estate on the screen. */
+  /* Asked daily, answered daily. It was stored as a bare value, so an answer
+     given on Tuesday still sat there on Friday claiming to describe how the
+     body felt that morning. Stamped with the day now; anything older simply
+     is not an answer any more. */
+  if(S.readinessAt && S.readinessAt !== dayKey()){ S.readiness = null; S.readinessAt = null; }
   const readyOn = !!S.readiness;
   if(!readyOn){
     h += `<div class="card" id="sec-ready">
@@ -3903,10 +4369,8 @@ function paneLog(){
     ${wi.today&&!wiDone?`<span class="wi-go">Go</span>`
       :`<span class="wi-cd"><b class="tnum">${wiDone?'7':wi.days}</b><i>${
           wiDone?'days':(wi.days===1?'day':'days')}</i></span>`}
-    <span class="wi-dots" aria-hidden="true">${DAYNM.map((d,i)=>{
-      const done = ((WEIGH_DOW - DOW + 7) % 7 + i) % 7;
-      return `<i class="${i<=( (WEIGH_DOW - DOW + 7) % 7 ) ? '' : 'off'}"></i>`;
-    }).join('')}</span>
+    <span class="wi-dots" aria-hidden="true">${WEEK_ORDER.map((_,n)=>
+      `<i class="${n <= ((WEIGH_DOW - DOW + 7) % 7) ? '' : 'off'}"></i>`).join('')}</span>
   </div>`;
 
   /* ---- what the book adds up to ---- */
@@ -4015,20 +4479,24 @@ function paneLog(){
     ${TESTS.map((t,i)=>{
       const got=(S.tests||{})[t.id];
       const flipped = !!(S.flip||{})[t.id];
+      /* Once a benchmark is set it stops being a challenge and becomes a
+         number to beat. The card says the next target rather than sitting
+         there inviting a test that has already happened. */
+      const target = got ? Math.max(got+1, Math.ceil(got*1.15)) : null;
       return `<div class="bflip ${flipped?'over':''} ${got?'got':''} ${!got&&i===0?'lead':''}">
         <div class="bf-in">
           <button class="bf-face bf-front" data-flip="${t.id}">
             <span class="bc-art">${art(t.id)}</span>
             <b>${t.name}</b>
-            <small>${t.how}</small>
-            <span class="bc-go">${got?got+' '+t.unit:'Test'}</span>
+            <small>${got ? `Beat ${got} ${t.unit}` : t.how}</small>
+            <span class="bc-go">${got ? `Next: ${target}` : 'Test'}</span>
           </button>
           <button class="bf-face bf-back" data-flip="${t.id}">
-            <span class="bf-eye">${t.unit === 'sec' ? 'Hold' : 'Reps'}</span>
+            <span class="bf-eye">${got ? 'Your best' : (t.unit === 'sec' ? 'Hold' : 'Reps')}</span>
             <b>${t.name}</b>
-            <p>${t.note}</p>
+            <p>${got ? `You did ${got}. ${target} beats it — that is the whole challenge.` : t.note}</p>
             ${got?`<span class="bf-score"><i class="tnum">${got}</i>${t.unit}</span>`:''}
-            <span class="bc-go alt" data-go="${t.id}">${got?'Test again':'Do it now'}</span>
+            <span class="bc-go alt" data-go="${t.id}">${got?`Go for ${target}`:'Do it now'}</span>
           </button>
         </div>
       </div>`;
@@ -4038,9 +4506,15 @@ function paneLog(){
     `<i class="${k===0?'on':''}"></i>`).join('')}</div>
   <div class="micro" style="text-align:center;margin:2px 2px 0">Scroll through them. Tap one to turn it over.</div>`;
 
+  const pics = S.photos || [];
   h += `<div class="sect"><b>Photos</b><a data-act="logsheet:photo">Add</a></div>
-  <div class="empty">${svg(I.cam)}<b>No photos yet</b>
-    <p>One from the front, one from the side, once a fortnight. Nobody sees them. In twelve weeks they will say more than the scale does.</p></div>`;
+  ${pics.length
+    ? `<div class="shotrail">${pics.map(p=>`<figure class="shotcard">
+        <img src="${p.src}" alt=""><figcaption>${dayLabel(p.at)}</figcaption></figure>`).join('')}</div>
+       <div class="micro" style="margin:9px 2px 0">${pics.length} photo${pics.length===1?'':'s'},
+         on this device only.</div>`
+    : `<div class="empty">${svg(I.cam)}<b>No photos yet</b>
+        <p>One from the front, one from the side, once a fortnight. Nobody sees them. In twelve weeks they will say more than the scale does.</p></div>`}`;
 
   return h+`</div>`;
 }
@@ -4345,8 +4819,8 @@ function reactor(pct){
 }
 
 /* One button, one job: the answers in here are not carved in stone. */
-const updateBtn = label =>
-  `<button class="go ghost upd" data-act="editprofile">${label}</button>`;
+const updateBtn = (label, tab) =>
+  `<button class="go ghost upd" data-act="editprofile:${tab||'week'}">${label}</button>`;
 
 function paneMe(){
   const done=PTODO.filter(t=>S.profile[t[0]]).length;
@@ -4364,8 +4838,10 @@ function paneMe(){
        style="--pf:${(pct/100).toFixed(3)};--p:${pct}%">
     ${ps==='sunset' ? groundSvg() : ''}
     <button class="prof-hd" data-act="fold:todos">
-      <span class="prof-rx">${ps==='sunset' ? sunSvg(pct) : reactor(pct)}</span>
-      ${ps==='sunset' ? `<span class="prof-n">${segNum(pct)}</span>` : ''}
+      <span class="prof-rx">${ps==='sunset'
+        ? sunSvg(pct) + `<span class="sunnum" style="--suny:${((110 - pct/100*70)/80).toFixed(4)}"
+            ><b class="tnum">${pct}</b><i>%</i></span>`
+        : reactor(pct)}</span>
       <span class="prof-tx">
         <b>Your profile</b>
         <small>${nextUp ? `${PTODO.length-done} left · next is +${nextUp[4]}%` : 'Complete'}</small>
@@ -4396,7 +4872,7 @@ function paneMe(){
   const INFO = [['Name',A.name],['Age',A.age],
       ['Country',MARKET.name+' <em>— sets your units, your currency, and where buy links point</em>'],
       ['Height', A.heightCm ? A.heightCm+' cm' : ''],
-      ['Weight', A.weightKg ? `${A.weightKg} kg · ${Math.round(A.weightKg*2.20462*10)/10} lb` : ''],
+      ['Weight', A.weightKg ? `${disp(A.weightKg)} ${U}` : ''],
       ['Training at','Home · '+KIT_LABEL],
       ['Days', trainDays.length
         ? `${trainDays.length} a week — ${trainDays.map(d=>DAYNM[d]).join(', ')}`
@@ -4406,12 +4882,12 @@ function paneMe(){
         (A.levels&&A.levels.body||'New').toLowerCase()} to bodyweight`],
       ['When', WHEN[A.when] || 'Whenever the day allows'],
       ['Intensity', INT[A.intensity] || 'Steady'],
-      ['Check-in', A.checkin ? DAYFULL[['sun','mon','tue','wed','thu','fri','sat']
-        .indexOf(A.checkin)] + ' morning' : 'Not set']];
+      ['Check-in', DAYFULL[WEIGH_DOW] + (A.checkin ? ' morning'
+        : ' morning <em>— the day before your first session</em>')]];
   const infoDone = INFO.filter(([,v])=>v!=null && String(v).trim()!=='').length;
   cards.push(['info', `${esc(A.name)}'s info`, `<div class="card plain">
     ${INFO.map(([k,v])=>`<div class="arow"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('')}
-    ${updateBtn('Something here has changed')}
+    ${updateBtn('Something here has changed','goals')}
   </div>`, {icon: I.user, steps: INFO.length, did: infoDone,
             sub: infoDone===INFO.length ? 'All answered at the start' : 'What you told me at the start'}]);
 
@@ -4451,7 +4927,8 @@ function paneMe(){
           <span class="lv-when ${g.when==='now'?'now':''}">${g.when==='now'?'start here':'wait — '+g.when}</span>
         </div>
         <div class="lv-un">${n?`Unlocks <b>${n}</b> exercise${n===1?'':'s'}`:'No new exercises — but it is how you keep progressing'}</div>
-        ${g.load?`<div class="lv-load">${svg(I.scale,'lvi')}${g.load}</div>`:''}
+        ${(g.load || g.loadKg)?`<div class="lv-load">${svg(I.scale,'lvi')}${
+          g.loadKg ? `<b>${wt(g.loadKg)}</b> ${g.loadWhy||''}` : g.load}</div>`:''}
         ${names.length?`<ul class="lv-list">${names.map(x=>`<li>${x}</li>`).join('')}${n>3?`<li class="more">+${n-3} more</li>`:''}</ul>`:''}
         ${g.alt?`<button class="lv-alt" data-act="gearalt:${g.id}">I have something that could stand in — let me tell you</button>`:''}
         <div class="lv-foot"><span class="gp">${MARKET.currency}${g.price}</span>${svg(I.arrow,'arw')}</div>
@@ -4464,24 +4941,53 @@ function paneMe(){
                : open3.length ? `Next: ${open3[0].name.toLowerCase()} \u00b7 ${MARKET.currency}${open3[0].price}`
                               : 'You have the lot'}]);
 
+  /* WORKING AROUND, FROM HIS ACTUAL ANSWERS.
+     This was Ozzy's knee, arm and ankle typed in by hand, so a person with a
+     bad shoulder opened the app and was told about somebody else's joints.
+     The survey asks exactly this question — it just was not being read.
+
+     Each zone carries the constraint it implies, because "knees" on its own
+     is a label and "no loaded bend until it settles" is a rule the program
+     can be checked against. */
+  const ZONE = {
+    neck: ['Neck',        'Nothing overhead until it is quiet'],
+    shldr:['Shoulders',   'No pressing overhead, and rows stay below the shoulder'],
+    arm:  ['Elbows or wrists','Fists or handles instead of flat palms'],
+    mid:  ['Upper back',  'Chest supported wherever a row allows it'],
+    low:  ['Lower back',  'Hinges stay light and braced, no loaded rounding'],
+    hip:  ['Hips',        'Depth is what you own today, not what the picture shows'],
+    knee: ['Knees',       'No loaded bend until it settles'],
+    ankle:['Ankles or feet','No jumping, no landing'],
+    other:['Something else','You told me in your own words — I have it noted']
+  };
   const gpOk = !!S.dismissed.parq;
-  const AROUND = [
-    ['Knee','No loaded bend, weeks 1–4', true],
-    ['Arm','Nothing overhead until it is quiet', true],
-    ['Ankle','No jumping, all twelve weeks', true],
-    ['Week 3','Where you have stopped before. I will be loud.', true],
-    ['GP', gpOk?'Cleared — we can start adding load':'Clearance needed before load goes up', gpOk]
-  ];
+  const pains = (A.pain||[]).filter(k=>ZONE[k]);
+  const needsGP = (A.parq||[]).some(x=>x && x!=='none');
+
+  const AROUND = pains.map(k=>[ZONE[k][0], ZONE[k][1], true]);
+  if(A.painNote && String(A.painNote).trim())
+    AROUND.push(['In your words', String(A.painNote).trim(), true]);
+  if(needsGP)
+    AROUND.push(['GP', gpOk ? 'Cleared — we can start adding load'
+                            : 'Clearance needed before load goes up', gpOk]);
+  if(!AROUND.length)
+    AROUND.push(['Nothing flagged', 'You told me nothing hurts. Say the word if that changes.', true]);
+
   const aroundDone = AROUND.filter(r=>r[2]).length;
   cards.push(['around', 'Working around', `<div class="card plain">
     ${AROUND.map(([k,v,ok])=>`<div class="wrow ${ok?'':'flag'}"><b>${k}</b><span>${v}</span></div>`).join('')}
-    <div class="micro just" style="margin-top:12px">${gpOk
-      ? 'All five accounted for.'
-      : 'Four are built into the program. The tick from your GP is the one left.'}</div>
-    ${updateBtn('Something has changed — or something new hurts')}
+    <div class="micro just" style="margin-top:12px">${
+      (needsGP && !gpOk)
+        ? 'The rest are built into the program. The tick from your GP is the one left.'
+        : (pains.length
+            ? 'Every one of these is designed around, not skipped.'
+            : 'Nothing to work around today. That makes this simpler.')}</div>
+    ${updateBtn('Something has changed — or something new hurts','pain')}
   </div>`, {icon: I.shield, steps: AROUND.length, did: aroundDone,
             note: `${aroundDone} of ${AROUND.length}`,
-            sub: gpOk ? 'All five accounted for' : 'One still open — the GP tick'}]);
+            sub: (needsGP && !gpOk) ? 'One still open — the GP tick'
+               : (pains.length ? pains.map(k=>ZONE[k][0].toLowerCase()).join(', ')
+                               : 'Nothing flagged')}]);
 
   /* least finished first — a section already dealt with drops to the end */
   cards.sort((x,y)=>{
@@ -4533,12 +5039,28 @@ function paneMe(){
   </div>`, {icon: I.drop, sub: 'Three colours, six to pick from',
              note: S.themeRandom?'shuffling':pal(pick.neon).name});
 
+  /* Settings promised three things and did none of them. Units and the two
+     data rights are real now; reminders needs a service worker and says so
+     rather than sitting there looking clickable. */
   h+=fold('settings', 'Settings', `<div class="card plain">
-    <div class="arow"><span class="k">Units</span><span class="v">Pounds · switch to kg</span></div>
-    <div class="arow"><span class="k">Reminders</span><span class="v">Session day, 30 min before</span></div>
-    <div class="arow"><span class="k">Your data</span><span class="v">Export everything · delete everything</span></div>
+    <div class="arow"><span class="k">Units</span><span class="v">
+      <button class="unitbtn ${U==='kg'?'on':''}" data-act="setunit:kg">kg</button>
+      <button class="unitbtn ${U==='lb'?'on':''}" data-act="setunit:lb">lb</button></span></div>
+    <div class="arow"><span class="k">Reminders</span><span class="v">Not yet
+      <em>— needs notifications, which need the app installed</em></span></div>
+    <div class="eqsplit">Your data</div>
+    <div class="micro just">Everything this app knows about you is on this device. Nothing has
+      been sent anywhere. You can take it with you, or destroy it — both, right now, without
+      asking anyone.</div>
+    <button class="go ghost" style="margin-top:12px" data-act="exportdata">Download everything</button>
+    <button class="go ghost danger" style="margin-top:8px" data-act="wipe">Delete everything</button>
   </div>`, {icon: I.gear, sub: 'Units, reminders, your data'});
-  h+=`<div class="micro" style="text-align:center;margin-top:22px;opacity:.6">Fitness Journey · prototype build</div>`;
+  /* A VISIBLE BUILD STAMP.
+     "Is the app actually updating?" is unanswerable without one, and it came
+     up the moment there was a phone in the loop and a browser cache between
+     us. If this line has not changed, neither has anything else. */
+  h+=`<div class="micro" style="text-align:center;margin-top:22px;opacity:.6">
+    Fitness Journey &middot; build ${BUILD_STAMP}</div>`;
 
   return h+`</div>`;
 }
@@ -4636,9 +5158,11 @@ function sheetDay(id){
     ${note?`<div class="micro" style="margin-top:12px;color:var(--accent)">${note}</div>`:''}
     ${blocks.map(b=>`<div class="blk">
       <div class="blkh"><b>${b.role}</b><small>${b.mins} min</small></div>
+      ${b.name?`<div class="blkt">${b.name}</div>`:''}
+      ${b.note?`<div class="blkn">${b.note}</div>`:''}
       ${b.items.map(([k,rx,note])=>`<div class="mv" data-ex="${k}">
         <div class="th">${art(k)}</div>
-        <div class="tx"><b>${EX[k].n}</b><small>${note||EX[k].pat}</small></div>
+        <div class="tx"><b>${EX[k]?EX[k].n:k}</b><small>${note||(EX[k]?EX[k].pat:'')}</small></div>
         <div class="rx">${rx}</div>
       </div>`).join('')}
     </div>`).join('')}
@@ -4729,8 +5253,8 @@ function sheetWeek(){
     <div class="eyebrow">Foundation · weeks 1–4</div>
     <h4 style="margin-top:8px">Kettlebell Foundation</h4>
     <div class="shsub">Twelve weeks in three phases, built around one bell. Weeks one to four teach the hinge — which is why there is no swing in them. The swing is a hinge done fast, and you cannot do a hinge fast before you can do one at all.</div>
-    ${DAYNM.map((d,i)=>{
-      const id=WEEKPLAN[i];
+    ${WEEK_ORDER.map(i=>{
+      const d=DAYNM[i], id=WEEKPLAN[i];
       if(!id) return `<div class="mv" style="opacity:.5;cursor:default">
         <div class="th" style="display:flex;align-items:center;justify-content:center;color:var(--ink3);font-size:11px">${d}</div>
         <div class="tx"><b>Rest</b><small>Walk if you can</small></div></div>`;
@@ -4767,9 +5291,21 @@ function sheetLog(kind){
     note:{h:'Write it down',s:'How it felt, what hurt, what you noticed. Future-you reads these.',
       body:`<div class="fld"><label>Title</label><input id="lgh" type="text" placeholder="Knee felt better today"></div>
             <div class="fld"><label>Note</label><textarea id="lgv" placeholder="Anything at all."></textarea></div>`},
-    photo:{h:'Progress photo',s:'Front and side, same spot, same light. Stored on your phone, nowhere else.',
-      body:`<div class="empty" style="margin-top:16px">${svg(I.cam)}<b>Take or choose a photo</b>
-            <p>In the real app this opens the camera. Tap save to mark it done in the prototype.</p></div>`},
+    /* A REAL PHOTO, NOT A TICKBOX.
+       This said "in the real app this opens the camera" and then marked
+       itself done, which is the worst kind of placeholder: it looks like
+       it worked. capture="environment" opens the camera on a phone and the
+       file picker everywhere else. The image is read to a data URL and kept
+       in this browser — it is never uploaded, because there is nowhere to
+       upload it to and saying otherwise would be a lie about someone's
+       body. */
+    photo:{h:'Progress photo',s:'Front and side, same spot, same light. It stays on this device.',
+      body:`<label class="shot">
+              <input id="lgphoto" type="file" accept="image/*" capture="environment" hidden>
+              <span class="shot-in">${svg(I.cam)}<b>Take or choose a photo</b>
+                <small>Nothing leaves this device</small></span>
+            </label>
+            <div id="shotprev"></div>`},
     /* FREESTYLE — training that did not come from a program. A more
        experienced person does this constantly, and an app that only
        counts what it prescribed will lose them by month two. It lands
@@ -4913,6 +5449,87 @@ function sheetRecovery(id){
     <div class="sheetcta"><button class="go" data-act="dorecov:${r.id}">Done — log it</button></div>`);
 }
 
+/* ============================================================
+   CHANGE YOUR ANSWERS
+   Onboarding is a one-off; a life is not. The week moves, a
+   shoulder starts hurting, a bar arrives. Every one of those was
+   a question the survey asked and then locked, so the only honest
+   options were "live with it" or "fill the survey in again".
+
+   Each panel edits the same fields the survey wrote, saves to the
+   same profile record, and takes effect immediately — the week
+   strip rebuilds, the kit filter changes, Working around updates.
+   ============================================================ */
+const ANSTABS = [['week','Your week'],['kit','Your kit'],['pain','What hurts'],['goals','Your goals']];
+const DAYLONG = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const KITALL = [['kb','Kettlebell'],['bench','Bench'],['mat','Mat'],['bar','Pull-up bar'],
+                ['band','Bands'],['db','Dumbbells']];
+const ZONELIST = [['neck','Neck'],['shldr','Shoulders'],['arm','Elbows or wrists'],
+                  ['mid','Upper back'],['low','Lower back'],['hip','Hips'],
+                  ['knee','Knees'],['ankle','Ankles or feet'],['other','Somewhere else']];
+
+function sheetAnswers(tab){
+  tab = tab || 'week';
+  const head = `<div class="sh-hd"><div class="eyebrow">Your answers</div>
+      <h3>${ANSTABS.find(t=>t[0]===tab)[1]}</h3></div>
+    <div class="anstabs">${ANSTABS.map(([id,nm])=>
+      `<button class="anstab ${id===tab?'on':''}" data-act="editprofile:${id}">${nm}</button>`).join('')}</div>`;
+
+  let body = '';
+  if(tab === 'week'){
+    body = `<p class="micro just">Tap a day to add or drop it. The sessions redistribute across
+        whatever you pick — skip Wednesday and train Thursday instead, it is your week.</p>
+      <div class="daygrid">
+        ${DAYLONG.map((nm,i)=>{
+          const on = (A.trainDays||[]).includes(i);
+          return `<button class="dayopt ${on?'on':''}" data-act="toggleday:${i}">
+            <b>${nm.slice(0,3)}</b><small>${on?(SESSIONS[WEEKPLAN[i]]||{name:'Training'}).name:'Rest'}</small>
+          </button>`;
+        }).join('')}
+      </div>
+      <div class="micro" style="margin-top:12px">${(A.trainDays||[]).length} day${
+        (A.trainDays||[]).length===1?'':'s'} a week.</div>`;
+  }
+  if(tab === 'kit'){
+    body = `<p class="micro just">What you can actually train with today. Everything in the app
+        — your sessions, the library, what you can build — is filtered by this.</p>
+      <div class="kitgrid">
+        ${KITALL.map(([k,nm])=>`<button class="kitopt ${OWNED.has(k)?'on':''}"
+          data-act="togglekit:${k}">${nm}</button>`).join('')}
+      </div>`;
+  }
+  if(tab === 'pain'){
+    body = `<p class="micro just">Only what is bothering you now. Nothing gets skipped — it
+        gets swapped for something that does the same job.</p>
+      <div class="kitgrid">
+        ${ZONELIST.map(([k,nm])=>`<button class="kitopt ${(A.pain||[]).includes(k)?'on':''}"
+          data-act="togglepain:${k}">${nm}</button>`).join('')}
+      </div>
+      <div class="fld" style="margin-top:14px"><label>In your own words</label>
+        <textarea id="ansv" rows="2" placeholder="Which side, what it stops you doing…">${esc(A.painNote||'')}</textarea></div>
+      <div class="sheetcta"><button class="go" data-act="savetext:painNote">Save that</button></div>`;
+  }
+  if(tab === 'goals'){
+    const INT = [['easy','Ease me in'],['steady','Steady'],['push','Push me']];
+    body = `<p class="micro just">What you are training for, and how hard you want pushing while
+        you do it.</p>
+      <div class="fld"><label>How hard should I push?</label></div>
+      <div class="kitgrid">
+        ${INT.map(([k,nm])=>`<button class="kitopt ${A.intensity===k?'on':''}"
+          data-act="setans:intensity~${k}">${nm}</button>`).join('')}
+      </div>
+      <div class="fld" style="margin-top:16px"><label>Session length</label></div>
+      <div class="kitgrid">
+        ${['20','30','45','60'].map(v=>`<button class="kitopt ${String(A.length)===v?'on':''}"
+          data-act="setans:length~${v}">${v} min</button>`).join('')}
+      </div>
+      <div class="fld" style="margin-top:16px"><label>What are you actually after?</label>
+        <textarea id="ansv" rows="3" placeholder="In your words — it goes to Coach Nico.">${esc(A.goalNote||'')}</textarea></div>
+      <div class="sheetcta"><button class="go" data-act="savetext:goalNote">Save that</button></div>`;
+  }
+  openSheet(head + body);
+}
+
 function sheetTodo(k){
   const t=PTODO.find(x=>x[0]===k) || ['test','Push-up test','Get your first rank','90 sec',12];
   const extra={
@@ -4945,7 +5562,9 @@ function sheetTodo(k){
    ============================================================ */
 function wire(){
   view.querySelectorAll('[data-ready]').forEach(b=>b.onclick=()=>{
-    S.readiness = S.readiness===b.dataset.ready?null:b.dataset.ready; save(); go('today');
+    S.readiness = S.readiness===b.dataset.ready?null:b.dataset.ready;
+    S.readinessAt = S.readiness ? dayKey() : null;
+    save(); go('today');
     if(S.readiness) toast('Session adjusted');
   });
   view.querySelectorAll('[data-habit]').forEach(b=>b.onclick=()=>{
@@ -5037,7 +5656,21 @@ function wire(){
     const n=view.querySelector('#q'); if(n){ n.focus(); n.setSelectionRange(c,c);} };
   view.querySelectorAll('[data-act]').forEach(b=>b.onclick=e=>{ e.stopPropagation(); act(b.dataset.act,b); });
 }
+/* the chosen image, held until Save is pressed */
+let PHOTO_DATA = null;
 function wireSheet(){
+  PHOTO_DATA = null;
+  const pf = sBody.querySelector('#lgphoto');
+  if(pf) pf.onchange = () => {
+    const f = pf.files && pf.files[0]; if(!f) return;
+    const r = new FileReader();
+    r.onload = () => {
+      PHOTO_DATA = r.result;
+      const prev = sBody.querySelector('#shotprev');
+      if(prev) prev.innerHTML = `<img class="shotimg" src="${r.result}" alt="">`;
+    };
+    r.readAsDataURL(f);
+  };
   sBody.querySelectorAll('[data-act]').forEach(b=>b.onclick=e=>{ e.stopPropagation(); act(b.dataset.act,b); });
   sBody.querySelectorAll('[data-ex]').forEach(b=>b.onclick=()=>sheetExercise(b.dataset.ex));
   sBody.querySelectorAll('[data-day]').forEach(b=>b.onclick=()=>sheetDay(b.dataset.day));
@@ -5051,10 +5684,59 @@ function act(a,el){
   if(cmd==='close') return closeSheet();
   if(cmd==='parq'){ S.dismissed.parq=1; save(); go('today'); return toast('Noted — I will ask again before week 5'); }
   if(cmd==='openday') return released(el.dataset.day)?sheetDay(el.dataset.day):toast('Still in review');
+  /* THE END OF THE SPINE: onboarding, dashboard, program, workout day.
+     "Start the session" has been on the day sheet all along with nothing
+     listening for it — the runner lives in the app shell, not in this page,
+     so this is the hand-off to it. index.html?run=<dayId> boots, resolves
+     who this is, reads the day out of THEIR released program and starts it.
+     The session is marked done here when they come back. */
+  if(cmd==='start'){
+    S.queued = (S.queued||[]).filter(x=>x!==arg);
+    save(1);
+    location.href = 'index.html?run=' + encodeURIComponent(arg);
+    return;
+  }
   if(cmd==='pending') return toast("You'll get a nudge the moment it unlocks");
   if(cmd==='openweek') return sheetWeek();
   if(cmd==='swap') return toast('Swap coming — three alternatives for today');
-  if(cmd==='editprofile') return toast('Opens the onboarding answers, editable');
+  if(cmd==='editprofile') return sheetAnswers(arg||'info');
+  if(cmd==='setans'){
+    /* Written to the PROFILE, not to a copy — the answers are one record and
+       the app has to read the edited one from now on, including after a
+       reload. A "change this" button that only changes the screen is a lie. */
+    const [field, val] = arg.split('~');
+    A[field] = val === '__toggle' ? A[field] : val;
+    saveProfile(); go(S.tab, true);
+    return toast('Updated');
+  }
+  if(cmd==='togglepain'){
+    A.pain = A.pain || [];
+    const i = A.pain.indexOf(arg);
+    if(i>=0) A.pain.splice(i,1); else A.pain.push(arg);
+    saveProfile(); sheetAnswers('pain');
+    return;
+  }
+  if(cmd==='togglekit'){
+    A.kit = A.kit || [];
+    const i = A.kit.indexOf(arg);
+    if(i>=0) A.kit.splice(i,1); else A.kit.push(arg);
+    OWNED.clear(); A.kit.forEach(x=>OWNED.add(x));
+    saveProfile(); sheetAnswers('kit');
+    return;
+  }
+  if(cmd==='toggleday'){
+    A.trainDays = A.trainDays || [];
+    const d = +arg, i = A.trainDays.indexOf(d);
+    if(i>=0) A.trainDays.splice(i,1); else A.trainDays.push(d);
+    A.trainDays.sort((a,b)=>a-b); A.days = A.trainDays.length;
+    saveProfile(); rebuildWeek(); sheetAnswers('week');
+    return;
+  }
+  if(cmd==='savetext'){
+    const el = sBody.querySelector('#ansv'); if(!el) return;
+    A[arg] = el.value; saveProfile(); closeSheet(); go(S.tab, true);
+    return toast('Updated');
+  }
   if(cmd==='gearalt'){
     /* A person improvising with two chairs is telling us something useful.
        It goes to the coach as a question, not into a void. */
@@ -5098,6 +5780,41 @@ function act(a,el){
       rpe:'', b:w.items.map(it=>`${(EX[it.ex]||{n:it.ex}).n}${it.pres?' '+it.pres:''}`).join(', ')});
     save(); closeSheet(); go('today');
     return toast('Logged \u2014 that is your week');
+  }
+  if(cmd==='setunit'){
+    A.unit = arg; saveProfile();
+    return location.reload();          /* U is read once at boot, by design */
+  }
+  if(cmd==='exportdata'){
+    /* Every record this app holds for this person, in one readable file.
+       Not a summary — the actual stored objects, so it is a real export. */
+    const dump = {exported:new Date().toISOString(), uid:USER, profile:A,
+      dashboard:S, coach:(()=>{try{return JSON.parse(localStorage.getItem(COACH_KEY)||'null');}catch(e){return null;}})()};
+    const blob = new Blob([JSON.stringify(dump,null,2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a2 = document.createElement('a');
+    a2.href = url; a2.download = `fitness-journey-${USER}.json`;
+    document.body.appendChild(a2); a2.click(); a2.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 4000);
+    return toast('Downloaded — that is everything');
+  }
+  if(cmd==='wipe'){
+    if(!confirm('Delete everything on this device — your answers, your log, your photos? This cannot be undone.')) return;
+    if(!confirm('Really? There is no copy anywhere else.')) return;
+    try{
+      [KEY, COACH_KEY, 'fj.v1.profile.'+USER].forEach(k=>localStorage.removeItem(k));
+      localStorage.removeItem('fj.v1.current');
+      const people = JSON.parse(localStorage.getItem('fj.v1.people')||'[]').filter(x=>x.uid!==USER);
+      localStorage.setItem('fj.v1.people', JSON.stringify(people));
+    }catch(e){}
+    return location.reload();
+  }
+  if(cmd==='dosport'){
+    S.freestyle = S.freestyle || [];
+    S.freestyle.unshift({at:nowMs(), h:'Sport \u00b7 ' + sportName(), mins:'45', rpe:'',
+      b:'From your own week, not the program.'});
+    save(); go('today');
+    return toast('Counted \u2014 that is your week');
   }
   if(cmd==='dorecov'){
     const r = RECOVERY.find(x=>x.id===arg); if(!r) return;
@@ -5155,7 +5872,10 @@ function act(a,el){
   if(cmd==='deckmore') return sheetDeck();
   if(cmd==='gear') return sheetGear(arg);
   if(cmd==='buy'){
-    const g=GEAR.find(x=>x.id===arg); if(!g) return;
+    let g=GEAR.find(x=>x.id===arg); if(!g) return;
+    /* search in the unit they buy in — "kettlebell 44 lb" finds a shop,
+       "kettlebell 20kg" finds a conversion table */
+    if(g.loadKg) g = Object.assign({}, g, {search: g.search + ' ' + wt(g.loadKg)});
     /* A search page, deliberately — see the note on GEAR. Opens in a new tab
        so a half-finished session is never lost behind a shopping trip. */
     window.open(MARKET.search+encodeURIComponent(g.search),'_blank','noopener');
@@ -5196,7 +5916,14 @@ function act(a,el){
         h:(hh&&hh.value)||(arg==='checkin'?'You replied to Coach Nico':'Note'),
         b:(v&&v.value)||'—'});
     }
-    if(arg==='photo'){ S.profile.photo=true; S.photoAt=nowMs(); }
+    if(arg==='photo'){
+      if(!PHOTO_DATA) return toast('Choose a photo first');
+      S.photos = S.photos || [];
+      S.photos.unshift({at:nowMs(), src:PHOTO_DATA});
+      /* two is a comparison, twenty is a storage problem on a phone */
+      if(S.photos.length > 12) S.photos.length = 12;
+      S.profile.photo = true; S.photoAt = nowMs(); PHOTO_DATA = null;
+    }
     /* If this sheet was opened by today's one thing, saving IS ticking it. */
     if(PENDING_TODO){ S.todos=S.todos||{}; S.todos[PENDING_TODO]=1; PENDING_TODO=null; }
     save(); closeSheet(); go(S.tab);
