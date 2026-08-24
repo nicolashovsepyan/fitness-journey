@@ -1899,13 +1899,42 @@ function wireAddClient(id){
   if(go) go.onclick = () => addClientFrom(document.getElementById(id).value);
 }
 
+/* REMOVING ONE. The example client is seeded once and never re-seeded, so
+   that a coach who clears him out gets a console that stays cleared - but
+   until there was a way to clear him, that was a promise with no button
+   behind it. Removes the intake, the indexes and this console's drawer for
+   them; leaves their dashboard log alone, because that is the client's
+   record and not the coach's to delete. */
+function removeClient(id){
+  const nm = (A.name || id);
+  if(!confirm(`Remove ${nm} from this console? Their program draft and layer notes go with them. Their own app and training log are untouched.`)) return;
+  try{
+    localStorage.setItem('fj.intakes', JSON.stringify(
+      lsGet(INTAKES_LS).filter(i => i.userId !== id)));
+    localStorage.setItem(USERS_LS, JSON.stringify(
+      lsGet(USERS_LS).filter(u => u.id !== id)));
+    localStorage.setItem('fj.v1.people', JSON.stringify(
+      lsGet('fj.v1.people').filter(x => x.uid !== id)));
+    ['fj.v1.'+id+'.profile', 'fj.v1.profile.'+id, `fj.v1.${id}.coach`,
+     `fj.v1.${id}.hist`, `fj.v1.${id}.hist.log`, `fj.v1.${id}.hist.prev`]
+      .forEach(k => localStorage.removeItem(k));
+    if(localStorage.getItem('fj.v1.current') === id) localStorage.removeItem('fj.v1.current');
+    localStorage.removeItem('fj.coach.client');
+  }catch(e){ return toast('Could not remove them'); }
+  location.search = '';
+}
+
 function drawAddClient(){
   const host = document.getElementById('addClient'); if(!host) return;
   host.innerHTML = `<details><summary style="cursor:pointer;font-size:12px;color:var(--dim,#8B949E)">
       Add a client from their survey</summary>
       <div style="margin-top:7px">${addClientBox('addLink', true)}</div>
-    </details>`;
+    </details>
+    ${HAS_CLIENT ? `<button class="btn sm" id="rmClient"
+      style="margin-top:7px;width:100%;color:var(--ink3)">Remove ${esc(A.name||CLIENT_ID)}</button>` : ''}`;
   wireAddClient('addLink');
+  const rm = document.getElementById('rmClient');
+  if(rm) rm.onclick = () => removeClient(CLIENT_ID);
 }
 
 function drawClients(){
