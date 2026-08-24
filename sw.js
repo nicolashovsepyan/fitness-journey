@@ -15,21 +15,11 @@
    Training data lives in localStorage, not here, so an update never
    touches a logged session.
    ============================================================ */
-const VERSION = '581be56982';
+const VERSION = 'c03aaad6a0';
 const CACHE = 'fj-' + VERSION;
 const ASSETS = [
-  "./ EXERCISE LIBRARY/Exercise_Illustration_Collection/03_Lower_Body_Glutes_Posterior_Chain/019_bodyweight_squat.png",
   "./ FOR NICOLAS/EXERCISE CLASSIFIER.html",
   "./.claude/launch.json",
-  "./EXERCISE DATABASE/DASHBOARD.html",
-  "./EXERCISE DATABASE/tools/build-kettlebell.mjs",
-  "./EXERCISE DATABASE/tools/dashboard.template.html",
-  "./EXERCISE DATABASE/tools/derive.mjs",
-  "./EXERCISE DATABASE/tools/fundamentals.json",
-  "./EXERCISE DATABASE/tools/gym-library-seed.json",
-  "./EXERCISE DATABASE/tools/kettlebell-library.json",
-  "./EXERCISE DATABASE/workbook/_derived.json",
-  "./EXERCISE DATABASE/workbook/_kettlebell_merge.json",
   "./coach.html",
   "./dashboard.html",
   "./icon-180.png",
@@ -105,21 +95,28 @@ const ASSETS = [
   "./spine/benchmarks.json",
   "./spine/catalog.json",
   "./spine/program.default.json",
+  "./spine/programs/beginner_return.json",
+  "./spine/programs/index.json",
+  "./spine/programs/main.json",
   "./spine/theme.json",
   "./styles.css",
+  "./tools/audit-answers.mjs",
   "./tools/audit-classes.mjs",
   "./tools/audit-survey-wiring.mjs",
   "./tools/build-app-data.mjs",
   "./tools/build-avatars.mjs",
   "./tools/build-benchmarks.mjs",
   "./tools/build-classifier.mjs",
+  "./tools/build-coach-library.mjs",
   "./tools/build-deck-art.mjs",
   "./tools/build-equipment.mjs",
   "./tools/build-exercise-images.mjs",
   "./tools/build-logo.mjs",
   "./tools/build-spine.mjs",
   "./tools/export-program.mjs",
-  "./tools/fix-progression-links.mjs"
+  "./tools/fix-progression-links.mjs",
+  "./tools/make-link.mjs",
+  "./tools/port-programs.mjs"
 ];
 
 self.addEventListener('install', (e) => {
