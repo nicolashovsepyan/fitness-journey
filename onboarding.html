@@ -744,6 +744,40 @@ h1.q{text-align:center}
 .cbub.key{border-color:rgba(123,227,196,.42);box-shadow:0 0 22px rgba(123,227,196,.13)}
 .cbub b{color:var(--accent);font-weight:600}
 .cbub small{display:block;margin-top:4px;font-size:12.5px;color:var(--ink3);line-height:1.4}
+
+/* ---- THE ANSWERING CHAT ------------------------------------------------
+   The promise screen is Niko talking. This is Niko talking AND listening, so
+   the thread needs a second voice. Answers sit on the right, mirrored: same
+   bubble, opposite corner cut, accent instead of card. That mirroring is the
+   whole trick - it reads as a conversation without a single new shape. */
+.cbub.me{align-self:flex-end;background:var(--accent-soft);border-color:rgba(62,203,168,.42);
+  border-radius:19px 19px 5px 19px;transform-origin:100% 100%;color:var(--ink)}
+.cans{display:flex;flex-direction:column;gap:8px;margin:4px 0 2px;
+  opacity:0;transform:translateY(9px);transition:opacity .3s,transform .3s}
+.cans.on{opacity:1;transform:none}
+/* Every option is the same size, including the one that opens a text box.
+   A "write your own" set smaller than the buttons beside it reads as an
+   afterthought, and it is not one. */
+.cans button{width:100%;min-height:52px;border-radius:14px;border:1.5px solid var(--line);
+  background:var(--bg2);color:var(--ink);font:inherit;font-size:15px;font-weight:550;
+  padding:14px 16px;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent;
+  touch-action:manipulation}
+.cans button:active{transform:scale(.985)}
+.cans button.on{border-color:var(--accent);background:var(--accent-soft)}
+.cans .crow{display:flex;gap:8px;align-items:stretch}
+.cans input{flex:1;min-width:0;min-height:52px;border-radius:14px;border:1.5px solid var(--line);
+  background:var(--bg2);color:var(--ink);font:inherit;font-size:16px;padding:0 15px}
+.cans input:focus{outline:none;border-color:var(--accent)}
+.cans .csend{flex:0 0 52px;min-height:52px;width:52px;padding:0;display:grid;place-items:center;
+  background:var(--accent);border:none;color:#0C1512;font-size:19px;font-weight:700}
+.cans .csend[disabled]{opacity:.35}
+/* the dial, inside a bubble, with its unit switch above it */
+.cdial{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px 6px}
+.cdial .cdval{text-align:center;font-size:27px;font-weight:700;letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums;margin-bottom:2px}
+.cdial .cdunit{display:block;margin:0 auto 8px;background:none;border:none;width:auto;min-height:0;
+  font:inherit;font-size:12.5px;color:var(--accent);text-decoration:underline;
+  text-underline-offset:3px;padding:2px 6px;text-align:center;cursor:pointer}
 .typing{align-self:flex-start;display:none;gap:4px;background:var(--card);
   border:1px solid var(--line);border-radius:19px 19px 19px 5px;padding:13px 15px}
 .typing.on{display:flex}
@@ -3124,12 +3158,86 @@ const FLOW = [
 
 /* 1 · YOU */
 { ch:1, type:'chapter', n:1, title:'You', sub:'So every question after this is the right one.' },
-{ ch:1, type:'text', key:'name', h:'What should I call you?', sub:'Goes on the front of your Log.',
-  placeholder:'First name', cta:'Continue' },
-{ ch:1, type:'vitals', h:'The basics.',
-  sub:'Strength benchmarks and starting loads all hang off these.', cta:'That is me' },
+{ ch:1, type:'chatq', cta:'Keep going',
+  /* THE OPENING, AS A CONVERSATION.
+     Five screens used to live here and in chapter 3: name, the basics,
+     how active, how long trained, and the why. They are one thread now.
+     Nicolas: "the idea is to make the survey more dynamic, and shorter in
+     some way, 2-3 different sections makes it feel different for user and
+     we might keep him engaged."
 
-/* 2 · WHERE YOU'RE GOING */
+     The beats are DATA so the wording can be argued with without touching
+     the renderer. Each beat is: what Niko says, then how they answer.
+       type  a keyboard        tap  buttons        dial  the scroller
+     `say` may use {name} once it has been given.
+     `echo` is what their answer looks like in their own bubble. */
+  beats:[
+    { say:["What's up, I'm Coach {coach}.",
+           "Welcome to your Fitness Journey. This is your app now, not mine.",
+           "What should I call you?"],
+      ask:{ kind:'type', key:'name', placeholder:'Your name', keyboard:'text' } },
+
+    { say:["Good to meet you, {name}. How old are you?"],
+      ask:{ kind:'type', key:'age', placeholder:'Age', keyboard:'number',
+            min:14, max:99, echo:v=>v+' years old' } },
+
+    { say:["Man or woman? Strength standards differ, so this keeps your numbers honest."],
+      ask:{ kind:'tap', key:'sex',
+            opts:[{v:'m',t:'Man'},{v:'f',t:'Woman'}] } },
+
+    { say:["2 quick ones. How tall are you?"],
+      ask:{ kind:'dial', key:'heightCm', min:130, max:215, step:1, value:178,
+            units:['cm','ft'] } },
+
+    { say:["And roughly what do you weigh?"],
+      ask:{ kind:'dial', key:'weightKg', min:35, max:200, step:1, value:80,
+            units:['kg','lb'] } },
+
+    { say:["So, what made you open this today?"],
+      /* writes `driver`, which the pattern label already reads and already
+         copes with a single value. The chapter 6 multi-select that used to
+         ask this is gone: asking it twice is worse than asking it once. */
+      ask:{ kind:'tap', key:'driver', wrap:true,
+            opts:[{v:'miss',   t:"I've let it slide. Time to get back on track"},
+                  {v:'plateau',t:"I'm active, but stuck. I need help past this plateau"},
+                  {v:'lose',   t:'I want to lose weight'},
+                  {v:'strong', t:'I want to get stronger'},
+                  {v:'own',    t:'Say it your own way', free:true,
+                   placeholder:'In your words'}] } },
+
+    { say:["How long have you been at it, on and off?"],
+      ask:{ kind:'tap', key:'trained',
+            opts:[{v:'new',t:'Just starting'},{v:'lt1',t:'Under 1 year'},
+                  {v:'1to5',t:'1 to 5 years'},{v:'5plus',t:'5 years or more'}] } },
+
+    { say:["And when you train, what does it look like?"],
+      /* NEW. The audit found we never ask this, and it is the answer that
+         fixes being measured on a bench press when you are a calisthenics
+         person. See SURVEY WIRING AUDIT.md section 4. */
+      ask:{ kind:'tap', key:'style',
+            opts:[{v:'weights',t:'Weights, sets and reps'},
+                  {v:'hiit',   t:'Classes or HIIT'},
+                  {v:'crossfit',t:'CrossFit'},
+                  {v:'calis',  t:'Calisthenics'},
+                  {v:'func',   t:'Functional, mixed'},
+                  {v:'run',    t:'Running or cycling'}] } },
+
+    { say:["How many days a week can you actually give me? Realistic beats ambitious."],
+      /* This pre-fills the week screen later rather than competing with it -
+         that screen asks days AND session length AND which days, which is a
+         better place to settle a schedule than a chat bubble. */
+      ask:{ kind:'tap', key:'days',
+            opts:[{v:2,t:'2'},{v:3,t:'3'},{v:4,t:'4'},{v:5,t:'5+'}] } },
+
+    { say:["Last one. Anything hurt? Bad knee, cranky shoulder, anything."],
+      ask:{ kind:'tap', key:'painNote', wrap:true,
+            opts:[{v:'',t:'Nothing right now'},
+                  {v:'some',t:'Yeah, let me tell you', free:true,
+                   placeholder:'What is going on?'}] } },
+
+    { say:["That's you. Now let's see what you've got to work with."] }
+  ]},
+
 { ch:2, type:'chapter', n:2, title:'Where you are going', sub:'We start at the end and work back.' },
 /* Two screens again. They were merged onto one and it was worse: the far
    horizon and the ninety-day focus are different questions and asking them
@@ -3145,29 +3253,6 @@ const FLOW = [
    end of it — it measures the distance they are from where they want to be
    and calls it a starting point. The slider stops one step above them and
    opens further only if they say it should. */
-{ ch:3, type:'single', key:'activity', h:'How active are you right now?',
-  sub:'Today, not last year. It only sets where we start.',
-  opts:[{v:'none',    ic:'cloud',    t:'Not training',            s:'Maybe the odd walk'},
-        {v:'light',   ic:'leaf',     t:'Active, but not training', s:'On my feet, walking, the odd class'},
-        {v:'regular', ic:'flame',    t:'Training 1–3 times a week'},
-        {v:'serious', ic:'bolt',     t:'Training 4+ times a week',  s:'It is part of my week already'}]},
-/* Training age. Two people with the same push-up number and six months
-   versus ten years behind them need different progressions — the slider
-   cannot tell them apart and neither can "how active are you now". */
-{ ch:3, type:'single', key:'trained', h:'How long have you trained?',
-  sub:'Properly. Not counting the gaps.',
-  opts:[{v:'new',  ic:'leaf',    t:'This is the start'},
-        {v:'<1',   ic:'sunrise', t:'Under a year'},
-        {v:'1-3',  ic:'flame',   t:'1 to 3 years'},
-        {v:'3-10', ic:'barbell', t:'3 to 10 years'},
-        {v:'10+',  ic:'mountain',t:'10 years or more'}]},
-/* The wearable and "which numbers do you look at" both moved to the
-   dashboard, to be answered once someone is inside. Neither changes what
-   gets programmed on day one, and two screens of it here is two screens of
-   nothing happening. Worth having later though: which numbers a person
-   actually checks says a lot about what will keep them going — someone
-   watching sleep and someone watching load want different nudges. See
-   DASHBOARD QUESTIONS.md. */
 { ch:3, type:'shape', key:'shape', h:'Which one is closest to you?',
   sub:'Rough is fine. Nobody sees this but me.' },
 { ch:3, type:'multi', key:'where', h:'Where will you train?', sub:'Tick everything you have.',
@@ -3244,17 +3329,6 @@ const FLOW = [
 /* More than one reason is the honest answer — almost nobody trains for a
    single thing. Capped at three so it still ranks rather than becoming a
    shopping list, and the first tap stays the strongest signal. */
-{ ch:6, type:'multi', key:'driver', max:3, h:'Why does this matter to you?',
-  sub:'Pick up to 3. The true ones, not the best-sounding.', cta:'Continue',
-  opts:[{v:'best',   ic:'mountain',t:'I want to be in the best shape of my life'},
-        {v:'plateau',ic:'chart',   t:'I have plateaued and I want past it'},
-        {v:'event',  ic:'target',  t:'I am training for something specific'},
-        {v:'strong', ic:'barbell', t:'I want to be strong again'},
-        {v:'miss',   ic:'heart',   t:'I actually miss training'},
-        {v:'lose',   ic:'trendDown',t:'I want to lose weight'},
-        {v:'feel',   ic:'cloud',   t:'I do not like how I feel right now'},
-        {v:'kids',   ic:'child',   t:'I want to keep up with my kids'},
-        {v:'doctor', ic:'stetho',  t:'My doctor told me to'}]},
 { ch:6, type:'multi', key:'blockers', h:'What has stopped you before?', sub:'Every plan fails the same way twice.',
   cta:'Continue',
   opts:[{v:'time',   ic:'hourglass',t:'Time disappears'},
@@ -3785,8 +3859,32 @@ const TIER_NAME=['Just starting','Beginner','Intermediate','Advanced','Elite'];
    inform them, it measures the gap and calls it a starting point. The
    scale stops one step past where they are and opens further only if
    they ask it to. */
-const ACTIVITY_CAP={none:1, light:2, regular:3, serious:4};
-function defaultCap(){ return ACTIVITY_CAP[A.activity] || 3; }
+/* HOW FAR THE SLIDERS REACH, ie. how strong an answer somebody is allowed to
+   claim before the card says "that is a lot, are you sure".
+
+   This used to read A.activity, "how active are you right now", which the
+   chat opening removed as a question. Nicolas was right to cut it: it asked
+   people to rate themselves, and self-rating is the weakest signal in the
+   survey. But it was the ONLY thing setting this, so deleting it alone would
+   have silently given every single person the middle value.
+
+   Training history answers it better. Somebody 5 years in has a real 1RM to
+   report whether or not they trained last month; somebody starting this week
+   does not, and a slider that reaches 400lb only invites a number nobody
+   believes. `style` nudges it too: a calisthenics person is not claiming a
+   heavy bench, and asking them to is how you lose them on card 4.
+
+   The deck's own measurement is still the truth. This only decides how much
+   rope the card gives before it asks a second time. */
+const TRAINED_CAP={ new:1, lt1:2, '1to5':3, '5plus':4 };
+function defaultCap(){
+  let cap = TRAINED_CAP[A.trained];
+  if(!cap) cap = 3;                       /* they skipped it, stay neutral */
+  /* Two styles rarely chase a maximal barbell number. One notch, not two:
+     they can still reach it, they are just not started there. */
+  if((A.style==='calis' || A.style==='run') && cap>2) cap -= 1;
+  return cap;
+}
 
 /* EVERY CARD GETS THE SCROLLER. A BENCHMARK ONLY DECIDES WHETHER IT GETS A LEVEL.
 
@@ -4117,7 +4215,7 @@ function head(s,dynSub){
 }
 function render(){const s=FLOW[i];if(!s)return;
   ({hero,promise,chapter,text,single,multi,rank,rankdyn,stepper,bands,levels,body,shape,insight,numbers,feelings,
-    vitals,equip,deckintro,deck,enjoy,actload,goalone,week,reactor,reading,nextsteps,loader,reveal,patternscreen,entry}[s.type])(s);}
+    vitals,equip,deckintro,deck,enjoy,actload,goalone,week,reactor,reading,nextsteps,loader,reveal,patternscreen,entry,chatq}[s.type])(s);}
 
 /* hero — "The Path": a route draws itself up the screen, milestones light,
    the summit glows and keeps breathing. Everything below is one clear promise. */
@@ -4546,6 +4644,179 @@ function hero(s){
 /* ===== /LOGO:JS ===== */
 
 /* the contract — as messages, arriving one at a time with the coach typing */
+/* Their own words go into a bubble via innerHTML, so they have to be escaped
+   on the way in. A name is free text typed by a stranger; it is the one thing
+   on this screen the app did not write. */
+const esc = t => String(t == null ? '' : t)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+/* ============================================================
+   CHATQ - the opening, as a conversation Niko can also listen to.
+
+   promise() plays a monologue: bubbles land, you press Continue. This plays
+   a dialogue, which needs three things that one did not:
+     - a second voice, so an answer appears as their own bubble
+     - an input under the last bubble, in one of three shapes
+     - a cursor through the beats, because each answer reveals the next line
+
+   The beats live in the FLOW entry as DATA. Wording is argued about far more
+   often than behaviour, and it should never require reading this function.
+   ============================================================ */
+function chatq(s){
+  const d=el(`<div class="chatwrap">
+    <div class="chathead"><i>${COACH.name[0]}</i><b>Coach ${COACH.name}</b><span>Online</span></div>
+    <div class="chat" id="chat"></div></div>`);
+  const chat=d.querySelector('#chat');
+  let bi=0;
+
+  const scroll=()=>{ const sc=stage.querySelector('.screen'); if(sc) sc.scrollTop=sc.scrollHeight; };
+  /* {name} is theirs, {coach} is his. The coach's name is a constant in one
+     place (COACH.name) and the header already reads it, so the script must
+     too, or the bubble says Niko under a header that says Nico. */
+  const fill=t=>String(t).replace(/\{name\}/g, A.name||'')
+                         .replace(/\{coach\}/g, COACH.name);
+
+  function typing(){
+    const t=document.createElement('div');
+    t.className='typing on'; t.innerHTML='<i></i><i></i><i></i>';
+    chat.appendChild(t); scroll(); return t;
+  }
+  function bubble(html, mine){
+    const b=document.createElement('div');
+    b.className='cbub'+(mine?' me':'');
+    b.innerHTML=html; chat.appendChild(b);
+    requestAnimationFrame(()=>{ b.classList.add('on'); scroll(); });
+    return b;
+  }
+
+  /* One line at a time, with a pause proportional to its length. The pause is
+     the entire reason this reads as a person rather than a list rendering. */
+  function say(lines, done){
+    let k=0;
+    (function step(){
+      if(k>=lines.length) return done();
+      const t=typing();
+      const txt=fill(lines[k]);
+      later(function(){
+        t.remove(); bubble(txt, false); haptic(9); k++;
+        later(step, 240);
+      }, Math.min(900, 320 + txt.length*7));
+    })();
+  }
+
+  function answered(beat, value, label){
+    if(beat.ask && beat.ask.key!=null && value!=='' && value!=null) A[beat.ask.key]=value;
+    if(label) bubble(label, true);
+    saveDraft();
+    later(()=>{ bi++; run(); }, 320);
+  }
+
+  /* ---- the three ways to answer ---- */
+  function askType(beat, host){
+    const a=beat.ask;
+    host.innerHTML=`<div class="crow">
+      <input id="cin" type="${a.keyboard==='number'?'tel':'text'}"
+        inputmode="${a.keyboard==='number'?'numeric':'text'}"
+        placeholder="${a.placeholder||''}" autocomplete="off" enterkeyhint="send">
+      <button class="csend" id="cgo" disabled>&rsaquo;</button></div>`;
+    const inp=host.querySelector('#cin'), go=host.querySelector('#cgo');
+    const ok=()=>{ const v=inp.value.trim();
+      if(!v) return false;
+      if(a.keyboard==='number'){ const n=+v; return !isNaN(n) && (!a.min||n>=a.min) && (!a.max||n<=a.max); }
+      return true; };
+    const sync=()=>{ go.disabled=!ok(); };
+    inp.addEventListener('input', sync); sync();
+    const send=()=>{ if(!ok()) return; haptic(14);
+      const raw=inp.value.trim(), v=a.keyboard==='number'?+raw:raw;
+      host.remove(); answered(beat, v, a.echo?a.echo(v):esc(raw)); };
+    go.onclick=send;
+    inp.addEventListener('keydown', e=>{ if(e.key==='Enter') send(); });
+  }
+
+  function askTap(beat, host){
+    const a=beat.ask;
+    host.innerHTML=a.opts.map((o,k)=>`<button data-k="${k}">${o.t}</button>`).join('');
+    host.querySelectorAll('button').forEach(b=>b.onclick=()=>{
+      const o=a.opts[+b.dataset.k];
+      haptic(14);
+      /* "Say it your own way" is a full-size option, not a link, and it turns
+         into a text box in place rather than opening anything. */
+      if(o.free){
+        host.innerHTML=`<div class="crow">
+          <input id="cin" type="text" placeholder="${o.placeholder||''}" autocomplete="off" enterkeyhint="send">
+          <button class="csend" id="cgo">&rsaquo;</button></div>`;
+        const inp=host.querySelector('#cin');
+        inp.focus();
+        const send=()=>{ const v=inp.value.trim(); if(!v) return; haptic(14);
+          host.remove(); answered(beat, v, esc(v)); };
+        host.querySelector('#cgo').onclick=send;
+        inp.addEventListener('keydown', e=>{ if(e.key==='Enter') send(); });
+        scroll(); return;
+      }
+      host.remove(); answered(beat, o.v, o.t);
+    });
+  }
+
+  function askDial(beat, host){
+    const a=beat.ask;
+    let unit=a.units[0], val=A[a.key]||a.value;
+    host.innerHTML=`<div class="cdial">
+      <div class="cdval" id="cdv"></div>
+      <button class="cdunit" id="cdu"></button>
+      <div class="dial" id="cdd"></div>
+      </div><button id="cdok">That's me</button>`;
+    const vEl=host.querySelector('#cdv'), uEl=host.querySelector('#cdu');
+    /* Stored in metric ALWAYS. The switch changes what they read, never what
+       is written - the app reads heightCm and weightKg everywhere, and a
+       display unit leaking into storage is how numbers silently double. */
+    const show=()=>{
+      if(a.key==='heightCm'){
+        if(unit==='cm'){ vEl.textContent=Math.round(val)+' cm'; }
+        else { const t=Math.round(val/2.54); vEl.textContent=Math.floor(t/12)+"'"+(t%12)+'"'; }
+        uEl.textContent = unit==='cm' ? 'Show me feet and inches' : 'Show me centimetres';
+      } else {
+        if(unit==='kg'){ vEl.textContent=Math.round(val)+' kg'; }
+        else { vEl.textContent=Math.round(val*2.20462)+' lb'; }
+        uEl.textContent = unit==='kg' ? 'Show me pounds' : 'Show me kilos';
+      }
+    };
+    makeDial(host.querySelector('#cdd'), { min:a.min, max:a.max, step:a.step, value:val,
+      onChange:function(n){ val=n; show(); } });
+    uEl.onclick=()=>{ haptic(9); unit = unit===a.units[0]?a.units[1]:a.units[0];
+      /* the weight switch also sets the unit the rest of the app uses */
+      if(a.key==='weightKg') A.unit = unit==='kg'?'kg':'lb';
+      if(a.key==='heightCm') A.heightUnit = unit;
+      show(); };
+    show();
+    host.querySelector('#cdok').onclick=()=>{ haptic(14);
+      const label=vEl.textContent; host.remove(); answered(beat, val, label); };
+  }
+
+  function ask(beat){
+    const host=document.createElement('div');
+    host.className='cans'; chat.appendChild(host);
+    requestAnimationFrame(()=>{ host.classList.add('on'); scroll(); });
+    const k=beat.ask.kind;
+    if(k==='type') askType(beat, host);
+    else if(k==='dial') askDial(beat, host);
+    else askTap(beat, host);
+  }
+
+  function run(){
+    if(bi>=s.beats.length){
+      setFoot(`<button class="cta accent">${s.cta||'Continue'}</button>`);
+      foot.querySelector('.cta').onclick=()=>{ haptic(16); next(); };
+      syncFootPad(); scroll(); return;
+    }
+    const beat=s.beats[bi];
+    say(beat.say||[], function(){
+      if(!beat.ask){ bi++; return run(); }
+      ask(beat);
+    });
+  }
+  run();
+}
+
 function promise(s){
   const d=el(`<div class="chatwrap">
     <div class="chathead"><i>${COACH.name[0]}</i><b>Coach ${COACH.name}</b><span>Online</span></div>

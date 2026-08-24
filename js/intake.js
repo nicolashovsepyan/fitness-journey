@@ -50,7 +50,11 @@ const SELF = 'me';
 function uiFor(a) {
   const tier = a.tier;                     // 0-4, averaged from the deck
   if (typeof tier === 'number' && tier >= 2) return 'pro';
-  if (a.activity === 'lots' || a.activity === 'some') return 'pro';
+  /* `activity` used to be the fallback here and the survey no longer asks it.
+     Training history is the replacement, and it is a better one: how long
+     somebody has trained says more about whether they can read a session
+     plan than how busy their last fortnight was. */
+  if (a.trained === '1to5' || a.trained === '5plus') return 'pro';
   return 'beginner';
 }
 
