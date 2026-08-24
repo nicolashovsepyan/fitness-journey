@@ -101,7 +101,9 @@ header:after{
 @media (max-width:940px){ .wrap{grid-template-columns:1fr;padding:20px 18px} .rail{position:static!important} }
 
 /* ---------- the client rail ---------- */
-.rail{position:sticky;top:20px;display:flex;flex-direction:column;gap:12px}
+/* clears the sticky jump bar (52px) rather than pinning underneath it -
+   which only became visible once the "Client" link went anywhere */
+.rail{position:sticky;top:64px;display:flex;flex-direction:column;gap:12px}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
   box-shadow:var(--shadow);overflow:hidden}
 .panel > h2{font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink3);
@@ -333,7 +335,34 @@ select.pin{appearance:none;cursor:pointer}
 #jump a.hot{color:#0F1417;background:var(--ok,#3ECBA8);border-color:transparent}
 #jump a.on{color:#fff;border-color:rgba(255,255,255,.2)}
 /* anything jumped to must clear the sticky bar */
-#prog,#releasePanel,#layers{scroll-margin-top:64px}
+#top,#prog,#releasePanel,#layers{scroll-margin-top:64px}
+
+/* THE REASONING, FOLDED.
+   The ten layers are ~3,600px of essay and they were the first thing the
+   page showed. For a first program that is the right order - you reason,
+   then you prescribe. For a second one it is backwards: the reasoning
+   already happened, the program exists, and the thing you came to do is
+   edit it. So the layers become a section you open, and the editor is
+   what the page opens on. */
+#reason{margin-top:30px;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+#reason>summary{cursor:pointer;list-style:none;padding:16px 18px;display:flex;gap:12px;
+  align-items:center;background:rgba(255,255,255,.02)}
+#reason>summary::-webkit-details-marker{display:none}
+#reason>summary b{font-size:15px;letter-spacing:-.01em}
+#reason>summary small{display:block;color:var(--ink3);font-size:12.5px;margin-top:2px}
+#reason>summary .chev{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;
+  stroke-width:2;color:var(--ink3);transition:transform .18s}
+#reason[open]>summary .chev{transform:rotate(90deg)}
+#reason .inner{padding:0 18px 18px}
+
+/* LAST BLOCK. What the previous program was and what he actually did with
+   it - the input a second program is built from, and the one thing this
+   console could not see. */
+.hist{border-top:1px solid var(--line);padding-top:11px;margin-top:11px}
+.hist:first-child{border-top:0;padding-top:0;margin-top:0}
+.hist b{display:block;font-size:13px;margin-bottom:3px}
+.hist small{display:block;color:var(--ink3);font-size:12px;line-height:1.5}
+.hist .num{font-variant-numeric:tabular-nums;color:var(--accent);font-weight:650}
 </style>
 </head>
 <body>
@@ -349,8 +378,9 @@ select.pin{appearance:none;cursor:pointer}
     <div class="grow">
       <div class="kick">Coach console</div>
       <h1>Building Ozzy's first program</h1>
-      <div class="sub">Ten layers, in Galpin's order. Each one shows his own words, how I read them, and
-        what I propose. You approve, push back, or park it - and nothing reaches his app until you release it.</div>
+      <div class="sub">The program is the page: every session, every block, every movement, editable
+        in place. Under it are the ten layers in Galpin's order - the reasoning, kept, and out of the way.
+        Nothing reaches their app until you release it.</div>
     </div>
     <div class="meter">
       <div class="big tnum"><span id="mOk">0</span><i>/10</i></div>
@@ -366,15 +396,19 @@ select.pin{appearance:none;cursor:pointer}
      worth keeping; they are just not what you open the console to do. -->
 <nav id="jump">
   <a href="#top" data-j="top">Client</a>
-  <a href="#layers" data-j="layers">Layers</a>
   <a href="#prog" data-j="prog" class="hot">The program</a>
+  <a href="#reason" data-j="reason">The reasoning</a>
   <a href="#releasePanel" data-j="releasePanel">Send it</a>
 </nav>
 
 <div class="wrap">
 
-  <!-- ================= THE CLIENT ================= -->
-  <aside class="rail">
+  <!-- ================= THE CLIENT =================
+       id="top" is load-bearing. The jump bar's first link has always
+       pointed at #top and nothing on the page has ever carried that id,
+       so "Client" was a link to nowhere - it did nothing, on every click,
+       for every client. -->
+  <aside class="rail" id="top">
     <div class="panel">
       <div class="who">
         <div class="av">O</div>
@@ -397,6 +431,16 @@ select.pin{appearance:none;cursor:pointer}
       <div class="pad" id="inbox"></div>
     </div>
 
+    <!-- WHAT CAME BEFORE. A second program is not a first program with
+         different exercises - it is an answer to what the first one
+         returned. This console could not see that: it read the profile
+         and nothing else, so every program it built was a first program.
+         This panel reads the block that ran and the log it produced. -->
+    <div class="panel" id="histPanel" style="display:none">
+      <h2>Last block</h2>
+      <div class="pad" id="hist"></div>
+    </div>
+
     <div class="panel">
       <h2>Hard constraints</h2>
       <div class="pad" id="constraints"></div>
@@ -410,21 +454,30 @@ select.pin{appearance:none;cursor:pointer}
 
   <!-- ================= THE BUILD ================= -->
   <main>
-    <div class="lead">
-      <h2>The build, in layers</h2>
-      <p>Galpin's ten program-design steps, run in order. A layer can't be honestly settled before the
-        one above it, which is the point of doing it this way rather than writing four sessions and
-        reverse-engineering a rationale.</p>
-    </div>
-    <div id="layers"></div>
-
-    <div class="lead" id="progLead" style="margin-top:30px">
+    <!-- THE ORDER OF THIS PAGE, AND WHY IT CHANGED.
+         The editor used to sit under ten essay-length layers, so opening
+         the console meant scrolling past 3,600px of reasoning about a
+         different client to reach the four fields you came to change. The
+         reasoning still matters and is still here - it is just no longer
+         the thing standing between you and the work. -->
+    <div class="lead" id="progLead">
       <h2>The program, day by day</h2>
-      <p>The layers above are the reasoning. This is the thing itself: every session, every block,
-        every movement, editable. Change anything here and it is what lands in the app the next
-        time that day is released - there is no second copy anywhere.</p>
+      <p>Every session, every block, every movement, editable in place. Change anything here and it is
+        what lands in the app the next time that day is released - there is no second copy anywhere.
+        The reasoning behind it is below.</p>
     </div>
     <div id="prog"></div>
+
+    <details id="reason">
+      <summary>
+        <svg class="chev" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg>
+        <span class="grow"><b>The build, in layers</b>
+          <small>Galpin's ten program-design steps, run in order - the reasoning under the program above</small></span>
+      </summary>
+      <div class="inner">
+        <div id="layers"></div>
+      </div>
+    </details>
 
     <!-- RELEASE. The switches above put a SECTION in front of the client on
          this device. This puts the whole program on their PHONE, which is a
@@ -560,7 +613,58 @@ const CLIENT_A = clientAnswers(CLIENT_ID);
 const IS_OZZY = !CLIENT_A;
 const A = CLIENT_A || OZZY_A;
 
-const FACTS = [
+/* ============================================================
+   THE RAIL, ABOUT THE PERSON SELECTED
+
+   FACTS and CONSTRAINTS were two hand-written arrays of Ozzy's answers,
+   rendered unconditionally. Selecting Nicolas changed the name at the top
+   of the rail and left everything under it saying "kettlebell, bench, mat -
+   4 days, 20 minutes" about a man who trains five days on rings and a
+   barbell. Stale prose that looks authored reads as true, which is worse
+   than a blank panel.
+
+   These derive from the intake now. Ozzy keeps his hand-written pair
+   because he is the worked example the ten layers are written about.
+   ============================================================ */
+/* The survey stores option values; these are the words the client actually
+   read next to them, lifted from onboarding.html. Anything not here falls
+   back to the raw value rather than being dropped - an unknown code shown
+   is a bug you can see. */
+const SURVEY_LABELS = {"sport":"Still play my sport","heavy":"Still lift heavy","strongold":"Be the strong one at 55","nopain":"No back pain from a desk","kids":"Keep up with kids I don't have yet","anything":"Say yes to anything, unprepared","hike":"Say yes to any hike","floor":"Get off the floor unaided","grand":"Pick a grandchild up","carry":"Carry my bags upstairs","indep":"Stay in my own home","stairs":"Stairs without the rail","travel":"Still travel properly","m":"Man","f":"Woman","miss":"I've let it slide. Time to get back on track","plateau":"I'm active, but stuck. I need help past this plateau","lose":"I want to lose weight","strong":"I want to get stronger","own":"Say it your own way","new":"Just starting","lt1":"Under 1 year","1to5":"1 to 5 years","5plus":"5 years or more","weights":"Weights, sets and reps","hiit":"Classes or HIIT","crossfit":"CrossFit","calis":"Calisthenics","func":"Functional, mixed","run":"Running or cycling","some":"Yeah, let me tell you","gym":"A full gym","homekit":"Home, some equipment","homenone":"Home, nothing","outdoor":"Outdoors","hotel":"Hotel gyms, often","no":"Not a chance","maybe":"Probably, and I would hate it","yes":"Yes, comfortably","runner":"I run further than that already","none":"Nothing else","team":"A team sport","yoga":"Yoga or pilates","swim":"Swimming","racket":"Tennis, padel or squash","martial":"Martial arts or boxing","climb":"Climbing","other":"Something else","time":"Time disappears","week3":"Motivation dies at week 3","toohard":"I start too hard and burn out","injury":"Something started hurting","lost":"Did not know if it was working","life":"Life gets busy, it goes first","never":"Never really started","heart":"Heart trouble, chest pain or high blood pressure","dizzy":"Dizziness or fainting spells","joint":"A joint, back or bone problem that could get worse","preg":"Pregnant, or recently gave birth","<6":"Under 6 hours","6-7":"6 to 7","7-8":"7 to 8","8+":"More than 8","lean":"Lean out","muscle":"Build muscle","pain":"Move without pain","energy":"More energy","wind":"Get my wind back","forget":"I open it and forget","strain":"Strain","recovery":"Recovery %","sleep":"Sleep performance","hrv":"HRV","steps":"Steps","cals":"Calories","vo2":"VO₂ max","rings":"The rings","hr":"Heart rate","battery":"Body Battery","ready":"Training Readiness","activity":"Activity score","azm":"Active Zone Minutes","db":"Dumbbells","kb":"Kettlebell","bb":"Barbell","rack":"Squat rack","bench":"Bench","pullupbar":"Pull-up bar","dipbars":"Dip bars","parallettes":"Parallettes","band":"Bands","vest":"Weighted vest","sliders":"Sliders","abwheel":"Ab wheel","slantboard":"Slant board","mat":"Mat","sweat":"Getting out of breath","skill":"Learning technique","quiet":"Training alone","running":"Running","circuits":"Circuits and burpees","neck":"Neck","shldr":"Shoulders","arm":"Elbows or wrists","mid":"Upper back","low":"Lower back","hip":"Hips","knee":"Knees","ankle":"Ankles or feet","early":"Early morning","lunch":"Midday","after":"After work","evening":"Evening"};
+/* The last question renders its two options as markup rather than from an
+   opts array, so the sweep above misses it. Only these two are added by
+   hand: every other value in Ozzy's fixture (flex, gains, light, doctor)
+   was checked against the live survey and does not exist there, so writing
+   labels for them would be inventing words no client ever read. Unknown
+   values fall through to themselves, which is visibly a gap rather than a
+   confident wrong answer. */
+Object.assign(SURVEY_LABELS, { push:'Push me', protect:'Protect me' });
+
+/* THE SAME VALUE MEANS DIFFERENT THINGS IN DIFFERENT QUESTIONS.
+   `travel` is "Still travel properly" as a ten-year horizon and "Travel
+   breaks the rhythm" as a defender; `other` is "Something else" in a sport
+   list and "Something else a doctor told me to be careful with" in the
+   PAR-Q. A single flat map picks one and is silently wrong in the other -
+   which is how the rail came to report a man's travel plans as the reason
+   he stops training. Only the questions that actually collide are listed;
+   everything else falls through to the flat map. */
+const FIELD_LABELS = {
+  blockers:{ travel:'Travel breaks the rhythm', never:'Never really started' },
+  parq:{ other:'Something else a doctor told me to be careful with', none:'None of these' },
+  sport:{ hiit:'HIIT or bootcamp classes', other:'Something else', none:'Nothing else' }
+};
+const lbl = (v, field) => (field && FIELD_LABELS[field] && FIELD_LABELS[field][v])
+  || SURVEY_LABELS[v] || String(v == null ? '' : v);
+const lblList = (xs, max, field) => {
+  const a = [].concat(xs || []).filter(Boolean);
+  if(!a.length) return null;
+  const shown = max ? a.slice(0, max) : a;
+  return shown.map(v => lbl(v, field)).join(' &middot; ')
+    + (a.length > shown.length ? ` <em>(+${a.length - shown.length})</em>` : '');
+};
+const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+const OZZY_FACTS = [
   ['Goal, 90 days','Lean out, <em>then</em> get stronger'],
   ['Ten years out','Keep up with the kids · no pain · play sport'],
   ['Real driver','Lose weight · doctor said so · the kids'],
@@ -574,13 +678,64 @@ const FACTS = [
   ['Stopped before','Time · life · <b>motivation dies at week 3</b>']
 ];
 
-const CONSTRAINTS = [
+const OZZY_CONSTRAINTS = [
   ['Medical','Joint problem + something a doctor mentioned. <b>GP clearance before load goes up.</b>',1],
   ['Pain','Arm, knee, ankle. No loaded deep knee bend, nothing overhead, no impact.',1],
   ['No bar','No pull-up bar in the house - the pull pattern is limited to a single-arm row.',0],
   ['No bands','No bands either. Shoulder prep has to come from the bell.',0],
   ['80 min a week','4 × 20. That is the entire training budget, warm-up included.',0]
 ];
+
+/* What a coach needs on screen while editing a session, in the order they
+   need it: what this is for, what they can do, what they own, and how much
+   of the week they have. */
+function factsFor(a){
+  const out = [];
+  const push = (k, v) => { if(v) out.push([k, v]); };
+  push('Goal, 90 days', lblList(a.focus));
+  push('Ten years out', lblList(a.horizon, 3));
+  push('Real driver', lblList(a.driver, 3));
+  push('Experience', a.levels
+    ? [a.levels.gym && 'gym: ' + a.levels.gym, a.levels.body && 'bodyweight: ' + a.levels.body]
+        .filter(Boolean).join(' &middot; ')
+    : lbl(a.history));
+  push('Trains', lblList(a.where));
+  push('Kit', lblList(a.kit, 6) || '<em>nothing ticked</em>');
+  push('Week', [a.days && a.days + ' days', a.length && a.length + ' min',
+    Array.isArray(a.trainDays) && a.trainDays.length
+      ? a.trainDays.map(d => DOW[d] || d).join(' ') : null].filter(Boolean).join(' &middot; '));
+  push('Timing', lbl(a.when));
+  push('Intensity', lbl(a.intensity));
+  push('Wearable', a.tracker && a.tracker !== 'none' ? lbl(a.tracker) : 'None');
+  push('Stopped before', lblList(a.blockers, 3, 'blockers'));
+  return out;
+}
+
+/* Only the things that change what may be prescribed. A constraint panel
+   that lists preferences trains a coach to skim it. */
+function constraintsFor(a){
+  const out = [];
+  const parq = [].concat(a.parq || []).filter(x => x && x !== 'none');
+  if(parq.length) out.push(['Medical',
+    parq.map(v => lbl(v, 'parq')).join('. ') + '. <b>Clear this before load goes up.</b>', 1]);
+  const pain = [].concat(a.pain || []).filter(Boolean);
+  if(pain.length) out.push(['Pain',
+    pain.map(lbl).join(' &middot; ') + '. Nothing that loads these through range.', 1]);
+  const kit = [].concat(a.kit || []).filter(Boolean);
+  if(!kit.includes('pullupbar') && !kit.includes('rack'))
+    out.push(['No bar', 'Nothing to hang from - the pull pattern is limited to rows.', 0]);
+  if(!kit.length)
+    out.push(['No kit', 'Bodyweight only. Load has to come from leverage and tempo.', 0]);
+  const budget = (+a.days || 0) * (+a.length || 0);
+  if(budget) out.push([budget + ' min a week',
+    `${a.days} &times; ${a.length}. That is the entire training budget, warm-up included.`, 0]);
+  if(!out.length) out.push(['Nothing hard',
+    'No medical flags, no pain zones, and the kit is not the limit.', 0]);
+  return out;
+}
+
+const FACTS       = IS_OZZY ? OZZY_FACTS       : factsFor(A);
+const CONSTRAINTS = IS_OZZY ? OZZY_CONSTRAINTS : constraintsFor(A)
 
 /* ============================================================
    2 · THE TEN LAYERS
@@ -742,9 +897,14 @@ const LAYERS = [
        the review cadence is what makes it one.` }
 ];
 
-/* What Ozzy is allowed to see. Locked chunks show as "your coach is
-   still building this" in his app — not as an error, and not as nothing. */
-const RELEASE = [
+/* What the client is allowed to see. Locked chunks show as "your coach is
+   still building this" in their app — not as an error, and not as nothing.
+
+   THIS USED TO BE A FIXED LIST of Ozzy's four days. A five-day program
+   therefore had a release panel with four switches and two wrong names,
+   and the fifth day could not be released at all. The switches are the
+   program's days now, so they are right by construction. */
+const OZZY_RELEASE = [
   ['shape','The program shape','Name, 12 weeks, 4 days, 20 minutes'],
   ['d1','Day 1 · Ground Floor','Full body - the first session'],
   ['d2','Day 2 · Hinge & Carry','Posterior + loaded carry'],
@@ -753,6 +913,21 @@ const RELEASE = [
   ['bench','Benchmarks','The six he can test at home'],
   ['arc','The 12-week arc','Phases, and what unlocks at weeks 5 and 9']
 ];
+let RELEASE = OZZY_RELEASE;
+
+/* Rebuilt whenever the program changes shape. Called from drawProgram. */
+function syncRelease(){
+  const days = Object.keys((PROG && PROG.days) || {});
+  if(IS_OZZY || !days.length){ RELEASE = OZZY_RELEASE; return; }
+  RELEASE = [['shape','The program shape',
+      `${days.length} day${days.length===1?'':'s'}${A.length ? ' · ' + A.length + ' minutes' : ''}`]]
+    .concat(days.map((k,i) => {
+      const d = PROG.days[k] || {};
+      return [k, `Day ${i+1} · ${d.name || k}`, d.tag || ''];
+    }))
+    .concat([['bench','Benchmarks','What they can test'],
+             ['arc','The arc','Phases, and what unlocks when']]);
+}
 
 /* ============================================================
    3 · STATE — shared with the client app through localStorage,
@@ -768,6 +943,210 @@ let S=load();
 function load(){ try{const r=localStorage.getItem(KEY);return r?Object.assign({},structuredClone(blank),JSON.parse(r)):structuredClone(blank);}catch(e){return structuredClone(blank);} }
 function save(quiet){ try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){} if(!quiet)toast('Saved'); }
 
+/* ============================================================
+   WHAT CAME BEFORE
+
+   The console read a PROFILE and nothing else, so it could only ever build
+   a first program: the same ten layers, the same "untested across all nine
+   adaptations", for a man who has just finished six weeks of training. The
+   answers to layers 1, 7 and 8 are not in the survey any more - they are in
+   what he actually did.
+
+   Two sources, both records that already exist:
+     the LOG      fj.v1.<uid>.dash   - what he did, written by the dashboard
+     the PROGRAM  fj.v1.<uid>.coach  - what he was told to do, written here
+
+   THE DEVICE PROBLEM. Those keys are localStorage, so they are on the phone
+   that trained, not on the laptop that plans. The dashboard already has
+   "Download everything", which dumps exactly these two objects to a file.
+   So the file is the carrier: drop it in and the block is here. No new
+   record, no new export, no server needed first.
+   ============================================================ */
+const HIST_KEY = `fj.v1.${USER}.hist`;
+
+function readJSON(k, dflt){ try{ const r = localStorage.getItem(k); return r ? JSON.parse(r) : dflt; }
+  catch(e){ return dflt; } }
+
+/* Archived blocks - programs that have been run and closed off. Written by
+   "Start the next block" below, which is the only thing that ever ends one. */
+function archive(){ return readJSON(HIST_KEY, []); }
+
+/* The log. From this device if the client trains on it, otherwise from the
+   export file the coach dropped in, which is stored under the same shape. */
+function clientLog(){
+  const local = readJSON(`fj.v1.${USER}.dash`, null);
+  const dropped = readJSON(`${HIST_KEY}.log`, null);
+  if(!local && !dropped) return null;
+  if(!local) return dropped;
+  if(!dropped) return local;
+  /* both: whichever knows about more days is the fuller record */
+  return Object.keys(dropped.days||{}).length > Object.keys(local.days||{}).length ? dropped : local;
+}
+
+/* Six weeks of training reduced to the handful of numbers that change the
+   next block. Every one of these is counted, not estimated - if the log
+   does not say, this does not either. */
+function logSummary(log, since){
+  if(!log) return null;
+  const days = log.days || {};
+  /* `since` is the day the previous block was closed. Without it the live
+     log still contains every day of every block that ran before, and the
+     "since then" panel reports the whole history as if it were new. */
+  const from = since ? String(since).slice(0,10) : null;
+  const keys = Object.keys(days).sort().filter(k => !from || k > from);
+  const done = keys.filter(k => (days[k] || 0) >= 60).length;
+  const opened = keys.length;
+  const cut = from ? Date.parse(from + 'T23:59:59') : 0;
+  const free = (log.freestyle || []).filter(f => (f.at||0) > cut).length;
+
+  /* Weigh-ins are dated in a parallel array. Where those dates survive we
+     can scope the trend to this block; where they are zeroed we cannot, and
+     the reading is flagged as spanning the whole record rather than quietly
+     presented as this block's. */
+  const at = log.weightAt || [];
+  const dated = cut && at.some(t => t > 0);
+  const w = (log.weights || [])
+    .map((x, i) => ({ kg: Array.isArray(x) ? x[1] : x, at: at[i] || 0 }))
+    .filter(x => typeof x.kg === 'number' && (!dated || x.at > cut))
+    .map(x => x.kg);
+  const weightSpansAll = !!cut && !dated;
+  const weight = w.length >= 2
+    ? { from:w[0], to:w[w.length-1], delta:+(w[w.length-1] - w[0]).toFixed(1), n:w.length }
+    : (w.length === 1 ? { from:w[0], to:w[0], delta:0, n:1 } : null);
+
+  const span = keys.length
+    ? { first:keys[0], last:keys[keys.length-1],
+        weeks: Math.max(1, Math.round((new Date(keys[keys.length-1]) - new Date(keys[0])) / 6048e5) + 1) }
+    : null;
+
+  const notes = (log.notes || []).filter(n => n && (n.b || n.h) && (n.at||0) > cut)
+    .sort((a,b) => (b.at||0) - (a.at||0)).slice(0, 3);
+
+  return { done, opened, free, weight, span, notes, weightSpansAll,
+    rate: opened ? Math.round(done / opened * 100) : null };
+}
+
+function drawHist(){
+  const panel = document.getElementById('histPanel'), host = document.getElementById('hist');
+  if(!panel || !host) return;
+  const past = archive();
+  const log  = clientLog();
+  const last = past.length ? past[past.length-1].closedAt : null;
+  const sum  = logSummary(log, last);
+
+  /* Ozzy is the worked example and has never trained. Saying "no history"
+     about him would be true and useless, so the panel simply stays away. */
+  if(IS_OZZY || (!past.length && !sum)){
+    panel.style.display = 'none';
+    /* but the coach still needs a way to get a block in from a phone */
+    if(!IS_OZZY){ panel.style.display = ''; host.innerHTML = histDrop(
+      `<p class="micro" style="margin:0 0 9px">Nothing from a previous block on this device.
+       If ${esc(A.name||USER)} trained on their phone, open their app &rarr; Settings &rarr;
+       <b>Download everything</b>, and drop that file here.</p>`); wireDrop(); }
+    return;
+  }
+  panel.style.display = '';
+
+  let h = '';
+  past.forEach((b, i) => {
+    const s = logSummary(b.log);
+    h += `<div class="hist">
+      <b>${esc(b.name || 'Block ' + (i+1))}</b>
+      <small>${Object.keys(b.program && b.program.days || {}).length} days &middot; closed ${
+        esc(String(b.closedAt||'').slice(0,10))}</small>
+      ${s ? `<small><span class="num">${s.done}</span> sessions completed${
+        s.span ? ` over ${s.span.weeks} week${s.span.weeks===1?'':'s'}` : ''}</small>` : ''}
+    </div>`;
+  });
+
+  if(sum){
+    h += `<div class="hist">
+      <b>${past.length ? 'Since that block closed' : 'What the log says'}</b>
+      ${past.length && !sum.opened ? '<small>Nothing logged yet.</small>' : `
+        <small><span class="num">${sum.done}</span> session${sum.done===1?'':'s'} completed${
+          sum.opened ? ` of ${sum.opened} days opened` : ''}${
+          sum.rate != null ? ` &middot; <span class="num">${sum.rate}%</span>` : ''}</small>
+        ${sum.span ? `<small>${esc(sum.span.first)} to ${esc(sum.span.last)} &middot; ${
+          sum.span.weeks} week${sum.span.weeks===1?'':'s'}</small>` : ''}
+        ${sum.free ? `<small><span class="num">${sum.free}</span> unprescribed session${
+          sum.free===1?'':'s'} logged</small>` : ''}`}
+      ${sum.weight ? `<small>Weight <span class="num">${sum.weight.from}</span> &rarr; <span class="num">${
+        sum.weight.to}</span> kg${sum.weight.n>1 ? ` (${sum.weight.delta>0?'+':''}${sum.weight.delta})` : ''
+        }${sum.weight.n<2 ? ' <em>- one reading, no trend</em>' : ''}${
+        sum.weightSpansAll ? ' <em>- undated, so this is the whole record</em>' : ''}</small>` : ''}
+    </div>`;
+    if(sum.notes.length) h += `<div class="hist"><b>What they wrote</b>${
+      sum.notes.map(n => `<small>&ldquo;${esc(strip(n.b || n.h)).slice(0,140)}&rdquo;</small>`).join('')}</div>`;
+  }
+
+  host.innerHTML = h + histDrop('');
+  wireDrop();
+}
+
+function histDrop(intro){
+  return `<div class="hist">${intro}
+    <details><summary style="cursor:pointer;font-size:12px;color:var(--dim,#8B949E)">
+      Load a block from their export file</summary>
+    <input type="file" id="histFile" accept="application/json,.json"
+      style="margin-top:8px;width:100%;font:inherit;font-size:11px;color:inherit">
+    <p class="micro" style="margin:7px 0 0">The file from the client app's
+      <b>Download everything</b>. It carries their log and the program they were on.</p>
+    </details></div>`;
+}
+
+function wireDrop(){
+  const f = document.getElementById('histFile'); if(!f) return;
+  f.onchange = () => {
+    const file = f.files && f.files[0]; if(!file) return;
+    const r = new FileReader();
+    r.onload = () => {
+      let d; try{ d = JSON.parse(r.result); }catch(e){ return toast('That file could not be read'); }
+      if(!d || (!d.dashboard && !d.coach)) return toast('That is not a Fitness Journey export');
+      /* Stored, not merged. The client's log is theirs and read-only here;
+         writing it into the live dash key would have this console pretending
+         to be the app. */
+      if(d.dashboard) localStorage.setItem(`${HIST_KEY}.log`, JSON.stringify(d.dashboard));
+      if(d.coach && d.coach.program) localStorage.setItem(`${HIST_KEY}.prev`, JSON.stringify(d.coach.program));
+      toast('Loaded ' + (d.uid ? d.uid + "'s" : 'their') + ' block');
+      drawHist(); drawProgram();
+    };
+    r.readAsText(file);
+  };
+}
+
+/* CLOSING A BLOCK AND OPENING THE NEXT.
+   A second program that overwrites the first loses the thing that makes it
+   a second program. This copies the current one forward - same days, same
+   structure, editable from there - and files the old one with whatever the
+   log says about how it went. Nothing is deleted. */
+function startNextBlock(){
+  const days = Object.keys((PROG && PROG.days) || {});
+  if(!days.length) return toast('There is no program to continue from');
+  const n = archive().length + 2;
+  const label = prompt('Name the next block', `Block ${n}`);
+  if(label == null) return;
+
+  const past = archive();
+  past.push({ name: (PROG.name || `Block ${past.length + 1}`),
+    closedAt: new Date().toISOString(),
+    program: structuredClone(PROG),
+    log: clientLog() });
+  try{ localStorage.setItem(HIST_KEY, JSON.stringify(past)); }
+  catch(e){ return toast('Could not file the last block - storage is full'); }
+
+  PROG = structuredClone(PROG);
+  PROG.name = label || `Block ${n}`;
+  PROG.version = (+PROG.version || 1) + 1;
+  PROG.from = PROG.from || null;
+  PROG.startedAt = new Date().toISOString();
+  S.program = PROG;
+  /* the decisions were about the block that just closed - a new block is
+     undecided, and pre-agreed layers would be a lie about what was reviewed */
+  S.decisions = {}; S.notes = {};
+  save(1); drawProgram(); drawHist(); drawLayers(); drawDock();
+  toast(`${PROG.name} started from the last one`);
+}
+
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const strip=h=>String(h).replace(/<[^>]*>/g,'');
 
@@ -781,7 +1160,7 @@ function drawRail(){
     CONSTRAINTS.map(([k,v,hard])=>hard
       ? `<div class="warn"><div><b>${k}</b>${v}</div></div>`
       : `<div class="fact"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('');
-  drawRelease(); drawInbox();
+  drawRelease(); drawInbox(); drawHist();
 }
 
 /* Anything the client changed that should reach a human. Right now that is
@@ -809,7 +1188,7 @@ function drawRelease(){
     <div class="rel">
       <div class="tx"><b>${t}</b><small>${s}</small></div>
       <button class="sw ${S.released[id]?'on':''}" data-rel="${id}"
-        aria-pressed="${!!S.released[id]}" aria-label="Release ${strip(t)} to Ozzy"></button>
+        aria-pressed="${!!S.released[id]}" aria-label="Release ${strip(t)} to ${esc(A.name||CLIENT_ID)}"></button>
     </div>`).join('');
   document.querySelectorAll('[data-rel]').forEach(b=>b.onclick=()=>{
     const id=b.dataset.rel;
@@ -956,9 +1335,17 @@ function libRow(){
     </div>
     <p class="micro" style="margin:8px 0 0">This replaces whatever is below with a copy that belongs to
       ${esc(A.name||CLIENT_ID)}. Edit it freely - the library file is not touched.</p>
+    ${Object.keys((PROG&&PROG.days)||{}).length ? `
+      <div style="border-top:1px solid var(--line);margin-top:12px;padding-top:12px">
+        <button class="btn" id="nextBlock">Start the next block from this one</button>
+        <p class="micro" style="margin:7px 0 0">Files ${esc(PROG.name || 'the current program')} with what
+          the log says about it, then hands you a copy to change. The old block is kept, not overwritten.</p>
+      </div>` : ''}
   </div></div>`;
 }
 function libWire(){
+  const nb = document.getElementById('nextBlock');
+  if(nb) nb.onclick = startNextBlock;
   const go = document.getElementById('libGo'), pick = document.getElementById('libPick');
   if(!go || !pick) return;
   go.onclick = () => {
@@ -966,7 +1353,7 @@ function libWire(){
     const src = LIBRARY[id];
     if(Object.keys(PROG.days||{}).length &&
        !confirm(`Replace ${A.name||CLIENT_ID}'s current program with "${src.name}"?`)) return;
-    PROG = structuredClone({ from:id, version:src.version, days:src.days });
+    PROG = structuredClone({ from:id, name:src.name, version:src.version, days:src.days });
     PDAY = Object.keys(PROG.days)[0] || null;
     S.program = PROG;
     /* a program handed over is a program to run — release every day of it,
@@ -984,7 +1371,7 @@ function drawProgram(){
   if(!days.length){ host.innerHTML = libRow() + `<div class="panel"><div class="pad">
     <p class="mut">No program yet. Start from one above, or build a day.</p>
     <button class="btn" onclick="addDay()">Add a day</button></div></div>`;
-    libWire(); return; }
+    libWire(); syncRelease(); drawRelease(); return; }
 
   const d = PROG.days[PDAY] || PROG.days[days[0]];
   const totalMins = (d.blocks||[]).reduce((t,b)=>t+(+b.mins||0),0);
@@ -1046,6 +1433,9 @@ function drawProgram(){
     <div class="pwarn" id="pwarn"></div>`;
 
   libWire();
+  /* the release switches are the program's days - resynced here so adding
+     or renaming a day cannot leave the panel describing the old shape */
+  syncRelease(); drawRelease();
   host.querySelectorAll('[data-pday]').forEach(b=>b.onclick=()=>{ PDAY=b.dataset.pday; drawProgram(); });
   host.querySelectorAll('.pin').forEach(el=>{
     el.onchange = () => {
@@ -1120,13 +1510,39 @@ function drawDock(){
   document.getElementById('mOk').textContent=ok;
   document.getElementById('dockSt').innerHTML =
     `<b>${ok}</b> agreed &middot; <b>${work}</b> need work &middot; <b>${parked}</b> parked &middot; ` +
-    `<b>${notes}</b> note${notes===1?'':'s'} &middot; <b>${rel}</b> of ${RELEASE.length} sections live for Ozzy`;
+    `<b>${notes}</b> note${notes===1?'':'s'} &middot; <b>${rel}</b> of ${RELEASE.length} live for ${esc(A.name||CLIENT_ID)}`;
 }
 
 /* ---------- the handoff back to me ---------- */
 function brief(){
   const L=[];
-  L.push('# Coach console - Ozzy, program build');
+  L.push(`# Coach console - ${A.name||CLIENT_ID}, program build`);
+  L.push('');
+  /* WHAT THE BRIEF WAS MISSING. It carried the ten decisions and nothing
+     about the person or what they had already done, so every brief read as
+     a first program even when it was a fourth. */
+  const past = archive();
+  const sum = logSummary(clientLog(), past.length ? past[past.length-1].closedAt : null);
+  if(past.length || sum){
+    L.push('## What came before');
+    past.forEach((b,i)=>{
+      const s2 = logSummary(b.log);
+      L.push(`- **${b.name||'Block '+(i+1)}** - ${Object.keys(b.program&&b.program.days||{}).length} days, closed ${String(b.closedAt||'').slice(0,10)}${s2?`, ${s2.done} sessions completed`:''}`);
+    });
+    if(sum){
+      L.push(`- **The log**: ${sum.done} sessions completed of ${sum.opened} days opened${sum.rate!=null?` (${sum.rate}%)`:''}${sum.span?`, ${sum.span.first} to ${sum.span.last}`:''}.`);
+      if(sum.free) L.push(`- ${sum.free} unprescribed sessions logged.`);
+      if(sum.weight) L.push(`- Weight ${sum.weight.from} to ${sum.weight.to} kg${sum.weight.n<2?' (one reading - no trend)':` (${sum.weight.delta>0?'+':''}${sum.weight.delta})`}.`);
+      sum.notes.forEach(n=>L.push(`  > ${strip(n.b||n.h)}`));
+    }
+    L.push('');
+  }
+  L.push('## The program now');
+  L.push(`${Object.keys((PROG&&PROG.days)||{}).length} days${PROG&&PROG.name?` - ${PROG.name}`:''}${PROG&&PROG.version?` (v${PROG.version})`:''}`);
+  Object.entries((PROG&&PROG.days)||{}).forEach(([k,d])=>{
+    const mins=(d.blocks||[]).reduce((t,b)=>t+(+b.mins||0),0);
+    L.push(`- ${k} · ${d.name||k} - ${(d.blocks||[]).length} blocks, ${mins} min`);
+  });
   L.push('');
   L.push('## Decisions');
   LAYERS.forEach(x=>{
@@ -1137,7 +1553,7 @@ function brief(){
     if(n) L.push(`   > ${n.replace(/\n/g,'\n   > ')}`);
   });
   L.push('');
-  L.push('## Released to Ozzy');
+  L.push(`## Released to ${A.name||CLIENT_ID}`);
   RELEASE.forEach(([id,t])=>L.push(`- [${S.released[id]?'x':' '}] ${t}`));
   const work=LAYERS.filter(x=>S.decisions[x.id]==='work');
   if(work.length){
@@ -1344,13 +1760,17 @@ function drawClients(){
 
   /* The ten layers are written about Ozzy's numbers. Say so rather than let
      them read as if they were about whoever is selected. */
-  const lead = document.querySelector('.lead .sub, header .sub');
-  if(lead && !IS_OZZY && !lead.dataset.warned){
-    lead.dataset.warned = '1';
-    lead.insertAdjacentHTML('beforeend',
-      `<b style="display:block;margin-top:8px;color:var(--warn,#F2C14E)">The ten layers below are still
-       written against Ozzy's answers - they have not been re-reasoned for ${esc(A.name||'this client')}.
-       The program editor and the release are correctly theirs.</b>`);
+  /* THE WARNING GOES WHERE THE THING IT WARNS ABOUT IS.
+     It used to be appended to the masthead, which now sits above the
+     program editor - so it read as a warning about the editor, which is
+     the one part that was always correct. It belongs on the folded
+     reasoning section, because that is the stale part. */
+  const sum = document.querySelector('#reason > summary .grow');
+  if(sum && !IS_OZZY && !sum.dataset.warned){
+    sum.dataset.warned = '1';
+    sum.insertAdjacentHTML('beforeend',
+      `<small style="color:var(--warn,#F2C14E);margin-top:5px">Still written against Ozzy's answers -
+       not yet re-reasoned for ${esc(A.name||'this client')}.</small>`);
   }
 }
 
