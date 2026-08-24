@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#171A1E">
-<title>Coach Console — Ozzy</title>
+<title>Coach Console - Ozzy</title>
 <link rel="icon" href="icon.svg">
 <style>
 /* ============================================================
@@ -350,7 +350,7 @@ select.pin{appearance:none;cursor:pointer}
       <div class="kick">Coach console</div>
       <h1>Building Ozzy's first program</h1>
       <div class="sub">Ten layers, in Galpin's order. Each one shows his own words, how I read them, and
-        what I propose. You approve, push back, or park it — and nothing reaches his app until you release it.</div>
+        what I propose. You approve, push back, or park it - and nothing reaches his app until you release it.</div>
     </div>
     <div class="meter">
       <div class="big tnum"><span id="mOk">0</span><i>/10</i></div>
@@ -361,7 +361,7 @@ select.pin{appearance:none;cursor:pointer}
 
 <!-- WHERE THINGS ARE. The program editor sits about 3,600px down this page,
      under ten essay-length layers, and there was no way to get to it except
-     scrolling past all of them — which is exactly how you end up asking
+     scrolling past all of them - which is exactly how you end up asking
      where the program section is. The layers are the reasoning and they are
      worth keeping; they are just not what you open the console to do. -->
 <nav id="jump">
@@ -422,7 +422,7 @@ select.pin{appearance:none;cursor:pointer}
       <h2>The program, day by day</h2>
       <p>The layers above are the reasoning. This is the thing itself: every session, every block,
         every movement, editable. Change anything here and it is what lands in the app the next
-        time that day is released — there is no second copy anywhere.</p>
+        time that day is released - there is no second copy anywhere.</p>
     </div>
     <div id="prog"></div>
 
@@ -434,7 +434,7 @@ select.pin{appearance:none;cursor:pointer}
     <div class="lead" style="margin-top:30px">
       <h2>Send it to their phone</h2>
       <p>The switches above decide what is visible. This is how it gets there. Their installed app
-        cannot read this browser, so the program travels in a link — open it on the phone once and
+        cannot read this browser, so the program travels in a link - open it on the phone once and
         the app takes it in, sets them to active and opens on their week.</p>
     </div>
     <div class="panel" id="releasePanel"><div class="pad"></div></div>
@@ -484,7 +484,7 @@ select.pin{appearance:none;cursor:pointer}
    answers and are worth keeping as the worked example — but he is now one
    entry among the real ones rather than the only shape the console knows. */
 const OZZY_ID = 'ozzy';
-const PAYLOAD_V = 6;   /* matches PROFILE_V in dashboard.html — same record */
+const PAYLOAD_V = 6;   /* matches PROFILE_V in dashboard.html - same record */
 /* TWO SURVEYS WROTE TWO DIFFERENT DRAWERS.
    One build of onboarding appends to `fj.intakes`; another writes
    `fj.v1.profile.<uid>` and indexes them in `fj.v1.people`. Both are real
@@ -577,7 +577,7 @@ const FACTS = [
 const CONSTRAINTS = [
   ['Medical','Joint problem + something a doctor mentioned. <b>GP clearance before load goes up.</b>',1],
   ['Pain','Arm, knee, ankle. No loaded deep knee bend, nothing overhead, no impact.',1],
-  ['No bar','No pull-up bar in the house — the pull pattern is limited to a single-arm row.',0],
+  ['No bar','No pull-up bar in the house - the pull pattern is limited to a single-arm row.',0],
   ['No bands','No bands either. Shoulder prep has to come from the bell.',0],
   ['80 min a week','4 × 20. That is the entire training budget, warm-up included.',0]
 ];
@@ -594,7 +594,7 @@ const LAYERS = [
   tag:'Where he actually is, before anything is prescribed',
   said:[['Activity','Active, but not training'],['Gym level','New'],['Bodyweight level','New'],
         ['Movement deck','0 of 12'],['Wearable','None'],['Self-image','3 of 5']],
-  read:`Nothing here is a <b>weak</b> score — it is an <b>absent</b> one. He has never performed a single
+  read:`Nothing here is a <b>weak</b> score - it is an <b>absent</b> one. He has never performed a single
         one of the twelve foundational patterns, and with no wearable there is no passive data either.
         The honest reading is that eight of Galpin's nine adaptations are simply untested, and the ninth
         (long-duration endurance) is only guessable from &ldquo;on my feet, walking&rdquo;.`,
@@ -602,23 +602,23 @@ const LAYERS = [
         ['Treat <b>weeks 1–2 as the assessment</b>, not as training. The sessions double as the test.',''],
         ['Test only three adaptations now: muscular endurance (bench push-up), strength (KB deadlift), and the isometric brace (plank). Those are the three his kit and his joints can safely measure.',''],
         ['Leave speed, power, anaerobic capacity, VO₂ max and long-duration formally untested until phase 2. Testing them on a deconditioned 45-year-old with a sore ankle buys nothing and risks something.','flag']],
-  why:`<b>Galpin step 1</b> — assess across all nine adaptations before prescribing. He is explicit that
+  why:`<b>Galpin step 1</b> - assess across all nine adaptations before prescribing. He is explicit that
        an unmeasured adaptation should be recorded as unknown, not assumed.` },
 
 { id:'goals', n:2, title:'Turn his answers into SMART goals',
-  tag:'Specific, measurable, and his — not ours',
+  tag:'Specific, measurable, and his - not ours',
   said:[['Focus 1','Lean out'],['Focus 2','Get stronger'],['Driver','Lose weight'],
         ['Driver','My doctor told me to'],['Weight tends to','Creep up fast']],
   read:`He ranked <b>lean</b> first and strong second, so fat loss is the ninety-day priority and strength
         is the vehicle, not the headline. &ldquo;My doctor told me to&rdquo; is the most under-weighted answer in
-        the survey — it implies an external deadline and a number someone else is watching, neither of
+        the survey - it implies an external deadline and a number someone else is watching, neither of
         which he has told us. <b>Worth asking at the first check-in.</b>`,
-  prop:[['<b>Primary:</b> lose ~8 kg in 12 weeks. That is 0.65 kg/week — inside the safe rate, and visible.',''],
+  prop:[['<b>Primary:</b> lose ~8 kg in 12 weeks. That is 0.65 kg/week - inside the safe rate, and visible.',''],
         ['<b>Secondary:</b> 20 unbroken push-ups with hands on the bench, from an untested start.',''],
-        ['<b>Tertiary — and the one that actually predicts the other two:</b> complete 4 of 4 sessions in 10 of the 12 weeks.',''],
+        ['<b>Tertiary - and the one that actually predicts the other two:</b> complete 4 of 4 sessions in 10 of the 12 weeks.',''],
         ['Blocked: he has <b>not set a target weight</b> in the app yet. Until he does, the 8 kg is my number, not his, and the chart has no line.','ask'],
         ['Ask at check-in one: what did the doctor actually say, and is there a date attached?','ask']],
-  why:`<b>Galpin step 2</b> — SMART goals. Each of the three above is specific, measurable against something
+  why:`<b>Galpin step 2</b> - SMART goals. Each of the three above is specific, measurable against something
        we already log, and time-bound to the twelve-week block.` },
 
 { id:'defenders', n:3, title:'Name the defenders',
@@ -626,14 +626,14 @@ const LAYERS = [
   said:[['Stopped before','Time disappears'],['Stopped before','Life gets busy, it goes first'],
         ['Stopped before','Motivation dies at week three'],['Trains','Whenever the day allows']],
   read:`He named week three <b>unprompted</b>. People do not volunteer that unless it has happened to them
-        more than once — he is telling us where the program will break and roughly when. The quieter risk
+        more than once - he is telling us where the program will break and roughly when. The quieter risk
         is &ldquo;whenever the day allows&rdquo;: a session with no fixed slot has no cue, and a habit without a cue
         is the one that loses to a busy Tuesday.`,
   prop:[['<b>The 20-minute ceiling is never breached</b>, in any phase. The moment a session runs 27 minutes it stops being the thing he agreed to.',''],
-        ['<b>Week 3 gets deliberately lighter</b> — not a full deload, a visible easing — plus a coach touchpoint that week rather than a generic check-in.',''],
+        ['<b>Week 3 gets deliberately lighter</b> - not a full deload, a visible easing - plus a coach touchpoint that week rather than a generic check-in.',''],
         ['Push for a <b>fixed time of day</b> at check-in one. &ldquo;Whenever&rdquo; is the single most fixable risk in this profile.','ask'],
-        ['Two of his four days are the weekend (Sun) and Monday — the two most protectable days in most people\'s weeks. Good instinct; leave it.','']],
-  why:`<b>Galpin step 3</b> — identify the obstacles before designing around them. He calls these the
+        ['Two of his four days are the weekend (Sun) and Monday - the two most protectable days in most people\'s weeks. Good instinct; leave it.','']],
+  why:`<b>Galpin step 3</b> - identify the obstacles before designing around them. He calls these the
        defenders, and treats a program that ignores them as already failed.` },
 
 { id:'quadrant', n:4, title:'The ten-point quadrant',
@@ -641,44 +641,44 @@ const LAYERS = [
   said:[['Not asked','The survey has no question for this'],['Inferred','45, kids, &ldquo;life gets busy&rdquo;']],
   read:`We genuinely do not know this one. Galpin's default baseline is 2 points to fitness and 1 to
         recovery out of 10, and everything about Ozzy's answers is consistent with a man at exactly that
-        baseline — but that is an assumption, and it should be labelled as one rather than quietly used.`,
+        baseline - but that is an assumption, and it should be labelled as one rather than quietly used.`,
   prop:[['Run phase 1 on the <b>2 fitness / 1 recovery</b> baseline. Four twenty-minute sessions is what that budget buys, which is a useful sanity check on the rest of this build.',''],
         ['Ask the quadrant question at check-in one, in plain words: <em>&ldquo;out of ten, how much of you is available for this right now?&rdquo;</em>','ask'],
         ['If recovery comes back at 0, the deload weeks move earlier and the intensity ceiling comes down.','']],
-  why:`<b>Galpin step 4</b> — distribute ten points across the four quadrants. It is the step most
+  why:`<b>Galpin step 4</b> - distribute ten points across the four quadrants. It is the step most
        programs skip, and the one that explains why ambitious plans fail people with jobs.` },
 
 { id:'time', n:5, title:'What 80 minutes a week can actually buy',
   tag:'The constraint everything else bends around',
   said:[['Days','4'],['Length','20 minutes'],['Days chosen','Sun · Mon · Wed · Fri']],
   read:`Eighty minutes a week, warm-ups included, is the whole budget. This is the layer where most
-        programs quietly lie. Galpin's strength protocol alone asks for 3–5 minutes of rest between sets —
+        programs quietly lie. Galpin's strength protocol alone asks for 3–5 minutes of rest between sets - 
         <b>three sets of one exercise would eat half a session in rest</b>. So classical strength work is
         arithmetically off the table, and pretending otherwise would produce a program that looks
         impressive and delivers nothing.`,
-  prop:[['<b>Drop max-strength as a phase-1 target.</b> Not because he is a beginner — because the rest periods do not fit in the box he gave us.',''],
+  prop:[['<b>Drop max-strength as a phase-1 target.</b> Not because he is a beginner - because the rest periods do not fit in the box he gave us.',''],
         ['Build phase 1 on <b>muscular endurance + hypertrophy</b>, 6–30 reps, 30–90 second rests. This is also precisely Galpin\'s fat-loss prescription, which is his stated first priority.',''],
         ['<b>Skill and technique ride along free.</b> They cost no fatigue and no rest, and for someone at 0 of 12 patterns they are the highest-return work in the session.',''],
         ['Budget per session: 4 min prime · 13 min work · 3 min finish. Held to, in every session, across all three phases.','']],
-  why:`<b>Galpin step 5 + fat-loss protocol</b> — realistic time commitments first, then adaptation
+  why:`<b>Galpin step 5 + fat-loss protocol</b> - realistic time commitments first, then adaptation
        selection. Fat loss = hypertrophy + muscular endurance in the 6–30 rep range.` },
 
 { id:'select', n:6, title:'Exercise selection by pattern',
   tag:'Six patterns, one kettlebell, three sore joints',
   said:[['Kit','Kettlebell · bench · mat'],['Pain','Arm · knee · ankle'],
         ['Wants','Kettlebell-focused <em>(said to you, not in the survey)</em>']],
-  read:`His kit answers the question before we ask it — the bell is his only load, so this is a kettlebell
+  read:`His kit answers the question before we ask it - the bell is his only load, so this is a kettlebell
         program whether or not he had asked for one. The real finding is the shape of the hole:
         <b>the pull pattern has no home</b>. With no bar and no bands, every pulling rep he does for twelve
         weeks is a single-arm row.`,
-  prop:[['<b>Hinge</b> — KB deadlift → KB RDL → (week 5) the swing. This is the spine of the program.',''],
-        ['<b>Squat</b> — bench squat → goblet squat. The bench is the depth gauge, which is what makes it knee-safe.',''],
-        ['<b>Push</b> — bench push-up + KB floor press. The floor press has a hard stop at the bottom, so the sore shoulder never travels further than it wants.',''],
-        ['<b>Pull</b> — single-arm row, and nothing else. <b>Under-served, and it will stay that way</b> until he owns something to hang from.','flag'],
-        ['<b>Carry</b> — suitcase carry. The most underrated thing a kettlebell does, and it costs no joint load at all.',''],
-        ['<b>Core</b> — plank, side plank, dead bug, goblet march. Anti-rotation and anti-extension, no spinal flexion under load.',''],
+  prop:[['<b>Hinge</b> - KB deadlift → KB RDL → (week 5) the swing. This is the spine of the program.',''],
+        ['<b>Squat</b> - bench squat → goblet squat. The bench is the depth gauge, which is what makes it knee-safe.',''],
+        ['<b>Push</b> - bench push-up + KB floor press. The floor press has a hard stop at the bottom, so the sore shoulder never travels further than it wants.',''],
+        ['<b>Pull</b> - single-arm row, and nothing else. <b>Under-served, and it will stay that way</b> until he owns something to hang from.','flag'],
+        ['<b>Carry</b> - suitcase carry. The most underrated thing a kettlebell does, and it costs no joint load at all.',''],
+        ['<b>Core</b> - plank, side plank, dead bug, goblet march. Anti-rotation and anti-extension, no spinal flexion under load.',''],
         ['<b>No swings before week 5.</b> A swing is a ballistic hinge; he has never hinged. Weeks 1–4 teach the deadlift so week 5 has something to be fast with.','']],
-  why:`<b>Galpin step 6</b> — select by movement pattern rather than by muscle or by exercise name. The
+  why:`<b>Galpin step 6</b> - select by movement pattern rather than by muscle or by exercise name. The
        pattern list is what exposes a gap like the pull one; an exercise list would have hidden it.` },
 
 { id:'dose', n:7, title:'Volume, intensity, frequency',
@@ -689,56 +689,56 @@ const LAYERS = [
         minimum</b> and I do not think we should quietly round it up or pretend the range is softer than it
         is. In phase 1 the adaptation we are actually buying is technique and adherence; hypertrophy is a
         phase-2 conversation once the sessions are habitual.`,
-  prop:[['<b>Reps 8–15</b>, stopping ~2 short of failure. Not to failure — he is 45, deconditioned, and has a medical flag.',''],
+  prop:[['<b>Reps 8–15</b>, stopping ~2 short of failure. Not to failure - he is 45, deconditioned, and has a medical flag.',''],
         ['<b>Rest 45–75 s.</b> Tight, per Galpin\'s time-efficient hypertrophy variant, because the clock is the binding constraint.',''],
-        ['<b>Cadence 312</b> on working sets — 3 down, 1 pause, 2 up. Slow eccentrics are free technique practice for someone at 0 of 12.',''],
-        ['<b>48-hour rule respected by accident and by design</b> — Sun/Mon/Wed/Fri with rotating patterns means no muscle group is hit twice inside 48 hours.',''],
+        ['<b>Cadence 312</b> on working sets - 3 down, 1 pause, 2 up. Slow eccentrics are free technique practice for someone at 0 of 12.',''],
+        ['<b>48-hour rule respected by accident and by design</b> - Sun/Mon/Wed/Fri with rotating patterns means no muscle group is hit twice inside 48 hours.',''],
         ['<b>State the shortfall to him plainly</b> rather than hiding it. &ldquo;Push me&rdquo; means he can take being told that week 1 is deliberately below what growth requires.','flag']],
-  why:`<b>Galpin step 7 + hypertrophy protocol</b> — 10–25 sets/muscle/week, 8–15 rep sweet spot, 2 min
+  why:`<b>Galpin step 7 + hypertrophy protocol</b> - 10–25 sets/muscle/week, 8–15 rep sweet spot, 2 min
        rest (30–90 s for the time-efficient variant), 48 h between sessions for the same muscle.` },
 
 { id:'progress', n:8, title:'How it gets harder',
   tag:'Double progression, and what unlocks when',
   said:[['Intensity','Push me'],['Weeks','12'],['Phases','Foundation → Build → Peak']],
   read:`With one bell he has <b>one load</b>. That removes the obvious progression lever, so progression has
-        to come from reps, then tempo, then leverage, then density — in that order. It also means the
+        to come from reps, then tempo, then leverage, then density - in that order. It also means the
         second kettlebell becomes genuinely necessary somewhere around week eight, which is a purchase
         conversation to have <em>then</em>, not now.`,
-  prop:[['<b>Weeks 1–2 — calibrate.</b> Find his real numbers. Nothing progresses; we are collecting a baseline.',''],
-        ['<b>Weeks 3–4 — add reps</b> inside the 8–15 band, same load, same tempo. Week 3 stays deliberately light.',''],
-        ['<b>Week 5 — the swing arrives</b>, plus two-bell carries. The first real unlock, and it lands right after the week-3 danger zone on purpose.',''],
-        ['<b>Weeks 6–8 — add tempo and range</b> before adding anything else.',''],
-        ['<b>Week 9 — reassess the joints.</b> If the knee is quiet, split squats enter. If the arm is quiet, overhead press enters. <b>Both are conditional, neither is promised.</b>','flag'],
-        ['<b>Weeks 9–12 — density.</b> Same work, less rest. It is the only lever left inside 20 minutes.','']],
-  why:`<b>Galpin step 8</b> — progression strategy chosen deliberately, and 3–5% weekly progression before
+  prop:[['<b>Weeks 1–2 - calibrate.</b> Find his real numbers. Nothing progresses; we are collecting a baseline.',''],
+        ['<b>Weeks 3–4 - add reps</b> inside the 8–15 band, same load, same tempo. Week 3 stays deliberately light.',''],
+        ['<b>Week 5 - the swing arrives</b>, plus two-bell carries. The first real unlock, and it lands right after the week-3 danger zone on purpose.',''],
+        ['<b>Weeks 6–8 - add tempo and range</b> before adding anything else.',''],
+        ['<b>Week 9 - reassess the joints.</b> If the knee is quiet, split squats enter. If the arm is quiet, overhead press enters. <b>Both are conditional, neither is promised.</b>','flag'],
+        ['<b>Weeks 9–12 - density.</b> Same work, less rest. It is the only lever left inside 20 minutes.','']],
+  why:`<b>Galpin step 8</b> - progression strategy chosen deliberately, and 3–5% weekly progression before
        a deload. With a single fixed load, reps and tempo carry what percentage load normally would.` },
 
 { id:'recover', n:9, title:'Recovery and deloads',
   tag:'With no wearable, and a body that has told us three things',
   said:[['Wearable','None'],['PAR-Q','Joint problem · doctor'],['Pain','Arm · knee · ankle'],['Sleep','Not asked']],
   read:`No wearable means no HRV, so Galpin's primary objective recovery marker is unavailable to us. His
-        fallback — the <b>WUT check</b> (weight, urine, thirst) — is free, needs no hardware, and we are
+        fallback - the <b>WUT check</b> (weight, urine, thirst) - is free, needs no hardware, and we are
         already asking for one of the three. The daily <b>&ldquo;how's the body?&rdquo;</b> tap in the app is the
         closest honest substitute, and it already scales the session.`,
   prop:[['<b>The readiness tap is the recovery system.</b> Rough pulls a set off everything and drops the finisher; good adds a set to the first two working movements. It already does this.',''],
-        ['<b>Deload weeks 5 and 10</b> — Galpin\'s every-five-weeks rhythm. Week 5 is also when the swing lands, so the deload is in volume, not in novelty.',''],
+        ['<b>Deload weeks 5 and 10</b> - Galpin\'s every-five-weeks rhythm. Week 5 is also when the swing lands, so the deload is in volume, not in novelty.',''],
         ['Add <b>weight and thirst</b> to the Monday check-in. That is two thirds of WUT for two extra taps.','ask'],
         ['<b>Three &ldquo;rough&rdquo; days in a row triggers a coach flag</b>, mirroring Galpin\'s three-day HRV rule.',''],
         ['Sleep was never asked in onboarding. For a 45-year-old whose weight &ldquo;creeps up fast&rdquo;, that is a real gap.','ask']],
-  why:`<b>Galpin step 9 + recovery protocol</b> — deload every ~5 weeks; sleep first, light movement
+  why:`<b>Galpin step 9 + recovery protocol</b> - deload every ~5 weeks; sleep first, light movement
        second; HRV is the primary marker, WUT the accessible one; 3 days of decline is the warning.` },
 
 { id:'review', n:10, title:'Review and adjust',
   tag:'The loop that makes the other nine layers correctable',
   said:[['Check-in','Monday morning'],['Contact','Weekly, 60 seconds']],
   read:`He chose Monday, which is the right end of the week for a man whose weekends are protected
-        training days — it reviews what just happened rather than forecasting what might. Sixty seconds
+        training days - it reviews what just happened rather than forecasting what might. Sixty seconds
         is the correct length; anything longer and it becomes the fifth thing to do.`,
   prop:[['<b>Watch four numbers only:</b> sessions completed, average readiness, weight trend, and whether the knee has been mentioned.',''],
         ['<b>Week 3 gets a real message</b>, not an automated one. He told us that is where it breaks.',''],
-        ['<b>Week 6 is the first honest re-plan</b> — by then there are 24 sessions of data and the phase-2 volume question can be answered instead of guessed.',''],
+        ['<b>Week 6 is the first honest re-plan</b> - by then there are 24 sessions of data and the phase-2 volume question can be answered instead of guessed.',''],
         ['<b>Every layer above is revisable.</b> Layer 7 in particular is my weakest call and should be first to change once real numbers exist.','']],
-  why:`<b>Galpin step 10</b> — review and adjust. He frames the program as a hypothesis, not a plan;
+  why:`<b>Galpin step 10</b> - review and adjust. He frames the program as a hypothesis, not a plan;
        the review cadence is what makes it one.` }
 ];
 
@@ -746,7 +746,7 @@ const LAYERS = [
    still building this" in his app — not as an error, and not as nothing. */
 const RELEASE = [
   ['shape','The program shape','Name, 12 weeks, 4 days, 20 minutes'],
-  ['d1','Day 1 · Ground Floor','Full body — the first session'],
+  ['d1','Day 1 · Ground Floor','Full body - the first session'],
   ['d2','Day 2 · Hinge & Carry','Posterior + loaded carry'],
   ['d3','Day 3 · Press & Pull','Upper, arm-safe'],
   ['d4','Day 4 · Reset & Move','Mobility'],
@@ -761,7 +761,7 @@ const RELEASE = [
 /* Same key scheme as the client app: fj.v1.<user>.<record>. The console is
    pointed at a client rather than built for one — swapping USER is all it
    takes to open somebody else's program. */
-const USER = CLIENT_ID;   /* resolved at the top of this script — see CLIENT_ID */
+const USER = CLIENT_ID;   /* resolved at the top of this script - see CLIENT_ID */
 const KEY = `fj.v1.${USER}.coach`;
 const blank={decisions:{},notes:{},released:{shape:true},open:{},inbox:[],program:null};
 let S=load();
@@ -814,7 +814,7 @@ function drawRelease(){
   document.querySelectorAll('[data-rel]').forEach(b=>b.onclick=()=>{
     const id=b.dataset.rel;
     S.released[id]=!S.released[id]; save(1); drawRelease(); drawDock();
-    toast(S.released[id]?'Released — it is live in his app now':'Hidden from his app again');
+    toast(S.released[id]?'Released - it is live in his app now':'Hidden from his app again');
   });
 }
 
@@ -857,7 +857,7 @@ function drawLayers(){
           <button class="btn ${d==='blocked'?'on-blocked':''}" data-dec="${L.id}:blocked">Park it</button>
           <span class="sp"></span>
         </div>
-        <textarea data-note="${L.id}" placeholder="Your thinking, corrections, or what you want me to change — this goes straight into the brief.">${esc(S.notes[L.id]||'')}</textarea>
+        <textarea data-note="${L.id}" placeholder="Your thinking, corrections, or what you want me to change - this goes straight into the brief.">${esc(S.notes[L.id]||'')}</textarea>
       </div>
     </section>`;
   }).join('');
@@ -894,7 +894,7 @@ function drawLayers(){
    Regenerate with:  node tools/port-programs.mjs && node tools/build-coach-library.mjs
    Source of truth:  spine/programs/*.json
    2 programs, built 2026-08-23. */
-const LIBRARY = {"beginner_return":{"id":"beginner_return","version":1,"name":"Come Back Strong","who":"Training partner","source":"ported from js/data/sessions.js — the program this person is actually on","duration":45,"fixed":true,"trainDays":[1,3,5],"units":"lb","equipment":["bw","db","bb","band","bench","rack","pullupbar","machine","cable","kb","mat"],"constraints":{"knee":"no running, no jumping, no deep knee flexion under load"},"goals":["Show up three times a week","Build muscle, armour the joints","Lose weight over time"],"habits":[{"id":"walk","label":"20 min walk after a meal","daily":true},{"id":"no8pm","label":"No eating after 8pm","daily":true},{"id":"protein","label":"First meal was high protein","daily":true},{"id":"sport","label":"Sport session","daily":false,"note":"weekly — tick it on the day you do it"}],"days":{"d1":{"name":"Day 1 · Upper","tag":"upper","why":"","blocks":[{"role":"Prime","name":"Warm-up A · Loosen up","note":"Never rushed, but no stopping — flow straight through. This is the part that protects the joints.","mins":3,"items":[{"ex":"arm_circles","pres":"20","note":""},{"ex":"down_dog_up_dog","pres":"5","note":""},{"ex":"hip_90_90","pres":"8","note":""}]},{"role":"Prime","name":"Warm-up A · Circuit","note":"3 rounds, continuous — no rest inside a round","mins":3,"items":[{"ex":"pushup","pres":"3-5 reps","note":"Hands under your shoulders, body in one straight line."},{"ex":"dead_hang","pres":"20s","note":"Just hang from the bar with straight arms and let your shoulders stretch out."},{"ex":"banded_pullapart","pres":"10-15 reps","note":"Band in both hands, arms straight out in front."},{"ex":"mountain_climber","pres":"10","note":"Push-up position."}]},{"role":"Work","name":"A · Push-Ups + Lat Pulldown","note":"A1 straight into A2 with no rest, then rest 75 sec, then go again.","mins":9,"items":[{"ex":"straight_bar_push_up","pres":"10-15 reps","note":"Straight Bar Push-Up · superset A1 · Set a bar in the rack about waist height."},{"ex":"lat_pulldown","pres":"10","note":"superset A2"}]},{"role":"Work","name":"B · Assisted Dip + Cable Row","note":"B1 straight into B2 with no rest, then rest 75 sec.","mins":9,"items":[{"ex":"assisted_dip","pres":"8","note":"superset B1"},{"ex":"seated_cable_row","pres":"10","note":"superset B2"}]},{"role":"Work","name":"C · Lateral Raise + Pushdown","note":"C1 into C2, no rest, then 75 sec.","mins":9,"items":[{"ex":"lateral_raise","pres":"12","note":"superset C1"},{"ex":"triceps_pushdown","pres":"12","note":"superset C2"}]},{"role":"Work","name":"D · Reverse Fly + Curl","note":"D1 into D2, no rest, then 75 sec. Reverse fly is never heavy — light and slow.","mins":9,"items":[{"ex":"reverse_fly","pres":"12-15 reps","note":"superset D1 · Chest flat on an incline bench, light dumbbells hanging."},{"ex":"barbell_curl","pres":"12","note":"superset D2"}]},{"role":"Finish","name":"Finisher · Kettlebell Swings","note":"3 rounds of 12, rest 20 sec between rounds.","mins":3,"items":[{"ex":"kb_swing","pres":"12","note":""}]}]},"d2":{"name":"Day 2 · Upper","tag":"upper","why":"","blocks":[{"role":"Prime","name":"Warm-up A · Loosen up","note":"Never rushed, but no stopping — flow straight through. This is the part that protects the joints.","mins":4,"items":[{"ex":"arm_circles","pres":"20","note":""},{"ex":"down_dog_up_dog","pres":"5","note":""},{"ex":"hip_90_90","pres":"8","note":""}]},{"role":"Prime","name":"Warm-up A · Circuit","note":"3 rounds, continuous — no rest inside a round","mins":4,"items":[{"ex":"pushup","pres":"3-5 reps","note":"Hands under your shoulders, body in one straight line."},{"ex":"dead_hang","pres":"20s","note":"Just hang from the bar with straight arms and let your shoulders stretch out."},{"ex":"banded_pullapart","pres":"10-15 reps","note":"Band in both hands, arms straight out in front."},{"ex":"mountain_climber","pres":"10","note":"Push-up position."}]},{"role":"Work","name":"A · Chest Press + Row","note":"A1 into A2, no rest, then rest 75 sec.","mins":11,"items":[{"ex":"chest_press_machine","pres":"10","note":"superset A1"},{"ex":"chest_supported_row","pres":"12","note":"superset A2"}]},{"role":"Work","name":"B · Shoulder Press + Pullover","note":"B1 into B2, no rest, then rest 75 sec.","mins":11,"items":[{"ex":"shoulder_press_machine","pres":"10","note":"superset B1"},{"ex":"db_pullover","pres":"12","note":"superset B2 · Lie on the bench, elbows slightly bent and fixed."}]},{"role":"Work","name":"C · Back Extension + Dip Hold","note":"C1 into C2, no rest, then rest 75 sec.","mins":11,"items":[{"ex":"back_extension_45","pres":"12","note":"superset C1"},{"ex":"dip_support_hold","pres":"20s","note":"superset C2 · Hold yourself up on the dip bars with your arms locked straight."}]},{"role":"Finish","name":"Finisher · Farmer's Carry","note":"4 rounds · walk 30-40 m · rest 45-60 sec between rounds. No straps — grip is the point. Start 40-50 lb per hand.","mins":4,"items":[{"ex":"farmers_carry","pres":"40s","note":"Farmer's Carry · A dumbbell in each hand, no straps."}]}]},"d3":{"name":"Day 3 · Full Body","tag":"full body","why":"","blocks":[{"role":"Prime","name":"Warm-up B · Sequence 1","note":"Flow straight through, no stopping.","mins":8,"items":[{"ex":"arm_circles","pres":"20","note":""},{"ex":"down_dog_up_dog","pres":"5","note":""},{"ex":"hip_90_90","pres":"8","note":""}]},{"role":"Prime","name":"Warm-up B · Sequence 2","note":"2 rounds, continuous — no rest inside a round","mins":8,"items":[{"ex":"banded_sidewalk","pres":"60s","note":"Banded Side-Step March · Band around your legs, stay low in a quarter-squat, step sideways without letting your feet click together."},{"ex":"pushup","pres":"3-5 reps","note":"Hands under your shoulders, body in one straight line."},{"ex":"dead_hang","pres":"20s","note":"Just hang from the bar with straight arms and let your shoulders stretch out."},{"ex":"superman","pres":"10-15 reps","note":"Superman · Lie face down, arms stretched out in front, thumbs pointing up."},{"ex":"mountain_climber","pres":"10","note":"Push-up position."}]},{"role":"Work","name":"Full Body Circuit","note":"Straight through, 3-5 rounds. Rest 90 sec between rounds ONLY — no rest between exercises. One pair of dumbbells: start 25-30 lb per hand (the shoulder press is the limiter). The RDL and row will feel light on purpose for now — that is fine for the first month.","mins":21,"items":[{"ex":"db_rdl","pres":"8","note":"DB Romanian Deadlift · Push your hips back, slide the dumbbells down the front of your legs, knees almost straight."},{"ex":"db_shoulder_press","pres":"6","note":"Sit or stand tall, dumbbells at shoulder height."},{"ex":"bent_over_row","pres":"6","note":"DB Bent-Over Row · Hinge at the hips, flat back, dumbbells hanging."},{"ex":"pushup_on_dumbbells","pres":"6","note":"DB Push-Ups · Hands gripping the two dumbbells on the floor so your wrists stay straight."},{"ex":"forearm_plank","pres":"30s","note":"Plank Hold · Elbows under your shoulders, body in one straight line."},{"ex":"wall_sit","pres":"30s","note":"Wall Sit · Back flat on the wall, slide down until your thighs are somewhere comfortable — the higher you stay, the easier on the knee."}]},{"role":"Finish","name":"Finisher · Core Circuit","note":"30 sec each, no rest between exercises. 2-3 rounds, 45 sec between rounds.","mins":8,"items":[{"ex":"dead_bug","pres":"30s","note":"On your back, arms up, knees over hips."},{"ex":"side_plank","pres":"30s each side","note":"On your side, elbow under your shoulder, knees bent at 90°."},{"ex":"side_plank","pres":"30s each side","note":"On your side, elbow under your shoulder, knees bent at 90°."},{"ex":"bird_dog","pres":"30s","note":"On hands and knees."},{"ex":"lying_leg_raise","pres":"30s","note":"Leg Raises · On your back, hands under your hips."}]}]}}},"main":{"id":"main","version":1,"name":"Foundation Block","who":"Nicolas","source":"ported from js/data/sessions.js — the program this person is actually on","duration":30,"fixed":false,"trainDays":[1,2,3,4,5],"units":"lb","equipment":["bw","db","bb","rings","parallettes","band","vest","slantboard","rack","pullupbar","bench","sliders"],"constraints":{"forearm":"supinated_neutral"},"goals":["Lower-body size","Strength (upper + lower)","Rep-max endurance","Zone-5 conditioning","Skills (handstand / front lever)","Mobility / into the stretch"],"habits":[],"days":{"d1":{"name":"Quads & Knees","tag":"hypertrophy","why":"","blocks":[{"role":"Prime","name":"Knee Armor Circuit","note":"2 rounds, controlled","mins":3,"items":[{"ex":"touchdown_squat","pres":"25 each side","note":""},{"ex":"tibialis_raise","pres":"25","note":""},{"ex":"kot_calf","pres":"50","note":""},{"ex":"slant_pulse","pres":"20","note":""}]},{"role":"Work","name":"Bulgarian Split Squat","note":"To failure, per side · 3 sets base (up to 4 on strong days)","mins":8,"items":[{"ex":"bulgarian_split","pres":"10 reps to failure each side","note":""}]},{"role":"Work","name":"Slant-Board Squat","note":"Strength, tempo 3-1-1","mins":8,"items":[{"ex":"slant_board_squat","pres":"3 × 6 · tempo 3-1-1","note":"90s rest"}]},{"role":"Work","name":"Assisted Reverse Nordic Curl","note":"Quad eccentric · limited rest · 3rd anchor","mins":8,"items":[{"ex":"reverse_nordic","pres":"3 × 8","note":"45s rest"}]},{"role":"Finish","name":"Iso Burner — Horse Stance + Side Plank","note":"3 rounds, continuous (no rest)","mins":3,"items":[{"ex":"horse_stance","pres":"40s","note":""},{"ex":"side_plank","pres":"30s each side","note":""},{"ex":"side_plank","pres":"30s each side","note":""}]}]},"d2":{"name":"Push & Handstand","tag":"push","why":"","blocks":[{"role":"Prime","name":"Core + Compression Prep","note":"2 rounds · handstand-ready","mins":3,"items":[{"ex":"long_lever_plank","pres":"30s","note":""},{"ex":"walk_up_plank","pres":"8","note":""},{"ex":"side_plank","pres":"30s each side","note":""},{"ex":"shoulder_tap","pres":"20","note":""},{"ex":"pike_compression","pres":"10","note":""}]},{"role":"Work","name":"Handstand Practice","note":"Fresh — quality over fatigue","mins":8,"items":[{"ex":"kick_up_practice","pres":"2 min","note":""},{"ex":"wall_handstand_hold","pres":"30s","note":"45s rest"},{"ex":"handstand","pres":"2 min","note":""}]},{"role":"Work","name":"Deep Parallette Pike Push-Up","note":"To failure","mins":8,"items":[{"ex":"deep_pike_pushup","pres":"8 reps to failure","note":""}]},{"role":"Work","name":"Weighted Dip","note":"Strength · 1 warm-up (8-10) → 3 × 5","mins":8,"items":[{"ex":"weighted_dip","pres":"3 × 5","note":"150s rest"}]},{"role":"Finish","name":"Push-Up AMRAP","note":"Volume","mins":3,"items":[{"ex":"pushup","pres":"—","note":""}]}]},"d3":{"name":"Hinge & Posterior","tag":"strength","why":"","blocks":[{"role":"Prime","name":"Glute Activation","note":"Sidewalks (continuous) + bird dogs","mins":3,"items":[{"ex":"banded_sidewalk","pres":"120s","note":"15s rest"},{"ex":"bird_dog_crunch","pres":"2 × 8 each side","note":"20s rest"}]},{"role":"Work","name":"Hip Thrust","note":"Strength loader — add load weekly","mins":8,"items":[{"ex":"hip_thrust","pres":"4 × 5","note":"150s rest"}]},{"role":"Work","name":"Single-Leg RDL","note":"Size — per side, progress load/reps · alternating sides = built-in rest","mins":8,"items":[{"ex":"single_leg_rdl","pres":"3 × 8 each side","note":"90s rest"}]},{"role":"Work","name":"Nordic Curl","note":"Hamstring eccentric — progress ROM → load · 3rd anchor","mins":8,"items":[{"ex":"nordic_curl","pres":"3 × 6","note":"90s rest"}]},{"role":"Finish","name":"Tabata — Swing + Jump Squat","note":"20/10, 5 cycles (~5 min)","mins":3,"items":[{"ex":"db_swing","pres":"—","note":""},{"ex":"jump_squat","pres":"—","note":""}]}]},"d4":{"name":"Pull & Front Lever","tag":"pull","why":"","blocks":[{"role":"Prime","name":"Pulling Prep","note":"Forearm-light","mins":3,"items":[{"ex":"banded_pullapart","pres":"1 × 20","note":"10s rest"},{"ex":"scap_pullup","pres":"1 × 15","note":""},{"ex":"active_hang","pres":"30s","note":"20s rest"},{"ex":"dragon_flag","pres":"30s","note":"15s rest"}]},{"role":"Work","name":"Front Lever","note":"TUT holds · advanced-tuck or banded straddle (set Week 1)","mins":8,"items":[{"ex":"front_lever_tuck","pres":"10s","note":"60s rest"}]},{"role":"Work","name":"Weighted Chin-Up","note":"Strength · supinated · 1 warm-up (8-10) → 3 × 5","mins":8,"items":[{"ex":"weighted_chinup","pres":"3 × 5","note":"150s rest"}]},{"role":"Work","name":"Single-Arm Row","note":"Horizontal · unilateral · per side · alternating sides = built-in rest","mins":8,"items":[{"ex":"single_arm_row","pres":"3 × 8 each side","note":"90s rest"}]},{"role":"Finish","name":"L-Sit Pull-ups + Skin the Cat","note":"5 min, minimal rest","mins":3,"items":[{"ex":"l_sit_pullup","pres":"5 reps","note":""},{"ex":"skin_the_cat","pres":"5 reps","note":""}]}]},"d5":{"name":"Full Body Engine","tag":"conditioning","why":"","blocks":[{"role":"Work","name":"Block 1 · Tempo AMRAP","note":"15 min, target ~4 rounds — all 5 patterns","mins":15,"items":[{"ex":"chin_up","pres":"5 reps · 5s hold / 5s down / 5s dead-hang","note":""},{"ex":"dip","pres":"5 reps","note":""},{"ex":"goblet_squat","pres":"8 reps · slow + pause","note":""},{"ex":"banded_glute_bridge","pres":"30s","note":""},{"ex":"l_sit","pres":"20s","note":""}]},{"role":"Work","name":"Block 2 · Explosive Intervals","note":"40s on / 20s off · ~3 rounds · all 5 patterns","mins":15,"items":[{"ex":"explosive_chinup","pres":"—","note":""},{"ex":"deadstop_pushup","pres":"—","note":""},{"ex":"jump_squat","pres":"—","note":""},{"ex":"db_swing","pres":"—","note":""},{"ex":"mountain_climber","pres":"—","note":""}]}]}}}};
+const LIBRARY = {"beginner_return":{"id":"beginner_return","version":1,"name":"Come Back Strong","who":"Training partner","source":"ported from js/data/sessions.js - the program this person is actually on","duration":45,"fixed":true,"trainDays":[1,3,5],"units":"lb","equipment":["bw","db","bb","band","bench","rack","pullupbar","machine","cable","kb","mat"],"constraints":{"knee":"no running, no jumping, no deep knee flexion under load"},"goals":["Show up three times a week","Build muscle, armour the joints","Lose weight over time"],"habits":[{"id":"walk","label":"20 min walk after a meal","daily":true},{"id":"no8pm","label":"No eating after 8pm","daily":true},{"id":"protein","label":"First meal was high protein","daily":true},{"id":"sport","label":"Sport session","daily":false,"note":"weekly - tick it on the day you do it"}],"days":{"d1":{"name":"Day 1 · Upper","tag":"upper","why":"","blocks":[{"role":"Prime","name":"Warm-up A · Loosen up","note":"Never rushed, but no stopping - flow straight through. This is the part that protects the joints.","mins":3,"items":[{"ex":"arm_circles","pres":"20","note":""},{"ex":"down_dog_up_dog","pres":"5","note":""},{"ex":"hip_90_90","pres":"8","note":""}]},{"role":"Prime","name":"Warm-up A · Circuit","note":"3 rounds, continuous - no rest inside a round","mins":3,"items":[{"ex":"pushup","pres":"3-5 reps","note":"Hands under your shoulders, body in one straight line."},{"ex":"dead_hang","pres":"20s","note":"Just hang from the bar with straight arms and let your shoulders stretch out."},{"ex":"banded_pullapart","pres":"10-15 reps","note":"Band in both hands, arms straight out in front."},{"ex":"mountain_climber","pres":"10","note":"Push-up position."}]},{"role":"Work","name":"A · Push-Ups + Lat Pulldown","note":"A1 straight into A2 with no rest, then rest 75 sec, then go again.","mins":9,"items":[{"ex":"straight_bar_push_up","pres":"10-15 reps","note":"Straight Bar Push-Up · superset A1 · Set a bar in the rack about waist height."},{"ex":"lat_pulldown","pres":"10","note":"superset A2"}]},{"role":"Work","name":"B · Assisted Dip + Cable Row","note":"B1 straight into B2 with no rest, then rest 75 sec.","mins":9,"items":[{"ex":"assisted_dip","pres":"8","note":"superset B1"},{"ex":"seated_cable_row","pres":"10","note":"superset B2"}]},{"role":"Work","name":"C · Lateral Raise + Pushdown","note":"C1 into C2, no rest, then 75 sec.","mins":9,"items":[{"ex":"lateral_raise","pres":"12","note":"superset C1"},{"ex":"triceps_pushdown","pres":"12","note":"superset C2"}]},{"role":"Work","name":"D · Reverse Fly + Curl","note":"D1 into D2, no rest, then 75 sec. Reverse fly is never heavy - light and slow.","mins":9,"items":[{"ex":"reverse_fly","pres":"12-15 reps","note":"superset D1 · Chest flat on an incline bench, light dumbbells hanging."},{"ex":"barbell_curl","pres":"12","note":"superset D2"}]},{"role":"Finish","name":"Finisher · Kettlebell Swings","note":"3 rounds of 12, rest 20 sec between rounds.","mins":3,"items":[{"ex":"kb_swing","pres":"12","note":""}]}]},"d2":{"name":"Day 2 · Upper","tag":"upper","why":"","blocks":[{"role":"Prime","name":"Warm-up A · Loosen up","note":"Never rushed, but no stopping - flow straight through. This is the part that protects the joints.","mins":4,"items":[{"ex":"arm_circles","pres":"20","note":""},{"ex":"down_dog_up_dog","pres":"5","note":""},{"ex":"hip_90_90","pres":"8","note":""}]},{"role":"Prime","name":"Warm-up A · Circuit","note":"3 rounds, continuous - no rest inside a round","mins":4,"items":[{"ex":"pushup","pres":"3-5 reps","note":"Hands under your shoulders, body in one straight line."},{"ex":"dead_hang","pres":"20s","note":"Just hang from the bar with straight arms and let your shoulders stretch out."},{"ex":"banded_pullapart","pres":"10-15 reps","note":"Band in both hands, arms straight out in front."},{"ex":"mountain_climber","pres":"10","note":"Push-up position."}]},{"role":"Work","name":"A · Chest Press + Row","note":"A1 into A2, no rest, then rest 75 sec.","mins":11,"items":[{"ex":"chest_press_machine","pres":"10","note":"superset A1"},{"ex":"chest_supported_row","pres":"12","note":"superset A2"}]},{"role":"Work","name":"B · Shoulder Press + Pullover","note":"B1 into B2, no rest, then rest 75 sec.","mins":11,"items":[{"ex":"shoulder_press_machine","pres":"10","note":"superset B1"},{"ex":"db_pullover","pres":"12","note":"superset B2 · Lie on the bench, elbows slightly bent and fixed."}]},{"role":"Work","name":"C · Back Extension + Dip Hold","note":"C1 into C2, no rest, then rest 75 sec.","mins":11,"items":[{"ex":"back_extension_45","pres":"12","note":"superset C1"},{"ex":"dip_support_hold","pres":"20s","note":"superset C2 · Hold yourself up on the dip bars with your arms locked straight."}]},{"role":"Finish","name":"Finisher · Farmer's Carry","note":"4 rounds · walk 30-40 m · rest 45-60 sec between rounds. No straps - grip is the point. Start 40-50 lb per hand.","mins":4,"items":[{"ex":"farmers_carry","pres":"40s","note":"Farmer's Carry · A dumbbell in each hand, no straps."}]}]},"d3":{"name":"Day 3 · Full Body","tag":"full body","why":"","blocks":[{"role":"Prime","name":"Warm-up B · Sequence 1","note":"Flow straight through, no stopping.","mins":8,"items":[{"ex":"arm_circles","pres":"20","note":""},{"ex":"down_dog_up_dog","pres":"5","note":""},{"ex":"hip_90_90","pres":"8","note":""}]},{"role":"Prime","name":"Warm-up B · Sequence 2","note":"2 rounds, continuous - no rest inside a round","mins":8,"items":[{"ex":"banded_sidewalk","pres":"60s","note":"Banded Side-Step March · Band around your legs, stay low in a quarter-squat, step sideways without letting your feet click together."},{"ex":"pushup","pres":"3-5 reps","note":"Hands under your shoulders, body in one straight line."},{"ex":"dead_hang","pres":"20s","note":"Just hang from the bar with straight arms and let your shoulders stretch out."},{"ex":"superman","pres":"10-15 reps","note":"Superman · Lie face down, arms stretched out in front, thumbs pointing up."},{"ex":"mountain_climber","pres":"10","note":"Push-up position."}]},{"role":"Work","name":"Full Body Circuit","note":"Straight through, 3-5 rounds. Rest 90 sec between rounds ONLY - no rest between exercises. One pair of dumbbells: start 25-30 lb per hand (the shoulder press is the limiter). The RDL and row will feel light on purpose for now - that is fine for the first month.","mins":21,"items":[{"ex":"db_rdl","pres":"8","note":"DB Romanian Deadlift · Push your hips back, slide the dumbbells down the front of your legs, knees almost straight."},{"ex":"db_shoulder_press","pres":"6","note":"Sit or stand tall, dumbbells at shoulder height."},{"ex":"bent_over_row","pres":"6","note":"DB Bent-Over Row · Hinge at the hips, flat back, dumbbells hanging."},{"ex":"pushup_on_dumbbells","pres":"6","note":"DB Push-Ups · Hands gripping the two dumbbells on the floor so your wrists stay straight."},{"ex":"forearm_plank","pres":"30s","note":"Plank Hold · Elbows under your shoulders, body in one straight line."},{"ex":"wall_sit","pres":"30s","note":"Wall Sit · Back flat on the wall, slide down until your thighs are somewhere comfortable - the higher you stay, the easier on the knee."}]},{"role":"Finish","name":"Finisher · Core Circuit","note":"30 sec each, no rest between exercises. 2-3 rounds, 45 sec between rounds.","mins":8,"items":[{"ex":"dead_bug","pres":"30s","note":"On your back, arms up, knees over hips."},{"ex":"side_plank","pres":"30s each side","note":"On your side, elbow under your shoulder, knees bent at 90°."},{"ex":"side_plank","pres":"30s each side","note":"On your side, elbow under your shoulder, knees bent at 90°."},{"ex":"bird_dog","pres":"30s","note":"On hands and knees."},{"ex":"lying_leg_raise","pres":"30s","note":"Leg Raises · On your back, hands under your hips."}]}]}}},"main":{"id":"main","version":1,"name":"Foundation Block","who":"Nicolas","source":"ported from js/data/sessions.js - the program this person is actually on","duration":30,"fixed":false,"trainDays":[1,2,3,4,5],"units":"lb","equipment":["bw","db","bb","rings","parallettes","band","vest","slantboard","rack","pullupbar","bench","sliders"],"constraints":{"forearm":"supinated_neutral"},"goals":["Lower-body size","Strength (upper + lower)","Rep-max endurance","Zone-5 conditioning","Skills (handstand / front lever)","Mobility / into the stretch"],"habits":[],"days":{"d1":{"name":"Quads & Knees","tag":"hypertrophy","why":"","blocks":[{"role":"Prime","name":"Knee Armor Circuit","note":"2 rounds, controlled","mins":3,"items":[{"ex":"touchdown_squat","pres":"25 each side","note":""},{"ex":"tibialis_raise","pres":"25","note":""},{"ex":"kot_calf","pres":"50","note":""},{"ex":"slant_pulse","pres":"20","note":""}]},{"role":"Work","name":"Bulgarian Split Squat","note":"To failure, per side · 3 sets base (up to 4 on strong days)","mins":8,"items":[{"ex":"bulgarian_split","pres":"10 reps to failure each side","note":""}]},{"role":"Work","name":"Slant-Board Squat","note":"Strength, tempo 3-1-1","mins":8,"items":[{"ex":"slant_board_squat","pres":"3 × 6 · tempo 3-1-1","note":"90s rest"}]},{"role":"Work","name":"Assisted Reverse Nordic Curl","note":"Quad eccentric · limited rest · 3rd anchor","mins":8,"items":[{"ex":"reverse_nordic","pres":"3 × 8","note":"45s rest"}]},{"role":"Finish","name":"Iso Burner - Horse Stance + Side Plank","note":"3 rounds, continuous (no rest)","mins":3,"items":[{"ex":"horse_stance","pres":"40s","note":""},{"ex":"side_plank","pres":"30s each side","note":""},{"ex":"side_plank","pres":"30s each side","note":""}]}]},"d2":{"name":"Push & Handstand","tag":"push","why":"","blocks":[{"role":"Prime","name":"Core + Compression Prep","note":"2 rounds · handstand-ready","mins":3,"items":[{"ex":"long_lever_plank","pres":"30s","note":""},{"ex":"walk_up_plank","pres":"8","note":""},{"ex":"side_plank","pres":"30s each side","note":""},{"ex":"shoulder_tap","pres":"20","note":""},{"ex":"pike_compression","pres":"10","note":""}]},{"role":"Work","name":"Handstand Practice","note":"Fresh - quality over fatigue","mins":8,"items":[{"ex":"kick_up_practice","pres":"2 min","note":""},{"ex":"wall_handstand_hold","pres":"30s","note":"45s rest"},{"ex":"handstand","pres":"2 min","note":""}]},{"role":"Work","name":"Deep Parallette Pike Push-Up","note":"To failure","mins":8,"items":[{"ex":"deep_pike_pushup","pres":"8 reps to failure","note":""}]},{"role":"Work","name":"Weighted Dip","note":"Strength · 1 warm-up (8-10) → 3 × 5","mins":8,"items":[{"ex":"weighted_dip","pres":"3 × 5","note":"150s rest"}]},{"role":"Finish","name":"Push-Up AMRAP","note":"Volume","mins":3,"items":[{"ex":"pushup","pres":" - ","note":""}]}]},"d3":{"name":"Hinge & Posterior","tag":"strength","why":"","blocks":[{"role":"Prime","name":"Glute Activation","note":"Sidewalks (continuous) + bird dogs","mins":3,"items":[{"ex":"banded_sidewalk","pres":"120s","note":"15s rest"},{"ex":"bird_dog_crunch","pres":"2 × 8 each side","note":"20s rest"}]},{"role":"Work","name":"Hip Thrust","note":"Strength loader - add load weekly","mins":8,"items":[{"ex":"hip_thrust","pres":"4 × 5","note":"150s rest"}]},{"role":"Work","name":"Single-Leg RDL","note":"Size - per side, progress load/reps · alternating sides = built-in rest","mins":8,"items":[{"ex":"single_leg_rdl","pres":"3 × 8 each side","note":"90s rest"}]},{"role":"Work","name":"Nordic Curl","note":"Hamstring eccentric - progress ROM → load · 3rd anchor","mins":8,"items":[{"ex":"nordic_curl","pres":"3 × 6","note":"90s rest"}]},{"role":"Finish","name":"Tabata - Swing + Jump Squat","note":"20/10, 5 cycles (~5 min)","mins":3,"items":[{"ex":"db_swing","pres":" - ","note":""},{"ex":"jump_squat","pres":" - ","note":""}]}]},"d4":{"name":"Pull & Front Lever","tag":"pull","why":"","blocks":[{"role":"Prime","name":"Pulling Prep","note":"Forearm-light","mins":3,"items":[{"ex":"banded_pullapart","pres":"1 × 20","note":"10s rest"},{"ex":"scap_pullup","pres":"1 × 15","note":""},{"ex":"active_hang","pres":"30s","note":"20s rest"},{"ex":"dragon_flag","pres":"30s","note":"15s rest"}]},{"role":"Work","name":"Front Lever","note":"TUT holds · advanced-tuck or banded straddle (set Week 1)","mins":8,"items":[{"ex":"front_lever_tuck","pres":"10s","note":"60s rest"}]},{"role":"Work","name":"Weighted Chin-Up","note":"Strength · supinated · 1 warm-up (8-10) → 3 × 5","mins":8,"items":[{"ex":"weighted_chinup","pres":"3 × 5","note":"150s rest"}]},{"role":"Work","name":"Single-Arm Row","note":"Horizontal · unilateral · per side · alternating sides = built-in rest","mins":8,"items":[{"ex":"single_arm_row","pres":"3 × 8 each side","note":"90s rest"}]},{"role":"Finish","name":"L-Sit Pull-ups + Skin the Cat","note":"5 min, minimal rest","mins":3,"items":[{"ex":"l_sit_pullup","pres":"5 reps","note":""},{"ex":"skin_the_cat","pres":"5 reps","note":""}]}]},"d5":{"name":"Full Body Engine","tag":"conditioning","why":"","blocks":[{"role":"Work","name":"Block 1 · Tempo AMRAP","note":"15 min, target ~4 rounds - all 5 patterns","mins":15,"items":[{"ex":"chin_up","pres":"5 reps · 5s hold / 5s down / 5s dead-hang","note":""},{"ex":"dip","pres":"5 reps","note":""},{"ex":"goblet_squat","pres":"8 reps · slow + pause","note":""},{"ex":"banded_glute_bridge","pres":"30s","note":""},{"ex":"l_sit","pres":"20s","note":""}]},{"role":"Work","name":"Block 2 · Explosive Intervals","note":"40s on / 20s off · ~3 rounds · all 5 patterns","mins":15,"items":[{"ex":"explosive_chinup","pres":" - ","note":""},{"ex":"deadstop_pushup","pres":" - ","note":""},{"ex":"jump_squat","pres":" - ","note":""},{"ex":"db_swing","pres":" - ","note":""},{"ex":"mountain_climber","pres":" - ","note":""}]}]}}}};
 /* <<< END GENERATED PROGRAM LIBRARY */
 
 let CAT = {};           /* the movement catalogue, for the pickers */
@@ -930,7 +930,7 @@ function mvOptions(sel){
       .map(m=>`<option value="${esc(m.id)}" ${m.id===sel?'selected':''}>${esc(m.name)}</option>`)
       .join('')}</optgroup>`).join('');
   const orphan = sel && !CAT[sel]
-    ? `<option value="${esc(sel)}" selected>${esc(sel)} — not in the catalogue</option>` : '';
+    ? `<option value="${esc(sel)}" selected>${esc(sel)} - not in the catalogue</option>` : '';
   return orphan + opts;
 }
 
@@ -947,7 +947,7 @@ function libRow(){
     <div class="pgrid">
       <label>Start from a program
         <select class="pin" id="libPick">
-          <option value="">— pick one —</option>
+          <option value=""> - pick one - </option>
           ${ids.map(id=>`<option value="${esc(id)}">${esc(LIBRARY[id].name)} · ${
             Object.keys(LIBRARY[id].days).length} days · written for ${esc(LIBRARY[id].who)}</option>`).join('')}
         </select></label>
@@ -955,7 +955,7 @@ function libRow(){
         <button class="btn" id="libGo" style="width:100%">Give it to ${esc(A.name||CLIENT_ID)}</button></label>
     </div>
     <p class="micro" style="margin:8px 0 0">This replaces whatever is below with a copy that belongs to
-      ${esc(A.name||CLIENT_ID)}. Edit it freely — the library file is not touched.</p>
+      ${esc(A.name||CLIENT_ID)}. Edit it freely - the library file is not touched.</p>
   </div></div>`;
 }
 function libWire(){
@@ -1028,7 +1028,7 @@ function drawProgram(){
             </div>
           </div>
           <input class="pin bnote" data-b="${bi}" data-f="note"
-            placeholder="how to run it — rounds, rest, what to watch" value="${esc(b.note||'')}">
+            placeholder="how to run it - rounds, rest, what to watch" value="${esc(b.note||'')}">
           ${(b.items||[]).map((it,ii)=>`
             <div class="itrow">
               <select class="pin ex" data-b="${bi}" data-i="${ii}" data-f="ex">${mvOptions(it.ex)}</select>
@@ -1078,13 +1078,13 @@ function checkProgram(){
     const m = CAT[it.ex]; if(!m) return;
     const need = (m.equipment||[]).filter(k=>k!=='bw');
     if(need.length && !need.some(k=>kit.has(k)))
-      out.push(`${m.name} needs ${need.join(' or ')} — not in his kit.`);
+      out.push(`${m.name} needs ${need.join(' or ')} - not in his kit.`);
   });
   const seen = {};
   all.forEach(it=>{ const m=CAT[it.ex]; if(!m) return;
     seen[m.pattern] = (seen[m.pattern]||0)+1; });
   Object.entries(seen).forEach(([pt,n])=>{ if(n>3)
-    out.push(`${n} ${pt} movements in one session — that is a lot for one pattern.`); });
+    out.push(`${n} ${pt} movements in one session - that is a lot for one pattern.`); });
   if(!all.length) out.push('No movements in this session yet.');
 
   el.innerHTML = out.length
@@ -1126,13 +1126,13 @@ function drawDock(){
 /* ---------- the handoff back to me ---------- */
 function brief(){
   const L=[];
-  L.push('# Coach console — Ozzy, program build');
+  L.push('# Coach console - Ozzy, program build');
   L.push('');
   L.push('## Decisions');
   LAYERS.forEach(x=>{
     const d=S.decisions[x.id];
     const label=d==='ok'?'AGREED':d==='work'?'NEEDS WORK':d==='blocked'?'PARKED':'undecided';
-    L.push(`${x.n}. ${x.title} — **${label}**`);
+    L.push(`${x.n}. ${x.title} - **${label}**`);
     const n=(S.notes[x.id]||'').trim();
     if(n) L.push(`   > ${n.replace(/\n/g,'\n   > ')}`);
   });
@@ -1143,7 +1143,7 @@ function brief(){
   if(work.length){
     L.push('');
     L.push('## Rework these first');
-    work.forEach(x=>L.push(`- Layer ${x.n} · ${x.title}${(S.notes[x.id]||'').trim()?' — '+S.notes[x.id].trim():''}`));
+    work.forEach(x=>L.push(`- Layer ${x.n} · ${x.title}${(S.notes[x.id]||'').trim()?' - '+S.notes[x.id].trim():''}`));
   }
   return L.join('\n');
 }
@@ -1164,11 +1164,11 @@ document.getElementById('btnBrief').onclick=()=>{
 document.getElementById('btnClose').onclick=()=>document.getElementById('out').classList.remove('on');
 document.getElementById('out').onclick=e=>{ if(e.target.id==='out') e.currentTarget.classList.remove('on'); };
 document.getElementById('btnCopy').onclick=async()=>{
-  try{ await navigator.clipboard.writeText(brief()); toast('Copied — paste it into the chat'); }
+  try{ await navigator.clipboard.writeText(brief()); toast('Copied - paste it into the chat'); }
   catch(e){ const p=document.getElementById('outTx');
     const r=document.createRange(); r.selectNodeContents(p);
     const s=getSelection(); s.removeAllRanges(); s.addRange(r);
-    toast('Selected — press Cmd+C'); }
+    toast('Selected - press Cmd+C'); }
 };
 
 
@@ -1281,7 +1281,7 @@ function clientOptions(){
     out.push({ id:i.userId,
       name:(u && u.displayName) || (i.answers && i.answers.name) || i.userId });
   });
-  out.push({ id:OZZY_ID, name:'Ozzy — built-in example' });
+  out.push({ id:OZZY_ID, name:'Ozzy - built-in example' });
   return out;
 }
 
@@ -1289,7 +1289,7 @@ function drawAddClient(){
   const host = document.getElementById('addClient'); if(!host) return;
   const none = !coachIntakes().length;
   host.innerHTML = `
-    ${none ? `<p class="micro" style="margin:0 0 7px">No clients yet. Ozzy is the built-in example —
+    ${none ? `<p class="micro" style="margin:0 0 7px">No clients yet. Ozzy is the built-in example - 
       paste a client's link to add a real one.</p>` : ''}
     <details ${none?'open':''}><summary style="cursor:pointer;font-size:12px;color:var(--dim,#8B949E)">
       Add a client from their link</summary>
@@ -1340,7 +1340,7 @@ function drawClients(){
   if(h1) h1.textContent = IS_OZZY
     ? "Building Ozzy's first program"
     : `Building ${A.name}'s program`;
-  document.title = 'Coach Console — ' + (A.name || CLIENT_ID);
+  document.title = 'Coach Console - ' + (A.name || CLIENT_ID);
 
   /* The ten layers are written about Ozzy's numbers. Say so rather than let
      them read as if they were about whoever is selected. */
@@ -1349,7 +1349,7 @@ function drawClients(){
     lead.dataset.warned = '1';
     lead.insertAdjacentHTML('beforeend',
       `<b style="display:block;margin-top:8px;color:var(--warn,#F2C14E)">The ten layers below are still
-       written against Ozzy's answers — they have not been re-reasoned for ${esc(A.name||'this client')}.
+       written against Ozzy's answers - they have not been re-reasoned for ${esc(A.name||'this client')}.
        The program editor and the release are correctly theirs.</b>`);
   }
 }
@@ -1387,10 +1387,10 @@ function drawRelease2(){
       <button class="btn" id="relOpen">Open it here</button>
     </div>
     <p class="micro" style="margin-top:9px">Message or AirDrop it to yourself. It carries the program,
-      so it is long — that is the trade for not having a server yet.</p>`;
+      so it is long - that is the trade for not having a server yet.</p>`;
   document.getElementById('relCopy').onclick = async () => {
     try { await navigator.clipboard.writeText(link); toast('Link copied'); }
-    catch(e){ const t=document.getElementById('relLink'); t.select(); toast('Selected — press Cmd+C'); }
+    catch(e){ const t=document.getElementById('relLink'); t.select(); toast('Selected - press Cmd+C'); }
   };
   document.getElementById('relOpen').onclick = () => { location.href = link; };
 }

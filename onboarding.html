@@ -1759,7 +1759,7 @@ function sh(hex, dL, dS){
 
 var PLATE = { 5:{r:15,t:4.5}, 10:{r:19,t:5.6}, 20:{r:25,t:6.5} };
 var GAPP = 1.2;                /* air between neighbouring plates */
-var GRIP = 22;                 /* half the exposed handle — the one live dial */
+var GRIP = 22;                 /* half the exposed handle - the one live dial */
 var COLLAR = 6;                /* bar left proud of the outermost plate */
 
 /* ==========================================================================
@@ -1767,7 +1767,7 @@ var COLLAR = 6;                /* bar left proud of the outermost plate */
    ========================================================================== */
 var LOCK = {
   yaw:   17,      /* degrees on the floor. Mirrored to 180-17 on the right. */
-  depth: 0.50,    /* eye height — how much of a unit of depth you see */
+  depth: 0.50,    /* eye height - how much of a unit of depth you see */
   gap:   120,     /* floor between the two, about a foot */
   pair:  true,
   floor: true
@@ -2016,7 +2016,7 @@ function plusGlyph(x, y, r){
    ========================================================================== */
 var BAR = {
   shaftR:    3.40,   /* 28mm across the grip */
-  sleeveR:   6.07,   /* 50mm across the sleeve — 1.79x */
+  sleeveR:   6.07,   /* 50mm across the sleeve - 1.79x */
   shaftHalf: 159,    /* centre to collar: half of 1310mm */
   sleeveLen: 101,    /* 415mm of loadable sleeve */
   self:      45      /* the bar weighs 45 on its own */
@@ -2382,7 +2382,7 @@ function beltSceneSVG(total, o){
   var chainW = BORE * 1.3 * sc;
   var chainCol = sh(C.handle, -6);
 
-  var belt = '';   /* the beam is gone — the chain fades out instead */
+  var belt = '';   /* the beam is gone - the chain fades out instead */
 
   /* THE LOOP. One chain, three legs: down from the beam, along the bore axis
      THROUGH every plate on the stack, and back up to the beam. The middle leg
@@ -2722,7 +2722,7 @@ var KETTLEBELL = {
   id: 'k',
   size: 165,          /* drawn height in user units at KBMAX */
   growth: 1/3,        /* mass -> length exponent; see kbScale */
-  count: 'one',       /* 'one' | 'pair' — a kettlebell is usually alone */
+  count: 'one',       /* 'one' | 'pair' - a kettlebell is usually alone */
   gap: 40,            /* floor between a pair, in user units */
   mirror: true,       /* flip the second one, as the dumbbell pair does */
   wide: 1,            /* horizontal stretch, 1 = the artwork's own proportion */
@@ -2730,16 +2730,16 @@ var KETTLEBELL = {
   depth: 0.36,        /* shadow foreshortening, matches the dumbbell's floor */
   tint: true,
   dark: '#20242a',    /* what black in the source becomes */
-  light: '#95A1AE',   /* what white becomes — the two ends of the facet ramp */
+  light: '#95A1AE',   /* what white becomes - the two ends of the facet ramp */
   stretch: 2.96,      /* 255/(97-11): opens the crushed source back up */
   black: 0.128,       /* 11/255 * stretch: where the ramp starts */
   numbers: true,
-  numX: 0.7963,       /* medallion centre, fraction of the drawn box — measured */
+  numX: 0.7963,       /* medallion centre, fraction of the drawn box - measured */
   numY: 0.7031,
   numSize: 0.115,     /* digit height as a fraction of drawn height */
   squash: 0.724,      /* measured: the medallion is turning away from us */
-  tilt: -12,          /* NOT measured — see the note in kettlebellSceneSVG */
-  numFill: '#FFFFFF',   /* the plates' numbers are white too — one family */
+  tilt: -12,          /* NOT measured - see the note in kettlebellSceneSVG */
+  numFill: '#FFFFFF',   /* the plates' numbers are white too - one family */
   numOpacity: 0.92,
 };
 var KBMAX  = 100;
@@ -3115,10 +3115,10 @@ const FLOW = [
 { ch:0, type:'promise', cta:'Got it',
   msgs:[
     "Right. Here is how this works.",
-    "I ask you a short set of questions. Every one of them is there for a reason — nothing is filler.",
+    "I ask you a short set of questions. Every one of them is there for a reason - nothing is filler.",
     "You answer honestly. <b>These are for you, not for me.</b> There is no answer here that makes you look bad.",
-    "<b>Stage 1</b> — the answers get read and processed. Every one of them, against what the training actually says.",
-    "<b>Stage 2</b> — then I go through it myself and build the program. A person, not a template.",
+    "<b>Stage 1</b> - the answers get read and processed. Every one of them, against what the training actually says.",
+    "<b>Stage 2</b> - then I go through it myself and build the program. A person, not a template.",
     "<b>4 minutes.</b> No typing. Then it is your log, your data, your journey.<small>Every answer and every session, yours, forever.</small>"
   ]},
 
@@ -3308,8 +3308,8 @@ const FLOW = [
   msgs:[
     "That is everything I need.",
     "Last part, and it is the important one. <b>Add this page to your home screen.</b>",
-    "It stops being a link and becomes <b>your app</b> — it opens full screen, it works with no signal, and everything you just told me is already in it.",
-    "Open it and you land on <b>your dashboard</b>. Have a look around: your log, your movements, your week — all of it is yours from the first day.",
+    "It stops being a link and becomes <b>your app</b> - it opens full screen, it works with no signal, and everything you just told me is already in it.",
+    "Open it and you land on <b>your dashboard</b>. Have a look around: your log, your movements, your week - all of it is yours from the first day.",
     "I build the program from here and it appears <b>inside the app</b>. <b>You will get a message the moment it is ready.</b><small>Nothing to check. Nothing to wait for in an inbox.</small>"
   ]},
 /* Still asked, but not as a delivery address any more — the programme
@@ -3332,13 +3332,13 @@ function insight1(){
   /* Every branch names two things they said, then says what it changes. */
   if(f[0]==='lean' && (f[1]==='strong'||f[1]==='muscle')){
     head='Those two compete.';
-    body='Leaning out and building muscle want opposite things from your recovery. I build the muscle first and let the leanness follow — that order works. The other one stalls at week six.';
+    body='Leaning out and building muscle want opposite things from your recovery. I build the muscle first and let the leanness follow - that order works. The other one stalls at week six.';
   } else if(f[0]==='lean' && (h.includes('heavy')||h.includes('sport'))){
     head='Your 90 days and your '+horizonAge(age)+' disagree.';
     body='You want to lean out now and still be lifting at '+horizonAge(age)+'. Muscle is the thing that gets you there. So we train for it and let the leanness come off the back of it, not the other way round.';
   } else if(h.includes('floor') && age>=50){
     head='You picked the one that actually predicts things.';
-    body='Getting off the floor unaided is one of the better markers of an independent old age — and unlike most markers, it stays trainable. It moves within eight weeks.';
+    body='Getting off the floor unaided is one of the better markers of an independent old age - and unlike most markers, it stays trainable. It moves within eight weeks.';
   } else if((f[0]==='energy'||f[0]==='wind') && (f[1]==='strong'||f[1]==='muscle')){
     head='Same fix, different order.';
     body='"'+cap(g1)+'" and "'+cap(g2||'strength')+'" both sit on an aerobic base almost nobody builds. Twenty minutes of easy work a week buys both. It is the least glamorous thing I will ask you to do.';
@@ -3350,7 +3350,7 @@ function insight1(){
     body='Muscle and bone built before 40 is the account you draw down from for the next 50 years. Almost nobody makes that deposit on purpose. It changes what I load and how hard.';
   } else if(g2){
     head=cap(g1)+' first. '+cap(g2)+' second.';
-    body='You gave me two, in order, and the order is the useful part. Every session gets built around the first one. The second gets whatever is left — which is more than you would think.';
+    body='You gave me two, in order, and the order is the useful part. Every session gets built around the first one. The second gets whatever is left - which is more than you would think.';
   } else {
     head='Specific enough to build on.';
     body='Most people answer this with a number on a scale. You gave me something testable, so I can tell you whether it is working instead of asking how you feel about it.';
@@ -3367,16 +3367,16 @@ function pattern(){
   const dl=Array.isArray(A.driver)?A.driver:(A.driver?[A.driver]:[]);
   const d=v=>dl.includes(v);
   if(b.includes('toohard')||b.includes('week3'))
-    return {n:'The Fast Starter', b:'Not a motivation problem — a pacing problem. You go too hard in week one and week three collects the bill. Your first fortnight will feel conservative. If you think "is this it?", that is the plan working.'};
+    return {n:'The Fast Starter', b:'Not a motivation problem - a pacing problem. You go too hard in week one and week three collects the bill. Your first fortnight will feel conservative. If you think "is this it?", that is the plan working.'};
   if(b.includes('life')||b.includes('time'))
-    return {n:'First Thing Dropped', b:'Training sits at the bottom of the list, so it goes first when the list gets long. The fix is not discipline — it is making the session small enough that dropping it stops being a decision.'};
+    return {n:'First Thing Dropped', b:'Training sits at the bottom of the list, so it goes first when the list gets long. The fix is not discipline - it is making the session small enough that dropping it stops being a decision.'};
   if(b.includes('lost'))
     return {n:'Needs to See the Map', b:'You stopped because you couldn\'t tell if it was working. You will get the reason for every session before it, and a measure of whether it worked after.'};
   if(d('doctor'))
     return {n:'Started by Someone Else', b:'Someone else set this in motion, which is a fine way to begin and a poor way to continue. Over 90 days my job is to hand you a reason of your own.'};
   if(d('event'))
     return {n:'Deadline-Driven', b:'Something is pulling you forward, which works right until the day it passes. Watch for what replaces it around week six.'};
-  return {n:'Quietly Consistent', b:'Nothing here suggests drama. You are building a habit, not chasing a transformation — and that profile outperforms almost everyone over two years. Your risk is not quitting, it is plateauing politely.'};
+  return {n:'Quietly Consistent', b:'Nothing here suggests drama. You are building a habit, not chasing a transformation - and that profile outperforms almost everyone over two years. Your risk is not quitting, it is plateauing politely.'};
 }
 
 /* ================= TRACKER METRICS — per device ================= */
@@ -4077,7 +4077,7 @@ var TIGHT_AT = 665, TIGHTER_AT = 495;
 function setTight(el){
   if(!el) return;
   var h = el.clientHeight;
-  if(!h) return;                       /* not laid out yet — nothing to say */
+  if(!h) return;                       /* not laid out yet - nothing to say */
   el.classList.toggle('tight',   h <= TIGHT_AT);
   el.classList.toggle('tighter', h <= TIGHTER_AT);
 }
@@ -4239,7 +4239,7 @@ function hero(s){
         <!-- The glare. Light coming OFF the dumbbell and landing on the tube,
              so it is its own blurred overlay fading to nothing a little above
              and below the bar line, rather than a white stop inside the pink.
-             y=100 is where the bar crosses the two sides — measured. -->
+             y=100 is where the bar crosses the two sides - measured. -->
         <linearGradient id="triGlare" gradientUnits="userSpaceOnUse" x1="0" y1="70" x2="0" y2="132">
           <stop offset="0%"   stop-color="#FFFFFF" stop-opacity="0"/>
           <stop offset="34%"  stop-color="#FFFFFF" stop-opacity=".55"/>
@@ -4249,7 +4249,7 @@ function hero(s){
         </linearGradient>
       </defs>
       <!-- Not a closed triangle. It starts at x=100 on the top edge, runs
-           right, down to the apex, back up the left side and stops at x=60 —
+           right, down to the apex, back up the left side and stops at x=60 - 
            leaving a 40-unit break in the top-left, the way a neon tube in a
            real sign has a dark segment. Drawn as one open path rather than
            faked with a dash gap, so the draw-in animation still works and
@@ -4274,7 +4274,7 @@ function hero(s){
             <stop offset="100%" stop-color="#34B396"/>
           </linearGradient>
           <!-- The bar carries the same colour as everything else, but its middle
-               falls away to nothing. Not a cut — the ends hold full weight, then
+               falls away to nothing. Not a cut - the ends hold full weight, then
                dissolve, so the two halves read as one object with air in it.
                Colours are sampled off dbGrad at the same x, so the seam is invisible. -->
           <linearGradient id="dbBar" gradientUnits="userSpaceOnUse" x1="86" y1="0" x2="174" y2="0">
@@ -4697,7 +4697,7 @@ function multi(s){
     if(has){ sel.delete(v); b.classList.remove('on'); }
     else{
       if(s.max&&sel.size>=s.max){
-        if(want===undefined) toast(s.max+' is the limit — it forces a real choice.',2000);
+        if(want===undefined) toast(s.max+' is the limit - it forces a real choice.',2000);
         return;
       }
       sel.add(v); b.classList.add('on');
@@ -4807,7 +4807,7 @@ function numbers(s){
       if(w||r||c) o[row.dataset.l]={load:(w||'?')+' x '+(r||'?'), sure:c?c.c:'not said'};
     });
     A[s.key]=o;
-    toast(Object.keys(o).length?'Saved to your Log.':'No problem — session one will find them.',2200);
+    toast(Object.keys(o).length?'Saved to your Log.':'No problem - session one will find them.',2200);
     later(next,700);};
   foot.querySelector('.skip').onclick=()=>{haptic(14);A[s.key]=null;A.calibrate=true;next();};
 }
@@ -4970,7 +4970,7 @@ function reactor(s){
           <div class="rxname">${o.n}</div></div>`).join('')}
         <div class="rxaxis small">${SMALL_AXIS.slice().reverse().map(v=>`<span>${v}m</span>`).join('')}</div>
       </div>
-      <p class="rxscale">Training runs on the right-hand scale — minutes, not hours.</p>
+      <p class="rxscale">Training runs on the right-hand scale - minutes, not hours.</p>
 
       <div class="rxsay" id="rxsay"></div>
       <p class="rxhint" id="rxhint">Pick the one closest to you, then drag any bar.</p>
@@ -5017,7 +5017,7 @@ function reactor(s){
       rod.classList.toggle('locked', locked.has(o.k));
     });
     say.innerHTML = RODS.map(o=>
-      `<div style="--rod:${o.c}"><i></i><span><b>${o.n}</b> — ${o.say[rodBand(o,r[o.k])]}
+      `<div style="--rod:${o.c}"><i></i><span><b>${o.n}</b> - ${o.say[rodBand(o,r[o.k])]}
         <em>${rodSays(o,r[o.k])}</em></span></div>`).join('');
 
     const st = rxStrain(r);
@@ -5048,7 +5048,7 @@ function reactor(s){
   function toggleLock(k){
     if(locked.has(k)) locked.delete(k);
     else {
-      if(locked.size>=2){ toast('2 locks at a time — the rest has to be free to move.',2400); return; }
+      if(locked.size>=2){ toast('2 locks at a time - the rest has to be free to move.',2400); return; }
       locked.add(k);
     }
     haptic(15); paint();
@@ -5121,11 +5121,11 @@ function reading(s){
     const nm={run:'Running',team:'Your sport',yoga:'Yoga',hiit:'Your classes',swim:'Swimming',
               racket:'Racket sport',martial:'Training',climb:'Climbing',other:'What you already do'}[acts[0]]||'What you already do';
     const times={'1':'once','2':'twice','3':'3 times','4':'4 times','5':'5 times'}[load.freq]||load.freq+'×';
-    lines.push(`${nm}, <b>${times} a week</b> — counted, not ignored.`);
+    lines.push(`${nm}, <b>${times} a week</b> - counted, not ignored.`);
   }
   const recRod=RODS.find(o=>o.k==='recovery'), rec=rodBand(recRod, r.recovery);
   lines.push(rec<=0 ? 'Recovery is <b>thin</b>. That caps how much hard work a week can hold.'
-    : rec===1 ? 'Recovery at <b>6 to 7 hours</b> — that holds 3 or 4 hard sessions.'
+    : rec===1 ? 'Recovery at <b>6 to 7 hours</b> - that holds 3 or 4 hard sessions.'
     : 'Recovery is <b>protected</b>. That holds real work.');
   lines.push(`Training is <b>${(Math.round(r.training*7*2)/2)} hours a week</b> as you drew it.`);
 
@@ -5177,10 +5177,10 @@ function weekplan(s){
 
   /* It pushes back, but it never refuses. The trade is always theirs. */
   function verdict(){
-    if(days>ceil) return ['warn', `<b>${days} days</b> at the recovery you drew is where people stall. I would hold you at ${ceil} — but it is your call.`];
+    if(days>ceil) return ['warn', `<b>${days} days</b> at the recovery you drew is where people stall. I would hold you at ${ceil} - but it is your call.`];
     if(days<2)    return ['warn', 'Below 2 days nothing compounds. Two is the floor that still works.'];
     if(days<wanted) return ['', `<b>${days} days</b> is honest. Fewer days done properly beats more days missed.`];
-    if(days===2)  return ['', '<b>2 days</b> is enough to get stronger. Not enough to get stronger fast — a fine trade if it is the one you can keep.'];
+    if(days===2)  return ['', '<b>2 days</b> is enough to get stronger. Not enough to get stronger fast - a fine trade if it is the one you can keep.'];
     return ['', `<b>${days} × ${LEN[len]}</b> is a real block of work. That is a program, not a plan.`];
   }
   function paint(){
@@ -5237,10 +5237,10 @@ function week(s){
       let verdict='';
       if(pts!==null){
         const claimed=days*(+len)/60;
-        verdict = pts<=2 ? ' — I will build two sessions and make them count.'
-          : pts<=4 ? (days>=4?' — that is more days than you have room for. I will protect the best 3.':' — that fits.')
-          : pts<=7 ? (days>=6?' — 6 days at that share is where people stall. I will hold you at 5.':' — that fits.')
-          : (days<=2?' — you have more room than you are using. Worth one more day.':' — good. That is a real block of work.');
+        verdict = pts<=2 ? ' - I will build two sessions and make them count.'
+          : pts<=4 ? (days>=4?' - that is more days than you have room for. I will protect the best 3.':' - that fits.')
+          : pts<=7 ? (days>=6?' - 6 days at that share is where people stall. I will hold you at 5.':' - that fits.')
+          : (days<=2?' - you have more room than you are using. Worth one more day.':' - good. That is a real block of work.');
       }
       read.innerHTML = `<b>${days} × ${len==='35'?'35':len==='55'?'55':len==='75'?'75':'20'} min ≈ ${h} hours a week</b>`
         + (pts!==null?`<span>${pts}/10 of you${verdict}</span>`:'<span>Now the honest one.</span>');
@@ -5373,7 +5373,7 @@ function equip(s){
   dragPick(d.querySelector('.kitgrid'), '.kit', (b,mode)=>pick(b,mode,true));
   const add=()=>{ const t=inp.value.trim();
     if(!t) return;
-    if(extra.length>=6){ toast('That is plenty — tell me the rest later.',2000); return; }
+    if(extra.length>=6){ toast('That is plenty - tell me the rest later.',2000); return; }
     extra.push(t); inp.value=''; haptic(13); sync();
     requestAnimationFrame(function(){
       var last=chips.lastElementChild;
@@ -5465,7 +5465,7 @@ function vitals(s){
     A.sex=sex; A.age=age;
     A.heightCm=Math.round(cm); A.heightUnit=hu;
     A.weightKg=Math.round(kg*10)/10; A.unit=wu;
-    warmAvatars();          /* sex and age are known now — pull their five in */
+    warmAvatars();          /* sex and age are known now - pull their five in */
     next(); };
   paint();
 }
@@ -5566,7 +5566,7 @@ function deck(s){
         : poseSvg(c.a)}
         <!-- The stamp sits OPPOSITE the direction of travel. Swipe left and
              the card uncovers its right edge, so that is where the word for
-             a left swipe has to be — under the old arrangement your own hand
+             a left swipe has to be - under the old arrangement your own hand
              covered the label you were trying to read. -->
         <div class="dkstamp yes">I know it</div>
         <div class="dkstamp no">Added to learn</div></div>
@@ -5586,7 +5586,7 @@ function deck(s){
              which is why the barbell ended up smaller than the type. */
           return `<div class="gb head">
               <div class="bq">How much do you lift?</div>
-              <div class="bh"><b>${c.n}</b> — a rough number is fine.</div>
+              <div class="bh"><b>${c.n}</b> - a rough number is fine.</div>
             </div>
             <div class="gb art"><div class="gwrap" data-g="${g.kind}"></div></div>
             <div class="gb num">
@@ -5609,14 +5609,14 @@ function deck(s){
         }
         const sc=scaleFor(c);
         if(!sc) return `<div class="gb head"><div class="bq">${bandQ(c)}</div>
-            <div class="bh"><b>${c.n}</b> — rough is fine.</div></div>
+            <div class="bh"><b>${c.n}</b> - rough is fine.</div></div>
           <div class="gb dials">${bandsFor(c).map(v=>`<button data-v="${v}">${v}</button>`).join('')}</div>`;
         /* THE SAME SCROLLER, on the cards measured in reps or seconds.
            These were the last thing still using a range input, which is the
            control the dial replaced everywhere else. Same bands too, so a
            bodyweight card and a loaded one are the same object. */
         return `<div class="gb head"><div class="bq">${sc.q}</div>
-            <div class="bh"><b>${c.n}</b> — a rough number is fine.</div></div>
+            <div class="bh"><b>${c.n}</b> - a rough number is fine.</div></div>
           <div class="gb num">
             <div class="gval"><b>0</b><span>${sc.unit}</span></div>
             <div class="gtier"></div>
@@ -5629,7 +5629,7 @@ function deck(s){
           </div>`;
       })()}</div>
       <div class="dkfeel">
-        <div class="bq">Honestly — how do you feel about it?</div>
+        <div class="bq">Honestly - how do you feel about it?</div>
         <div class="bh">The ones you dread are the ones you skip. I would rather know now.</div>
         <button data-f="love"><span class="fe">♥</span><b>Love it</b><small>Look forward to it</small></button>
         <button data-f="meh"><span class="fe">•</span><b>Fine</b><small>No strong feeling</small></button>
@@ -6208,9 +6208,9 @@ function body(s){
          <i class="zmark"></i><span class="tx"><b>${z[1]}</b></span></button>`).join('')}
     </div>
     <input class="tin painnote" id="painNote" type="text"
-      placeholder="In your words — which knee, what it stops you doing…"
+      placeholder="In your words - which knee, what it stops you doing…"
       value="${(A.painNote||'').replace(/"/g,'&quot;')}">
-    <p class="micro zmicro">Nothing gets skipped — it gets swapped.</p>`);
+    <p class="micro zmicro">Nothing gets skipped - it gets swapped.</p>`);
 
   setFoot(`<button class="cta accent">Continue</button>`);
   const cta = foot.querySelector('.cta');
@@ -6412,11 +6412,11 @@ function reveal(){
 
   function verdict(){
     if(picked.length>ceil) return ['warn',
-      `<b>${picked.length} days</b> at the recovery you drew is where people stall. I would hold you at ${ceil} — your call.`];
+      `<b>${picked.length} days</b> at the recovery you drew is where people stall. I would hold you at ${ceil} - your call.`];
     if(picked.length<2) return ['warn','Below 2 days nothing compounds. 2 is the floor that still works.'];
     const clash=picked.filter(k=>actDays.indexOf(k)>-1).length;
     if(clash) return ['warn',
-      `<b>${clash} day${clash>1?'s':''}</b> doubled with ${actName}. Not forbidden — I will build it as a hard day.`];
+      `<b>${clash} day${clash>1?'s':''}</b> doubled with ${actName}. Not forbidden - I will build it as a hard day.`];
     if(picked.length<wanted) return ['',
       `<b>${picked.length} days</b> is honest. Fewer days done properly beats more days missed.`];
     return ['', `<b>${picked.length} × ${LENNAME[len]} min</b> is a program, not a plan.`];
@@ -6516,7 +6516,7 @@ function patternscreen(){
   d.querySelector('#notme').onclick=()=>{haptic(14);
     const t=d.querySelector('#pnote');
     t.focus();
-    toast('Tell me what I got wrong and I rebuild it — the model changes, not the label.',3200);};
+    toast('Tell me what I got wrong and I rebuild it - the model changes, not the label.',3200);};
   setFoot(`<button class="cta accent">This is right</button>`);
   foot.querySelector('.cta').onclick=()=>{haptic(400);
     A.note=(d.querySelector('#pnote').value||'').trim(); next();};
@@ -6548,7 +6548,7 @@ function nextsteps(s){
       ? 'One tap and it is on your home screen.'
       : ios
         ? 'Tap <b>Share</b>, then <b>Add to Home Screen</b>.'
-        : 'Open the browser menu, then <b>Add to Home screen</b> — or <b>Install</b>.';
+        : 'Open the browser menu, then <b>Add to Home screen</b> - or <b>Install</b>.';
 
   const d=el(`<div class="chatwrap">
     <div class="chathead"><i>${COACH.name[0]}</i><b>Coach ${COACH.name}</b><span>Online</span></div>
@@ -6643,7 +6643,7 @@ function entry(){
       <div class="coachtag"><i>N</i>Coach ${COACH.name}</div>
       <h4>One last tap</h4>
       <p>This sends me everything you just answered, in one link. I read it, build the program,
-         and <b>it appears in your app</b> — you will get a message there when it is ready.</p>
+         and <b>it appears in your app</b> - you will get a message there when it is ready.</p>
       <div class="sendrow">
         <button class="pri" id="sendBtn">Send to ${COACH.name}</button>
         <button id="copyBtn">Copy link</button>
@@ -6652,7 +6652,7 @@ function entry(){
         <span class="sendwhy">Until the app can carry it itself, this is how your answers reach me.</span></p>
       <div id="sentMark"></div>
     </div>
-    <p class="micro">Nothing gets overwritten. When something changes it becomes a new entry with a new date.${saved?'':' <b>Note:</b> this browser blocked local saving — use the link.'}</p></div>`);
+    <p class="micro">Nothing gets overwritten. When something changes it becomes a new entry with a new date.${saved?'':' <b>Note:</b> this browser blocked local saving - use the link.'}</p></div>`);
 
   const mark=document.getElementById('sentMark');
   const done=(t)=>{ mark.innerHTML='<div class="sentmark"><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg>'+t+'</div>'; };
@@ -6661,7 +6661,7 @@ function entry(){
 
   document.getElementById('sendBtn').onclick=function(){
     haptic(400);
-    const subject='Fitness Journey profile — '+(A.name||'new client');
+    const subject='Fitness Journey profile - '+(A.name||'new client');
     const body='Profile for '+(A.name||'a new client')+
       (A.email?' ('+A.email+')':'')+':\n\n'+link+'\n\nOpen the link to see the full intake.';
     /* Straight to the coach's inbox, already addressed. The share sheet
