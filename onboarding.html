@@ -6407,9 +6407,17 @@ function encodeProfile(o){
   const b=btoa(unescape(encodeURIComponent(j)));
   return b.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 }
+/* WHERE A FINISHED SURVEY GOES WHEN IT HAS TO TRAVEL.
+   This pointed at profile.html - a printable read of an intake, superseded
+   by the console's rail - so the link a client sent their coach opened a
+   page the coach could not build anything from. It opens the console now,
+   which imports the intake, selects them, and lands on the program editor.
+
+   Still a fragment, not a query string: this is a PAR-Q and a body map,
+   and a fragment never reaches a server log. */
 function profileLink(){
   const base=location.href.split('#')[0].replace(/onboarding\.html.*$/,'');
-  return base+'profile.html#'+encodeProfile(payload());
+  return base+'coach.html#fj='+encodeProfile(payload());
 }
 /* THE WAY INTO THE APP.
 
@@ -6424,12 +6432,57 @@ function appLink(){
   const base=location.href.split('#')[0].replace(/onboarding\.html.*$/,'');
   return base+'index.html#fj='+encodeProfile(payload());
 }
+/* THE ID A FINISHED SURVEY GETS.
+   Derived from the email so the same person filling the survey twice
+   updates one record instead of minting a second, and from the name when
+   there is no email. Same derivation as coach.html's coachUidFor - if
+   these two ever disagree, a re-import becomes a duplicate client. */
+function intakeUid(a){
+  const e=String((a&&a.email)||'').trim().toLowerCase();
+  if(e){ let h=0; for(let i=0;i<e.length;i++) h=(h*31+e.charCodeAt(i))|0; return 'c'+(h>>>0).toString(36); }
+  const n=String((a&&a.name)||'').trim().toLowerCase().replace(/[^a-z0-9]+/g,'')||'client';
+  return 'c'+n.slice(0,12);
+}
+
 function saveLocal(){
   try{
     const all=JSON.parse(localStorage.getItem('fj_profiles')||'[]');
     all.push(payload());
     localStorage.setItem('fj_profiles',JSON.stringify(all));
     localStorage.setItem('fj_current',JSON.stringify(payload()));
+
+    /* AND THE RECORD THE REST OF THE APP ACTUALLY READS.
+       The two lines above are this file's own store and nothing else has
+       ever opened them: the coach console reads `fj.intakes` and
+       `fj.v1.profile.<uid>`, the client app reads `fj.v1.current`. So a
+       finished survey wrote itself into a drawer no other surface knows
+       about, and a client who onboarded in this browser never appeared in
+       the console running in the next tab. That is Break 2 in SYSTEM.md.
+
+       Written here, on the same device, the handoff needs no link and no
+       server: finish the survey, open the console, they are in the picker. */
+    const p=payload(), uid=intakeUid(p.a);
+
+    const itk=JSON.parse(localStorage.getItem('fj.intakes')||'[]').filter(x=>x.userId!==uid);
+    itk.unshift({id:'itk_'+Date.now(), userId:uid, version:p.v, answers:p.a,
+      derived:{tier:p.a.tier??null, levels:p.a.levels??null}, submittedAt:p.at});
+    localStorage.setItem('fj.intakes',JSON.stringify(itk));
+
+    const users=JSON.parse(localStorage.getItem('fj.users')||'[]').filter(u=>u.id!==uid);
+    users.push({id:uid, role:'client', status:'pending', displayName:p.a.name||'',
+      email:p.a.email||null, ui:'pro', programId:null, trainerId:null, accent:'#3ECBA8',
+      createdAt:p.at, updatedAt:p.at});
+    localStorage.setItem('fj.users',JSON.stringify(users));
+
+    localStorage.setItem('fj.v1.profile.'+uid, JSON.stringify({v:p.v, at:p.at, a:p.a}));
+    const people=JSON.parse(localStorage.getItem('fj.v1.people')||'[]').filter(x=>x.uid!==uid);
+    people.push({uid, at:p.at, name:p.a.name||''});
+    localStorage.setItem('fj.v1.people',JSON.stringify(people));
+    localStorage.setItem('fj.v1.current', uid);
+
+    /* the example client stops being seeded once a real one exists */
+    localStorage.setItem('fj.coach.seeded','1');
+    localStorage.setItem('fj.coach.client', uid);
     return true;
   }catch(e){ return false; }
 }

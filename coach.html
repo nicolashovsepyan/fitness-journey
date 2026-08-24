@@ -427,7 +427,7 @@ select.pin{appearance:none;cursor:pointer}
     </div>
 
     <div class="panel" id="inboxPanel" style="display:none">
-      <h2>From Ozzy</h2>
+      <h2 id="inboxTitle">From the client</h2>
       <div class="pad" id="inbox"></div>
     </div>
 
@@ -447,7 +447,7 @@ select.pin{appearance:none;cursor:pointer}
     </div>
 
     <div class="panel">
-      <h2>What Ozzy can see right now</h2>
+      <h2 id="releaseTitle">What the client can see right now</h2>
       <div class="pad" id="release"></div>
     </div>
   </aside>
@@ -533,9 +533,17 @@ select.pin{appearance:none;cursor:pointer}
    reloads, because half this file reads these constants at parse time and
    re-keying live would leave the older half pointing at the previous person.
 
-   Ozzy stays as the built-in example — the ten layers are written about his
-   answers and are worth keeping as the worked example — but he is now one
-   entry among the real ones rather than the only shape the console knows. */
+   OZZY IS A CLIENT NOW, NOT FURNITURE. He used to be built into this file:
+   a hardcoded `A`, a hardcoded rail, a hardcoded release list, and an
+   `IS_OZZY` branch at every point where the console had to decide whether
+   it was looking at a real person. That made him unlike every other client
+   in ways that mattered - he could not be picked past, his facts rendered
+   over everybody else's, and the console could not be opened with no
+   clients at all, which is the state it actually starts in.
+
+   He is seeded into the ordinary client store on first run instead, and
+   after that he is a row like any other. Nothing else in this file knows
+   his name. */
 const OZZY_ID = 'ozzy';
 const PAYLOAD_V = 6;   /* matches PROFILE_V in dashboard.html - same record */
 /* TWO SURVEYS WROTE TWO DIFFERENT DRAWERS.
@@ -567,15 +575,38 @@ function coachIntakes(){
   }catch(e){}
   return out;
 }
+/* Seeded ONCE. A coach who deletes the example should not find him back
+   next time, so the flag records that the seeding happened rather than
+   checking whether he is currently present. */
+function seedExample(){
+  if(localStorage.getItem('fj.coach.seeded')) return;
+  try{
+    const itk = JSON.parse(localStorage.getItem('fj.intakes')||'[]');
+    if(!itk.some(i=>i.userId===OZZY_ID)){
+      itk.push({ id:'itk_ozzy', userId:OZZY_ID, version:PAYLOAD_V, answers:OZZY_A,
+        submittedAt:'2026-08-10T09:00:00.000Z', example:true });
+      localStorage.setItem('fj.intakes', JSON.stringify(itk));
+    }
+    const users = JSON.parse(localStorage.getItem('fj.users')||'[]');
+    if(!users.some(u=>u.id===OZZY_ID)){
+      users.push({ id:OZZY_ID, role:'client', status:'example', displayName:'Ozzy',
+        email:null, createdAt:'2026-08-10T09:00:00.000Z' });
+      localStorage.setItem('fj.users', JSON.stringify(users));
+    }
+    localStorage.setItem('fj.coach.seeded','1');
+  }catch(e){}
+}
+
+/* Null when nobody has onboarded yet. The console has a real empty state
+   now rather than falling back to a person who is not the client. */
 function pickedClientId(){
   const q = new URLSearchParams(location.search).get('client');
   if(q) return q;
   const saved = localStorage.getItem('fj.coach.client');
-  if(saved) return saved;
+  if(saved && coachIntakes().some(i=>i.userId===saved)) return saved;
   const first = coachIntakes()[0];
-  return (first && first.userId) || OZZY_ID;
+  return (first && first.userId) || null;
 }
-const CLIENT_ID = pickedClientId();
 
 /* The built-in example. Kept verbatim: it is the subject of every worked
    number in the ten layers below, and a real client's answers are read over
@@ -609,9 +640,15 @@ function clientAnswers(id){
   }
   return null;
 }
-const CLIENT_A = clientAnswers(CLIENT_ID);
-const IS_OZZY = !CLIENT_A;
-const A = CLIENT_A || OZZY_A;
+seedExample();
+const CLIENT_ID = pickedClientId();
+const CLIENT_A  = CLIENT_ID ? clientAnswers(CLIENT_ID) : null;
+/* NO CLIENT IS A REAL STATE. It used to be impossible - the console fell
+   back to Ozzy's answers and then rendered a whole page of confident
+   sentences about a man nobody had onboarded. An empty object renders an
+   empty rail, which is the truth. */
+const HAS_CLIENT = !!CLIENT_A;
+const A = CLIENT_A || {};
 
 /* ============================================================
    THE RAIL, ABOUT THE PERSON SELECTED
@@ -664,27 +701,6 @@ const lblList = (xs, max, field) => {
 };
 const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
-const OZZY_FACTS = [
-  ['Goal, 90 days','Lean out, <em>then</em> get stronger'],
-  ['Ten years out','Keep up with the kids · no pain · play sport'],
-  ['Real driver','Lose weight · doctor said so · the kids'],
-  ['Experience','New to the gym · new to bodyweight'],
-  ['The deck','<b>0 of 12</b> movements he already does'],
-  ['Kit','Kettlebell · bench · mat <em>(3 of 15 ticked)</em>'],
-  ['Week','4 days · 20 min · Sun Mon Wed Fri'],
-  ['Timing','&ldquo;Whenever the day allows&rdquo;'],
-  ['Intensity','Push me'],
-  ['Wearable','None'],
-  ['Stopped before','Time · life · <b>motivation dies at week 3</b>']
-];
-
-const OZZY_CONSTRAINTS = [
-  ['Medical','Joint problem + something a doctor mentioned. <b>GP clearance before load goes up.</b>',1],
-  ['Pain','Arm, knee, ankle. No loaded deep knee bend, nothing overhead, no impact.',1],
-  ['No bar','No pull-up bar in the house - the pull pattern is limited to a single-arm row.',0],
-  ['No bands','No bands either. Shoulder prep has to come from the bell.',0],
-  ['80 min a week','4 × 20. That is the entire training budget, warm-up included.',0]
-];
 
 /* What a coach needs on screen while editing a session, in the order they
    need it: what this is for, what they can do, what they own, and how much
@@ -734,17 +750,32 @@ function constraintsFor(a){
   return out;
 }
 
-const FACTS       = IS_OZZY ? OZZY_FACTS       : factsFor(A);
-const CONSTRAINTS = IS_OZZY ? OZZY_CONSTRAINTS : constraintsFor(A)
+const FACTS       = HAS_CLIENT ? factsFor(A)       : [];
+const CONSTRAINTS = HAS_CLIENT ? constraintsFor(A) : []
 
 /* ============================================================
    2 · THE TEN LAYERS
-   Galpin's program-design sequence (Huberman Lab, Ep 4), each
-   filled in against Ozzy. `said` is quoted from his answers,
-   `read` is my inference stated as inference, `prop` is the
-   actual call.
+
+   Galpin's program-design sequence (Huberman Lab, Ep 4). Two different
+   things used to live in one array and that is why the console could only
+   ever be about one person:
+
+     the FRAMEWORK  - the ten steps, their order, and the citation for each.
+                      General. True for every client.
+     the REASONING  - what this client said, how it was read, what was
+                      proposed. Specific. True for exactly one.
+
+   Written together, selecting a second client produced ten confident
+   essays about the first. They are separated below: the framework is
+   derived from the ten step definitions, `said` is quoted from whichever
+   client is selected, and `read`/`prop` are per-client work that starts
+   empty and is filled in.
+
+   Ozzy's reasoning is kept in full - it is real coaching work and the
+   worked example of what a finished layer looks like - but it is now
+   attached to Ozzy the client rather than to the console.
    ============================================================ */
-const LAYERS = [
+const OZZY_LAYERS = [
 { id:'assess', n:1, title:'Assess across the nine adaptations',
   tag:'Where he actually is, before anything is prescribed',
   said:[['Activity','Active, but not training'],['Gym level','New'],['Bodyweight level','New'],
@@ -897,6 +928,82 @@ const LAYERS = [
        the review cadence is what makes it one.` }
 ];
 
+/* The framework: the fields that are true of the step rather than of the
+   person. Taken from the definitions above so the ten steps and their
+   citations cannot drift apart from the worked example. */
+const LAYER_FRAMEWORK = OZZY_LAYERS.map(({id,n,title,tag,why}) => ({id,n,title,tag,why}));
+
+/* Reasoning that ships with a client rather than with the console. */
+const SEED_LAYERS = { [OZZY_ID]: Object.fromEntries(
+  OZZY_LAYERS.map(L => [L.id, {said:L.said, read:L.read, prop:L.prop}])) };
+
+/* WHAT THIS CLIENT ACTUALLY SAID, per step, quoted from their intake.
+   The survey does not have a question for every one of Galpin's steps -
+   the ten-point quadrant has none at all - and a step with no question
+   returns nothing rather than a guess dressed as a quote. */
+function saidFor(stepId, a){
+  const q = [];
+  const add = (k, v) => { if(v != null && v !== '' && !(Array.isArray(v) && !v.length)) q.push([k, v]); };
+  const list = (xs, f) => lblList(xs, 4, f);
+  switch(stepId){
+    case 'assess':
+      add('Activity', lbl(a.activity)); add('Gym level', a.levels && a.levels.gym);
+      add('Bodyweight level', a.levels && a.levels.body);
+      add('Movement deck', Array.isArray(a.patterns) ? `${a.patterns.length} of ${a.patternsTotal||12}` : null);
+      add('Wearable', a.tracker && a.tracker !== 'none' ? lbl(a.tracker) : 'None');
+      add('Self-image', a.shape && a.shape.now != null ? a.shape.now + ' of 5' : null);
+      break;
+    case 'goals':
+      add('Focus', list(a.focus)); add('Driver', list(a.driver));
+      add('Weight tends to', lbl(a.weightTend)); add('Target', a.targetKg ? a.targetKg + ' kg' : null);
+      break;
+    case 'defenders':
+      add('Stopped before', list(a.blockers, 'blockers')); add('Trains', lbl(a.when));
+      break;
+    case 'quadrant':
+      add('Not asked', 'The survey has no question for this');
+      break;
+    case 'time':
+      add('Days', a.days); add('Length', a.length ? a.length + ' minutes' : null);
+      add('Days chosen', Array.isArray(a.trainDays) ? a.trainDays.map(d=>DOW[d]||d).join(' · ') : null);
+      break;
+    case 'select':
+      add('Kit', list(a.kit)); add('Pain', list(a.pain)); add('Where', list(a.where));
+      break;
+    case 'dose':
+      add('Budget', (+a.days && +a.length) ? (a.days*a.length) + ' min/week' : null);
+      add('Intensity', lbl(a.intensity)); add('Sessions', a.days);
+      break;
+    case 'progress':
+      add('Experience', a.levels && [a.levels.gym, a.levels.body].filter(Boolean).join(' · '));
+      add('Intensity', lbl(a.intensity));
+      break;
+    case 'recover':
+      add('Sleep', lbl(a.sleep)); add('Health flags', list(a.parq, 'parq'));
+      add('Wearable', a.tracker && a.tracker !== 'none' ? lbl(a.tracker) : 'None');
+      break;
+    case 'review':
+      add('Check-in', lbl(a.checkin)); add('Sessions a week', a.days);
+      break;
+  }
+  return q;
+}
+
+/* The live ten, for whoever is selected: the step, their answers, and any
+   reasoning that has been done for them. Saved work beats the seed. */
+function layersFor(a, id){
+  const seed  = SEED_LAYERS[id] || {};
+  const saved = (S && S.layers) || {};
+  return LAYER_FRAMEWORK.map(F => {
+    const sd = seed[F.id] || {}, sv = saved[F.id] || {};
+    return Object.assign({}, F, {
+      said: saidFor(F.id, a).length ? saidFor(F.id, a) : (sd.said || []),
+      read: sv.read != null ? sv.read : (sd.read || ''),
+      prop: sv.prop || sd.prop || []
+    });
+  });
+}
+
 /* What the client is allowed to see. Locked chunks show as "your coach is
    still building this" in their app — not as an error, and not as nothing.
 
@@ -904,21 +1011,12 @@ const LAYERS = [
    therefore had a release panel with four switches and two wrong names,
    and the fifth day could not be released at all. The switches are the
    program's days now, so they are right by construction. */
-const OZZY_RELEASE = [
-  ['shape','The program shape','Name, 12 weeks, 4 days, 20 minutes'],
-  ['d1','Day 1 · Ground Floor','Full body - the first session'],
-  ['d2','Day 2 · Hinge & Carry','Posterior + loaded carry'],
-  ['d3','Day 3 · Press & Pull','Upper, arm-safe'],
-  ['d4','Day 4 · Reset & Move','Mobility'],
-  ['bench','Benchmarks','The six he can test at home'],
-  ['arc','The 12-week arc','Phases, and what unlocks at weeks 5 and 9']
-];
-let RELEASE = OZZY_RELEASE;
+let RELEASE = [];
 
 /* Rebuilt whenever the program changes shape. Called from drawProgram. */
 function syncRelease(){
   const days = Object.keys((PROG && PROG.days) || {});
-  if(IS_OZZY || !days.length){ RELEASE = OZZY_RELEASE; return; }
+  if(!days.length){ RELEASE = []; return; }
   RELEASE = [['shape','The program shape',
       `${days.length} day${days.length===1?'':'s'}${A.length ? ' · ' + A.length + ' minutes' : ''}`]]
     .concat(days.map((k,i) => {
@@ -938,8 +1036,11 @@ function syncRelease(){
    takes to open somebody else's program. */
 const USER = CLIENT_ID;   /* resolved at the top of this script - see CLIENT_ID */
 const KEY = `fj.v1.${USER}.coach`;
-const blank={decisions:{},notes:{},released:{shape:true},open:{},inbox:[],program:null};
+const blank={decisions:{},notes:{},released:{shape:true},open:{},inbox:[],program:null,layers:{}};
 let S=load();
+/* Built after the drawer is open, because per-client reasoning is saved in
+   it and the seed is only a fallback. */
+const LAYERS = layersFor(A, CLIENT_ID);
 function load(){ try{const r=localStorage.getItem(KEY);return r?Object.assign({},structuredClone(blank),JSON.parse(r)):structuredClone(blank);}catch(e){return structuredClone(blank);} }
 function save(quiet){ try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){} if(!quiet)toast('Saved'); }
 
@@ -1036,13 +1137,12 @@ function drawHist(){
 
   /* Ozzy is the worked example and has never trained. Saying "no history"
      about him would be true and useless, so the panel simply stays away. */
-  if(IS_OZZY || (!past.length && !sum)){
-    panel.style.display = 'none';
-    /* but the coach still needs a way to get a block in from a phone */
-    if(!IS_OZZY){ panel.style.display = ''; host.innerHTML = histDrop(
+  if(!HAS_CLIENT){ panel.style.display = 'none'; return; }
+  if(!past.length && !sum){
+    panel.style.display = ''; host.innerHTML = histDrop(
       `<p class="micro" style="margin:0 0 9px">Nothing from a previous block on this device.
        If ${esc(A.name||USER)} trained on their phone, open their app &rarr; Settings &rarr;
-       <b>Download everything</b>, and drop that file here.</p>`); wireDrop(); }
+       <b>Download everything</b>, and drop that file here.</p>`); wireDrop();
     return;
   }
   panel.style.display = '';
@@ -1211,19 +1311,27 @@ function drawLayers(){
       <div class="lbody">
 
         <div class="step">
-          <h4 class="h-said">What he said</h4>
-          <div class="quotes">${L.said.map(([k,v])=>`<span class="q">${k} &middot; <b>${v}</b></span>`).join('')}</div>
+          <h4 class="h-said">What ${esc(A.name||'they')} said</h4>
+          <div class="quotes">${L.said.length
+            ? L.said.map(([k,v])=>`<span class="q">${k} &middot; <b>${v}</b></span>`).join('')
+            : `<span class="q mut">The survey has no question for this step</span>`}</div>
         </div>
 
+        <!-- AN UNREASONED STEP SAYS SO. It used to render Ozzy's paragraph
+             for everybody, which is the single worst thing this page could
+             do: a confident inference about the wrong person. Empty is the
+             honest state for a client nobody has thought about yet. -->
         <div class="step">
           <h4 class="h-read">How I read it</h4>
-          <div class="read">${L.read}</div>
+          <div class="read">${L.read || `<span class="mut">Not read yet for ${
+            esc(A.name||'this client')}. Their answers are above; put your thinking in the box below
+            and it goes into the brief.</span>`}</div>
         </div>
 
-        <div class="step">
+        ${L.prop.length ? `<div class="step">
           <h4 class="h-prop">What I propose</h4>
           <ul class="prop">${L.prop.map(([t,f])=>`<li class="${f}">${t}</li>`).join('')}</ul>
-        </div>
+        </div>` : ''}
 
         <div class="step">
           <h4 class="h-why">Where it comes from</h4>
@@ -1286,13 +1394,17 @@ async function loadProgram(){
     if(r.ok) CAT = (await r.json()).movements || {};
   }catch(e){ /* offline: the pickers fall back to free text */ }
 
-  if(S.program && S.program.days){ PROG = S.program; }
-  else{
-    try{
-      const r = await fetch('spine/program.default.json', {cache:'no-cache'});
-      if(r.ok) PROG = await r.json();
-    }catch(e){}
-  }
+  /* A NEW CLIENT STARTS EMPTY.
+     This used to fall back to spine/program.default.json, which is not a
+     neutral template - it is Ozzy's first program, exported from the
+     dashboard: four 20-minute kettlebell sessions built around one man's
+     bad knee. Every new client opened on it, already mismatched against
+     their own answers ("20 min planned, 30 asked for"), and a draft that
+     is already there is a draft you edit rather than one you question.
+
+     The library row above offers the real programs to start from, and
+     "Add a day" builds from nothing. Both are deliberate choices. */
+  if(S.program && S.program.days) PROG = S.program;
   if(!PROG) PROG = {days:{}};
   PDAY = PDAY || Object.keys(PROG.days)[0] || null;
   drawProgram();
@@ -1367,6 +1479,24 @@ function libWire(){
 function drawProgram(){
   const host = document.getElementById('prog');
   if(!host) return;
+
+  /* NO CLIENT, NO PROGRAM. The console cannot build against answers that do
+     not exist, and the one useful thing it can offer in that state is the
+     way to get some - so that is the whole page. */
+  if(!HAS_CLIENT){
+    host.innerHTML = `<div class="panel"><div class="pad">
+      <h3 style="margin:0 0 6px;font-size:16px">Nobody to build for yet</h3>
+      <p class="mut" style="margin:0 0 14px">A program is built from a survey. Paste one below and
+        this becomes their console - their answers in the rail, their answers in the ten layers.</p>
+      ${addClientBox('emptyAdd')}
+      <p class="micro" style="margin:10px 0 0">The survey's last screen has <b>Send to Nico</b> and
+        <b>Copy link</b>. Either one produces the thing that goes in this box. Filling the survey out
+        in this browser puts the client here on its own, with nothing to paste.</p>
+    </div></div>`;
+    wireAddClient('emptyAdd');
+    syncRelease(); drawRelease();
+    return;
+  }
   const days = Object.keys(PROG.days || {});
   if(!days.length){ host.innerHTML = libRow() + `<div class="panel"><div class="pad">
     <p class="mut">No program yet. Start from one above, or build a day.</p>
@@ -1510,7 +1640,9 @@ function drawDock(){
   document.getElementById('mOk').textContent=ok;
   document.getElementById('dockSt').innerHTML =
     `<b>${ok}</b> agreed &middot; <b>${work}</b> need work &middot; <b>${parked}</b> parked &middot; ` +
-    `<b>${notes}</b> note${notes===1?'':'s'} &middot; <b>${rel}</b> of ${RELEASE.length} live for ${esc(A.name||CLIENT_ID)}`;
+    (HAS_CLIENT
+      ? `<b>${notes}</b> note${notes===1?'':'s'} &middot; <b>${rel}</b> of ${RELEASE.length} live for ${esc(A.name||CLIENT_ID)}`
+      : `<b>${notes}</b> note${notes===1?'':'s'} &middot; no client selected`);
 }
 
 /* ---------- the handoff back to me ---------- */
@@ -1646,10 +1778,9 @@ function coachUidFor(a){
   return 'c' + slug.slice(0,12);
 }
 
-function importIntakeFromUrl(){
-  const m = String(location.hash||'').match(/[#&]fj=([A-Za-z0-9_\-]+)/);
-  if(!m) return null;
-  let p; try{ p = b64urlDecode(m[1]); }catch(e){ toast('That link could not be read'); return null; }
+/* One writer for an arriving intake, whether it came from the address bar
+   or from the paste box. They used to be the same code twice. */
+function importIntake(p){
   const a = p.a || {};
   /* A DISTINCT ID PER PERSON, and this matters more here than on a phone.
      js/intake.js uses the fixed id 'me' because a phone belongs to one
@@ -1669,8 +1800,21 @@ function importIntakeFromUrl(){
     derived:{tier:a.tier??null, levels:a.levels??null},
     submittedAt:p.at||new Date().toISOString() });
   localStorage.setItem(INTAKES_LS, JSON.stringify(itk));
-  try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){ location.hash=''; }
+  /* an imported client is a real one - the seeding flag stops the example
+     from being re-added underneath them on a later visit */
+  localStorage.setItem('fj.coach.seeded','1');
   toast('Imported ' + (a.name || 'the client'));
+  return uid;
+}
+
+function importIntakeFromUrl(){
+  const m = String(location.hash||'').match(/[#&]fj=([A-Za-z0-9_\-]+)/);
+  if(!m) return null;
+  let p; try{ p = b64urlDecode(m[1]); }catch(e){ toast('That link could not be read'); return null; }
+  const uid = importIntake(p);
+  /* stripped from the address bar once read: an intake is a PAR-Q and a
+     body map, and it has no business sitting in a URL after it has landed */
+  try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){ location.hash=''; }
   return uid;
 }
 
@@ -1697,33 +1841,71 @@ function clientOptions(){
     out.push({ id:i.userId,
       name:(u && u.displayName) || (i.answers && i.answers.name) || i.userId });
   });
-  out.push({ id:OZZY_ID, name:'Ozzy - built-in example' });
   return out;
+}
+
+/* ------------------------------------------------------------------
+   TAKING A SURVEY IN BY HAND
+
+   Three things can be pasted here and all three are the same intake in
+   different clothes, so the box accepts whichever one the coach happens to
+   be holding rather than making them convert it:
+
+     a link      https://.../coach.html#fj=eyJ2Ijo2...   (from the survey)
+     the payload eyJ2Ijo2...                             (the tail of one)
+     the JSON    {"v":6,"at":"...","a":{...}}            (a pasted record)
+
+   It used to be a collapsed <details> in the rail labelled "Add a client
+   from their link", which is the least discoverable place on the page for
+   the one action a console with no clients has to offer.
+   ------------------------------------------------------------------ */
+function readPastedIntake(v){
+  v = String(v||'').trim();
+  if(!v) return null;
+  const m = v.match(/[#&]fj=([A-Za-z0-9_\-]+)/) || v.match(/^([A-Za-z0-9_\-]{40,})$/);
+  if(m){ try{ return b64urlDecode(m[1]); }catch(e){ return null; } }
+  if(v[0] === '{'){
+    try{
+      const o = JSON.parse(v);
+      /* both shapes the app writes: {v,at,a} from the survey, and the
+         bare answers object someone copied out of it */
+      if(o && o.a) return o;
+      if(o && (o.name || o.days || o.focus)) return {v:PAYLOAD_V, at:new Date().toISOString(), a:o};
+    }catch(e){}
+  }
+  return null;
+}
+
+function addClientFrom(v){
+  const p = readPastedIntake(v);
+  if(!p) return toast('That is not a survey link, payload or record');
+  const a = p.a || {};
+  if(!a.name && !a.email) return toast('That survey has no name or email in it');
+  const uid = importIntake(p);
+  localStorage.setItem('fj.coach.client', uid);
+  location.search = '?client=' + encodeURIComponent(uid);
+}
+
+function addClientBox(id, compact){
+  return `
+    <textarea id="${id}" placeholder="Paste the survey link, or the record itself"
+      style="width:100%;height:${compact?60:96}px;font:inherit;font-size:11px;background:#181D23;
+      color:inherit;border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:8px;
+      resize:vertical"></textarea>
+    <button class="btn" id="${id}Go" style="margin-top:6px;width:100%">Add them</button>`;
+}
+function wireAddClient(id){
+  const go = document.getElementById(id + 'Go');
+  if(go) go.onclick = () => addClientFrom(document.getElementById(id).value);
 }
 
 function drawAddClient(){
   const host = document.getElementById('addClient'); if(!host) return;
-  const none = !coachIntakes().length;
-  host.innerHTML = `
-    ${none ? `<p class="micro" style="margin:0 0 7px">No clients yet. Ozzy is the built-in example - 
-      paste a client's link to add a real one.</p>` : ''}
-    <details ${none?'open':''}><summary style="cursor:pointer;font-size:12px;color:var(--dim,#8B949E)">
-      Add a client from their link</summary>
-      <textarea id="addLink" placeholder="Paste the link from the end of their onboarding"
-        style="width:100%;height:56px;margin-top:7px;font:inherit;font-size:11px;background:#181D23;
-        color:inherit;border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:7px;
-        resize:vertical"></textarea>
-      <button class="btn" id="addGo" style="margin-top:6px;width:100%">Add them</button>
+  host.innerHTML = `<details><summary style="cursor:pointer;font-size:12px;color:var(--dim,#8B949E)">
+      Add a client from their survey</summary>
+      <div style="margin-top:7px">${addClientBox('addLink', true)}</div>
     </details>`;
-  const go = document.getElementById('addGo');
-  if(go) go.onclick = () => {
-    const v = (document.getElementById('addLink').value||'').trim();
-    const m = v.match(/[#&]fj=([A-Za-z0-9_\-]+)/) || v.match(/^([A-Za-z0-9_\-]{40,})$/);
-    if(!m) return toast('That does not look like an onboarding link');
-    /* reuse the one importer, by handing it the fragment it expects */
-    location.hash = 'fj=' + m[1];
-    location.reload();
-  };
+  wireAddClient('addLink');
 }
 
 function drawClients(){
@@ -1744,19 +1926,25 @@ function drawClients(){
   const nameEl = document.getElementById('whoName'), subEl = document.getElementById('whoSub');
   if(nameEl) nameEl.textContent = A.name || CLIENT_ID;
   if(subEl){
-    subEl.textContent = IS_OZZY
-      ? '45 · male · Canada · the console\'s worked example'
-      : [A.age && A.age+'', A.sex==='f'?'female':A.sex==='m'?'male':null,
+    subEl.textContent = HAS_CLIENT
+      ? [A.age && A.age+'', A.sex==='f'?'female':A.sex==='m'?'male':null,
          A.tierName || (A.levels && A.levels.gym!=null ? 'level '+A.levels.gym : null),
-         'from their survey'].filter(Boolean).join(' · ');
+         'from their survey'].filter(Boolean).join(' · ')
+      : 'Nobody selected';
   }
   const av = document.querySelector('.who .av');
   if(av) av.textContent = ((A.name||'?').trim()[0]||'?').toUpperCase();
+  /* these were hardcoded to Ozzy in the markup, so every client's rail
+     offered to release things to a man who was not on screen */
+  const who = A.name || (HAS_CLIENT ? CLIENT_ID : 'the client');
+  const it = document.getElementById('inboxTitle');   if(it) it.textContent = `From ${who}`;
+  const rt = document.getElementById('releaseTitle'); if(rt) rt.textContent =
+    HAS_CLIENT ? `What ${who} can see right now` : 'Nothing to release yet';
   const h1 = document.querySelector('header h1');
-  if(h1) h1.textContent = IS_OZZY
-    ? "Building Ozzy's first program"
-    : `Building ${A.name}'s program`;
-  document.title = 'Coach Console - ' + (A.name || CLIENT_ID);
+  if(h1) h1.textContent = HAS_CLIENT
+    ? `Building ${A.name || CLIENT_ID}'s program`
+    : 'No client yet';
+  document.title = 'Coach Console' + (HAS_CLIENT ? ' - ' + (A.name || CLIENT_ID) : '');
 
   /* The ten layers are written about Ozzy's numbers. Say so rather than let
      them read as if they were about whoever is selected. */
@@ -1765,20 +1953,15 @@ function drawClients(){
      program editor - so it read as a warning about the editor, which is
      the one part that was always correct. It belongs on the folded
      reasoning section, because that is the stale part. */
-  const sum = document.querySelector('#reason > summary .grow');
-  if(sum && !IS_OZZY && !sum.dataset.warned){
-    sum.dataset.warned = '1';
-    sum.insertAdjacentHTML('beforeend',
-      `<small style="color:var(--warn,#F2C14E);margin-top:5px">Still written against Ozzy's answers -
-       not yet re-reasoned for ${esc(A.name||'this client')}.</small>`);
-  }
+  /* THE WARNING IS GONE because the thing it warned about is fixed: the
+     layers quote whoever is selected now, and a step with no reasoning for
+     them says so in its own body rather than needing a banner. */
 }
 
 function drawRelease2(){
   const host = document.querySelector('#releasePanel .pad'); if(!host) return;
-  if(IS_OZZY){
-    host.innerHTML = `<p class="micro">Ozzy is the built-in example and has no app to send to.
-      Pick a client who has completed onboarding.</p>`;
+  if(!HAS_CLIENT){
+    host.innerHTML = `<p class="micro">No client selected. Paste a survey to add one.</p>`;
     return;
   }
   const base = location.href.split('#')[0].replace(/coach\.html.*$/,'');
@@ -1815,7 +1998,26 @@ function drawRelease2(){
   document.getElementById('relOpen').onclick = () => { location.href = link; };
 }
 
-importIntakeFromUrl();
+/* A LINK ARRIVING HAS TO BE THE CLIENT ON SCREEN.
+   This used to run here, after CLIENT_ID and A were already resolved at
+   parse time - so opening a survey link imported the person and then
+   showed you the previous one. Importing now selects them and reloads,
+   which is the same thing the client picker does and for the same reason:
+   half this file reads these constants once. */
+function takeLinkFromAddressBar(){
+  if(!/[#&]fj=/.test(location.hash)) return false;
+  const uid = importIntakeFromUrl();
+  if(!uid) return false;
+  localStorage.setItem('fj.coach.client', uid);
+  location.search = '?client=' + encodeURIComponent(uid);
+  return true;
+}
+takeLinkFromAddressBar();
+/* Pasting a link into the address bar of a console that is ALREADY open is
+   a same-document navigation - the page does not reload and boot never
+   runs again, so the link appeared to do nothing. */
+addEventListener('hashchange', takeLinkFromAddressBar);
+
 drawRail(); drawInbox(); drawLayers(); drawDock();
 loadProgram().then(() => { drawClients(); drawAddClient(); drawRelease2(); });
 
