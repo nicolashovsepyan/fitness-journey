@@ -1,0 +1,54 @@
+# ONE APP, ONE FOLDER, TWO WEB ADDRESSES.
+#
+# This file lives at the TOP of the project on purpose. The old one was inside
+# site/, which is a second, older, incomplete copy of the app: no js/, no
+# styles.css, no service worker. So Netlify was publishing a different app from
+# the one being worked on, and every update went to the GitHub address while
+# the Netlify address stayed still. That is the confusion this file ends.
+#
+# The top level of this project is now the only source of truth. Both web
+# addresses serve it:
+#
+#   GitHub Pages  https://nicolashovsepyan.github.io/fitness-journey/
+#   Netlify       whatever address the Netlify site has
+#
+# ONE SETTING HAS TO CHANGE IN NETLIFY for this to take effect, because
+# Netlify was told to look inside site/ and only Netlify's own dashboard can
+# untell it. In the Netlify site settings, under Build & deploy:
+#
+#     Base directory       clear it, leave it empty
+#     Publish directory    .
+#
+# After that, site/ can be deleted and there is only one app.
+
+[build]
+  publish = "."
+  command = ""
+
+# The survey and the app MUST be same origin. The hand-off from the survey
+# into the app carries the answers in the link, and the app writes them to
+# storage that is per origin. Splitting them across two hosts is what broke
+# it the first time.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Never cache the pages themselves. The service worker handles offline; a
+# cached html is how somebody ends up looking at last week's app.
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"

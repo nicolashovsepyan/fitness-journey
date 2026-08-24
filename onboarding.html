@@ -3146,16 +3146,19 @@ const FLOW = [
   sub:'starts here',
   cta:'Take the first step' },
 
-{ ch:0, type:'promise', cta:'Got it',
-  msgs:[
-    "Right. Here is how this works.",
-    "I ask you a short set of questions. Every one of them is there for a reason - nothing is filler.",
-    "You answer honestly. <b>These are for you, not for me.</b> There is no answer here that makes you look bad.",
-    "<b>Stage 1</b> - the answers get read and processed. Every one of them, against what the training actually says.",
-    "<b>Stage 2</b> - then I go through it myself and build the program. A person, not a template.",
-    "<b>4 minutes.</b> No typing. Then it is your log, your data, your journey.<small>Every answer and every session, yours, forever.</small>"
-  ]},
+/* THE "HERE IS HOW THIS WORKS" SCREEN IS GONE.
 
+   It was a chat: six bubbles explaining that questions were coming, then a
+   Continue, and THEN the real conversation started. Two threads back to back,
+   the first one about the second one. Nicolas: "it has to be one continuous
+   thread". He is right - explaining a conversation before having it is what a
+   form does, not a person.
+
+   The chapter card for YOU still runs before the thread, because a section
+   title is a breath, not a second conversation.
+
+   promise() itself is left in place. It is a good renderer and the FLOW may
+   want a monologue again somewhere; nothing points at it today. */
 /* 1 · YOU */
 { ch:1, type:'chapter', n:1, title:'You', sub:'So every question after this is the right one.' },
 { ch:1, type:'chatq', cta:'Keep going',
