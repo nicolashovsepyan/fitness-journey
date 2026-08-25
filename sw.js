@@ -138,14 +138,30 @@ self.addEventListener('fetch', (e) => {
   // connection or not — that is what makes it feel like an installed app
   if (req.mode === 'navigate') {
     e.respondWith((async () => {
+      // WHICH PAGE IS THIS, ACTUALLY. Every page in this app is a navigation:
+      // dashboard.html, coach.html, onboarding.html. This used to write the
+      // response into './index.html' whatever had been asked for, so opening
+      // the console once left the console's HTML cached as the app's start
+      // page - and the next offline open of the home-screen icon served it.
+      // Cache each page under its own name, and only the real start page
+      // under index.html.
+      const path = url.pathname.split('/').pop() || 'index.html';
+      const key = './' + path;
       try {
         const fresh = await fetch(req);
         const cache = await caches.open(CACHE);
-        cache.put('./index.html', fresh.clone());
+        // Only cache pages the shell actually ships; a navigation to
+        // anything else is not ours to keep.
+        if (ASSETS.includes(key)) cache.put(key, fresh.clone());
         return fresh;
       } catch (err) {
         const cache = await caches.open(CACHE);
-        return (await cache.match('./index.html')) || Response.error();
+        // Offline: the page asked for, then the start page. A workout must
+        // open from the home screen with no signal, which is the fallback -
+        // but not at the cost of serving the wrong page when we have it.
+        return (await cache.match(key))
+            || (await cache.match('./index.html'))
+            || Response.error();
       }
     })());
     return;
