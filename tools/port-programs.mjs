@@ -17,7 +17,7 @@
    Nothing here invents training. Every set, rep, hold and note comes
    from the source session; only the packaging changes.
    ============================================================ */
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -148,9 +148,24 @@ const used = new Set();
 for (const id of [...build('main', PROGRAM, PROFILE, 'Nicolas')]) used.add(id);
 for (const id of [...build('beginner_return', BEGINNER_PROGRAM, BEGINNER_PROFILE, 'Training partner')]) used.add(id);
 
+/* THE INDEX IS THE DIRECTORY, NOT WHAT THIS SCRIPT JUST PORTED.
+   It used to hardcode the two ported ids, so any program written by hand
+   into spine/programs/ disappeared from the manifest the next time this
+   ran - present on disk, absent from the index, and no error either way.
+   Scanned instead, so a hand-authored program survives a re-port. */
+const onDisk = readdirSync(p('spine/programs'))
+  .filter(f => f.endsWith('.json') && f !== 'index.json')
+  .map(f => f.slice(0, -5)).sort();
+onDisk.forEach(id => {
+  if (id === 'main' || id === 'beginner_return') return;
+  const prog = JSON.parse(readFileSync(p('spine/programs', id + '.json'), 'utf8'));
+  Object.values(prog.days || {}).forEach(d =>
+    (d.blocks || []).forEach(b => (b.items || []).forEach(it => used.add(it.ex))));
+});
+
 writeFileSync(p('spine/programs/index.json'),
   JSON.stringify({ built: new Date().toISOString().slice(0, 10),
-                   programs: ['main', 'beginner_return'],
+                   programs: onDisk,
                    movements: [...used].sort() }, null, 2) + '\n');
 
 console.log(`\n  ${used.size} distinct movements across both programs`);
