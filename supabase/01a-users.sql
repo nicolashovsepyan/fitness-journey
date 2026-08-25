@@ -4,7 +4,7 @@
 --
 -- This said:  id uuid primary key references auth.users(id) on delete cascade
 --
--- auth.users is Supabase's own login table, in a schema this project will not
+-- auth.users is the Supabase login table, in a schema this project will not
 -- let the editor reach across to. That is what "Backend error" meant, twice.
 --
 -- The link is gone. `id` is still the login id, it is simply no longer the

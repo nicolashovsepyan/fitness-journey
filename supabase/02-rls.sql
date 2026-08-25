@@ -69,7 +69,7 @@ create policy users_read_own_clients on public.users
 create policy users_update_self on public.users
   for update using (id = auth.uid()) with check (id = auth.uid());
 -- A trainer sets status and program, which is the release. Nothing else here
--- lets one person write another person's row.
+-- lets one person write a row belonging to somebody else.
 create policy users_update_own_clients on public.users
   for update using (trainer_id = auth.uid()) with check (trainer_id = auth.uid());
 -- Signing up creates your own row and only your own.

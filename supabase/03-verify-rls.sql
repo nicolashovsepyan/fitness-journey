@@ -2,7 +2,7 @@
 -- THE NEGATIVE TEST. Run this THIRD, and read the output.
 --
 -- docs/BACKEND.md, step 3: "sign in as client A and confirm a read of client
--- B's rows returns nothing." This is that test, automated, and it is the gate.
+-- the rows of client B and confirm nothing comes back. This is that test,
 --
 --   IF ANY LINE BELOW SAYS "FAIL", THE ANON KEY DOES NOT GO IN THE REPO.
 --
@@ -10,7 +10,7 @@
 -- rows behind. Paste the whole file into the Supabase SQL editor and run it.
 --
 -- It proves the thing that actually matters: that a signed-in person cannot
--- read somebody else's medical answers, not merely that the app does not ask.
+-- read the medical answers of somebody else, not merely that the app does
 -- ============================================================
 begin;
 

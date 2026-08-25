@@ -21,6 +21,23 @@ no Postgres on the machine these were written on to test against.
 So it is in small pieces now. Whichever one errors names the problem exactly,
 in one round instead of five.
 
+## The thing that kept failing, and it was not the schema
+
+Three files came back "Backend error! Retry your query" and that message names
+no line. The cause was a word like `Supabase's` **inside a comment**.
+
+The Supabase SQL editor cuts a script into statements in the browser, before
+the database ever sees it, and its cutter does not skip comments. So an
+apostrophe in a comment opens a piece of text that never closes, and every
+statement after it is read as nonsense. Postgres would have been perfectly
+happy with all three files.
+
+The evidence was sitting there: `00-check.sql` has no apostrophe in any
+comment and it passed. Every file that failed had one.
+
+`node tools/check-sql.mjs` now refuses to let a file leave with an apostrophe
+or a dollar pair in a comment. Run it before handing any of these over.
+
 ## If one of them errors
 
 Send the message and which file. Do not retry it.

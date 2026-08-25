@@ -1,4 +1,4 @@
--- STEP 1b. The other six tables. No links to Supabase's own tables here,
+-- STEP 1b. The other six tables. No links to the Supabase login table here,
 -- so if 1a failed and this one passes, we have found it exactly.
 create table if not exists public.intakes (
   id            uuid primary key default gen_random_uuid(),
