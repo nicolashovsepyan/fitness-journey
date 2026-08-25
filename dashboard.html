@@ -1111,6 +1111,16 @@ h2.h{font-size:23px;line-height:1.2;letter-spacing:-.022em;font-weight:550}
    own thing", because only one of those says the plan is working. */
 .wd.free .b{border-style:dashed;border-color:var(--accent)}
 
+/* A SPORT DAY IS NOT A REST DAY, AND IT IS NOT A SESSION EITHER.
+   Nicolas plays on Sundays and that is the reason Monday is upper body
+   only - a week that draws Sunday as empty is not describing his week.
+   But it is not something the coach wrote, so it does not get the coach
+   colour, and it is not a session, so it does not get the dumbbell.
+   Dotted, quiet, and unmistakably occupied. Sits after .free and before
+   the .now rules, so today still outranks it. */
+.wd.sport .b{border-style:dotted;border-color:var(--line2);color:var(--ink3)}
+.wd.sport .b svg{stroke-width:2}
+
 /* THE LAST WORD ON TODAY'S CELL.
    .wd.plan, .done, .miss and .free each set a border, and every one of them
    can also be the current day — so a .wd.now rule written before them loses
@@ -4011,6 +4021,10 @@ function paneToday(){
         /* the mark itself marks a training day — the app's own symbol doing
            a job rather than decorating one */
         const plan = WEEKPLAN[i], free = freeOn(i);
+        /* The fifth session. Only drawn when BOTH halves of the answer are
+           present - which day, and which sport - because a day marked busy
+           with nothing to call it explains nothing. */
+        const sport = !plan && sportDays().includes(i) && mySports().length > 0;
         const dn = !!S.done[d] || free, now = i===DOW;
         /* how far through a Monday-first week each day sits, so "past" is
            still past once Sunday is the last column rather than the first */
@@ -4020,10 +4034,15 @@ function paneToday(){
            counts as missed if it was released and the day has passed —
            otherwise it stays a plain planned day, which is what it is. */
         const missed = plan && past && released(plan);
-        const cls = (dn?'done':(missed?'miss':(plan?'plan':'')))
+        const cls = (dn?'done':(missed?'miss':(plan?'plan':(sport?'sport':''))))
                   + (free && !S.done[d] ? ' free' : '')
                   + (now && (S.markStyle||'square')!=='stamp' ? ' box' : '');
-        return `<div class="wd ${cls} ${now?'now':''}">
+        /* A ball, drawn once and used by both branches below - a sport day
+           that happens to be today still has to show something. */
+        const BALL = '<svg viewBox="0 0 24 24" aria-hidden="true">'
+                   + '<circle cx="12" cy="12" r="7"/><path d="M12 5v14"/></svg>';
+        return `<div class="wd ${cls} ${now?'now':''}"${
+          sport ? ` title="${esc(sportName())}"` : ''}>
           <span class="l">${d[0]}</span>
           <span class="b">${
             dn  ? svg(I.check)
@@ -4034,12 +4053,13 @@ function paneToday(){
           : now ? ((S.markStyle||'square')==='stamp'
                     ? markSvg('wmark', !!plan, '0 16 300 252')
                     : (plan ? `<svg class="wdb" viewBox="0 0 260 130" aria-hidden="true">
-                        <g class="mk-db">${DB_PATHS}</g></svg>` : ''))
+                        <g class="mk-db">${DB_PATHS}</g></svg>` : (sport ? BALL : '')))
           /* A lone bell gets its own frame. Inside the triangle's 300x268 box
              it would be drawn at the size it is IN the logo, which is a
              sixth of a cell — right for the lockup, invisible on its own. */
           : plan? `<svg class="wdb" viewBox="0 0 260 130" aria-hidden="true">
                      <g class="mk-db">${DB_PATHS}</g></svg>`
+          : sport ? BALL
           : ''}</span>
         </div>`;
       }).join('')}
