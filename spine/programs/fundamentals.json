@@ -437,5 +437,15 @@
         }
       ]
     }
+  },
+  "sport": {
+    "acts": [
+      "team"
+    ],
+    "days": [
+      0
+    ],
+    "minutes": 45,
+    "note": "Sunday-based, same convention as trainDays. Written down as data because the constraint text alone cannot put it on the week."
   }
 }

@@ -47,6 +47,13 @@ const a = {
   goalsText: prog.goals || [],
   ...(days ? { trainDays: days, dayBase: 'sun', days: days.length } : {}),
   ...(prog.equipment ? { kitFull: prog.equipment } : {}),
+  /* THE FIFTH SESSION. A sport the person already plays is training, and the
+     week is a lie without it: Nicolas plays on Sundays, which is the whole
+     reason Monday is upper body only. The dashboard needs BOTH halves to
+     draw it - actDays says when, otherAct says what - and carrying one
+     without the other shows nothing. Already Sunday-based, like trainDays. */
+  ...(prog.sport && prog.sport.days ? { actDays: prog.sport.days } : {}),
+  ...(prog.sport && prog.sport.acts ? { otherAct: prog.sport.acts } : {}),
   ...(prog.constraints && Object.keys(prog.constraints).length
         ? { constraintsText: Object.values(prog.constraints) } : {})
 };

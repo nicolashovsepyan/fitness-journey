@@ -2172,6 +2172,11 @@ function uidFor(a){
    link, all three are read. The prefix is stripped, the payload is decoded,
    and whatever it turns out to contain — answers, a program, or both — is
    used. A person should never be told their link is the wrong sort. */
+/* Set by fromHash() when a payload was present and unreadable. Read by the
+   opening card, which then says what happened instead of pretending this is
+   a brand new device. */
+let HANDOFF_BROKEN = null;
+
 function fromHash(){
   let h = (location.hash || '').replace(/^#/, '');
   if(!h) return null;
@@ -2193,7 +2198,25 @@ function fromHash(){
       if(rec && rec.a && (!p.uid || p.uid === cur)) p.a = rec.a, p.uid = cur;
     }
     return p.a ? p : null;
-  }catch(e){ return null; }
+  }catch(e){
+    /* A LINK THAT ARRIVED BROKEN MUST SAY SO.
+
+       This used to return null and nothing else. The app then behaved
+       exactly as it does for somebody who has never opened it: it showed
+       the SAMPLE - a kettlebell program, on Sun/Mon/Wed/Fri, belonging to
+       nobody. So a link that was mangled in transit did not look like a
+       broken link. It looked like the app handing you a stranger's
+       program and getting your week wrong, which is a far worse thing to
+       be told and impossible to diagnose from the outside.
+
+       The payloads are long. A link that carries a whole program is around
+       thirteen thousand characters, and mail clients, message bubbles and
+       notes fields all break lines in them. Silence is the wrong response
+       to the most likely failure this app has. */
+    HANDOFF_BROKEN = String(e && e.message || e).slice(0, 120);
+    console.warn('[handoff] the link could not be read', e);
+    return null;
+  }
 }
 
 /* ONE SET OF RECORDS, NOT TWO.
@@ -6176,9 +6199,17 @@ function showIntro(){
   if(!el) return;
   const first = A.name ? A.name.split(/\s+/)[0] : 'there';
   el.querySelector('.in-mark').innerHTML = markSvg('in-lock', true);
-  el.querySelector('.in-eye').textContent = IS_DEMO ? 'Sample dashboard' : 'You are in';
-  el.querySelector('.in-name').textContent = IS_DEMO ? 'Have a look' : first;
-  el.querySelector('.in-copy').innerHTML = IS_DEMO
+  const broken = IS_DEMO && HANDOFF_BROKEN;
+  el.querySelector('.in-eye').textContent =
+    broken ? 'That link arrived broken' : IS_DEMO ? 'Sample dashboard' : 'You are in';
+  el.querySelector('.in-name').textContent =
+    broken ? 'Not your program' : IS_DEMO ? 'Have a look' : first;
+  el.querySelector('.in-copy').innerHTML = broken
+    ? 'The link had your program in it, but it did not survive the trip - it was '
+      + 'cut short somewhere between being sent and being opened. What you are '
+      + 'looking at below is the sample, not you. '
+      + 'Ask for the link again and open it directly rather than copying it by hand.'
+    : IS_DEMO
     ? 'Nobody has filled in the survey on this device yet, so this is a sample. '
       + 'Fill it in and this becomes yours.'
     : `Your answers are in and Coach Nico is building your program. `
