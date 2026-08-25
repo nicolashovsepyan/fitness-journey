@@ -30,12 +30,12 @@ const KEEP_EXT = /\.(html|css|js|mjs|png|svg|webmanifest|json|woff2?)$/i;
    connection; nothing else belongs in it.
 
    ARCHIVE/ is finished work kept for reference — see ARCHIVE/README.md.
-   site/ is the separate Netlify copy of the app: it is published from its
-   own folder by Netlify and has nothing to do with this shell. Both were
-   in the shell, and site/ alone was 111 of the 217 files a phone had to
-   download before the app would open — every one of them a stale duplicate
-   of a file sitting at the root. */
-const SKIP_PREFIX = ['test/', 'docs/', 'ARCHIVE/', 'site/',
+   It once held the separate Netlify copy of the app too, in site/, which
+   alone was 111 of the 217 files a phone had to download before the app
+   would open — every one of them a stale duplicate of a file at the root.
+   That folder was archived on 25 Aug 2026 and both addresses now serve the
+   top level, so 'site/' is gone from this list: ARCHIVE/ covers it. */
+const SKIP_PREFIX = ['test/', 'docs/', 'ARCHIVE/',
   /* The exercise database is an AUTHORING surface, not part of the app: the
      workbook, the derived JSON and the build tools. dist/ is what gets
      uploaded, so shipping half a megabyte of internal data to a public URL

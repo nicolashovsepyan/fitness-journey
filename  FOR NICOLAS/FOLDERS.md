@@ -132,19 +132,22 @@ the spine and the logo are all still in the list.
 
 ## 6. Still waiting on you
 
-### `site/` — do you use the Netlify address?
+### `site/` — settled, 25 August
 
-There is a second copy of the app in a folder called `site/`. It was set up to
-publish to **Netlify** — a different hosting service from the one your real
-app uses. It has not been updated since 17 August, it is missing large parts of
-the app, and it very likely does not work any more.
+You said archive it, and it is archived: `ARCHIVE/site-netlify-copy-2026-08-25/`.
 
-I have left it completely alone.
+Before it moved I checked every one of its 138 files against the top level.
+**Every single one already existed there.** Nothing was unique to it, so
+nothing was lost, and it is kept anyway because that is the rule.
 
-- **If you never use that address:** say so, and the whole folder goes to
-  `ARCHIVE/`.
-- **If you do use it:** say so, and I will bring it back in step and set it up
-  so it stays that way.
+**One setting is still yours to confirm.** Netlify was originally told to
+build from inside `site/`, and only Netlify's own dashboard can untell it.
+The instructions are in `netlify.toml` at the top level: base directory
+empty, publish directory `.`. If that was already changed, the Netlify
+address is serving the real app and this is done. If it was not, that
+address will fail its next build until you change it.
+
+Your GitHub address is not affected either way. That is the one you use.
 
 ### `images/` — the big old artwork
 

@@ -50,7 +50,6 @@ sort to the top in Finder.
 | `tools/` | The scripts that turn a source into what the app uses. |
 | `docs/` | Long technical notes, for me. |
 | `test/` | The checks that must pass before anything ships. |
-| `site/` | A second, out-of-date copy of the app for a Netlify address. See `site/README.md` — a decision is waiting. |
 | `ARCHIVE/` | Finished-with experiments. Nothing loads any of it. |
 | `SYSTEM.md` | How the pieces fit together. The one document worth reading. |
 

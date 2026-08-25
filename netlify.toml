@@ -1,10 +1,16 @@
 # ONE APP, ONE FOLDER, TWO WEB ADDRESSES.
 #
 # This file lives at the TOP of the project on purpose. The old one was inside
-# site/, which is a second, older, incomplete copy of the app: no js/, no
-# styles.css, no service worker. So Netlify was publishing a different app from
-# the one being worked on, and every update went to the GitHub address while
-# the Netlify address stayed still. That is the confusion this file ends.
+# site/, a second, older, incomplete copy of the app: no js/, no styles.css, no
+# service worker. So Netlify was publishing a different app from the one being
+# worked on, and every update went to the GitHub address while the Netlify
+# address stayed still. That is the confusion this file ends.
+#
+# site/ WAS ARCHIVED ON 25 AUG 2026, to ARCHIVE/site-netlify-copy-2026-08-25/.
+# All 138 of its files were checked against the top level first and every one
+# of them already existed there. So the setting below is no longer a tidy-up,
+# it is required: if Netlify is still told to build from inside site/, it will
+# not find the folder. The GitHub Pages address is unaffected.
 #
 # The top level of this project is now the only source of truth. Both web
 # addresses serve it:
@@ -19,7 +25,8 @@
 #     Base directory       clear it, leave it empty
 #     Publish directory    .
 #
-# After that, site/ can be deleted and there is only one app.
+# That is now the only thing standing between the Netlify address and the real
+# app. site/ is gone; there is one app.
 
 [build]
   publish = "."
