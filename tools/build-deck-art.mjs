@@ -4,7 +4,7 @@
    Run:  node tools/build-deck-art.mjs
 
    Rewrites the <script id="deckart"> island in onboarding.html from
-   the artwork in "EXERCISE LIBRARY".
+   the artwork folder named in tools/paths.mjs.
 
    The survey shows twelve cards, drawn from two decks — a gym deck if
    the person has weights, a bodyweight deck otherwise. Twenty-two
@@ -20,29 +20,14 @@
    so a missing picture is a plainer card, never a broken one.
    ============================================================ */
 import { execFileSync } from 'node:child_process';
-import { readFileSync, writeFileSync, existsSync, statSync, readdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { ROOT, artwork, must } from './paths.mjs';
 
-const ROOT = fileURLToPath(new URL('..', import.meta.url));
-
-/* Find a folder by name, tolerating a leading/trailing space or different
-   case. Both "EXERCISE LIBRARY" and "FOR NICOLAS" turned up one day renamed
-   to " EXERCISE LIBRARY" and " FOR NICOLAS" — a space in front sorts them to
-   the top of Finder, which is a perfectly reasonable thing to want and used
-   to break every script here with ENOENT. */
-function resolveDir(parent, wanted) {
-  const want = wanted.trim().toLowerCase();
-  const exact = join(parent, wanted);
-  try { if (statSync(exact).isDirectory()) return exact; } catch {}
-  for (const name of readdirSync(parent)) {
-    if (name.trim().toLowerCase() !== want) continue;
-    const full = join(parent, name);
-    try { if (statSync(full).isDirectory()) return full; } catch {}
-  }
-  return exact;   // let the caller fail with a clear path
-}
-const SRC = process.argv[2] || resolveDir(ROOT, 'EXERCISE LIBRARY');
+/* Where the artwork lives is decided in ONE file, tools/paths.mjs, because
+   it has moved once already and five tools each had their own copy of the
+   answer. Pass a folder as the first argument to override it. */
+const SRC = process.argv[2] || must(artwork(), 'artwork');
 const PAGE = join(ROOT, 'onboarding.html');
 
 /* The card renders about 340px wide. 440 covers that comfortably; going to
@@ -52,7 +37,7 @@ const PAGE = join(ROOT, 'onboarding.html');
 const WIDTH = 440;
 const PALETTE = 96;
 
-/* deck id  ->  file in EXERCISE LIBRARY */
+/* deck id  ->  file in the artwork folder */
 const MAP = {
   /* bodyweight deck */
   pushup:    'push-up-anime.png',

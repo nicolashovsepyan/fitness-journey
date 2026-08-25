@@ -10,11 +10,24 @@ mockups/
 
 dist/
 
-# Source artwork — huge, and the survey inlines what it needs via
-# tools/build-avatars.mjs. Keeping it out of the shell and out of git.
+# This rule NEVER MATCHED and the artwork has been in git the whole time.
+# The folder was renamed to " EXERCISE LIBRARY", with a space in front to sort
+# it to the top of Finder, and a gitignore pattern is literal about that space.
+# On 25 Aug 2026 it moved again, into " EXERCISE DATABASE/ EXERCISE PHOTO
+# LIBRARY", where the pictures sit beside the movements they illustrate.
+#
+# It is left here, matching nothing, as the honest record: roughly 160 MB of
+# source artwork IS tracked, which is most of the size of this repo. Taking it
+# out is a real decision with a real cost - the pictures would then live only
+# in Dropbox - so it is Nicolas's to make, not something to do quietly.
 EXERCISE LIBRARY/
 fitness-journey-update/
+
+# Excel's lock file, written while a workbook is open and deleted when it
+# closes. One was committed by accident and reappeared on every open.
+~$*.xlsx
 
 # Handoff links carry a person's answers and their program. Minted on demand
 # with tools/make-link.mjs; never committed.
 spine/programs/link.*.txt
+fitness-journey-site.zip

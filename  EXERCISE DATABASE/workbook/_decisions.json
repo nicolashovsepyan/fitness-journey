@@ -1,0 +1,423 @@
+{
+ "gym": {
+  "Barbell Bench Press": "yes",
+  "Incline Barbell Bench Press": "yes",
+  "Decline Barbell Bench Press": "yes",
+  "Dumbbell Bench Press": "yes",
+  "Incline Dumbbell Press": "yes",
+  "Dumbbell Floor Press": "no",
+  "Dumbbell Fly": "yes",
+  "Incline Dumbbell Fly": "yes",
+  "Cable Crossover": "yes",
+  "Low-to-High Cable Fly": "yes",
+  "Pec Deck": "yes",
+  "Chest Press Machine": "yes",
+  "Incline Chest Press Machine": "no",
+  "Smith Machine Bench Press": "no",
+  "Rack Pull": "yes",
+  "Barbell Bent-Over Row": "yes",
+  "Pendlay Row": "yes",
+  "T-Bar Row": "yes",
+  "Single-Arm Dumbbell Row": "yes",
+  "Chest-Supported Dumbbell Row": "yes",
+  "Seated Cable Row": "yes",
+  "Machine Row": "no",
+  "Lat Pulldown": "yes",
+  "Wide-Grip Lat Pulldown": "yes",
+  "Close-Grip Lat Pulldown": "yes",
+  "Straight-Arm Pulldown": "yes",
+  "Assisted Pull-Up Machine": "yes",
+  "Barbell Shrug": "yes",
+  "Dumbbell Shrug": "yes",
+  "Face Pull": "yes",
+  "Reverse Pec Deck": "yes",
+  "Barbell Overhead Press": "yes",
+  "Seated Dumbbell Shoulder Press": "yes",
+  "Arnold Press": "yes",
+  "Shoulder Press Machine": "yes",
+  "Dumbbell Lateral Raise": "yes",
+  "Cable Lateral Raise": "yes",
+  "Front Raise": "yes",
+  "Bent-Over Rear Delt Fly": "yes",
+  "Upright Row": "yes",
+  "Landmine Press": "yes",
+  "Barbell Curl": "yes",
+  "EZ-Bar Curl": "yes",
+  "Dumbbell Curl": "yes",
+  "Hammer Curl": "yes",
+  "Incline Dumbbell Curl": "yes",
+  "Preacher Curl": "yes",
+  "Concentration Curl": "yes",
+  "Cable Curl": "no",
+  "Triceps Pushdown (Bar)": "yes",
+  "Triceps Pushdown (Rope)": "yes",
+  "Overhead Triceps Extension": "yes",
+  "Skull Crusher": "yes",
+  "Close-Grip Bench Press": "yes",
+  "Triceps Dip Machine": "yes",
+  "Barbell Wrist Curl": "yes",
+  "Back Squat": "yes",
+  "Front Squat": "yes",
+  "Box Squat": "yes",
+  "Smith Machine Squat": "yes",
+  "Hack Squat": "yes",
+  "Leg Press": "yes",
+  "Belt Squat": "yes",
+  "Goblet Squat": "yes",
+  "Barbell Bulgarian Split Squat": "yes",
+  "Dumbbell Walking Lunge": "yes",
+  "Reverse Lunge": "yes",
+  "Dumbbell Step-Up": "yes",
+  "Leg Extension": "yes",
+  "Lying Leg Curl": "yes",
+  "Seated Leg Curl": "yes",
+  "Romanian Deadlift": "yes",
+  "Stiff-Leg Deadlift": "yes",
+  "Dumbbell Romanian Deadlift": "yes",
+  "Good Morning": "yes",
+  "Standing Calf Raise": "yes",
+  "Seated Calf Raise": "yes",
+  "Barbell Hip Thrust": "yes",
+  "Barbell Glute Bridge": "yes",
+  "Cable Glute Kickback": "yes",
+  "Hip Abduction Machine": "yes",
+  "Hip Adduction Machine": "yes",
+  "45-Degree Back Extension": "yes",
+  "Reverse Hyperextension": "yes",
+  "Power Clean": "yes",
+  "Hang Clean": "yes",
+  "Clean and Jerk": "yes",
+  "Snatch": "yes",
+  "Push Press": "yes",
+  "Push Jerk": "yes",
+  "Barbell High Pull": "yes",
+  "Cable Crunch": "yes",
+  "Machine Crunch": "no",
+  "Weighted Decline Sit-Up": "yes",
+  "Ab Wheel Rollout": "yes",
+  "Pallof Press": "yes",
+  "Landmine Twist": "yes",
+  "Weighted Russian Twist": "yes",
+  "Weighted Plank": "yes",
+  "Treadmill Run": "yes",
+  "Rowing Machine": "yes",
+  "Assault Bike": "yes",
+  "Ski Erg": "no",
+  "Stairmaster": "yes",
+  "Sled Push": "yes",
+  "Sled Drag": "yes",
+  "Battle Ropes": "yes",
+  "Farmer's Walk": "yes",
+  "Box Jump": "yes"
+ },
+ "gym_notes": {
+  "Barbell Bench Press": "close grip for tricep"
+ },
+ "kettlebell": {
+  "kb_deadlift": "yes",
+  "kb_suitcase_deadlift": "yes",
+  "kb_single_leg_deadlift": "yes",
+  "kb_rdl_double": "yes",
+  "kb_swing_two_hand": "yes",
+  "kb_swing_one_hand": "yes",
+  "kb_swing_hand_to_hand": "yes",
+  "kb_swing_double": "yes",
+  "kb_dead_stop_swing": "yes",
+  "kb_high_pull": "yes",
+  "kb_clean": "yes",
+  "kb_clean_double": "yes",
+  "kb_snatch": "yes",
+  "kb_goblet_squat": "yes",
+  "kb_prying_goblet_squat": "yes",
+  "kb_front_squat_single": "yes",
+  "kb_front_squat_double": "yes",
+  "kb_overhead_squat": "yes",
+  "kb_cossack_squat": "yes",
+  "kb_lateral_lunge_goblet": "yes",
+  "kb_pistol_squat": "yes",
+  "kb_reverse_lunge_racked": "yes",
+  "kb_walking_lunge_goblet": "yes",
+  "kb_reverse_lunge_overhead": "yes",
+  "kb_tactical_lunge": "yes",
+  "kb_press_military": "yes",
+  "kb_press_double": "yes",
+  "kb_seesaw_press": "yes",
+  "kb_push_press": "yes",
+  "kb_jerk": "yes",
+  "kb_half_kneeling_press": "yes",
+  "kb_bottoms_up_press": "yes",
+  "kb_sots_press": "yes",
+  "kb_floor_press": "yes",
+  "kb_floor_press_double": "yes",
+  "kb_crush_press": "yes",
+  "kb_pushup_on_bells": "yes",
+  "kb_bent_row": "yes",
+  "kb_bent_row_double": "yes",
+  "kb_gorilla_row": "yes",
+  "kb_renegade_row": "yes",
+  "kb_floor_pullover": "yes",
+  "kb_farmer_carry": "yes",
+  "kb_suitcase_carry": "yes",
+  "kb_racked_carry": "yes",
+  "kb_overhead_carry": "yes",
+  "kb_bottoms_up_carry": "yes",
+  "kb_mixed_carry": "yes",
+  "kb_turkish_get_up": "yes",
+  "kb_half_get_up": "yes",
+  "kb_arm_bar": "yes",
+  "kb_overhead_hold": "yes",
+  "kb_windmill": "yes",
+  "kb_bent_press": "yes",
+  "kb_halo": "yes",
+  "kb_around_the_body_pass": "yes",
+  "kb_figure_eight": "yes",
+  "kb_clean_and_press": "yes",
+  "kb_long_cycle": "yes",
+  "kb_thruster": "yes",
+  "kb_devils_press": "yes",
+  "kb_man_maker": "yes"
+ },
+ "complexes": {},
+ "calibration": {
+  "Bodyweight Squat": {
+   "beg": 20,
+   "int": 50,
+   "adv": 100
+  },
+  "Burpee": {
+   "beg": 10,
+   "int": 25,
+   "adv": 50
+  },
+  "Dead Hang": {
+   "beg": 30,
+   "int": 75,
+   "adv": 120
+  },
+  "Dip": {
+   "beg": 10,
+   "int": 20,
+   "adv": 40
+  },
+  "Dragon Flag (Tuck)": {
+   "beg": 20,
+   "int": 45,
+   "adv": 75
+  },
+  "Forearm Plank": {
+   "beg": 60,
+   "int": 120,
+   "adv": 180
+  },
+  "Freestanding HS": {
+   "beg": 3,
+   "int": 10,
+   "adv": 30
+  },
+  "Full Front Lever": {
+   "beg": null,
+   "int": 5,
+   "adv": 10
+  },
+  "Handstand Push-Up": {
+   "beg": null,
+   "int": 5,
+   "adv": 10
+  },
+  "Hanging Leg Raise": {
+   "beg": 8,
+   "int": 15,
+   "adv": 30
+  },
+  "Hollow Hold": {
+   "beg": 30,
+   "int": 60,
+   "adv": 120
+  },
+  "Jump Squats": {
+   "beg": 10,
+   "int": 25,
+   "adv": 40
+  },
+  "L-Sit Hold": {
+   "beg": 10,
+   "int": 20,
+   "adv": 45
+  },
+  "Muscle-Up (Bar)": {
+   "beg": null,
+   "int": 3,
+   "adv": null
+  },
+  "Pike Push-Up": {
+   "beg": 3,
+   "int": 10,
+   "adv": 20
+  },
+  "Pseudo Planche Push-Up": {
+   "beg": null,
+   "int": 5,
+   "adv": 10
+  },
+  "Pull-Up": {
+   "beg": 7,
+   "int": 15,
+   "adv": 25
+  },
+  "Push-ups": {
+   "beg": 20,
+   "int": 45,
+   "adv": 75
+  },
+  "Ring Dip": {
+   "beg": 5,
+   "int": 10,
+   "adv": 20
+  },
+  "V-Sit": {
+   "beg": 10,
+   "int": 30,
+   "adv": 60
+  },
+  "Wall Handstand": {
+   "beg": 30,
+   "int": 60,
+   "adv": 120
+  },
+  "Weighted Chin-Up": {
+   "beg": 5,
+   "int": 8,
+   "adv": 15
+  },
+  "Wide Inverted Row": {
+   "beg": 5,
+   "int": 15,
+   "adv": 30
+  }
+ },
+ "cards": {},
+ "movement_edits": {},
+ "nick_notes": {
+  "Dead hang -> negative pull-up": {
+   "note": "Deadhang is one, and pull ups we need to get them redy for. It should always be part of fundementals but with a regression if they cant do one. Banded, assited, negtiveetc\u2026 this is how we need to seee our fundememtals. Main exercise and regression / progression on level of user. thsi could be applied, maybe not to all types but to some. and when its possible we should.",
+   "call": "take yours"
+  },
+  "Hollow hold + hollow rock": {
+   "note": "just take hollow hold or hollow crunch (reps)",
+   "call": "take yours"
+  },
+  "Joint prep - CARs circuit": {
+   "note": "this has to be replaced with one very good overall mobility exercise (like best stretch in the wrold or something similar, doable for a beginner)",
+   "call": "take yours"
+  },
+  "Ring dip / ring push-up": {
+   "note": "This should be Dip as the fundemental exercises, and regression and progressions whoudl bring us to hard dips like ring dips, and others.",
+   "call": null
+  },
+  "Plank": {
+   "note": "not sure, maybe i would take on a more important core than this one, actually the other core fundemental i want is dragon flag, and i want us to create a good regression for beginners to start getting working towards it and also a good prgoression for very advanced",
+   "call": null
+  },
+  "Dead bug": {
+   "note": "this is to get us ready for the hollow hold, because thats the fundemental i want to work on and regress and progress from.",
+   "call": null
+  },
+  "Bodyweight Hip Hinge": "Not sure what the main movement is.. Is this for the glutes? If this is for glutes, what is the single most effective movement that can give results and that we should all master? And what is its regressions and progrsssions, deadlift can be hard on the back, so i would pick a better more targeted killer that helps in mobility as well if possible and that can be done from beg. to expert.",
+  "Nordic Curl": "for the quad work, I really like spanish squats, look into it, and dd it to our list",
+  "Push-Up": "i want to add, deadstop push-ups, which are a hard variation and also straight bar push-ups which is slightly easier (because usually on a small incline, or parralettes.",
+  "Tuck Planche": "this is not a fundemental unless you are into claisthenics. Fundementals need to be the foerever exercises we need to master in order to workout and stay fit",
+  "Inverted Row": "yes good, but i feel like in the gym version its more like the cable row machine that matches this - with a wide grip or other grip depending on variation, and to bellybutton or to chest also is other variations to mtach.",
+  "Tuck Front Lever": "I just want to make sure and not sure whcih is whcih but the front lever banded raises, so reps essentially is a really good one that i would probably put in my fundementals for all (or pullovers/pulldowns",
+  "Half-Kneeling Rotation": "Not sure what this exercise is, and if it should be the core fundemental, maybe a variation, and the options you are giving, are they really rotational? What is rotational? What are we really targeting? I need you to rework this",
+  "Farmer Carry": "isnt suit case carry harder then farmers carry(in terms of stabilizing) maybe not in weight..",
+  "Burpee": "you should add navyseal 5 pumps and 7pumps as they are harder variations",
+  "Jump Squat": "there is also reverse lunge jump squats, and there is also the lateral jumps that could be a variiation i just dont know the name"
+ },
+ "calibration_weights": {
+  "Weighted Chin-Up": {
+   "beg": 25,
+   "int": 45,
+   "adv": 90
+  },
+  "Power Clean": {
+   "beg": 95,
+   "int": 155,
+   "adv": 205
+  },
+  "Farmer's Carry (no straps)": {
+   "beg": 90,
+   "int": 180,
+   "adv": 270
+  },
+  "Turkish Get-Up": {
+   "beg": 20,
+   "int": 35,
+   "adv": 53
+  },
+  "Kettlebell Swing": {
+   "beg": 35,
+   "int": 53,
+   "adv": 70
+  },
+  "Kettlebell Bent-Over Row": {
+   "beg": 35,
+   "int": 53,
+   "adv": 70
+  },
+  "Kettlebell Clean": {
+   "beg": 26,
+   "int": 44,
+   "adv": 62
+  },
+  "Kettlebell Farmer Carry": {
+   "beg": 90,
+   "int": 180,
+   "adv": 270
+  },
+  "Kettlebell Military Press": {
+   "beg": 26,
+   "int": 44,
+   "adv": 62
+  },
+  "Kettlebell Overhead Press": {
+   "beg": 26,
+   "int": 44,
+   "adv": 62
+  },
+  "Kettlebell Romanian Deadlift": {
+   "beg": 44,
+   "int": 70,
+   "adv": 106
+  },
+  "Kettlebell Snatch": {
+   "beg": 26,
+   "int": 44,
+   "adv": 53
+  },
+  "Two-Hand Swing": {
+   "beg": 35,
+   "int": 53,
+   "adv": 70
+  },
+  "Weighted Pull-Up": {
+   "beg": 25,
+   "int": 45,
+   "adv": 90
+  },
+  "Jefferson Curl": {
+   "beg": 15,
+   "int": 25,
+   "adv": 45
+  },
+  "Man-Maker": {
+   "beg": 20,
+   "int": 35,
+   "adv": 50
+  }
+ },
+ "_calibration_note": "Restored 20 Aug. A build shipped the CALIBRATION sheet pre-filled with proposed values and the extractor briefly read them back as Nicolas's own. These 23 are his, verbatim, from the 19 Aug extraction. The extractor now keys off the Source column so it cannot recur.",
+ "nick_notes_general": [
+  "you need to add the body parts that we target.",
+  "also you need to add the youtube links so i can see the movement. Also once we settle you need to add the cues for these exercises and what we target needs to be clear and simple"
+ ]
+}

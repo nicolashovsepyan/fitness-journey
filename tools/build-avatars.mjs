@@ -2,7 +2,8 @@
    BUILD AVATARS — slice the body-type sheets into the survey.
 
    Run:  node tools/build-avatars.mjs ["<sheets folder>"]
-   Default folder: "EXERCISE LIBRARY" (and one level below it)
+   Default folder: the artwork folder named in tools/paths.mjs (and one
+   level below it)
 
    Nicolas renders one sheet per sex per age band: five figures in a
    row, transparent background, no labels. This script finds the five
@@ -39,27 +40,12 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync, readdirSync, statSync, mkdirSync, rmSync } from 'node:fs';
 import { join, dirname, basename } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { ROOT, artwork, must } from './paths.mjs';
 
-const ROOT = fileURLToPath(new URL('..', import.meta.url));
-
-/* Find a folder by name, tolerating a leading/trailing space or different
-   case. Both "EXERCISE LIBRARY" and "FOR NICOLAS" turned up one day renamed
-   to " EXERCISE LIBRARY" and " FOR NICOLAS" — a space in front sorts them to
-   the top of Finder, which is a perfectly reasonable thing to want and used
-   to break every script here with ENOENT. */
-function resolveDir(parent, wanted) {
-  const want = wanted.trim().toLowerCase();
-  const exact = join(parent, wanted);
-  try { if (statSync(exact).isDirectory()) return exact; } catch {}
-  for (const name of readdirSync(parent)) {
-    if (name.trim().toLowerCase() !== want) continue;
-    const full = join(parent, name);
-    try { if (statSync(full).isDirectory()) return full; } catch {}
-  }
-  return exact;   // let the caller fail with a clear path
-}
-const SRC_DIR = process.argv[2] || resolveDir(ROOT, 'EXERCISE LIBRARY');
+/* Where the artwork lives is decided in ONE file, tools/paths.mjs, because
+   it has moved once already and five tools each had their own copy of the
+   answer. Pass a folder as the first argument to override it. */
+const SRC_DIR = process.argv[2] || must(artwork(), 'artwork');
 const PAGE = join(ROOT, 'onboarding.html');
 const OUT_DIR = join(ROOT, 'images', 'avatars');
 
@@ -134,9 +120,9 @@ function verticalExtent(rgba, w, h) {
   return { top, bot };
 }
 
-/* Look in the folder and one level down. The sheets have arrived in both
-   "EXERCISE LIBRARY" and "EXERCISE LIBRARY/Body Shape", and which one a
-   render lands in is not something worth having to remember. */
+/* Look in the folder and one level down. The sheets have arrived both loose
+   in the artwork folder and inside its "Body Shape" subfolder, and which one
+   a render lands in is not something worth having to remember. */
 function findSheets(dir, depth = 1) {
   const out = [];
   for (const name of readdirSync(dir, { withFileTypes: true })) {

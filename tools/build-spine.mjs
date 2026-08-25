@@ -12,7 +12,7 @@
      1. js/data/exercises.js (+ -gym)  the movement database, 288 entries
      2. dashboard.html `EX`            hand-written coaching copy
      3. images/exercises/*.png         artwork that is finished
-     4. " EXERCISE LIBRARY"/*.png      artwork drawn but not yet cropped in
+     4. the artwork folder /*.png    artwork drawn but not yet cropped in
      5. " FOR NICOLAS"/BENCHMARKS-*.csv the rank thresholds
 
    THE ALIAS TABLES BELOW ARE BY HAND, ON PURPOSE — the same reasoning
@@ -21,11 +21,17 @@
    the wrong cue on the wrong exercise, which is worse than a gap.
    ============================================================ */
 import { readFileSync, writeFileSync, readdirSync, mkdirSync, existsSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+import { join } from 'node:path';
+import { ROOT, artwork, nicolas } from './paths.mjs';
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const p = (...x) => join(ROOT, ...x);
+
+/* The two folders outside the repo's own structure. Where they are is
+   decided in ONE file, tools/paths.mjs, because both have moved. Null when
+   missing, and every read below already guards for that: this script must
+   still run for somebody who has the code and not the artwork. */
+const ART = artwork();
+const NICO = nicolas();
 
 /* ------------------------------------------------------------
    1 · ALIASES — every id any surface has ever used for a movement,
@@ -77,7 +83,7 @@ const BENCH_ALIAS = {
   'L-Sit':'l_sit', 'Muscle-Up':'muscle_up_bar', 'Nordic Curl':'nordic_curl'
 };
 
-/* artwork in " EXERCISE LIBRARY" that is drawn but not yet cropped into
+/* artwork in the folder named by tools/paths.mjs, drawn but not yet cropped into
    images/exercises. Hand-mapped for the same reason as everything else. */
 const SOURCE_ART = {
   wall_sit:'wall-sit-anime.png',
@@ -120,7 +126,8 @@ function readDashboardCopy() {
 function readBenchmarks() {
   const out = {};
   for (const sex of ['Male', 'Female']) {
-    const f = p(' FOR NICOLAS', `BENCHMARKS - ${sex}.csv`);
+    const f = NICO && join(NICO, `BENCHMARKS - ${sex}.csv`);
+    if (!f) { console.warn('  ! no FOR NICOLAS folder - benchmarks skipped'); return out; }
     if (!existsSync(f)) { console.warn('  ! missing', f); continue; }
     const [head, ...rows] = readFileSync(f, 'utf8').trim().split('\n');
     const cols = head.split(',');
@@ -143,8 +150,8 @@ const BENCH = readBenchmarks();
 const DRAWN = existsSync(p('images/exercises'))
   ? new Set(readdirSync(p('images/exercises')).filter(f => f.endsWith('.png')).map(f => f.replace('.png', '')))
   : new Set();
-const LIBRARY = existsSync(p(' EXERCISE LIBRARY'))
-  ? new Set(readdirSync(p(' EXERCISE LIBRARY')).filter(f => f.endsWith('.png')))
+const LIBRARY = ART && existsSync(ART)
+  ? new Set(readdirSync(ART).filter(f => f.endsWith('.png')))
   : new Set();
 
 /* ------------------------------------------------------------

@@ -1793,7 +1793,7 @@ function sh(hex, dL, dS){
 
 var PLATE = { 5:{r:15,t:4.5}, 10:{r:19,t:5.6}, 20:{r:25,t:6.5} };
 var GAPP = 1.2;                /* air between neighbouring plates */
-var GRIP = 22;                 /* half the exposed handle - the one live dial */
+var GRIP = 22;                 /* half the exposed handle — the one live dial */
 var COLLAR = 6;                /* bar left proud of the outermost plate */
 
 /* ==========================================================================
@@ -1801,7 +1801,7 @@ var COLLAR = 6;                /* bar left proud of the outermost plate */
    ========================================================================== */
 var LOCK = {
   yaw:   17,      /* degrees on the floor. Mirrored to 180-17 on the right. */
-  depth: 0.50,    /* eye height - how much of a unit of depth you see */
+  depth: 0.50,    /* eye height — how much of a unit of depth you see */
   gap:   120,     /* floor between the two, about a foot */
   pair:  true,
   floor: true
@@ -2050,7 +2050,7 @@ function plusGlyph(x, y, r){
    ========================================================================== */
 var BAR = {
   shaftR:    3.40,   /* 28mm across the grip */
-  sleeveR:   6.07,   /* 50mm across the sleeve - 1.79x */
+  sleeveR:   6.07,   /* 50mm across the sleeve — 1.79x */
   shaftHalf: 159,    /* centre to collar: half of 1310mm */
   sleeveLen: 101,    /* 415mm of loadable sleeve */
   self:      45      /* the bar weighs 45 on its own */
@@ -2416,7 +2416,7 @@ function beltSceneSVG(total, o){
   var chainW = BORE * 1.3 * sc;
   var chainCol = sh(C.handle, -6);
 
-  var belt = '';   /* the beam is gone - the chain fades out instead */
+  var belt = '';   /* the beam is gone — the chain fades out instead */
 
   /* THE LOOP. One chain, three legs: down from the beam, along the bore axis
      THROUGH every plate on the stack, and back up to the beam. The middle leg
@@ -2756,7 +2756,7 @@ var KETTLEBELL = {
   id: 'k',
   size: 165,          /* drawn height in user units at KBMAX */
   growth: 1/3,        /* mass -> length exponent; see kbScale */
-  count: 'one',       /* 'one' | 'pair' - a kettlebell is usually alone */
+  count: 'one',       /* 'one' | 'pair' — a kettlebell is usually alone */
   gap: 40,            /* floor between a pair, in user units */
   mirror: true,       /* flip the second one, as the dumbbell pair does */
   wide: 1,            /* horizontal stretch, 1 = the artwork's own proportion */
@@ -2764,16 +2764,16 @@ var KETTLEBELL = {
   depth: 0.36,        /* shadow foreshortening, matches the dumbbell's floor */
   tint: true,
   dark: '#20242a',    /* what black in the source becomes */
-  light: '#95A1AE',   /* what white becomes - the two ends of the facet ramp */
+  light: '#95A1AE',   /* what white becomes — the two ends of the facet ramp */
   stretch: 2.96,      /* 255/(97-11): opens the crushed source back up */
   black: 0.128,       /* 11/255 * stretch: where the ramp starts */
   numbers: true,
-  numX: 0.7963,       /* medallion centre, fraction of the drawn box - measured */
+  numX: 0.7963,       /* medallion centre, fraction of the drawn box — measured */
   numY: 0.7031,
   numSize: 0.115,     /* digit height as a fraction of drawn height */
   squash: 0.724,      /* measured: the medallion is turning away from us */
-  tilt: -12,          /* NOT measured - see the note in kettlebellSceneSVG */
-  numFill: '#FFFFFF',   /* the plates' numbers are white too - one family */
+  tilt: -12,          /* NOT measured — see the note in kettlebellSceneSVG */
+  numFill: '#FFFFFF',   /* the plates' numbers are white too — one family */
   numOpacity: 0.92,
 };
 var KBMAX  = 100;
@@ -4340,7 +4340,7 @@ function hero(s){
         <!-- The glare. Light coming OFF the dumbbell and landing on the tube,
              so it is its own blurred overlay fading to nothing a little above
              and below the bar line, rather than a white stop inside the pink.
-             y=100 is where the bar crosses the two sides - measured. -->
+             y=100 is where the bar crosses the two sides — measured. -->
         <linearGradient id="triGlare" gradientUnits="userSpaceOnUse" x1="0" y1="70" x2="0" y2="132">
           <stop offset="0%"   stop-color="#FFFFFF" stop-opacity="0"/>
           <stop offset="34%"  stop-color="#FFFFFF" stop-opacity=".55"/>
@@ -4350,7 +4350,7 @@ function hero(s){
         </linearGradient>
       </defs>
       <!-- Not a closed triangle. It starts at x=100 on the top edge, runs
-           right, down to the apex, back up the left side and stops at x=60 - 
+           right, down to the apex, back up the left side and stops at x=60 —
            leaving a 40-unit break in the top-left, the way a neon tube in a
            real sign has a dark segment. Drawn as one open path rather than
            faked with a dash gap, so the draw-in animation still works and
@@ -4375,7 +4375,7 @@ function hero(s){
             <stop offset="100%" stop-color="#34B396"/>
           </linearGradient>
           <!-- The bar carries the same colour as everything else, but its middle
-               falls away to nothing. Not a cut - the ends hold full weight, then
+               falls away to nothing. Not a cut — the ends hold full weight, then
                dissolve, so the two halves read as one object with air in it.
                Colours are sampled off dbGrad at the same x, so the seam is invisible. -->
           <linearGradient id="dbBar" gradientUnits="userSpaceOnUse" x1="86" y1="0" x2="174" y2="0">

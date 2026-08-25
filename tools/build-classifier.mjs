@@ -28,26 +28,13 @@
    the database directly; a tool that edits the source under you is a tool
    you cannot trust.
    ============================================================ */
-import { writeFileSync, existsSync, statSync, readdirSync, mkdirSync } from 'node:fs';
+import { writeFileSync, existsSync, readdirSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { pathToFileURL } from 'node:url';
+import { ROOT, nicolas, must } from './paths.mjs';
 
-const ROOT = fileURLToPath(new URL('..', import.meta.url));
-
-/* Same tolerance as the other tools — the folder has turned up renamed with
-   a leading space more than once, and it is a reasonable thing to want. */
-function resolveDir(parent, wanted) {
-  const want = wanted.trim().toLowerCase();
-  const exact = join(parent, wanted);
-  try { if (statSync(exact).isDirectory()) return exact; } catch {}
-  for (const name of readdirSync(parent)) {
-    if (name.trim().toLowerCase() !== want) continue;
-    const full = join(parent, name);
-    try { if (statSync(full).isDirectory()) return full; } catch {}
-  }
-  return exact;
-}
-const OUT_DIR = resolveDir(ROOT, 'FOR NICOLAS');
+/* Where "FOR NICOLAS" is, is decided in ONE file, tools/paths.mjs. */
+const OUT_DIR = must(nicolas(), 'FOR NICOLAS');
 const OUT = join(OUT_DIR, 'EXERCISE CLASSIFIER.html');
 
 /* Import the database rather than parse it. A regex over the source is what

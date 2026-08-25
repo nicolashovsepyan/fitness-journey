@@ -21,6 +21,9 @@ EXERCISE DATABASE/
     dashboard.template.html  the dashboard's source
     gym-library-seed.json    the 110 proposed classic-gym movements
     fundamentals.json        the 15 / 30 / 50 list, from FOR NICOLAS/FUNDAMENTALS.md
+    kettlebell-library.json  62 researched bell movements + tracks + complexes
+    new-movements.mjs        turns those two libraries into full records
+    extract-decisions.py     YOUR ANSWERS -> _decisions.json (run before any rebuild)
 ```
 
 ---
@@ -38,7 +41,7 @@ see why this rebuild matters.
 | **START HERE** | Curation state, coverage per profile, your task list |
 | **MOVEMENTS** | All 307, one row each, every field. Dropdowns on every list column |
 | **TRACKS** | Progression chains, easiest → hardest. Gaps are marked |
-| **CALIBRATION** | Blank on purpose. This is the batch job that is yours |
+| **CALIBRATION** | Rescoped — fundamentals + kettlebell core only (78 rows, not 267), now with weight columns |
 | **FUNDAMENTALS** | The 15 / 30 / 50 we promise to teach. Cards and artwork attach here |
 | **GYM LIBRARY** | The parallel classic-gym build. Say yes / no / later per line |
 | **LISTS** | The allowed values. Anything outside them fails the build |
@@ -53,20 +56,32 @@ see why this rebuild matters.
 
 ---
 
-## The three disciplines
+## Modality and functional — two questions, not one
 
-A new axis, per your note. Every movement carries exactly one.
+The single `discipline` field was wrong and has been replaced. A push-up is
+bodyweight **and** functional. A kettlebell swing is functional but not
+calisthenics. A pec deck is neither. One field could not hold both facts.
 
-| Discipline | What it is | Count today |
+| Modality | Count | Functional |
 |---|---|---|
-| **Calisthenics** | Bodyweight strength. **The only one that also holds skills** | 236 |
-| **Functional** | Loaded real-world patterns — kettlebell, carries, get-ups, complexes | 37 |
-| **Gym** | Barbell, dumbbell, cable, machine. Predictable load, small increments | 34 |
+| **Bodyweight** | 237 | 218 — and the only world that holds **skills** (73) |
+| **Kettlebell** | 72 | 70 |
+| **Barbell** | 43 | 34 |
+| **Dumbbell** | 41 | 26 |
+| **Machine** | 32 | 0 — never functional, never the default |
+| **Cable** | 12 | 0 |
+| **Band** | 11 | 9 |
 
-Skills — handstand, planche, front lever, muscle-up, L-sit — are a flag inside
-calisthenics (`Skill?` column), not a fourth discipline. That is what your
-sentence described, and it keeps the placement rule clean: skill *practice*
-needs a fresh nervous system, skill *strength* can go anywhere.
+"Calisthenics" is not a field: it is `modality: bodyweight`, mostly functional,
+with the skill subset on top.
+
+### Bridges — honour the choice, introduce the fundamental later
+
+66 movements now carry a `bridges_to` link: the fundamental we intend to bring
+the person to. Bench press → push-up. Lat pulldown → pull-up. Leg press →
+bodyweight squat. This is the mechanism behind the rule — give them the bench
+press in programme 1, bring the push-up in on programme 2 or 3, never swap
+abruptly.
 
 ---
 
@@ -113,12 +128,14 @@ progression chain.
 
 | Area | Movements | State |
 |---|---|---|
-| Core | 78 | **done** |
-| Push | 96 | **done** |
-| Pull | 71 | to do |
-| Lower body | 39 | to do — and it was never really started |
-| Full body / conditioning | 5 | to do — barely exists |
+| Core | 89 | **done** |
+| Push | 132 | **done** |
+| Pull | 99 | to do |
+| Lower body | 92 | to do — and it was never really started |
+| Full body / conditioning | 19 | to do |
 | Mobility / prep | 18 | to do |
+
+**452 movements** as of 2026-08-17 — 307 original, +50 kettlebell, +88 gym.
 
 ---
 
@@ -126,12 +143,19 @@ progression chain.
 
 Ozzy's kit is a kettlebell, a bench and a mat.
 
-**The database holds zero pulling movements he can perform.** Not few — none.
-Bodyweight-only is also zero. Every pull-free session he has been given was
-pull-free because there was nothing to give him, and nothing in the app said so.
+**It used to hold zero pulling movements he could perform.** The kettlebell
+library fixed that: he now has 6 — bent-over row, double row, gorilla row,
+renegade row, floor pullover and the man maker.
 
-Add a pull-up bar in the dashboard and Pull goes from 0 to 34. That single
-toggle is the argument for this whole rebuild.
+Six is still below the floor of twelve, and the reason is not laziness. **A
+kettlebell cannot do a vertical pull.** There is no way to load shoulder
+adduction without a bar; StrongFirst say so themselves. The floor pullover is
+the closest and caps out light. So the app has to state this rather than
+quietly score a bells-only profile as balanced.
+
+Add a pull-up bar in the dashboard and Pull goes 6 → 40. **Bodyweight-only is
+still zero** — that is what the bar-free pull job (table row, towel row,
+backpack row) is for.
 
 ---
 
@@ -157,11 +181,16 @@ If `js/data/exercises.js` changes, regenerate from the repo root:
 node "EXERCISE DATABASE/tools/derive.mjs" && python3 "EXERCISE DATABASE/tools/build-workbook.py" && python3 "EXERCISE DATABASE/tools/build-dashboard.py"
 ```
 
-⚠️ **This overwrites `EXERCISES.xlsx`.** Safe today, because nothing has been
-edited by hand yet. The moment you start editing, the direction reverses: the
-workbook becomes the source of truth and a new tool generates `exercises.js`
-from it. Tell me when you have started and I will build that half and remove
-this footgun.
+**Your answers are now safe from rebuilds.** `extract-decisions.py` pulls
+everything you type into `_decisions.json`, which the generator reads and never
+writes. The rebuild re-injects your answers. The full command:
+
+```bash
+python3 "EXERCISE DATABASE/tools/extract-decisions.py" && node "EXERCISE DATABASE/tools/derive.mjs" && python3 "EXERCISE DATABASE/tools/build-workbook.py" && python3 "EXERCISE DATABASE/tools/build-dashboard.py"
+```
+
+Close Excel first — a workbook open in Excel does not have your latest keystrokes
+on disk.
 
 ---
 

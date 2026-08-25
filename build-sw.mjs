@@ -35,7 +35,12 @@ const KEEP_EXT = /\.(html|css|js|mjs|png|svg|webmanifest|json|woff2?)$/i;
    in the shell, and site/ alone was 111 of the 217 files a phone had to
    download before the app would open — every one of them a stale duplicate
    of a file sitting at the root. */
-const SKIP_PREFIX = ['test/', 'docs/', 'ARCHIVE/', 'site/'];
+const SKIP_PREFIX = ['test/', 'docs/', 'ARCHIVE/', 'site/',
+  /* The exercise database is an AUTHORING surface, not part of the app: the
+     workbook, the derived JSON and the build tools. dist/ is what gets
+     uploaded, so shipping half a megabyte of internal data to a public URL
+     is both a waste and a leak. The app reads spine/*.json, never this. */
+  'EXERCISE DATABASE/', ' EXERCISE DATABASE/'];
 
 /* The file list comes from GIT, not from the disk.
 

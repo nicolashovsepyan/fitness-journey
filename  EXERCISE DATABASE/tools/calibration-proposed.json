@@ -1,0 +1,520 @@
+{
+ "_what": "A proposed entry/solid/strong number for every fundamental. Nicolas's own answers always win; these fill the gaps so nothing is blank by morning.",
+ "_meaning": "entry = the day you first own the movement. solid = you train it comfortably. strong = you have mastered it. This is about the MOVEMENT, not the person.",
+ "_units": "reps | reps_per_side | secs. wt_* are lbs and only apply to loaded movements.",
+ "_sources": "Triangulated calisthenics standards (memory/calisthenics_benchmarks_research.md), BENCHMARKS - Male.csv, and 2026-08 web checks for plank/push-up/dead-hang/L-sit.",
+ "values": {
+  "Bodyweight Squat": [
+   15,
+   40,
+   80,
+   "reps"
+  ],
+  "Bodyweight Hip Hinge": [
+   15,
+   30,
+   50,
+   "reps"
+  ],
+  "Reverse Lunge": [
+   8,
+   15,
+   25,
+   "reps_per_side"
+  ],
+  "Push-ups": [
+   5,
+   25,
+   50,
+   "reps"
+  ],
+  "Pike Push-Up": [
+   3,
+   12,
+   25,
+   "reps"
+  ],
+  "Wide Inverted Row": [
+   5,
+   18,
+   35,
+   "reps"
+  ],
+  "Dead Hang": [
+   20,
+   60,
+   120,
+   "secs"
+  ],
+  "Negative Pull-Up": [
+   3,
+   8,
+   15,
+   "reps"
+  ],
+  "Farmer's Carry (no straps)": [
+   30,
+   60,
+   120,
+   "secs"
+  ],
+  "Jump Squats": [
+   8,
+   20,
+   35,
+   "reps"
+  ],
+  "Burpee": [
+   8,
+   20,
+   40,
+   "reps"
+  ],
+  "Forearm Plank": [
+   30,
+   90,
+   150,
+   "secs"
+  ],
+  "Side Plank": [
+   20,
+   60,
+   100,
+   "secs_per_side"
+  ],
+  "Dead Bug": [
+   8,
+   16,
+   30,
+   "reps_per_side"
+  ],
+  "Half-Kneeling Rotation": [
+   8,
+   15,
+   25,
+   "reps_per_side"
+  ],
+  "Deep Squat Rocks": [
+   null,
+   null,
+   null,
+   "mobility \u2014 do not calibrate"
+  ],
+  "Bulgarian Split Squat": [
+   8,
+   15,
+   25,
+   "reps_per_side"
+  ],
+  "Box Pistol Squat": [
+   3,
+   8,
+   15,
+   "reps_per_side"
+  ],
+  "Nordic Curl": [
+   1,
+   4,
+   8,
+   "reps"
+  ],
+  "Cossack Squat": [
+   5,
+   12,
+   20,
+   "reps_per_side"
+  ],
+  "Pull-Up": [
+   3,
+   10,
+   20,
+   "reps"
+  ],
+  "Dip": [
+   4,
+   14,
+   25,
+   "reps"
+  ],
+  "Pseudo Planche Push-Up": [
+   3,
+   8,
+   18,
+   "reps"
+  ],
+  "Wall Handstand": [
+   20,
+   45,
+   90,
+   "secs"
+  ],
+  "Hollow Hold": [
+   20,
+   45,
+   90,
+   "secs"
+  ],
+  "Hollow Rock": [
+   8,
+   20,
+   40,
+   "reps"
+  ],
+  "Hanging Leg Raise": [
+   3,
+   10,
+   20,
+   "reps"
+  ],
+  "Tuck L-Sit": [
+   15,
+   30,
+   60,
+   "secs"
+  ],
+  "Kettlebell Swing": [
+   15,
+   30,
+   50,
+   "reps"
+  ],
+  "Turkish Get-Up": [
+   2,
+   5,
+   10,
+   "reps_per_side"
+  ],
+  "Box Jump": [
+   5,
+   12,
+   20,
+   "reps"
+  ],
+  "Kettlebell Windmill": [
+   5,
+   10,
+   15,
+   "reps_per_side"
+  ],
+  "Thoracic Rotations": [
+   null,
+   null,
+   null,
+   "mobility \u2014 do not calibrate"
+  ],
+  "Pistol Squat": [
+   1,
+   5,
+   12,
+   "reps_per_side"
+  ],
+  "Shrimp Squat": [
+   1,
+   5,
+   10,
+   "reps_per_side"
+  ],
+  "Archer Pull-Up": [
+   1,
+   4,
+   8,
+   "reps_per_side"
+  ],
+  "Muscle-Up (Bar)": [
+   1,
+   3,
+   8,
+   "reps"
+  ],
+  "Weighted Pull-Up": [
+   3,
+   6,
+   10,
+   "reps"
+  ],
+  "Weighted Dip": [
+   4,
+   8,
+   12,
+   "reps"
+  ],
+  "Front Lever Tuck": [
+   8,
+   20,
+   40,
+   "secs"
+  ],
+  "Freestanding HS": [
+   3,
+   15,
+   45,
+   "secs"
+  ],
+  "Handstand Push-Up": [
+   1,
+   4,
+   10,
+   "reps"
+  ],
+  "One-Arm Push-Up": [
+   1,
+   4,
+   10,
+   "reps_per_side"
+  ],
+  "Ring Dip": [
+   3,
+   10,
+   18,
+   "reps"
+  ],
+  "L-Sit": [
+   10,
+   25,
+   50,
+   "secs"
+  ],
+  "V-Sit": [
+   3,
+   10,
+   25,
+   "secs"
+  ],
+  "Dragon Flag": [
+   1,
+   4,
+   8,
+   "reps"
+  ],
+  "Planche Lean": [
+   10,
+   20,
+   30,
+   "secs"
+  ],
+  "Tuck Planche Hold": [
+   5,
+   12,
+   25,
+   "secs"
+  ],
+  "Power Clean": [
+   3,
+   6,
+   10,
+   "reps"
+  ],
+  "Man-Maker": [
+   4,
+   10,
+   18,
+   "reps"
+  ],
+  "Jefferson Curl": [
+   5,
+   8,
+   12,
+   "reps"
+  ],
+  "Two-Hand Swing": [
+   20,
+   40,
+   60,
+   "reps"
+  ],
+  "Kettlebell Goblet Squat": [
+   10,
+   20,
+   35,
+   "reps"
+  ],
+  "Goblet Squat": [
+   10,
+   20,
+   35,
+   "reps"
+  ],
+  "Kettlebell Clean": [
+   8,
+   15,
+   25,
+   "reps_per_side"
+  ],
+  "Kettlebell Military Press": [
+   5,
+   10,
+   18,
+   "reps_per_side"
+  ],
+  "Kettlebell Overhead Press": [
+   5,
+   10,
+   18,
+   "reps_per_side"
+  ],
+  "Kettlebell Snatch": [
+   5,
+   12,
+   20,
+   "reps_per_side"
+  ],
+  "Kettlebell Bent-Over Row": [
+   8,
+   15,
+   25,
+   "reps_per_side"
+  ],
+  "Kettlebell Romanian Deadlift": [
+   10,
+   20,
+   30,
+   "reps"
+  ],
+  "Kettlebell Farmer Carry": [
+   30,
+   60,
+   120,
+   "secs"
+  ],
+  "Full Front Lever": [
+   2,
+   5,
+   12,
+   "secs"
+  ],
+  "Weighted Chin-Up": [
+   3,
+   6,
+   10,
+   "reps"
+  ]
+ },
+ "weights_lbs": {
+  "Weighted Pull-Up": [
+   25,
+   45,
+   90,
+   "added load; +50% bodyweight for 1 rep is the advanced marker"
+  ],
+  "Weighted Dip": [
+   25,
+   55,
+   100,
+   "added load"
+  ],
+  "Kettlebell Swing": [
+   35,
+   53,
+   70,
+   "roughly 0.2 / 0.3 / 0.45 x bodyweight"
+  ],
+  "Turkish Get-Up": [
+   20,
+   35,
+   53,
+   "one bell"
+  ],
+  "Farmer's Carry (no straps)": [
+   90,
+   180,
+   270,
+   "total of both hands, roughly 0.5 / 1.0 / 1.5 x bodyweight"
+  ],
+  "Bulgarian Split Squat": [
+   20,
+   50,
+   90,
+   "total dumbbell load"
+  ],
+  "Power Clean": [
+   95,
+   155,
+   205,
+   "barbell"
+  ],
+  "Man-Maker": [
+   20,
+   35,
+   50,
+   "per dumbbell"
+  ],
+  "Jefferson Curl": [
+   15,
+   25,
+   45,
+   "keep it light \u2014 this is a mobility lift"
+  ],
+  "Box Jump": [
+   null,
+   null,
+   null,
+   "box height, not load: 18 / 24 / 30 inches"
+  ],
+  "Two-Hand Swing": [
+   35,
+   53,
+   70,
+   "one bell"
+  ],
+  "Kettlebell Goblet Squat": [
+   35,
+   53,
+   70,
+   "one bell"
+  ],
+  "Goblet Squat": [
+   35,
+   53,
+   70,
+   "one bell"
+  ],
+  "Kettlebell Clean": [
+   26,
+   44,
+   62,
+   "one bell"
+  ],
+  "Kettlebell Military Press": [
+   26,
+   44,
+   62,
+   "one bell"
+  ],
+  "Kettlebell Overhead Press": [
+   26,
+   44,
+   62,
+   "one bell"
+  ],
+  "Kettlebell Snatch": [
+   26,
+   44,
+   53,
+   "one bell"
+  ],
+  "Kettlebell Bent-Over Row": [
+   35,
+   53,
+   70,
+   "one bell"
+  ],
+  "Kettlebell Romanian Deadlift": [
+   44,
+   70,
+   106,
+   "one or two bells"
+  ],
+  "Kettlebell Farmer Carry": [
+   90,
+   180,
+   270,
+   "total both hands"
+  ],
+  "Weighted Chin-Up": [
+   25,
+   45,
+   90,
+   "added load"
+  ]
+ }
+}

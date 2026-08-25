@@ -1,0 +1,230 @@
+{
+ "_what": "The gym version of each fundamental. Nicolas, 20 Aug: 'for each fundamental we decide on, we should try to identify the gym version of it. Maybe less progressions because it's weighted based mostly, and maybe not for all exercises, just the ones where the gym exercise is a solid replacement.'",
+ "_why_shorter": "A bodyweight ladder needs many rungs because leverage is the only way to change difficulty. A loaded lane needs two or three, because the LOAD is the progression \u2014 the leg curl machine moves in 5 lb steps where the Nordic curl needs a band or a vest.",
+ "_rule": "A lane only exists where the gym movement trains the same joint action against the same demand. Where it does not, the lane is null and says why \u2014 a fake equivalence is worse than an honest gap.",
+ "_fields": "ladder id: { anchor, easier[], harder[], why }  OR  null_reason",
+ "lanes": {
+  "squat": {
+   "anchor": "back_squat",
+   "easier": [
+    "leg_press",
+    "goblet_squat"
+   ],
+   "harder": [
+    "front_squat"
+   ],
+   "why": "Same knee-and-hip pattern, load instead of leverage. Leg press first if depth or balance is the limit."
+  },
+  "hinge": {
+   "anchor": "romanian_deadlift",
+   "easier": [
+    "db_rdl",
+    "back_extension_45"
+   ],
+   "harder": [
+    "deadlift",
+    "stiff_leg_deadlift"
+   ],
+   "why": "The RDL is the hinge with a barbell; deadlift adds the floor and the heaviest loads."
+  },
+  "single_leg": {
+   "anchor": "barbell_bulgarian_split_squat",
+   "easier": [
+    "dumbbell_step_up",
+    "dumbbell_walking_lunge"
+   ],
+   "harder": [],
+   "why": "Loaded split stance is the gym single-leg pattern. Step-up first \u2014 it is the least balance-dependent."
+  },
+  "hamstring": {
+   "anchor": "lying_leg_curl",
+   "easier": [
+    "seated_leg_curl"
+   ],
+   "harder": [],
+   "why": "Same knee-flexion action as the Nordic curl. The machine's advantage is precisely what the Nordic lacks: 5 lb load steps instead of bands and vests. The Nordic still wins on eccentric overload and fascicle length, so this is a replacement, not an upgrade."
+  },
+  "h_push": {
+   "anchor": "barbell_bench_press",
+   "easier": [
+    "chest_press_machine",
+    "dumbbell_bench_press"
+   ],
+   "harder": [
+    "incline_barbell_bench_press"
+   ],
+   "why": "Bench press is the push-up with a barbell \u2014 same horizontal press, load instead of body angle."
+  },
+  "dip": {
+   "anchor": "close_grip_bench_press",
+   "easier": [
+    "triceps_dip_machine",
+    "assisted_dip"
+   ],
+   "harder": [
+    "weighted_dip"
+   ],
+   "why": "Close-grip bench is the loaded version of the dip's chest-and-triceps action without the shoulder position that hurts people."
+  },
+  "v_push": {
+   "anchor": "barbell_overhead_press",
+   "easier": [
+    "seated_dumbbell_shoulder_press",
+    "shoulder_press_machine"
+   ],
+   "harder": [
+    "push_press"
+   ],
+   "why": "Strict overhead press is the pike push-up loaded. Push press adds leg drive for heavier top-end."
+  },
+  "h_pull": {
+   "anchor": "seated_cable_row",
+   "easier": [
+    "chest_supported_row"
+   ],
+   "harder": [
+    "t_bar_row",
+    "barbell_bent_over_row",
+    "pendlay_row"
+   ],
+   "why": "Your call, and it is the better match: the cable row hits the same body angle as an inverted row, and the grip and the target (navel vs sternum) are variations of the SAME movement rather than separate exercises. Barbell rows move up the lane as the heavy end."
+  },
+  "v_pull": {
+   "anchor": "lat_pulldown",
+   "easier": [
+    "assisted_pull_up_machine"
+   ],
+   "harder": [
+    "close_grip_lat_pulldown"
+   ],
+   "why": "The pulldown is the pull-up with adjustable load \u2014 the single most useful gym substitute in the whole library, because it lets someone train the pattern years before they can hang their own weight."
+  },
+  "front_lever": {
+   "anchor": "straight_arm_pulldown",
+   "easier": [
+    "db_pullover"
+   ],
+   "harder": [],
+   "why": "Nicolas's example, and the cleanest mapping we have. Both are shoulder extension with the elbows LOCKED \u2014 one of the very few lat exercises that is not elbow-flexion driven, which is exactly the front lever demand."
+  },
+  "grip": {
+   "anchor": "farmers_carry",
+   "easier": [
+    "dumbbell_shrug"
+   ],
+   "harder": [],
+   "why": "Loaded carries are the gym version of hanging: the same grip endurance under load, without needing a bar to hang from."
+  },
+  "core_hollow": {
+   "anchor": "ab_wheel_rollout",
+   "easier": [
+    "cable_crunch"
+   ],
+   "harder": [],
+   "why": "The rollout is loaded anti-extension \u2014 the same job as the hollow hold, with the lever getting longer instead of the clock running longer."
+  },
+  "core_hanging": {
+   "anchor": "cable_crunch",
+   "easier": [
+    "weighted_decline_sit_up"
+   ],
+   "harder": [],
+   "why": "Loaded spinal flexion. Not a perfect match \u2014 the hanging version also trains grip and shoulder \u2014 but it is the closest loaded trunk flexion the gym offers."
+  },
+  "core_lateral": {
+   "anchor": "suitcase_carry",
+   "easier": [
+    "pallof_press"
+   ],
+   "harder": [],
+   "why": "A one-sided carry is anti-lateral-flexion under load \u2014 exactly the side plank's job, standing up."
+  },
+  "rotation": {
+   "anchor": "cable_woodchop",
+   "easier": [
+    "half_kneeling_chop"
+   ],
+   "harder": [
+    "landmine_twist",
+    "med_ball_rotational_throw"
+   ],
+   "why": "True rotation needs a cable or a ball \u2014 something to rotate against or throw. Bodyweight cannot load the transverse plane."
+  },
+  "carry": {
+   "anchor": "farmers_carry",
+   "easier": [],
+   "harder": [],
+   "why": "Already a gym movement \u2014 dumbbells or a trap bar. Nothing to substitute."
+  },
+  "full_body": {
+   "anchor": "devil_s_press",
+   "easier": [
+    "man_maker"
+   ],
+   "harder": [],
+   "why": "The loaded burpee. Same floor-to-overhead cycle, with dumbbells doing the work the jump used to."
+  },
+  "explosive": {
+   "anchor": "push_press",
+   "easier": [
+    "dumbbell_step_up"
+   ],
+   "harder": [
+    "power_clean"
+   ],
+   "why": "Triple extension under load. The jump squat's job with a barbell instead of bodyweight."
+  },
+  "ballistic": {
+   "anchor": "barbell_high_pull",
+   "easier": [
+    "db_swing"
+   ],
+   "harder": [
+    "hang_clean"
+   ],
+   "why": "Ballistic hinge with a barbell. The swing's hip snap, loaded."
+  },
+  "get_up": {
+   "anchor": "turkish_get_up",
+   "easier": [
+    "kb_half_get_up"
+   ],
+   "harder": [],
+   "why": "Already a gym movement with a dumbbell. Same exercise, different implement."
+  },
+  "barbell_full": {
+   "anchor": "power_clean",
+   "easier": [
+    "hang_clean"
+   ],
+   "harder": [
+    "clean_and_jerk"
+   ],
+   "why": "Already a barbell movement. The lane is the Olympic progression."
+  },
+  "glute": {
+   "anchor": "barbell_hip_thrust",
+   "easier": [
+    "cable_glute_kickback",
+    "back_extension_45"
+   ],
+   "harder": [],
+   "why": "The barbell hip thrust IS the gym version \u2014 highest glute activation of any hip-extension movement measured, and no load on the spine."
+  },
+  "anti_rotation": {
+   "anchor": "pallof_press",
+   "easier": [
+    "landmine_twist"
+   ],
+   "harder": [],
+   "why": "Already a cable movement. The gym is where anti-rotation is easiest to load precisely."
+  }
+ },
+ "no_lane": {
+  "handstand": "Balance is the whole point. A loaded overhead press builds the strength but not the skill, and pretending otherwise would let the engine swap a handstand for a shoulder press and call it done.",
+  "lateral": "No loaded lateral-lunge or cossack pattern exists in the library. The hip abduction machine trains the muscle but not the pattern \u2014 it is seated and single-joint. Worth adding a lateral lunge rather than faking it.",
+  "core_dragon": "Nothing in a gym replicates a full-body anti-extension lever. Cable crunch and decline sit-up are spinal flexion, which is the opposite demand.",
+  "core_compression": "Straight-leg compression at the hip has no loaded gym analogue in the library. A captain's chair leg raise would be the closest and we do not have one.",
+  "mobility": "Mobility work does not need a loaded substitute."
+ }
+}

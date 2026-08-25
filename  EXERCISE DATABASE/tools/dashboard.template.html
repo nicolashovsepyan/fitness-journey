@@ -4,7 +4,7 @@
   --ground:#EDF0F2; --panel:#FFFFFF; --panel-2:#F5F8F9; --sunk:#E3E9EC;
   --ink:#0E1418; --ink-2:#53616A; --ink-3:#8A969C;
   --rule:#D2DADF; --rule-2:#E4EAED;
-  --accent:#1B5B70; --on-accent:#FFFFFF;
+  --accent:#1B5B70; --on-accent:#FFFFFF; --gym:#6B4E8F; --gym-bg:#F4F0F7;
   --ok:#2C6A52;   --ok-bg:#DFEDE6;
   --warn:#8E6209; --warn-bg:#F6ECD6;
   --crit:#A02D25; --crit-bg:#F6DEDB;
@@ -17,7 +17,7 @@
     --ground:#0D1215; --panel:#151C20; --panel-2:#1B2327; --sunk:#101619;
     --ink:#E7EDF0; --ink-2:#94A2A9; --ink-3:#68767D;
     --rule:#2A353B; --rule-2:#212A2F;
-    --accent:#63AAC1; --on-accent:#0D1215;
+    --accent:#63AAC1; --on-accent:#0D1215; --gym:#B492D8; --gym-bg:#241C30; --gym:#B492D8; --gym-bg:#241C30;
     --ok:#63B692;   --ok-bg:#17302A;
     --warn:#D8A344; --warn-bg:#33280F;
     --crit:#E4756D; --crit-bg:#37201E;
@@ -27,7 +27,7 @@
   --ground:#0D1215; --panel:#151C20; --panel-2:#1B2327; --sunk:#101619;
   --ink:#E7EDF0; --ink-2:#94A2A9; --ink-3:#68767D;
   --rule:#2A353B; --rule-2:#212A2F;
-  --accent:#63AAC1; --on-accent:#0D1215;
+  --accent:#63AAC1; --on-accent:#0D1215; --gym:#B492D8; --gym-bg:#241C30;
   --ok:#63B692;   --ok-bg:#17302A;
   --warn:#D8A344; --warn-bg:#33280F;
   --crit:#E4756D; --crit-bg:#37201E;
@@ -154,6 +154,21 @@ td.note{color:var(--ink-2); font-size:13px}
 .nested .h{font-family:var(--data); font-size:10px; letter-spacing:.13em; text-transform:uppercase; color:var(--ink-3)}
 .nested .b{font-family:var(--display); font-size:13px; color:var(--ink-2); line-height:1.5}
 
+/* ---------- where everything is ---------- */
+.maprows{display:flex; flex-direction:column; gap:1px; background:var(--rule);
+         border:1px solid var(--rule); border-radius:4px; overflow:hidden}
+.maprow{background:var(--panel); padding:13px 16px; display:grid;
+        grid-template-columns:150px minmax(0,1fr) 120px; gap:14px; align-items:baseline}
+@media (max-width:700px){.maprow{grid-template-columns:1fr; gap:5px}}
+.maprow .nm{font-family:var(--data); font-size:12px; font-weight:600; letter-spacing:.03em}
+.maprow .ds{font-family:var(--display); font-size:13.5px; color:var(--ink-2); line-height:1.45}
+.maprow .st{font-family:var(--data); font-size:10px; letter-spacing:.08em; text-transform:uppercase;
+            padding:3px 8px; border-radius:2px; text-align:center; white-space:nowrap}
+.maprow.you .nm{color:var(--accent)}
+.maprow .st.you{background:var(--warn-bg); color:var(--warn)}
+.maprow .st.ref{background:var(--ok-bg); color:var(--ok)}
+.maprow .st.done{background:var(--ok-bg); color:var(--ok)}
+
 /* ---------- fundamentals ---------- */
 .tiers{display:grid; grid-template-columns:repeat(auto-fit,minmax(268px,1fr)); gap:14px}
 .tier{background:var(--panel); border:1px solid var(--rule); border-radius:4px; overflow:hidden}
@@ -169,6 +184,35 @@ td.note{color:var(--ink-2); font-size:13px}
 .tier li .fm{font-family:var(--data); font-size:9.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); white-space:nowrap}
 .tier li.gone{color:var(--crit); font-weight:600}
 .tier li.noart{color:var(--ink-2)}
+
+/* ---------- ladders ---------- */
+.ladders{display:flex; flex-direction:column; gap:10px}
+.lad{background:var(--panel); border:1px solid var(--rule); border-radius:4px; padding:13px 15px}
+.lad .hd{display:flex; align-items:baseline; gap:10px; margin-bottom:9px; flex-wrap:wrap}
+.lad .hd b{font-family:var(--display); font-size:15px; font-weight:800; letter-spacing:-.01em}
+.lad .hd .fam{font-family:var(--data); font-size:10px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3)}
+.lad .hd .tier{font-family:var(--data); font-size:10px; color:var(--ink-3); margin-left:auto}
+.rungs{display:flex; flex-wrap:wrap; align-items:stretch; gap:5px}
+.rung{border:1px solid var(--rule); border-radius:3px; padding:5px 9px; display:flex;
+      flex-direction:column; gap:2px; min-width:0; background:var(--panel-2)}
+.rung .rn{font-family:var(--display); font-size:12px; line-height:1.25}
+.rung .rl{font-family:var(--data); font-size:9px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3)}
+.rung.reg{border-left:3px solid var(--ok)}
+.rung.anch{border:1px solid var(--accent); border-left:3px solid var(--accent); background:var(--panel)}
+.rung.anch .rn{font-weight:700; color:var(--accent)}
+.rung.prog{border-left:3px solid var(--warn)}
+.arrow{align-self:center; font-family:var(--data); font-size:11px; color:var(--ink-3); padding:0 1px}
+
+.lane{display:flex; align-items:baseline; gap:9px; margin-top:8px;
+      padding-top:8px; border-top:1px dashed var(--rule)}
+.lane .lbl{font-family:var(--data); font-size:9px; letter-spacing:.11em; text-transform:uppercase;
+           color:var(--gym); white-space:nowrap; padding-top:4px}
+.lane .rungs{flex:1}
+.rung.gym{border-left:3px solid var(--gym); background:var(--gym-bg)}
+.rung.gymanch{border:1px solid var(--gym); border-left:3px solid var(--gym); background:var(--gym-bg)}
+.rung.gymanch .rn{font-weight:700; color:var(--gym)}
+.lane .none{font-family:var(--display); font-size:12px; color:var(--ink-3); font-style:italic; line-height:1.45}
+.lad .why{font-family:var(--display); font-size:11.5px; color:var(--ink-3); line-height:1.5; margin-top:6px}
 
 /* ---------- schema groups ---------- */
 .groups{display:grid; grid-template-columns:repeat(auto-fit,minmax(232px,1fr)); gap:12px}
@@ -197,14 +241,18 @@ td.note{color:var(--ink-2); font-size:13px}
 </header>
 
 <section>
-  <div class="figs">
-    <div class="fig"><span class="v num">307</span><span class="k">movements in the database</span></div>
-    <div class="fig is-warn"><span class="v num">101</span><span class="k">rows where I guessed and want your eyes</span></div>
-    <div class="fig is-crit"><span class="v num">0</span><span class="k">calibration numbers — the table doesn't exist here</span></div>
-    <div class="fig is-crit"><span class="v num">0</span><span class="k">pulling movements Ozzy's kit can reach</span></div>
-    <div class="fig is-warn"><span class="v num">57</span><span class="k">of 307 movements have a picture</span></div>
-    <div class="fig is-warn"><span class="v num">13</span><span class="k">of the 50 fundamentals are missing from the database</span></div>
+  <div class="figs" id="figs"></div></div>
+</section>
+
+
+<!-- ============ WHERE EVERYTHING IS ============ -->
+<section>
+  <div class="sechead">
+    <div class="eyebrow">Orientation</div>
+    <h2>Where everything is</h2>
+    <p class="lede">One folder, one workbook, seven sheets. If you only open one thing, open <span class="num">DO THIS NEXT</span> &mdash; it is the queue, and everything else is reference I keep current for you.</p>
   </div>
+  <div class="maprows" id="maprows"></div>
 </section>
 
 <!-- ============ GAP FINDER ============ -->
@@ -277,15 +325,16 @@ td.note{color:var(--ink-2); font-size:13px}
 <!-- ============ FUNDAMENTALS ============ -->
 <section>
   <div class="sechead">
-    <div class="eyebrow">What we promise to teach</div>
-    <h2>The 15 / 30 / 50, and where the cards and pictures attach</h2>
-    <p class="lede">Cumulative &mdash; advanced means all fifty, including the fifteen. The number is what you have <em>mastered</em>; about twelve is what you train in any given week at any level. Every one of these needs a card and a picture, so this list is where that work is tracked.</p>
+    <div class="eyebrow">The shape you asked for</div>
+    <h2>Every fundamental is a ladder, not an entry</h2>
+    <p class="lede">One anchor &mdash; the movement we are getting you to. Regressions to its left so somebody just starting can enter today. Progressions to its right so nobody runs out. Beneath each one, the <strong>gym lane</strong>: the loaded version of the same job, shorter on purpose because load is the progression. Five have no honest equivalent and say so.</p>
   </div>
-  <div class="tiers" id="tiers"></div>
+  <div class="ladders" id="ladders"></div>
   <div class="key">
-    <span><i style="background:var(--ok)"></i> in the database, drawn</span>
-    <span><i style="background:var(--warn)"></i> in the database, no picture</span>
-    <span><i style="background:var(--crit)"></i> not in the database at all</span>
+    <span><i style="background:var(--ok)"></i> regression &mdash; how you get in</span>
+    <span><i style="background:var(--accent)"></i> the anchor</span>
+    <span><i style="background:var(--warn)"></i> progression &mdash; where you go</span>
+    <span><i style="background:var(--gym)"></i> the gym version</span>
   </div>
 </section>
 
@@ -318,6 +367,7 @@ td.note{color:var(--ink-2); font-size:13px}
 
 <script id="mv" type="application/json">__DATA__</script>
 <script id="fd" type="application/json">__FUND__</script>
+<script id="ld" type="application/json">__LADDERS__</script>
 <script>
 (function(){
 const DATA = JSON.parse(document.getElementById('mv').textContent);
@@ -481,76 +531,121 @@ function progCell(a,b){
 
 /* ---------- taxonomy ---------- */
 const TAX = [
-  ['calisthenics','Calisthenics','c',
-   'Bodyweight strength. The only discipline that also contains skills — movements you practise rather than simply perform.',
-   'push-up · dip · pull-up · muscle-up · planche · front lever'],
-  ['functional','Functional','f',
-   'Loaded movement patterns that mirror real life. Kettlebells, carries, get-ups, complexes.',
-   'kettlebell swing · Turkish get-up · farmer carry · burpee'],
-  ['gym','Gym','g',
-   'The classic barbell, dumbbell, cable and machine lifts. Predictable load, easy to progress in small steps.',
-   'bench press · lat pulldown · leg press · lateral raise'],
+  ['bodyweight','Bodyweight','Calisthenics. Mostly functional, and the only world that also holds skills.'],
+  ['kettlebell','Kettlebell','Functional by nature. Owns hinge, carry and anti-lateral-flexion better than anything else.'],
+  ['dumbbell','Dumbbell','Free-weight. Functional when compound, isolation when not.'],
+  ['barbell','Barbell','Heavy compound strength, plus the Olympic lifts.'],
+  ['machine','Machine','Fixed path. Never functional, and never the default \u2014 opt-in only.'],
+  ['cable','Cable','Constant tension. A useful accessory, not a foundation.'],
+  ['band','Band','Portable resistance. Assistance and activation.'],
 ];
 (function taxonomy(){
   const T=document.getElementById('tax');
-  TAX.forEach(([id,title,code,desc,ex])=>{
-    const n = DATA.filter(m=>m.d===code).length;
+  TAX.forEach(([code,title,desc])=>{
+    const all=DATA.filter(m=>m.d===code);
+    if(!all.length) return;
+    const fn=all.filter(m=>m.fn).length;
     const card=document.createElement('div'); card.className='card';
     card.innerHTML='<div class="top"><h3></h3><span class="cnt num"></span></div><p></p><div class="ex"></div>';
     card.querySelector('h3').textContent=title;
-    card.querySelector('.cnt').textContent=n;
+    card.querySelector('.cnt').textContent=all.length;
     card.querySelector('p').textContent=desc;
-    card.querySelector('.ex').textContent=ex;
-    if(code==='c'){
-      const skills = DATA.filter(m=>m.d==='c'&&m.k).length;
+    card.querySelector('.ex').textContent=fn+' of '+all.length+' functional';
+    if(code==='bodyweight'){
+      const skills=all.filter(m=>m.k).length;
       const nest=document.createElement('div'); nest.className='nested';
-      nest.innerHTML='<span class="h">contains · skills</span><span class="b"></span>';
+      nest.innerHTML='<span class="h">contains \u00b7 skills</span><span class="b"></span>';
       nest.querySelector('.b').textContent =
-        skills+' of these are skills — handstand, planche, lever, muscle-up, L-sit. '+
-        'They get their own placement rule: practise them fresh, but their strength work belongs anywhere.';
+        skills+' are skills \u2014 handstand, planche, lever, muscle-up, L-sit. '+
+        'That is what calisthenics adds on top of functional movement.';
       card.appendChild(nest);
     }
     T.appendChild(card);
   });
 })();
 
-/* ---------- fundamentals ---------- */
-const FUND = JSON.parse(document.getElementById('fd').textContent);
-(function tiers(){
-  const T=document.getElementById('tiers');
-  const art={}; DATA.forEach(m=>{art[m.n]=m.a;});
-  const LABEL={15:'Beginner \u2014 15',30:'Intermediate \u2014 30',50:'Advanced \u2014 50'};
-  const SUB={15:'every one stays in the programme forever',
-             30:'the fifteen above, plus these fifteen',
-             50:'all thirty above, plus these twenty'};
-  [15,30,50].forEach(tier=>{
-    const rows=FUND.filter(f=>f[3]===tier);
-    const box=document.createElement('div'); box.className='tier';
-    box.innerHTML='<div class="hd"><b></b><span class="c"></span></div><ol></ol>';
-    box.querySelector('b').textContent=LABEL[tier];
-    const gone=rows.filter(f=>!f[4]).length;
-    box.querySelector('.c').textContent = gone? gone+' missing' : 'all present';
-    const ol=box.querySelector('ol');
-    rows.forEach(([no,name,family,,exid,dbname])=>{
-      const li=document.createElement('li');
-      const state = !exid? 'crit' : (art[dbname]==='drawn'? 'ok':'warn');
-      li.className = !exid?'gone':(state==='warn'?'noart':'');
-      li.innerHTML='<span class="dot"></span><span class="no"></span><span class="nm"></span><span class="fm"></span>';
-      li.querySelector('.dot').style.background='var(--'+state+')';
-      li.querySelector('.no').textContent=no;
-      li.querySelector('.nm').textContent=name;
-      li.querySelector('.fm').textContent=family;
-      ol.appendChild(li);
-    });
-    box.title=SUB[tier];
-    T.appendChild(box);
+/* ---------- fundamentals as ladders ---------- */
+const LADDERS = JSON.parse(document.getElementById('ld').textContent);
+(function ladders(){
+  const L=document.getElementById('ladders');
+  const TIER={1:'start here',2:'intermediate',3:'advanced'};
+  LADDERS.forEach(l=>{
+    const box=document.createElement('div'); box.className='lad';
+    box.innerHTML='<div class="hd"><b></b><span class="fam"></span><span class="tier"></span></div><div class="rungs"></div>';
+    box.querySelector('b').textContent=l.name;
+    box.querySelector('.fam').textContent=l.family;
+    const n=l.reg.length+1+l.prog.length;
+    box.querySelector('.tier').textContent=TIER[l.tier]+' \u00b7 '+n+' rungs';
+    const R=box.querySelector('.rungs');
+    const add=(r,cls,label)=>{
+      const d=document.createElement('div'); d.className='rung '+cls;
+      d.innerHTML='<span class="rn"></span><span class="rl"></span>';
+      d.querySelector('.rn').textContent=r.n;
+      d.querySelector('.rl').textContent=label;
+      R.appendChild(d);
+    };
+    l.reg.forEach(r=>add(r,'reg',r.l||''));
+    if(l.reg.length){const a=document.createElement('span');a.className='arrow';a.textContent='\u2192';R.appendChild(a);}
+    if(l.anch) add(l.anch,'anch','the fundamental');
+    if(l.prog.length){const a=document.createElement('span');a.className='arrow';a.textContent='\u2192';R.appendChild(a);}
+    l.prog.forEach(r=>add(r,'prog',r.l||''));
+
+    /* the gym lane — the loaded version of the same job, deliberately shorter */
+    const lane=document.createElement('div'); lane.className='lane';
+    lane.innerHTML='<span class="lbl">gym</span><div class="rungs"></div>';
+    const GR=lane.querySelector('.rungs');
+    const gadd=(r,cls,label)=>{
+      const d=document.createElement('div'); d.className='rung '+cls;
+      d.innerHTML='<span class="rn"></span><span class="rl"></span>';
+      d.querySelector('.rn').textContent=r.n;
+      d.querySelector('.rl').textContent=label;
+      GR.appendChild(d);
+    };
+    if(l.gym && l.gym.none){
+      const n=document.createElement('span'); n.className='none';
+      n.textContent='no honest gym equivalent \u2014 '+l.gym.none;
+      GR.appendChild(n);
+    } else if(l.gym){
+      (l.gym.easier||[]).forEach(r=>gadd(r,'gym','easier'));
+      if(l.gym.anch) gadd(l.gym.anch,'gymanch','the gym version');
+      (l.gym.harder||[]).forEach(r=>gadd(r,'gym','heavier'));
+    }
+    box.appendChild(lane);
+    if(l.gym && l.gym.why){
+      const w=document.createElement('div'); w.className='why'; w.textContent=l.gym.why;
+      box.appendChild(w);
+    }
+    L.appendChild(box);
+  });
+})();
+
+/* ---------- headline figures, computed ---------- */
+(function figs(){
+  const F=document.getElementById('figs');
+  const noArt=DATA.filter(m=>m.a!=='drawn').length;
+  const review=DATA.filter(m=>m.s==='REVIEW').length;
+  const onLadder=DATA.filter(m=>m.ld).length;
+  const kitOzzy=new Set(['bw','kb','bench','mat']);
+  const ozzyPull=DATA.filter(m=>m.e.every(e=>kitOzzy.has(e))&&m.r.includes('working-set')
+    &&['h-pull','v-pull','straight-arm-pull'].includes(m.p[0])).length;
+  [[DATA.length,'movements in the database',''],
+   [LADDERS.length,'fundamentals, each a full ladder',''],
+   [onLadder,'movements sit on one of those ladders',''],
+   [review,'rows where I guessed and want your eyes','is-warn'],
+   [ozzyPull,"pulling movements Ozzy's kit can reach",ozzyPull<12?'is-warn':''],
+   [noArt,'movements with no picture yet','is-warn'],
+  ].forEach(([v,k,cls])=>{
+    const d=document.createElement('div'); d.className='fig'+(cls?' '+cls:'');
+    d.innerHTML='<span class="v num"></span><span class="k"></span>';
+    d.querySelector('.v').textContent=v; d.querySelector('.k').textContent=k;
+    F.appendChild(d);
   });
 })();
 
 /* ---------- schema groups ---------- */
 const SCHEMA = [
   ['Identity','Which movement is this, and which world does it belong to?',
-   [['id',0],['name',0],['discipline',1],['skill?',1]]],
+   [['id',0],['name',0],['modality',1],['functional',1],['skill?',1]]],
   ['Mechanics','What does the body actually do?',
    [['patterns',1],['muscles · primary',1],['muscles · secondary',1],['laterality',0]]],
   ['Prescription','How is it measured, and how is it loaded?',
@@ -558,7 +653,7 @@ const SCHEMA = [
   ['Placement','Where in a session may it land?',
    [['role',1],['level',0],['difficulty',0],['CNS cost',1],['essential',0]]],
   ['Relations','What does it connect to?',
-   [['track',1],['rank',1],['families',0],['substitutes',1]]],
+   [['track',1],['rank',1],['families',0],['substitutes',1],['bridges to',1]]],
   ['Constraints','What does it need, and what does it punish?',
    [['equipment',0],['space',1],['demands',1],['hard on joints',1]]],
   ['Mastery','Is this one of the fifty, and does it have a card and a picture?',

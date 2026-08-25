@@ -24,9 +24,8 @@
    ============================================================ */
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { ROOT, workbook } from './paths.mjs';
 
-const ROOT  = fileURLToPath(new URL('..', import.meta.url));
 const SRC   = join(ROOT, 'logo/equipment.mjs');
 const CHECK = process.argv.includes('--check');
 
@@ -138,9 +137,20 @@ const DECK_DB = {
   carry:'farmers_carry',
 };
 
-const DERIVED = join(ROOT, 'EXERCISE DATABASE/workbook/_derived.json');
+/* The derived workbook. Where the database folder is, is decided in ONE
+   file, tools/paths.mjs. This read is guarded by existsSync below, which
+   means a folder that has MOVED does not error here - it quietly produces a
+   smaller answer than the truth. That happened on 25 August and is the
+   reason paths.mjs exists, so the miss is now reported out loud. */
+const DERIVED = workbook('_derived.json');
 let island = null, gapNote = [];
-if (existsSync(DERIVED)) {
+if (!DERIVED || !existsSync(DERIVED)) {
+  /* Say it out loud. This used to pass in silence and write a gauge island
+     built from nothing, which reads as success in every check that follows. */
+  console.error('  ! _derived.json not found - the gauge island is NOT being rebuilt.');
+  console.error('    Looked for: ' + (DERIVED || 'no database folder at all'));
+  console.error('    Run the database tools, or fix the folder in tools/paths.mjs.');
+} else {
   const raw = JSON.parse(readFileSync(DERIVED, 'utf8'));
   const rows = Array.isArray(raw) ? raw : (raw.rows || Object.values(raw)[0]);
   const byId = new Map(rows.map(r => [r.id, r]));

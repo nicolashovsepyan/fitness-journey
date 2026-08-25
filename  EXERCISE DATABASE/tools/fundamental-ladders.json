@@ -1,0 +1,485 @@
+{
+ "_what": "Fundamentals as LADDERS. Nicolas, 19 Aug: 'It should always be part of fundamentals but with a regression if they can't do one. Banded, assisted, negative etc. This is how we need to see our fundamentals. Main exercise and regression / progression on level of user.'",
+ "_model": "Each ladder has ONE anchor \u2014 the named fundamental, the destination. Below it, regressions ordered easiest-first so someone just starting can enter. Above it, progressions so an advanced person keeps going. A fundamental can be easy (bodyweight squat) or hard (pull-up); what matters is that everybody can enter somewhere.",
+ "_fields": "[id, name, family, tier, anchor, [regressions easiest-first], [progressions]]",
+ "ladders": [
+  [
+   "squat",
+   "Bodyweight Squat",
+   "squat",
+   1,
+   "bodyweight_squat",
+   [
+    "box_squat",
+    "spanish_squat"
+   ],
+   [
+    "goblet_squat",
+    "slant_board_squat",
+    "back_squat"
+   ]
+  ],
+  [
+   "hinge",
+   "Romanian Deadlift",
+   "hinge",
+   1,
+   "romanian_deadlift",
+   [
+    "bodyweight_hip_hinge",
+    "kb_deadlift",
+    "db_rdl"
+   ],
+   [
+    "single_leg_rdl",
+    "stiff_leg_deadlift",
+    "deadlift"
+   ]
+  ],
+  [
+   "glute",
+   "Hip Thrust",
+   "glute",
+   1,
+   "hip_thrust",
+   [
+    "glute_bridge",
+    "single_leg_bridge",
+    "banded_glute_bridge"
+   ],
+   [
+    "barbell_hip_thrust",
+    "cable_glute_kickback"
+   ]
+  ],
+  [
+   "single_leg",
+   "Reverse Lunge",
+   "single-leg",
+   1,
+   "reverse_lunge",
+   [
+    "box_squat"
+   ],
+   [
+    "bulgarian_split",
+    "box_pistol_squat",
+    "pistol_squat",
+    "shrimp_squat"
+   ]
+  ],
+  [
+   "hamstring",
+   "Nordic Curl",
+   "hinge",
+   2,
+   "nordic_curl",
+   [
+    "single_leg_bridge",
+    "sliding_ham_curl"
+   ],
+   []
+  ],
+  [
+   "lateral",
+   "Cossack Squat",
+   "frontal-plane",
+   2,
+   "cossack_squat",
+   [
+    "deep_squat_rock",
+    "banded_sidewalk"
+   ],
+   []
+  ],
+  [
+   "h_push",
+   "Push-Up",
+   "h-push",
+   1,
+   "pushup",
+   [
+    "wall_push_up",
+    "incline_push_up",
+    "straight_bar_push_up",
+    "knee_push_up"
+   ],
+   [
+    "decline_push_up",
+    "diamond_push_up",
+    "deadstop_pushup",
+    "pseudo_planche_push_up",
+    "archer_push_up",
+    "one_arm_push_up"
+   ]
+  ],
+  [
+   "dip",
+   "Dip",
+   "h-push",
+   2,
+   "dip",
+   [
+    "bench_dip",
+    "dip_support_hold",
+    "dip_bottom_hold",
+    "dip_negative",
+    "banded_dip"
+   ],
+   [
+    "ring_dip",
+    "weighted_dip",
+    "bulgarian_dip",
+    "russian_dip"
+   ]
+  ],
+  [
+   "v_push",
+   "Pike Push-Up",
+   "v-push",
+   1,
+   "pike_push_up",
+   [
+    "pike_hold",
+    "incline_push_up"
+   ],
+   [
+    "elevated_pike_push_up",
+    "wall_hspu",
+    "handstand_push_up"
+   ]
+  ],
+  [
+   "handstand",
+   "Wall Handstand",
+   "v-push",
+   2,
+   "wall_handstand",
+   [
+    "feet_on_wall_90_degree",
+    "wall_walk"
+   ],
+   [
+    "back_to_wall_handstand_hold",
+    "freestanding_hs",
+    "press_to_handstand"
+   ]
+  ],
+  [
+   "h_pull",
+   "Inverted Row",
+   "h-pull",
+   1,
+   "wide_inverted_row",
+   [
+    "incline_row",
+    "australian_pullup"
+   ],
+   [
+    "feet_elevated_ring_row",
+    "archer_row",
+    "single_arm_ring_row"
+   ]
+  ],
+  [
+   "v_pull",
+   "Pull-Up",
+   "v-pull",
+   2,
+   "pullup",
+   [
+    "dead_hang",
+    "scap_pullup",
+    "band_assisted_pullup",
+    "jumping_pullup",
+    "negative_pullup"
+   ],
+   [
+    "wide_pullup",
+    "archer_pullup",
+    "weighted_pullup",
+    "muscle_up_bar"
+   ]
+  ],
+  [
+   "grip",
+   "Dead Hang",
+   "carry-grip",
+   1,
+   "dead_hang",
+   [
+    "active_hang"
+   ],
+   [
+    "towel_hang"
+   ]
+  ],
+  [
+   "front_lever",
+   "Band-Assisted Front Lever",
+   "straight-arm-pull",
+   3,
+   "band_front_lever",
+   [
+    "skin_the_cat"
+   ],
+   [
+    "tuck_fl_raise",
+    "front_lever_tuck",
+    "adv_tuck_front_lever",
+    "full_front_lever"
+   ]
+  ],
+  [
+   "core_hollow",
+   "Hollow Hold",
+   "core-static",
+   1,
+   "hollow_hold",
+   [
+    "hollow_heels_down",
+    "dead_bug",
+    "bent_knee_hollow_hold",
+    "forearm_plank"
+   ],
+   [
+    "hollow_rock",
+    "squeeze_loaded_hollow_hold",
+    "hollow_to_v_sit_snap_up"
+   ]
+  ],
+  [
+   "core_dragon",
+   "Dragon Flag",
+   "core-static",
+   3,
+   "dragon_flag_full",
+   [
+    "hollow_hold",
+    "dragon_flag_candlestick",
+    "dragon_flag",
+    "tuck_dragon_flag_hold",
+    "single_leg_dragon_flag"
+   ],
+   []
+  ],
+  [
+   "core_compression",
+   "L-Sit",
+   "core-dynamic",
+   2,
+   "l_sit",
+   [
+    "foot_supported_l_sit",
+    "tuck_l_sit",
+    "one_leg_l_sit"
+   ],
+   [
+    "v_sit"
+   ]
+  ],
+  [
+   "core_hanging",
+   "Hanging Leg Raise",
+   "core-dynamic",
+   2,
+   "hanging_leg_raise",
+   [
+    "hanging_knee_raise"
+   ],
+   [
+    "toes_to_bar",
+    "windshield_wipers"
+   ]
+  ],
+  [
+   "core_lateral",
+   "Side Plank",
+   "frontal-plane",
+   1,
+   "side_plank",
+   [
+    "incline_side_plank"
+   ],
+   [
+    "side_plank_hip_dip",
+    "star_side_plank",
+    "copenhagen_plank"
+   ]
+  ],
+  [
+   "rotation",
+   "Cable Woodchop",
+   "rotation",
+   1,
+   "cable_woodchop",
+   [
+    "half_kneeling_chop"
+   ],
+   [
+    "landmine_twist",
+    "kb_windmill",
+    "med_ball_rotational_throw"
+   ]
+  ],
+  [
+   "anti_rotation",
+   "Pallof Press",
+   "anti-rotation",
+   1,
+   "pallof_press",
+   [
+    "dead_bug",
+    "bird_dog"
+   ],
+   [
+    "half_kneeling_chop",
+    "kb_bent_press"
+   ]
+  ],
+  [
+   "carry",
+   "Farmer Carry",
+   "carry-grip",
+   1,
+   "farmers_carry",
+   [],
+   [
+    "suitcase_carry",
+    "goblet_march",
+    "kb_overhead_hold"
+   ]
+  ],
+  [
+   "full_body",
+   "Burpee",
+   "full-body",
+   1,
+   "burpee",
+   [
+    "squat_thrust"
+   ],
+   [
+    "full_burpee",
+    "navy_seal_burpee",
+    "navy_seal_burpee_5",
+    "navy_seal_burpee_7",
+    "burpee_pull_up"
+   ]
+  ],
+  [
+   "explosive",
+   "Jump Squat",
+   "explosive",
+   1,
+   "jump_squat",
+   [
+    "bodyweight_squat"
+   ],
+   [
+    "box_jump",
+    "reverse_lunge_jump",
+    "lateral_bound"
+   ]
+  ],
+  [
+   "ballistic",
+   "Kettlebell Swing",
+   "explosive",
+   2,
+   "kb_swing",
+   [
+    "kb_deadlift"
+   ],
+   [
+    "kb_swing_one_hand",
+    "kb_snatch"
+   ]
+  ],
+  [
+   "get_up",
+   "Turkish Get-Up",
+   "full-body",
+   2,
+   "turkish_get_up",
+   [
+    "kb_half_get_up"
+   ],
+   []
+  ],
+  [
+   "mobility",
+   "World's Greatest Stretch",
+   "mobility",
+   1,
+   "worlds_greatest_stretch",
+   [
+    "cat_cow",
+    "hip_90_90"
+   ],
+   [
+    "deep_squat_thoracic",
+    "jefferson_curl"
+   ]
+  ],
+  [
+   "barbell_full",
+   "Power Clean to Overhead Press",
+   "full-body",
+   3,
+   "power_clean",
+   [
+    "kb_high_pull",
+    "kb_clean"
+   ],
+   [
+    "man_maker"
+   ]
+  ]
+ ],
+ "protocols": [
+  [
+   "P1",
+   "Zone 2 \u2014 20-30 min walk or easy jog",
+   "aerobic",
+   1,
+   "2-3x/week",
+   "Nasal breathing, conversational pace"
+  ],
+  [
+   "P2",
+   "VO2 intervals \u2014 4 x 4 min hard",
+   "aerobic",
+   2,
+   "1-2x/week",
+   "4 min at 90-95% max HR, 3 min easy between"
+  ],
+  [
+   "P3",
+   "Sprint",
+   "gait",
+   3,
+   "1x/week",
+   "6-10 x 20-40m near-max, full recovery"
+  ],
+  [
+   "P4",
+   "Long duration \u2014 60-90 min Zone 2 / ruck",
+   "aerobic",
+   3,
+   "1x/week",
+   "60-90 min continuous, optional load"
+  ]
+ ],
+ "_changes_20aug": [
+  "HINGE anchor is now the Romanian Deadlift, and a separate GLUTE ladder anchors on the Hip Thrust \u2014 hip thrust produces roughly 229% MVC glute activation against the back squat's 130%, with no bar on the spine.",
+  "SQUAT gains the Spanish Squat: loads the quad hard with minimal patellofemoral compression, and is analgesic on the patellar tendon.",
+  "PUSH-UP gains straight-bar push-up (easier) and dead-stop (harder), both yours.",
+  "PLANCHE removed \u2014 your call: fundamentals are the forever exercises, not calisthenics skills.",
+  "FRONT LEVER anchor is now the band-assisted version, reps not a hold, as you asked.",
+  "ROTATION reworked. Pallof press is ANTI-rotation (isometric resist) and has been moved to its own ladder; true rotation is the woodchop, chop and med-ball throw.",
+  "CARRY: suitcase carry moved from regression to progression \u2014 it is the harder one to stabilise.",
+  "BURPEE gains the 5- and 7-pump Navy Seals.",
+  "JUMP SQUAT gains the lateral bound (the skater jump you meant) and the jumping reverse lunge."
+ ]
+}

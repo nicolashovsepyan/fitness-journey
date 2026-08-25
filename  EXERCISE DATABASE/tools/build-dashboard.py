@@ -21,7 +21,9 @@ def split(s):
 
 web = [{
     'n': r['name'],
-    'd': r['discipline'][0],                 # g / f / c
+    'd': r['modality'],
+    'fn': r['functional'] == 'TRUE',
+    'b': r['bridges_to'],
     'p': split(r['patterns']),
     'l': r['level'] or '',
     'x': r['diff'] if r['diff'] != '' else None,
@@ -32,7 +34,37 @@ web = [{
     'k': r['is_skill'] == 'TRUE',
     'a': r['art'],
     'f': r['fundamental'],
+    'ld': r.get('ladder',''),
+    'lr': r.get('ladder_role',''),
+    'lp': r.get('ladder_pos',''),
 } for r in rows]
+
+# the ladders, with each rung resolved to its display name and level
+with open(os.path.join(HERE, 'fundamental-ladders.json')) as f:
+    LAD = json.load(f)
+byid = {r['id']: r for r in rows}
+def rung(mid):
+    r = byid.get(mid)
+    return None if not r else {'n': r['name'], 'l': r['level'], 'd': r['diff'], 'a': r['art']}
+with open(os.path.join(HERE, 'gym-lanes.json')) as f:
+    GYM = json.load(f)
+
+def lane_of(lid):
+    l = GYM['lanes'].get(lid)
+    if not l:
+        return {'none': GYM['no_lane'].get(lid, '')}
+    return {'easier': [x for x in (rung(m) for m in l['easier']) if x],
+            'anch':   rung(l['anchor']),
+            'harder': [x for x in (rung(m) for m in l['harder']) if x],
+            'why':    l['why']}
+
+ladders = [{
+    'name': name, 'family': family, 'tier': tier,
+    'reg':  [x for x in (rung(m) for m in regs) if x],
+    'anch': rung(anchor),
+    'prog': [x for x in (rung(m) for m in progs) if x],
+    'gym':  lane_of(lid),
+} for lid, name, family, tier, anchor, regs, progs in LAD['ladders']]
 
 # the fifty, with the database name appended so the page can look up artwork
 byid = {r['id']: r['name'] for r in rows}
@@ -48,6 +80,8 @@ assert '__DATA__' in html, 'template lost its __DATA__ placeholder'
 html = html.replace('__DATA__', json.dumps(web, separators=(',', ':')))
 assert '__FUND__' in html, 'template lost its __FUND__ placeholder'
 html = html.replace('__FUND__', json.dumps(fund, separators=(',', ':')))
+assert '__LADDERS__' in html, 'template lost its __LADDERS__ placeholder'
+html = html.replace('__LADDERS__', json.dumps(ladders, separators=(',', ':')))
 
 # ---- make the whole file pure ASCII -------------------------------------
 # The page has no <head> of its own (the Artifact wrapper supplies it) and a

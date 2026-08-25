@@ -25,7 +25,16 @@ const { EXERCISES } = await import(join(ROOT, 'js/data/exercises.js'));
    Cards and artwork are not side projects — they are fields on the
    movement, so they cannot drift the way four alias tables did.
    ------------------------------------------------------------ */
-const FUND = JSON.parse(readFileSync(join(HERE, 'fundamentals.json'), 'utf8')).list;
+const LAD  = JSON.parse(readFileSync(join(HERE, 'fundamental-ladders.json'), 'utf8'));
+const GYM_LANES = JSON.parse(readFileSync(join(HERE, 'gym-lanes.json'), 'utf8'));
+/* A fundamental is now a LADDER: one anchor (the destination), regressions
+   below it so anyone can enter, progressions above so nobody runs out.
+   Nicolas, 19 Aug: "Main exercise and regression / progression on level of
+   user." The anchors ARE the fundamentals list. */
+const FUND = LAD.ladders.map(([lid, name, family, tier, anchor]) =>
+  [lid, name, family, tier, anchor]);
+const { kettlebellRows, gymRows, additionRows, bridgeMap: BRIDGES, kbMergeInto: KB_MERGE } =
+  await import('./new-movements.mjs');
 const fundById = {};
 for (const [no, fname, family, tier, id] of FUND) {
   if (id) (fundById[id] ??= []).push({ no, tier, family, fname });
@@ -77,6 +86,7 @@ function patterns(id, m) {
       else if (f.has('hanging') || /hanging|toes to bar/.test(n)) add('flexion');
       else if (f.has('vup') || /crunch|sit-up|v-up|tuck-up|knee tuck|leg raise/.test(n)) add('flexion');
       else if (/superman|back extension|bridge|reverse plank/.test(n)) add('extension');
+      else if (/windmill|bent press|figure-8|around the body|russian twist|wood ?chop|landmine twist/.test(n)) add('rotation');
       else if (f.has('bear') || /bird dog|anti-rotation|pallof|opposite arm/.test(n)) add('anti-rotation');
       else add('anti-extension');
       break;
@@ -169,16 +179,36 @@ function role(id, m) {
 }
 
 /* ------------------------------------------------------------
-   discipline — Nicolas's axis. calisthenics = bodyweight, and it is
-   the only one of the three that also contains skills.
+   MODALITY + FUNCTIONAL — two axes, not one.
+
+   The old single `discipline` field was wrong: a push-up is bodyweight
+   AND functional, a kettlebell swing is functional but not calisthenics,
+   a pec deck is neither. One field cannot hold two independent facts.
+
+   "Calisthenics" is therefore not a field at all — it is
+   modality:bodyweight, mostly functional:true, with the skill subset
+   on top. Which is exactly how Nicolas described it.
    ------------------------------------------------------------ */
-function discipline(id, m) {
-  const n = nm(m);
-  if (has(m, 'machine', 'cable', 'bb', 'rack') || /machine|cable|pulldown|pushdown|preacher|barbell/.test(n)) return 'gym';
-  if (has(m, 'kb') || /kettlebell|get-up|getup|swing|carry|turkish|halo|goblet|man-maker|devil/.test(n))       return 'functional';
-  if (has(m, 'db')) return /fly|curl|lateral raise|preacher|pullover|shoulder press|zanetti/.test(n) ? 'gym' : 'functional';
-  if (/burpee|mountain climber|march|crawl|jump/.test(n)) return 'functional';
-  return 'calisthenics';
+function modality(id, m) {
+  const e = m.equipment || [];
+  if (e.includes('machine') || e.includes('cable')) return 'machine';
+  if (e.includes('bb') || e.includes('rack')) return 'barbell';
+  if (e.includes('kb')) return 'kettlebell';
+  if (e.includes('db')) return 'dumbbell';
+  if (e.includes('band')) return 'band';
+  return 'bodyweight';
+}
+
+/* functional = a real-world, multi-joint, transferable pattern.
+   Machines and single-joint isolation are not. Everything else is —
+   which is why most of the bodyweight library comes out functional. */
+const ISOLATION = /curl|extension|pushdown|lateral raise|front raise|fly|crossover|pec deck|shrug|kickback|pullover|wrist|skull|abduction|adduction|calf raise|leg curl|leg extension|pulse|stretch/i;
+function functional(id, m) {
+  const n = nm(m), mod = modality(id, m);
+  if (mod === 'machine') return 'FALSE';
+  if (ISOLATION.test(n)) return 'FALSE';
+  if (m.pattern === 'mobility') return 'FALSE';
+  return 'TRUE';
 }
 
 const isSkill = (id, m) => {
@@ -315,7 +345,8 @@ for (const [id, m] of Object.entries(EXERCISES)) {
   rows.push({
     id,
     name: m.name,
-    discipline: discipline(id, m),
+    modality: modality(id, m),
+    functional: functional(id, m),
     is_skill: isSkill(id, m) ? 'TRUE' : 'FALSE',
     patterns: pats.join(', '),
     muscles_primary: pri.join(', '),
@@ -336,12 +367,15 @@ for (const [id, m] of Object.entries(EXERCISES)) {
     rank: t.rank || '',
     families: [...fam(m)].join(', '),
     subs: '',
+    bridges_to: '',
     equipment: (m.equipment || []).join(', '),
     space: space(id, m),
     demands: dem.join(', '),
     contra: con.join(', '),
     /* a fundamental is a movement we promise to teach and track to mastery.
        Every one of these needs a card and a picture; nothing else does yet. */
+    ladder: '', ladder_role: '', ladder_pos: '',
+    gym_lane: '', gym_role: '', gym_pos: '',
     fundamental: fundById[id] ? String(fundById[id][0].tier) : '',
     fund_no: fundById[id] ? fundById[id].map(f => f.no).join(', ') : '',
     fund_family: fundById[id] ? fundById[id][0].family : '',
@@ -357,8 +391,121 @@ for (const [id, m] of Object.entries(EXERCISES)) {
   });
 }
 
+/* ------------------------------------------------------------
+   FOLD IN THE NEW LIBRARIES
+   Kettlebell first (it merges into existing ids where the database
+   already had the movement under another name), then the gym list
+   Nicolas approved.
+   ------------------------------------------------------------ */
+/* the kettlebell merge left four movements in the database twice under
+   different ids. One movement, one row — merge the equipment and drop the
+   copy, keeping the id everything else already points at. */
+const DEDUPE = {
+  kb_goblet_squat:        'goblet_squat',
+  kb_prying_goblet_squat: 'prying_goblet',
+  kb_suitcase_carry:      'suitcase_carry',
+  kb_turkish_get_up:      'turkish_get_up',
+  turkish_getup:          'turkish_get_up',
+};
+
+/* a handful of long-standing entries never got a level, and they sit at the
+   BOTTOM of a ladder — which is exactly where a just-starting person enters.
+   No level there means the engine cannot offer them the ladder at all. */
+const LEVEL_FIX = {
+  single_leg_bridge: 'beg', sliding_ham_curl: 'beg', deep_squat_rock: 'start',
+  banded_sidewalk: 'start', cat_cow: 'start', hip_90_90: 'start',
+  worlds_greatest_stretch: 'start', hip_thrust: 'beg', horse_stance: 'beg',
+  jump_squat: 'beg', sissy_squat: 'adv', slant_board_squat: 'int',
+  romanian_deadlift: 'int', deadlift: 'int', nordic_curl: 'adv',
+  ankle_mobility: 'start', hip_cars: 'start', wrist_prep: 'start',
+  thoracic_rotation: 'start', thoracic_open: 'start', leg_swings: 'start',
+  chest_stretch: 'start', shoulder_stretch: 'start', hip_flexor_stretch: 'start',
+};
+let levelled = 0;
+for (const [id, lv] of Object.entries(LEVEL_FIX)) {
+  const r = rows.find(x => x.id === id);
+  if (r && !r.level) { r.level = lv; levelled++; }
+}
+
+const existing = new Set(rows.map(r => r.id));
+let added = 0, merged = 0;
+
+for (const [libId, dbId] of Object.entries(KB_MERGE)) {
+  const target = rows.find(r => r.id === dbId);
+  if (target) { target.families = [target.families, 'kettlebell-fundamental'].filter(Boolean).join(', '); merged++; }
+}
+for (const r of kettlebellRows()) {
+  if (existing.has(r.id)) { merged++; continue; }
+  if (Object.values(KB_MERGE).includes(r.id)) { merged++; continue; }
+  rows.push(r); existing.add(r.id); added++;
+}
+for (const r of additionRows()) {
+  if (existing.has(r.id)) { merged++; continue; }
+  rows.push(r); existing.add(r.id); added++;
+}
+for (const r of gymRows()) {
+  if (existing.has(r.id)) { merged++; continue; }
+  const clash = rows.find(x => x.name.toLowerCase() === r.name.toLowerCase());
+  if (clash) { merged++; continue; }
+  rows.push(r); existing.add(r.id); added++;
+}
+
+/* apply the dedupe: fold equipment up into the survivor, then drop the copy */
+let deduped = 0;
+for (const [dropId, keepId] of Object.entries(DEDUPE)) {
+  const drop = rows.find(r => r.id === dropId);
+  const keep = rows.find(r => r.id === keepId);
+  if (!drop || !keep) continue;
+  const kit = new Set([...keep.equipment.split(',').map(x => x.trim()).filter(Boolean),
+                       ...drop.equipment.split(',').map(x => x.trim()).filter(Boolean)]);
+  keep.equipment = [...kit].join(', ');
+  rows.splice(rows.indexOf(drop), 1);
+  existing.delete(dropId);
+  deduped++;
+}
+
+/* stamp every movement with the ladder it belongs to and where on it.
+   ladder_pos: negative = regression, 0 = the anchor, positive = progression. */
+let onLadder = 0;
+for (const [lid, lname, family, tier, anchor, regs, progs] of LAD.ladders) {
+  const put = (id, role, pos) => {
+    const r = rows.find(x => x.id === id);
+    if (!r) return;
+    r.ladder = lid; r.ladder_role = role; r.ladder_pos = pos; onLadder++;
+    if (role === 'anchor') { r.fundamental = String(tier); r.fund_family = family; r.ess = 'TRUE'; }
+  };
+  regs.forEach((id, i) => put(id, 'regression', i - regs.length));
+  put(anchor, 'anchor', 0);
+  progs.forEach((id, i) => put(id, 'progression', i + 1));
+}
+
+/* the GYM LANE — the loaded version of each fundamental. Shorter than the
+   bodyweight ladder on purpose: load is the progression, so it needs two or
+   three rungs where leverage needs six. Only where the gym movement trains
+   the same joint action; five ladders honestly have no equivalent. */
+let laned = 0;
+for (const [lid, lane] of Object.entries(GYM_LANES.lanes)) {
+  const put = (id, role, pos) => {
+    const r = rows.find(x => x.id === id);
+    if (!r) return;
+    r.gym_lane = lid; r.gym_role = role; r.gym_pos = pos; laned++;
+  };
+  lane.easier.forEach((id, i) => put(id, 'easier', i - lane.easier.length));
+  put(lane.anchor, 'gym-anchor', 0);
+  lane.harder.forEach((id, i) => put(id, 'harder', i + 1));
+}
+
+/* bridges — a gym movement points at the fundamental we mean to reach.
+   Also applied to anything already in the database that has a pairing. */
+let bridged = 0;
+for (const r of rows) {
+  if (r.bridges_to) { bridged++; continue; }
+  const b = BRIDGES[r.name];
+  if (b && existing.has(b)) { r.bridges_to = b; bridged++; }
+}
+
 rows.sort((a, b) =>
-  a.discipline.localeCompare(b.discipline) ||
+  a.modality.localeCompare(b.modality) ||
   (a.patterns.split(',')[0] || '').localeCompare(b.patterns.split(',')[0] || '') ||
   (a.diff || 99) - (b.diff || 99) ||
   a.name.localeCompare(b.name));
@@ -366,8 +513,10 @@ rows.sort((a, b) =>
 writeFileSync(join(HERE, '..', 'workbook', '_derived.json'), JSON.stringify(rows, null, 1));
 
 const by = (f) => rows.reduce((a, r) => (a[r[f]] = (a[r[f]] || 0) + 1, a), {});
-console.log(`derived ${rows.length} rows`);
-console.log('  discipline   ', by('discipline'));
+console.log(`derived ${rows.length} rows  (+${added} new, ${merged} merged into existing)`);
+console.log('  modality     ', by('modality'));
+console.log('  functional   ', by('functional'));
+console.log('  bridges set  ', bridged);
 console.log('  needs review ', rows.filter(r => r.status === 'REVIEW').length);
 console.log('  with a track ', rows.filter(r => r.track).length);
 console.log('  primary pattern', Object.entries(rows.reduce((a, r) => {
@@ -376,8 +525,15 @@ console.log('  primary pattern', Object.entries(rows.reduce((a, r) => {
 
 /* THE SECOND INVARIANT, one level up from onboarding: if we promise to teach a
    movement to mastery, the database has to hold it. */
-const missingFund = FUND.filter(([, , , , id]) => !id || !EXERCISES[id]);
-console.log(`\n  fundamentals in the DB  ${FUND.length - missingFund.length} / ${FUND.length}`);
+/* check against the FINAL row set, not the original source module — a movement
+   added by the kettlebell, gym or fundamentals libraries is just as real. */
+const finalIds = new Set(rows.map(r => r.id));
+const missingFund = FUND.filter(([, , , , id]) => !id || !finalIds.has(id));
+console.log(`\n  duplicates merged       ${deduped}`);
+console.log(`  levels filled in        ${levelled}`);
+console.log(`  gym lanes               ${Object.keys(GYM_LANES.lanes).length} of ${LAD.ladders.length}   (${laned} movements, ${Object.keys(GYM_LANES.no_lane).length} ladders have none)`);
+console.log(`  ladders                 ${LAD.ladders.length}   (${onLadder} movements sit on one)`);
+console.log(`  fundamentals in the DB  ${FUND.length - missingFund.length} / ${FUND.length}`);
 if (missingFund.length) {
   console.log(`  MISSING (${missingFund.length}) — promised on the fundamentals list, absent from the database:`);
   for (const [no, fname, family, tier] of missingFund)
