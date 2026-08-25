@@ -2435,8 +2435,25 @@ function releasedProgram(){
    they are missing - an older link, or a program released before they were
    carried - this says so plainly rather than inventing a title. The sample
    keeps the kettlebell copy, because on the sample it is true. */
+function programRaw(){
+  /* THE SAME CHAIN coachProgram() WALKS, and for the same reason.
+
+     releasedProgram() alone is not enough. It matches on fj.user, the person
+     this DEVICE belongs to, while a link writes the program under
+     fj.v1.current, the person the link was for. Those are routinely
+     different - a phone claimed as one person, then handed a link for
+     another - and on this very device fj.user was "nico" while the program
+     sat under "nicolas". Reading only the first source found the days (they
+     come from the answers) and lost the name. */
+  try{
+    return releasedProgram()
+      || JSON.parse(localStorage.getItem(COACH_KEY) || '{}').program
+      || null;
+  }catch(e){ return null; }
+}
+
 function programMeta(){
-  const raw  = releasedProgram() || {};
+  const raw  = programRaw() || {};
   const days = (Array.isArray(A.trainDays) && A.trainDays.length) || +A.days || 0;
   const mins = parseInt(A.length, 10) || 0;
   if(IS_DEMO) return {
@@ -2460,8 +2477,7 @@ function programMeta(){
 
 function coachProgram(){
   try{
-    const p = releasedProgram()
-      || JSON.parse(localStorage.getItem(COACH_KEY)||'{}').program;
+    const p = programRaw();
     if(!p || !p.days || !Object.keys(p.days).length) return null;
     const out = {};
     for(const [id,d] of Object.entries(p.days)){
