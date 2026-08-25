@@ -701,6 +701,47 @@ const lblList = (xs, max, field) => {
 };
 const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
+/* THE WEEK, AS THE CLIENT ANSWERED IT.
+   The survey's last real question is four rods that add up to a 24-hour
+   day - work, people, recovery, training - and it derives `capacity`, a
+   0-10 training allocation, straight from the training rod. That is
+   Galpin's ten-point quadrant, asked in hours instead of points.
+
+   Mirrored from onboarding.html's RODS so the console can quote the words
+   the client actually read rather than printing "training: 0.75". If the
+   survey's bands move, these move with them. */
+const RODS = [
+  { k:'work', n:'Work', band:[5,8,10.5],
+    say:['A short day','A steady day','Long days','It takes the evenings too'] },
+  { k:'people', n:'People', band:[1.5,3.5,5.5],
+    say:['Weekends, mostly','An hour or two','Most evenings are theirs','They come first, always'] },
+  { k:'recovery', n:'Recovery', band:[7,8.5,10],
+    say:['Short sleep, no let-up','6 to 7 hours, little downtime','7 to 8 hours and some rest','8 hours and real downtime'] },
+  { k:'training', n:'Training', band:[0.28,0.5,0.8],
+    say:['Whatever is left over','2 or 3 sessions a week','3 or 4 sessions, planned','5 sessions, planned first'] }
+];
+const rodBand = (o,h) => h<o.band[0]?0 : h<o.band[1]?1 : h<o.band[2]?2 : 3;
+const rodsToCapacity = r => Math.max(1, Math.min(10, Math.round((r.training/1.75)*10)));
+/* hours, except training, which the survey itself keeps in minutes */
+const rodText = (o,h) => o.k==='training'
+  ? `${Math.round(h*60)} min/day - "${o.say[rodBand(o,h)]}"`
+  : `${h} h - "${o.say[rodBand(o,h)]}"`;
+
+/* The deck records a number for movements the client could put one to, and
+   "not sure, test it" for the rest. Both are findings; only the first is a
+   measurement. */
+function deckRead(a){
+  const d = a.deck || {};
+  const done = [], test = [];
+  Object.entries(d).forEach(([k,v]) => {
+    if(!v || !v.does) return;
+    if(v.value != null && v.unit) done.push(`${k} ${v.value}${v.unit==='sec'?'s':' '+v.unit}`);
+    else if(v.value != null) done.push(`${k} ${v.value}`);
+    else if(v.unsure || v.toTest) test.push(k);
+  });
+  return {done, test};
+}
+
 
 /* What a coach needs on screen while editing a session, in the order they
    need it: what this is for, what they can do, what they own, and how much
@@ -711,10 +752,13 @@ function factsFor(a){
   push('Goal, 90 days', lblList(a.focus));
   push('Ten years out', lblList(a.horizon, 3));
   push('Real driver', lblList(a.driver, 3));
+  push('Level', [a.tierName, a.trained && a.trained + ' years'].filter(Boolean).join(' &middot; '));
   push('Experience', a.levels
     ? [a.levels.gym && 'gym: ' + a.levels.gym, a.levels.body && 'bodyweight: ' + a.levels.body]
         .filter(Boolean).join(' &middot; ')
     : lbl(a.history));
+  push('The deck', Array.isArray(a.patterns)
+    ? `<b>${a.patterns.length} of ${a.patternsTotal||a.patterns.length}</b> patterns` : null);
   push('Trains', lblList(a.where));
   push('Kit', lblList(a.kit, 6) || '<em>nothing ticked</em>');
   push('Week', [a.days && a.days + ' days', a.length && a.length + ' min',
@@ -722,6 +766,13 @@ function factsFor(a){
       ? a.trainDays.map(d => DOW[d] || d).join(' ') : null].filter(Boolean).join(' &middot; '));
   push('Timing', lbl(a.when));
   push('Intensity', lbl(a.intensity));
+  push('Sleep', lbl(a.sleep));
+  /* the survey's own answer to Galpin's quadrant, in his units */
+  push('Room for this', a.capacity != null
+    ? `<b>${a.capacity} of 10</b>${a.rods ? ` &middot; ${Math.round(a.rods.training*60)} min a day` : ''}` : null);
+  push('Also does', a.otherAct && a.otherAct.length
+    ? lblList(a.otherAct, 3) + (a.otherLoad && a.otherLoad.freq
+        ? ` <em>(${a.otherLoad.freq}&times;, ${a.otherLoad.mins} min)</em>` : '') : null);
   push('Wearable', a.tracker && a.tracker !== 'none' ? lbl(a.tracker) : 'None');
   push('Stopped before', lblList(a.blockers, 3, 'blockers'));
   return out;
@@ -745,6 +796,13 @@ function constraintsFor(a){
   const budget = (+a.days || 0) * (+a.length || 0);
   if(budget) out.push([budget + ' min a week',
     `${a.days} &times; ${a.length}. That is the entire training budget, warm-up included.`, 0]);
+  /* A quadrant answer this low is a hard constraint, not a preference:
+     it is the client saying how much of themselves is available. */
+  if(a.capacity != null && a.capacity <= 4) out.push(['Low capacity',
+    `<b>${a.capacity} of 10</b> to training. Volume comes off before quality does.`, 0]);
+  if(a.otherAct && a.otherAct.length && a.otherLoad && a.otherLoad.freq)
+    out.push(['Outside load',
+      `${lblList(a.otherAct,2)}, ${a.otherLoad.freq}&times; a week, ${a.otherLoad.mins} min. That is training too.`, 0]);
   if(!out.length) out.push(['Nothing hard',
     'No medical flags, no pain zones, and the kit is not the limit.', 0]);
   return out;
@@ -777,7 +835,7 @@ const CONSTRAINTS = HAS_CLIENT ? constraintsFor(A) : []
    ============================================================ */
 const OZZY_LAYERS = [
 { id:'assess', n:1, title:'Assess across the nine adaptations',
-  tag:'Where he actually is, before anything is prescribed',
+  tag:'Where they actually are, before anything is prescribed',
   said:[['Activity','Active, but not training'],['Gym level','New'],['Bodyweight level','New'],
         ['Movement deck','0 of 12'],['Wearable','None'],['Self-image','3 of 5']],
   read:`Nothing here is a <b>weak</b> score - it is an <b>absent</b> one. He has never performed a single
@@ -791,8 +849,8 @@ const OZZY_LAYERS = [
   why:`<b>Galpin step 1</b> - assess across all nine adaptations before prescribing. He is explicit that
        an unmeasured adaptation should be recorded as unknown, not assumed.` },
 
-{ id:'goals', n:2, title:'Turn his answers into SMART goals',
-  tag:'Specific, measurable, and his - not ours',
+{ id:'goals', n:2, title:'Turn the answers into SMART goals',
+  tag:'Specific, measurable, and theirs - not ours',
   said:[['Focus 1','Lean out'],['Focus 2','Get stronger'],['Driver','Lose weight'],
         ['Driver','My doctor told me to'],['Weight tends to','Creep up fast']],
   read:`He ranked <b>lean</b> first and strong second, so fat loss is the ninety-day priority and strength
@@ -808,7 +866,7 @@ const OZZY_LAYERS = [
        we already log, and time-bound to the twelve-week block.` },
 
 { id:'defenders', n:3, title:'Name the defenders',
-  tag:'What has beaten him before, and what will try again',
+  tag:'What has beaten them before, and what will try again',
   said:[['Stopped before','Time disappears'],['Stopped before','Life gets busy, it goes first'],
         ['Stopped before','Motivation dies at week three'],['Trains','Whenever the day allows']],
   read:`He named week three <b>unprompted</b>. People do not volunteer that unless it has happened to them
@@ -823,7 +881,7 @@ const OZZY_LAYERS = [
        defenders, and treats a program that ignores them as already failed.` },
 
 { id:'quadrant', n:4, title:'The ten-point quadrant',
-  tag:'Business · relationships · fitness · recovery',
+  tag:'Work · people · recovery · training',
   said:[['Not asked','The survey has no question for this'],['Inferred','45, kids, &ldquo;life gets busy&rdquo;']],
   read:`We genuinely do not know this one. Galpin's default baseline is 2 points to fitness and 1 to
         recovery out of 10, and everything about Ozzy's answers is consistent with a man at exactly that
@@ -834,7 +892,7 @@ const OZZY_LAYERS = [
   why:`<b>Galpin step 4</b> - distribute ten points across the four quadrants. It is the step most
        programs skip, and the one that explains why ambitious plans fail people with jobs.` },
 
-{ id:'time', n:5, title:'What 80 minutes a week can actually buy',
+{ id:'time', n:5, title:'What the week can actually buy',
   tag:'The constraint everything else bends around',
   said:[['Days','4'],['Length','20 minutes'],['Days chosen','Sun · Mon · Wed · Fri']],
   read:`Eighty minutes a week, warm-ups included, is the whole budget. This is the layer where most
@@ -850,7 +908,7 @@ const OZZY_LAYERS = [
        selection. Fat loss = hypertrophy + muscular endurance in the 6–30 rep range.` },
 
 { id:'select', n:6, title:'Exercise selection by pattern',
-  tag:'Six patterns, one kettlebell, three sore joints',
+  tag:'Patterns first, then what the kit and the joints allow',
   said:[['Kit','Kettlebell · bench · mat'],['Pain','Arm · knee · ankle'],
         ['Wants','Kettlebell-focused <em>(said to you, not in the survey)</em>']],
   read:`His kit answers the question before we ask it - the bell is his only load, so this is a kettlebell
@@ -868,7 +926,7 @@ const OZZY_LAYERS = [
        pattern list is what exposes a gap like the pull one; an exercise list would have hidden it.` },
 
 { id:'dose', n:7, title:'Volume, intensity, frequency',
-  tag:'And the number we are knowingly under',
+  tag:'The dose, and any number we are knowingly under',
   said:[['Budget','80 min/week'],['Intensity preference','&ldquo;Push me&rdquo;'],['Sessions','4']],
   read:`Galpin puts hypertrophy at <b>10–25 working sets per muscle per week</b>. Inside 80 minutes, across
         six patterns, Ozzy will land at roughly <b>6–9 sets per muscle</b>. That is <b>below the stated
@@ -884,7 +942,7 @@ const OZZY_LAYERS = [
        rest (30–90 s for the time-efficient variant), 48 h between sessions for the same muscle.` },
 
 { id:'progress', n:8, title:'How it gets harder',
-  tag:'Double progression, and what unlocks when',
+  tag:'Progression, and what unlocks when',
   said:[['Intensity','Push me'],['Weeks','12'],['Phases','Foundation → Build → Peak']],
   read:`With one bell he has <b>one load</b>. That removes the obvious progression lever, so progression has
         to come from reps, then tempo, then leverage, then density - in that order. It also means the
@@ -900,7 +958,7 @@ const OZZY_LAYERS = [
        a deload. With a single fixed load, reps and tempo carry what percentage load normally would.` },
 
 { id:'recover', n:9, title:'Recovery and deloads',
-  tag:'With no wearable, and a body that has told us three things',
+  tag:'What the body and the week can absorb',
   said:[['Wearable','None'],['PAR-Q','Joint problem · doctor'],['Pain','Arm · knee · ankle'],['Sleep','Not asked']],
   read:`No wearable means no HRV, so Galpin's primary objective recovery marker is unavailable to us. His
         fallback - the <b>WUT check</b> (weight, urine, thirst) - is free, needs no hardware, and we are
@@ -915,7 +973,7 @@ const OZZY_LAYERS = [
        second; HRV is the primary marker, WUT the accessible one; 3 days of decline is the warning.` },
 
 { id:'review', n:10, title:'Review and adjust',
-  tag:'The loop that makes the other nine layers correctable',
+  tag:'The loop that makes the other nine correctable',
   said:[['Check-in','Monday morning'],['Contact','Weekly, 60 seconds']],
   read:`He chose Monday, which is the right end of the week for a man whose weekends are protected
         training days - it reviews what just happened rather than forecasting what might. Sixty seconds
@@ -931,6 +989,13 @@ const OZZY_LAYERS = [
 /* The framework: the fields that are true of the step rather than of the
    person. Taken from the definitions above so the ten steps and their
    citations cannot drift apart from the worked example. */
+/* THE TITLES AND TAGS HAD TO BE GENERALISED TOO. Several were not
+   descriptions of a step at all - step 5 was called "What 80 minutes a
+   week can actually buy", which is Ozzy's budget, shown to a man with 140;
+   step 6's tag read "one kettlebell, three sore joints"; step 9's assumed
+   no wearable. A heading is the most confident text on a page and these
+   were quietly wrong for everybody else. The client's own numbers appear
+   in `said` now, which is where they can be right. */
 const LAYER_FRAMEWORK = OZZY_LAYERS.map(({id,n,title,tag,why}) => ({id,n,title,tag,why}));
 
 /* Reasoning that ships with a client rather than with the console. */
@@ -946,40 +1011,80 @@ function saidFor(stepId, a){
   const add = (k, v) => { if(v != null && v !== '' && !(Array.isArray(v) && !v.length)) q.push([k, v]); };
   const list = (xs, f) => lblList(xs, 4, f);
   switch(stepId){
-    case 'assess':
-      add('Activity', lbl(a.activity)); add('Gym level', a.levels && a.levels.gym);
+    case 'assess': {
+      add('Activity', lbl(a.activity)); add('Years training', a.trained);
+      add('Tier', a.tierName); add('Gym level', a.levels && a.levels.gym);
       add('Bodyweight level', a.levels && a.levels.body);
       add('Movement deck', Array.isArray(a.patterns) ? `${a.patterns.length} of ${a.patternsTotal||12}` : null);
+      /* THE DECK IS THE ASSESSMENT. It carries real numbers for what the
+         client could put one to, and an explicit "test it" for the rest -
+         which is exactly what Galpin's step 1 asks for and is far better
+         than the "untested across all nine" this step used to assume. */
+      const d = deckRead(a);
+      if(d.done.length) add('Measured', d.done.join(' · '));
+      if(d.test.length) add('To test', `${d.test.length}: ` + d.test.join(', '));
       add('Wearable', a.tracker && a.tracker !== 'none' ? lbl(a.tracker) : 'None');
       add('Self-image', a.shape && a.shape.now != null ? a.shape.now + ' of 5' : null);
-      break;
+      break; }
     case 'goals':
       add('Focus', list(a.focus)); add('Driver', list(a.driver));
+      add('Ten years out', list(a.horizon));
+      add('Weight now', a.weightKg ? a.weightKg + ' kg' : null);
       add('Weight tends to', lbl(a.weightTend)); add('Target', a.targetKg ? a.targetKg + ' kg' : null);
       break;
     case 'defenders':
       add('Stopped before', list(a.blockers, 'blockers')); add('Trains', lbl(a.when));
+      add('In their words', a.note || null);
       break;
     case 'quadrant':
-      add('Not asked', 'The survey has no question for this');
+      /* This step used to read "the survey has no question for this", which
+         was true when it was written and is not any more: the reactor screen
+         asks exactly this, in hours of a real day, and derives the ten-point
+         allocation from the training rod. Leaving the old sentence in place
+         would have had the console tell you a question was unasked while
+         the answer sat two keys away in the same record. */
+      if(a.rods){
+        RODS.forEach(o => { if(a.rods[o.k] != null) add(o.n, rodText(o, a.rods[o.k])); });
+        add('Locked', (a.rodLocks||[]).length ? (a.rodLocks||[]).join(' · ') : 'nothing');
+        add('Preset', a.rodPreset === 'custom' ? 'set by hand' : lbl(a.rodPreset));
+      }
+      add('Points to training', a.capacity != null
+        ? `${a.capacity} of 10` + (a.rods ? ` (derived from the training rod)` : '') : null);
+      if(!a.rods && a.capacity == null) add('Not asked', 'This survey did not collect it');
       break;
     case 'time':
       add('Days', a.days); add('Length', a.length ? a.length + ' minutes' : null);
       add('Days chosen', Array.isArray(a.trainDays) ? a.trainDays.map(d=>DOW[d]||d).join(' · ') : null);
+      add('Weekly budget', (+a.days && +a.length) ? (a.days*a.length) + ' minutes' : null);
+      add('Other sport', a.otherAct && a.otherAct.length
+        ? `${list(a.otherAct)}${a.otherLoad && a.otherLoad.freq
+            ? ` - ${a.otherLoad.freq}× a week, ${a.otherLoad.mins} min` : ''}` : null);
+      add('Sport days', Array.isArray(a.actDays) && a.actDays.length
+        ? a.actDays.map(d=>DOW[d]||d).join(' · ') : null);
       break;
     case 'select':
-      add('Kit', list(a.kit)); add('Pain', list(a.pain)); add('Where', list(a.where));
+      add('Kit', lblList(a.kit, 12)); add('Pain', list(a.pain));
+      add('Pain note', a.painNote || null); add('Where', list(a.where));
+      add('Wants tested', Array.isArray(a.toTest) && a.toTest.length ? a.toTest.join(' · ') : null);
       break;
     case 'dose':
       add('Budget', (+a.days && +a.length) ? (a.days*a.length) + ' min/week' : null);
       add('Intensity', lbl(a.intensity)); add('Sessions', a.days);
+      add('Room for it', a.capacity != null ? a.capacity + ' of 10' : null);
+      add('Tier', a.tierName);
       break;
-    case 'progress':
+    case 'progress': {
       add('Experience', a.levels && [a.levels.gym, a.levels.body].filter(Boolean).join(' · '));
-      add('Intensity', lbl(a.intensity));
-      break;
+      add('Tier', a.tierName); add('Intensity', lbl(a.intensity));
+      const d = deckRead(a);
+      add('Known numbers', d.done.length ? d.done.length + ' movements' : null);
+      add('Unknown', d.test.length ? d.test.length + ' need a first number' : null);
+      break; }
     case 'recover':
-      add('Sleep', lbl(a.sleep)); add('Health flags', list(a.parq, 'parq'));
+      add('Sleep', lbl(a.sleep));
+      add('Recovery rod', a.rods && a.rods.recovery != null
+        ? rodText(RODS[2], a.rods.recovery) : null);
+      add('Health flags', list(a.parq, 'parq')); add('Pain', list(a.pain));
       add('Wearable', a.tracker && a.tracker !== 'none' ? lbl(a.tracker) : 'None');
       break;
     case 'review':
