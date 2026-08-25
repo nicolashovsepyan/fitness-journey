@@ -58,12 +58,22 @@ def lane_of(lid):
             'harder': [x for x in (rung(m) for m in l['harder']) if x],
             'why':    l['why']}
 
+GROUP = {'squat':'Lower','hinge':'Lower','glute':'Lower','single-leg':'Lower',
+         'h-push':'Push','v-push':'Push',
+         'h-pull':'Pull','v-pull':'Pull','straight-arm-pull':'Pull',
+         'carry-grip':'Carry & grip',
+         'core-static':'Core','core-dynamic':'Core','rotation':'Core','anti-rotation':'Core',
+         'explosive':'Power & conditioning','full-body':'Power & conditioning',
+         'mobility':'Mobility'}
+SPECIAL = {'lateral':'Lower', 'core_lateral':'Core'}
+
 ladders = [{
     'name': name, 'family': family, 'tier': tier,
     'reg':  [x for x in (rung(m) for m in regs) if x],
     'anch': rung(anchor),
     'prog': [x for x in (rung(m) for m in progs) if x],
     'gym':  lane_of(lid),
+    'grp':  SPECIAL.get(lid) or GROUP.get(family, 'Other'),
 } for lid, name, family, tier, anchor, regs, progs in LAD['ladders']]
 
 # the fifty, with the database name appended so the page can look up artwork

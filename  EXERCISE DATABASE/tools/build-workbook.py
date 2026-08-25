@@ -661,6 +661,56 @@ def build_do_next(wb, rows, ncal, nfund, nfundmiss):
         ws.row_dimensions[j].height = 40 if k <= 6 else 34
         j += 1
 
+    # ---- what we have, by category ----
+    j += 2
+    ws.cell(row=j, column=1, value='WHAT WE HAVE, BY CATEGORY').font = Font(bold=True, size=13, color=INK); j += 1
+    for i, h in enumerate(['', 'Category', 'Ladders', 'Rungs', 'Gym', 'The fundamentals in it'], start=1):
+        c = ws.cell(row=j, column=i, value=h)
+        c.fill = PatternFill('solid', fgColor=HEAD_BG); c.font = Font(bold=True, color=HEAD_FG)
+    j += 1
+    LADJ = json.load(open(os.path.join(HERE, 'fundamental-ladders.json')))
+    GYMJ = json.load(open(os.path.join(HERE, 'gym-lanes.json')))
+    ids = {r['id'] for r in rows}
+    GRP = {'squat': 'Lower', 'hinge': 'Lower', 'glute': 'Lower', 'single-leg': 'Lower',
+           'h-push': 'Push', 'v-push': 'Push',
+           'h-pull': 'Pull', 'v-pull': 'Pull', 'straight-arm-pull': 'Pull',
+           'carry-grip': 'Carry & grip',
+           'core-static': 'Core', 'core-dynamic': 'Core', 'rotation': 'Core',
+           'anti-rotation': 'Core',
+           'explosive': 'Power & conditioning', 'full-body': 'Power & conditioning',
+           'mobility': 'Mobility'}
+    SPEC = {'lateral': 'Lower', 'core_lateral': 'Core'}
+    buckets = {}
+    for lid, nm, fam, tier, anch, reg, prog in LADJ['ladders']:
+        g = SPEC.get(lid) or GRP.get(fam, 'Other')
+        n = len([m for m in reg if m in ids]) + 1 + len([m for m in prog if m in ids])
+        lane = GYMJ['lanes'].get(lid)
+        gn = (len(lane['easier']) + 1 + len(lane['harder'])) if lane else 0
+        buckets.setdefault(g, []).append((tier, nm, n, gn))
+    TOT = [0, 0, 0]
+    for g in ['Lower', 'Push', 'Pull', 'Core', 'Carry & grip', 'Power & conditioning', 'Mobility']:
+        if g not in buckets: continue
+        lst = sorted(buckets[g])
+        names = ', '.join(f'{nm} ({n}' + (f'+{gn}' if gn else '') + ')' for _, nm, n, gn in lst)
+        vals = ['', g, len(lst), sum(x[2] for x in lst), sum(x[3] for x in lst), names]
+        TOT = [TOT[0] + len(lst), TOT[1] + vals[3], TOT[2] + vals[4]]
+        for i, v in enumerate(vals, start=1):
+            c = ws.cell(row=j, column=i, value=v); c.border = THIN
+            c.alignment = Alignment(wrap_text=True, vertical='top')
+            if i == 2: c.font = Font(bold=True)
+            if i == 3:
+                c.font = Font(bold=True, size=12)
+                c.alignment = Alignment(horizontal='center', vertical='top')
+                if len(lst) <= 3: c.fill = NEEDS
+        ws.row_dimensions[j].height = 30
+        j += 1
+    for i, v in enumerate(['', 'TOTAL', TOT[0], TOT[1], TOT[2],
+                           f'{len(LADJ["protocols"])} protocols on top (Zone 2, VO2, sprint, long ruck)'], start=1):
+        c = ws.cell(row=j, column=i, value=v); c.border = THIN; c.font = Font(bold=True)
+        if i == 3: c.alignment = Alignment(horizontal='center')
+    j += 1
+    ws.cell(row=j, column=6, value='Rung counts are bodyweight (+gym). A category with three or fewer ladders is highlighted.').font = Font(italic=True, size=9, color='6B635A')
+
     j += 2
     ws.cell(row=j, column=1, value='WHERE EVERYTHING IS').font = Font(bold=True, size=13, color=INK); j += 1
     for i, h in enumerate(['', 'Sheet', 'What it is', '', 'Do you need to touch it?'], start=1):
