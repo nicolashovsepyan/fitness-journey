@@ -56,7 +56,14 @@ const payload = {
   at: new Date().toISOString(),
   uid, userId: uid, name: personName,
   a,
-  program: { from: prog.id, version: prog.version, days: prog.days },
+  /* NAME AND DURATION TRAVEL WITH IT.
+     They used to be left behind, and the dashboard has a card that names the
+     program the person is on. With nothing to read, that card showed the one
+     hard-coded into the page - so every client, on every program, was told
+     they were on "Kettlebell Foundation, 20 minutes, one bell". The days were
+     right and the title was somebody else's. */
+  program: { from: prog.id, version: prog.version,
+             name: prog.name, duration: prog.duration, days: prog.days },
   /* handed over means live — a person opening their link should not find
      every day locked behind a switch only the coach can see */
   released: Object.assign({ shape: true },

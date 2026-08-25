@@ -2422,6 +2422,42 @@ function releasedProgram(){
   }catch(e){ return null; }
 }
 
+/* WHAT THE PERSON IS ACTUALLY ON, for the places that name it.
+
+   Two spots printed "Kettlebell Foundation · Week 1 of 12 · 4 days, 20
+   minutes, one bell" as literal text: the program card on Today, and the
+   heading of the week sheet. That is one real program - the training
+   partner's - and it was shown to everybody, on every program. Nicolas
+   opened The Fundamentals, 4 days of 40 minutes, and was told he was doing
+   20-minute kettlebell sessions.
+
+   The name and the duration ride along in the released record now. Where
+   they are missing - an older link, or a program released before they were
+   carried - this says so plainly rather than inventing a title. The sample
+   keeps the kettlebell copy, because on the sample it is true. */
+function programMeta(){
+  const raw  = releasedProgram() || {};
+  const days = (Array.isArray(A.trainDays) && A.trainDays.length) || +A.days || 0;
+  const mins = parseInt(A.length, 10) || 0;
+  if(IS_DEMO) return {
+    name: 'Kettlebell Foundation',
+    sub:  'Week 1 of 12 \u00b7 Foundation phase \u00b7 4 days, 20 minutes, one bell',
+    eyebrow: 'Foundation \u00b7 weeks 1\u20134',
+    blurb: 'Twelve weeks in three phases, built around one bell. Weeks one to four teach the hinge - which is why there is no swing in them. The swing is a hinge done fast, and you cannot do a hinge fast before you can do one at all.',
+  };
+  const bits = [];
+  if(days) bits.push(days + (days === 1 ? ' day' : ' days'));
+  if(mins) bits.push(mins + ' minutes');
+  return {
+    name: raw.name || 'Your program',
+    sub:  ['Week 1', 'Foundation phase'].concat(bits).join(' \u00b7 '),
+    eyebrow: 'Foundation \u00b7 weeks 1\u20134',
+    /* No invented prose for a real program. The week below says what the
+       week is; a paragraph about somebody else's bell does not. */
+    blurb: bits.length ? 'Your week, as it stands: ' + bits.join(', ') + '.' : '',
+  };
+}
+
 function coachProgram(){
   try{
     const p = releasedProgram()
@@ -4032,8 +4068,8 @@ function paneToday(){
   <div class="card tap" data-act="openweek">
     <div class="prog">
       <div class="ring">${ring(8,'1')}</div>
-      <div class="tx"><b>Kettlebell Foundation</b>
-        <small>Week 1 of 12 · Foundation phase · 4 days, 20 minutes, one bell</small></div>
+      <div class="tx"><b>${esc(programMeta().name)}</b>
+        <small>${esc(programMeta().sub)}</small></div>
       ${svg(I.arrow,'arw')}
     </div>
     <div class="phases">
@@ -5273,9 +5309,9 @@ function sheetKit(){
 
 function sheetWeek(){
   openSheet(`
-    <div class="eyebrow">Foundation · weeks 1–4</div>
-    <h4 style="margin-top:8px">Kettlebell Foundation</h4>
-    <div class="shsub">Twelve weeks in three phases, built around one bell. Weeks one to four teach the hinge - which is why there is no swing in them. The swing is a hinge done fast, and you cannot do a hinge fast before you can do one at all.</div>
+    <div class="eyebrow">${esc(programMeta().eyebrow)}</div>
+    <h4 style="margin-top:8px">${esc(programMeta().name)}</h4>
+    ${programMeta().blurb ? `<div class="shsub">${esc(programMeta().blurb)}</div>` : ''}
     ${WEEK_ORDER.map(i=>{
       const d=DAYNM[i], id=WEEKPLAN[i];
       if(!id) return `<div class="mv" style="opacity:.5;cursor:default">
