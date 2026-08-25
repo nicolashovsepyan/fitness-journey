@@ -14,17 +14,19 @@
 -- ============================================================
 begin;
 
--- Three people. Real auth rows, because the users table points at auth.users.
-insert into auth.users (id, email) values
-  ('aaaaaaaa-0000-0000-0000-000000000001', 'client-a@test.invalid'),
-  ('bbbbbbbb-0000-0000-0000-000000000002', 'client-b@test.invalid'),
-  ('cccccccc-0000-0000-0000-000000000003', 'trainer@test.invalid')
-on conflict (id) do nothing;
+-- Three people. Plain rows, no auth rows: this project will not let the
+-- editor write to auth.users either, which is the same wall 01a hit. The test
+-- does not need real logins. It fakes the signed-in id further down with
+-- set_config, which is exactly what a real session does.
+-- The trainer goes in FIRST. Client A points at them, and while Postgres does
+-- check foreign keys at the end of a statement rather than row by row, there
+-- is no reason to lean on that when the order is free.
+insert into public.users (id, role, display_name, trainer_id) values
+  ('cccccccc-0000-0000-0000-000000000003','trainer','Trainer',  null);
 
 insert into public.users (id, role, display_name, trainer_id) values
   ('aaaaaaaa-0000-0000-0000-000000000001','client', 'Client A','cccccccc-0000-0000-0000-000000000003'),
-  ('bbbbbbbb-0000-0000-0000-000000000002','client', 'Client B', null),
-  ('cccccccc-0000-0000-0000-000000000003','trainer','Trainer',  null);
+  ('bbbbbbbb-0000-0000-0000-000000000002','client', 'Client B', null);
 
 -- Client B has answered a PAR-Q. This is the row nobody else may see.
 insert into public.intakes (user_id, answers) values

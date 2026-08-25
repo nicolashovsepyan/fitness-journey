@@ -25,10 +25,16 @@ in one round instead of five.
 
 Send the message and which file. Do not retry it.
 
-`01a` is the one carrying the risk: it points at `auth.users`, Supabase's own
-login table. If that is the one that fails, the fix is to drop that link. The
-app works without it. It only means the database stops checking that every
-person also has a login, which the app can check instead.
+**This already happened.** `01a` pointed at `auth.users`, Supabase's own login
+table, and this project will not let the SQL editor reach across to it. That
+was the "Backend error", twice. The link is gone from `01a`, and out of the
+test in `03` which was writing to the same table.
+
+It costs nothing in security. Every lock in `02` compares against the
+signed-in session itself, never against that link. What it costs is two bits
+of housekeeping the database used to do free: sweeping up a person's row when
+their login is deleted, and refusing a row whose id has no login. Both belong
+to the app now.
 
 ## The gate
 

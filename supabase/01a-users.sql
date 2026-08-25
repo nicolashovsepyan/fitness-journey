@@ -1,14 +1,26 @@
--- STEP 1a. The people table, on its own.
+-- STEP 1a. The people table.
 --
--- This is the riskiest statement in the whole set, which is why it is alone.
--- It points at auth.users, Supabase's own login table, and that is a link
--- across schemas that some projects will not allow from the editor.
+-- WHAT CHANGED, AND WHAT IT COSTS.
 --
--- If THIS is the one that errors, say so and I will drop the link. The app
--- works without it; it only means the database stops policing that every
--- person also has a login.
+-- This said:  id uuid primary key references auth.users(id) on delete cascade
+--
+-- auth.users is Supabase's own login table, in a schema this project will not
+-- let the editor reach across to. That is what "Backend error" meant, twice.
+--
+-- The link is gone. `id` is still the login id, it is simply no longer the
+-- DATABASE enforcing that. The app sets it from the signed-in session.
+--
+-- WHAT THIS DOES NOT COST: security. Nothing in the locking step reads this
+-- link. Every policy compares id against auth.uid(), which comes from the
+-- signed-in session itself, not from any foreign key. The protection is
+-- identical.
+--
+-- WHAT IT DOES COST: two housekeeping things the database used to do for
+-- free. If a login is deleted, its row here is no longer swept up with it,
+-- and a row could in principle be written with an id that has no login. Both
+-- are tidiness, not exposure, and both belong to the app now.
 create table if not exists public.users (
-  id            uuid primary key references auth.users(id) on delete cascade,
+  id            uuid primary key,
   role          text not null default 'client',
   status        text not null default 'pending',
   display_name  text not null default '',
