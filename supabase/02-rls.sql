@@ -52,12 +52,12 @@ language sql
 security definer
 set search_path = public
 stable
-as $$
+as $isclient$
   select exists (
     select 1 from public.users u
     where u.id = client and u.trainer_id = auth.uid()
   );
-$$;
+$isclient$;
 revoke all on function public.is_my_client(uuid) from public;
 grant execute on function public.is_my_client(uuid) to authenticated;
 

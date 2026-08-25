@@ -18,6 +18,10 @@
 -- on a laptop. Syncing either is a bug, not a feature.
 -- ============================================================
 
+-- gen_random_uuid() is built in on the Postgres version Supabase runs. This
+-- line is here so the file also works on an older one, and costs nothing.
+create extension if not exists pgcrypto;
+
 -- ---------- who ----------
 -- The id IS the Supabase auth id. That is the join that makes every policy
 -- below a one-line comparison instead of a lookup.
@@ -115,16 +119,48 @@ create table if not exists public.messages (
 create index if not exists messages_pair_idx on public.messages(to_user_id, from_user_id, created_at desc);
 
 -- ---------- every record is stamped, and stays stamped ----------
+-- WRITTEN OUT LONGHAND ON PURPOSE.
+-- This was an anonymous DO block calling format() with a positional
+-- argument. That is valid Postgres, but the Supabase SQL editor splits
+-- statements itself before the database sees them, and it cannot tell
+-- where a dollar-quoted block ends when there is a dollar sign inside
+-- it. It returned "Backend error! Retry your query", which sounds like
+-- their problem and was ours.
+--
+-- Seven repeated statements are duller and they run everywhere. If you add a
+-- table later, copy one of these blocks for it.
 create or replace function public.touch_updated_at() returns trigger
-language plpgsql as $$
-begin new.updated_at = now(); return new; end $$;
-
-do $$
-declare t text;
+language plpgsql as $touch$
 begin
-  foreach t in array array['users','intakes','programs','sessions','logs','prs','messages'] loop
-    execute format('drop trigger if exists touch_%1$s on public.%1$s', t);
-    execute format('create trigger touch_%1$s before update on public.%1$s
-                    for each row execute function public.touch_updated_at()', t);
-  end loop;
-end $$;
+  new.updated_at = now();
+  return new;
+end;
+$touch$;
+
+drop trigger if exists touch_users on public.users;
+create trigger touch_users before update on public.users
+  for each row execute function public.touch_updated_at();
+
+drop trigger if exists touch_intakes on public.intakes;
+create trigger touch_intakes before update on public.intakes
+  for each row execute function public.touch_updated_at();
+
+drop trigger if exists touch_programs on public.programs;
+create trigger touch_programs before update on public.programs
+  for each row execute function public.touch_updated_at();
+
+drop trigger if exists touch_sessions on public.sessions;
+create trigger touch_sessions before update on public.sessions
+  for each row execute function public.touch_updated_at();
+
+drop trigger if exists touch_logs on public.logs;
+create trigger touch_logs before update on public.logs
+  for each row execute function public.touch_updated_at();
+
+drop trigger if exists touch_prs on public.prs;
+create trigger touch_prs before update on public.prs
+  for each row execute function public.touch_updated_at();
+
+drop trigger if exists touch_messages on public.messages;
+create trigger touch_messages before update on public.messages
+  for each row execute function public.touch_updated_at();
