@@ -3,17 +3,33 @@
   "version": 1,
   "name": "The Fundamentals",
   "who": "Nicolas",
-  "source": "built in the coach console from survey v6 (25 Aug 2026) and the Foundation Block that ran before it",
+  "source": "built in the coach console from survey v6 (25 Aug 2026) and the Foundation Block that ran before it. Days corrected after the Monday/Sunday indexing bug.",
   "duration": 40,
   "fixed": false,
-  "trainDays": [0, 1, 3, 4],
+  "trainDays": [
+    1,
+    2,
+    4,
+    5
+  ],
   "units": "lb",
-  "equipment": ["bw", "db", "kb", "bb", "pullupbar", "bench", "rack", "rings", "dipbars", "parallettes"],
+  "equipment": [
+    "bw",
+    "db",
+    "kb",
+    "bb",
+    "pullupbar",
+    "bench",
+    "rack",
+    "rings",
+    "dipbars",
+    "parallettes"
+  ],
   "constraints": {
     "lowerback": "hinge is loaded but never rounded - the set ends the rep the back changes shape, not the rep after",
     "knee": "no jumping, no deep loaded knee flexion cold; the knee circuit runs before every lower day",
     "capacity": "4 of 10 to training and 7.75 h recovery - four sessions is the ceiling, not the floor",
-    "sport": "a team sport, 45 min, Saturdays - that is a fifth session and it is already in the week"
+    "sport": "a team sport, 45 min, SUNDAYS - that is a fifth session and it is already in the week. Monday is upper only because of it."
   },
   "goals": [
     "Build muscle, get stronger",
@@ -26,7 +42,7 @@
     "d1": {
       "name": "Push & Pull A",
       "tag": "upper · bench",
-      "why": "Sunday, and the week's first session lands on the lift with the most room to grow. Bench is one of your seven unknowns, so the top set is the test: ramp to a hard 6 and write the number down. Everything after it is volume around that.",
+      "why": "Monday, the day after Sunday's match. Upper only on purpose - legs that just played do not want a barbell on them. Bench is one of your seven unknowns, so the top set is the test: ramp to a hard 6 and write the number down. Everything after it is volume around that.",
       "blocks": [
         {
           "role": "Prime",
@@ -34,11 +50,31 @@
           "note": "Straight through, no rest. The wrists matter because dips and the front rack both load them cold.",
           "mins": 6,
           "items": [
-            { "ex": "arm_circles", "pres": "20", "note": "" },
-            { "ex": "thoracic_rotation", "pres": "8 each side", "note": "Open the mid back before anything presses." },
-            { "ex": "wrist_prep", "pres": "30s", "note": "" },
-            { "ex": "scap_pullup", "pres": "10", "note": "Hang, then pull the shoulders down without bending the arms." },
-            { "ex": "shoulder_tap", "pres": "20", "note": "Push-up position, no hip sway." }
+            {
+              "ex": "arm_circles",
+              "pres": "20",
+              "note": ""
+            },
+            {
+              "ex": "thoracic_rotation",
+              "pres": "8 each side",
+              "note": "Open the mid back before anything presses."
+            },
+            {
+              "ex": "wrist_prep",
+              "pres": "30s",
+              "note": ""
+            },
+            {
+              "ex": "scap_pullup",
+              "pres": "10",
+              "note": "Hang, then pull the shoulders down without bending the arms."
+            },
+            {
+              "ex": "shoulder_tap",
+              "pres": "20",
+              "note": "Push-up position, no hip sway."
+            }
           ]
         },
         {
@@ -47,7 +83,11 @@
           "note": "4 × 6, rest 150s. TEST: weeks 1 and 2, ramp to a hard 6 that leaves 1 in the tank and record it. That number is what everything after week 2 progresses from.",
           "mins": 12,
           "items": [
-            { "ex": "bench_press", "pres": "4 × 6", "note": "150s rest · stop 1 rep short, every set" }
+            {
+              "ex": "bench_press",
+              "pres": "4 × 6",
+              "note": "150s rest · stop 1 rep short, every set"
+            }
           ]
         },
         {
@@ -56,8 +96,16 @@
           "note": "B1 into B2 with no rest, then 90s. Two of your fundamentals in one 9-minute block.",
           "mins": 9,
           "items": [
-            { "ex": "dip", "pres": "3 × 8", "note": "superset B1 · parallettes, controlled to depth the shoulder likes" },
-            { "ex": "single_arm_row", "pres": "3 × 10 each side", "note": "superset B2 · TEST the load · chest supported on the bench so the lower back stays out of it" }
+            {
+              "ex": "dip",
+              "pres": "3 × 8",
+              "note": "superset B1 · parallettes, controlled to depth the shoulder likes"
+            },
+            {
+              "ex": "single_arm_row",
+              "pres": "3 × 10 each side",
+              "note": "superset B2 · TEST the load · chest supported on the bench so the lower back stays out of it"
+            }
           ]
         },
         {
@@ -66,8 +114,16 @@
           "note": "C1 into C2, no rest, then 75s. The Y-T-W is never heavy - it is there to pay for the pressing.",
           "mins": 8,
           "items": [
-            { "ex": "db_shoulder_press", "pres": "3 × 10", "note": "superset C1 · seated, back supported" },
-            { "ex": "prone_ytw", "pres": "3 × 8", "note": "superset C2 · light, slow, chest on an incline bench" }
+            {
+              "ex": "db_shoulder_press",
+              "pres": "3 × 10",
+              "note": "superset C1 · seated, back supported"
+            },
+            {
+              "ex": "prone_ytw",
+              "pres": "3 × 8",
+              "note": "superset C2 · light, slow, chest on an incline bench"
+            }
           ]
         },
         {
@@ -76,131 +132,24 @@
           "note": "Straight through, 45s between rounds.",
           "mins": 5,
           "items": [
-            { "ex": "hanging_knee_raise", "pres": "3 × 15", "note": "You tested at 25. These are slow, not max." },
-            { "ex": "side_plank", "pres": "3 × 45s each side", "note": "Anti-side-bend. This is lower back work." }
+            {
+              "ex": "hanging_knee_raise",
+              "pres": "3 × 15",
+              "note": "You tested at 25. These are slow, not max."
+            },
+            {
+              "ex": "side_plank",
+              "pres": "3 × 45s each side",
+              "note": "Anti-side-bend. This is lower back work."
+            }
           ]
         }
       ]
     },
     "d2": {
-      "name": "Squat & Carry",
-      "tag": "lower · squat",
-      "why": "Monday, the day after an upper session, so the legs are fresh. The knee circuit is not a warm-up you can skip - it is the reason this day is repeatable. Squat is the test; the split squat already has a number from your survey.",
-      "blocks": [
-        {
-          "role": "Prime",
-          "name": "Knee armour",
-          "note": "2 rounds, controlled. Carried over from the Foundation Block because it worked and you actually did it.",
-          "mins": 7,
-          "items": [
-            { "ex": "leg_swings", "pres": "10 each way", "note": "" },
-            { "ex": "ankle_mobility", "pres": "8 each side", "note": "Ankles first - a stiff ankle is a knee problem." },
-            { "ex": "deep_squat_rock", "pres": "10", "note": "" },
-            { "ex": "touchdown_squat", "pres": "15 each side", "note": "" },
-            { "ex": "tibialis_raise", "pres": "25", "note": "" },
-            { "ex": "kot_calf", "pres": "25", "note": "" }
-          ]
-        },
-        {
-          "role": "Work",
-          "name": "A · Back Squat",
-          "note": "4 × 5, rest 150s. TEST: ramp to a hard 5. If the knee talks on the way down, switch to a box squat at a height it likes and test that instead - a number you can repeat beats a number you cannot.",
-          "mins": 12,
-          "items": [
-            { "ex": "back_squat", "pres": "4 × 5", "note": "150s rest · TEST · box squat is the regression, not a failure" }
-          ]
-        },
-        {
-          "role": "Work",
-          "name": "B · Single-Leg RDL",
-          "note": "3 × 10 each side, alternating - the other leg is the rest. Hinge without loading the spine, which is the point on a squat day.",
-          "mins": 8,
-          "items": [
-            { "ex": "single_leg_rdl", "pres": "3 × 10 each side", "note": "Push the hip back, flat back, slow down" }
-          ]
-        },
-        {
-          "role": "Work",
-          "name": "C · Bulgarian Split Squat",
-          "note": "3 × 8 each side, rest 90s. You logged 40 lb × 10 in the survey, so this one starts with a real number instead of a guess.",
-          "mins": 8,
-          "items": [
-            { "ex": "bulgarian_split", "pres": "3 × 8 each side", "note": "Start at 40 lb · 90s rest" }
-          ]
-        },
-        {
-          "role": "Finish",
-          "name": "Suitcase Carry",
-          "note": "3 rounds, 40s per side, 45s between rounds. One of your seven unknowns and the cheapest lower-back insurance in the program.",
-          "mins": 5,
-          "items": [
-            { "ex": "suitcase_carry", "pres": "3 × 40s each side", "note": "TEST the load · one kettlebell, do not let the ribs tip" }
-          ]
-        }
-      ]
-    },
-    "d3": {
-      "name": "Push & Pull B",
-      "tag": "upper · press and row",
-      "why": "Wednesday. Two more unknowns tested back to back - overhead press and the barbell row - and the pull-up finally gets loaded rather than counted. You do 15, so sets of 8 are strength work, not endurance.",
-      "blocks": [
-        {
-          "role": "Prime",
-          "name": "Overhead and grip",
-          "note": "Straight through. The dead hang is prep and a test of how the shoulder feels today.",
-          "mins": 6,
-          "items": [
-            { "ex": "arm_circles", "pres": "20", "note": "" },
-            { "ex": "down_dog_up_dog", "pres": "5", "note": "" },
-            { "ex": "wrist_prep", "pres": "30s", "note": "" },
-            { "ex": "dead_hang", "pres": "30s", "note": "" },
-            { "ex": "bird_dog", "pres": "8 each side", "note": "Braced before anything goes overhead." }
-          ]
-        },
-        {
-          "role": "Work",
-          "name": "A · Overhead Press",
-          "note": "4 × 6, rest 150s. TEST. Strict, standing, ribs down - if the lower back arches to finish the rep, the set is over.",
-          "mins": 12,
-          "items": [
-            { "ex": "overhead_press", "pres": "4 × 6", "note": "150s rest · TEST · strict, no leg drive" }
-          ]
-        },
-        {
-          "role": "Work",
-          "name": "B · Barbell Row",
-          "note": "4 × 8, rest 90s. TEST. Hinged and flat backed - this is the one row that asks something of the lower back, so it comes on the day the deadlift does not.",
-          "mins": 10,
-          "items": [
-            { "ex": "bent_over_row", "pres": "4 × 8", "note": "90s rest · TEST · flat back, stop the set if it changes shape" }
-          ]
-        },
-        {
-          "role": "Work",
-          "name": "C · Pull-Up + Ring Push-Up",
-          "note": "C1 into C2, no rest, then 90s. Add load to the pull-up as soon as 3 × 8 is comfortable - a dumbbell between the feet does the job without a vest.",
-          "mins": 7,
-          "items": [
-            { "ex": "pullup", "pres": "3 × 8", "note": "superset C1 · load it once 8 is easy" },
-            { "ex": "ring_pushup", "pres": "3 × 10", "note": "superset C2 · rings low, turn the hands out at the top" }
-          ]
-        },
-        {
-          "role": "Finish",
-          "name": "Core",
-          "note": "45s between rounds.",
-          "mins": 5,
-          "items": [
-            { "ex": "hanging_leg_raise", "pres": "3 × 12", "note": "Straight legs, no swing." },
-            { "ex": "copenhagen_plank", "pres": "2 × 20s each side", "note": "Top foot on the bench. Start with the knee bent." }
-          ]
-        }
-      ]
-    },
-    "d4": {
       "name": "Hinge & Swing",
       "tag": "lower · deadlift",
-      "why": "Thursday, three days after the squat. The deadlift is the lift your lower back has the most to say about, so it gets the longest prime, the longest rest, and the strictest stop rule. Then the swing, which is the same pattern moving fast.",
+      "why": "Tuesday. The deadlift is the lift your lower back has the most to say about, so it gets the longest prime, the longest rest and the strictest stop rule. Placed here rather than late in the week so it sits as far from Sunday's match as the week allows in one direction, and two full days after it in the other. Then the swing, which is the same pattern moving fast.",
       "blocks": [
         {
           "role": "Prime",
@@ -208,11 +157,31 @@
           "note": "2 rounds, unhurried. This one is longer than the others on purpose.",
           "mins": 7,
           "items": [
-            { "ex": "cat_cow", "pres": "8", "note": "" },
-            { "ex": "hip_90_90", "pres": "8 each side", "note": "" },
-            { "ex": "worlds_greatest_stretch", "pres": "5 each side", "note": "" },
-            { "ex": "single_leg_bridge", "pres": "12 each side", "note": "Glutes on before the bar, so they are not the thing that switches on late." },
-            { "ex": "dead_bug", "pres": "8 each side", "note": "Ribs down, back flat on the floor." }
+            {
+              "ex": "cat_cow",
+              "pres": "8",
+              "note": ""
+            },
+            {
+              "ex": "hip_90_90",
+              "pres": "8 each side",
+              "note": ""
+            },
+            {
+              "ex": "worlds_greatest_stretch",
+              "pres": "5 each side",
+              "note": ""
+            },
+            {
+              "ex": "single_leg_bridge",
+              "pres": "12 each side",
+              "note": "Glutes on before the bar, so they are not the thing that switches on late."
+            },
+            {
+              "ex": "dead_bug",
+              "pres": "8 each side",
+              "note": "Ribs down, back flat on the floor."
+            }
           ]
         },
         {
@@ -221,7 +190,11 @@
           "note": "4 × 5, rest 180s. TEST, and the most conservative test in the program: ramp to a hard 5 that leaves 2 in the tank. Weeks 1 and 2 will feel too easy. That is correct.",
           "mins": 13,
           "items": [
-            { "ex": "deadlift", "pres": "4 × 5", "note": "180s rest · TEST · the set ends the rep the back changes shape, not the rep after" }
+            {
+              "ex": "deadlift",
+              "pres": "4 × 5",
+              "note": "180s rest · TEST · the set ends the rep the back changes shape, not the rep after"
+            }
           ]
         },
         {
@@ -230,7 +203,11 @@
           "note": "5 × 12, rest 45s. TEST the bell. Hips, not arms - the bell floats, you do not lift it.",
           "mins": 8,
           "items": [
-            { "ex": "kb_swing", "pres": "5 × 12", "note": "45s rest · TEST · snap the hips, chest tall" }
+            {
+              "ex": "kb_swing",
+              "pres": "5 × 12",
+              "note": "45s rest · TEST · snap the hips, chest tall"
+            }
           ]
         },
         {
@@ -239,7 +216,11 @@
           "note": "3 × 12, rest 75s. Light on purpose - the squat pattern's second exposure this week, and the knees have already had Monday.",
           "mins": 7,
           "items": [
-            { "ex": "goblet_squat", "pres": "3 × 12", "note": "75s rest · slow down, pause at the bottom" }
+            {
+              "ex": "goblet_squat",
+              "pres": "3 × 12",
+              "note": "75s rest · slow down, pause at the bottom"
+            }
           ]
         },
         {
@@ -248,7 +229,210 @@
           "note": "3 rounds of 10, 45s between. You tested at 30 unbroken, so this is conditioning, not a max.",
           "mins": 5,
           "items": [
-            { "ex": "burpee", "pres": "3 × 10", "note": "Step back rather than jump back if the knee prefers it." }
+            {
+              "ex": "burpee",
+              "pres": "3 × 10",
+              "note": "Step back rather than jump back if the knee prefers it."
+            }
+          ]
+        }
+      ]
+    },
+    "d3": {
+      "name": "Push & Pull B",
+      "tag": "upper · press and row",
+      "why": "Thursday, after Wednesday off. Two more unknowns tested back to back - overhead press and the barbell row - and the pull-up finally gets loaded rather than counted. You do 15, so sets of 8 are strength work, not endurance.",
+      "blocks": [
+        {
+          "role": "Prime",
+          "name": "Overhead and grip",
+          "note": "Straight through. The dead hang is prep and a test of how the shoulder feels today.",
+          "mins": 6,
+          "items": [
+            {
+              "ex": "arm_circles",
+              "pres": "20",
+              "note": ""
+            },
+            {
+              "ex": "down_dog_up_dog",
+              "pres": "5",
+              "note": ""
+            },
+            {
+              "ex": "wrist_prep",
+              "pres": "30s",
+              "note": ""
+            },
+            {
+              "ex": "dead_hang",
+              "pres": "30s",
+              "note": ""
+            },
+            {
+              "ex": "bird_dog",
+              "pres": "8 each side",
+              "note": "Braced before anything goes overhead."
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "A · Overhead Press",
+          "note": "4 × 6, rest 150s. TEST. Strict, standing, ribs down - if the lower back arches to finish the rep, the set is over.",
+          "mins": 12,
+          "items": [
+            {
+              "ex": "overhead_press",
+              "pres": "4 × 6",
+              "note": "150s rest · TEST · strict, no leg drive"
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "B · Barbell Row",
+          "note": "4 × 8, rest 90s. TEST. Hinged and flat backed - this is the one row that asks something of the lower back, so it comes on the day the deadlift does not.",
+          "mins": 10,
+          "items": [
+            {
+              "ex": "bent_over_row",
+              "pres": "4 × 8",
+              "note": "90s rest · TEST · flat back, stop the set if it changes shape"
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "C · Pull-Up + Ring Push-Up",
+          "note": "C1 into C2, no rest, then 90s. Add load to the pull-up as soon as 3 × 8 is comfortable - a dumbbell between the feet does the job without a vest.",
+          "mins": 7,
+          "items": [
+            {
+              "ex": "pullup",
+              "pres": "3 × 8",
+              "note": "superset C1 · load it once 8 is easy"
+            },
+            {
+              "ex": "ring_pushup",
+              "pres": "3 × 10",
+              "note": "superset C2 · rings low, turn the hands out at the top"
+            }
+          ]
+        },
+        {
+          "role": "Finish",
+          "name": "Core",
+          "note": "45s between rounds.",
+          "mins": 5,
+          "items": [
+            {
+              "ex": "hanging_leg_raise",
+              "pres": "3 × 12",
+              "note": "Straight legs, no swing."
+            },
+            {
+              "ex": "copenhagen_plank",
+              "pres": "2 × 20s each side",
+              "note": "Top foot on the bench. Start with the knee bent."
+            }
+          ]
+        }
+      ]
+    },
+    "d4": {
+      "name": "Squat & Carry",
+      "tag": "lower · squat",
+      "why": "Friday, and the last session before Sunday's match, which is why the squat is here and the deadlift is not: 48 hours is enough to walk into a game off a heavy squat and would be thin off heavy pulls. The knee circuit is not a warm-up you can skip - it is the reason this day repeats. Squat is the test; the split squat already has a number from your survey.",
+      "blocks": [
+        {
+          "role": "Prime",
+          "name": "Knee armour",
+          "note": "2 rounds, controlled. Carried over from the Foundation Block because it worked and you actually did it.",
+          "mins": 7,
+          "items": [
+            {
+              "ex": "leg_swings",
+              "pres": "10 each way",
+              "note": ""
+            },
+            {
+              "ex": "ankle_mobility",
+              "pres": "8 each side",
+              "note": "Ankles first - a stiff ankle is a knee problem."
+            },
+            {
+              "ex": "deep_squat_rock",
+              "pres": "10",
+              "note": ""
+            },
+            {
+              "ex": "touchdown_squat",
+              "pres": "15 each side",
+              "note": ""
+            },
+            {
+              "ex": "tibialis_raise",
+              "pres": "25",
+              "note": ""
+            },
+            {
+              "ex": "kot_calf",
+              "pres": "25",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "A · Back Squat",
+          "note": "4 × 5, rest 150s. TEST: ramp to a hard 5. If the knee talks on the way down, switch to a box squat at a height it likes and test that instead - a number you can repeat beats a number you cannot.",
+          "mins": 12,
+          "items": [
+            {
+              "ex": "back_squat",
+              "pres": "4 × 5",
+              "note": "150s rest · TEST · box squat is the regression, not a failure"
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "B · Single-Leg RDL",
+          "note": "3 × 10 each side, alternating - the other leg is the rest. Hinge without loading the spine, which is the point on a squat day.",
+          "mins": 8,
+          "items": [
+            {
+              "ex": "single_leg_rdl",
+              "pres": "3 × 10 each side",
+              "note": "Push the hip back, flat back, slow down"
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "C · Bulgarian Split Squat",
+          "note": "3 × 8 each side, rest 90s. You logged 40 lb × 10 in the survey, so this one starts with a real number instead of a guess.",
+          "mins": 8,
+          "items": [
+            {
+              "ex": "bulgarian_split",
+              "pres": "3 × 8 each side",
+              "note": "Start at 40 lb · 90s rest"
+            }
+          ]
+        },
+        {
+          "role": "Finish",
+          "name": "Suitcase Carry",
+          "note": "3 rounds, 40s per side, 45s between rounds. One of your seven unknowns and the cheapest lower-back insurance in the program.",
+          "mins": 5,
+          "items": [
+            {
+              "ex": "suitcase_carry",
+              "pres": "3 × 40s each side",
+              "note": "TEST the load · one kettlebell, do not let the ribs tip"
+            }
           ]
         }
       ]

@@ -2330,9 +2330,18 @@ function rebuildWeek(){
 }
 
 function normaliseDays(a){
-  if(!a || !Array.isArray(a.trainDays)) return a;
+  if(!a) return a;
   if(a.dayBase === 'sun') return a;                    /* already ours */
-  a.trainDays = a.trainDays.map(d => (d + 1) % 7).sort((x,y)=>x-y);
+  /* BOTH DAY LISTS, OR THE STAMP LIES.
+     This converted trainDays and then stamped dayBase:'sun' - but actDays
+     is written in the same Monday-based week and was left alone. The stamp
+     then told sportDays() the conversion had already happened, so it
+     returned the raw list and the sport landed a day early: a Sunday
+     football match showed up on Saturday. One flag covering two lists means
+     they have to be converted together. */
+  const toSun = xs => xs.map(d => (d + 1) % 7).sort((x,y)=>x-y);
+  if(Array.isArray(a.trainDays)) a.trainDays = toSun(a.trainDays);
+  if(Array.isArray(a.actDays))   a.actDays   = toSun(a.actDays);
   a.dayBase = 'sun';
   return a;
 }
@@ -3288,11 +3297,10 @@ const SPORTS = {run:'Running or cycling', team:'Your team sport', yoga:'Yoga or 
   hiit:'HIIT or a class', swim:'Swimming', racket:'Racket sport',
   martial:'Martial arts or boxing', climb:'Climbing', other:'Your other sport'};
 const mySports = () => (A.otherAct||[]).filter(x=>x && x!=='none');
-/* actDays is written in the survey's Monday-based week, like trainDays */
-const sportDays = () => {
-  const raw = A.actDays || [];
-  return (A.dayBase === 'sun' ? raw : raw.map(d=>(d+1)%7));
-};
+/* Already Sunday-based: normaliseDays converts actDays alongside trainDays
+   at boot. This used to convert again, gated on the same flag that the
+   conversion sets, which meant it never fired. */
+const sportDays = () => A.actDays || [];
 const sportToday = () => sportDays().includes(DOW);
 const sportName  = () => SPORTS[mySports()[0]] || 'Your sport';
 const sportDone  = () => todayItems(S.freestyle).some(f => (f.h||'').indexOf('Sport') === 0);
