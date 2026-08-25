@@ -37,35 +37,97 @@ const ROLE = {
 };
 
 /* ---- the grammar ------------------------------------------------------
-   Every form the console currently writes, and nothing speculative:
+   Every form the console currently writes, and nothing speculative.
 
-       3 × 8          sets and reps
-       3 × 40s        sets and a hold in seconds
-       12 reps        one set, counted
-       8 each side    one set, counted, both sides
-       8 slow         one set, counted (the adverb is a cue, not a number)
+       3 x 8                    sets and reps
+       3 x 40s                  sets and a hold in seconds
+       3 x 8 each side          sets and reps, per side
+       3 x 40s each side        sets and a hold, per side
+       10-15 reps               a range: the low end is the target
+       12 reps                  one set, counted
+       8 each side              one set, counted, both sides
+       30s each side            one hold, both sides
+       8 slow                   one set, counted (the adverb is a cue)
+       3 x 6 - tempo 3-1-1      a count, then a cue after a separator
+       (em dash)                deliberately no target: AMRAP, intervals
 
-   `×` may be typed as x or *. Everything else comes back unparsed. */
+   `x` may be typed as x, * or the multiplication sign.
+
+   WHY THIS GREW. An audit of all three programs ran every prescription
+   through this parser: 14 of 50 came back unreadable, and an unreadable
+   one becomes `sets: 1` with no rep target. So "Bulgarian Split Squat
+   3 x 8 each side" was running as ONE set of nothing, and the same was
+   true of every unilateral movement in every program, every rep range in
+   the beginner program, and every prescription carrying a tempo cue.
+
+   Nothing was dropped silently - `unparsed` was set and app.js logged a
+   warning to the console - but nobody reads a console mid-workout. The
+   grammar simply did not cover what the coach actually types.
+
+   THE RULE HAS NOT CHANGED: anything still unrecognised is carried
+   through with `unparsed` and its text intact, never guessed at. A
+   workout that quietly drops two sets is worse than one that admits it
+   did not understand. */
+
+/* A cue after a separator is not part of the count. "3 x 6 - tempo 3-1-1"
+   is three sets of six; the rest is instruction for the person, not the
+   timer. Split it off, parse the head, and keep the WHOLE original text
+   for display so nothing the coach wrote disappears from the screen. */
+const SEP = /\s*[·•|]\s*/;                 // middot, bullet, pipe
+const SIDE = '(?:reps?\\s*)?each\\s+(?:side|way|leg|arm)';
+const X = '\\s*[\\u00d7x*]\\s*';                     // multiplication sign, x, *
+
 export function parsePrescription(pres) {
   const raw = String(pres == null ? '' : pres).trim();
   if (!raw) return { unparsed: true, raw };
 
-  const sets = raw.match(/^(\d+)\s*[×x*]\s*(\d+)\s*(s|sec|secs)?$/i);
-  if (sets) {
-    const n = +sets[1], v = +sets[2];
-    return sets[3] ? { sets: n, hold: v, raw } : { sets: n, reps: v, raw };
+  /* Deliberately no target: an AMRAP, or one leg of an interval. The coach
+     means "as many as you get", not "one rep". Marked rather than left
+     unparsed, so it stops being reported as a failure it never was. */
+  if (/^[—–-]+$/.test(raw)) return { sets: 1, untargeted: true, raw };
+
+  const parts = raw.split(SEP);
+  const head = parts[0].trim();
+  const cue = parts.slice(1).join(' · ').trim();
+  const done = o => (cue ? { ...o, cue, raw } : { ...o, raw });
+
+  /* sets x reps|hold, per side — the most specific form, so it goes first */
+  const setsSide = head.match(new RegExp('^(\\d+)' + X + '(\\d+)\\s*(s|sec|secs)?\\s*' + SIDE + '$', 'i'));
+  if (setsSide) {
+    const n = +setsSide[1], v = +setsSide[2];
+    return done(setsSide[3] ? { sets: n, hold: v, perSide: true }
+                            : { sets: n, reps: v, perSide: true });
   }
 
-  const hold = raw.match(/^(\d+)\s*(s|sec|secs)$/i);
-  if (hold) return { sets: 1, hold: +hold[1], raw };
+  /* sets x reps|hold */
+  const sets = head.match(new RegExp('^(\\d+)' + X + '(\\d+)\\s*(s|sec|secs)?$', 'i'));
+  if (sets) {
+    const n = +sets[1], v = +sets[2];
+    return done(sets[3] ? { sets: n, hold: v } : { sets: n, reps: v });
+  }
 
-  const side = raw.match(/^(\d+)\s*(?:reps?\s*)?each\s+(side|way|leg|arm)$/i);
-  if (side) return { sets: 1, reps: +side[1], perSide: true, raw };
+  /* a range: "10-15 reps". The LOW end is the target, because a range is a
+     floor with room above it, and a target you have already beaten is not a
+     target. The full text stays on screen, so the top of the range is never
+     hidden from the person doing it. */
+  const range = head.match(/^(\d+)\s*[-–—]\s*(\d+)\s*(?:reps?)?$/i);
+  if (range) return done({ sets: 1, reps: +range[1], repsMax: +range[2] });
+
+  /* one hold, per side, then one hold */
+  const holdSide = head.match(new RegExp('^(\\d+)\\s*(?:s|sec|secs)\\s*' + SIDE + '$', 'i'));
+  if (holdSide) return done({ sets: 1, hold: +holdSide[1], perSide: true });
+
+  const hold = head.match(/^(\d+)\s*(s|sec|secs)$/i);
+  if (hold) return done({ sets: 1, hold: +hold[1] });
+
+  /* one set, counted, both sides */
+  const side = head.match(new RegExp('^(\\d+)\\s*' + SIDE + '$', 'i'));
+  if (side) return done({ sets: 1, reps: +side[1], perSide: true });
 
   /* a bare count, with or without a trailing cue: "12 reps", "8 rocks",
      "8 slow". The number leads in every one of them. */
-  const count = raw.match(/^(\d+)(?:\s+[A-Za-z][A-Za-z\s-]*)?$/);
-  if (count) return { sets: 1, reps: +count[1], raw };
+  const count = head.match(/^(\d+)(?:\s+[A-Za-z][A-Za-z\s-]*)?$/);
+  if (count) return done({ sets: 1, reps: +count[1] });
 
   return { unparsed: true, raw };
 }
@@ -106,6 +168,11 @@ export function adaptDay(dayId, day, catalog = {}) {
         ...(p.reps != null ? { reps: p.reps } : {}),
         ...(p.hold != null ? { hold: p.hold } : {}),
         ...(p.perSide ? { perSide: true } : {}),
+        /* the top of a range, and the coach's cue, both carried so the screen
+           can show what was written rather than only what was counted */
+        ...(p.repsMax != null ? { repsMax: p.repsMax } : {}),
+        ...(p.cue ? { cue: p.cue } : {}),
+        ...(p.untargeted ? { untargeted: true } : {}),
         note: it.note || '',
         pres: p.raw,
         unparsed: !!p.unparsed,

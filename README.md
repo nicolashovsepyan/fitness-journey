@@ -79,6 +79,7 @@ node tools/build-equipment.mjs --check   # the gauge still agrees everywhere
 node test/local-adapter.test.mjs
 node test/schema.test.mjs
 node test/store.test.mjs
+node test/program-adapter.test.mjs   # every prescription in every program is runnable
 node build-sw.mjs                        # rebuild the offline shell
 ```
 
