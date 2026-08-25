@@ -25,6 +25,12 @@ function beginStep(sec, kind = 'rest') { curStepKind = kind; saidHalf = false; h
 /* re-wake audio whenever the app returns to foreground — music/Bluetooth can suspend it */
 if (typeof document !== 'undefined') {
   document.addEventListener('visibilitychange', () => { if (!document.hidden && S && !S.done) initAudio(); });
+  /* And the first touch anywhere, whatever it lands on. "I'm ready" is the
+     expected first tap but it is not the only way into a session - a resumed
+     workout goes straight to the active screen and never shows that button.
+     Once, then it removes itself. */
+  const unlockOnce = () => { initAudio(); document.removeEventListener('pointerdown', unlockOnce); };
+  document.addEventListener('pointerdown', unlockOnce);
   // tap the timer circle to pause/resume that countdown (not the session clock)
   document.addEventListener('click', e => {
     if (!S || S.done) return;
@@ -252,7 +258,19 @@ function renderGetReady() {
     <div class="actionbar"><button class="btn lg" id="go">I'm ready ▸</button></div>`);
   const begin = () => { R.clearStep(S); onStepDone = null; renderActive(); };
   beginStep(10, 'rest'); onStepDone = begin;
-  document.getElementById('go').addEventListener('click', begin);
+  document.getElementById('go').addEventListener('click', () => {
+    /* THE FIRST TAP IS THE ONLY MOMENT AUDIO CAN BE UNLOCKED.
+       A session used to begin because somebody pressed something inside the
+       app, so the AudioContext was already unlocked by that press. It now
+       begins on PAGE LOAD - the dashboard hands over as index.html?run=<day>
+       and boot() starts the workout - and a page load is not a user gesture.
+       Every browser refuses to start audio or speech without one, so the
+       context was created suspended and stayed there: no beeps, no voice,
+       for the whole session, silently.
+       This is that gesture. */
+    initAudio();
+    begin();
+  });
 }
 function buildEntries(b) {
   S.captured[b.id] = (b.items || []).map(it => ({
