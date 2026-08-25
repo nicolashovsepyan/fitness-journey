@@ -15,11 +15,9 @@
    Training data lives in localStorage, not here, so an update never
    touches a logged session.
    ============================================================ */
-const VERSION = 'ff8f5b4668';
+const VERSION = '2ee87905fa';
 const CACHE = 'fj-' + VERSION;
 const ASSETS = [
-  "./ FOR NICOLAS/EXERCISE CLASSIFIER.html",
-  "./.claude/launch.json",
   "./coach.html",
   "./dashboard.html",
   "./icon-180.png",
@@ -96,27 +94,11 @@ const ASSETS = [
   "./spine/catalog.json",
   "./spine/program.default.json",
   "./spine/programs/beginner_return.json",
+  "./spine/programs/fundamentals.json",
   "./spine/programs/index.json",
   "./spine/programs/main.json",
   "./spine/theme.json",
-  "./styles.css",
-  "./tools/audit-answers.mjs",
-  "./tools/audit-classes.mjs",
-  "./tools/audit-survey-wiring.mjs",
-  "./tools/build-app-data.mjs",
-  "./tools/build-avatars.mjs",
-  "./tools/build-benchmarks.mjs",
-  "./tools/build-classifier.mjs",
-  "./tools/build-coach-library.mjs",
-  "./tools/build-deck-art.mjs",
-  "./tools/build-equipment.mjs",
-  "./tools/build-exercise-images.mjs",
-  "./tools/build-logo.mjs",
-  "./tools/build-spine.mjs",
-  "./tools/export-program.mjs",
-  "./tools/fix-progression-links.mjs",
-  "./tools/make-link.mjs",
-  "./tools/port-programs.mjs"
+  "./styles.css"
 ];
 
 self.addEventListener('install', (e) => {

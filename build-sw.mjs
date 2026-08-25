@@ -40,7 +40,25 @@ const SKIP_PREFIX = ['test/', 'docs/', 'ARCHIVE/',
      workbook, the derived JSON and the build tools. dist/ is what gets
      uploaded, so shipping half a megabyte of internal data to a public URL
      is both a waste and a leak. The app reads spine/*.json, never this. */
-  'EXERCISE DATABASE/', ' EXERCISE DATABASE/'];
+  'EXERCISE DATABASE/', ' EXERCISE DATABASE/',
+
+  /* SAME RULE, THREE MORE FOLDERS THAT WERE SLIPPING THROUGH.
+     KEEP_EXT matches .mjs, .html and .json, so every one of these was
+     being downloaded onto every client's phone:
+
+       tools/                19 build scripts. They run on a laptop with
+                             node and could not run on a phone if they
+                             tried. Nothing in the app references them -
+                             checked, not assumed.
+       FOR NICOLAS/          the coach's own surface. EXERCISE CLASSIFIER
+                             .html alone is 143 KB of internal working
+                             material, on a client's phone.
+       .claude/              launch.json. Editor configuration.
+
+     Found because a new file in tools/ turned up in the shell. It is the
+     same mistake site/ was, and the same answer: the shell is what the
+     app needs to RUN offline, and nothing else belongs in it. */
+  'tools/', 'FOR NICOLAS/', ' FOR NICOLAS/', '.claude/'];
 
 /* The file list comes from GIT, not from the disk.
 
