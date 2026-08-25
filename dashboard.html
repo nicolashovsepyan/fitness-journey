@@ -2747,6 +2747,142 @@ let SESSIONS = {
 { const cp = coachProgram(); if(cp) SESSIONS = cp; }
 
 /* ============================================================
+   THE LAST JOINT OF THE SPINE.
+
+   "Start the session" sends you to index.html?run=<dayId>. That page is
+   the app shell, and it does not read anything this file writes.
+
+   There are two record systems in this project and the comment above
+   fromRecords() already says so: this page grew fj.v1.profile.<uid> and
+   fj.v1.<uid>.coach, while js/ has the documented ones from
+   core/schema.js - fj.users, fj.programs, fj.user. The bridge between
+   them was built ONE WAY. This page reads the schema records; it never
+   writes them.
+
+   So a person who arrives by a dashboard link gets a perfect dashboard
+   and an app shell that has never heard of them. Press Start and the
+   runner asks "Whose phone is this?", offering the two people the app
+   ships with - having just shown you your own program on the screen
+   behind it. That is the exact report, and it is not a permissions bug
+   or a broken button: the runner looks for a User row and a Program row
+   that nothing ever created.
+
+   This writes them. It runs at boot rather than only when a link is
+   consumed, because the devices that need it most are the ones already
+   in the broken state - they have the program, they just have no way to
+   start it, and nobody should need a fresh link to be repaired.
+
+   It is deliberately conservative:
+     - it never overwrites a User or Program row that already exists with
+       the same content, so it is a no-op on every boot after the first;
+     - it never invents answers - the Intake it writes is the answers this
+       page already holds, which is what fromRecords() will read next time;
+     - it does not touch fj.user if this device is already claimed by
+       somebody, because "whose phone is this" is the one question this
+       project has always refused to guess at.
+   ============================================================ */
+function syncRunnerRecords(){
+  try{
+    const raw = programRaw();
+    if(!raw || !raw.days || !Object.keys(raw.days).length) return;
+
+    const uid = (LOADED && LOADED.uid) || localStorage.getItem('fj.v1.current');
+    if(!uid) return;
+
+    const now = new Date().toISOString();
+    const read = (k, d) => { try{ return JSON.parse(localStorage.getItem(k)) ?? d; }catch(e){ return d; } };
+    const progId = 'prg_' + uid;
+
+    /* ---- the Program row the runner reads ---- */
+    const programs = read('fj.programs', []);
+    const released = read('fj.v1.' + uid + '.coach', {}).released || null;
+    const next = {
+      id: progId, ownerId: 'coach', assignedTo: uid,
+      name: raw.name || 'Your program', status: 'assigned',
+      /* days[] is the ordered week; the console keys its days d1..dn, so
+         the order is the order it wrote them in. Same mapping js/release.js
+         uses, because the runner reads whichever of us wrote it. */
+      days: Object.entries(raw.days).map(([id, d], k) =>
+        ({ id, weekday: k, sessionId: id, label: d.name || null })),
+      profile: { source: 'console', raw, released },
+      updatedAt: now,
+    };
+    const pi = programs.findIndex(p => p.id === progId);
+    const before = pi >= 0 ? JSON.stringify(programs[pi]) : null;
+    next.createdAt = (pi >= 0 && programs[pi].createdAt) || now;
+    if(before !== JSON.stringify(next)){
+      if(pi >= 0) programs[pi] = next; else programs.push(next);
+      localStorage.setItem('fj.programs', JSON.stringify(programs));
+    }
+
+    /* ---- the User row, and the program it points at ---- */
+    const users = read('fj.users', []);
+    const ui = users.findIndex(u => u.id === uid);
+    const existing = ui >= 0 ? users[ui] : null;
+    const user = {
+      id: uid, role: 'client', status: 'active',
+      displayName: (A && A.name) || (existing && existing.displayName) || uid,
+      email: (existing && existing.email) ?? null,
+      /* Preserved if this device already decided; otherwise 'pro', because
+         a coach-written program is written in sets, tempos and rest, which
+         is what the pro session view shows. The link can carry `ui` to say
+         otherwise. */
+      ui: (existing && existing.ui) || (LOADED && LOADED.ui) || 'pro',
+      programId: progId,
+      trainerId: (existing && existing.trainerId) ?? null,
+      accent: (existing && existing.accent) ?? null,
+      createdAt: (existing && existing.createdAt) || now,
+      updatedAt: now,
+    };
+    if(!existing || JSON.stringify({...existing, updatedAt:0}) !== JSON.stringify({...user, updatedAt:0})){
+      if(ui >= 0) users[ui] = user; else users.push(user);
+      localStorage.setItem('fj.users', JSON.stringify(users));
+      /* saveUser() in the adapter keeps this in step; a half-converted app
+         must not be able to show two different names for one person. */
+      if(user.displayName) localStorage.setItem('fj.name.' + uid, String(user.displayName).slice(0,60));
+    }
+
+    /* ---- an Intake, so fromRecords() finds the answers next boot ---- */
+    if(A && !IS_DEMO){
+      const intakes = read('fj.intakes', []);
+      if(!intakes.some(i => i.userId === uid)){
+        intakes.push({ id:'itk_' + uid, userId: uid, version: 6,
+                       answers: A, derived: {}, submittedAt: (LOADED && LOADED.at) || now,
+                       createdAt: now, updatedAt: now });
+        localStorage.setItem('fj.intakes', JSON.stringify(intakes));
+      }
+    }
+
+    /* ---- claim the device, but never take it from somebody ----
+       js/users.js resolves identity once at boot and holds it, so a record
+       written without this leaves the runner with no active user and it
+       opens on the claim screen - which is the bug this whole function is
+       here to end.
+
+       "Never take it from somebody" cannot mean "never take it", or this
+       repairs nothing on the devices that need it. The app SHIPS claimed:
+       tapping a name on the claim screen once, months ago, is enough to
+       leave fj.user pointing at one of the two people the app was seeded
+       with. That is not a person whose phone this is, it is a leftover.
+
+       So: claim if nobody has it, if it is already ours, or if whoever
+       holds it has no program of their own. In that last case nothing is
+       taken - the incumbent has nothing to lose - and the person standing
+       in front of the phone, holding a program, gets to use it. A real
+       second client, who does have a program, is left alone. */
+    const claimed = localStorage.getItem('fj.user');
+    const incumbentHasProgram = !!claimed && claimed !== uid &&
+      read('fj.programs', []).some(p => p.assignedTo === claimed);
+    if(!claimed || claimed === uid || !incumbentHasProgram){
+      localStorage.setItem('fj.user', uid);
+    }
+  }catch(e){
+    console.warn('[spine] could not sync the runner records', e);
+  }
+}
+syncRunnerRecords();
+
+/* ============================================================
    2b · THE GAP, AND WHAT CLOSES IT
 
    A recommendation is only honest if three things are true, so all
