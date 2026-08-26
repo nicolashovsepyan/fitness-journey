@@ -31,7 +31,30 @@ let view = { name: 'home', sessionId: null };
 
 function go(name, sessionId) { view = { name, sessionId }; render(); }
 
-const runCb = { onExit: () => go('home'), onFinish: () => go('home') };
+/* WHERE A WORKOUT HANDS BACK TO, AND WHY IT IS NOT ALWAYS 'home'.
+
+   This said go('home') for both, unconditionally. 'home' is a screen in
+   THIS router, and every screen in this router reads the built-in program
+   from js/data/program.js - not the released one the coach wrote. So
+   finishing a session started from the dashboard dropped the person onto a
+   week that was somebody else's: the right workout logged, the wrong
+   program shown, immediately afterwards.
+
+   A workout that came from the dashboard goes back to the dashboard, which
+   is the page that knows their real program. Recorded on the PLAN, so it
+   survives the run state being persisted and reloaded - a session resumed
+   tomorrow morning still knows where it came from. Read into a variable
+   when the run is mounted, because quit() clears the run state before it
+   calls back. */
+let returnTo = null;
+const rememberReturn = (plan) => { returnTo = (plan && plan.returnTo) || null; };
+function leaveWorkout() {
+  const back = returnTo;
+  returnTo = null;
+  if (back) { location.replace(back); return; }
+  go('home');
+}
+const runCb = { onExit: leaveWorkout, onFinish: leaveWorkout };
 
 /* ---- the workout day, coming from the dashboard --------------------------
    The spine is onboarding, dashboard, program, workout day: the dashboard is
@@ -64,12 +87,15 @@ async function startFromProgram(dayId) {
 
     const { plan, warnings } = adaptDay(dayId, day, catalog);
     if (!plan.blocks.length) return false;
+    /* Started from the dashboard, so it hands back to the dashboard. */
+    plan.returnTo = 'dashboard.html';
     /* Loud on purpose. A prescription the adapter could not read is carried
        through with its text intact rather than guessed at, and this is the
        breadcrumb for why a set count looks odd. */
     if (warnings.length) {
       console.warn('[program] prescriptions not understood:', warnings);
     }
+    rememberReturn(plan);
     startWorkout(plan, runCb);
     return true;
   } catch (e) {
@@ -95,6 +121,7 @@ function render() {
    out is the user ending it. */
 function bootIntoActiveRun() {
   if (!R.isActive()) return false;
+  rememberReturn(R.load()?.plan);
   return resumeWorkout(runCb);
 }
 
@@ -105,12 +132,12 @@ document.addEventListener('visibilitychange', () => {
   if (document.hidden) return;
   if (!R.isActive()) return;
   const inRunner = !!document.querySelector('.screen.run');
-  if (!inRunner) resumeWorkout(runCb);
+  if (!inRunner) { rememberReturn(R.load()?.plan); resumeWorkout(runCb); }
 });
 window.addEventListener('pageshow', (e) => {
   // e.persisted = restored from the back/forward cache
   if (!R.isActive()) return;
-  if (e.persisted || !document.querySelector('.screen.run')) resumeWorkout(runCb);
+  if (e.persisted || !document.querySelector('.screen.run')) { rememberReturn(R.load()?.plan); resumeWorkout(runCb); }
 });
 
 /* A workout in progress also blocks accidental tab-closes / back-swipes. */
@@ -150,7 +177,7 @@ function injectResume() {
   const bar = document.createElement('div');
   bar.className = 'callout'; bar.style.cssText = 'cursor:pointer;margin-top:8px;';
   bar.innerHTML = `<span class="ico">⏱</span><span class="txt">Workout in progress — <b>${st.plan?.name || ''}</b>. Tap to resume.</span>`;
-  bar.addEventListener('click', () => resumeWorkout(runCb));
+  bar.addEventListener('click', () => { rememberReturn(R.load()?.plan); resumeWorkout(runCb); });
   screen.insertBefore(bar, screen.firstChild.nextSibling);
 }
 
