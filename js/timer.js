@@ -63,8 +63,34 @@ export function say(text) {
 
 /* ---- Web Audio beeps (mix over music, don't interrupt it) ---- */
 let actx = null;
+let speechPrimed = false;
+let keepalive = null;
+
+/* THREE SEPARATE THINGS SILENCE A PHONE, AND UNLOCKING ONE FIXES NOTHING
+   FOR THE OTHER TWO. All three are handled here, and all three have to
+   happen inside a real user gesture or they do not count.
+
+   1. THE AUDIO CONTEXT. Created suspended unless a gesture has happened.
+      This one was already handled - resume, plus a one-sample silent
+      buffer, which is the reliable iOS unlock.
+
+   2. SPEECH. On iOS, speechSynthesis ignores every speak() that did not
+      follow a gesture, permanently, for the life of the page. Warming up
+      the VOICE LIST is not the same thing and is what this used to do, so
+      the beeps could come back while the coach voice stayed dead. It has
+      to actually speak once, during the gesture. A single space at zero
+      volume is enough and is inaudible.
+
+   3. THE RINGER SWITCH. This is the one that is nobody's bug and silences
+      everything anyway. iOS plays Web Audio on the ambient channel, which
+      the hardware mute switch cuts - and a phone at a gym is on silent.
+      Playing an HTML media element moves the whole audio session to the
+      playback channel, which ignores the switch. So a silent looping clip
+      runs for the length of the workout and stops when it ends.
+
+   Called on every gesture; everything here is idempotent and cheap after
+   the first time. */
 export function initAudio() {
-  // call on a user gesture (workout start) so iOS unlocks audio
   try {
     actx = actx || new (window.AudioContext || window.webkitAudioContext)();
     if (actx.state === 'suspended') actx.resume();
@@ -72,8 +98,45 @@ export function initAudio() {
     const b = actx.createBuffer(1, 1, 22050);
     const src = actx.createBufferSource(); src.buffer = b; src.connect(actx.destination); src.start(0);
   } catch (e) {}
+
+  /* 2 — speech has its own gate, and it is one-shot */
+  try {
+    if (!speechPrimed && typeof speechSynthesis !== 'undefined') {
+      const u = new SpeechSynthesisUtterance(' ');
+      u.volume = 0;
+      speechSynthesis.speak(u);
+      speechPrimed = true;
+    }
+  } catch (e) {}
+
+  /* 3 — take the session off the ringer channel */
+  try {
+    if (!keepalive) {
+      keepalive = new Audio(SILENCE);
+      keepalive.loop = true;
+      keepalive.volume = 0;
+      /* not a track anybody chose; keep it off the lock screen where we can */
+      keepalive.setAttribute('playsinline', '');
+    }
+    if (keepalive.paused) { const pr = keepalive.play(); if (pr && pr.catch) pr.catch(() => {}); }
+  } catch (e) {}
+
   try { if (!preferredVoice) preferredVoice = pickVoice(); } catch (e) {}   // warm up the voice list
 }
+
+/* Stop the silent clip when the workout does. Leaving it running holds an
+   audio session open for no reason, and an app that quietly keeps the
+   speaker awake after you have finished training is its own small bug. */
+export function stopAudio() {
+  try { keepalive?.pause?.(); } catch (e) {}
+}
+
+/* A real silent clip - 8 kHz, 8-bit mono, a quarter second - not a
+   zero-length one. A WAV with no samples ends the instant it starts and
+   some browsers never fire the loop, which puts the session straight back
+   on the ringer channel it was moved off. Inline because it has to work
+   with no connection. */
+const SILENCE = 'data:audio/wav;base64,UklGRvQHAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YdAHAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==';
 /* Master chain: everything routes through a compressor + make-up gain so the
    cues stay audible OVER music. A pure sine is the easiest thing in the world
    for a mix to mask, so the tones are now harmonically rich (square/sawtooth)

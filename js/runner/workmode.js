@@ -10,7 +10,7 @@ import * as R from './runstate.js';
 import { store } from '../store.js';
 import { EXERCISES } from '../data/exercises.js';
 import { alternatives } from '../core/resolve.js';
-import { say, beep, buzz, fmt, initAudio, keepAwake, releaseAwake } from '../timer.js';
+import { say, beep, buzz, fmt, initAudio, stopAudio, keepAwake, releaseAwake } from '../timer.js';
 
 const UNIT = { reps: 'reps', hold: 'sec', cals: 'cals' };
 const WUNIT = 'lb';                       // weight unit (Nicolas trains in pounds)
@@ -205,7 +205,7 @@ export function resumeWorkout(callbacks = {}) {
   enterBlock(S.bi, true);
   return true;
 }
-function quit() { stopTicker(); releaseAwake(); R.clear(); cb.onExit?.(); }
+function quit() { stopTicker(); releaseAwake(); stopAudio(); R.clear(); cb.onExit?.(); }
 
 const block = () => S.plan.blocks[S.bi];
 const isLastBlock = () => S.bi >= S.plan.blocks.length - 1;
