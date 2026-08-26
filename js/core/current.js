@@ -69,6 +69,12 @@ function toSession(dayId, day, fixed) {
     name: b.name || b.role || 'Block',
     note: b.note || '',
     minutes: +b.mins || 0,
+    /* A HUMAN CHOSE THIS NUMBER. blockMinutes() estimates a block's length
+       from sets, reps and rest, which is right for a session assembled by
+       the app and wrong for one a coach wrote: they already said how long
+       it takes. Without this the day screen re-derived 27 minutes for a
+       session the dashboard calls 40, which is two numbers for one thing. */
+    coachMinutes: +b.mins > 0,
     items: (b.items || []).map(it => {
       const p = parsePrescription(it.pres);
       const o = { ex: it.ex, note: it.note || '', pres: p.raw };

@@ -108,7 +108,8 @@ export function resolveSession(sessionId, { duration = 30, sessionIndex = 0, swa
     const block = {
       id: b.id || `b${i}`, role: b.role, type: b.role, name: b.name, format: b.format, note: b.note || '',
       anchor: !!b.anchor, rounds: b.rounds, work: b.work, rest: b.rest,
-      transition: b.transition, roundRest: b.roundRest, minutes: b.minutes, items,
+      transition: b.transition, roundRest: b.roundRest, minutes: b.minutes,
+      coachMinutes: !!b.coachMinutes, items,
       zoned: !!b.zoned, fromWeek: b.fromWeek || 1,
       optional: !!b.optional, extra: !!b.extra,
     };
@@ -185,6 +186,10 @@ function fmtRest(s) {
 const RS = 2;
 function itemWorkSec(it) { return it.measure === 'hold' ? (it.hold || it.target || 20) : (it.reps || it.target || 10) * RS; }
 export function blockMinutes(b) {
+  /* A coach's own number beats an estimate of it. Everything below works
+     out how long a block SHOULD take from its sets and rests; a block a
+     person wrote already carries how long they meant it to take. */
+  if (b.coachMinutes && b.minutes) return b.minutes;
   if (['jointprep', 'amrap', 'emom'].includes(b.format)) return b.minutes || 0;
   if (b.format === 'tabata') return Math.max(1, Math.round((b.rounds * b.items.length * ((b.work || 20) + (b.rest || 10))) / 60));
   if (b.format === 'circuit') {
