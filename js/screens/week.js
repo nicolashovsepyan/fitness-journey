@@ -71,7 +71,11 @@ export function renderWeek(host, { onOpenDay, onOpenHistory }) {
         const s = sessions()[d.sessionId];
         const dn = doneThisWeek(s);
         const anchors = s.blocks.filter(b => b.anchor).map(b => b.name);
-        const sub = anchors.length ? anchors.join(' · ') : (s.variant || s.category);
+        /* Ends in a string, deliberately. A session with no anchor block, no
+           variant and no category used to leave this undefined and the row
+           rendered the word "null" under the day name. */
+        const sub = anchors.length ? anchors.join(' · ')
+                  : (s.variant || s.category || s.pattern || '');
         return `
           <div class="week-day img ${dn ? 'done' : ''}" data-day="${d.sessionId}" style="--img:url('${DAY_IMG[d.sessionId] || ''}')">
             <div class="content">

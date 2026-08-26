@@ -83,7 +83,11 @@ function toSession(dayId, day, fixed) {
   return {
     id: dayId,
     name: day.name || 'Session',
-    category: null,
+    /* The console's tag is the one line describing what a day IS -
+       "lower · squat", "upper · bench". Both of these are display only
+       (the week row's subtitle, the day screen's chips), so the tag is
+       the honest thing to put in them rather than an invented grouping. */
+    category: day.tag || null,
     pattern: day.tag || null,
     coreDominant: false,
     tags: day.tag ? [day.tag] : [],
