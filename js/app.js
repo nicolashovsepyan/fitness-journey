@@ -302,8 +302,28 @@ if (NO_SW && 'serviceWorker' in navigator) {
   if (self.caches) caches.keys().then(ks => ks.forEach(k => caches.delete(k)));
 }
 if (!NO_SW && 'serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+  window.addEventListener('load', async () => {
+    try {
+      /* updateViaCache:'none' IS THE IMPORTANT PART.
+
+         GitHub Pages sends `cache-control: max-age=600` on everything and
+         there is no way to change that - it is not configurable. That
+         header applies to sw.js TOO, so for ten minutes after a deploy the
+         browser would not even re-read the worker to notice a new version
+         existed. A fix could be live and a phone would keep serving the old
+         app, with nothing on screen to say so.
+
+         This tells the browser to bypass its HTTP cache for the worker
+         script specifically. The worker then notices a new version on the
+         next check, and its own precache does the rest. */
+      const reg = await navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' });
+      /* And actively ask, rather than waiting for the browser to feel like
+         it. Coming back to the app is exactly when a person is most likely
+         to be holding a version from before the last fix. */
+      const poke = () => { if (!document.hidden) reg.update().catch(() => {}); };
+      document.addEventListener('visibilitychange', poke);
+      poke();
+    } catch (e) { /* no worker is survivable; the app still runs online */ }
   });
   let seenController = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.addEventListener('message', (e) => {

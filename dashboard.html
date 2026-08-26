@@ -6313,6 +6313,56 @@ applyTheme();   /* paint immediately from the fallback */
 go(S.tab||'today');
 if(!S.sawIntro) showIntro();
 loadTheme().then(()=>go(S.tab||'today'));   /* then again from the spine, if reachable */
+
+/* ============================================================
+   KEEPING THIS PAGE UP TO DATE.
+
+   This page never touched the service worker. index.html registered one,
+   and because a worker controls the whole folder it was quietly serving
+   the dashboard too - while the dashboard had no idea, could not tell
+   when a new version arrived, and never said so.
+
+   That is why a fix could be live and this screen would keep showing the
+   old one with nothing to explain it.
+
+   Two parts, and both are needed:
+
+     updateViaCache:'none' - GitHub Pages sends `cache-control:
+     max-age=600` on everything and that is not configurable. It applies
+     to sw.js as well, so for ten minutes after a deploy the browser
+     would not even re-read the worker to notice a new version existed.
+     This bypasses the browser cache for the worker script only.
+
+     A RELOAD, not a bar. index.html shows "new version ready, tap to
+     update" because it may be running a workout and must never
+     interrupt one. Nothing runs on this page, so waiting for a tap only
+     means looking at a stale screen for longer. It reloads itself once
+     and says so afterwards.
+   ============================================================ */
+(function(){
+  if(!('serviceWorker' in navigator)) return;
+  let seen = !!navigator.serviceWorker.controller;   // already controlled = not a first install
+  navigator.serviceWorker.addEventListener('message', e => {
+    if(!e.data || e.data.type !== 'sw-updated') return;
+    if(!seen){ seen = true; return; }                // the very first install updates nothing
+    /* Remember across the reload so the page can say what happened rather
+       than appearing to have blinked for no reason. */
+    try{ sessionStorage.setItem('fj.justUpdated', e.data.version || '1'); }catch(err){}
+    location.reload();
+  });
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(reg => {
+    const poke = () => { if(!document.hidden) reg.update().catch(()=>{}); };
+    document.addEventListener('visibilitychange', poke);
+    poke();
+  }).catch(()=>{});
+
+  try{
+    if(sessionStorage.getItem('fj.justUpdated')){
+      sessionStorage.removeItem('fj.justUpdated');
+      setTimeout(()=>{ try{ toast('Updated to the latest version'); }catch(err){} }, 600);
+    }
+  }catch(err){}
+})();
 </script>
 </body>
 </html>
