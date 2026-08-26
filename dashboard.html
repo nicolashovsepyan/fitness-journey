@@ -4004,7 +4004,10 @@ function paneToday(){
   const planned = WEEKPLAN.filter(Boolean).length || 4;
   /* Minutes TRAINED, said so. A bare "0 min" next to a streak reads as
      minutes-on-the-app, which is the opposite of what this app is for. */
-  const trainedMins = Object.keys(S.done).length * (parseInt(A.length,10)||20) + freeMins();
+  /* Real minutes where a session clocked itself; the planned length only
+     for a day marked done without one. */
+  const trainedMins = Object.keys(S.done).reduce((t,d) =>
+      t + ((S.doneMin && S.doneMin[d]) || (parseInt(A.length,10)||20)), 0) + freeMins();
 
   h += `<div class="sect"><b>Your week</b><a data-act="tab:log">Your log</a></div>
   <div class="card slim">
@@ -6144,12 +6147,14 @@ function act(a,el){
     else { S.queued.push(arg); toast(EX[arg].n+' is in Wednesday\'s session'); }
     save(); closeSheet(); go(S.tab); return;
   }
-  if(cmd==='start'){
-    S.done[DAYNM[DOW]]=1;
-    S.doneAt=S.doneAt||{}; S.doneAt[DAYNM[DOW]]=nowMs();
-    save(); closeSheet(); go('today');
-    return toast('Work Mode opens here - session marked done for the demo');
-  }
+  /* A SECOND `start` BRANCH USED TO SIT HERE and it was unreachable - the
+     real one, further up, returns. Left over from the demo, when pressing
+     Start marked the day done on the spot instead of running anything.
+
+     It mattered because it was the ONLY line in this file that ever wrote
+     S.done, so the flag the whole week strip is built on had no writer.
+     Deleted rather than fixed: a day is done when a workout was actually
+     logged, and absorbWorkouts() reads that from the real log. */
   if(cmd==='save'){
     const v=sBody.querySelector('#lgv'), hh=sBody.querySelector('#lgh');
     if(arg==='weight'&&v&&v.value){
@@ -6244,6 +6249,64 @@ function showIntro(){
 
 /* ---------- boot ---------- */
 document.querySelectorAll('.tb').forEach(b=>b.onclick=()=>go(b.dataset.tab));
+/* ============================================================
+   THE WORK COMES BACK.
+
+   The spine is: survey, dashboard, program, workout - and then back to
+   the dashboard. That last arrow was never connected.
+
+   Work Mode writes a finished session through the storage contract, into
+   fj.v1.<uid>. This page keeps its own state in fj.v1.<uid>.dash and
+   marks a day trained with S.done[<day name>]. Two keys, and NOTHING read
+   both. So you could train four days a week forever and this page would
+   show 0 of 4, no streak, and 0 minutes trained, permanently.
+
+   Worse, the only line in this file that ever wrote S.done sat inside a
+   SECOND `cmd === 'start'` branch in act() - unreachable, because the
+   first one returns. It was left over from the demo. So the flag the
+   whole week strip is built on had no writer at all.
+
+   This reads the real log, which is the one that matters: it is what the
+   runner writes, what the schema documents, and what Supabase will hold.
+   S.done becomes a cache of it rather than a separate truth.
+
+   ONLY THIS WEEK. S.done is keyed by day NAME, and names repeat - absorb
+   everything and last Monday marks this Monday trained. The window is the
+   Monday-based week the strip itself draws.
+
+   Minutes come from the session's own clock where it has one, rather than
+   from the planned length: what you actually did beats what was asked for.
+   ============================================================ */
+function absorbWorkouts(){
+  try{
+    if(!USER || USER === 'demo') return;
+    const doc = JSON.parse(localStorage.getItem('fj.v1.' + USER) || 'null');
+    const list = doc && Array.isArray(doc.sessions) ? doc.sessions : [];
+    if(!list.length) return;
+
+    /* midnight on the Monday of the week now showing */
+    const start = new Date(NOW);
+    start.setHours(0,0,0,0);
+    start.setDate(start.getDate() - ((DOW + 6) % 7));
+
+    S.doneAt  = S.doneAt  || {};
+    S.doneMin = S.doneMin || {};
+    let changed = false;
+
+    for(const rec of list){
+      const at = new Date(rec && rec.date);
+      if(isNaN(at) || at < start) continue;
+      const nm = DAYNM[at.getDay()];
+      if(!S.done[nm]){ S.done[nm] = 1; changed = true; }
+      if(!S.doneAt[nm]){ S.doneAt[nm] = at.getTime(); changed = true; }
+      const mins = Math.max(1, Math.round((+rec.seconds || 0) / 60));
+      if(rec.seconds && S.doneMin[nm] !== mins){ S.doneMin[nm] = mins; changed = true; }
+    }
+    if(changed) save();
+  }catch(e){ /* a log we cannot read must not stop the page drawing */ }
+}
+absorbWorkouts();
+
 datePlaceholders();
 applyGlow();
 applyTheme();   /* paint immediately from the fallback */
