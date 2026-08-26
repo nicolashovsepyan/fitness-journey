@@ -25,6 +25,7 @@ import { consumeReleaseHandoff } from './release.js';
 import { adaptDay } from './program-adapter.js';
 import { storage } from './core/storage.js';
 import { applyUserManifest } from './manifest-user.js';
+import { loadCurrentProgram } from './core/current.js';
 
 const app = document.getElementById('app');
 let view = { name: 'home', sessionId: null };
@@ -236,6 +237,12 @@ async function boot() {
     loadStore(uid),
     R.loadRunState(uid),
     loadVoicePref(),
+    /* WHAT THIS PERSON IS ACTUALLY TRAINING, resolved once, here, before
+       anything draws. Every screen reads it synchronously afterwards —
+       same rule as identity, and for the same reason: a screen that has
+       to await its own program renders an empty week first and calls it
+       the truth. See js/core/current.js. */
+    loadCurrentProgram(uid),
   ]);
 
   applyUserManifest();                    // home-screen icon opens THEIR program

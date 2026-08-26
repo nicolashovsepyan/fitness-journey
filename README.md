@@ -80,6 +80,7 @@ node test/local-adapter.test.mjs
 node test/schema.test.mjs
 node test/store.test.mjs
 node test/program-adapter.test.mjs   # every prescription in every program is runnable
+node test/current-program.test.mjs   # every screen reads the program the coach released
 node build-sw.mjs                        # rebuild the offline shell
 ```
 

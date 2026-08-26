@@ -7,7 +7,9 @@
    no-desync contract from ARCHITECTURE.md.
    ============================================================ */
 import { EXERCISES } from '../data/exercises.js';
-import { SESSIONS } from '../data/sessions.js';
+/* Not the built-in map any more: whichever program this person is on.
+   See js/core/current.js — the built-in one is the fallback inside it. */
+import { sessions } from './current.js';
 import { FILLERS, ANTAGONIST } from '../data/program.js';
 import { currentProfile } from '../users.js';
 
@@ -83,7 +85,7 @@ const TIER = { 'Joint Prep': 0, Primer: 1, Work: 2, Finisher: 3, Benchmark: 4, M
 const oidx = (arr, v) => { const i = (arr || []).indexOf(v); return i < 0 ? 1e6 : i; };
 
 export function resolveSession(sessionId, { duration = 30, sessionIndex = 0, swaps = {}, removed = [], order = {}, added = {}, fillerSwaps = {} } = {}) {
-  const s = SESSIONS[sessionId];
+  const s = sessions()[sessionId];
   if (!s) throw new Error(`Unknown session '${sessionId}'`);
 
   let fillerIndex = 0;

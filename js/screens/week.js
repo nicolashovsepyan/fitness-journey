@@ -2,8 +2,10 @@
    SCREEN — HOME / WEEK (merged): logo, progress, your 5 days.
    This is the landing page.
    ============================================================ */
-import { PROGRAM } from '../data/program.js';
-import { SESSIONS } from '../data/sessions.js';
+/* The program this person is actually on. This screen used to import the
+   hardcoded Foundation Block directly, which is why it showed somebody
+   else's week to a person with a program of their own. */
+import { program, sessions } from '../core/current.js';
 import { store } from '../store.js';
 import { setVoice, isVoiceOn, listVoices, getVoiceName, setVoiceName, say, initAudio } from '../timer.js';
 import { USERS, activeUser, switchUser } from '../users.js';
@@ -34,18 +36,18 @@ function sessionInRange(s, startMs, endMs) {
 function doneThisWeek(s) { return sessionInRange(s, weekStartMs(0), Date.now() + 1000); }
 
 export function renderWeek(host, { onOpenDay, onOpenHistory }) {
-  const total = PROGRAM.week.length;
-  const done = PROGRAM.week.filter(d => doneThisWeek(SESSIONS[d.sessionId])).length;
+  const total = program().week.length;
+  const done = program().week.filter(d => doneThisWeek(sessions()[d.sessionId])).length;
   const pct = Math.round((done / total) * 100);
   const thisWk = weekStartMs(0), lastWk = weekStartMs(1);
-  const lastWeekDone = PROGRAM.week.filter(d => sessionInRange(SESSIONS[d.sessionId], lastWk, thisWk)).length;
+  const lastWeekDone = program().week.filter(d => sessionInRange(sessions()[d.sessionId], lastWk, thisWk)).length;
 
   host.innerHTML = `
     <div class="screen fade-in">
       <img class="logo-img" src="images/logo-mark.svg" alt="Fitness Journey" />
 
       <div class="topbar" style="margin-bottom:10px;">
-        <div><h1>This week</h1><div class="sub">${PROGRAM.name} · ${PROGRAM.phases[0]} phase</div></div>
+        <div><h1>This week</h1><div class="sub">${program().name} · ${program().phases[0]} phase</div></div>
         <div style="display:flex;gap:8px;align-items:center;">
           <button class="gear" id="historyBtn" title="Progress">📊</button>
           <button class="gear" id="settingsBtn" title="Settings">⚙</button>
@@ -65,8 +67,8 @@ export function renderWeek(host, { onOpenDay, onOpenHistory }) {
         ${lastWeekDone ? `<div class="prog-last">Last week · ${lastWeekDone} / ${total} done</div>` : ''}
       </div>
 
-      ${PROGRAM.week.map(d => {
-        const s = SESSIONS[d.sessionId];
+      ${program().week.map(d => {
+        const s = sessions()[d.sessionId];
         const dn = doneThisWeek(s);
         const anchors = s.blocks.filter(b => b.anchor).map(b => b.name);
         const sub = anchors.length ? anchors.join(' · ') : (s.variant || s.category);

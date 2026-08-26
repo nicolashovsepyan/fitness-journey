@@ -70,7 +70,12 @@ const payload = {
      they were on "Kettlebell Foundation, 20 minutes, one bell". The days were
      right and the title was somebody else's. */
   program: { from: prog.id, version: prog.version,
-             name: prog.name, duration: prog.duration, days: prog.days },
+             name: prog.name, duration: prog.duration,
+             /* Whether the app may scale this week to a shorter session.
+                A coach who wrote 4 x 5 did not write 3 x 5, and without
+                this flag the duration scaler is free to decide otherwise. */
+             fixed: !!prog.fixed,
+             days: prog.days },
   /* handed over means live — a person opening their link should not find
      every day locked behind a switch only the coach can see */
   released: Object.assign({ shape: true },

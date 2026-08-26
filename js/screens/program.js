@@ -9,8 +9,11 @@
    day-view + runner + swap stack unchanged.
    ============================================================ */
 import { EXERCISES } from '../data/exercises.js';
-import { SESSIONS } from '../data/sessions.js';
-import { PROGRAM, PROFILE } from '../data/program.js';
+/* The live program and session map — the builder writes a finished day
+   straight into them, and that only works because current.js hands back
+   the real objects rather than copies. */
+import { program, sessions } from '../core/current.js';
+import { PROFILE } from '../data/program.js';
 import { alternatives } from '../core/resolve.js';
 import { renderLibrary } from './library.js';
 
@@ -190,13 +193,13 @@ function renderBuild(body, { onOpenDay }) {
   $('#regenBtn').addEventListener('click', () => { state.session = null; renderPreview(); });
   $('#startBtn').addEventListener('click', () => {
     const s = ensureSession(); if (!s) return;
-    SESSIONS[s.id] = s;
+    sessions()[s.id] = s;
     onOpenDay?.(s.id);
   });
   $('#saveBtn').addEventListener('click', () => {
     const s = ensureSession(); if (!s) return;
-    SESSIONS[s.id] = s;
-    PROGRAM.week.push({ day: PROGRAM.week.length + 1, sessionId: s.id });
+    sessions()[s.id] = s;
+    program().week.push({ day: program().week.length + 1, sessionId: s.id });
     toast(body, 'Added to this week');
   });
 
