@@ -3351,6 +3351,35 @@ function recordDay(){
     if(S.days[k] !== sc.pct){ S.days[k] = sc.pct; save(); }
   }catch(e){}
 }
+/* THE STREAK, WHICH HAS BEEN THE NUMBER 1 SINCE THE DAY IT SHIPPED.
+
+   S.streak was read in exactly one place - `${S.streak||1}` next to "day
+   streak" on the week card - and written in none. Nothing has ever set
+   it. Every person who has ever opened this app has been told they are
+   on a one day streak, on their first day and on their fiftieth.
+
+   recordDay() has been quietly writing the real material all along:
+   S.days, a score per calendar day. So the streak is countable, it just
+   was not being counted.
+
+   Counted from YESTERDAY backwards, with today added only if today has
+   a score. Otherwise opening the app at 7am - before doing anything -
+   would show the streak broken, which is both wrong and discouraging at
+   exactly the wrong moment. A day with no entry at all ends it. */
+function streakDays(){
+  try{
+    const days = S.days || {};
+    const d = new Date(nowMs());
+    let n = (days[dayKey(d)] || 0) > 0 ? 1 : 0;
+    for(;;){
+      d.setDate(d.getDate() - 1);
+      if((days[dayKey(d)] || 0) > 0) n++; else break;
+      if(n > 3650) break;               // a decade is where a bug lives, not a person
+    }
+    return n;
+  }catch(e){ return 0; }
+}
+
 /* the last n days, oldest first, with nulls for days never opened */
 function dayHistory(n){
   const out = [];
@@ -4014,7 +4043,7 @@ function paneToday(){
     <div class="wkrow">
       <div class="wk-n"><b class="tnum">${doneCount}</b><i class="tnum">/${planned}</i></div>
       <div class="wk-st">
-        <span><i class="tnum">${S.streak||1}</i>day streak</span>
+        <span><i class="tnum">${streakDays()}</i>day streak</span>
         <span><i class="tnum">${trainedMins}</i>min trained</span>
       </div>
     </div>
@@ -4559,12 +4588,34 @@ function logEntries(){
     body:i===0?'Starting weight, from your onboarding.':''}));
   (S.freestyle||[]).forEach(f=>out.push({at:AT(f), kind:'free', title:f.h,
     body:[f.mins,f.rpe].filter(Boolean).join(' \u00b7 ') + (f.b?` \u2014 ${f.b}`:'')}));
-  Object.entries(S.doneAt||{}).forEach(([dn,when])=>{
-    const idx=DAYNM.indexOf(dn), sid=WEEKPLAN[idx];
-    if(!sid) return;
-    const ses=SESSIONS[sid];
-    out.push({at:when, kind:'session', title:ses.name,
-      body:`${ses.blocks.reduce((t,x)=>t+x.mins,0)} minutes \u00b7 ${ses.tag}`});
+  /* EVERY SESSION EVER, FROM THE REAL LOG.
+
+     This used to read S.doneAt, which is a cache keyed by DAY NAME and
+     filled only for the week now showing. Three things were wrong with
+     that and all of them were invisible until you had trained for more
+     than seven days:
+
+       your history was one week deep, permanently - last week's sessions
+       simply vanished when the week rolled over;
+
+       the name came from looking the weekday up in THIS week's plan, so
+       a session from three weeks ago was labelled with whatever is
+       scheduled for that weekday now;
+
+       and the minutes were the PLANNED length of that lookup, not the
+       time the session actually took.
+
+     The real log has all three, correctly, for every session ever. The
+     tag is looked up only when the session still exists in the current
+     program - an old session from a replaced program keeps its name and
+     simply has no tag, rather than borrowing one that is not its own. */
+  appSessions().forEach(rec=>{
+    const at = Date.parse(rec && rec.date);
+    if(isNaN(at)) return;
+    const mins = Math.max(1, Math.round((+rec.seconds || 0) / 60)) || (+rec.duration || 0);
+    const ses  = rec.sessionId && SESSIONS[rec.sessionId];
+    out.push({at, kind:'session', title: rec.name || (ses && ses.name) || 'Session',
+      body: [`${mins} minutes`, ses && ses.tag].filter(Boolean).join(' \u00b7 ')});
   });
   Object.entries(S.testAt||{}).forEach(([id,when])=>{
     const t=TESTS.find(x=>x.id===id); if(!t) return;
@@ -6277,11 +6328,24 @@ document.querySelectorAll('.tb').forEach(b=>b.onclick=()=>go(b.dataset.tab));
    Minutes come from the session's own clock where it has one, rather than
    from the planned length: what you actually did beats what was asked for.
    ============================================================ */
+/* THE REAL LOG, READ IN ONE PLACE.
+
+   Work Mode writes every finished session into fj.v1.<uid> through the
+   storage contract: date, name, sessionId, planned duration, and the
+   seconds it actually took. That is the record the schema documents and
+   the one Supabase will hold. Both readers below go through here so
+   there is one answer to "what has this person done". */
+function appSessions(){
+  try{
+    if(!USER || USER === 'demo') return [];
+    const doc = JSON.parse(localStorage.getItem('fj.v1.' + USER) || 'null');
+    return (doc && Array.isArray(doc.sessions)) ? doc.sessions : [];
+  }catch(e){ return []; }
+}
+
 function absorbWorkouts(){
   try{
-    if(!USER || USER === 'demo') return;
-    const doc = JSON.parse(localStorage.getItem('fj.v1.' + USER) || 'null');
-    const list = doc && Array.isArray(doc.sessions) ? doc.sessions : [];
+    const list = appSessions();
     if(!list.length) return;
 
     /* midnight on the Monday of the week now showing */
