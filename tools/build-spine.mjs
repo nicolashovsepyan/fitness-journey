@@ -180,6 +180,11 @@ function readWorkbook() {
   }
 }
 const WB = readWorkbook();
+const VIDEOS = (() => {
+  const f = p('spine/videos.json');
+  try { return existsSync(f) ? JSON.parse(readFileSync(f, 'utf8')) : {}; }
+  catch (e) { console.warn('  ! spine/videos.json unreadable:', e.message); return {}; }
+})();
 const listOf = (r, k) => Array.isArray(r[k]) ? r[k]
   : String(r[k] || '').split(/[,;|]/).map(x => x.trim()).filter(Boolean);
 const patternsOf = r => listOf(r, 'patterns');
@@ -260,7 +265,10 @@ for (const [id, m] of Object.entries(EXERCISES)) {
     secPerRep: (WB[id] && WB[id].sec_per_rep != null && WB[id].sec_per_rep !== '')
       ? Number(WB[id].sec_per_rep) : null,
     art,
-    video: m.demoUrl ?? null,
+    /* Demo videos come from spine/videos.json, filled in through
+       " FOR NICOLAS/VIDEOS TO LINK.md" and read by tools/link-videos.mjs.
+       The movement's own demoUrl still wins where one was set in code. */
+    video: m.demoUrl ?? VIDEOS[id] ?? null,
     benchmark: BENCH[id] ?? null,
     aliases: {
       deck: deckByCanonical[id] ?? [],
