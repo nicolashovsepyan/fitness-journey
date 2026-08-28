@@ -1,0 +1,366 @@
+{
+  "id": "back_to_basics_2",
+  "version": 1,
+  "name": "Back to Basics 2",
+  "family": "back_to_basics",
+  "level": 2,
+  "who": "Someone who owns the shapes",
+  "source": "written 28 Aug 2026. Level 2 of three. Same six shapes as level 1 at the next rung, and the first level where HOW you do a rep is part of the prescription.",
+  "duration": 29,
+  "fixed": true,
+  "trainDays": [
+    1,
+    3,
+    5
+  ],
+  "units": "lb",
+  "equipment": [
+    "bw",
+    "mat",
+    "band",
+    "db",
+    "kb",
+    "pullupbar",
+    "bench"
+  ],
+  "weeks": 4,
+  "entryIf": "You can do 3 × 10 bodyweight squats, 3 × 8 push-ups from the floor and hold a 30 second plank without the hips dropping. If any of those is a maybe, level 1 first.",
+  "methods": [
+    {
+      "name": "Tempo",
+      "what": "A count on the way down. 3-1-1 is three seconds lowering, one at the bottom, one up.",
+      "why": "Time under load without more load. The cheapest way to make a movement harder while it is still being learned."
+    },
+    {
+      "name": "Pause",
+      "what": "A full stop at the hardest position, then move.",
+      "why": "Kills the bounce. What is left is what you can actually do."
+    },
+    {
+      "name": "Unilateral",
+      "what": "One side at a time.",
+      "why": "The strong side stops covering for the weak one. This is where most people find out."
+    },
+    {
+      "name": "Superset",
+      "what": "Two movements back to back, one rest after the pair.",
+      "why": "More work in the same half hour, without turning it into conditioning."
+    }
+  ],
+  "constraints": {
+    "time": "30 minutes, three days. The extra ten minutes over level 1 is the tempo, not more exercises."
+  },
+  "goals": [
+    "Own the six shapes at full range and under control",
+    "Find the weak side and stop hiding it",
+    "Hold a tempo without counting out loud by week 4",
+    "Arrive at level 3 able to be tested"
+  ],
+  "habits": [],
+  "days": {
+    "d1": {
+      "name": "Squat & Push",
+      "tag": "lower · push",
+      "why": "Same day as level 1, done properly. The squat gets a three second lower and a pause at the bottom, which is where the honest version of the movement lives. The push-up comes off the counter and onto the floor.",
+      "blocks": [
+        {
+          "role": "Prime",
+          "name": "Loosen off",
+          "note": "Straight through, no rest.",
+          "type": "Straight",
+          "mins": 4,
+          "items": [
+            {
+              "ex": "cat_cow",
+              "pres": "8",
+              "note": ""
+            },
+            {
+              "ex": "ankle_mobility",
+              "pres": "8 each side",
+              "note": ""
+            },
+            {
+              "ex": "deep_squat_rock",
+              "pres": "10",
+              "note": ""
+            },
+            {
+              "ex": "glute_bridge",
+              "pres": "12",
+              "note": "Waking them up."
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "A · Goblet Squat, tempo",
+          "note": "4 × 8, tempo 3-1-1, rest 90s. Three down, one at the bottom, one up. Stop the set when the tempo goes, not when the reps do.",
+          "type": "Tempo",
+          "mins": 7,
+          "items": [
+            {
+              "ex": "goblet_squat",
+              "pres": "4 × 8",
+              "note": "90s rest · tempo 3-1-1 · elbows inside the knees at the bottom"
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "B · Push-Up + Ring Row",
+          "note": "B1 into B2 with no rest, then 75s. Two shapes in one block.",
+          "type": "Superset",
+          "cfg": {
+            "rounds": 3,
+            "rest": 75
+          },
+          "mins": 8,
+          "items": [
+            {
+              "ex": "pushup",
+              "pres": "3 × 8",
+              "note": "superset B1 · from the floor. Knees down for the last reps beats stopping at six."
+            },
+            {
+              "ex": "ring_row",
+              "pres": "3 × 10",
+              "note": "superset B2 · walk the feet forward to make it harder"
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "C · Single-Leg Bridge",
+          "note": "3 × 10 each side, rest 45s. One side at a time.",
+          "type": "Straight",
+          "mins": 5,
+          "items": [
+            {
+              "ex": "single_leg_bridge",
+              "pres": "3 × 10 each side",
+              "note": "45s rest · hips stay level. The side that shakes is the side that needed this."
+            }
+          ]
+        },
+        {
+          "role": "Finish",
+          "name": "Middle",
+          "note": "Two rounds, 45s between.",
+          "type": "Straight",
+          "mins": 5,
+          "items": [
+            {
+              "ex": "hollow_hold",
+              "pres": "2 × 20s",
+              "note": "Knees bent is still the right version if the back lifts."
+            },
+            {
+              "ex": "side_plank",
+              "pres": "2 × 25s each side",
+              "note": ""
+            }
+          ]
+        }
+      ]
+    },
+    "d2": {
+      "name": "Hinge & Pull",
+      "tag": "lower · pull",
+      "why": "The hinge takes load for the first time and the pull moves toward a bar. The RDL keeps the strictest rule in the program: the set ends the rep the back changes shape.",
+      "blocks": [
+        {
+          "role": "Prime",
+          "name": "Hips and shoulders",
+          "note": "Straight through.",
+          "type": "Straight",
+          "mins": 4,
+          "items": [
+            {
+              "ex": "hip_90_90",
+              "pres": "8 each side",
+              "note": ""
+            },
+            {
+              "ex": "worlds_greatest_stretch",
+              "pres": "5 each side",
+              "note": ""
+            },
+            {
+              "ex": "banded_pullapart",
+              "pres": "15",
+              "note": ""
+            },
+            {
+              "ex": "scap_pullup",
+              "pres": "8",
+              "note": "Hang, pull the shoulders down, arms stay straight."
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "A · Romanian Deadlift, paused",
+          "note": "4 × 8, rest 90s. Pause one second at the bottom of every rep — the stretch is the point, the bounce is not.",
+          "type": "Tempo",
+          "mins": 7,
+          "items": [
+            {
+              "ex": "db_rdl",
+              "pres": "4 × 8",
+              "note": "90s rest · 1s pause at the bottom · the set ends the rep the back rounds"
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "B · Wide Inverted Row",
+          "note": "4 × 8, rest 75s. Lower the bar as it gets easier.",
+          "type": "Straight",
+          "mins": 6,
+          "items": [
+            {
+              "ex": "wide_inverted_row",
+              "pres": "4 × 8",
+              "note": "75s rest · chest to the bar, body in one line"
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "C · Suitcase Carry",
+          "note": "3 rounds of 40 seconds per side, rest 45s. One weight — the point is the side that is not holding it.",
+          "type": "Straight",
+          "mins": 6,
+          "items": [
+            {
+              "ex": "suitcase_carry",
+              "pres": "3 × 40s each side",
+              "note": "45s rest · do not let the ribs tip"
+            }
+          ]
+        },
+        {
+          "role": "Finish",
+          "name": "Hang",
+          "note": "Two rounds, 45s between.",
+          "type": "Straight",
+          "mins": 4,
+          "items": [
+            {
+              "ex": "hanging_knee_raise",
+              "pres": "2 × 10",
+              "note": "Slow down, no swing."
+            },
+            {
+              "ex": "dead_hang",
+              "pres": "2 × 25s",
+              "note": ""
+            }
+          ]
+        }
+      ]
+    },
+    "d3": {
+      "name": "Full Body",
+      "tag": "full body",
+      "why": "The day that puts it together. A superset opens it, a unilateral squat finds the weak leg, and it closes on a carry — the shape nobody trains and everybody needs.",
+      "blocks": [
+        {
+          "role": "Prime",
+          "name": "Everything, briefly",
+          "note": "Straight through.",
+          "type": "Straight",
+          "mins": 4,
+          "items": [
+            {
+              "ex": "down_dog_up_dog",
+              "pres": "6",
+              "note": ""
+            },
+            {
+              "ex": "ankle_mobility",
+              "pres": "8 each side",
+              "note": ""
+            },
+            {
+              "ex": "bird_dog",
+              "pres": "8 each side",
+              "note": ""
+            },
+            {
+              "ex": "banded_pullapart",
+              "pres": "15",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "A · Kettlebell Swing + Push-Up",
+          "note": "A1 into A2, no rest, then 75s. Fast then slow — the swing is hips, the push-up is control.",
+          "type": "Superset",
+          "cfg": {
+            "rounds": 4,
+            "rest": 75
+          },
+          "mins": 12,
+          "items": [
+            {
+              "ex": "kb_swing",
+              "pres": "4 × 12",
+              "note": "superset A1 · snap the hips, the bell floats"
+            },
+            {
+              "ex": "pushup",
+              "pres": "4 × 8",
+              "note": "superset A2 · slow down, one count up"
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "B · Bulgarian Split Squat",
+          "note": "3 × 8 each side, rest 75s. Back foot on a bench. This is the one that tells you the truth.",
+          "type": "Straight",
+          "mins": 6,
+          "items": [
+            {
+              "ex": "bulgarian_split",
+              "pres": "3 × 8 each side",
+              "note": "75s rest · front foot takes the weight, knee tracks the toes"
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "C · Hip Thrust",
+          "note": "3 × 12, rest 60s. Squeeze and hold a second at the top.",
+          "type": "Straight",
+          "mins": 4,
+          "items": [
+            {
+              "ex": "hip_thrust",
+              "pres": "3 × 12",
+              "note": "60s rest · 1s hold at the top, ribs down"
+            }
+          ]
+        },
+        {
+          "role": "Finish",
+          "name": "Carry",
+          "note": "Three rounds, 45s between.",
+          "type": "Straight",
+          "mins": 4,
+          "items": [
+            {
+              "ex": "farmers_carry",
+              "pres": "3 × 40s",
+              "note": "45s rest · heavy enough that the last ten seconds are honest"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

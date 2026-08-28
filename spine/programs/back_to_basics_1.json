@@ -1,7 +1,9 @@
 {
-  "id": "baseline",
+  "id": "back_to_basics_1",
   "version": 1,
-  "name": "Baseline",
+  "name": "Back to Basics 1",
+  "family": "back_to_basics",
+  "level": 1,
   "who": "Anyone starting",
   "source": "written 27 Aug 2026 as the program a new person gets before anything is known about them. Built from the fundamentals list in the exercise database, bodyweight first, nothing that needs a gym.",
   "duration": 20,
@@ -20,6 +22,14 @@
     "pullupbar"
   ],
   "weeks": 4,
+  "entryIf": "Start here unless you can already do 3 × 10 bodyweight squats and 3 × 8 push-ups from the floor with good shape.",
+  "methods": [
+    {
+      "name": "Straight sets",
+      "what": "Sets and reps, one movement at a time, generous rest.",
+      "why": "Level 1 has exactly one variable and it is the movement itself. Everything else - tempo, the clock, failure - waits until the shape is owned."
+    }
+  ],
   "arc": [
     {
       "week": 1,
@@ -85,7 +95,8 @@
               "pres": "10",
               "note": "Sit into the bottom of a squat and rock. If you cannot get down, hold a doorframe."
             }
-          ]
+          ],
+          "type": "Straight"
         },
         {
           "role": "Work",
@@ -98,7 +109,8 @@
               "pres": "3 × 10",
               "note": "60s rest · hold a doorframe if balance is the problem"
             }
-          ]
+          ],
+          "type": "Straight"
         },
         {
           "role": "Work",
@@ -111,7 +123,8 @@
               "pres": "3 × 8",
               "note": "60s rest · body in one line from ear to heel"
             }
-          ]
+          ],
+          "type": "Straight"
         },
         {
           "role": "Work",
@@ -124,7 +137,8 @@
               "pres": "3 × 12",
               "note": "45s rest · squeeze at the top, ribs down"
             }
-          ]
+          ],
+          "type": "Straight"
         },
         {
           "role": "Finish",
@@ -142,7 +156,8 @@
               "pres": "2 × 8 each side",
               "note": "Lower back stays flat on the floor the whole time."
             }
-          ]
+          ],
+          "type": "Straight"
         }
       ]
     },
@@ -177,7 +192,8 @@
               "pres": "8 each side",
               "note": "Slow. Nothing else moves."
             }
-          ]
+          ],
+          "type": "Straight"
         },
         {
           "role": "Work",
@@ -190,7 +206,8 @@
               "pres": "3 × 10",
               "note": "75s rest · light. Weight is not the point in week one."
             }
-          ]
+          ],
+          "type": "Straight"
         },
         {
           "role": "Work",
@@ -203,7 +220,8 @@
               "pres": "3 × 8",
               "note": "60s rest · chest to the bar, elbows past the ribs"
             }
-          ]
+          ],
+          "type": "Straight"
         },
         {
           "role": "Work",
@@ -216,7 +234,8 @@
               "pres": "3 × 30s",
               "note": "45s rest · tall, shoulders down, do not lean"
             }
-          ]
+          ],
+          "type": "Straight"
         },
         {
           "role": "Finish",
@@ -234,7 +253,8 @@
               "pres": "2 × 15s",
               "note": "Feet on the floor taking some weight is fine."
             }
-          ]
+          ],
+          "type": "Straight"
         }
       ]
     },
@@ -269,7 +289,8 @@
               "pres": "20",
               "note": ""
             }
-          ]
+          ],
+          "type": "Straight"
         },
         {
           "role": "Work",
@@ -282,7 +303,8 @@
               "pres": "3 × 10",
               "note": "75s rest · elbows inside the knees at the bottom"
             }
-          ]
+          ],
+          "type": "Straight"
         },
         {
           "role": "Work",
@@ -295,7 +317,8 @@
               "pres": "3 × 10",
               "note": "60s rest · hips in line with the shoulders, not up"
             }
-          ]
+          ],
+          "type": "Straight"
         },
         {
           "role": "Work",
@@ -308,7 +331,8 @@
               "pres": "3 × 8 each side",
               "note": "45s rest · hips stay level"
             }
-          ]
+          ],
+          "type": "Straight"
         },
         {
           "role": "Finish",
@@ -326,7 +350,8 @@
               "pres": "2 × 20s each side",
               "note": "One weight. Do not let the ribs tip."
             }
-          ]
+          ],
+          "type": "Straight"
         }
       ]
     }

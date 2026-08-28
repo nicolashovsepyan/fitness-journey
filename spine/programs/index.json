@@ -1,7 +1,9 @@
 {
   "built": "2026-08-28",
   "programs": [
-    "baseline",
+    "back_to_basics_1",
+    "back_to_basics_2",
+    "back_to_basics_3",
     "beginner_return",
     "fundamentals",
     "main"
@@ -81,6 +83,8 @@
     "reverse_fly",
     "reverse_nordic",
     "ring_pushup",
+    "ring_row",
+    "romanian_deadlift",
     "scap_pullup",
     "seated_cable_row",
     "shoulder_press_machine",
@@ -104,6 +108,7 @@
     "wall_sit",
     "weighted_chinup",
     "weighted_dip",
+    "wide_inverted_row",
     "worlds_greatest_stretch",
     "wrist_prep"
   ]

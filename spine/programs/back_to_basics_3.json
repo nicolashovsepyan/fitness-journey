@@ -1,0 +1,392 @@
+{
+  "id": "back_to_basics_3",
+  "version": 1,
+  "name": "Back to Basics 3",
+  "family": "back_to_basics",
+  "level": 3,
+  "who": "Someone ready to be tested",
+  "source": "written 28 Aug 2026. Level 3 of three. The same six shapes at their real version, and the level where the clock and the failure point become part of the prescription.",
+  "duration": 33,
+  "fixed": true,
+  "trainDays": [
+    1,
+    3,
+    5
+  ],
+  "units": "lb",
+  "equipment": [
+    "bw",
+    "mat",
+    "band",
+    "db",
+    "kb",
+    "bb",
+    "pullupbar",
+    "bench",
+    "rings",
+    "parallettes"
+  ],
+  "weeks": 4,
+  "entryIf": "You can hold a 3-1-1 tempo squat for 4 × 8, do 10 push-ups from the floor, and hang for 45 seconds. Level 3 asks what you have; it does not teach you what to do.",
+  "methods": [
+    {
+      "name": "EMOM",
+      "what": "One set on the top of every minute. The rest is whatever is left of that minute.",
+      "why": "The clock sets the rest, not how you feel. It makes pacing a skill instead of a mood."
+    },
+    {
+      "name": "AMRAP",
+      "what": "As many rounds as possible inside a time cap.",
+      "why": "Density you can compare week to week. The number IS the progress."
+    },
+    {
+      "name": "Max set",
+      "what": "One set to honest failure, recorded.",
+      "why": "Four weeks of work needs a number at the end of it, or nothing was measured."
+    },
+    {
+      "name": "Rest-pause",
+      "what": "One load, short breaks, keep going to a rep target.",
+      "why": "More hard reps than straight sets allow, without adding a set."
+    },
+    {
+      "name": "Circuit",
+      "what": "Straight through every movement, then rest, then again.",
+      "why": "The conditioning cost of strength work, kept in one block so the rest of the session stays clean."
+    },
+    {
+      "name": "Complex",
+      "what": "Several movements with the same implement, no putting it down.",
+      "why": "Grip, breathing and technique under fatigue, all at once."
+    }
+  ],
+  "constraints": {
+    "time": "40 minutes, three days. Week 4 is a test week and it is shorter, not longer."
+  },
+  "goals": [
+    "Put a number on all six shapes",
+    "Hold a pace set by a clock rather than by feel",
+    "Finish a hard set without the shape falling apart",
+    "Know which of the six is your weakest, with evidence"
+  ],
+  "habits": [],
+  "days": {
+    "d1": {
+      "name": "Squat & Push",
+      "tag": "lower · push",
+      "why": "A heavy squat opens it while you are fresh, then the pushing goes on the clock. The EMOM is the point of the day — the same eight reps get harder every minute without the weight changing.",
+      "blocks": [
+        {
+          "role": "Prime",
+          "name": "Loosen off",
+          "note": "Two rounds, straight through.",
+          "type": "Straight",
+          "mins": 5,
+          "items": [
+            {
+              "ex": "cat_cow",
+              "pres": "8",
+              "note": ""
+            },
+            {
+              "ex": "ankle_mobility",
+              "pres": "8 each side",
+              "note": ""
+            },
+            {
+              "ex": "deep_squat_rock",
+              "pres": "10",
+              "note": ""
+            },
+            {
+              "ex": "glute_bridge",
+              "pres": "15",
+              "note": ""
+            },
+            {
+              "ex": "arm_circles",
+              "pres": "20",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "A · Goblet Squat",
+          "note": "5 × 5, rest 120s. Heavy for five. Week 4 this becomes one max set.",
+          "type": "Straight",
+          "mins": 10,
+          "items": [
+            {
+              "ex": "goblet_squat",
+              "pres": "5 × 5",
+              "note": "120s rest · TEST in week 4 · stop one rep before the shape goes"
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "B · Push-Up EMOM",
+          "note": "8 reps on the top of every minute for 10 minutes. If you cannot finish a minute, stop the block and write down which minute it was.",
+          "type": "EMOM",
+          "cfg": {
+            "mins": 10,
+            "interval": 60
+          },
+          "mins": 10,
+          "items": [
+            {
+              "ex": "pushup",
+              "pres": "8",
+              "note": "the rest is whatever is left of the minute"
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "C · Bulgarian Split Squat",
+          "note": "3 × 8 each side, rest 75s.",
+          "type": "Straight",
+          "mins": 6,
+          "items": [
+            {
+              "ex": "bulgarian_split",
+              "pres": "3 × 8 each side",
+              "note": "75s rest · knee tracks the toes"
+            }
+          ]
+        },
+        {
+          "role": "Finish",
+          "name": "Hollow",
+          "note": "Rest-pause. One long hold, break when you must, back on until the clock says 90 seconds of work.",
+          "type": "Rest-pause",
+          "mins": 3,
+          "items": [
+            {
+              "ex": "hollow_hold",
+              "pres": "3 × 30s",
+              "note": "20s rest · lower back stays on the floor or the set is over"
+            }
+          ]
+        }
+      ]
+    },
+    "d2": {
+      "name": "Hinge & Pull",
+      "tag": "lower · pull",
+      "why": "The heaviest day. The deadlift pattern gets real load and the longest rest in the program, then the pulling is tested with a max set — because a pull-up number is the one people actually remember.",
+      "blocks": [
+        {
+          "role": "Prime",
+          "name": "Hips and shoulders",
+          "note": "Two rounds, unhurried. Longer than the others on purpose.",
+          "type": "Straight",
+          "mins": 5,
+          "items": [
+            {
+              "ex": "hip_90_90",
+              "pres": "8 each side",
+              "note": ""
+            },
+            {
+              "ex": "worlds_greatest_stretch",
+              "pres": "5 each side",
+              "note": ""
+            },
+            {
+              "ex": "single_leg_bridge",
+              "pres": "10 each side",
+              "note": "Glutes on before the bar."
+            },
+            {
+              "ex": "scap_pullup",
+              "pres": "10",
+              "note": ""
+            },
+            {
+              "ex": "active_hang",
+              "pres": "30s",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "A · Romanian Deadlift",
+          "note": "4 × 6, rest 150s. The strictest stop rule in the program: the set ends the rep the back changes shape, not the rep after.",
+          "type": "Straight",
+          "mins": 9,
+          "items": [
+            {
+              "ex": "romanian_deadlift",
+              "pres": "4 × 6",
+              "note": "150s rest · TEST in week 4 · hips back, flat back, slow down"
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "B · Pull-Up, max set",
+          "note": "One warm-up set of half your best, then ONE set to honest failure. Write the number down.",
+          "type": "Test",
+          "mins": 4,
+          "items": [
+            {
+              "ex": "pullup",
+              "pres": "2 × 5",
+              "note": "180s rest · the second set is the test — go to failure and record it"
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "C · Kettlebell Swing",
+          "note": "6 × 12, rest 45s. Fast, and the short rest is the work.",
+          "type": "Straight",
+          "mins": 8,
+          "items": [
+            {
+              "ex": "kb_swing",
+              "pres": "6 × 12",
+              "note": "45s rest · hips, not arms"
+            }
+          ]
+        },
+        {
+          "role": "Finish",
+          "name": "Grip",
+          "note": "Three rounds, 45s between.",
+          "type": "Straight",
+          "mins": 4,
+          "items": [
+            {
+              "ex": "dead_hang",
+              "pres": "3 × 40s",
+              "note": "45s rest · no straps, ever"
+            }
+          ]
+        }
+      ]
+    },
+    "d3": {
+      "name": "Full Body",
+      "tag": "full body",
+      "why": "The engine day. An AMRAP covering all six shapes, then a carry complex to finish — the number of rounds is the thing you compare in four weeks, not how it felt.",
+      "blocks": [
+        {
+          "role": "Prime",
+          "name": "Everything",
+          "note": "Two rounds.",
+          "type": "Straight",
+          "mins": 4,
+          "items": [
+            {
+              "ex": "down_dog_up_dog",
+              "pres": "6",
+              "note": ""
+            },
+            {
+              "ex": "bird_dog",
+              "pres": "8 each side",
+              "note": ""
+            },
+            {
+              "ex": "banded_pullapart",
+              "pres": "15",
+              "note": ""
+            },
+            {
+              "ex": "deep_squat_rock",
+              "pres": "10",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "A · Dip + Ring Row",
+          "note": "A1 into A2, no rest, then 90s. The two shapes level 1 could not touch.",
+          "type": "Superset",
+          "cfg": {
+            "rounds": 4,
+            "rest": 90
+          },
+          "mins": 13,
+          "items": [
+            {
+              "ex": "dip",
+              "pres": "4 × 6",
+              "note": "superset A1 · bench dip is the honest regression, not a failure"
+            },
+            {
+              "ex": "ring_row",
+              "pres": "4 × 10",
+              "note": "superset A2 · feet forward to make it harder"
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "B · Six Shapes AMRAP",
+          "note": "15 minutes. As many rounds as possible. Write the number down — that number is the whole point of this block.",
+          "type": "AMRAP",
+          "cfg": {
+            "cap": 15
+          },
+          "mins": 15,
+          "items": [
+            {
+              "ex": "goblet_squat",
+              "pres": "10",
+              "note": ""
+            },
+            {
+              "ex": "pushup",
+              "pres": "8",
+              "note": ""
+            },
+            {
+              "ex": "wide_inverted_row",
+              "pres": "8",
+              "note": ""
+            },
+            {
+              "ex": "kb_swing",
+              "pres": "12",
+              "note": ""
+            },
+            {
+              "ex": "hanging_knee_raise",
+              "pres": "8",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "role": "Finish",
+          "name": "Carry complex",
+          "note": "Three rounds. Farmer's carry 30 seconds straight into a suitcase carry 20 seconds each side, without putting the weight down.",
+          "type": "Circuit",
+          "cfg": {
+            "rounds": 3,
+            "rest": 60
+          },
+          "mins": 2,
+          "items": [
+            {
+              "ex": "farmers_carry",
+              "pres": "30s",
+              "note": "do not put it down between the two"
+            },
+            {
+              "ex": "suitcase_carry",
+              "pres": "20s each side",
+              "note": ""
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

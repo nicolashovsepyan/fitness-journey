@@ -51,6 +51,16 @@ let SESS = null;      // SESSIONS-shaped, or null
    closest honest match. */
 const ROLE = { Prime: 'Primer', Work: 'Work', Finish: 'Finisher', Hold: 'Work', Move: 'Mobility' };
 
+/* The console's word for a block, in the runner's vocabulary. Both lists
+   are short and neither is going to grow quietly, so this is written out
+   rather than guessed at by lowercasing. */
+const FORMAT = {
+  Straight: 'straight', Superset: 'superset', Circuit: 'circuit',
+  EMOM: 'emom', AMRAP: 'amrap', Tabata: 'tabata',
+  Tempo: 'tempo', 'Rest-pause': 'rest_pause', Hold: 'isometric',
+  Test: 'max_test', Volume: 'volume',
+};
+
 /* One console day, in the shape the screens already understand.
 
    The console writes prose — "3 × 8 each side" — and the screens want
@@ -62,10 +72,19 @@ function toSession(dayId, day, fixed) {
   const blocks = (day.blocks || []).map((b, i) => ({
     id: `${dayId}b${i}`,
     role: ROLE[b.role] || 'Work',
-    /* 'straight' walks item by item, set by set — the only honest reading
-       of a list of movements with sets written against each one. The
-       console has no way to say "circuit" yet, so none is assumed. */
-    format: 'straight',
+    /* A BLOCK CAN SAY WHAT KIND OF BLOCK IT IS NOW.
+
+       This was hardcoded to 'straight' with a comment saying the console
+       had no way to say "circuit" — true when it was written, and the
+       reason a program could only ever be sets and reps. The runner has
+       supported emom, amrap, circuit, tabata and the rest all along
+       (js/data/formats.js); nothing could reach them.
+
+       A block that says nothing is still straight sets, which is the
+       right default and what every existing program means. */
+    format: FORMAT[b.type] || 'straight',
+    /* whatever the type needs: rounds, a cap, an interval, work/rest */
+    ...(b.cfg || {}),
     name: b.name || b.role || 'Block',
     note: b.note || '',
     minutes: +b.mins || 0,
