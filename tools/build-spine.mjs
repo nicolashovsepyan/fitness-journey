@@ -252,6 +252,13 @@ for (const [id, m] of Object.entries(EXERCISES)) {
     modality: (WB[id] && WB[id].modality) || null,
     role: (WB[id] && WB[id].role) || null,
     demands: WB[id] ? listOf(WB[id], 'demands') : [],
+    /* HOW LONG ONE REP TAKES. The console used to ask a coach to type how
+       many minutes a block would run, which meant the number stopped being
+       true the moment a set was added. With this the time can be derived
+       from what is actually prescribed. A back squat rep is 4 seconds, a
+       push-up 3; where the workbook does not say, the reader falls back. */
+    secPerRep: (WB[id] && WB[id].sec_per_rep != null && WB[id].sec_per_rep !== '')
+      ? Number(WB[id].sec_per_rep) : null,
     art,
     video: m.demoUrl ?? null,
     benchmark: BENCH[id] ?? null,

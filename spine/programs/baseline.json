@@ -1,0 +1,334 @@
+{
+  "id": "baseline",
+  "version": 1,
+  "name": "Baseline",
+  "who": "Anyone starting",
+  "source": "written 27 Aug 2026 as the program a new person gets before anything is known about them. Built from the fundamentals list in the exercise database, bodyweight first, nothing that needs a gym.",
+  "duration": 20,
+  "fixed": true,
+  "trainDays": [
+    1,
+    3,
+    5
+  ],
+  "units": "lb",
+  "equipment": [
+    "bw",
+    "mat",
+    "band",
+    "db",
+    "pullupbar"
+  ],
+  "weeks": 4,
+  "arc": [
+    {
+      "week": 1,
+      "focus": "Learn the shapes",
+      "rule": "Every set stops two reps before it gets hard. This week is about where your body goes, not what it can do."
+    },
+    {
+      "week": 2,
+      "focus": "Same work, better",
+      "rule": "Same numbers as week 1. Slower down, full range, no bouncing. If week 1 felt easy this is where it starts to bite."
+    },
+    {
+      "week": 3,
+      "focus": "One more set",
+      "rule": "Add a set to the first work block of each day. Everything else stays."
+    },
+    {
+      "week": 4,
+      "focus": "Write a number down",
+      "rule": "Squat, push and hinge get one honest hard set. That number is where the next program starts."
+    }
+  ],
+  "constraints": {
+    "unknown": "nothing is known about this person yet - so nothing here loads a spine heavily, nothing jumps, and every movement has an easier version one tap away",
+    "time": "30 minutes, three days. A fourth day is a decision for week five, not week one."
+  },
+  "goals": [
+    "Learn the six shapes everything else is built from",
+    "Turn up three times a week for four weeks",
+    "Finish week 4 with a number on the squat, the push and the hinge",
+    "Leave knowing which movements you want more of"
+  ],
+  "habits": [],
+  "days": {
+    "d1": {
+      "name": "Squat & Push",
+      "tag": "lower · push",
+      "why": "The two shapes you use most and think about least - standing up out of a chair, and pushing a door. Everything is done where you can already do it well; the point of week one is a rep you would be happy to show someone.",
+      "blocks": [
+        {
+          "role": "Prime",
+          "name": "Loosen off",
+          "note": "Straight through, no rest. Two rounds if you have time.",
+          "mins": 4,
+          "items": [
+            {
+              "ex": "cat_cow",
+              "pres": "8",
+              "note": "Slow. Breathe out as you round."
+            },
+            {
+              "ex": "ankle_mobility",
+              "pres": "8 each side",
+              "note": "Knee travels over the toes, heel stays down."
+            },
+            {
+              "ex": "arm_circles",
+              "pres": "20",
+              "note": ""
+            },
+            {
+              "ex": "deep_squat_rock",
+              "pres": "10",
+              "note": "Sit into the bottom of a squat and rock. If you cannot get down, hold a doorframe."
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "A · Bodyweight Squat",
+          "note": "3 × 10, rest 60s. Sit back like there is a chair behind you. Stop the set the moment the knees fall inward.",
+          "mins": 4,
+          "items": [
+            {
+              "ex": "bodyweight_squat",
+              "pres": "3 × 10",
+              "note": "60s rest · hold a doorframe if balance is the problem"
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "B · Incline Push-Up",
+          "note": "3 × 8, rest 60s. Hands on a counter or a wall. Higher hands is easier - start easier than you think.",
+          "mins": 4,
+          "items": [
+            {
+              "ex": "incline_push_up",
+              "pres": "3 × 8",
+              "note": "60s rest · body in one line from ear to heel"
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "C · Glute Bridge",
+          "note": "3 × 12, rest 45s. The one that makes the squat better.",
+          "mins": 4,
+          "items": [
+            {
+              "ex": "glute_bridge",
+              "pres": "3 × 12",
+              "note": "45s rest · squeeze at the top, ribs down"
+            }
+          ]
+        },
+        {
+          "role": "Finish",
+          "name": "Middle",
+          "note": "Straight through, 45s between rounds. Two rounds.",
+          "mins": 4,
+          "items": [
+            {
+              "ex": "forearm_plank",
+              "pres": "2 × 20s",
+              "note": "Stop when the hips drop, not at the time."
+            },
+            {
+              "ex": "dead_bug",
+              "pres": "2 × 8 each side",
+              "note": "Lower back stays flat on the floor the whole time."
+            }
+          ]
+        }
+      ]
+    },
+    "d2": {
+      "name": "Hinge & Pull",
+      "tag": "lower · pull",
+      "why": "Picking something up, and pulling something towards you. The hinge is the one people get wrong and the one that protects a back, so it gets the most attention and the strictest stop rule.",
+      "blocks": [
+        {
+          "role": "Prime",
+          "name": "Hips and shoulders",
+          "note": "Straight through, no rest.",
+          "mins": 4,
+          "items": [
+            {
+              "ex": "hip_90_90",
+              "pres": "8 each side",
+              "note": ""
+            },
+            {
+              "ex": "worlds_greatest_stretch",
+              "pres": "5 each side",
+              "note": ""
+            },
+            {
+              "ex": "banded_pullapart",
+              "pres": "15",
+              "note": "Arms straight, squeeze the shoulder blades."
+            },
+            {
+              "ex": "bird_dog",
+              "pres": "8 each side",
+              "note": "Slow. Nothing else moves."
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "A · Romanian Deadlift",
+          "note": "3 × 10, rest 75s. Push the hips back, not down. The set ends the rep your back changes shape.",
+          "mins": 5,
+          "items": [
+            {
+              "ex": "db_rdl",
+              "pres": "3 × 10",
+              "note": "75s rest · light. Weight is not the point in week one."
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "B · Incline Row",
+          "note": "3 × 8, rest 60s. Under a bar or a table, feet forward. The higher the bar, the easier it is.",
+          "mins": 4,
+          "items": [
+            {
+              "ex": "incline_row",
+              "pres": "3 × 8",
+              "note": "60s rest · chest to the bar, elbows past the ribs"
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "C · Farmer's Carry",
+          "note": "3 rounds of 30 seconds, rest 45s. Heavy enough that the last ten seconds are honest.",
+          "mins": 3,
+          "items": [
+            {
+              "ex": "farmers_carry",
+              "pres": "3 × 30s",
+              "note": "45s rest · tall, shoulders down, do not lean"
+            }
+          ]
+        },
+        {
+          "role": "Finish",
+          "name": "Side and grip",
+          "note": "Two rounds, 45s between.",
+          "mins": 4,
+          "items": [
+            {
+              "ex": "side_plank",
+              "pres": "2 × 20s each side",
+              "note": "Knees down is a real option."
+            },
+            {
+              "ex": "dead_hang",
+              "pres": "2 × 15s",
+              "note": "Feet on the floor taking some weight is fine."
+            }
+          ]
+        }
+      ]
+    },
+    "d3": {
+      "name": "Full Body",
+      "tag": "full body",
+      "why": "The same six shapes, loaded a little differently, so week one has repetition without being the same session three times. This is the day where you find out which movements you actually like.",
+      "blocks": [
+        {
+          "role": "Prime",
+          "name": "Everything, briefly",
+          "note": "Straight through, no rest.",
+          "mins": 4,
+          "items": [
+            {
+              "ex": "down_dog_up_dog",
+              "pres": "6",
+              "note": ""
+            },
+            {
+              "ex": "ankle_mobility",
+              "pres": "8 each side",
+              "note": ""
+            },
+            {
+              "ex": "glute_bridge",
+              "pres": "12",
+              "note": "Waking them up, not training them."
+            },
+            {
+              "ex": "arm_circles",
+              "pres": "20",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "A · Goblet Squat",
+          "note": "3 × 10, rest 75s. Holding a weight at the chest makes the squat easier to do well, not harder.",
+          "mins": 5,
+          "items": [
+            {
+              "ex": "goblet_squat",
+              "pres": "3 × 10",
+              "note": "75s rest · elbows inside the knees at the bottom"
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "B · Knee Push-Up",
+          "note": "3 × 10, rest 60s. Knees down on purpose - it lets you do more good reps than a hard version does.",
+          "mins": 4,
+          "items": [
+            {
+              "ex": "knee_push_up",
+              "pres": "3 × 10",
+              "note": "60s rest · hips in line with the shoulders, not up"
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "C · Single-Leg Bridge",
+          "note": "3 × 8 each side, rest 45s. One leg finds the side that is asleep.",
+          "mins": 4,
+          "items": [
+            {
+              "ex": "single_leg_bridge",
+              "pres": "3 × 8 each side",
+              "note": "45s rest · hips stay level"
+            }
+          ]
+        },
+        {
+          "role": "Finish",
+          "name": "Hold",
+          "note": "Two rounds, 45s between.",
+          "mins": 4,
+          "items": [
+            {
+              "ex": "hollow_hold",
+              "pres": "2 × 15s",
+              "note": "Knees bent and hands by the hips is the starting version."
+            },
+            {
+              "ex": "suitcase_carry",
+              "pres": "2 × 20s each side",
+              "note": "One weight. Do not let the ribs tip."
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
