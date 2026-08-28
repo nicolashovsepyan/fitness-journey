@@ -180,8 +180,9 @@ function readWorkbook() {
   }
 }
 const WB = readWorkbook();
-const patternsOf = r => Array.isArray(r.patterns) ? r.patterns
-  : String(r.patterns || '').split(/[,;|]/).map(x => x.trim()).filter(Boolean);
+const listOf = (r, k) => Array.isArray(r[k]) ? r[k]
+  : String(r[k] || '').split(/[,;|]/).map(x => x.trim()).filter(Boolean);
+const patternsOf = r => listOf(r, 'patterns');
 
 const DASH = readDashboardCopy();
 const BENCH = readBenchmarks();
@@ -238,6 +239,19 @@ for (const [id, m] of Object.entries(EXERCISES)) {
     fundamental: !!(WB[id] && WB[id].fundamental),
     fundFamily: (WB[id] && WB[id].fund_family) || null,
     patterns: WB[id] ? patternsOf(WB[id]) : [],
+    /* WHAT A SEARCH ACTUALLY NEEDS TO MATCH ON. "leg explosive" is two
+       words about two different columns, and neither of them is the
+       movement's name. Carried so one search box can answer it.
+
+       `demands` earns its place twice over: it is also the honest way to
+       check a constraint. "No jumping" is impact; "no deep loaded knee
+       flexion" is deep-knee-flexion. A rule written against these is a
+       rule about the movement, not about how its name happens to read. */
+    muscles: WB[id] ? listOf(WB[id], 'muscles_primary') : [],
+    musclesAlso: WB[id] ? listOf(WB[id], 'muscles_secondary') : [],
+    modality: (WB[id] && WB[id].modality) || null,
+    role: (WB[id] && WB[id].role) || null,
+    demands: WB[id] ? listOf(WB[id], 'demands') : [],
     art,
     video: m.demoUrl ?? null,
     benchmark: BENCH[id] ?? null,

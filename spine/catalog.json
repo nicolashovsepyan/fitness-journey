@@ -27,6 +27,20 @@
    "patterns": [
     "squat"
    ],
+   "muscles": [
+    "quad",
+    "glute"
+   ],
+   "musclesAlso": [
+    "abs",
+    "lower-back",
+    "calf"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "deep-knee-flexion"
+   ],
    "art": {
     "file": "images/exercises/bodyweight_squat.png",
     "status": "drawn"
@@ -65,6 +79,20 @@
    "patterns": [
     "squat"
    ],
+   "muscles": [
+    "quad",
+    "glute"
+   ],
+   "musclesAlso": [
+    "abs",
+    "lower-back",
+    "calf"
+   ],
+   "modality": "barbell",
+   "role": "working-set",
+   "demands": [
+    "deep-knee-flexion"
+   ],
    "art": {
     "file": "images/exercises/back_squat.png",
     "status": "drawn"
@@ -102,6 +130,18 @@
    "fundFamily": null,
    "patterns": [
     "squat"
+   ],
+   "muscles": [
+    "hamstring"
+   ],
+   "musclesAlso": [
+    "glute",
+    "calf"
+   ],
+   "modality": "band",
+   "role": "working-set",
+   "demands": [
+    "deep-knee-flexion"
    ],
    "art": {
     "file": null,
@@ -152,6 +192,20 @@
    "fundFamily": null,
    "patterns": [
     "lunge"
+   ],
+   "muscles": [
+    "quad",
+    "glute"
+   ],
+   "musclesAlso": [
+    "hamstring",
+    "adductor",
+    "abs"
+   ],
+   "modality": "dumbbell",
+   "role": "working-set",
+   "demands": [
+    "deep-knee-flexion"
    ],
    "art": {
     "file": "images/exercises/bulgarian_split.png",
@@ -222,6 +276,20 @@
    "patterns": [
     "squat"
    ],
+   "muscles": [
+    "quad",
+    "glute"
+   ],
+   "musclesAlso": [
+    "abs",
+    "lower-back",
+    "calf"
+   ],
+   "modality": "dumbbell",
+   "role": "working-set",
+   "demands": [
+    "deep-knee-flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -256,6 +324,17 @@
    "fundFamily": null,
    "patterns": [
     "squat"
+   ],
+   "muscles": [
+    "quad"
+   ],
+   "musclesAlso": [
+    "glute"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "deep-knee-flexion"
    ],
    "art": {
     "file": "images/exercises/horse_stance.png",
@@ -292,6 +371,21 @@
    "patterns": [
     "squat",
     "jump"
+   ],
+   "muscles": [
+    "quad",
+    "glute"
+   ],
+   "musclesAlso": [
+    "abs",
+    "lower-back",
+    "calf"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "deep-knee-flexion",
+    "impact"
    ],
    "art": {
     "file": "images/exercises/jump_squat.png",
@@ -348,6 +442,17 @@
    "patterns": [
     "squat"
    ],
+   "muscles": [
+    "quad"
+   ],
+   "musclesAlso": [
+    "glute"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "deep-knee-flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -382,6 +487,17 @@
    "fundFamily": null,
    "patterns": [
     "squat"
+   ],
+   "muscles": [
+    "quad"
+   ],
+   "musclesAlso": [
+    "glute"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "deep-knee-flexion"
    ],
    "art": {
     "file": null,
@@ -419,6 +535,17 @@
    "patterns": [
     "squat"
    ],
+   "muscles": [
+    "quad"
+   ],
+   "musclesAlso": [
+    "glute"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "deep-knee-flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -454,6 +581,17 @@
    "patterns": [
     "lunge"
    ],
+   "muscles": [
+    "quad"
+   ],
+   "musclesAlso": [
+    "glute"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "deep-knee-flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -488,6 +626,19 @@
    "fundFamily": null,
    "patterns": [
     "hinge"
+   ],
+   "muscles": [
+    "hamstring",
+    "glute"
+   ],
+   "musclesAlso": [
+    "lower-back",
+    "grip"
+   ],
+   "modality": "barbell",
+   "role": "working-set",
+   "demands": [
+    "hip-hinge"
    ],
    "art": {
     "file": "images/exercises/deadlift.png",
@@ -526,6 +677,19 @@
    "patterns": [
     "hinge"
    ],
+   "muscles": [
+    "hamstring",
+    "glute"
+   ],
+   "musclesAlso": [
+    "lower-back",
+    "grip"
+   ],
+   "modality": "dumbbell",
+   "role": "working-set",
+   "demands": [
+    "hip-hinge"
+   ],
    "art": {
     "file": "images/exercises/db_swing.png",
     "status": "drawn"
@@ -561,6 +725,19 @@
    "fundFamily": "hinge",
    "patterns": [
     "hinge"
+   ],
+   "muscles": [
+    "hamstring",
+    "glute"
+   ],
+   "musclesAlso": [
+    "lower-back",
+    "grip"
+   ],
+   "modality": "barbell",
+   "role": "working-set",
+   "demands": [
+    "hip-hinge"
    ],
    "art": {
     "file": null,
@@ -609,6 +786,19 @@
    "fundFamily": null,
    "patterns": [
     "hinge"
+   ],
+   "muscles": [
+    "hamstring",
+    "glute"
+   ],
+   "musclesAlso": [
+    "lower-back",
+    "grip"
+   ],
+   "modality": "dumbbell",
+   "role": "working-set",
+   "demands": [
+    "hip-hinge"
    ],
    "art": {
     "file": "images/exercises/single_leg_rdl.png",
@@ -675,6 +865,18 @@
    "patterns": [
     "hinge"
    ],
+   "muscles": [
+    "glute"
+   ],
+   "musclesAlso": [
+    "hamstring",
+    "abs"
+   ],
+   "modality": "band",
+   "role": "working-set",
+   "demands": [
+    "hip-hinge"
+   ],
    "art": {
     "file": "images/exercises/banded_glute_bridge.png",
     "status": "drawn"
@@ -709,6 +911,18 @@
    "fundFamily": null,
    "patterns": [
     "hinge"
+   ],
+   "muscles": [
+    "glute"
+   ],
+   "musclesAlso": [
+    "hamstring",
+    "abs"
+   ],
+   "modality": "band",
+   "role": "working-set",
+   "demands": [
+    "hip-hinge"
    ],
    "art": {
     "file": "images/exercises/banded_sidewalk.png",
@@ -745,6 +959,18 @@
    "fundFamily": "glute",
    "patterns": [
     "hinge"
+   ],
+   "muscles": [
+    "glute"
+   ],
+   "musclesAlso": [
+    "hamstring",
+    "abs"
+   ],
+   "modality": "barbell",
+   "role": "working-set",
+   "demands": [
+    "hip-hinge"
    ],
    "art": {
     "file": "images/exercises/hip_thrust.png",
@@ -783,6 +1009,19 @@
    "patterns": [
     "hinge"
    ],
+   "muscles": [
+    "hamstring",
+    "glute"
+   ],
+   "musclesAlso": [
+    "lower-back",
+    "grip"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "hip-hinge"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -819,6 +1058,18 @@
    "patterns": [
     "hinge"
    ],
+   "muscles": [
+    "hamstring"
+   ],
+   "musclesAlso": [
+    "glute",
+    "calf"
+   ],
+   "modality": "band",
+   "role": "working-set",
+   "demands": [
+    "hip-hinge"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -853,6 +1104,18 @@
    "fundFamily": null,
    "patterns": [
     "hinge"
+   ],
+   "muscles": [
+    "hamstring"
+   ],
+   "musclesAlso": [
+    "glute",
+    "calf"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "hip-hinge"
    ],
    "art": {
     "file": null,
@@ -889,6 +1152,13 @@
    "patterns": [
     "calf"
    ],
+   "muscles": [
+    "calf"
+   ],
+   "musclesAlso": [],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -924,6 +1194,13 @@
    "patterns": [
     "shin"
    ],
+   "muscles": [
+    "tibialis"
+   ],
+   "musclesAlso": [],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -960,6 +1237,20 @@
    "fundFamily": null,
    "patterns": [
     "h-push"
+   ],
+   "muscles": [
+    "chest",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "serratus",
+    "abs"
+   ],
+   "modality": "barbell",
+   "role": "working-set",
+   "demands": [
+    "overhead-rom"
    ],
    "art": {
     "file": "images/exercises/bench_press.png",
@@ -998,6 +1289,20 @@
    "patterns": [
     "v-push"
    ],
+   "muscles": [
+    "front-delt",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "chest",
+    "traps",
+    "abs"
+   ],
+   "modality": "barbell",
+   "role": "working-set",
+   "demands": [
+    "overhead-rom"
+   ],
    "art": {
     "file": "images/exercises/overhead_press.png",
     "status": "drawn"
@@ -1035,6 +1340,20 @@
    "patterns": [
     "h-push"
    ],
+   "muscles": [
+    "chest",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "serratus",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -1069,6 +1388,20 @@
    "fundFamily": null,
    "patterns": [
     "h-push"
+   ],
+   "muscles": [
+    "chest",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "serratus",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -1105,6 +1438,20 @@
    "patterns": [
     "h-push"
    ],
+   "muscles": [
+    "chest",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "serratus",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -1139,6 +1486,21 @@
    "fundFamily": null,
    "patterns": [
     "v-push"
+   ],
+   "muscles": [
+    "front-delt",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "chest",
+    "traps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "overhead-rom",
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -1175,6 +1537,18 @@
    "patterns": [
     "h-push"
    ],
+   "muscles": [
+    "chest",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "serratus",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -1209,6 +1583,18 @@
    "fundFamily": null,
    "patterns": [
     "h-push"
+   ],
+   "muscles": [
+    "triceps",
+    "chest"
+   ],
+   "musclesAlso": [
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -1245,6 +1631,18 @@
    "patterns": [
     "h-push"
    ],
+   "muscles": [
+    "triceps",
+    "chest"
+   ],
+   "musclesAlso": [
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
+   ],
    "art": {
     "file": "images/exercises/dip_support_hold.png",
     "status": "drawn"
@@ -1280,6 +1678,20 @@
    "patterns": [
     "straight-arm-push"
    ],
+   "muscles": [
+    "front-delt",
+    "serratus"
+   ],
+   "musclesAlso": [
+    "chest",
+    "biceps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "wrist-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -1314,6 +1726,21 @@
    "fundFamily": null,
    "patterns": [
     "v-push"
+   ],
+   "muscles": [
+    "front-delt",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "chest",
+    "traps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "overhead-rom",
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -1362,6 +1789,20 @@
    "fundFamily": "h-push",
    "patterns": [
     "h-push"
+   ],
+   "muscles": [
+    "chest",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "serratus",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": "images/exercises/pushup.png",
@@ -1418,6 +1859,17 @@
    "patterns": [
     "compression"
    ],
+   "muscles": [
+    "abs",
+    "hip-flexor"
+   ],
+   "musclesAlso": [
+    "quad",
+    "triceps"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -1453,6 +1905,18 @@
    "fundFamily": null,
    "patterns": [
     "h-push"
+   ],
+   "muscles": [
+    "triceps",
+    "chest"
+   ],
+   "musclesAlso": [
+    "front-delt"
+   ],
+   "modality": "band",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -1490,6 +1954,16 @@
    "patterns": [
     "h-push"
    ],
+   "muscles": [
+    "biceps"
+   ],
+   "musclesAlso": [
+    "forearm",
+    "grip"
+   ],
+   "modality": "dumbbell",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -1524,6 +1998,20 @@
    "fundFamily": null,
    "patterns": [
     "h-push"
+   ],
+   "muscles": [
+    "chest",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "serratus",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -1560,6 +2048,18 @@
    "patterns": [
     "h-push"
    ],
+   "muscles": [
+    "triceps",
+    "chest"
+   ],
+   "musclesAlso": [
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -1595,6 +2095,18 @@
    "patterns": [
     "h-push"
    ],
+   "muscles": [
+    "triceps",
+    "chest"
+   ],
+   "musclesAlso": [
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -1629,6 +2141,20 @@
    "fundFamily": null,
    "patterns": [
     "v-push"
+   ],
+   "muscles": [
+    "front-delt",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "chest",
+    "traps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "overhead-rom"
    ],
    "art": {
     "file": null,
@@ -1667,6 +2193,23 @@
     "squat",
     "jump"
    ],
+   "muscles": [
+    "chest",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "serratus",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, conditioning",
+   "demands": [
+    "wrist-extension",
+    "deep-knee-flexion",
+    "impact",
+    "floor-to-stand"
+   ],
    "art": {
     "file": "images/exercises/full_burpee.png",
     "status": "drawn"
@@ -1701,6 +2244,20 @@
    "fundFamily": null,
    "patterns": [
     "h-push"
+   ],
+   "muscles": [
+    "chest",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "serratus",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -1737,6 +2294,21 @@
    "patterns": [
     "v-push"
    ],
+   "muscles": [
+    "front-delt",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "chest",
+    "traps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "overhead-rom",
+    "wrist-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -1771,6 +2343,21 @@
    "fundFamily": "v-push",
    "patterns": [
     "v-push"
+   ],
+   "muscles": [
+    "front-delt",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "chest",
+    "traps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "overhead-rom",
+    "wrist-extension"
    ],
    "art": {
     "file": "images/exercises/pike_push_up.png",
@@ -1827,6 +2414,18 @@
    "patterns": [
     "h-push"
    ],
+   "muscles": [
+    "chest",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "serratus",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -1863,6 +2462,21 @@
    "patterns": [
     "h-push"
    ],
+   "muscles": [
+    "chest",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "serratus",
+    "abs"
+   ],
+   "modality": "barbell",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension",
+    "grip"
+   ],
    "art": {
     "file": "images/exercises/straight_bar_push_up.png",
     "status": "drawn"
@@ -1898,6 +2512,18 @@
    "patterns": [
     "h-push"
    ],
+   "muscles": [
+    "chest",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "serratus",
+    "abs"
+   ],
+   "modality": "dumbbell",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -1933,6 +2559,22 @@
    "patterns": [
     "v-push"
    ],
+   "muscles": [
+    "front-delt",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "chest",
+    "traps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "overhead-rom",
+    "wrist-extension",
+    "inversion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -1967,6 +2609,20 @@
    "fundFamily": null,
    "patterns": [
     "h-push"
+   ],
+   "muscles": [
+    "chest",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "serratus",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": "images/exercises/deadstop_pushup.png",
@@ -2004,6 +2660,21 @@
    "patterns": [
     "v-push"
    ],
+   "muscles": [
+    "front-delt",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "chest",
+    "traps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "overhead-rom",
+    "wrist-extension"
+   ],
    "art": {
     "file": "images/exercises/deep_pike_pushup.png",
     "status": "drawn"
@@ -2039,6 +2710,18 @@
    "patterns": [
     "h-push"
    ],
+   "muscles": [
+    "triceps",
+    "chest"
+   ],
+   "musclesAlso": [
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2073,6 +2756,18 @@
    "fundFamily": "h-push",
    "patterns": [
     "h-push"
+   ],
+   "muscles": [
+    "triceps",
+    "chest"
+   ],
+   "musclesAlso": [
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": "images/exercises/dip.png",
@@ -2127,6 +2822,18 @@
    "patterns": [
     "h-push"
    ],
+   "muscles": [
+    "chest",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "serratus",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -2161,6 +2868,21 @@
    "fundFamily": null,
    "patterns": [
     "v-push"
+   ],
+   "muscles": [
+    "front-delt",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "chest",
+    "traps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "overhead-rom",
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -2197,6 +2919,21 @@
    "patterns": [
     "v-push"
    ],
+   "muscles": [
+    "front-delt",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "chest",
+    "traps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "overhead-rom",
+    "wrist-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2231,6 +2968,22 @@
    "fundFamily": null,
    "patterns": [
     "v-push"
+   ],
+   "muscles": [
+    "front-delt",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "chest",
+    "traps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "overhead-rom",
+    "wrist-extension",
+    "inversion"
    ],
    "art": {
     "file": null,
@@ -2267,6 +3020,20 @@
    "patterns": [
     "h-push"
    ],
+   "muscles": [
+    "chest",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "serratus",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2301,6 +3068,20 @@
    "fundFamily": null,
    "patterns": [
     "straight-arm-push"
+   ],
+   "muscles": [
+    "front-delt",
+    "serratus"
+   ],
+   "musclesAlso": [
+    "chest",
+    "biceps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -2337,6 +3118,20 @@
    "patterns": [
     "h-push"
    ],
+   "muscles": [
+    "chest",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "serratus",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2372,6 +3167,17 @@
    "patterns": [
     "compression"
    ],
+   "muscles": [
+    "abs",
+    "hip-flexor"
+   ],
+   "musclesAlso": [
+    "quad",
+    "triceps"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -2407,6 +3213,17 @@
    "patterns": [
     "compression"
    ],
+   "muscles": [
+    "abs",
+    "hip-flexor"
+   ],
+   "musclesAlso": [
+    "quad",
+    "triceps"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -2441,6 +3258,20 @@
    "fundFamily": null,
    "patterns": [
     "straight-arm-push"
+   ],
+   "muscles": [
+    "front-delt",
+    "serratus"
+   ],
+   "musclesAlso": [
+    "chest",
+    "biceps",
+    "abs"
+   ],
+   "modality": "dumbbell",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -2477,6 +3308,20 @@
    "patterns": [
     "h-push"
    ],
+   "muscles": [
+    "chest",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "serratus",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2511,6 +3356,20 @@
    "fundFamily": null,
    "patterns": [
     "v-push"
+   ],
+   "muscles": [
+    "front-delt",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "chest",
+    "traps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "overhead-rom"
    ],
    "art": {
     "file": null,
@@ -2548,6 +3407,20 @@
    "patterns": [
     "h-push"
    ],
+   "muscles": [
+    "chest",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "serratus",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2583,6 +3456,18 @@
    "fundFamily": null,
    "patterns": [
     "h-push"
+   ],
+   "muscles": [
+    "triceps",
+    "chest"
+   ],
+   "musclesAlso": [
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -2620,6 +3505,20 @@
    "patterns": [
     "h-push"
    ],
+   "muscles": [
+    "chest",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "serratus",
+    "abs"
+   ],
+   "modality": "dumbbell",
+   "role": "working-set",
+   "demands": [
+    "overhead-rom"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2655,6 +3554,18 @@
    "patterns": [
     "h-push"
    ],
+   "muscles": [
+    "chest",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "serratus",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -2689,6 +3600,22 @@
    "fundFamily": null,
    "patterns": [
     "v-push"
+   ],
+   "muscles": [
+    "front-delt",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "chest",
+    "traps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "overhead-rom",
+    "wrist-extension",
+    "inversion"
    ],
    "art": {
     "file": null,
@@ -2728,6 +3655,25 @@
     "squat",
     "jump"
    ],
+   "muscles": [
+    "lat",
+    "biceps"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "grip",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, conditioning",
+   "demands": [
+    "wrist-extension",
+    "deep-knee-flexion",
+    "grip",
+    "hang",
+    "impact",
+    "floor-to-stand"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2763,6 +3709,18 @@
    "patterns": [
     "h-push"
    ],
+   "muscles": [
+    "triceps",
+    "chest"
+   ],
+   "musclesAlso": [
+    "front-delt"
+   ],
+   "modality": "kettlebell",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2797,6 +3755,20 @@
    "fundFamily": null,
    "patterns": [
     "straight-arm-push"
+   ],
+   "muscles": [
+    "front-delt",
+    "serratus"
+   ],
+   "musclesAlso": [
+    "chest",
+    "biceps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "skill-practice",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -2835,6 +3807,23 @@
     "squat",
     "jump"
    ],
+   "muscles": [
+    "chest",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "serratus",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, conditioning",
+   "demands": [
+    "wrist-extension",
+    "deep-knee-flexion",
+    "impact",
+    "floor-to-stand"
+   ],
    "art": {
     "file": "images/exercises/navy_seal_burpee.png",
     "status": "drawn"
@@ -2869,6 +3858,21 @@
    "fundFamily": null,
    "patterns": [
     "v-push"
+   ],
+   "muscles": [
+    "front-delt",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "chest",
+    "traps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "overhead-rom",
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -2907,6 +3911,22 @@
     "lunge",
     "anti-lateral-flexion"
    ],
+   "muscles": [
+    "front-delt",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "chest",
+    "traps",
+    "abs"
+   ],
+   "modality": "dumbbell",
+   "role": "working-set",
+   "demands": [
+    "overhead-rom",
+    "deep-knee-flexion",
+    "floor-to-stand"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2942,6 +3962,22 @@
    "patterns": [
     "v-push"
    ],
+   "muscles": [
+    "front-delt",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "chest",
+    "traps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "skill-practice",
+   "demands": [
+    "overhead-rom",
+    "wrist-extension",
+    "inversion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2976,6 +4012,20 @@
    "fundFamily": null,
    "patterns": [
     "h-push"
+   ],
+   "muscles": [
+    "chest",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "serratus",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -3014,6 +4064,22 @@
     "squat",
     "v-push"
    ],
+   "muscles": [
+    "chest",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "serratus",
+    "abs"
+   ],
+   "modality": "dumbbell",
+   "role": "working-set",
+   "demands": [
+    "overhead-rom",
+    "deep-knee-flexion",
+    "floor-to-stand"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3048,6 +4114,20 @@
    "fundFamily": null,
    "patterns": [
     "h-push"
+   ],
+   "muscles": [
+    "chest",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "serratus",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -3084,6 +4164,20 @@
    "patterns": [
     "straight-arm-push"
    ],
+   "muscles": [
+    "front-delt",
+    "serratus"
+   ],
+   "musclesAlso": [
+    "chest",
+    "biceps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "skill-practice",
+   "demands": [
+    "wrist-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3118,6 +4212,20 @@
    "fundFamily": null,
    "patterns": [
     "straight-arm-push"
+   ],
+   "muscles": [
+    "front-delt",
+    "serratus"
+   ],
+   "musclesAlso": [
+    "chest",
+    "biceps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -3154,6 +4262,18 @@
    "patterns": [
     "h-push"
    ],
+   "muscles": [
+    "triceps",
+    "chest"
+   ],
+   "musclesAlso": [
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
+   ],
    "art": {
     "file": "images/exercises/ring_dip.png",
     "status": "drawn"
@@ -3188,6 +4308,18 @@
    "fundFamily": null,
    "patterns": [
     "h-push"
+   ],
+   "muscles": [
+    "triceps",
+    "chest"
+   ],
+   "musclesAlso": [
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -3224,6 +4356,20 @@
    "patterns": [
     "straight-arm-push"
    ],
+   "muscles": [
+    "front-delt",
+    "serratus"
+   ],
+   "musclesAlso": [
+    "chest",
+    "biceps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "wrist-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3258,6 +4404,20 @@
    "fundFamily": null,
    "patterns": [
     "straight-arm-push"
+   ],
+   "muscles": [
+    "front-delt",
+    "serratus"
+   ],
+   "musclesAlso": [
+    "chest",
+    "biceps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "skill-practice",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -3294,6 +4454,20 @@
    "patterns": [
     "h-push"
    ],
+   "muscles": [
+    "chest",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "serratus",
+    "abs"
+   ],
+   "modality": "band",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3328,6 +4502,18 @@
    "fundFamily": null,
    "patterns": [
     "h-push"
+   ],
+   "muscles": [
+    "triceps",
+    "chest"
+   ],
+   "musclesAlso": [
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -3365,6 +4551,21 @@
    "patterns": [
     "v-push"
    ],
+   "muscles": [
+    "front-delt",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "chest",
+    "traps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "overhead-rom",
+    "inversion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3399,6 +4600,21 @@
    "fundFamily": null,
    "patterns": [
     "straight-arm-push"
+   ],
+   "muscles": [
+    "front-delt",
+    "serratus"
+   ],
+   "musclesAlso": [
+    "chest",
+    "biceps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "skill-practice",
+   "demands": [
+    "wrist-extension",
+    "deep-knee-flexion"
    ],
    "art": {
     "file": null,
@@ -3438,6 +4654,22 @@
     "squat",
     "v-push"
    ],
+   "muscles": [
+    "chest",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "serratus",
+    "abs"
+   ],
+   "modality": "dumbbell",
+   "role": "working-set",
+   "demands": [
+    "overhead-rom",
+    "deep-knee-flexion",
+    "floor-to-stand"
+   ],
    "art": {
     "file": "images/exercises/man_maker.png",
     "status": "drawn"
@@ -3472,6 +4704,20 @@
    "fundFamily": null,
    "patterns": [
     "h-push"
+   ],
+   "muscles": [
+    "chest",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "serratus",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -3508,6 +4754,20 @@
    "patterns": [
     "straight-arm-push"
    ],
+   "muscles": [
+    "front-delt",
+    "serratus"
+   ],
+   "musclesAlso": [
+    "chest",
+    "biceps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "wrist-extension"
+   ],
    "art": {
     "file": "images/exercises/pseudo_planche_push_up.png",
     "status": "drawn"
@@ -3542,6 +4802,18 @@
    "fundFamily": null,
    "patterns": [
     "h-push"
+   ],
+   "muscles": [
+    "triceps",
+    "chest"
+   ],
+   "musclesAlso": [
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -3578,6 +4850,20 @@
    "patterns": [
     "straight-arm-push"
    ],
+   "muscles": [
+    "front-delt",
+    "serratus"
+   ],
+   "musclesAlso": [
+    "chest",
+    "biceps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "skill-practice",
+   "demands": [
+    "wrist-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3612,6 +4898,20 @@
    "fundFamily": null,
    "patterns": [
     "straight-arm-push"
+   ],
+   "muscles": [
+    "front-delt",
+    "serratus"
+   ],
+   "musclesAlso": [
+    "chest",
+    "biceps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "skill-practice",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -3648,6 +4948,18 @@
    "patterns": [
     "straight-arm-push"
    ],
+   "muscles": [
+    "triceps",
+    "chest"
+   ],
+   "musclesAlso": [
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "wrist-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3682,6 +4994,21 @@
    "fundFamily": null,
    "patterns": [
     "v-push"
+   ],
+   "muscles": [
+    "front-delt",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "chest",
+    "traps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "overhead-rom",
+    "inversion"
    ],
    "art": {
     "file": null,
@@ -3718,6 +5045,22 @@
    "patterns": [
     "straight-arm-push"
    ],
+   "muscles": [
+    "front-delt",
+    "serratus"
+   ],
+   "musclesAlso": [
+    "chest",
+    "biceps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "overhead-rom",
+    "wrist-extension",
+    "inversion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3752,6 +5095,20 @@
    "fundFamily": null,
    "patterns": [
     "v-push"
+   ],
+   "muscles": [
+    "front-delt",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "chest",
+    "traps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "skill-practice",
+   "demands": [
+    "overhead-rom"
    ],
    "art": {
     "file": null,
@@ -3788,6 +5145,22 @@
    "patterns": [
     "v-push"
    ],
+   "muscles": [
+    "front-delt",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "chest",
+    "traps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "overhead-rom",
+    "wrist-extension",
+    "inversion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3822,6 +5195,22 @@
    "fundFamily": null,
    "patterns": [
     "straight-arm-push"
+   ],
+   "muscles": [
+    "front-delt",
+    "serratus"
+   ],
+   "musclesAlso": [
+    "chest",
+    "biceps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "overhead-rom",
+    "wrist-extension",
+    "inversion"
    ],
    "art": {
     "file": null,
@@ -3858,6 +5247,20 @@
    "patterns": [
     "straight-arm-push"
    ],
+   "muscles": [
+    "front-delt",
+    "serratus"
+   ],
+   "musclesAlso": [
+    "chest",
+    "biceps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "skill-practice",
+   "demands": [
+    "wrist-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3892,6 +5295,22 @@
    "fundFamily": null,
    "patterns": [
     "straight-arm-push"
+   ],
+   "muscles": [
+    "front-delt",
+    "serratus"
+   ],
+   "musclesAlso": [
+    "chest",
+    "biceps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "skill-practice",
+   "demands": [
+    "overhead-rom",
+    "wrist-extension",
+    "inversion"
    ],
    "art": {
     "file": null,
@@ -3928,6 +5347,20 @@
    "patterns": [
     "straight-arm-push"
    ],
+   "muscles": [
+    "front-delt",
+    "serratus"
+   ],
+   "musclesAlso": [
+    "chest",
+    "biceps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "skill-practice",
+   "demands": [
+    "wrist-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3962,6 +5395,20 @@
    "fundFamily": null,
    "patterns": [
     "straight-arm-push"
+   ],
+   "muscles": [
+    "front-delt",
+    "serratus"
+   ],
+   "musclesAlso": [
+    "chest",
+    "biceps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -3998,6 +5445,22 @@
    "patterns": [
     "v-push"
    ],
+   "muscles": [
+    "front-delt",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "chest",
+    "traps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "skill-practice",
+   "demands": [
+    "overhead-rom",
+    "wrist-extension",
+    "inversion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -4032,6 +5495,20 @@
    "fundFamily": null,
    "patterns": [
     "v-pull"
+   ],
+   "muscles": [
+    "grip",
+    "lat"
+   ],
+   "musclesAlso": [
+    "forearm",
+    "mid-back"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "grip",
+    "hang"
    ],
    "art": {
     "file": "images/exercises/active_hang.png",
@@ -4081,6 +5558,16 @@
    "patterns": [
     "h-pull"
    ],
+   "muscles": [
+    "rear-delt"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "traps"
+   ],
+   "modality": "band",
+   "role": "joint-prep, activation",
+   "demands": [],
    "art": {
     "file": "images/exercises/banded_pullapart.png",
     "status": "drawn"
@@ -4128,6 +5615,20 @@
    "fundFamily": "carry-grip",
    "patterns": [
     "v-pull"
+   ],
+   "muscles": [
+    "grip",
+    "lat"
+   ],
+   "musclesAlso": [
+    "forearm",
+    "mid-back"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "grip",
+    "hang"
    ],
    "art": {
     "file": "images/exercises/dead_hang.png",
@@ -4184,6 +5685,18 @@
    "patterns": [
     "h-pull"
    ],
+   "muscles": [
+    "mid-back",
+    "lat"
+   ],
+   "musclesAlso": [
+    "biceps",
+    "rear-delt",
+    "grip"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -4229,6 +5742,21 @@
    "patterns": [
     "v-pull"
    ],
+   "muscles": [
+    "lat",
+    "biceps"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "grip",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "joint-prep, activation",
+   "demands": [
+    "grip",
+    "hang"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -4263,6 +5791,21 @@
    "fundFamily": null,
    "patterns": [
     "h-pull"
+   ],
+   "muscles": [
+    "mid-back",
+    "lat"
+   ],
+   "musclesAlso": [
+    "biceps",
+    "rear-delt",
+    "grip"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "grip",
+    "hang"
    ],
    "art": {
     "file": null,
@@ -4311,6 +5854,21 @@
    "patterns": [
     "v-pull"
    ],
+   "muscles": [
+    "lat",
+    "biceps"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "grip",
+    "abs"
+   ],
+   "modality": "band",
+   "role": "working-set",
+   "demands": [
+    "grip",
+    "hang"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -4347,6 +5905,22 @@
     "v-pull",
     "jump"
    ],
+   "muscles": [
+    "lat",
+    "biceps"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "grip",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "grip",
+    "hang",
+    "impact"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -4381,6 +5955,21 @@
    "fundFamily": null,
    "patterns": [
     "v-pull"
+   ],
+   "muscles": [
+    "lat",
+    "biceps"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "grip",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "grip",
+    "hang"
    ],
    "art": {
     "file": null,
@@ -4418,6 +6007,18 @@
    "patterns": [
     "h-pull"
    ],
+   "muscles": [
+    "mid-back",
+    "lat"
+   ],
+   "musclesAlso": [
+    "biceps",
+    "rear-delt",
+    "grip"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -4454,6 +6055,18 @@
    "patterns": [
     "straight-arm-pull"
    ],
+   "muscles": [
+    "lat",
+    "abs"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "biceps",
+    "grip"
+   ],
+   "modality": "band",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -4490,6 +6103,21 @@
    "patterns": [
     "straight-arm-pull"
    ],
+   "muscles": [
+    "lat",
+    "abs"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "biceps",
+    "grip"
+   ],
+   "modality": "band",
+   "role": "skill-practice",
+   "demands": [
+    "grip",
+    "hang"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -4524,6 +6152,21 @@
    "fundFamily": null,
    "patterns": [
     "v-pull"
+   ],
+   "muscles": [
+    "lat",
+    "biceps"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "grip",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "grip",
+    "hang"
    ],
    "art": {
     "file": "images/exercises/chin_up.png",
@@ -4561,6 +6204,21 @@
    "patterns": [
     "v-pull"
    ],
+   "muscles": [
+    "lat",
+    "biceps"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "grip",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "grip",
+    "hang"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -4597,6 +6255,18 @@
    "patterns": [
     "h-pull"
    ],
+   "muscles": [
+    "mid-back",
+    "lat"
+   ],
+   "musclesAlso": [
+    "biceps",
+    "rear-delt",
+    "grip"
+   ],
+   "modality": "dumbbell",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -4646,6 +6316,20 @@
    "patterns": [
     "h-pull"
    ],
+   "muscles": [
+    "mid-back",
+    "lat"
+   ],
+   "musclesAlso": [
+    "biceps",
+    "rear-delt",
+    "grip"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "inversion"
+   ],
    "art": {
     "file": "images/exercises/wide_inverted_row.png",
     "status": "drawn"
@@ -4694,6 +6378,18 @@
    "patterns": [
     "h-pull"
    ],
+   "muscles": [
+    "mid-back",
+    "lat"
+   ],
+   "musclesAlso": [
+    "biceps",
+    "rear-delt",
+    "grip"
+   ],
+   "modality": "barbell",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": "images/exercises/bent_over_row.png",
     "status": "drawn"
@@ -4731,6 +6427,18 @@
    "patterns": [
     "h-pull"
    ],
+   "muscles": [
+    "mid-back",
+    "lat"
+   ],
+   "musclesAlso": [
+    "biceps",
+    "rear-delt",
+    "grip"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -4778,6 +6486,21 @@
    "fundFamily": "v-pull",
    "patterns": [
     "v-pull"
+   ],
+   "muscles": [
+    "lat",
+    "biceps"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "grip",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "grip",
+    "hang"
    ],
    "art": {
     "file": "images/exercises/pullup.png",
@@ -4835,6 +6558,18 @@
    "patterns": [
     "h-pull"
    ],
+   "muscles": [
+    "mid-back",
+    "lat"
+   ],
+   "musclesAlso": [
+    "biceps",
+    "rear-delt",
+    "grip"
+   ],
+   "modality": "dumbbell",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -4869,6 +6604,21 @@
    "fundFamily": null,
    "patterns": [
     "straight-arm-pull"
+   ],
+   "muscles": [
+    "lat",
+    "abs"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "biceps",
+    "grip"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "hang",
+    "inversion"
    ],
    "art": {
     "file": null,
@@ -4905,6 +6655,20 @@
    "patterns": [
     "v-pull"
    ],
+   "muscles": [
+    "grip",
+    "lat"
+   ],
+   "musclesAlso": [
+    "forearm",
+    "mid-back"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "grip",
+    "hang"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -4939,6 +6703,21 @@
    "fundFamily": null,
    "patterns": [
     "straight-arm-pull"
+   ],
+   "muscles": [
+    "lat",
+    "abs"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "biceps",
+    "grip"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "grip",
+    "hang"
    ],
    "art": {
     "file": null,
@@ -4975,6 +6754,21 @@
    "patterns": [
     "v-pull"
    ],
+   "muscles": [
+    "lat",
+    "biceps"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "grip",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "grip",
+    "hang"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5010,6 +6804,18 @@
    "patterns": [
     "straight-arm-pull"
    ],
+   "muscles": [
+    "lat",
+    "abs"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "biceps",
+    "grip"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -5046,6 +6852,21 @@
    "patterns": [
     "straight-arm-pull"
    ],
+   "muscles": [
+    "lat",
+    "abs"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "biceps",
+    "grip"
+   ],
+   "modality": "bodyweight",
+   "role": "skill-practice",
+   "demands": [
+    "grip",
+    "hang"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5081,6 +6902,18 @@
    "patterns": [
     "h-pull"
    ],
+   "muscles": [
+    "mid-back",
+    "lat"
+   ],
+   "musclesAlso": [
+    "biceps",
+    "rear-delt",
+    "grip"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -5115,6 +6948,21 @@
    "fundFamily": null,
    "patterns": [
     "v-pull"
+   ],
+   "muscles": [
+    "lat",
+    "biceps"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "grip",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "grip",
+    "hang"
    ],
    "art": {
     "file": null,
@@ -5151,6 +6999,21 @@
    "patterns": [
     "v-pull"
    ],
+   "muscles": [
+    "lat",
+    "biceps"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "grip",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "grip",
+    "hang"
+   ],
    "art": {
     "file": "images/exercises/explosive_chinup.png",
     "status": "drawn"
@@ -5185,6 +7048,21 @@
    "fundFamily": null,
    "patterns": [
     "v-pull"
+   ],
+   "muscles": [
+    "lat",
+    "biceps"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "grip",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "grip",
+    "hang"
    ],
    "art": {
     "file": null,
@@ -5222,6 +7100,20 @@
    "patterns": [
     "straight-arm-pull"
    ],
+   "muscles": [
+    "grip",
+    "lat"
+   ],
+   "musclesAlso": [
+    "forearm",
+    "mid-back"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "grip",
+    "hang"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5258,6 +7150,21 @@
     "hinge",
     "h-pull"
    ],
+   "muscles": [
+    "hamstring",
+    "glute"
+   ],
+   "musclesAlso": [
+    "lower-back",
+    "grip"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "hip-hinge",
+    "grip",
+    "hang"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5292,6 +7199,20 @@
    "fundFamily": null,
    "patterns": [
     "v-pull"
+   ],
+   "muscles": [
+    "lat",
+    "biceps"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "grip",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "grip"
    ],
    "art": {
     "file": null,
@@ -5328,6 +7249,18 @@
    "patterns": [
     "h-pull"
    ],
+   "muscles": [
+    "mid-back",
+    "lat"
+   ],
+   "musclesAlso": [
+    "biceps",
+    "rear-delt",
+    "grip"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -5362,6 +7295,21 @@
    "fundFamily": null,
    "patterns": [
     "v-pull"
+   ],
+   "muscles": [
+    "lat",
+    "biceps"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "grip",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "grip",
+    "hang"
    ],
    "art": {
     "file": null,
@@ -5399,6 +7347,21 @@
    "patterns": [
     "v-pull"
    ],
+   "muscles": [
+    "lat",
+    "biceps"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "grip",
+    "abs"
+   ],
+   "modality": "band",
+   "role": "skill-practice",
+   "demands": [
+    "grip",
+    "hang"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5433,6 +7396,21 @@
    "fundFamily": null,
    "patterns": [
     "v-pull"
+   ],
+   "muscles": [
+    "lat",
+    "biceps"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "grip",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "grip",
+    "hang"
    ],
    "art": {
     "file": "images/exercises/chest_to_bar.png",
@@ -5469,6 +7447,22 @@
    "patterns": [
     "v-pull"
    ],
+   "muscles": [
+    "lat",
+    "biceps"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "grip",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "deep-knee-flexion",
+    "grip",
+    "hang"
+   ],
    "art": {
     "file": "images/exercises/l_sit_pullup.png",
     "status": "drawn"
@@ -5503,6 +7497,21 @@
    "fundFamily": null,
    "patterns": [
     "v-pull"
+   ],
+   "muscles": [
+    "lat",
+    "biceps"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "grip",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "grip",
+    "hang"
    ],
    "art": {
     "file": null,
@@ -5539,6 +7548,20 @@
    "patterns": [
     "v-pull"
    ],
+   "muscles": [
+    "grip",
+    "lat"
+   ],
+   "musclesAlso": [
+    "forearm",
+    "mid-back"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "grip",
+    "hang"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5574,6 +7597,18 @@
    "patterns": [
     "straight-arm-pull"
    ],
+   "muscles": [
+    "lat",
+    "abs"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "biceps",
+    "grip"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -5609,6 +7644,21 @@
    "patterns": [
     "straight-arm-pull"
    ],
+   "muscles": [
+    "lat",
+    "abs"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "biceps",
+    "grip"
+   ],
+   "modality": "bodyweight",
+   "role": "skill-practice",
+   "demands": [
+    "grip",
+    "hang"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5643,6 +7693,21 @@
    "fundFamily": null,
    "patterns": [
     "straight-arm-pull"
+   ],
+   "muscles": [
+    "lat",
+    "abs"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "biceps",
+    "grip"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "hang",
+    "inversion"
    ],
    "art": {
     "file": null,
@@ -5680,6 +7745,21 @@
    "patterns": [
     "v-pull"
    ],
+   "muscles": [
+    "lat",
+    "biceps"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "grip",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "grip",
+    "hang"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5714,6 +7794,21 @@
    "fundFamily": null,
    "patterns": [
     "v-pull"
+   ],
+   "muscles": [
+    "lat",
+    "biceps"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "grip",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "grip",
+    "hang"
    ],
    "art": {
     "file": null,
@@ -5750,6 +7845,21 @@
    "patterns": [
     "v-pull"
    ],
+   "muscles": [
+    "lat",
+    "biceps"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "grip",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "grip",
+    "hang"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5784,6 +7894,21 @@
    "fundFamily": null,
    "patterns": [
     "v-pull"
+   ],
+   "muscles": [
+    "lat",
+    "biceps"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "grip",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "grip",
+    "hang"
    ],
    "art": {
     "file": null,
@@ -5820,6 +7945,21 @@
    "patterns": [
     "straight-arm-pull"
    ],
+   "muscles": [
+    "lat",
+    "abs"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "biceps",
+    "grip"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "grip",
+    "hang"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5855,6 +7995,18 @@
    "patterns": [
     "straight-arm-pull"
    ],
+   "muscles": [
+    "lat",
+    "abs"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "biceps",
+    "grip"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -5890,6 +8042,18 @@
    "patterns": [
     "straight-arm-pull"
    ],
+   "muscles": [
+    "lat",
+    "abs"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "biceps",
+    "grip"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -5924,6 +8088,21 @@
    "fundFamily": null,
    "patterns": [
     "straight-arm-pull"
+   ],
+   "muscles": [
+    "lat",
+    "abs"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "biceps",
+    "grip"
+   ],
+   "modality": "bodyweight",
+   "role": "skill-practice",
+   "demands": [
+    "grip",
+    "hang"
    ],
    "art": {
     "file": null,
@@ -5960,6 +8139,21 @@
    "patterns": [
     "v-pull"
    ],
+   "muscles": [
+    "lat",
+    "biceps"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "grip",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "grip",
+    "hang"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5994,6 +8188,21 @@
    "fundFamily": null,
    "patterns": [
     "straight-arm-pull"
+   ],
+   "muscles": [
+    "lat",
+    "abs"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "biceps",
+    "grip"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "grip",
+    "hang"
    ],
    "art": {
     "file": null,
@@ -6030,6 +8239,18 @@
    "patterns": [
     "straight-arm-pull"
    ],
+   "muscles": [
+    "lat",
+    "abs"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "biceps",
+    "grip"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -6066,6 +8287,21 @@
    "patterns": [
     "straight-arm-pull"
    ],
+   "muscles": [
+    "lat",
+    "abs"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "biceps",
+    "grip"
+   ],
+   "modality": "bodyweight",
+   "role": "skill-practice",
+   "demands": [
+    "grip",
+    "hang"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -6100,6 +8336,21 @@
    "fundFamily": null,
    "patterns": [
     "v-pull"
+   ],
+   "muscles": [
+    "lat",
+    "biceps"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "grip",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "grip",
+    "hang"
    ],
    "art": {
     "file": "images/exercises/muscle_up_bar.png",
@@ -6136,6 +8387,21 @@
    "patterns": [
     "v-pull"
    ],
+   "muscles": [
+    "lat",
+    "biceps"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "grip",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "grip",
+    "hang"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -6170,6 +8436,21 @@
    "fundFamily": null,
    "patterns": [
     "v-pull"
+   ],
+   "muscles": [
+    "lat",
+    "biceps"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "grip",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "grip",
+    "hang"
    ],
    "art": {
     "file": null,
@@ -6206,6 +8487,21 @@
    "patterns": [
     "v-pull"
    ],
+   "muscles": [
+    "lat",
+    "biceps"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "grip",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "grip",
+    "hang"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -6241,6 +8537,16 @@
    "patterns": [
     "flexion"
    ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "hip-flexor",
+    "obliques"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -6275,6 +8581,18 @@
    "fundFamily": null,
    "patterns": [
     "anti-extension"
+   ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "obliques",
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -6311,6 +8629,16 @@
    "patterns": [
     "flexion"
    ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "hip-flexor",
+    "obliques"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -6345,6 +8673,18 @@
    "fundFamily": null,
    "patterns": [
     "anti-extension"
+   ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "obliques",
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -6381,6 +8721,16 @@
    "patterns": [
     "anti-extension"
    ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "obliques",
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -6416,6 +8766,16 @@
    "patterns": [
     "anti-rotation"
    ],
+   "muscles": [
+    "obliques",
+    "abs"
+   ],
+   "musclesAlso": [
+    "glute"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": "images/exercises/bird_dog.png",
     "status": "drawn"
@@ -6464,6 +8824,16 @@
    "patterns": [
     "anti-extension"
    ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "obliques",
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": "images/exercises/dead_bug.png",
     "status": "drawn"
@@ -6499,6 +8869,16 @@
    "patterns": [
     "anti-extension"
    ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "obliques",
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -6533,6 +8913,19 @@
    "fundFamily": null,
    "patterns": [
     "compression"
+   ],
+   "muscles": [
+    "abs",
+    "hip-flexor"
+   ],
+   "musclesAlso": [
+    "quad",
+    "triceps"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "deep-knee-flexion"
    ],
    "art": {
     "file": null,
@@ -6569,6 +8962,16 @@
    "patterns": [
     "flexion"
    ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "hip-flexor",
+    "obliques"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -6604,6 +9007,16 @@
    "patterns": [
     "anti-extension"
    ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "obliques",
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -6638,6 +9051,18 @@
    "fundFamily": null,
    "patterns": [
     "flexion"
+   ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "hip-flexor",
+    "obliques"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "deep-knee-flexion"
    ],
    "art": {
     "file": null,
@@ -6674,6 +9099,16 @@
    "patterns": [
     "extension"
    ],
+   "muscles": [
+    "lower-back",
+    "glute"
+   ],
+   "musclesAlso": [
+    "hamstring"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -6709,6 +9144,16 @@
    "patterns": [
     "flexion"
    ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "hip-flexor",
+    "obliques"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -6743,6 +9188,19 @@
    "fundFamily": null,
    "patterns": [
     "compression"
+   ],
+   "muscles": [
+    "abs",
+    "hip-flexor"
+   ],
+   "musclesAlso": [
+    "quad",
+    "triceps"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "deep-knee-flexion"
    ],
    "art": {
     "file": null,
@@ -6779,6 +9237,18 @@
    "patterns": [
     "anti-rotation"
    ],
+   "muscles": [
+    "obliques",
+    "abs"
+   ],
+   "musclesAlso": [
+    "glute"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -6814,6 +9284,16 @@
    "patterns": [
     "anti-lateral-flexion"
    ],
+   "muscles": [
+    "obliques"
+   ],
+   "musclesAlso": [
+    "abs",
+    "glute"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -6849,6 +9329,16 @@
    "patterns": [
     "anti-extension"
    ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "obliques",
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -6896,6 +9386,18 @@
    "fundFamily": null,
    "patterns": [
     "anti-extension"
+   ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "obliques",
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": "images/exercises/forearm_plank.png",
@@ -6962,6 +9464,20 @@
    "patterns": [
     "flexion"
    ],
+   "muscles": [
+    "grip",
+    "lat"
+   ],
+   "musclesAlso": [
+    "forearm",
+    "mid-back"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "grip",
+    "hang"
+   ],
    "art": {
     "file": "images/exercises/hanging_knee_raise.png",
     "status": "drawn"
@@ -6996,6 +9512,18 @@
    "fundFamily": null,
    "patterns": [
     "anti-extension"
+   ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "obliques",
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -7032,6 +9560,16 @@
    "patterns": [
     "flexion"
    ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "hip-flexor",
+    "obliques"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -7080,6 +9618,16 @@
    "patterns": [
     "anti-extension"
    ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "obliques",
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": "images/exercises/hollow_hold.png",
     "status": "drawn"
@@ -7115,6 +9663,16 @@
    "patterns": [
     "flexion"
    ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "hip-flexor",
+    "obliques"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -7150,6 +9708,16 @@
    "patterns": [
     "anti-lateral-flexion"
    ],
+   "muscles": [
+    "obliques"
+   ],
+   "musclesAlso": [
+    "abs",
+    "glute"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -7198,6 +9766,18 @@
    "patterns": [
     "anti-lateral-flexion"
    ],
+   "muscles": [
+    "obliques"
+   ],
+   "musclesAlso": [
+    "abs",
+    "glute"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -7233,6 +9813,16 @@
    "patterns": [
     "flexion"
    ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "hip-flexor",
+    "obliques"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -7267,6 +9857,18 @@
    "fundFamily": null,
    "patterns": [
     "anti-rotation"
+   ],
+   "muscles": [
+    "obliques",
+    "abs"
+   ],
+   "musclesAlso": [
+    "glute"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -7303,6 +9905,18 @@
    "patterns": [
     "anti-rotation"
    ],
+   "muscles": [
+    "obliques",
+    "abs"
+   ],
+   "musclesAlso": [
+    "glute"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -7337,6 +9951,18 @@
    "fundFamily": null,
    "patterns": [
     "anti-extension"
+   ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "obliques",
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "inversion"
    ],
    "art": {
     "file": null,
@@ -7373,6 +9999,20 @@
    "patterns": [
     "compression"
    ],
+   "muscles": [
+    "abs",
+    "hip-flexor"
+   ],
+   "musclesAlso": [
+    "quad",
+    "triceps"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "overhead-rom",
+    "wrist-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -7407,6 +10047,18 @@
    "fundFamily": null,
    "patterns": [
     "anti-extension"
+   ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "obliques",
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -7443,6 +10095,19 @@
    "patterns": [
     "anti-rotation"
    ],
+   "muscles": [
+    "obliques",
+    "abs"
+   ],
+   "musclesAlso": [
+    "glute"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension",
+    "deep-knee-flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -7477,6 +10142,18 @@
    "fundFamily": null,
    "patterns": [
     "anti-extension"
+   ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "obliques",
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -7513,6 +10190,16 @@
    "patterns": [
     "flexion"
    ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "hip-flexor",
+    "obliques"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -7548,6 +10235,17 @@
    "patterns": [
     "compression"
    ],
+   "muscles": [
+    "abs",
+    "hip-flexor"
+   ],
+   "musclesAlso": [
+    "quad",
+    "triceps"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -7582,6 +10280,19 @@
    "fundFamily": null,
    "patterns": [
     "compression"
+   ],
+   "muscles": [
+    "abs",
+    "hip-flexor"
+   ],
+   "musclesAlso": [
+    "quad",
+    "triceps"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "deep-knee-flexion"
    ],
    "art": {
     "file": null,
@@ -7618,6 +10329,19 @@
    "patterns": [
     "compression"
    ],
+   "muscles": [
+    "abs",
+    "hip-flexor"
+   ],
+   "musclesAlso": [
+    "quad",
+    "triceps"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "deep-knee-flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -7653,6 +10377,16 @@
    "patterns": [
     "flexion"
    ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "hip-flexor",
+    "obliques"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -7688,6 +10422,16 @@
    "patterns": [
     "flexion"
    ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "hip-flexor",
+    "obliques"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": "images/exercises/bird_dog_crunch.png",
     "status": "drawn"
@@ -7723,6 +10467,16 @@
    "patterns": [
     "anti-extension"
    ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "obliques",
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": "images/exercises/dragon_flag.png",
     "status": "drawn"
@@ -7757,6 +10511,18 @@
    "fundFamily": null,
    "patterns": [
     "anti-extension"
+   ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "obliques",
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -7793,6 +10559,20 @@
    "patterns": [
     "flexion"
    ],
+   "muscles": [
+    "grip",
+    "lat"
+   ],
+   "musclesAlso": [
+    "forearm",
+    "mid-back"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "grip",
+    "hang"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -7828,6 +10608,16 @@
    "patterns": [
     "anti-extension"
    ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "obliques",
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": "images/exercises/hollow_rocks.png",
     "status": "drawn"
@@ -7862,6 +10652,20 @@
    "fundFamily": null,
    "patterns": [
     "anti-extension"
+   ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "obliques",
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension",
+    "grip",
+    "hang"
    ],
    "art": {
     "file": null,
@@ -7898,6 +10702,18 @@
    "patterns": [
     "anti-extension"
    ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "obliques",
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -7932,6 +10748,18 @@
    "fundFamily": null,
    "patterns": [
     "anti-extension"
+   ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "obliques",
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -7968,6 +10796,18 @@
    "patterns": [
     "anti-lateral-flexion"
    ],
+   "muscles": [
+    "triceps",
+    "chest"
+   ],
+   "musclesAlso": [
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -8002,6 +10842,18 @@
    "fundFamily": null,
    "patterns": [
     "anti-lateral-flexion"
+   ],
+   "muscles": [
+    "obliques"
+   ],
+   "musclesAlso": [
+    "abs",
+    "glute"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -8038,6 +10890,18 @@
    "patterns": [
     "anti-extension"
    ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "obliques",
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -8073,6 +10937,16 @@
    "patterns": [
     "anti-extension"
    ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "obliques",
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -8107,6 +10981,18 @@
    "fundFamily": null,
    "patterns": [
     "anti-lateral-flexion"
+   ],
+   "muscles": [
+    "obliques"
+   ],
+   "musclesAlso": [
+    "abs",
+    "glute"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -8143,6 +11029,19 @@
    "patterns": [
     "compression"
    ],
+   "muscles": [
+    "abs",
+    "hip-flexor"
+   ],
+   "musclesAlso": [
+    "quad",
+    "triceps"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "deep-knee-flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -8177,6 +11076,19 @@
    "fundFamily": "core-dynamic",
    "patterns": [
     "compression"
+   ],
+   "muscles": [
+    "abs",
+    "hip-flexor"
+   ],
+   "musclesAlso": [
+    "quad",
+    "triceps"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "deep-knee-flexion"
    ],
    "art": {
     "file": null,
@@ -8213,6 +11125,19 @@
    "patterns": [
     "compression"
    ],
+   "muscles": [
+    "abs",
+    "hip-flexor"
+   ],
+   "musclesAlso": [
+    "quad",
+    "triceps"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "deep-knee-flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -8247,6 +11172,18 @@
    "fundFamily": null,
    "patterns": [
     "anti-extension"
+   ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "obliques",
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -8283,6 +11220,16 @@
    "patterns": [
     "anti-extension"
    ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "obliques",
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -8317,6 +11264,19 @@
    "fundFamily": null,
    "patterns": [
     "compression"
+   ],
+   "muscles": [
+    "abs",
+    "hip-flexor"
+   ],
+   "musclesAlso": [
+    "quad",
+    "triceps"
+   ],
+   "modality": "bodyweight",
+   "role": "skill-practice",
+   "demands": [
+    "deep-knee-flexion"
    ],
    "art": {
     "file": null,
@@ -8353,6 +11313,18 @@
    "patterns": [
     "flexion"
    ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "hip-flexor",
+    "obliques"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "grip"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -8388,6 +11360,16 @@
    "patterns": [
     "anti-extension"
    ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "obliques",
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -8422,6 +11404,21 @@
    "fundFamily": null,
    "patterns": [
     "flexion"
+   ],
+   "muscles": [
+    "grip",
+    "lat"
+   ],
+   "musclesAlso": [
+    "forearm",
+    "mid-back"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "grip",
+    "hang",
+    "inversion"
    ],
    "art": {
     "file": null,
@@ -8458,6 +11455,18 @@
    "patterns": [
     "anti-lateral-flexion"
    ],
+   "muscles": [
+    "obliques"
+   ],
+   "musclesAlso": [
+    "abs",
+    "glute"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -8492,6 +11501,19 @@
    "fundFamily": null,
    "patterns": [
     "compression"
+   ],
+   "muscles": [
+    "abs",
+    "hip-flexor"
+   ],
+   "musclesAlso": [
+    "quad",
+    "triceps"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "deep-knee-flexion"
    ],
    "art": {
     "file": null,
@@ -8528,6 +11550,19 @@
    "patterns": [
     "compression"
    ],
+   "muscles": [
+    "abs",
+    "hip-flexor"
+   ],
+   "musclesAlso": [
+    "quad",
+    "triceps"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "deep-knee-flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -8562,6 +11597,18 @@
    "fundFamily": null,
    "patterns": [
     "anti-extension"
+   ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "obliques",
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -8598,6 +11645,16 @@
    "patterns": [
     "anti-extension"
    ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "obliques",
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -8632,6 +11689,18 @@
    "fundFamily": null,
    "patterns": [
     "anti-lateral-flexion"
+   ],
+   "muscles": [
+    "obliques"
+   ],
+   "musclesAlso": [
+    "abs",
+    "glute"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -8668,6 +11737,19 @@
    "patterns": [
     "compression"
    ],
+   "muscles": [
+    "abs",
+    "hip-flexor"
+   ],
+   "musclesAlso": [
+    "quad",
+    "triceps"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "deep-knee-flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -8703,6 +11785,16 @@
    "patterns": [
     "anti-lateral-flexion"
    ],
+   "muscles": [
+    "obliques"
+   ],
+   "musclesAlso": [
+    "abs",
+    "glute"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -8737,6 +11829,18 @@
    "fundFamily": null,
    "patterns": [
     "anti-extension"
+   ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "obliques",
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -8773,6 +11877,19 @@
    "patterns": [
     "compression"
    ],
+   "muscles": [
+    "abs",
+    "hip-flexor"
+   ],
+   "musclesAlso": [
+    "quad",
+    "triceps"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "deep-knee-flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -8808,6 +11925,18 @@
    "patterns": [
     "anti-extension"
    ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "obliques",
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "inversion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -8842,6 +11971,20 @@
    "fundFamily": null,
    "patterns": [
     "v-push"
+   ],
+   "muscles": [
+    "front-delt",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "chest",
+    "traps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "skill-practice",
+   "demands": [
+    "overhead-rom"
    ],
    "art": {
     "file": "images/exercises/handstand.png",
@@ -8879,6 +12022,21 @@
    "patterns": [
     "straight-arm-pull"
    ],
+   "muscles": [
+    "lat",
+    "abs"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "biceps",
+    "grip"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "grip",
+    "hang"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -8914,6 +12072,20 @@
    "patterns": [
     "v-push"
    ],
+   "muscles": [
+    "front-delt",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "chest",
+    "traps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "overhead-rom"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -8948,6 +12120,22 @@
    "fundFamily": null,
    "patterns": [
     "v-push"
+   ],
+   "muscles": [
+    "front-delt",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "chest",
+    "traps",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, skill-strength",
+   "demands": [
+    "overhead-rom",
+    "wrist-extension",
+    "inversion"
    ],
    "art": {
     "file": null,
@@ -8997,6 +12185,17 @@
    "patterns": [
     "locomotion"
    ],
+   "muscles": [
+    "abs",
+    "quad"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "calf"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, conditioning",
+   "demands": [],
    "art": {
     "file": "images/exercises/mountain_climber.png",
     "status": "drawn"
@@ -9054,6 +12253,23 @@
     "h-push",
     "jump"
    ],
+   "muscles": [
+    "quad",
+    "glute"
+   ],
+   "musclesAlso": [
+    "abs",
+    "lower-back",
+    "calf"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, conditioning",
+   "demands": [
+    "wrist-extension",
+    "deep-knee-flexion",
+    "impact",
+    "floor-to-stand"
+   ],
    "art": {
     "file": null,
     "status": "source",
@@ -9088,6 +12304,11 @@
    "fundamental": false,
    "fundFamily": null,
    "patterns": [],
+   "muscles": [],
+   "musclesAlso": [],
+   "modality": "bodyweight",
+   "role": "joint-prep",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -9134,6 +12355,11 @@
    "fundamental": false,
    "fundFamily": null,
    "patterns": [],
+   "muscles": [],
+   "musclesAlso": [],
+   "modality": "bodyweight",
+   "role": "joint-prep, activation",
+   "demands": [],
    "art": {
     "file": "images/exercises/cat_cow.png",
     "status": "drawn"
@@ -9178,6 +12404,13 @@
    "fundamental": false,
    "fundFamily": null,
    "patterns": [],
+   "muscles": [],
+   "musclesAlso": [],
+   "modality": "bodyweight",
+   "role": "joint-prep, activation",
+   "demands": [
+    "deep-knee-flexion"
+   ],
    "art": {
     "file": "images/exercises/deep_squat_rock.png",
     "status": "drawn"
@@ -9211,6 +12444,11 @@
    "fundamental": false,
    "fundFamily": null,
    "patterns": [],
+   "muscles": [],
+   "musclesAlso": [],
+   "modality": "bodyweight",
+   "role": "joint-prep, activation",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -9244,6 +12482,11 @@
    "fundamental": false,
    "fundFamily": null,
    "patterns": [],
+   "muscles": [],
+   "musclesAlso": [],
+   "modality": "bodyweight",
+   "role": "joint-prep",
+   "demands": [],
    "art": {
     "file": "images/exercises/hip_cars.png",
     "status": "drawn"
@@ -9277,6 +12520,11 @@
    "fundamental": false,
    "fundFamily": null,
    "patterns": [],
+   "muscles": [],
+   "musclesAlso": [],
+   "modality": "bodyweight",
+   "role": "joint-prep, activation",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -9312,6 +12560,19 @@
    "patterns": [
     "hinge"
    ],
+   "muscles": [
+    "hamstring",
+    "glute"
+   ],
+   "musclesAlso": [
+    "lower-back",
+    "grip"
+   ],
+   "modality": "bodyweight",
+   "role": "joint-prep",
+   "demands": [
+    "hip-hinge"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -9345,6 +12606,13 @@
    "fundamental": false,
    "fundFamily": null,
    "patterns": [],
+   "muscles": [],
+   "musclesAlso": [],
+   "modality": "bodyweight",
+   "role": "joint-prep, activation",
+   "demands": [
+    "overhead-rom"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -9378,6 +12646,11 @@
    "fundamental": false,
    "fundFamily": null,
    "patterns": [],
+   "muscles": [],
+   "musclesAlso": [],
+   "modality": "bodyweight",
+   "role": "joint-prep",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -9411,6 +12684,11 @@
    "fundamental": false,
    "fundFamily": null,
    "patterns": [],
+   "muscles": [],
+   "musclesAlso": [],
+   "modality": "bodyweight",
+   "role": "joint-prep",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -9459,6 +12737,19 @@
    "patterns": [
     "hinge"
    ],
+   "muscles": [
+    "hamstring",
+    "glute"
+   ],
+   "musclesAlso": [
+    "lower-back",
+    "grip"
+   ],
+   "modality": "kettlebell",
+   "role": "working-set",
+   "demands": [
+    "hip-hinge"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -9506,6 +12797,19 @@
    "fundFamily": null,
    "patterns": [
     "hinge"
+   ],
+   "muscles": [
+    "hamstring",
+    "glute"
+   ],
+   "musclesAlso": [
+    "lower-back",
+    "grip"
+   ],
+   "modality": "kettlebell",
+   "role": "working-set",
+   "demands": [
+    "hip-hinge"
    ],
    "art": {
     "file": null,
@@ -9557,6 +12861,20 @@
    "patterns": [
     "h-push"
    ],
+   "muscles": [
+    "chest",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "serratus",
+    "abs"
+   ],
+   "modality": "kettlebell",
+   "role": "working-set",
+   "demands": [
+    "overhead-rom"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -9604,6 +12922,20 @@
    "fundFamily": null,
    "patterns": [
     "v-push"
+   ],
+   "muscles": [
+    "front-delt",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "chest",
+    "traps",
+    "abs"
+   ],
+   "modality": "kettlebell",
+   "role": "working-set",
+   "demands": [
+    "overhead-rom"
    ],
    "art": {
     "file": null,
@@ -9653,6 +12985,19 @@
     "hinge",
     "h-pull"
    ],
+   "muscles": [
+    "hamstring",
+    "glute"
+   ],
+   "musclesAlso": [
+    "lower-back",
+    "grip"
+   ],
+   "modality": "kettlebell",
+   "role": "working-set",
+   "demands": [
+    "hip-hinge"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -9699,6 +13044,13 @@
    "fundamental": false,
    "fundFamily": null,
    "patterns": [],
+   "muscles": [],
+   "musclesAlso": [],
+   "modality": "kettlebell",
+   "role": "joint-prep, activation",
+   "demands": [
+    "overhead-rom"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -9747,6 +13099,16 @@
    "patterns": [
     "anti-extension"
    ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "obliques",
+    "front-delt"
+   ],
+   "modality": "kettlebell",
+   "role": "working-set, conditioning",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -9795,6 +13157,17 @@
    "patterns": [
     "carry"
    ],
+   "muscles": [
+    "grip",
+    "abs"
+   ],
+   "musclesAlso": [
+    "traps",
+    "glute"
+   ],
+   "modality": "kettlebell",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -9842,6 +13215,11 @@
    "fundamental": false,
    "fundFamily": null,
    "patterns": [],
+   "muscles": [],
+   "musclesAlso": [],
+   "modality": null,
+   "role": null,
+   "demands": [],
    "art": {
     "file": "images/exercises/turkish_getup.png",
     "status": "drawn"
@@ -9888,6 +13266,13 @@
    "fundamental": false,
    "fundFamily": null,
    "patterns": [],
+   "muscles": [],
+   "musclesAlso": [],
+   "modality": "kettlebell",
+   "role": "joint-prep, activation",
+   "demands": [
+    "deep-knee-flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -9935,6 +13320,18 @@
    "fundFamily": null,
    "patterns": [
     "hinge"
+   ],
+   "muscles": [
+    "glute"
+   ],
+   "musclesAlso": [
+    "hamstring",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "hip-hinge"
    ],
    "art": {
     "file": null,
@@ -9984,6 +13381,20 @@
    "patterns": [
     "squat"
    ],
+   "muscles": [
+    "quad",
+    "glute"
+   ],
+   "musclesAlso": [
+    "abs",
+    "lower-back",
+    "calf"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "deep-knee-flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -10029,6 +13440,17 @@
    "patterns": [
     "locomotion"
    ],
+   "muscles": [
+    "abs",
+    "quad"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "calf"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, conditioning",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -10063,6 +13485,19 @@
    "fundFamily": null,
    "patterns": [
     "h-push"
+   ],
+   "muscles": [
+    "triceps",
+    "chest"
+   ],
+   "musclesAlso": [
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension",
+    "grip"
    ],
    "art": {
     "file": "images/exercises/straight_bar_dip.png",
@@ -10099,6 +13534,18 @@
    "patterns": [
     "h-push"
    ],
+   "muscles": [
+    "triceps",
+    "chest"
+   ],
+   "musclesAlso": [
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
+   ],
    "art": {
     "file": "images/exercises/ring_dip_support_hold.png",
     "status": "drawn"
@@ -10132,6 +13579,11 @@
    "fundamental": false,
    "fundFamily": null,
    "patterns": [],
+   "muscles": [],
+   "musclesAlso": [],
+   "modality": "bodyweight",
+   "role": "joint-prep",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -10165,6 +13617,11 @@
    "fundamental": false,
    "fundFamily": null,
    "patterns": [],
+   "muscles": [],
+   "musclesAlso": [],
+   "modality": "bodyweight",
+   "role": "joint-prep",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -10198,6 +13655,11 @@
    "fundamental": false,
    "fundFamily": null,
    "patterns": [],
+   "muscles": [],
+   "musclesAlso": [],
+   "modality": "bodyweight",
+   "role": "joint-prep, activation",
+   "demands": [],
    "art": {
     "file": "images/exercises/down_dog_up_dog.png",
     "status": "drawn"
@@ -10231,6 +13693,13 @@
    "fundamental": false,
    "fundFamily": null,
    "patterns": [],
+   "muscles": [],
+   "musclesAlso": [],
+   "modality": "barbell",
+   "role": "joint-prep, activation",
+   "demands": [
+    "grip"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -10264,6 +13733,13 @@
    "fundamental": false,
    "fundFamily": null,
    "patterns": [],
+   "muscles": [],
+   "musclesAlso": [],
+   "modality": "barbell",
+   "role": "joint-prep, activation",
+   "demands": [
+    "deep-knee-flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -10299,6 +13775,17 @@
    "patterns": [
     "locomotion"
    ],
+   "muscles": [
+    "abs",
+    "quad"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "calf"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, conditioning",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -10345,6 +13832,11 @@
    "fundamental": false,
    "fundFamily": null,
    "patterns": [],
+   "muscles": [],
+   "musclesAlso": [],
+   "modality": "bodyweight",
+   "role": "joint-prep",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -10378,6 +13870,11 @@
    "fundamental": true,
    "fundFamily": "mobility",
    "patterns": [],
+   "muscles": [],
+   "musclesAlso": [],
+   "modality": "bodyweight",
+   "role": "joint-prep, activation",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -10412,6 +13909,20 @@
    "fundFamily": null,
    "patterns": [
     "v-pull"
+   ],
+   "muscles": [
+    "lat",
+    "biceps"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "grip",
+    "abs"
+   ],
+   "modality": "machine",
+   "role": "working-set",
+   "demands": [
+    "grip"
    ],
    "art": {
     "file": null,
@@ -10448,6 +13959,18 @@
    "patterns": [
     "h-pull"
    ],
+   "muscles": [
+    "mid-back",
+    "lat"
+   ],
+   "musclesAlso": [
+    "biceps",
+    "rear-delt",
+    "grip"
+   ],
+   "modality": "machine",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -10483,6 +14006,18 @@
    "patterns": [
     "h-pull"
    ],
+   "muscles": [
+    "mid-back",
+    "lat"
+   ],
+   "musclesAlso": [
+    "biceps",
+    "rear-delt",
+    "grip"
+   ],
+   "modality": "machine",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -10518,6 +14053,16 @@
    "patterns": [
     "h-pull"
    ],
+   "muscles": [
+    "rear-delt"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "traps"
+   ],
+   "modality": "machine",
+   "role": "joint-prep, activation",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -10554,6 +14099,16 @@
    "patterns": [
     "h-pull"
    ],
+   "muscles": [
+    "rear-delt"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "traps"
+   ],
+   "modality": "dumbbell",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -10590,6 +14145,18 @@
    "patterns": [
     "h-pull"
    ],
+   "muscles": [
+    "mid-back",
+    "lat"
+   ],
+   "musclesAlso": [
+    "biceps",
+    "rear-delt",
+    "grip"
+   ],
+   "modality": "dumbbell",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -10625,6 +14192,18 @@
    "patterns": [
     "h-pull"
    ],
+   "muscles": [
+    "mid-back",
+    "lat"
+   ],
+   "musclesAlso": [
+    "biceps",
+    "rear-delt",
+    "grip"
+   ],
+   "modality": "machine",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -10661,6 +14240,18 @@
    "patterns": [
     "h-pull"
    ],
+   "muscles": [
+    "mid-back",
+    "lat"
+   ],
+   "musclesAlso": [
+    "biceps",
+    "rear-delt",
+    "grip"
+   ],
+   "modality": "dumbbell",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -10696,6 +14287,18 @@
    "patterns": [
     "v-pull"
    ],
+   "muscles": [
+    "biceps"
+   ],
+   "musclesAlso": [
+    "forearm",
+    "grip"
+   ],
+   "modality": "barbell",
+   "role": "working-set",
+   "demands": [
+    "grip"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -10730,6 +14333,21 @@
    "fundFamily": null,
    "patterns": [
     "v-pull"
+   ],
+   "muscles": [
+    "lat",
+    "biceps"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "grip",
+    "abs"
+   ],
+   "modality": "machine",
+   "role": "working-set",
+   "demands": [
+    "grip",
+    "hang"
    ],
    "art": {
     "file": null,
@@ -10767,6 +14385,20 @@
    "patterns": [
     "v-pull"
    ],
+   "muscles": [
+    "lat",
+    "biceps"
+   ],
+   "musclesAlso": [
+    "mid-back",
+    "grip",
+    "abs"
+   ],
+   "modality": "dumbbell",
+   "role": "working-set",
+   "demands": [
+    "grip"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -10803,6 +14435,20 @@
    "patterns": [
     "v-push"
    ],
+   "muscles": [
+    "front-delt",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "chest",
+    "traps",
+    "abs"
+   ],
+   "modality": "dumbbell",
+   "role": "working-set",
+   "demands": [
+    "overhead-rom"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -10838,6 +14484,17 @@
    "patterns": [
     "locomotion"
    ],
+   "muscles": [
+    "abs",
+    "quad"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "calf"
+   ],
+   "modality": "dumbbell",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": "images/exercises/farmers_carry.png",
     "status": "drawn"
@@ -10875,6 +14532,22 @@
    "patterns": [
     "h-push"
    ],
+   "muscles": [
+    "chest",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "serratus",
+    "abs"
+   ],
+   "modality": "machine",
+   "role": "working-set",
+   "demands": [
+    "overhead-rom",
+    "grip",
+    "hang"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -10909,6 +14582,22 @@
    "fundFamily": null,
    "patterns": [
     "v-push"
+   ],
+   "muscles": [
+    "front-delt",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "chest",
+    "traps",
+    "abs"
+   ],
+   "modality": "machine",
+   "role": "working-set",
+   "demands": [
+    "overhead-rom",
+    "grip",
+    "hang"
    ],
    "art": {
     "file": null,
@@ -10945,6 +14634,20 @@
    "patterns": [
     "h-push"
    ],
+   "muscles": [
+    "triceps",
+    "chest"
+   ],
+   "musclesAlso": [
+    "front-delt"
+   ],
+   "modality": "machine",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension",
+    "grip",
+    "hang"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -10980,6 +14683,15 @@
    "patterns": [
     "h-push"
    ],
+   "muscles": [
+    "side-delt"
+   ],
+   "musclesAlso": [
+    "traps"
+   ],
+   "modality": "dumbbell",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -11015,6 +14727,16 @@
    "patterns": [
     "h-push"
    ],
+   "muscles": [
+    "triceps",
+    "chest"
+   ],
+   "musclesAlso": [
+    "front-delt"
+   ],
+   "modality": "machine",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -11049,6 +14771,20 @@
    "fundFamily": null,
    "patterns": [
     "h-push"
+   ],
+   "muscles": [
+    "chest",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "serratus",
+    "abs"
+   ],
+   "modality": "dumbbell",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension"
    ],
    "art": {
     "file": null,
@@ -11085,6 +14821,19 @@
    "patterns": [
     "hinge"
    ],
+   "muscles": [
+    "hamstring",
+    "glute"
+   ],
+   "musclesAlso": [
+    "lower-back",
+    "grip"
+   ],
+   "modality": "dumbbell",
+   "role": "working-set",
+   "demands": [
+    "hip-hinge"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -11119,6 +14868,19 @@
    "fundFamily": null,
    "patterns": [
     "hinge"
+   ],
+   "muscles": [
+    "hamstring",
+    "glute"
+   ],
+   "musclesAlso": [
+    "lower-back",
+    "grip"
+   ],
+   "modality": "machine",
+   "role": "working-set",
+   "demands": [
+    "hip-hinge"
    ],
    "art": {
     "file": "images/exercises/back_extension_45.png",
@@ -11168,6 +14930,19 @@
    "patterns": [
     "hinge"
    ],
+   "muscles": [
+    "hamstring",
+    "glute"
+   ],
+   "musclesAlso": [
+    "lower-back",
+    "grip"
+   ],
+   "modality": "kettlebell",
+   "role": "working-set",
+   "demands": [
+    "hip-hinge"
+   ],
    "art": {
     "file": "images/exercises/kb_swing.png",
     "status": "drawn"
@@ -11215,6 +14990,17 @@
    "fundFamily": null,
    "patterns": [
     "squat"
+   ],
+   "muscles": [
+    "quad"
+   ],
+   "musclesAlso": [
+    "glute"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "deep-knee-flexion"
    ],
    "art": {
     "file": "images/exercises/wall_sit.png",
@@ -11272,6 +15058,20 @@
    "patterns": [
     "squat"
    ],
+   "muscles": [
+    "quad",
+    "glute"
+   ],
+   "musclesAlso": [
+    "abs",
+    "lower-back",
+    "calf"
+   ],
+   "modality": "barbell",
+   "role": "working-set",
+   "demands": [
+    "deep-knee-flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -11308,6 +15108,20 @@
    "patterns": [
     "squat"
    ],
+   "muscles": [
+    "quad",
+    "glute"
+   ],
+   "musclesAlso": [
+    "abs",
+    "lower-back",
+    "calf"
+   ],
+   "modality": "barbell",
+   "role": "working-set",
+   "demands": [
+    "deep-knee-flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -11342,6 +15156,21 @@
    "fundFamily": null,
    "patterns": [
     "hinge"
+   ],
+   "muscles": [
+    "hamstring",
+    "glute"
+   ],
+   "musclesAlso": [
+    "lower-back",
+    "grip"
+   ],
+   "modality": "machine",
+   "role": "working-set",
+   "demands": [
+    "hip-hinge",
+    "grip",
+    "hang"
    ],
    "art": {
     "file": null,
@@ -11378,6 +15207,21 @@
    "patterns": [
     "hinge"
    ],
+   "muscles": [
+    "hamstring",
+    "glute"
+   ],
+   "musclesAlso": [
+    "lower-back",
+    "grip"
+   ],
+   "modality": "machine",
+   "role": "working-set",
+   "demands": [
+    "hip-hinge",
+    "grip",
+    "hang"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -11413,6 +15257,16 @@
    "patterns": [
     "anti-extension"
    ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "obliques",
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -11447,6 +15301,19 @@
    "fundFamily": null,
    "patterns": [
     "anti-lateral-flexion"
+   ],
+   "muscles": [
+    "obliques"
+   ],
+   "musclesAlso": [
+    "abs",
+    "glute"
+   ],
+   "modality": "barbell",
+   "role": "working-set",
+   "demands": [
+    "wrist-extension",
+    "grip"
    ],
    "art": {
     "file": null,
