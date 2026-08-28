@@ -22,7 +22,7 @@
    ============================================================ */
 import { readFileSync, writeFileSync, readdirSync, mkdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { ROOT, artwork, nicolas } from './paths.mjs';
+import { ROOT, artwork, nicolas, workbook } from './paths.mjs';
 
 const p = (...x) => join(ROOT, ...x);
 
@@ -145,6 +145,44 @@ function readBenchmarks() {
   return out;
 }
 
+/* THE WORKBOOK KNOWS THINGS THE APP'S LIST DOES NOT.
+
+   Movements live in two places in this project and both are real:
+   js/data/exercises.js is what the APP ships and runs on, and the
+   workbook in EXERCISE DATABASE is the AUTHORING surface - 465 rows
+   with a richer pattern taxonomy, and the `fundamental` flag that
+   marks the 28 movements every program is supposed to cover.
+
+   They join on id, and cleanly: 306 of the app's 307 are in the
+   workbook. So rather than merge two lists - which is a real decision
+   about which one wins, and not one to make quietly - the spine now
+   CARRIES the workbook's knowledge onto the app's list. The app keeps
+   its own movements; it just knows which of them are fundamentals and
+   what patterns they really train.
+
+   Missing workbook, or a movement not in it, costs nothing: the fields
+   come out null and every reader already handles that. */
+function readWorkbook() {
+  const f = workbook('_derived.json');
+  if (!f || !existsSync(f)) {
+    console.warn('  ! no workbook found - fundamentals and rich patterns will be null');
+    return {};
+  }
+  try {
+    const raw = JSON.parse(readFileSync(f, 'utf8'));
+    const rows = Array.isArray(raw) ? raw : (raw.rows || Object.values(raw)[0] || []);
+    const by = {};
+    for (const r of rows) if (r && r.id) by[r.id] = r;
+    return by;
+  } catch (e) {
+    console.warn('  ! workbook unreadable, carrying on without it:', e.message);
+    return {};
+  }
+}
+const WB = readWorkbook();
+const patternsOf = r => Array.isArray(r.patterns) ? r.patterns
+  : String(r.patterns || '').split(/[,;|]/).map(x => x.trim()).filter(Boolean);
+
 const DASH = readDashboardCopy();
 const BENCH = readBenchmarks();
 const DRAWN = existsSync(p('images/exercises'))
@@ -194,6 +232,12 @@ for (const [id, m] of Object.entries(EXERCISES)) {
        copy where a human has written it */
     cue: typeof m.cues === 'string' ? m.cues : null,
     coaching: dash ? { why: dash.why, cues: dash.cues ?? [], mistakes: dash.bad ?? [], kit: dash.kit ?? [] } : null,
+    /* From the workbook, joined by id. `pattern` above is the app's own
+       single word; `patterns` is what the movement actually trains, which
+       is often more than one thing - a burpee is squat, push AND jump. */
+    fundamental: !!(WB[id] && WB[id].fundamental),
+    fundFamily: (WB[id] && WB[id].fund_family) || null,
+    patterns: WB[id] ? patternsOf(WB[id]) : [],
     art,
     video: m.demoUrl ?? null,
     benchmark: BENCH[id] ?? null,

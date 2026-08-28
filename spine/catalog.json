@@ -1,6 +1,6 @@
 {
  "version": 1,
- "built": "2026-08-25",
+ "built": "2026-08-28",
  "count": 307,
  "movements": {
   "bodyweight_squat": {
@@ -22,6 +22,11 @@
    "gymOnly": false,
    "cue": "Feet about shoulder width, sit down between the hips. Hip crease below the knee, chest tall, drive through the whole foot.",
    "coaching": null,
+   "fundamental": true,
+   "fundFamily": "squat",
+   "patterns": [
+    "squat"
+   ],
    "art": {
     "file": "images/exercises/bodyweight_squat.png",
     "status": "drawn"
@@ -55,6 +60,11 @@
    "gymOnly": false,
    "cue": "Bar on the back, brace, sit between the hips. Hip crease below the knee, knees tracking over the toes.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "squat"
+   ],
    "art": {
     "file": "images/exercises/back_squat.png",
     "status": "drawn"
@@ -88,6 +98,11 @@
    "gymOnly": false,
    "cue": "Knees-over-toes eccentric; assist with band or hands.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "squat"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -133,6 +148,11 @@
      "bench"
     ]
    },
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "lunge"
+   ],
    "art": {
     "file": "images/exercises/bulgarian_split.png",
     "status": "drawn"
@@ -197,6 +217,11 @@
      "kb"
     ]
    },
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "squat"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -227,6 +252,11 @@
    "gymOnly": false,
    "cue": "Thighs parallel, isometric hold.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "squat"
+   ],
    "art": {
     "file": "images/exercises/horse_stance.png",
     "status": "drawn"
@@ -257,6 +287,12 @@
    "gymOnly": false,
    "cue": "Explode up, soft landing, reset.",
    "coaching": null,
+   "fundamental": true,
+   "fundFamily": "explosive",
+   "patterns": [
+    "squat",
+    "jump"
+   ],
    "art": {
     "file": "images/exercises/jump_squat.png",
     "status": "drawn"
@@ -307,6 +343,11 @@
    "gymOnly": false,
    "cue": "Knees forward, lean back — quad-focused. (future anchor)",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "squat"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -337,6 +378,11 @@
    "gymOnly": false,
    "cue": "Heels elevated, small quad pulses.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "squat"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -368,6 +414,11 @@
    "gymOnly": false,
    "cue": "Tempo 311, full depth, heels raised.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "squat"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -398,6 +449,11 @@
    "gymOnly": false,
    "cue": "Knees-over-toes, controlled reach.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "lunge"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -428,6 +484,11 @@
    "gymOnly": false,
    "cue": "Brace, push floor away, neutral spine.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "hinge"
+   ],
    "art": {
     "file": "images/exercises/deadlift.png",
     "status": "drawn"
@@ -460,6 +521,11 @@
    "gymOnly": false,
    "cue": "Hip snap, not a squat. (KB→DB)",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "hinge"
+   ],
    "art": {
     "file": "images/exercises/db_swing.png",
     "status": "drawn"
@@ -491,6 +557,11 @@
    "gymOnly": false,
    "cue": "Hinge, soft knees, hamstring stretch.",
    "coaching": null,
+   "fundamental": true,
+   "fundFamily": "hinge",
+   "patterns": [
+    "hinge"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -534,6 +605,11 @@
     ],
     "kit": []
    },
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "hinge"
+   ],
    "art": {
     "file": "images/exercises/single_leg_rdl.png",
     "status": "drawn"
@@ -594,6 +670,11 @@
      "band"
     ]
    },
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "hinge"
+   ],
    "art": {
     "file": "images/exercises/banded_glute_bridge.png",
     "status": "drawn"
@@ -624,6 +705,11 @@
    "gymOnly": false,
    "cue": "Band at knees, stay low, continuous side-steps.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "hinge"
+   ],
    "art": {
     "file": "images/exercises/banded_sidewalk.png",
     "status": "drawn"
@@ -655,6 +741,11 @@
    "gymOnly": false,
    "cue": "Chin tucked, full lockout, glute squeeze.",
    "coaching": null,
+   "fundamental": true,
+   "fundFamily": "glute",
+   "patterns": [
+    "hinge"
+   ],
    "art": {
     "file": "images/exercises/hip_thrust.png",
     "status": "drawn"
@@ -687,6 +778,11 @@
    "gymOnly": false,
    "cue": "Hips level, full extension.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "hinge"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -718,6 +814,11 @@
    "gymOnly": false,
    "cue": "Control the eccentric; progress ROM → load.",
    "coaching": null,
+   "fundamental": true,
+   "fundFamily": "hinge",
+   "patterns": [
+    "hinge"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -748,6 +849,11 @@
    "gymOnly": false,
    "cue": "Hips up, slow eccentric.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "hinge"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -778,6 +884,11 @@
    "gymOnly": false,
    "cue": "Knees-over-toes calf, deep stretch.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "calf"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -808,6 +919,11 @@
    "gymOnly": false,
    "cue": "Toes up against wall, full ROM.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "shin"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -840,6 +956,11 @@
    "gymOnly": false,
    "cue": "Shoulder blades pinned to the bench, feet down. Bar to the sternum, elbows about 45 degrees, press to lockout.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": "images/exercises/bench_press.png",
     "status": "drawn"
@@ -872,6 +993,11 @@
    "gymOnly": false,
    "cue": "Standing and strict. Ribs down, squeeze the glutes, press until the arms are by the ears. No leg drive.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-push"
+   ],
    "art": {
     "file": "images/exercises/overhead_press.png",
     "status": "drawn"
@@ -904,6 +1030,11 @@
    "gymOnly": false,
    "cue": "Hands on wall at chest height, feet a step back. Body straight. Press into wall, control the return. The further your feet, the harder.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -934,6 +1065,11 @@
    "gymOnly": false,
    "cue": "Hands on elevated surface. Great entry-level push pattern. Elbows 45°. Chest to bench.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -964,6 +1100,11 @@
    "gymOnly": false,
    "cue": "From knees, hands shoulder-width, body straight from knees to head. Chest to floor. Lock arms at top. No hip pike — this is a real push-up scaled.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -994,6 +1135,11 @@
    "gymOnly": false,
    "cue": "Inverted V position, straight arms, push floor away. Hold position. Builds wrist endurance and shoulder overhead strength.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -1024,6 +1170,11 @@
    "gymOnly": false,
    "cue": "Bottom-half partial push-ups — chest near floor to mid-range, no lockout at top. Continuous tension, deep stretch on the chest, no rest. Alternative: top-half pulses (upper 50%, no chest touch) — different stimulus, less stretch. Both = killer pump tools after full push-ups.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -1054,6 +1205,11 @@
    "gymOnly": false,
    "cue": "Hands behind on bench, feet on floor or elevated. Full depth. Great entry-level dip.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -1084,6 +1240,11 @@
    "gymOnly": false,
    "cue": "Top of the dip position — arms locked, shoulders depressed and packed, body upright. Hold full bodyweight without bending arms. The entry test for dip work. Build 30-60s before attempting reps.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": "images/exercises/dip_support_hold.png",
     "status": "drawn"
@@ -1114,6 +1275,11 @@
    "gymOnly": false,
    "cue": "Hands shoulder-width, knees resting on elbows/triceps. Lean forward and lift feet. First real planche shape — accessible to beginners. Build to 30s.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -1144,6 +1310,11 @@
    "gymOnly": false,
    "cue": "Sit in pike (legs straight together). Actively pulse torso DOWN toward legs using hip flexors only — not gravity bounce. 20-30 reps. Key compression warm-up before handstand or L-sit work.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -1187,6 +1358,11 @@
      "bench"
     ]
    },
+   "fundamental": true,
+   "fundFamily": "h-push",
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": "images/exercises/pushup.png",
     "status": "drawn"
@@ -1237,6 +1413,11 @@
    "gymOnly": false,
    "cue": "Sit on floor or parallettes, hands beside hips, arms straight. Pull knees to chest explosively, hold 1-2s at top. Lower with control. Builds the strength needed for L-sit and press to handstand.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "compression"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -1268,6 +1449,11 @@
    "gymOnly": false,
    "cue": "Loop a resistance band over the parallel bars, knees rest in the band loop. The band assists the press out of the bottom. Choose band tension so you can do 5-8 reps unbroken. Progress by switching to a lighter band.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -1299,6 +1485,11 @@
    "gymOnly": false,
    "cue": "Use a preacher bench (or any padded incline). Isolate the bicep — curl with maximum tension and a controlled lower. Focus on the BOTTOM lockout — that is where the bicep tendon takes load. Specifically conditions the bicep tendon against hyperextension injuries that planche straight-arm pressure causes. Bulletproofs the elbow for planche work.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -1329,6 +1520,11 @@
    "gymOnly": false,
    "cue": "Feet elevated, lead with chest. Straight body from head to heels.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -1359,6 +1555,11 @@
    "gymOnly": false,
    "cue": "Bottom of the dip — shoulder below elbow, controlled tension. Hold here to build strength at the hardest position. Start at 5-10s holds, build to 30s.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -1389,6 +1590,11 @@
    "gymOnly": false,
    "cue": "Start at the top of the dip (arms locked). Lower yourself slowly — 4-5 seconds down to the bottom. Step off and reset. Eccentric work builds the strength to press up. 3-5 negatives per set.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -1419,6 +1625,11 @@
    "gymOnly": false,
    "cue": "Hands on floor ~1 foot from wall, feet walked up the wall to hip height — body forms a 90° angle. Hold position with shoulders stacked. The L-shape primes the overhead press pattern for HSPU work.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -1449,6 +1660,13 @@
    "gymOnly": false,
    "cue": "Squat → hands → jump back → chest to floor (full push-up) → jump feet in → squat → explosive jump with arms overhead. One fluid motion. Land soft every rep. No shortcuts — full range is the entire point.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push",
+    "squat",
+    "jump"
+   ],
    "art": {
     "file": "images/exercises/full_burpee.png",
     "status": "drawn"
@@ -1479,6 +1697,11 @@
    "gymOnly": false,
    "cue": "Start in pike. Arc chest close to ground forward into upward dog, push to lockout. Reverse the arc back to pike. Not a push-up — it's a full shoulder arc wave. Control the spine extension at the top.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -1509,6 +1732,11 @@
    "gymOnly": false,
    "cue": "From pike, shift shoulders FORWARD over wrists. No balance assist — pure strength. The further you lean, the harder it gets.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -1539,6 +1767,11 @@
    "gymOnly": false,
    "cue": "Hips high, head goes through arms at bottom, press overhead.",
    "coaching": null,
+   "fundamental": true,
+   "fundFamily": "v-push",
+   "patterns": [
+    "v-push"
+   ],
    "art": {
     "file": "images/exercises/pike_push_up.png",
     "status": "drawn"
@@ -1589,6 +1822,11 @@
    "gymOnly": false,
    "cue": "Straight arms, rings turned out at bottom (RTO). Shoulders depressed and packed. Build to 30-60s before ring dips.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -1620,6 +1858,11 @@
    "gymOnly": false,
    "cue": "Hands on parallettes or a fixed barbell. Greater depth than floor — chest drops well below hand level. Full scapular protraction at top. Narrow grip, elbows at 45°. Excellent shoulder health and chest stimulus.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": "images/exercises/straight_bar_push_up.png",
     "status": "drawn"
@@ -1650,6 +1893,11 @@
    "gymOnly": false,
    "cue": "Kettlebell upside-down at shoulder, bell pointing to ceiling. Wrist neutral, elbow tucked. The bell wants to flop — your grip + shoulder stabilizers fight for the line. 20–40 sec each hand. Brutal for shoulder stability + grip.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -1680,6 +1928,11 @@
    "gymOnly": false,
    "cue": "Face the wall. Walk up into handstand with the chest, thighs and feet near the wall (NOT the back). Locked elbows, elevated scapula. Only the feet touch the wall — body straight line. Trains the same alignment as freestanding handstand without the balance demand.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -1710,6 +1963,11 @@
    "gymOnly": false,
    "cue": "Lower all the way to the floor. Lift hands off — full tension release. Reset. Press from zero. No stretch reflex, no momentum. Every rep is a fresh max effort. Brutally effective for pure chest strength.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": "images/exercises/deadstop_pushup.png",
     "status": "drawn"
@@ -1741,6 +1999,11 @@
    "gymOnly": false,
    "cue": "Hips stacked, deep ROM off parallettes.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-push"
+   ],
    "art": {
     "file": "images/exercises/deep_pike_pushup.png",
     "status": "drawn"
@@ -1771,6 +2034,11 @@
    "gymOnly": false,
    "cue": "Hands form diamond, elbows track back, squeeze triceps hard at lockout.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -1801,6 +2069,11 @@
    "gymOnly": false,
    "cue": "Slight lean for chest, upright for triceps. Full depth. No shoulder shrug.",
    "coaching": null,
+   "fundamental": true,
+   "fundFamily": "h-push",
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": "images/exercises/dip.png",
     "status": "drawn"
@@ -1849,6 +2122,11 @@
    "gymOnly": false,
    "cue": "Start in pike/downward dog. Walk hands backward toward feet, keeping legs as straight as possible and hips high. Alternate hand steps. Bridges pike strength to press to handstand.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -1879,6 +2157,11 @@
    "gymOnly": false,
    "cue": "Feet elevated on bench. Pike lean forward — more load through the arms due to elevation.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -1909,6 +2192,11 @@
    "gymOnly": false,
    "cue": "Feet elevated on bench in pike position. Press overhead. Closer to handstand angle than floor pike push-up.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -1939,6 +2227,11 @@
    "gymOnly": false,
    "cue": "Practice the dynamic entry to freestanding handstand. Kick up, find balance briefly, come down. Reps = entries. Use wall nearby for safety.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -1969,6 +2262,11 @@
    "gymOnly": false,
    "cue": "At the bottom of each push-up, do 3 small partial pumps (chest stays an inch off floor) before pressing back to lockout. 1 set = 3 pumps + 1 full rep. Time-under-tension at the hardest position. Brutal for chest endurance.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -1999,6 +2297,11 @@
    "gymOnly": false,
    "cue": "Arms locked, lean forward until shoulders over or past wrists. Go further each week.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2029,6 +2332,11 @@
    "gymOnly": false,
    "cue": "Keep rings close, turn out (RTO) at lockout. Serratus fires hard.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2059,6 +2367,11 @@
    "gymOnly": false,
    "cue": "Sit on floor or parallettes, arms straight beside hips, scapula depressed. Raise straight legs up as high as possible. Lower with control. Pure compression strength and active hamstring flexibility.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "compression"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2089,6 +2402,11 @@
    "gymOnly": false,
    "cue": "Sit, legs straddled wide. Lift both legs in straddle — keeping knees straight. Develops active compression + straddle flexibility simultaneously. Key for press to handstand.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "compression"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2119,6 +2437,11 @@
    "gymOnly": false,
    "cue": "Standing or slightly leaning forward, hold light DBs at sides with arms locked straight. Raise dumbbells HORIZONTALLY out to the sides while maintaining strict scapular protraction (push the floor away). Keep the path of movement near your waistline — simulates planche load through the same shoulder angle. ALTERNATIVE: use a band anchored at hip height — pull straight out to the side with same form.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2149,6 +2472,11 @@
    "gymOnly": false,
    "cue": "Push-up, then rotate body into a side plank and raise top arm straight up forming a T. Alternate sides. Push + anti-rotation in one movement.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2179,6 +2507,11 @@
    "gymOnly": false,
    "cue": "Start in push-up position. Walk feet up wall and hands in toward wall simultaneously until chest is close to wall. Walk back down with control.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2210,6 +2543,11 @@
    "gymOnly": false,
    "cue": "Deep ROM, turn rings out at top. (Phase-2 push anchor)",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2241,6 +2579,11 @@
    "gymOnly": false,
    "cue": "Full depth, controlled, lean forward.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2272,6 +2615,11 @@
    "gymOnly": false,
    "cue": "Lie back on a bench. Hold dumbbells with arms STRAIGHT (elbows locked) at hip level. Raise the weights up to a 45° angle above the hips, then lower slowly. Replicates the exact straight-arm shoulder flexion required for planche. ALTERNATIVE: anchor a resistance band low and pull with straight arms to the same 45° endpoint — same pattern, scalable load.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2302,6 +2650,11 @@
    "gymOnly": false,
    "cue": "Alternating: unilateral ring row right → push-up → ring row left = 1 rep. Scapular control on each row. Hips square. The push-up is the controlled reset between rows. Pull elbow back — not out.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2332,6 +2685,11 @@
    "gymOnly": false,
    "cue": "Kick up facing AWAY from wall. Heels lightly touch wall. Good entry to handstand balance work.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2362,6 +2720,14 @@
    "gymOnly": false,
    "cue": "Full burpee directly below the bar. Use the jump momentum to flow into the pull-up — don't pause between. Pull to chin over bar. Land softly on descent. One continuous fluid motion.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-pull",
+    "h-push",
+    "squat",
+    "jump"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2392,6 +2758,11 @@
    "gymOnly": false,
    "cue": "Diamond grip on a single KB handle. Lower deep — the KB elevates your hands giving extra ROM. Elbows track tight. Squeeze hard at top. Bell stability adds a hidden challenge.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2422,6 +2793,11 @@
    "gymOnly": false,
    "cue": "Between Tuck and Advanced Tuck. Knees rest lightly on the outside of your elbows while leaning forward. Slowly pull knees away from the arms as you gain strength. The bridge that lets you load planche torque without full bodyweight commitment.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2452,6 +2828,13 @@
    "gymOnly": false,
    "cue": "3 push-ups at bottom of each burpee, then jump + clap. Punishing and effective.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push",
+    "squat",
+    "jump"
+   ],
    "art": {
     "file": "images/exercises/navy_seal_burpee.png",
     "status": "drawn"
@@ -2482,6 +2865,11 @@
    "gymOnly": false,
    "cue": "Parallettes allow DEEPER lean = greater forward lean angle = more horizontal load. Far harder than floor version. Directly bridges to planche and handstand strength.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2512,6 +2900,13 @@
    "gymOnly": false,
    "cue": "Eyes on the bell every second of the movement. 7 steps up, 7 down. Never rush a step. Drive through heel not knee on the lunge. Wrist locked and packed throughout the entire movement.",
    "coaching": null,
+   "fundamental": true,
+   "fundFamily": "full-body",
+   "patterns": [
+    "v-push",
+    "lunge",
+    "anti-lateral-flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2542,6 +2937,11 @@
    "gymOnly": false,
    "cue": "Straight line ears-hips-heels. Active shoulders (push floor away). Gaze at floor.",
    "coaching": null,
+   "fundamental": true,
+   "fundFamily": "v-push",
+   "patterns": [
+    "v-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2572,6 +2972,11 @@
    "gymOnly": false,
    "cue": "Shift weight to one arm, other arm straight for balance. Hips square.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2602,6 +3007,13 @@
    "gymOnly": false,
    "cue": "Burpee down, chest touches floor. Explosive hip hinge to snatch both DBs overhead in one motion. Arms stay straight on the swing up. Control the descent — don't drop.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push",
+    "squat",
+    "v-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2632,6 +3044,11 @@
    "gymOnly": false,
    "cue": "Working arm shoulder-width, free hand on a low box (so the body angle is steeper than incline but easier than full one-arm). Slow descent on one arm only. The box absorbs less weight as it lowers.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2662,6 +3079,11 @@
    "gymOnly": false,
    "cue": "Knees off the chest, knees still bent. Lower back should flatten completely — hips no longer protected by the tuck. The jump from this to Adv Tuck is where most people stall; do not skip it.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2692,6 +3114,11 @@
    "gymOnly": false,
    "cue": "Start in a standard planche lean. Press hard through your shoulders WHILE walking or sliding your feet forward — forcing your hips to elevate until your toes lightly float off the floor. The dynamic version of planche lean that introduces the hip lift.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2722,6 +3149,11 @@
    "gymOnly": false,
    "cue": "Full lockout with RTO. Rings tight to body. Control the descent.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": "images/exercises/ring_dip.png",
     "status": "drawn"
@@ -2752,6 +3184,11 @@
    "gymOnly": false,
    "cue": "Full ring dip → hold at top → compress knees to chest. Shoulders packed. RTO at lockout. The knee raise is active compression — not a swing. Link the push and core as one unit.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2782,6 +3219,11 @@
    "gymOnly": false,
    "cue": "Wrists turned out, shoulders over wrists, max protraction, knees tight to chest.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2812,6 +3254,11 @@
    "gymOnly": false,
    "cue": "Back flat, legs tuck below hips. 5s max holds with full rest.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2842,6 +3289,11 @@
    "gymOnly": false,
    "cue": "Use a band looped overhead, hooked under the chest to unload some bodyweight, OR free hand resting LIGHTLY on a low surface for balance only (not bearing weight). Working arm does the work.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2872,6 +3324,11 @@
    "gymOnly": false,
    "cue": "On rings. From the top of a ring dip, rotate the rings outward and turn the palms forward at the top (Bulgarian press). Adds rotational shoulder stability + tricep load. Slow tempo only.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2903,6 +3360,11 @@
    "gymOnly": false,
    "cue": "Hands on parallettes facing the wall, chest-to-wall handstand position. Lower your head BELOW the level of your hands (the deficit). Press back up to lockout. Builds the deepest range of motion needed for full HSPU.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2933,6 +3395,11 @@
    "gymOnly": false,
    "cue": "Start in L-sit or tuck sit on parallettes. Fluidly push hips backward and upward through a tuck planche, aiming to extend into straddle or full planche for a brief 1-2 second hold. Trains the dynamic entry to planche.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -2963,6 +3430,14 @@
    "gymOnly": false,
    "cue": "Push-up → row right → row left → feet jump in → clean → squat → overhead press. One rep = all 7 steps. Hips square during rows. Drive from legs into the press.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push",
+    "h-pull",
+    "squat",
+    "v-push"
+   ],
    "art": {
     "file": "images/exercises/man_maker.png",
     "status": "drawn"
@@ -2993,6 +3468,11 @@
    "gymOnly": false,
    "cue": "Feet wide, hips square. 3s descent. Master archer push-up first.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3023,6 +3503,11 @@
    "gymOnly": false,
    "cue": "Hands turned out, lean forward — shoulders over wrists. Maintain hollow body.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-push"
+   ],
    "art": {
     "file": "images/exercises/pseudo_planche_push_up.png",
     "status": "drawn"
@@ -3053,6 +3538,11 @@
    "gymOnly": false,
    "cue": "Parallel bar dip. At the bottom, lower onto your forearms (forearms touch the bars). Press back up to the dip start — drive through forearms then hands. Brutal triceps + shoulder control. Start with 1-3 reps, build slowly.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3083,6 +3573,11 @@
    "gymOnly": false,
    "cue": "Also called Closed Straddle. Legs spread wide BUT knees bent at 90°. Reduces lever length while training hip abduction. The final bridge before Full Straddle.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3113,6 +3608,11 @@
    "gymOnly": false,
    "cue": "From an Adv Tuck, extend exactly ONE leg straight back; keep the other tightly tucked. Alternate legs per set. This bridges the gap from Adv Tuck directly to Straddle Planche by training one half of the lever at a time.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3143,6 +3643,11 @@
    "gymOnly": false,
    "cue": "From RTO ring support hold, lean shoulders forward over (or past) the rings. Arms stay LOCKED straight throughout. Descend the body angle by leaning, not by bending arms. Pure straight-arm scapular + anterior shoulder strength — direct planche prep. Hold 3-10s leans, 3-5 sets.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3173,6 +3678,11 @@
    "gymOnly": false,
    "cue": "Hands shoulder-width, head to floor, press to full lockout. Ribs closed.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3203,6 +3713,11 @@
    "gymOnly": false,
    "cue": "Slowly lower from a handstand while \"seesawing\" the body horizontal until you catch a bent-arm planche position (head + chest at 90°). The fusion of HSPU eccentric with planche bottom position. Multi-year skill.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3233,6 +3748,11 @@
    "gymOnly": false,
    "cue": "Balance with finger pressure. Micro-wrist adjustments. Breathe and relax.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3263,6 +3783,11 @@
    "gymOnly": false,
    "cue": "Freestanding handstand push-up. From a balanced freestanding handstand, lower head to floor under control, press back to full lockout. No wall, no kick assist. The HSPU benchmark for elite calisthenics. Build to 5 strict.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3293,6 +3818,11 @@
    "gymOnly": false,
    "cue": "Start in a solid handstand. Arms locked. Slowly lower the body down through straddle or full layout, attempting to catch and freeze the movement right at the horizontal planche line. The eccentric forces the CNS to adapt to full planche load.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3323,6 +3853,11 @@
    "gymOnly": false,
    "cue": "Legs straddled. Maintain hollow body. Years of work to reach here.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3353,6 +3888,11 @@
    "gymOnly": false,
    "cue": "Lower from handstand into a bent-arm horizontal hold (the 90° planche position) and press back up to vertical handstand. Combines full HSPU range with planche-tier shoulder strength. The pinnacle of vertical+horizontal push fusion. Endpoint.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3383,6 +3923,11 @@
    "gymOnly": false,
    "cue": "Full straight-body planche hold. Legs together, body parallel to floor, shoulders over (and past) wrists. The pinnacle of straight-arm pushing strength. 3-5 second hold = elite. Multi-year skill — wrist conditioning mandatory.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3413,6 +3958,11 @@
    "gymOnly": false,
    "cue": "From a full planche hold, lower body to chest-to-floor maintaining the planche position (no leg drop), press back to the planche. Hardest bodyweight push movement that exists in calisthenics. 1-3 strict reps = elite.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3443,6 +3993,11 @@
    "gymOnly": false,
    "cue": "From standing pike (forward fold), press straight into freestanding handstand without jumping or kicking. Pure compression + straight-arm pressing strength. Combines straddle/pike flexibility with planche-tier shoulder strength. Multi-year goal.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3473,6 +4028,11 @@
    "gymOnly": false,
    "cue": "Shoulders packed, ribs down.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-pull"
+   ],
    "art": {
     "file": "images/exercises/active_hang.png",
     "status": "drawn"
@@ -3516,6 +4076,11 @@
      "band"
     ]
    },
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-pull"
+   ],
    "art": {
     "file": "images/exercises/banded_pullapart.png",
     "status": "drawn"
@@ -3559,6 +4124,11 @@
      "bar"
     ]
    },
+   "fundamental": true,
+   "fundFamily": "carry-grip",
+   "patterns": [
+    "v-pull"
+   ],
    "art": {
     "file": "images/exercises/dead_hang.png",
     "status": "drawn"
@@ -3609,6 +4179,11 @@
    "gymOnly": false,
    "cue": "High bar, body fairly upright. Row chest to bar.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3649,6 +4224,11 @@
      "bar"
     ]
    },
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3679,6 +4259,11 @@
    "gymOnly": false,
    "cue": "Bar at hip height, straight body, chest to bar. Feet forward = harder.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3721,6 +4306,11 @@
      "band"
     ]
    },
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3751,6 +4341,12 @@
    "gymOnly": false,
    "cue": "Assist the concentric with a small jump, control the descent.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-pull",
+    "jump"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3781,6 +4377,11 @@
    "gymOnly": false,
    "cue": "Jump to the top, lower 3-5s. Builds the pull eccentrically.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3812,6 +4413,11 @@
    "gymOnly": false,
    "cue": "Neutral grip, squeeze blades.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3843,6 +4449,11 @@
    "gymOnly": false,
    "cue": "Straight arms, drive the bar down / hips up with the lats only. The front-lever base.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3874,6 +4485,11 @@
    "gymOnly": false,
    "cue": "Band under the hips supports the lever. Thinner band to progress.",
    "coaching": null,
+   "fundamental": true,
+   "fundFamily": "straight-arm-pull",
+   "patterns": [
+    "straight-arm-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3904,6 +4520,11 @@
    "gymOnly": false,
    "cue": "Supinated, full ROM.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-pull"
+   ],
    "art": {
     "file": "images/exercises/chin_up.png",
     "status": "drawn"
@@ -3935,6 +4556,11 @@
    "gymOnly": false,
    "cue": "Palms facing — kindest on the elbows and forearm.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -3966,6 +4592,11 @@
    "gymOnly": false,
    "cue": "Prone on a bench, row the dumbbells — no momentum, pure back.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -4010,6 +4641,11 @@
      "bar"
     ]
    },
+   "fundamental": true,
+   "fundFamily": "h-pull",
+   "patterns": [
+    "h-pull"
+   ],
    "art": {
     "file": "images/exercises/wide_inverted_row.png",
     "status": "drawn"
@@ -4053,6 +4689,11 @@
      "db"
     ]
    },
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-pull"
+   ],
    "art": {
     "file": "images/exercises/bent_over_row.png",
     "status": "drawn"
@@ -4085,6 +4726,11 @@
    "gymOnly": false,
    "cue": "Feet up on a box — nearly horizontal, much harder.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -4128,6 +4774,11 @@
      "bar"
     ]
    },
+   "fundamental": true,
+   "fundFamily": "v-pull",
+   "patterns": [
+    "v-pull"
+   ],
    "art": {
     "file": "images/exercises/pullup.png",
     "status": "drawn"
@@ -4179,6 +4830,11 @@
    "gymOnly": false,
    "cue": "Square hips, drive elbow back, full stretch.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -4209,6 +4865,11 @@
    "gymOnly": false,
    "cue": "Controlled German-hang rotation; decompress.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -4239,6 +4900,11 @@
    "gymOnly": false,
    "cue": "Hang from towels. Grip endurance.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -4269,6 +4935,11 @@
    "gymOnly": false,
    "cue": "From dead hang, pull dynamically up into a tuck front lever, lower under control.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -4299,6 +4970,11 @@
    "gymOnly": false,
    "cue": "Wider than shoulders — lat emphasis.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -4329,6 +5005,11 @@
    "gymOnly": false,
    "cue": "Same raise, advanced-tuck position.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -4360,6 +5041,11 @@
    "gymOnly": false,
    "cue": "Open the tuck — hips extended, flat back, knees still bent.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -4390,6 +5076,11 @@
    "gymOnly": false,
    "cue": "One arm pulls, the other stays straight out to the side.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -4420,6 +5111,11 @@
    "gymOnly": false,
    "cue": "Straddle the bar, pull side to side, alternate lead hand.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -4450,6 +5146,11 @@
    "gymOnly": false,
    "cue": "Pull fast — chest toward bar.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-pull"
+   ],
    "art": {
     "file": "images/exercises/explosive_chinup.png",
     "status": "drawn"
@@ -4480,6 +5181,11 @@
    "gymOnly": false,
    "cue": "Pull as high and fast as possible — power for the muscle-up.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -4511,6 +5217,11 @@
    "gymOnly": false,
    "cue": "Inverted hang, shoulders fully extended behind. Mobility + strength.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -4541,6 +5252,12 @@
    "gymOnly": false,
    "cue": "Pull to lower-chest / waist height — the height a muscle-up needs.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "hinge",
+    "h-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -4571,6 +5288,11 @@
    "gymOnly": false,
    "cue": "Pull, then roll the hips over the bar to support. Transition builder.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -4601,6 +5323,11 @@
    "gymOnly": false,
    "cue": "One arm, feet forward. Fight the rotation.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -4631,6 +5358,11 @@
    "gymOnly": false,
    "cue": "Pull-ups gripping two towels — brutal grip and forearm.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -4662,6 +5394,11 @@
    "gymOnly": false,
    "cue": "Band assists the transition. Grease the whole movement.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -4692,6 +5429,11 @@
    "gymOnly": false,
    "cue": "Pull higher — sternum to the bar. Muscle-up prep.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-pull"
+   ],
    "art": {
     "file": "images/exercises/chest_to_bar.png",
     "status": "drawn"
@@ -4722,6 +5464,11 @@
    "gymOnly": false,
    "cue": "Hold the L, full pull — back + core.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-pull"
+   ],
    "art": {
     "file": "images/exercises/l_sit_pullup.png",
     "status": "drawn"
@@ -4752,6 +5499,11 @@
    "gymOnly": false,
    "cue": "Start on top of the bar, lower slowly through the transition.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -4782,6 +5534,11 @@
    "gymOnly": false,
    "cue": "Hang from one arm 5-10s. Builds toward one-arm pulling.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -4812,6 +5569,11 @@
    "gymOnly": false,
    "cue": "Raise with one leg extended straight.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -4842,6 +5604,11 @@
    "gymOnly": false,
    "cue": "One leg straight, one tucked. Switch sides.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -4872,6 +5639,11 @@
    "gymOnly": false,
    "cue": "Pull through the German hang back up to a front support.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -4903,6 +5675,11 @@
    "gymOnly": false,
    "cue": "Supinated (forearm-smart). Full ROM.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -4933,6 +5710,11 @@
    "gymOnly": false,
    "cue": "One arm bends, the other stays straight. Shift side to side.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -4963,6 +5745,11 @@
    "gymOnly": false,
    "cue": "Arc side to side over the bar in a U shape.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -4993,6 +5780,11 @@
    "gymOnly": false,
    "cue": "Wrists over the rings (false grip). The ring muscle-up gateway.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5023,6 +5815,11 @@
    "gymOnly": false,
    "cue": "From a front-lever line, row the body up to the bar. Elite back.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5053,6 +5850,11 @@
    "gymOnly": false,
    "cue": "From a front lever, pull to an inverted/pull-up top. Front-lever-to-bar.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5083,6 +5885,11 @@
    "gymOnly": false,
    "cue": "Raise into a straddle front lever.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5113,6 +5920,11 @@
    "gymOnly": false,
    "cue": "Legs straight and wide — shortens the lever vs full.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5143,6 +5955,11 @@
    "gymOnly": false,
    "cue": "At the top, slide side to side keeping the chin above the bar.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5173,6 +5990,11 @@
    "gymOnly": false,
    "cue": "Pull-up while holding the front-lever line. Extreme.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5203,6 +6025,11 @@
    "gymOnly": false,
    "cue": "Raise into a full front lever — elite.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5234,6 +6061,11 @@
    "gymOnly": false,
    "cue": "Body dead straight and horizontal. The goal hold.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5264,6 +6096,11 @@
    "gymOnly": false,
    "cue": "Explosive pull, transition elbows over the bar, press out.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-pull"
+   ],
    "art": {
     "file": "images/exercises/muscle_up_bar.png",
     "status": "drawn"
@@ -5294,6 +6131,11 @@
    "gymOnly": false,
    "cue": "False grip, deep transition, press to support on rings.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5324,6 +6166,11 @@
    "gymOnly": false,
    "cue": "One arm, slow lower only. Assist gently with the free hand.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5354,6 +6201,11 @@
    "gymOnly": false,
    "cue": "The elite pull — full range, one arm.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5384,6 +6236,11 @@
    "gymOnly": false,
    "cue": "Lie on back, knees bent. Curl the shoulder blades off the floor by flexing the abs — don't yank the neck. Lower with control. Top-ab spinal flexion.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5414,6 +6271,11 @@
    "gymOnly": false,
    "cue": "Hands on bench, body straight head to heel. Reduce bench height to progress.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5444,6 +6306,11 @@
    "gymOnly": false,
    "cue": "Lie on back, hands by hips or under the glutes. Draw the knees toward the chest, curling the hips slightly off the floor. Lower-ab entry movement.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5474,6 +6341,11 @@
    "gymOnly": false,
    "cue": "Bear-crawl position held still: hands under shoulders, knees hovering an inch off the floor, back flat. Squeeze everything and hold. A held bear crawl — brutal deep-core tension.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5504,6 +6376,11 @@
    "gymOnly": false,
    "cue": "Lift the shoulder blades off the floor, knees bent at 90°, arms extended straight back behind the ears. Low back pressed flat. The easier hollow — keeps the legs light to protect the lower back.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5534,6 +6411,11 @@
    "gymOnly": false,
    "cue": "On all fours. Extend the right arm forward and the left leg straight back at the same time. Hold 2 sec without letting the hips rotate, then switch sides. Anti-rotation control.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-rotation"
+   ],
    "art": {
     "file": "images/exercises/bird_dog.png",
     "status": "drawn"
@@ -5577,6 +6459,11 @@
      "mat"
     ]
    },
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-extension"
+   ],
    "art": {
     "file": "images/exercises/dead_bug.png",
     "status": "drawn"
@@ -5607,6 +6494,11 @@
    "gymOnly": false,
    "cue": "Legs straight, heels six inches off the floor, low back pressed down. Alternate small fast up-down kicks. Keep the core braced the whole set.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5637,6 +6529,11 @@
    "gymOnly": false,
    "cue": "Beginner L-sit: hands pressing down on the floor (or parallettes), knees bent or heels lightly touching the floor. Press the shoulders down and lift the chest. Build the compression before going feet-up.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "compression"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5667,6 +6564,11 @@
    "gymOnly": false,
    "cue": "Knees at 90°. Curl the pelvis up toward the ribs — lift the hips off the floor using the lower abs, not a leg swing. Slow eccentric.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5697,6 +6599,11 @@
    "gymOnly": false,
    "cue": "Legs straight, heels off the floor. Cross one leg over the other in a scissor motion, alternating. Low back stays glued to the floor.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5727,6 +6634,11 @@
    "gymOnly": false,
    "cue": "Full range — shoulder blades up to the knees and back down. Knees bent, feet planted. Drive through the abs, not momentum. Classic top-ab builder.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5757,6 +6669,11 @@
    "gymOnly": false,
    "cue": "Prone on floor. Simultaneously raise arms, chest, and legs off the ground. Hold 2 sec. Lower with control. Great lower back and posterior chain activation.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5787,6 +6704,11 @@
    "gymOnly": false,
    "cue": "Legs straight up toward the ceiling. Reach the hands toward the toes, curling the upper back off the floor. Squeeze the upper abs at the top.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5817,6 +6739,11 @@
    "gymOnly": false,
    "cue": "Glutes lifted, arms locked. Lift one foot off the floor, hold a few seconds, tap it down, then lift the other — march the legs (bent-knee or straight-leg style). Builds toward zero foot support.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "compression"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5847,6 +6774,11 @@
    "gymOnly": false,
    "cue": "From a static bear hold (knees hovering an inch off the floor), slowly tap one hand to the opposite shoulder, then switch. Keep the hips dead-even — no rotation. Anti-rotation under load.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-rotation"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5877,6 +6809,11 @@
    "gymOnly": false,
    "cue": "Lying crunch: opposite elbow to opposite knee in a pedaling motion. Slow and controlled beats fast and sloppy. Obliques + hip flexors.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-lateral-flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5907,6 +6844,11 @@
    "gymOnly": false,
    "cue": "Face down on floor. Arms straight overhead. Squeeze everything: glutes, core, quads, push armpits toward ears. Body is one rigid plank. The fundamental shape that all handstand work requires.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -5950,6 +6892,11 @@
      "mat"
     ]
    },
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-extension"
+   ],
    "art": {
     "file": "images/exercises/forearm_plank.png",
     "status": "drawn"
@@ -6010,6 +6957,11 @@
      "bar"
     ]
    },
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "flexion"
+   ],
    "art": {
     "file": "images/exercises/hanging_knee_raise.png",
     "status": "drawn"
@@ -6040,6 +6992,11 @@
    "gymOnly": false,
    "cue": "Arms straight, wrists under shoulders. Body rigid head to heel. Active shoulders — push the floor away.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -6070,6 +7027,11 @@
    "gymOnly": false,
    "cue": "From a full hollow hold, crunch the ribs toward the pelvis a few inches and return without losing the hollow line. Constant tension on the deep core — a hollow-position crunch.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -6113,6 +7075,11 @@
      "mat"
     ]
    },
+   "fundamental": true,
+   "fundFamily": "core-static",
+   "patterns": [
+    "anti-extension"
+   ],
    "art": {
     "file": "images/exercises/hollow_hold.png",
     "status": "drawn"
@@ -6143,6 +7110,11 @@
    "gymOnly": false,
    "cue": "Lie flat, legs straight. Raise the legs to vertical keeping them straight, then lower slowly without letting the heels touch. Hands under the glutes to protect the low back.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -6173,6 +7145,11 @@
    "gymOnly": false,
    "cue": "Sit at 45° lean, feet off floor. Rotate torso side to side. Touch ground each side. Add weight to progress.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-lateral-flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -6216,6 +7193,11 @@
      "mat"
     ]
    },
+   "fundamental": true,
+   "fundFamily": "frontal-plane",
+   "patterns": [
+    "anti-lateral-flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -6246,6 +7228,11 @@
    "gymOnly": false,
    "cue": "Lie flat, arms overhead, legs hovering. Crunch up while pulling both knees deeply into the chest, reach the hands past the feet at the peak balancing on the glutes, then open back to flat. The bent-knee V-up.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -6276,6 +7263,11 @@
    "gymOnly": false,
    "cue": "Hold the hovering bear position and lift just one hand OR one foot slightly off the ground, hold briefly, return, then alternate. Two-point stability — fight the urge to shift your weight.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-rotation"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -6306,6 +7298,11 @@
    "gymOnly": false,
    "cue": "From the bear hold, lift the opposing arm and leg (right arm + left leg) at once, hold 2-3 sec, then switch. The hardest bear variation — maximal anti-rotation and balance.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-rotation"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -6336,6 +7333,11 @@
    "gymOnly": false,
    "cue": "Grip a sturdy anchor behind the head. Roll the hips back, kick straight legs vertical (weight on the upper back, not neck), then lower the hips down rolling the spine one vertebra at a time. The hip-lift base.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -6366,6 +7368,11 @@
    "gymOnly": false,
    "cue": "Seated on floor, legs straight. Actively flex hip flexors to fold chest toward legs. Each rep is a muscular contraction — not gravity. THE L-sit/V-sit builder.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "compression"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -6396,6 +7403,11 @@
    "gymOnly": false,
    "cue": "Forearm plank. Lift one leg 6 inches — squeeze glute at top. No hip rotation. Hold 2 sec. Alternate.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -6426,6 +7438,11 @@
    "gymOnly": false,
    "cue": "High plank: extend opposite arm and leg simultaneously. Hold 2 sec at top. Anti-rotation + anti-extension in one movement. Bird-dog in plank position.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-rotation"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -6456,6 +7473,11 @@
    "gymOnly": false,
    "cue": "High plank. Tap opposite shoulder — fight the rotation. Wider foot stance for more stability.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -6486,6 +7508,11 @@
    "gymOnly": false,
    "cue": "Sit up dynamically throwing ONE straight leg up, reaching both hands to touch that foot at the peak. Lower with control, alternate sides. Half the lower-body load of a full V-up.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -6516,6 +7543,11 @@
    "gymOnly": false,
    "cue": "Sit up opening both straight legs wide into a V straddle, reaching the hands through the center to the floor or ankles. Wide legs shorten the lever — easier than a closed-leg V-up.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "compression"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -6546,6 +7578,11 @@
    "gymOnly": false,
    "cue": "Knees tucked to chest in L-sit position. Build to 10s before extending legs.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "compression"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -6576,6 +7613,11 @@
    "gymOnly": false,
    "cue": "From parallel bars or floor. Arms locked, scapula depressed. Tuck knees to chest, feet OFF floor. Build to 3x15s before extending legs.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "compression"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -6606,6 +7648,11 @@
    "gymOnly": false,
    "cue": "Lie flat, arms overhead. Simultaneously lift legs and torso to meet in a V, hands toward feet. Lower under control — no slamming down.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -6636,6 +7683,11 @@
    "gymOnly": false,
    "cue": "Extend, then draw elbow-to-knee under body.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "flexion"
+   ],
    "art": {
     "file": "images/exercises/bird_dog_crunch.png",
     "status": "drawn"
@@ -6666,6 +7718,11 @@
    "gymOnly": false,
    "cue": "From the vertical candlestick, knees tucked, lock the hips so torso and thighs are one rigid line and lower slowly (5-sec negative) until the lower back touches. Slow negatives (reps) OR hold parallel.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-extension"
+   ],
    "art": {
     "file": "images/exercises/dragon_flag.png",
     "status": "drawn"
@@ -6696,6 +7753,11 @@
    "gymOnly": false,
    "cue": "High plank with feet on bench. More load shifts to upper core and shoulders. 30-60 sec.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -6726,6 +7788,11 @@
    "gymOnly": false,
    "cue": "No swing. Posterior pelvic tilt at top. Control the descent. Legs straight.",
    "coaching": null,
+   "fundamental": true,
+   "fundFamily": "core-dynamic",
+   "patterns": [
+    "flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -6756,6 +7823,11 @@
    "gymOnly": false,
    "cue": "From hollow body hold, rock forward and back like a rocking chair. No momentum — all core.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-extension"
+   ],
    "art": {
     "file": "images/exercises/hollow_rocks.png",
     "status": "drawn"
@@ -6786,6 +7858,11 @@
    "gymOnly": false,
    "cue": "Forearm plank but hands extended further forward. Increases the lever arm dramatically. Pure anti-extension strength.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -6816,6 +7893,11 @@
    "gymOnly": false,
    "cue": "Start in forearm plank. Press up one hand at a time to high plank, then lower back down one hand at a time. Alternate the leading arm. Fight rotation throughout.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -6846,6 +7928,11 @@
    "gymOnly": false,
    "cue": "Posterior pelvic tilt, squeeze fists and glutes hard. 10s sets are enough.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -6876,6 +7963,11 @@
    "gymOnly": false,
    "cue": "Full side plank: lower hip toward floor without touching, drive back up. Oblique-focused. 10-15 reps each side.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-lateral-flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -6906,6 +7998,11 @@
    "gymOnly": false,
    "cue": "Full side plank: raise top leg to hip height and lower with control. Abductors and obliques working simultaneously.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-lateral-flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -6936,6 +8033,11 @@
    "gymOnly": false,
    "cue": "Walk hands out to plank and back; long body.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -6966,6 +8068,11 @@
    "gymOnly": false,
    "cue": "Hips must not sag at extension. Pull from abs — not hip flexors — to return.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -6996,6 +8103,11 @@
    "gymOnly": false,
    "cue": "Top leg on bench, bottom leg floating. Straight body. Insane adductor + core.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-lateral-flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -7026,6 +8138,11 @@
    "gymOnly": false,
    "cue": "From a low full hollow hold (heels 6 inches up), snap up into a full V-up touching the toes, then drop back into a rock-solid frozen hollow — no floor rest. Elite eccentric core control.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "compression"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -7056,6 +8173,11 @@
    "gymOnly": false,
    "cue": "Arm lockout, depress scapulae, legs parallel to floor. Build tuck first.",
    "coaching": null,
+   "fundamental": true,
+   "fundFamily": "core-dynamic",
+   "patterns": [
+    "compression"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -7086,6 +8208,11 @@
    "gymOnly": false,
    "cue": "From a tuck L-sit (glutes off floor), keep one knee tucked and extend the other leg dead straight out parallel to the floor, toes pointed. Switch legs. Hold, or do dynamic kick-outs. Bridges tuck → full L-sit.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "compression"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -7116,6 +8243,11 @@
    "gymOnly": false,
    "cue": "Forearm plank on sliders or socks. Slide body forward and pull back. Anti-extension at its hardest. Keep hips from sagging.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -7146,6 +8278,11 @@
    "gymOnly": false,
    "cue": "Full hollow hold with a yoga block or ball squeezed between the ankles and a light plate held overhead. Squeeze hard — irradiation multiplies the load on the lower abs. Elite hollow.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -7176,6 +8313,11 @@
    "gymOnly": false,
    "cue": "Legs spread wide in straddle rather than parallel. Easier to hold than strict L-sit. Good stepping stone to V-sit.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "compression"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -7206,6 +8348,11 @@
    "gymOnly": false,
    "cue": "Posterior pelvic tilt. Touch toes to bar. Minimize kip. Control descent.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -7236,6 +8383,11 @@
    "gymOnly": false,
    "cue": "Tucked, lower the rigid body until the torso hovers 2-3 inches parallel above the bench and freeze — weight on the shoulder blades and arms. Static tuck dragon flag.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -7266,6 +8418,11 @@
    "gymOnly": false,
    "cue": "Pull the toes to the bar then keep tilting the hips back until the feet point at the ceiling — body upside down, tucked or straight. Depress the scapula hard. Balance shifts to the upper back and deep core.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -7296,6 +8453,11 @@
    "gymOnly": false,
    "cue": "From high plank, rotate into star side plank (top arm + top leg raised), hold 1 sec, rotate back through center plank, then rotate to the other side. Non-stop alternating. Also called alternating star plank or rotating star plank.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-lateral-flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -7326,6 +8488,11 @@
    "gymOnly": false,
    "cue": "From the high tuck V-sit (leaning back, knees high), keep one knee tucked to the shoulder and kick the other leg straight up high toward the ceiling, above head height. Alternate legs.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "compression"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -7356,6 +8523,11 @@
    "gymOnly": false,
    "cue": "L-sit on rings. Fight rotation — rings want to turn inward. Much harder than parallettes due to instability. Builds serious core and lat strength.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "compression"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -7386,6 +8558,11 @@
    "gymOnly": false,
    "cue": "High plank — remove one arm. Fight hard to prevent rotation. Start at 10-15 sec per side. Build from there.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -7416,6 +8593,11 @@
    "gymOnly": false,
    "cue": "One leg straight (locked knee, pointed toe), the other knee tucked. Keeping a dead-rigid waistline, lower until parallel to the bench. Switch legs. Slow negatives (reps) OR hold. Bridges tuck → full.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -7446,6 +8628,11 @@
    "gymOnly": false,
    "cue": "Side plank: raise top arm and top leg simultaneously into full star shape. Maximum stability demand on every plane.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-lateral-flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -7476,6 +8663,11 @@
    "gymOnly": false,
    "cue": "Lean the torso back, push the hips up, launch both straight legs wide into a high V straddle, knees locked. Wide legs shorten the lever — the gateway to the full V-sit.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "compression"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -7506,6 +8698,11 @@
    "gymOnly": false,
    "cue": "Hang from bar. Legs together, rotate side to side. Oblique gold.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-lateral-flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -7536,6 +8733,11 @@
    "gymOnly": false,
    "cue": "One arm, opposite leg lifted. Two-point plank. Hardest plank variation. Master single arm before attempting.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -7566,6 +8768,11 @@
    "gymOnly": false,
    "cue": "Legs above horizontal. Lean torso slightly back to counterbalance. Active compression.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "compression"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -7596,6 +8803,11 @@
    "gymOnly": false,
    "cue": "From the inverted hang, lock a straight line shoulders-to-toes (a vertical candle), then slowly lower the straight body toward horizontal, pivoting only at the shoulders. The ultimate suspension test (hanging dragon flag).",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -7626,6 +8838,11 @@
    "gymOnly": false,
    "cue": "Kick to balance, ride it as long as you can, bail safely.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-push"
+   ],
    "art": {
     "file": "images/exercises/handstand.png",
     "status": "drawn"
@@ -7657,6 +8874,11 @@
    "gymOnly": false,
    "cue": "Gentle while forearm heals. Posterior tilt.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "straight-arm-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -7687,6 +8909,11 @@
    "gymOnly": false,
    "cue": "Freestanding entries — find the balance point, bail to a cartwheel.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -7717,6 +8944,11 @@
    "gymOnly": false,
    "cue": "Chest to wall version: hands ~6in from wall. Hollow body, active shoulders. Chest-to-wall is harder than back-to-wall — less arch, more true handstand position.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -7760,6 +8992,11 @@
      "mat"
     ]
    },
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "locomotion"
+   ],
    "art": {
     "file": "images/exercises/mountain_climber.png",
     "status": "drawn"
@@ -7810,6 +9047,13 @@
    "gymOnly": false,
    "cue": "Squat-jump back-push-up-jump forward-jump + clap overhead. Rhythm is everything.",
    "coaching": null,
+   "fundamental": true,
+   "fundFamily": "full-body",
+   "patterns": [
+    "squat",
+    "h-push",
+    "jump"
+   ],
    "art": {
     "file": null,
     "status": "source",
@@ -7841,6 +9085,9 @@
    "gymOnly": false,
    "cue": "Knee over toe, heel down.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -7884,6 +9131,9 @@
      "mat"
     ]
    },
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [],
    "art": {
     "file": "images/exercises/cat_cow.png",
     "status": "drawn"
@@ -7925,6 +9175,9 @@
     ],
     "kit": []
    },
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [],
    "art": {
     "file": "images/exercises/deep_squat_rock.png",
     "status": "drawn"
@@ -7955,6 +9208,9 @@
    "gymOnly": false,
    "cue": "Forearm on frame, rotate away.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -7985,6 +9241,9 @@
    "gymOnly": false,
    "cue": "Slow, controlled full hip circles.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [],
    "art": {
     "file": "images/exercises/hip_cars.png",
     "status": "drawn"
@@ -8015,6 +9274,9 @@
    "gymOnly": false,
    "cue": "Tall hips, posterior tilt, per side.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -8045,6 +9307,11 @@
    "gymOnly": false,
    "cue": "Front-back then lateral, controlled.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "hinge"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -8075,6 +9342,9 @@
    "gymOnly": false,
    "cue": "Lat/shoulder stretch, ribs down.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -8105,6 +9375,9 @@
    "gymOnly": false,
    "cue": "Open-book / quadruped reach-through.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -8135,6 +9408,9 @@
    "gymOnly": false,
    "cue": "Quadruped, reach hand to ceiling.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -8178,6 +9454,11 @@
      "kb"
     ]
    },
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "hinge"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -8221,6 +9502,11 @@
      "kb"
     ]
    },
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "hinge"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -8266,6 +9552,11 @@
      "mat"
     ]
    },
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -8309,6 +9600,11 @@
      "kb"
     ]
    },
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -8351,6 +9647,12 @@
      "kb"
     ]
    },
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "hinge",
+    "h-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -8394,6 +9696,9 @@
      "kb"
     ]
    },
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -8437,6 +9742,11 @@
      "kb"
     ]
    },
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -8480,6 +9790,11 @@
      "kb"
     ]
    },
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "carry"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -8524,6 +9839,9 @@
      "mat"
     ]
    },
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [],
    "art": {
     "file": "images/exercises/turkish_getup.png",
     "status": "drawn"
@@ -8567,6 +9885,9 @@
      "kb"
     ]
    },
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -8610,6 +9931,11 @@
      "mat"
     ]
    },
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "hinge"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -8653,6 +9979,11 @@
      "bench"
     ]
    },
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "squat"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -8693,6 +10024,11 @@
     ],
     "kit": []
    },
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "locomotion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -8723,6 +10059,11 @@
    "gymOnly": false,
    "cue": "Support over a straight bar, lean forward slightly, lower until the chest reaches the bar. Harder on the shoulder than parallel bars — earn it.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": "images/exercises/straight_bar_dip.png",
     "status": "drawn"
@@ -8753,6 +10094,11 @@
    "gymOnly": false,
    "cue": "Locked out on the rings, rings turned out, shoulders down. Stillness is the whole exercise.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": "images/exercises/ring_dip_support_hold.png",
     "status": "drawn"
@@ -8783,6 +10129,9 @@
    "gymOnly": false,
    "cue": "Rock over wrists, all directions.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -8813,6 +10162,9 @@
    "gymOnly": true,
    "cue": "One arm at a time. Ten big slow circles forward, ten backward. Wakes the shoulder up before you load it.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -8843,6 +10195,9 @@
    "gymOnly": true,
    "cue": "Hips high in an upside-down V, then sweep the chest through and forward until the arms are straight. Hold five seconds at each end.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [],
    "art": {
     "file": "images/exercises/down_dog_up_dog.png",
     "status": "drawn"
@@ -8873,6 +10228,9 @@
    "gymOnly": true,
    "cue": "Same movement with your hands on a hip-height bar instead of the floor. Much easier on the wrists and shoulders.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -8903,6 +10261,9 @@
    "gymOnly": true,
    "cue": "Hold a rack upright or straps and sink into a squat as deep as feels fine — never into pain. Reach the free arm up and behind you and let your chest turn to follow your hand. Swap arms.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -8933,6 +10294,11 @@
    "gymOnly": true,
    "cue": "March on the spot, driving each knee up to hip height. Stay tall. No jumping, no impact — knee-friendly swap for mountain climbers.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "locomotion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -8976,6 +10342,9 @@
      "mat"
     ]
    },
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -9006,6 +10375,9 @@
    "gymOnly": true,
    "cue": "Step one foot forward into a gentle lunge, both hands on the floor inside the front foot. Reach the inside arm up to the ceiling and turn your chest to follow it. Bring it back down, step back, switch sides. Opens hips, chest and back in one move.",
    "coaching": null,
+   "fundamental": true,
+   "fundFamily": "mobility",
+   "patterns": [],
    "art": {
     "file": null,
     "status": "missing"
@@ -9036,6 +10408,11 @@
    "gymOnly": true,
    "cue": "Sit tall, pull the bar to your upper chest and lead with your elbows, not your hands. Let it back up slowly.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -9066,6 +10443,11 @@
    "gymOnly": true,
    "cue": "Chest up, pull the handle to your belly and squeeze your shoulder blades together. Do not lean back to move the weight.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -9096,6 +10478,11 @@
    "gymOnly": true,
    "cue": "Chest stays flat on the pad the whole set. Row to your ribs, pause a beat, lower slowly. The pad does the cheating for you.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -9126,6 +10513,11 @@
    "gymOnly": true,
    "cue": "Rope at head height. Pull it toward your forehead and let your hands split apart at the end. Light weight, slow, feel it between the shoulder blades.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -9157,6 +10549,11 @@
    "gymOnly": true,
    "cue": "Chest flat on an incline bench, a light dumbbell in each hand hanging down. Arms almost straight, raise them out to the sides like opening your arms wide. Squeeze the back of your shoulders at the top, lower slowly. Light weight — this is never a heavy movement.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -9188,6 +10585,11 @@
    "gymOnly": true,
    "cue": "Chest on the incline bench, dumbbells hanging. Row them out WIDE with your elbows flared out to the sides, up toward your chest — not tucked to your ribs. The wide elbow path is what makes it hit the back of the shoulders. Squeeze, lower slow.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -9218,6 +10620,11 @@
    "gymOnly": true,
    "cue": "Cable set at shoulder height. Grab the handle with the opposite hand so the cable crosses your body, arm almost straight. Pull it out and across, away from your body. Constant tension the whole way. One arm at a time.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -9249,6 +10656,11 @@
    "gymOnly": true,
    "cue": "Face down on an incline bench, arms hanging, thumbs up. Raise the arms into a Y overhead, lower. Then straight out to a T, lower. Then bent into a W, lower. That is one rep. No weight or very light — this is for the small muscles that hold your shoulders back.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -9279,6 +10691,11 @@
    "gymOnly": true,
    "cue": "Elbows pinned to your sides. Curl up, lower all the way down under control. If your back is swinging, the bar is too heavy.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -9309,6 +10726,11 @@
    "gymOnly": true,
    "cue": "Palms facing you. Use the assist machine to get your chin above the bar, then just hold there. Chest up, shoulders down. Log the ASSIST weight: lower is stronger.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -9340,6 +10762,11 @@
    "gymOnly": true,
    "cue": "Lie back on the bench holding one dumbbell over your chest, elbows slightly bent and fixed. Lower the dumbbell back to about head level only — feel the stretch across your lats and ribs, not deep in the shoulder. Pull it back over your chest. Start light, 20-25 lb.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-pull"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -9371,6 +10798,11 @@
    "gymOnly": true,
    "cue": "Sit tall, a dumbbell in each hand at shoulder height. Press straight overhead, ribs down so you do not arch your back. Lower back to ear height under control.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -9401,6 +10833,11 @@
    "gymOnly": true,
    "cue": "A dumbbell in each hand, no straps — grip is the point. Walk tall, shoulders back, 30-40 m. Set them down when the round is done, not when your grip fails. If they slip early, go lighter. Start 40-50 lb per hand.",
    "coaching": null,
+   "fundamental": true,
+   "fundFamily": "carry-grip",
+   "patterns": [
+    "locomotion"
+   ],
    "art": {
     "file": "images/exercises/farmers_carry.png",
     "status": "drawn"
@@ -9433,6 +10870,11 @@
    "gymOnly": true,
    "cue": "Set the seat so the handles sit level with the middle of your chest. Press out, control the way back. Do not lock out hard.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -9463,6 +10905,11 @@
    "gymOnly": true,
    "cue": "Press straight overhead, ribs down so you do not arch your back. Lower until your hands are about ear height.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "v-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -9493,6 +10940,11 @@
    "gymOnly": true,
    "cue": "Kneel or stand on the pad — the machine takes weight off you. Lean forward a little, lower until your upper arms are level with the floor, press back up. Log the ASSIST weight: lower is stronger.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -9523,6 +10975,11 @@
    "gymOnly": true,
    "cue": "Light dumbbells. Raise them out to the sides up to shoulder height, elbows soft. Lower slowly. This one is never heavy.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -9553,6 +11010,11 @@
    "gymOnly": true,
    "cue": "Elbows glued to your sides. Push the bar or rope down until your arms are straight, then let it come back up slowly.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -9583,6 +11045,11 @@
    "gymOnly": true,
    "cue": "Hands gripping two dumbbells set on the floor so your wrists stay straight. Body in one line, chest down between them, press back up.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "h-push"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -9613,6 +11080,11 @@
    "gymOnly": true,
    "cue": "Push your hips back and slide the dumbbells down the front of your legs. Knees stay almost straight. Stop when you feel the stretch behind your thighs, then stand tall.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "hinge"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -9643,6 +11115,11 @@
    "gymOnly": true,
    "cue": "Pad just below your hip bones. Bend at the hips and come back up until your body is one straight line — do not arch past that.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "hinge"
+   ],
    "art": {
     "file": "images/exercises/back_extension_45.png",
     "status": "drawn"
@@ -9686,6 +11163,11 @@
      "kb"
     ]
    },
+   "fundamental": true,
+   "fundFamily": "explosive",
+   "patterns": [
+    "hinge"
+   ],
    "art": {
     "file": "images/exercises/kb_swing.png",
     "status": "drawn"
@@ -9729,6 +11211,11 @@
     ],
     "kit": []
    },
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "squat"
+   ],
    "art": {
     "file": "images/exercises/wall_sit.png",
     "status": "drawn"
@@ -9780,6 +11267,11 @@
    "gymOnly": true,
    "cue": "Thick band looped behind your knees and anchored in front of you. Sit back against the band and hold. Great for calming a cranky knee down.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "squat"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -9811,6 +11303,11 @@
    "gymOnly": true,
    "cue": "Band around the back of your knee, anchored in front. Straighten the knee against the band and squeeze the thigh. Tiny range, big effect — knee-friendly.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "squat"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -9841,6 +11338,11 @@
    "gymOnly": true,
    "cue": "Pads on the outside of your knees. Push your knees apart, pause, come back slowly. Sit up tall.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "hinge"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -9871,6 +11373,11 @@
    "gymOnly": true,
    "cue": "Flip the pads to the inside of your knees. Squeeze your knees together, pause, let them open back out slowly.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "hinge"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -9901,6 +11408,11 @@
    "gymOnly": true,
    "cue": "Lie on your back with your heels resting on the floor. Lift only your shoulders off the ground and press your low back flat. Easiest version — nothing should pull on your back.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-extension"
+   ],
    "art": {
     "file": null,
     "status": "missing"
@@ -9931,6 +11443,11 @@
    "gymOnly": true,
    "cue": "One hand on a hip-height bar, feet on the floor, body in a straight line. The higher the bar, the easier it is.",
    "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [
+    "anti-lateral-flexion"
+   ],
    "art": {
     "file": null,
     "status": "missing"
