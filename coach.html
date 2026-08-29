@@ -96,7 +96,12 @@ header:after{
   color:var(--ink3);font-weight:600;margin-top:7px}
 
 /* ---------- shell ---------- */
-.wrap{max-width:1180px;margin:0 auto;padding:24px 28px;display:grid;
+/* WIDER, BECAUSE THIS IS A WORKBENCH NOW.
+   1180px is a reading width and most of this console is reading. The
+   builder is three columns of working surface sitting beside a client
+   rail, which is four columns fighting over 840px of it. The page keeps
+   its rail and takes the room it needs instead. */
+.wrap{max-width:1560px;margin:0 auto;padding:24px 28px;display:grid;
   grid-template-columns:308px 1fr;gap:26px;align-items:start}
 @media (max-width:940px){ .wrap{grid-template-columns:1fr;padding:20px 18px} .rail{position:static!important} }
 
@@ -363,12 +368,11 @@ select.pin{appearance:none;cursor:pointer}
 .hist b{display:block;font-size:13px;margin-bottom:3px}
 .hist small{display:block;color:var(--ink3);font-size:12px;line-height:1.5}
 .hist .num{font-variant-numeric:tabular-nums;color:var(--accent);font-weight:650}
-
 /* ============================================================
    THE BUILDER. Prefixed nb- throughout so nothing here can collide
    with the console's own styling, which the other tabs still use.
    ============================================================ */
-.nbcols{ display:grid; grid-template-columns:250px minmax(0,1fr) 270px; gap:1px;
+.nbcols{ display:grid; grid-template-columns:225px minmax(320px,1fr) 250px; gap:1px;
          background:var(--line,#2A313A); border-radius:10px; overflow:hidden;
          height:calc(100vh - 250px); min-height:520px; margin-top:10px; }
 .nbcol{ background:var(--bg,#12151a); padding:14px 13px 40px; overflow-y:auto; min-width:0; }
@@ -557,6 +561,7 @@ select.pin{appearance:none;cursor:pointer}
        padding:7px 8px; border-radius:6px; cursor:pointer }
 .nbmv:hover{ background:rgba(255,255,255,.05) }
 .nbmv .plus{ color:#5d6873; font-size:15px } .nbmv:hover .plus{ color:var(--accent,#3ECBA8) }
+
 
 </style>
 </head>
@@ -2128,7 +2133,7 @@ function nbLeft(){
   const goals = (A.goalsText||[]).filter(Boolean);
   const cons  = (A.constraintsText||[]).filter(Boolean);
   const ids   = Object.keys(PROG.days||{});
-  const total = ids.reduce((t,id)=>t+nbDayMins(id),0);
+  const total = ids.reduce((t,id)=>t+nbDayMins(PROG.days[id]),0);
   const want  = +(A.length||0) * (ids.length||1);
 
   let h = `<p class="nblbl">What they asked for</p>`;
@@ -2239,8 +2244,135 @@ function nbRedrawList(){
 /* ---- the middle: the day, its blocks, its movements ---- */
 function nbMiddle(){
   const days = Object.keys(PROG.days||{});
-  /* THE THREE COLUMNS. Everything the old editor did is still here - it
-     is the same PROG, the same PDAY, the same save - it just stopped
+  const day = PROG.days[PDAY] || PROG.days[days[0]];
+  let h = `<div class="nbdays">` + days.map(k=>`<button class="nbday ${k===PDAY?'on':''}"
+      onclick="PDAY='${k}';nbSel=null;nbOpen=null;drawProgram()">
+      <b>${esc(PROG.days[k].name||k)}</b>
+      <span class="parts">${nbDayParts(k).join(' · ')}</span>
+      <span class="mn">${nbDayMins(PROG.days[k])} min</span></button>`).join('')
+    + `<button class="nbday add" onclick="addDay()">+</button></div>`;
+
+  h += `<div class="nbdayhead">
+      <span class="t"><input class="nbdn" value="${esc(day.name||'')}" placeholder="Name this day"
+              onchange="PROG.days[PDAY].name=this.value;nbSave()">
+        <small>${nbDayParts(PDAY).join(' · ') || 'nothing in this day yet'}</small></span>
+      <input class="nbtag" value="${esc(day.tag||'')}" placeholder="tag"
+             onchange="PROG.days[PDAY].tag=this.value;nbSave()">
+      <span class="nbmin"><b>${nbDayMins(day)}</b><em>min</em></span>
+      <button class="btn sm" onclick="delDay()">Delete day</button></div>
+    <textarea class="nbwhy" rows="2" placeholder="Why this session exists"
+      onchange="PROG.days[PDAY].why=this.value;nbSave()">${esc(day.why||'')}</textarea>`;
+
+  (day.blocks||[]).forEach((b,bi)=>{
+    b.type = b.type || 'Straight'; b.cfg = b.cfg || {};
+    const spec = NB_SPEC[b.type] || NB_SPEC.Straight;
+    const RC = { Prime:'#4E7A2E', Work:'#1D6FC7', Finish:'#C24A3B' }[b.role] || '#999';
+    const sel = nbSel===bi;
+    h += `<div class="nbblock ${sel?'sel':''} ${b.locked?'locked':''}" style="--rc:${RC}"
+            onclick="${b.locked?'':'nbSel='+bi+';drawProgram()'}">
+      <div class="nbbhead">
+        <select class="nbrole" onclick="event.stopPropagation()" onchange="nbSetBlock(${bi},'role',this.value)">
+          ${['Prime','Work','Finish'].map(r=>`<option ${b.role===r?'selected':''}>${r}</option>`).join('')}</select>
+        <span class="nbnw"><input class="nbbn" value="${esc(b.name||'')}" placeholder="Name this block"
+            onclick="event.stopPropagation()" onchange="nbSetBlock(${bi},'name',this.value)">
+          <small>${spec.blurb}</small></span>
+        <span class="nbctl" onclick="event.stopPropagation()">
+          <select class="nbtype" onchange="nbSetType(${bi},this.value)">
+            ${NB_TYPES.map(t=>`<option ${b.type===t?'selected':''}>${t}</option>`).join('')}</select>
+          ${spec.block.map(k=>{const f=NB_FIELD[k];
+            return `<span class="nbcfg" title="${f[0]}"><input type="number" min="0" max="600"
+              value="${b.cfg[k] != null ? b.cfg[k] : NB_DEF[k]}"
+              onchange="nbSetCfg(${bi},'${k}',this.value)"><em>${f[1]||f[0]}</em></span>`;}).join('')}
+          <span class="nbmin"><b>${nbMins(b)}</b><em>min</em></span>
+          <button class="nblock ${b.locked?'on':''}" onclick="nbToggleLock(${bi})">${b.locked?'🔒':'🔓'}</button>
+        </span></div>`;
+
+    const GS = nbGroups(b);
+    GS.forEach((grp,gi)=>{
+      const pair = grp.idx.length>1;
+      const SC = ['#12876C','#7B4FCB','#B3651A','#0E7F76'][gi%4];
+      if(pair) h += `<div class="nbss" style="--sc:${SC}"><span class="bar"><b>${String.fromCharCode(65+gi)}</b></span><div>`;
+      grp.idx.forEach(ii=>{
+        const it = b.items[ii], m = MV(it.ex), pr = nbParse(it.pres);
+        const key = bi+':'+ii, isOpen = nbOpen===key, rest = nbRestOf(it,b);
+        const ss = pair ? String.fromCharCode(65+gi)+(grp.idx.indexOf(ii)+1) : '';
+        h += `<div class="nbit" style="--c:${NBC(m.g)}" draggable="true"
+            ondragstart="nbDragStart(event,${bi},${ii})" ondragover="nbDragOver(event,${bi})"
+            ondrop="nbDrop(event,${bi},${ii})">
+          <span class="hand">⠿</span><span class="ss">${ss}</span>
+          <span class="nm" onclick="event.stopPropagation();nbToggleCard(${bi},${ii})">
+            <b>${esc(m.n)}${m.f?' ★':''}</b> <i>${isOpen?'▲':'▼'}</i>
+            <small>${esc([m.g,(m.p||[])[0],(m.mus||[]).slice(0,2).join('/')].filter(Boolean).join(' · '))}${m.lat==='unilateral'?' · per side':''}</small></span>
+          <span class="nbnums" onclick="event.stopPropagation()">
+            ${spec.item.indexOf('sets')>=0
+              ? `<input type="number" min="1" max="20" value="${pr.sets}" title="sets"
+                        onchange="nbSetNum(${bi},${ii},'sets',this.value)"><em>×</em>`
+              : `<span class="gh">—</span><em>×</em>`}
+            <input type="number" min="1" max="600" value="${pr.val}" title="${pr.hold?'seconds':'reps'}"
+                   onchange="nbSetNum(${bi},${ii},'val',this.value)">
+            <em>${pr.hold?'s':'reps'}${pr.side?'/side':''}</em></span>
+          <span class="nbnums rest ${spec.item.indexOf('rest')>=0?'':'off'}" onclick="event.stopPropagation()">
+            ${spec.item.indexOf('rest')>=0
+              ? `<input type="number" min="0" max="600" step="15" placeholder="—" value="${rest != null ? rest : ''}"
+                        onchange="nbSetNum(${bi},${ii},'rest',this.value)">`
+              : `<span class="gh">—</span>`}<em>rest</em></span>
+          <button class="nbx" onclick="event.stopPropagation();nbDel(${bi},${ii})">×</button></div>`;
+        if(isOpen){
+          const so = nbSwap===key;
+          const btn = `<button class="nbswapbtn" onclick="event.stopPropagation();nbSwapQ='';nbSwap=${so?'null':"'"+key+"'"};drawProgram()">${so?'Cancel':'⇄ Swap this movement'}</button>`;
+          const panel = so ? `<div class="nbalts">
+              <input class="nbsearch sm" value="${esc(nbSwapQ)}" onclick="event.stopPropagation()"
+                     placeholder="Search all ${MOVES.length} — leg explosive, kettlebell hinge…"
+                     oninput="nbSwapSearch(${bi},${ii},this.value)">
+              ${nbLadder(bi,ii)}<div id="nbaltlist">${nbAltsHTML(bi,ii)}</div></div>` : '';
+          h += nbCard(m, btn + panel);
+        }
+      });
+      if(pair) h += `</div></div>`;
+      const nx = GS[gi+1] && GS[gi+1].idx[0];
+      if(nx != null && ['Circuit','Tabata','EMOM','AMRAP'].indexOf(b.type)<0)
+        h += `<div class="nblink"><button onclick="event.stopPropagation();nbToggleJoin(${bi},${grp.idx[grp.idx.length-1]})">⛓ join</button></div>`;
+      if(pair) h += `<div class="nblink"><button class="on" onclick="event.stopPropagation();nbToggleJoin(${bi},${grp.idx[0]})">⛓ ${String.fromCharCode(65+gi)} — split</button></div>`;
+    });
+
+    if(!(b.items||[]).length) h += `<p class="nbnone">Nothing in this block yet.</p>`;
+    h += `<button class="nbaddit ${sel?'sel':''}" onclick="event.stopPropagation();nbPickInto(${bi})">+ Add a movement${sel?' · searching':''}</button>`;
+    if(b.note) h += `<div class="nbbnote">${esc(b.note)}</div>`;
+    h += `</div>`;
+  });
+
+  h += `<button class="btn wide" onclick="nbNewBlock()">+ Add a block</button>`;
+  return h;
+}
+
+function drawProgram(){
+  const host = document.getElementById('prog');
+  if(!host) return;
+
+  /* NO CLIENT, NO PROGRAM. The console cannot build against answers that do
+     not exist, and the one useful thing it can offer in that state is the
+     way to get some - so that is the whole page. */
+  if(!HAS_CLIENT){
+    host.innerHTML = `<div class="panel"><div class="pad">
+      <h3 style="margin:0 0 6px;font-size:16px">Nobody to build for yet</h3>
+      <p class="mut" style="margin:0 0 14px">A program is built from a survey. Paste one below and
+        this becomes their console - their answers in the rail, their answers in the ten layers.</p>
+      ${addClientBox('emptyAdd')}
+      <p class="micro" style="margin:10px 0 0">The survey's last screen has <b>Send to Nico</b> and
+        <b>Copy link</b>. Either one produces the thing that goes in this box. Filling the survey out
+        in this browser puts the client here on its own, with nothing to paste.</p>
+    </div></div>`;
+    wireAddClient('emptyAdd');
+    syncRelease(); drawRelease();
+    return;
+  }
+  const days = Object.keys(PROG.days || {});
+  if(!days.length){ host.innerHTML = libRow() + `<div class="panel"><div class="pad">
+    <p class="mut">No program yet. Start from one above, or build a day.</p>
+    <button class="btn" onclick="addDay()">Add a day</button></div></div>`;
+    libWire(); syncRelease(); drawRelease(); return; }
+
+  /* THE THREE COLUMNS. Same PROG, same PDAY, same save - it just stopped
      being a stack of text inputs. */
   if(!MOVES.length) nbBuildLibrary();
   if(PDAY == null || !PROG.days[PDAY]) PDAY = days[0];
@@ -2249,7 +2381,7 @@ function nbMiddle(){
       <div class="nbcol left" id="nbleft"></div>
       <div class="nbcol mid"  id="nbmid"></div>
       <div class="nbcol right" id="nbright"></div>
-    </div>`;
+    </div><div class="pwarn" id="pwarn"></div>`;
   document.getElementById('nbleft').innerHTML  = nbLeft();
   document.getElementById('nbmid').innerHTML   = nbMiddle();
   document.getElementById('nbright').innerHTML = nbRight();
