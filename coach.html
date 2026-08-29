@@ -363,6 +363,201 @@ select.pin{appearance:none;cursor:pointer}
 .hist b{display:block;font-size:13px;margin-bottom:3px}
 .hist small{display:block;color:var(--ink3);font-size:12px;line-height:1.5}
 .hist .num{font-variant-numeric:tabular-nums;color:var(--accent);font-weight:650}
+
+/* ============================================================
+   THE BUILDER. Prefixed nb- throughout so nothing here can collide
+   with the console's own styling, which the other tabs still use.
+   ============================================================ */
+.nbcols{ display:grid; grid-template-columns:250px minmax(0,1fr) 270px; gap:1px;
+         background:var(--line,#2A313A); border-radius:10px; overflow:hidden;
+         height:calc(100vh - 250px); min-height:520px; margin-top:10px; }
+.nbcol{ background:var(--bg,#12151a); padding:14px 13px 40px; overflow-y:auto; min-width:0; }
+.nbcol.mid{ background:rgba(0,0,0,.16); }
+.nbcol::-webkit-scrollbar{ width:9px; }
+.nbcol::-webkit-scrollbar-thumb{ background:#39424D; border-radius:5px; border:3px solid transparent; background-clip:content-box; }
+@media (max-width:1100px){ .nbcols{ grid-template-columns:1fr; height:auto; } .nbcol{ overflow:visible; } }
+
+.nblbl{ font:600 10px/1.3 ui-monospace,monospace; letter-spacing:.14em; text-transform:uppercase;
+        color:#7c8794; margin:0 0 8px; }
+.nblbl.mt{ margin-top:20px; }
+.nbmut{ color:#7c8794; font-size:11.6px; margin:6px 0 0; }
+.nbempty{ color:#7c8794; font-size:12px; padding:12px 2px; }
+
+.nbgoal{ display:grid; grid-template-columns:auto 1fr; gap:8px; padding:7px 0; border-bottom:1px solid rgba(255,255,255,.07); }
+.nbgoal i{ width:5px; height:5px; border-radius:50%; background:var(--accent,#3ECBA8); margin-top:6px; }
+.nbgoal b{ font-weight:600; font-size:12.6px; }
+.nbrule{ padding:8px 10px; margin-bottom:6px; border-radius:5px;
+         background:rgba(255,255,255,.03); border-left:2px solid #FF7A6B; }
+.nbrule p{ margin:0; font-size:11.8px; color:#c3ccd4; }
+.nbrule.bad{ margin-top:8px; }
+
+.nbchk{ display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid rgba(255,255,255,.07); }
+.nbchk .dot{ width:7px; height:7px; border-radius:50%; flex:none; }
+.nbchk .tx{ flex:1; font-size:12.2px; } .nbchk .n{ font:600 11.5px ui-monospace,monospace; }
+.nbchk.ok .dot{ background:#3ECBA8 } .nbchk.ok .n{ color:#3ECBA8 }
+.nbchk.warn .dot{ background:#F2C94C } .nbchk.warn .n{ color:#F2C94C }
+.nbchk.bad .dot{ background:#FF7A6B } .nbchk.bad .n{ color:#FF7A6B }
+
+.nbmixrow{ margin-bottom:12px; }
+.nbmixlbl{ display:flex; justify-content:space-between; font:600 9.5px ui-monospace,monospace;
+           letter-spacing:.09em; text-transform:uppercase; color:#7c8794; margin:0 0 5px; }
+.nbmixbar{ display:flex; height:9px; border-radius:5px; overflow:hidden; background:rgba(255,255,255,.07); }
+.nbmixkey{ display:flex; flex-wrap:wrap; gap:3px 9px; margin-top:5px; }
+.nbmixkey span{ font-size:10px; color:#7c8794; display:flex; align-items:center; gap:4px; }
+.nbmixkey i{ width:7px; height:7px; border-radius:2px; }
+
+.nbcovhead{ display:flex; align-items:center; gap:8px; margin-top:20px; margin-bottom:8px; }
+.nbseg{ display:flex; gap:2px; background:rgba(0,0,0,.3); border-radius:6px; padding:2px; }
+.nbseg button{ font:600 9px ui-monospace,monospace; letter-spacing:.05em; text-transform:uppercase;
+               color:#7c8794; background:none; border:none; border-radius:4px; padding:4px 6px; cursor:pointer; }
+.nbseg button.on{ background:var(--accent,#3ECBA8); color:#0C1512; }
+.nbdials{ display:flex; flex-wrap:wrap; gap:8px 6px; }
+.nbdial{ width:52px; text-align:center; }
+.nbdial .bg{ stroke:rgba(255,255,255,.12) } .nbdial .fg{ stroke:var(--c) }
+.nbdial .mid{ font:600 10px ui-monospace,monospace; fill:#e9edf1 }
+.nbdial u{ display:block; font-size:9px; text-decoration:none; color:#7c8794; text-transform:capitalize; }
+.nbbody{ display:flex; align-items:center; gap:8px; padding:3px 0; }
+.nbbody .nm{ width:70px; font-size:11px; color:#c3ccd4; }
+.nbbody .bar{ flex:1; height:7px; border-radius:4px; background:rgba(255,255,255,.08); overflow:hidden; }
+.nbbody .bar i{ display:block; height:100%; background:var(--accent,#3ECBA8); }
+.nbbody .n{ font:600 10px ui-monospace,monospace; color:#7c8794; width:16px; text-align:right; }
+
+.nbdays{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
+.nbday{ flex:1; min-width:96px; text-align:left; padding:8px 10px; cursor:pointer; color:#c3ccd4;
+        background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.09); border-radius:8px; }
+.nbday.on{ border-color:var(--accent,#3ECBA8); background:rgba(62,203,168,.10); color:#e9edf1; }
+.nbday.add{ flex:0 0 40px; min-width:40px; text-align:center; font-size:16px; }
+.nbday b{ display:block; font-size:12.5px; font-weight:650; }
+.nbday .parts, .nbday .mn{ display:block; font:400 9.5px ui-monospace,monospace; color:#7c8794;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-transform:capitalize; }
+
+.nbdayhead{ display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-bottom:6px; }
+.nbdayhead .t{ flex:1; min-width:140px; display:flex; flex-direction:column; }
+.nbdn{ font:700 18px/1.2 inherit; background:none; border:none; color:#e9edf1; padding:2px 3px; border-radius:4px; }
+.nbdayhead small{ font-size:11px; color:#7c8794; text-transform:capitalize; padding-left:3px; }
+.nbtag{ width:110px; font:400 11px ui-monospace,monospace; color:#c3ccd4; background:rgba(0,0,0,.25);
+        border:1px solid rgba(255,255,255,.10); border-radius:5px; padding:5px 7px; }
+.nbwhy{ width:100%; font:400 12px inherit; color:#c3ccd4; background:rgba(0,0,0,.22);
+        border:1px solid rgba(255,255,255,.09); border-radius:6px; padding:7px 9px; margin-bottom:12px; }
+.nbmin{ font:600 12px ui-monospace,monospace; color:#e9edf1; white-space:nowrap; }
+.nbmin em{ font-style:normal; font-size:9px; color:#7c8794; margin-left:2px; }
+
+.nbblock{ background:rgba(255,255,255,.035); border:1px solid rgba(255,255,255,.09);
+          border-left:3px solid var(--rc); border-radius:9px; margin-bottom:10px; overflow:hidden; }
+.nbblock.sel{ border-color:var(--rc); box-shadow:0 0 0 2px color-mix(in srgb, var(--rc) 30%, transparent); }
+.nbblock.locked{ opacity:.85 } .nbblock.locked .nbaddit{ display:none }
+.nbbhead{ display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:9px;
+          padding:8px 10px; background:color-mix(in srgb, var(--rc) 12%, transparent);
+          border-bottom:1px solid rgba(255,255,255,.08); }
+.nbrole{ appearance:none; border:none; cursor:pointer; border-radius:5px; color:var(--rc);
+         font:600 9px ui-monospace,monospace; letter-spacing:.11em; text-transform:uppercase;
+         padding:5px 7px; background:color-mix(in srgb, var(--rc) 22%, transparent); }
+.nbnw{ display:flex; flex-direction:column; min-width:0; }
+.nbbn{ font:650 13px inherit; background:none; border:none; color:#e9edf1; padding:1px 3px; border-radius:4px; width:100%; }
+.nbnw small{ font-size:10px; color:#7c8794; padding-left:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.nbctl{ display:flex; align-items:center; gap:6px; }
+.nbtype{ appearance:none; cursor:pointer; border:1px solid rgba(255,255,255,.14); border-radius:6px;
+         font:600 10px ui-monospace,monospace; letter-spacing:.05em; text-transform:uppercase;
+         padding:5px 8px; color:#c3ccd4; background:rgba(0,0,0,.25); }
+.nbcfg{ display:flex; align-items:center; gap:3px; }
+.nbcfg input{ width:36px; text-align:center; font:600 11px ui-monospace,monospace; color:#e9edf1;
+              background:rgba(0,0,0,.3); border:1px solid rgba(255,255,255,.1); border-radius:5px; padding:4px 2px; }
+.nbcfg em{ font-style:normal; font:400 9px ui-monospace,monospace; color:#7c8794; }
+.nblock{ background:none; border:none; cursor:pointer; font-size:12px; padding:2px 3px; filter:grayscale(1) opacity(.55); }
+.nblock:hover,.nblock.on{ filter:none }
+
+.nbit{ display:grid; grid-template-columns:14px 20px minmax(0,1fr) auto auto 22px; align-items:center;
+       gap:8px; padding:7px 9px; border-left:3px solid var(--c); }
+.nbit + .nbit{ border-top:1px solid rgba(255,255,255,.06) }
+.nbit:hover{ background:color-mix(in srgb, var(--c) 9%, transparent) }
+.nbit .hand{ color:#5d6873; cursor:grab; font-size:12px }
+.nbit .ss{ font:600 9.5px ui-monospace,monospace; color:#7c8794; text-align:center }
+.nbit .nm{ cursor:pointer; min-width:0 }
+.nbit .nm b{ font-weight:550; font-size:12.6px } .nbit .nm i{ font-style:normal; font-size:8px; color:#5d6873 }
+.nbit .nm small{ display:block; font-size:10px; color:#7c8794 }
+.nbnums{ display:grid; grid-template-columns:32px 12px 32px 40px; align-items:center; gap:2px; justify-items:center;
+         background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.09); border-radius:6px; padding:3px 5px; }
+.nbnums.rest{ grid-template-columns:32px 28px; border-style:dashed }
+.nbnums.rest.off{ opacity:.4 }
+.nbnums input{ width:32px; background:none; border:none; color:#e9edf1; text-align:center;
+               font:600 11.5px ui-monospace,monospace; padding:2px 0 }
+.nbnums input::-webkit-outer-spin-button,.nbnums input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0 }
+.nbnums em{ font-style:normal; font:400 9px ui-monospace,monospace; color:#7c8794; white-space:nowrap }
+.nbnums .gh{ color:#5d6873; font:600 11.5px ui-monospace,monospace }
+.nbx{ border:none; background:none; color:#7c8794; cursor:pointer; font-size:15px }
+.nbx:hover{ color:#FF7A6B }
+
+.nbss{ display:grid; grid-template-columns:20px 1fr; margin:5px 7px; border:1.5px solid var(--sc);
+       border-radius:8px; overflow:hidden; background:color-mix(in srgb, var(--sc) 8%, transparent); }
+.nbss .bar{ background:color-mix(in srgb, var(--sc) 20%, transparent); display:grid; place-items:center;
+            border-right:1.5px solid var(--sc); }
+.nbss .bar b{ font:700 10px ui-monospace,monospace; color:var(--sc); writing-mode:vertical-rl; transform:rotate(180deg) }
+.nbss .nbit{ border-left:none }
+.nblink{ display:flex; justify-content:center; margin:2px 0 }
+.nblink button{ font:600 9px ui-monospace,monospace; letter-spacing:.08em; text-transform:uppercase;
+                color:#7c8794; background:rgba(0,0,0,.25); border:1px dashed rgba(255,255,255,.14);
+                border-radius:20px; padding:3px 10px; cursor:pointer }
+.nblink button.on{ color:#0C1512; background:var(--accent,#3ECBA8); border-style:solid; border-color:transparent }
+.nbnone{ margin:0; padding:10px 11px 2px; color:#7c8794; font-size:11.8px; font-style:italic }
+.nbaddit{ display:block; margin:6px 10px 8px; padding:5px 11px; background:none;
+          border:1px dashed rgba(255,255,255,.16); border-radius:14px; color:#7c8794;
+          font:600 10.5px inherit; cursor:pointer }
+.nbaddit:hover,.nbaddit.sel{ color:var(--accent,#3ECBA8); border-color:var(--accent,#3ECBA8) }
+.nbbnote{ padding:7px 11px; border-top:1px solid rgba(255,255,255,.07); color:#7c8794; font-size:11.5px }
+
+.nbcard{ display:grid; grid-template-columns:auto 1fr; gap:11px; padding:10px 11px 11px 28px;
+         background:rgba(0,0,0,.25); border-top:1px solid rgba(255,255,255,.07) }
+.nbpic{ width:86px; height:86px; border-radius:7px; background:rgba(255,255,255,.05);
+        display:grid; place-items:center; overflow:hidden }
+.nbpic img{ width:100%; height:100%; object-fit:contain }
+.nbpic.none{ border:1px dashed rgba(255,255,255,.15) }
+.nbpic.none span{ font:600 9px ui-monospace,monospace; letter-spacing:.06em; text-transform:uppercase; color:var(--c) }
+.nbcard h4{ margin:0 0 4px; font-size:14px; font-weight:700 }
+.nbchips{ display:flex; flex-wrap:wrap; gap:4px; margin-bottom:7px }
+.nbchips i{ font:400 9px ui-monospace,monospace; letter-spacing:.04em; text-transform:uppercase; font-style:normal;
+            padding:2px 6px; border-radius:3px; background:rgba(255,255,255,.07); color:#7c8794 }
+.nbchips i.g{ background:color-mix(in srgb, var(--c) 24%, transparent); color:var(--c) }
+.nbchips i.mus{ color:#c3ccd4 } .nbchips i.dem{ background:rgba(255,122,107,.14); color:#FF7A6B }
+.nbcard p{ margin:0 0 8px; font-size:12px; color:#c3ccd4 } .nbcard p.why{ color:#7c8794; font-size:11.5px }
+.nbswapbtn{ font:600 11px inherit; color:#e9edf1; background:rgba(255,255,255,.07);
+            border:1px solid rgba(255,255,255,.14); border-radius:6px; padding:6px 11px; cursor:pointer }
+.nbalts{ margin-top:9px; border-top:1px solid rgba(255,255,255,.08); padding-top:8px }
+#nbaltlist{ max-height:280px; overflow-y:auto }
+.nbladder{ margin-bottom:9px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,.08) }
+.nbrung,.nbalt{ display:grid; grid-template-columns:auto 1fr auto; gap:8px; align-items:center;
+                padding:6px 8px; border-radius:6px; cursor:pointer }
+.nbrung{ border:1px solid rgba(255,255,255,.1); margin-bottom:5px }
+.nbrung:hover,.nbalt:hover{ background:color-mix(in srgb, var(--c) 12%, transparent) }
+.nbrung .ar{ font-size:13px; color:var(--c); width:16px; text-align:center }
+.nbalt .dot,.nbmv .dot{ width:7px; height:7px; border-radius:2px; background:var(--c) }
+.nbrung b,.nbalt b,.nbmv b{ font-weight:550; font-size:12.4px }
+.nbrung small,.nbalt small,.nbmv small{ color:#7c8794; font:400 10px ui-monospace,monospace }
+.nbrung .go,.nbalt .go{ color:var(--accent,#3ECBA8); font:600 10px inherit; opacity:0 }
+.nbrung:hover .go,.nbalt:hover .go{ opacity:1 }
+.nbrung.no b,.nbalt.no b,.nbmv.no b{ color:#7c8794 }
+.nbrung.no small,.nbalt.no small,.nbmv.no small{ color:#FF7A6B }
+
+.nbtarget{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:8px; padding:7px 9px;
+           border-radius:6px; background:rgba(255,255,255,.04); border:1px solid var(--accent,#3ECBA8) }
+.nbtarget.none{ border-color:rgba(255,255,255,.12); border-style:dashed }
+.nbtarget span{ font:600 9px ui-monospace,monospace; letter-spacing:.1em; text-transform:uppercase; color:#7c8794 }
+.nbtarget select{ flex:1; min-width:110px; font:600 12px inherit; color:var(--accent,#3ECBA8);
+                  background:rgba(0,0,0,.3); border:1px solid rgba(255,255,255,.1); border-radius:5px; padding:4px 6px }
+.nbsearch{ width:100%; padding:8px 10px; background:rgba(0,0,0,.3); border:1px solid rgba(255,255,255,.11);
+           border-radius:7px; color:#e9edf1; font:400 12.5px inherit }
+.nbsearch.sm{ padding:6px 9px; font-size:12px }
+.nbfilters{ display:flex; flex-wrap:wrap; gap:5px; margin:9px 0 }
+.nbf{ font:400 9.5px ui-monospace,monospace; letter-spacing:.05em; text-transform:uppercase; padding:4px 7px;
+      border-radius:20px; cursor:pointer; border:1px solid rgba(255,255,255,.14); background:none; color:#7c8794 }
+.nbf.on{ color:#0C1512; background:var(--c,#3ECBA8); border-color:transparent }
+.nbf.fund{ border-color:#FFE24A; color:#FFE24A } .nbf.fund.on{ background:#FFE24A; color:#1a1600 }
+.nbf.body{ text-transform:none; letter-spacing:.02em } .nbf.body.on{ background:#c3ccd4; color:#12151a }
+.nbbreak{ flex-basis:100%; height:1px; background:rgba(255,255,255,.08); margin:3px 0 1px }
+.nbmv{ display:grid; grid-template-columns:auto 1fr auto; gap:8px; align-items:center;
+       padding:7px 8px; border-radius:6px; cursor:pointer }
+.nbmv:hover{ background:rgba(255,255,255,.05) }
+.nbmv .plus{ color:#5d6873; font-size:15px } .nbmv:hover .plus{ color:var(--accent,#3ECBA8) }
+
 </style>
 </head>
 <body>
@@ -1601,91 +1796,465 @@ function libWire(){
   };
 }
 
-function drawProgram(){
-  const host = document.getElementById('prog');
-  if(!host) return;
+/* ============================================================
+   THE BUILDER.
 
-  /* NO CLIENT, NO PROGRAM. The console cannot build against answers that do
-     not exist, and the one useful thing it can offer in that state is the
-     way to get some - so that is the whole page. */
-  if(!HAS_CLIENT){
-    host.innerHTML = `<div class="panel"><div class="pad">
-      <h3 style="margin:0 0 6px;font-size:16px">Nobody to build for yet</h3>
-      <p class="mut" style="margin:0 0 14px">A program is built from a survey. Paste one below and
-        this becomes their console - their answers in the rail, their answers in the ten layers.</p>
-      ${addClientBox('emptyAdd')}
-      <p class="micro" style="margin:10px 0 0">The survey's last screen has <b>Send to Nico</b> and
-        <b>Copy link</b>. Either one produces the thing that goes in this box. Filling the survey out
-        in this browser puts the client here on its own, with nothing to paste.</p>
-    </div></div>`;
-    wireAddClient('emptyAdd');
-    syncRelease(); drawRelease();
-    return;
+   Everything from here to drawProgram() is the program editor, rebuilt.
+   It replaces a stack of text inputs with three columns: who this is
+   for and whether the week obeys them, the week itself, and the whole
+   307-movement library.
+
+   IT OWNS NOTHING. PROG is still the program, PDAY is still the open
+   day, and every change goes through the same one line the old editor
+   used - S.program = PROG; save(1) - so Save, Release, the reasoning
+   layers and the release switches all carry on working untouched.
+   ============================================================ */
+
+/* ---- the library, from the catalogue the console already loads ---- */
+const NB_ORDER = [
+  ['power',   ['jump','explosive','conditioning','full','full-body']],
+  ['carry',   ['carry','locomotion','carry-grip']],
+  ['lower',   ['squat','hinge','lunge','quad','glute','hamstring','calf','shin','single-leg']],
+  ['push',    ['h-push','v-push','straight-arm-push','press','push']],
+  ['pull',    ['h-pull','v-pull','straight-arm-pull','pull']],
+  ['core',    ['anti-extension','anti-lateral-flexion','anti-rotation','rotation','flexion','extension','compression','core']],
+  ['mobility',['mobility']],
+];
+const NB_GROUPS = NB_ORDER.map(x=>x[0]);
+const NB_BODY = {
+  Quads:['quad'], Hamstrings:['hamstring'], Glutes:['glute'], Calves:['calf','tibialis'],
+  Chest:['chest'], Shoulders:['front-delt','side-delt','rear-delt','serratus'],
+  Triceps:['triceps'], Biceps:['biceps','forearm'],
+  Back:['lat','mid-back','traps','lower-back'], Core:['abs','obliques'],
+  'Hip flexors':['hip-flexor'], Grip:['grip'],
+};
+let MOVES = [], MVMAP = {};
+function nbBuildLibrary(){
+  MOVES = Object.values(CAT).map(m=>{
+    const ps = (m.patterns && m.patterns.length ? m.patterns : [m.pattern]).filter(Boolean);
+    let g = 'mobility';
+    for(const [k, keys] of NB_ORDER) if(ps.some(p=>keys.includes(p))) { g = k; break; }
+    return { id:m.id, n:m.name, g, p:ps,
+      mus:(m.muscles||[]).concat(m.musclesAlso||[]).slice(0,6),
+      mod:m.modality||'', role:m.role||'', dem:m.demands||[],
+      f:!!m.fundamental, fam:m.fundFamily||null,
+      meas:m.measure||'reps', lat:m.laterality||'bilateral', spr:m.secPerRep||null,
+      eq:(m.equipment||[]).slice(0,3), cue:m.cue||'',
+      why:((m.coaching&&m.coaching.why)||'').slice(0,180),
+      /* a rung that points at itself or at nothing is not a rung */
+      ez:(m.easier && m.easier!==m.id && CAT[m.easier]) ? m.easier : null,
+      hd:(m.harder && m.harder!==m.id && CAT[m.harder]) ? m.harder : null,
+      art:(m.art && m.art.status==='drawn') ? m.art.file : null };
+  }).sort((a,b)=>a.n.localeCompare(b.n));
+  MVMAP = {}; MOVES.forEach(m=>MVMAP[m.id]=m);
+}
+const MV = id => MVMAP[id] || { id, n:(CAT[id]&&CAT[id].name)||id, g:'mobility', p:[], mus:[], dem:[], eq:[], meas:'reps', lat:'bilateral' };
+const NBC = g => ({ lower:'#B3651A', push:'#1D6FC7', pull:'#7B4FCB', core:'#8A6A00',
+                    carry:'#0E7F76', power:'#C24A3B', mobility:'#4E7A2E' })[g] || '#888';
+
+/* ---- prescriptions: read the prose, write it back ---- */
+function nbParse(p){
+  const s = String(p||'').trim();
+  let m = s.match(/^(\d+)\s*[×x]\s*(\d+)\s*(s)?\s*(each side)?/i);
+  if(m) return { sets:+m[1], val:+m[2], hold:!!m[3], side:!!m[4] };
+  m = s.match(/^(\d+)\s*(s)?\s*(each side)?/i);
+  if(m) return { sets:1, val:+m[1], hold:!!m[2], side:!!m[3] };
+  return { sets:1, val:0, hold:false, side:false };
+}
+const nbFmt = p => `${p.sets} × ${p.val}${p.hold?'s':''}${p.side?' each side':''}`;
+
+/* ---- time, derived from what is prescribed ---- */
+const NB_SPR = 3, NB_TRANS = 8;
+const NB_REST = { Prime:15, Work:90, Finish:45 };
+function nbRestOf(it, b){
+  if(it.rest != null) return it.rest;
+  const m = String(it.note||'').match(/(\d+)\s*s(?:ec)?\s*rest|rest\s*(\d+)/i);
+  it.rest = m ? +(m[1]||m[2]) : null;
+  return it.rest;
+}
+function nbWork(it){
+  const m = MV(it.ex), p = nbParse(it.pres);
+  const per = p.hold ? p.val : p.val * (m.spr || NB_SPR);
+  return per * ((p.side || m.lat === 'unilateral') ? 2 : 1);
+}
+function nbGroups(b){
+  const out = [];
+  (b.items||[]).forEach((it,i)=>{
+    const last = out[out.length-1];
+    if(last && it.sg != null && last.g === it.sg) last.idx.push(i);
+    else out.push({ g: it.sg ?? ('solo'+i), idx:[i] });
+  });
+  return out;
+}
+const NB_DEF = { rounds:3, rest:90, mins:10, interval:60, cap:12, work:20, off:10 };
+function nbBlockSec(b){
+  const cfg = b.cfg || (b.cfg = {}), items = b.items || [];
+  if(!items.length) return 0;
+  if(b.type==='EMOM')   return (cfg.mins ?? NB_DEF.mins)*60;
+  if(b.type==='AMRAP')  return (cfg.cap  ?? NB_DEF.cap)*60;
+  if(b.type==='Tabata') return (cfg.rounds ?? NB_DEF.rounds)*items.length*((cfg.work ?? NB_DEF.work)+(cfg.off ?? NB_DEF.off));
+  if(b.type==='Circuit'){
+    const r = cfg.rounds ?? NB_DEF.rounds;
+    return r*items.reduce((t,it)=>t+nbWork(it)+NB_TRANS,0) + Math.max(0,r-1)*(cfg.rest ?? NB_DEF.rest);
   }
-  const days = Object.keys(PROG.days || {});
-  if(!days.length){ host.innerHTML = libRow() + `<div class="panel"><div class="pad">
-    <p class="mut">No program yet. Start from one above, or build a day.</p>
-    <button class="btn" onclick="addDay()">Add a day</button></div></div>`;
-    libWire(); syncRelease(); drawRelease(); return; }
+  let sec = 0;
+  for(const grp of nbGroups(b)){
+    const its = grp.idx.map(i=>items[i]);
+    const sets = Math.max(...its.map(it=>nbParse(it.pres).sets||1));
+    const through = its.reduce((t,it)=>t+nbWork(it),0) + (its.length-1)*NB_TRANS;
+    const rest = its.length>1 ? (cfg.rest ?? NB_DEF.rest)
+                              : (nbRestOf(its[0],b) ?? NB_REST[b.role] ?? 60);
+    sec += sets*through + Math.max(0,sets-1)*rest;
+  }
+  return sec;
+}
+const nbMins = b => Math.max(1, Math.round(nbBlockSec(b)/60));
+const nbDayMins = d => (d && d.blocks || []).reduce((t,b)=>t+nbMins(b),0);
 
-  const d = PROG.days[PDAY] || PROG.days[days[0]];
-  const totalMins = (d.blocks||[]).reduce((t,b)=>t+(+b.mins||0),0);
+/* ---- search: every word against everything a movement IS ---- */
+const NB_SYN = {
+  leg:['lower','squat','hinge','lunge','quad','glute','hamstring','calf'],
+  legs:['lower','squat','hinge','lunge','quad','glute','hamstring','calf'],
+  lower:['lower','squat','hinge','lunge'], upper:['push','pull'],
+  explosive:['power','jump','explosive','conditioning'], power:['power','jump','explosive'],
+  jump:['jump','impact'], chest:['chest','h-push'], back:['lat','mid-back','pull'],
+  shoulder:['front-delt','side-delt','v-push'], shoulders:['front-delt','side-delt','v-push'],
+  arms:['biceps','triceps'], abs:['abs','core'], core:['core','abs','obliques'],
+  grip:['grip','carry'], carry:['carry','locomotion','grip'],
+  cardio:['conditioning','power'], conditioning:['conditioning','power'],
+  mobility:['mobility','joint-prep'], warmup:['joint-prep','activation','mobility'],
+  strength:['working-set'], skill:['skill-strength','skill-practice'],
+  bw:['bodyweight'], bodyweight:['bodyweight'],
+  db:['dumbbell'], kb:['kettlebell'], bb:['barbell'],
+};
+function nbHay(m){
+  if(m._h) return m._h;
+  m._h = [m.n,m.g,m.mod,m.role,...(m.p||[]),...(m.mus||[]),...(m.dem||[]),...(m.eq||[]),
+          m.fam||'', m.f?'fundamental':''].join(' ').toLowerCase();
+  return m._h;
+}
+const nbWords = q => String(q||'').toLowerCase().split(/\s+/).filter(Boolean);
+const nbMatch = (m,w) => w.every(x => nbHay(m).includes(x) || (NB_SYN[x]||[]).some(y=>nbHay(m).includes(y)));
 
-  host.innerHTML = libRow() + `
-    <div class="ptabs">
-      ${days.map(k=>`<button class="ptab ${k===PDAY?'on':''}" data-pday="${k}">
-        ${esc(PROG.days[k].name || k)}</button>`).join('')}
-      <button class="ptab add" onclick="addDay()">+</button>
+/* ---- what this client's constraints forbid, from what a movement demands ---- */
+function nbForbidden(m){
+  const txt = ((A.constraintsText||[]).join(' ') + ' ' + (A.pain||[]).join(' ')).toLowerCase();
+  if((m.dem||[]).includes('impact') && /jump|impact|knee/.test(txt)) return 'no jumping';
+  if((m.dem||[]).includes('deep-knee-flexion') && /deep.*knee|knee/.test(txt)) return 'deep knee flexion';
+  return null;
+}
+
+/* ---- the checks, all reading the same program ---- */
+function nbCounts(){
+  const c = {}; NB_GROUPS.forEach(g=>c[g]=0);
+  for(const d of Object.values(PROG.days||{})) for(const b of d.blocks||[])
+    for(const it of b.items||[]){
+      const g = MV(it.ex).g; if(c[g]==null) continue;
+      if(b.role==='Prime' && g!=='mobility') continue;
+      c[g]++;
+    }
+  return c;
+}
+function nbBodyCounts(){
+  const t = {}; Object.keys(NB_BODY).forEach(k=>t[k]=0);
+  for(const d of Object.values(PROG.days||{})) for(const b of d.blocks||[]){
+    if(b.role==='Prime') continue;
+    for(const it of b.items||[]) for(const mu of (MV(it.ex).mus||[]).slice(0,2))
+      for(const [part,list] of Object.entries(NB_BODY)) if(list.includes(mu)) t[part]++;
+  }
+  return t;
+}
+const NB_Q = ['strength','hypertrophy','aerobic','mobility','explosive'];
+const NB_QC = { strength:'#1D6FC7', hypertrophy:'#7B4FCB', aerobic:'#0E7F76',
+                mobility:'#4E7A2E', explosive:'#C24A3B' };
+function nbQuality(it,b){
+  const m = MV(it.ex), p = nbParse(it.pres), cfg = b.cfg || {};
+  if(b.type==='Tabata') return 'explosive';
+  if(b.type==='AMRAP')  return 'aerobic';
+  if(b.type==='EMOM')   return (cfg.interval ?? 60) <= 60 ? 'aerobic' : 'hypertrophy';
+  if(b.type==='Circuit')return (cfg.rest ?? 60) < 60 ? 'aerobic' : 'hypertrophy';
+  const rest = b.type==='Superset' ? (cfg.rest ?? 75) : (nbRestOf(it,b) ?? NB_REST[b.role] ?? 60);
+  if(b.role==='Prime' || m.g==='mobility') return 'mobility';
+  if(m.g==='power' || /jump|swing|clean|burpee|snatch/i.test(m.n)) return 'explosive';
+  if(p.hold) return rest>=60 ? 'strength' : 'aerobic';
+  if(p.val<=6  && rest>=120) return 'strength';
+  if(p.val<=15 && rest>=45)  return 'hypertrophy';
+  return 'aerobic';
+}
+function nbMix(dayIds){
+  const t = {}; NB_Q.forEach(q=>t[q]=0); let total = 0;
+  for(const id of dayIds) for(const b of (PROG.days[id].blocks||[])){
+    if(!(b.items||[]).length) continue;
+    const per = nbMins(b)/b.items.length;
+    for(const it of b.items){ t[nbQuality(it,b)] += per; total += per; }
+  }
+  return { t, total };
+}
+function nbDayParts(id){
+  const t = {};
+  for(const b of (PROG.days[id].blocks||[])){
+    if(b.role==='Prime') continue;
+    for(const it of b.items||[]) for(const mu of (MV(it.ex).mus||[]).slice(0,2))
+      for(const [part,list] of Object.entries(NB_BODY)) if(list.includes(mu)) t[part]=(t[part]||0)+1;
+  }
+  return Object.entries(t).sort((a,b)=>b[1]-a[1]).slice(0,3).map(x=>x[0].toLowerCase());
+}
+
+/* ---- editor state. Nothing here is the program; the program is PROG. ---- */
+let nbSel = null, nbOpen = null, nbSwap = null, nbSwapQ = '',
+    nbFilter = null, nbBody = null, nbFund = false, nbView = 'patterns', nbDrag = null;
+const nbSave = () => { S.program = PROG; save(1); drawProgram(); };
+
+/* ---- mutations. Every one ends at nbSave, which is S.program + save(1). ---- */
+function nbSetNum(bi,ii,f,raw){
+  const it = PROG.days[PDAY].blocks[bi].items[ii];
+  const v = raw==='' ? null : Math.max(0, parseInt(raw,10)||0);
+  if(f==='rest'){ it.rest = v; return nbSave(); }
+  const p = nbParse(it.pres);
+  if(f==='sets') p.sets = Math.max(1, v||1);
+  if(f==='val')  p.val  = Math.max(1, v||1);
+  it.pres = nbFmt(p); nbSave();
+}
+function nbSetBlock(bi,k,v){ const b=PROG.days[PDAY].blocks[bi];
+  b[k] = (k==='mins') ? Math.max(0,parseInt(v,10)||0) : v; nbSave(); }
+function nbSetCfg(bi,k,v){ const b=PROG.days[PDAY].blocks[bi];
+  (b.cfg ||= {})[k] = v==='' ? null : Math.max(0,parseInt(v,10)||0); nbSave(); }
+const NB_TYPES = ['Straight','Superset','Circuit','EMOM','AMRAP','Tabata'];
+const NB_SPEC = {
+  Straight:{ blurb:'Sets and reps, one movement at a time.', block:[], item:['sets','val','rest'] },
+  Superset:{ blurb:'Straight through the pair, then rest, then again.', block:['rounds','rest'], item:['val'] },
+  Circuit: { blurb:'Every movement, then rest, then again.', block:['rounds','rest'], item:['val'] },
+  EMOM:    { blurb:'One movement on the top of each minute.', block:['mins','interval'], item:['val'] },
+  AMRAP:   { blurb:'As many rounds as possible inside the cap.', block:['cap'], item:['val'] },
+  Tabata:  { blurb:'Work, rest, repeat. The clock decides.', block:['work','off','rounds'], item:[] },
+};
+const NB_FIELD = { rounds:['rounds',''], rest:['rest','s'], mins:['length','min'],
+                   interval:['every','s'], cap:['cap','min'], work:['work','s'], off:['off','s'] };
+function nbSetType(bi,t){ const b=PROG.days[PDAY].blocks[bi]; b.type=t;
+  const cfg = b.cfg ||= {};
+  for(const k of NB_SPEC[t].block) if(cfg[k]==null) cfg[k]=NB_DEF[k];
+  nbSel=bi; nbSave(); }
+function nbDel(bi,ii){ const b=PROG.days[PDAY].blocks[bi];
+  b.items.splice(ii,1); if(!b.items.length) PROG.days[PDAY].blocks.splice(bi,1);
+  nbSel=null; nbOpen=null; nbSave(); }
+function nbAdd(id){
+  if(nbSel==null || !PROG.days[PDAY].blocks[nbSel])
+    return toast('Pick a block first — hit "+ Add a movement" on the one you want');
+  const b = PROG.days[PDAY].blocks[nbSel], m = MV(id), no = nbForbidden(m);
+  b.items.push({ ex:id, pres: m.meas==='hold' ? '3 × 30s' : '3 × 8', note:'' });
+  nbSave(); toast(no ? `${m.n} added — but it breaks: ${no}` : `${m.n} → ${b.name||'block'}`);
+}
+function nbPickInto(bi){ nbSel=bi; nbOpen=null; drawProgram();
+  const q=document.getElementById('nbq'); if(q){ q.focus(); q.select(); } }
+function nbNewBlock(){ (PROG.days[PDAY].blocks ||= [])
+  .push({ role:'Work', name:'New block', note:'', type:'Straight', cfg:{}, items:[] });
+  nbSel = PROG.days[PDAY].blocks.length-1; nbSave(); toast('Now pick movements on the right'); }
+function nbToggleCard(bi,ii){ const k=bi+':'+ii;
+  nbOpen = (nbOpen===k) ? null : k; if(nbOpen!==k) nbSwap=null; drawProgram(); }
+function nbToggleJoin(bi,ii){
+  const items = PROG.days[PDAY].blocks[bi].items, a=items[ii], b2=items[ii+1];
+  if(a.sg!=null && b2.sg===a.sg){ const old=a.sg, fresh=Date.now()%100000;
+    for(let k=ii+1;k<items.length && items[k].sg===old;k++) items[k].sg=fresh; }
+  else { a.sg = a.sg ?? (Date.now()%100000); b2.sg = a.sg; }
+  nbSave();
+}
+function nbToggleLock(bi){ const b=PROG.days[PDAY].blocks[bi]; b.locked=!b.locked;
+  if(b.locked && nbSel===bi) nbSel=null; nbSave(); }
+function nbSwapTo(bi,ii,id){ PROG.days[PDAY].blocks[bi].items[ii].ex=id;
+  nbSwap=null; nbSwapQ=''; nbOpen=bi+':'+ii; nbSave(); toast('Swapped in '+MV(id).n); }
+function nbDragStart(e,bi,ii){ nbDrag={bi,ii}; e.dataTransfer.effectAllowed='move'; }
+function nbDragOver(e,bi){ if(nbDrag && nbDrag.bi===bi){ e.preventDefault(); e.dataTransfer.dropEffect='move'; } }
+function nbDrop(e,bi,ii){ if(!nbDrag||nbDrag.bi!==bi) return; e.preventDefault();
+  const items=PROG.days[PDAY].blocks[bi].items;
+  const [m]=items.splice(nbDrag.ii,1); items.splice(ii,0,m); nbDrag=null; nbOpen=null; nbSave(); }
+
+/* ---- the movement card, and the ladder around a fundamental ---- */
+function nbCard(m, extra){
+  const pic = m.art ? `<div class="nbpic"><img src="${m.art}" alt=""></div>`
+                    : `<div class="nbpic none" style="--c:${NBC(m.g)}"><span>${(m.p||[])[0]||m.g}</span></div>`;
+  return `<div class="nbcard" style="--c:${NBC(m.g)}" onclick="event.stopPropagation()">${pic}
+    <div><h4>${esc(m.n)}${m.f?' ★':''}</h4>
+      <div class="nbchips"><i class="g">${m.g}</i>
+        ${(m.p||[]).map(x=>`<i>${esc(x)}</i>`).join('')}
+        ${(m.mus||[]).slice(0,4).map(x=>`<i class="mus">${esc(x)}</i>`).join('')}
+        ${m.mod?`<i>${esc(m.mod)}</i>`:''}${m.lat==='unilateral'?'<i>per side</i>':''}
+        ${(m.dem||[]).map(x=>`<i class="dem">${esc(x)}</i>`).join('')}</div>
+      ${m.cue?`<p>${esc(m.cue)}</p>`:''}${m.why?`<p class="why">${esc(m.why)}</p>`:''}
+      ${extra||''}</div></div>`;
+}
+function nbAlts(bi,ii){
+  const b = PROG.days[PDAY].blocks[bi], m = MV(b.items[ii].ex);
+  const here = new Set(b.items.map(x=>x.ex));
+  const w = nbWords(nbSwapQ);
+  const pool = w.length ? MOVES.filter(x=>!here.has(x.id) && nbMatch(x,w))
+                        : MOVES.filter(x=>x.g===m.g && !here.has(x.id));
+  return pool.sort((a,c)=>(c.f?1:0)-(a.f?1:0) || a.n.localeCompare(c.n)).slice(0,30);
+}
+function nbAltsHTML(bi,ii){
+  const list = nbAlts(bi,ii);
+  if(!list.length) return `<p class="nbempty">Nothing matches those words.</p>`;
+  return list.map(a=>`<div class="nbalt ${nbForbidden(a)?'no':''}" style="--c:${NBC(a.g)}"
+    onclick="event.stopPropagation();nbSwapTo(${bi},${ii},'${a.id}')">
+    <span class="dot"></span><span><b>${esc(a.n)}${a.f?' ★':''}</b><br>
+      <small>${esc(nbForbidden(a) || [a.g,(a.mus||[]).slice(0,2).join('/'),a.mod].filter(Boolean).join(' · '))}</small>
+    </span><span class="go">use</span></div>`).join('');
+}
+function nbLadder(bi,ii){
+  if(nbSwapQ) return '';
+  const m = MV(PROG.days[PDAY].blocks[bi].items[ii].ex), rungs = [];
+  if(m.ez) rungs.push(['Easier', MV(m.ez), '↓']);
+  if(m.hd) rungs.push(['Harder', MV(m.hd), '↑']);
+  if(!rungs.length) return '';
+  return `<div class="nbladder"><p class="nblbl">${m.f?'The ladder around this fundamental':'Same movement, different level'}</p>
+    ${rungs.map(([lab,a,ar])=>`<div class="nbrung ${nbForbidden(a)?'no':''}" style="--c:${NBC(a.g)}"
+      onclick="event.stopPropagation();nbSwapTo(${bi},${ii},'${a.id}')">
+      <span class="ar">${ar}</span><span><b>${esc(a.n)}${a.f?' ★':''}</b><br>
+      <small>${lab}${nbForbidden(a)?' · '+nbForbidden(a):''}</small></span>
+      <span class="go">use</span></div>`).join('')}</div>`;
+}
+function nbSwapSearch(bi,ii,v){
+  const had = !!nbSwapQ; nbSwapQ = v;
+  const host = document.getElementById('nbaltlist');
+  if(host) host.innerHTML = nbAltsHTML(bi,ii);
+  if(had !== !!v){
+    const lad = document.querySelector('.nbladder');
+    if(v && lad) lad.remove();
+    if(!v && !lad && host) host.insertAdjacentHTML('beforebegin', nbLadder(bi,ii));
+  }
+}
+
+/* ---- the three columns ---- */
+function nbLeft(){
+  const goals = (A.goalsText||[]).filter(Boolean);
+  const cons  = (A.constraintsText||[]).filter(Boolean);
+  const ids   = Object.keys(PROG.days||{});
+  const total = ids.reduce((t,id)=>t+nbDayMins(id),0);
+  const want  = +(A.length||0) * (ids.length||1);
+
+  let h = `<p class="nblbl">What they asked for</p>`;
+  h += goals.length ? goals.map(g=>`<div class="nbgoal"><i></i><b>${esc(g)}</b></div>`).join('')
+                    : `<p class="nbmut">No goals in this survey.</p>`;
+  if(cons.length){
+    h += `<p class="nblbl mt">Hard constraints</p>`;
+    h += cons.map(c=>`<div class="nbrule"><p>${esc(c)}</p></div>`).join('');
+  }
+
+  h += `<p class="nblbl mt">Does the week obey them?</p>`;
+  const rows = [
+    ['Sessions', `${ids.length}${A.days?' / '+A.days:''}`, !A.days || ids.length<=+A.days ? 'ok':'bad'],
+    ['Weekly minutes', want ? `${total} / ${want}` : `${total}`, !want || total<=want*1.1 ? 'ok':'warn'],
+  ];
+  const broken = [];
+  for(const id of ids) for(const b of (PROG.days[id].blocks||[])) for(const it of b.items||[]){
+    const no = nbForbidden(MV(it.ex)); if(no) broken.push(`${PROG.days[id].name} · ${MV(it.ex).n} — ${no}`);
+  }
+  rows.push(['Breaks a constraint', broken.length ? broken.length+' found' : 'clear', broken.length?'bad':'ok']);
+  h += rows.map(([t,n,k])=>`<div class="nbchk ${k}"><span class="dot"></span>
+        <span class="tx">${t}</span><span class="n">${n}</span></div>`).join('');
+  if(broken.length) h += `<div class="nbrule bad"><p>${broken.map(esc).join('<br>')}</p></div>`;
+
+  h += `<p class="nblbl mt">Training balance</p><div id="nbmix"></div>`;
+  h += `<div class="nbcovhead"><p class="nblbl" style="margin:0;flex:1">${
+        nbView==='patterns'?'A full ring is twice this week':'Where the work lands'}</p>
+      <span class="nbseg">${['patterns','body'].map(v=>
+        `<button class="${nbView===v?'on':''}" onclick="nbView='${v}';drawProgram()">${v==='body'?'body':'patterns'}</button>`).join('')}</span></div>
+      <div id="nbcov"></div>`;
+  return h;
+}
+function nbMixHTML(){
+  const ids = Object.keys(PROG.days||{});
+  const bar = (label, m) => {
+    if(!m.total) return '';
+    const seg = NB_Q.filter(q=>m.t[q]>0).map(q=>`<i style="flex:${m.t[q]};background:${NB_QC[q]}"></i>`).join('');
+    const key = NB_Q.filter(q=>m.t[q]>0).map(q=>`<span><i style="background:${NB_QC[q]}"></i>${q} ${Math.round(m.t[q]/m.total*100)}%</span>`).join('');
+    return `<div class="nbmixrow"><p class="nbmixlbl">${label}<b>${Math.round(m.total)} min</b></p>
+      <div class="nbmixbar">${seg}</div><div class="nbmixkey">${key}</div></div>`;
+  };
+  return bar('This day', nbMix([PDAY])) + bar('The week', nbMix(ids));
+}
+function nbCovHTML(){
+  if(nbView==='body'){
+    const t = nbBodyCounts();
+    const rows = Object.entries(t).filter(([,n])=>n>0).sort((a,b)=>b[1]-a[1]);
+    if(!rows.length) return `<p class="nbmut">Nothing in the week yet.</p>`;
+    const max = Math.max(1,...rows.map(r=>r[1]));
+    const thin = rows.filter(([,n])=>n===1).map(r=>r[0]);
+    return rows.map(([k,n])=>`<div class="nbbody"><span class="nm">${k}</span>
+      <span class="bar"><i style="width:${Math.round(n/max*100)}%"></i></span><span class="n">${n}</span></div>`).join('')
+      + (thin.length?`<p class="nbmut">Once this week: ${thin.join(', ')}.</p>`:'');
+  }
+  const c = nbCounts(), R = 15, C = 2*Math.PI*R;
+  return `<div class="nbdials">` + NB_GROUPS.map(g=>{
+    const n=c[g], frac=Math.min(1,n/2);
+    return `<div class="nbdial" style="--c:${NBC(g)}" title="${g}: ${n} this week, aiming for 2">
+      <svg width="36" height="36" viewBox="0 0 38 38">
+        <circle class="bg" cx="19" cy="19" r="${R}" fill="none" stroke-width="3.5"/>
+        <circle class="fg" cx="19" cy="19" r="${R}" fill="none" stroke-width="3.5" stroke-linecap="round"
+          transform="rotate(-90 19 19)" stroke-dasharray="${(C*frac).toFixed(1)} ${C.toFixed(1)}"/>
+        <text class="mid" x="19" y="23" text-anchor="middle">${n}×</text></svg><u>${g}</u></div>`;
+  }).join('') + `</div>`;
+}
+
+function nbRight(){
+  const b = nbSel!=null ? PROG.days[PDAY].blocks[nbSel] : null;
+  const opts = (PROG.days[PDAY].blocks||[]).map((x,i)=>
+    `<option value="${i}" ${i===nbSel?'selected':''}>${esc(x.role)} · ${esc(x.name||'block')}</option>`).join('');
+  const w = nbWords((document.getElementById('nbq')||{}).value||'');
+  const inBody = m => !nbBody || (m.mus||[]).some(mu=>(NB_BODY[nbBody]||[]).includes(mu));
+  const hits = MOVES.filter(m => (!nbFilter||m.g===nbFilter) && (!nbFund||m.f) && inBody(m) && nbMatch(m,w));
+  return `<p class="nblbl">Movements · ${hits.length} of ${MOVES.length}</p>
+    <div class="nbtarget ${b?'':'none'}"><span>Adding to</span>
+      <select onchange="nbSel = this.value===''?null:+this.value; drawProgram()">
+        <option value="" ${b?'':'selected'}>— pick a block —</option>${opts}</select></div>
+    <input class="nbsearch" id="nbq" placeholder="leg explosive · kettlebell hinge · abs…"
+           value="${esc((document.getElementById('nbq')||{}).value||'')}" oninput="nbRedrawList()">
+    <div class="nbfilters">
+      <button class="nbf fund ${nbFund?'on':''}" onclick="nbFund=!nbFund;drawProgram()">★ fundamentals</button>
+      ${NB_GROUPS.map(g=>`<button class="nbf ${nbFilter===g?'on':''}" style="--c:${NBC(g)}"
+        onclick="nbFilter = nbFilter==='${g}'?null:'${g}'; drawProgram()">${g}</button>`).join('')}
+      <span class="nbbreak"></span>
+      ${Object.keys(NB_BODY).map(part=>`<button class="nbf body ${nbBody===part?'on':''}"
+        onclick="nbBody = nbBody==='${part}'?null:'${part}'; drawProgram()">${part}</button>`).join('')}
     </div>
+    <div id="nblist">${nbListHTML(hits)}</div>`;
+}
+function nbListHTML(hits){
+  const list = (hits||[]).sort((a,b)=>(b.f?1:0)-(a.f?1:0)||a.n.localeCompare(b.n));
+  if(!list.length) return `<p class="nbempty">Nothing matches all of those words.</p>`;
+  return list.slice(0,120).map(m=>`<div class="nbmv ${nbForbidden(m)?'no':''}" style="--c:${NBC(m.g)}"
+      onclick="nbAdd('${m.id}')"><span class="dot"></span>
+      <span><b>${esc(m.n)}${m.f?' ★':''}</b><br><small>${esc(nbForbidden(m)?'⚠ '+nbForbidden(m)
+        : [m.g,(m.mus||[]).slice(0,2).join('/'),m.mod].filter(Boolean).join(' · '))}</small></span>
+      <span class="plus">+</span></div>`).join('')
+    + (list.length>120 ? `<p class="nbmut">${list.length-120} more — keep typing to narrow it.</p>` : '');
+}
+function nbRedrawList(){
+  const w = nbWords(document.getElementById('nbq').value);
+  const inBody = m => !nbBody || (m.mus||[]).some(mu=>(NB_BODY[nbBody]||[]).includes(mu));
+  const hits = MOVES.filter(m => (!nbFilter||m.g===nbFilter) && (!nbFund||m.f) && inBody(m) && nbMatch(m,w));
+  const host = document.getElementById('nblist');
+  if(host) host.innerHTML = nbListHTML(hits);
+}
 
-    <div class="panel">
-      <div class="pad">
-        <div class="pgrid">
-          <label>Name<input class="pin" data-f="name" value="${esc(d.name||'')}"></label>
-          <label>Tag<input class="pin" data-f="tag" value="${esc(d.tag||'')}"></label>
-        </div>
-        <label class="pfull">Why this session exists
-          <textarea class="pin" data-f="why" rows="2">${esc(d.why||'')}</textarea></label>
-        <div class="pmeta">
-          <span class="${totalMins>+(A.length||20)?'over':''}">${totalMins} min planned
-            &middot; ${A.length||20} asked for</span>
-          <button class="btn sm" onclick="delDay()">Delete this day</button>
-        </div>
-      </div>
-    </div>
+/* ---- the middle: the day, its blocks, its movements ---- */
+function nbMiddle(){
+  const days = Object.keys(PROG.days||{});
+  /* THE THREE COLUMNS. Everything the old editor did is still here - it
+     is the same PROG, the same PDAY, the same save - it just stopped
+     being a stack of text inputs. */
+  if(!MOVES.length) nbBuildLibrary();
+  if(PDAY == null || !PROG.days[PDAY]) PDAY = days[0];
 
-    ${(d.blocks||[]).map((b,bi)=>`
-      <div class="panel blk">
-        <div class="pad">
-          <div class="blkhd">
-            <input class="pin role" data-b="${bi}" data-f="role" value="${esc(b.role||'')}">
-            <input class="pin bname" data-b="${bi}" data-f="name"
-              placeholder="what this block is called" value="${esc(b.name||'')}">
-            <label class="mins">min<input class="pin" type="number" min="0"
-              data-b="${bi}" data-f="mins" value="${+b.mins||0}"></label>
-            <div class="blkbtns">
-              <button class="btn sm" onclick="moveBlock(${bi},-1)" title="Up">&uarr;</button>
-              <button class="btn sm" onclick="moveBlock(${bi},1)" title="Down">&darr;</button>
-              <button class="btn sm" onclick="delBlock(${bi})">Remove</button>
-            </div>
-          </div>
-          <input class="pin bnote" data-b="${bi}" data-f="note"
-            placeholder="how to run it - rounds, rest, what to watch" value="${esc(b.note||'')}">
-          ${(b.items||[]).map((it,ii)=>`
-            <div class="itrow">
-              <select class="pin ex" data-b="${bi}" data-i="${ii}" data-f="ex">${mvOptions(it.ex)}</select>
-              <input class="pin pres" data-b="${bi}" data-i="${ii}" data-f="pres"
-                placeholder="3 &times; 8" value="${esc(it.pres||'')}">
-              <input class="pin note" data-b="${bi}" data-i="${ii}" data-f="note"
-                placeholder="a cue, or why this one" value="${esc(it.note||'')}">
-              <button class="btn sm" onclick="delItem(${bi},${ii})">&times;</button>
-            </div>`).join('')}
-          <button class="btn sm add" onclick="addItem(${bi})">+ movement</button>
-        </div>
-      </div>`).join('')}
-
-    <button class="btn wide" onclick="addBlock()">+ block</button>
-    <div class="pwarn" id="pwarn"></div>`;
+  host.innerHTML = libRow() + `<div class="nbcols">
+      <div class="nbcol left" id="nbleft"></div>
+      <div class="nbcol mid"  id="nbmid"></div>
+      <div class="nbcol right" id="nbright"></div>
+    </div>`;
+  document.getElementById('nbleft').innerHTML  = nbLeft();
+  document.getElementById('nbmid').innerHTML   = nbMiddle();
+  document.getElementById('nbright').innerHTML = nbRight();
+  document.getElementById('nbmix').innerHTML   = nbMixHTML();
+  document.getElementById('nbcov').innerHTML   = nbCovHTML();
 
   libWire();
   /* the release switches are the program's days - resynced here so adding
