@@ -50,6 +50,10 @@
           "role": "Prime",
           "name": "Knee Armor Circuit",
           "note": "2 rounds, controlled",
+          "type": "Circuit",
+          "cfg": {
+            "rounds": 2
+          },
           "mins": 3,
           "items": [
             {
@@ -78,6 +82,8 @@
           "role": "Work",
           "name": "Bulgarian Split Squat",
           "note": "To failure, per side · 3 sets base (up to 4 on strong days)",
+          "type": "Straight",
+          "cfg": {},
           "mins": 8,
           "items": [
             {
@@ -91,12 +97,15 @@
           "role": "Work",
           "name": "Slant-Board Squat",
           "note": "Strength, tempo 3-1-1",
+          "type": "Straight",
+          "cfg": {},
           "mins": 8,
           "items": [
             {
               "ex": "slant_board_squat",
               "pres": "3 × 6 · tempo 3-1-1",
-              "note": "90s rest"
+              "note": "90s rest",
+              "rest": 90
             }
           ]
         },
@@ -104,12 +113,15 @@
           "role": "Work",
           "name": "Assisted Reverse Nordic Curl",
           "note": "Quad eccentric · limited rest · 3rd anchor",
+          "type": "Straight",
+          "cfg": {},
           "mins": 8,
           "items": [
             {
               "ex": "reverse_nordic",
               "pres": "3 × 8",
-              "note": "45s rest"
+              "note": "45s rest",
+              "rest": 45
             }
           ]
         },
@@ -117,6 +129,11 @@
           "role": "Finish",
           "name": "Iso Burner — Horse Stance + Side Plank",
           "note": "3 rounds, continuous (no rest)",
+          "type": "Circuit",
+          "cfg": {
+            "rounds": 3,
+            "rest": 0
+          },
           "mins": 3,
           "items": [
             {
@@ -147,6 +164,10 @@
           "role": "Prime",
           "name": "Core + Compression Prep",
           "note": "2 rounds · handstand-ready",
+          "type": "Circuit",
+          "cfg": {
+            "rounds": 2
+          },
           "mins": 3,
           "items": [
             {
@@ -180,6 +201,8 @@
           "role": "Work",
           "name": "Handstand Practice",
           "note": "Fresh — quality over fatigue",
+          "type": "Straight",
+          "cfg": {},
           "mins": 8,
           "items": [
             {
@@ -190,7 +213,8 @@
             {
               "ex": "wall_handstand_hold",
               "pres": "30s",
-              "note": "45s rest"
+              "note": "45s rest",
+              "rest": 45
             },
             {
               "ex": "handstand",
@@ -203,6 +227,8 @@
           "role": "Work",
           "name": "Deep Parallette Pike Push-Up",
           "note": "To failure",
+          "type": "Straight",
+          "cfg": {},
           "mins": 8,
           "items": [
             {
@@ -216,12 +242,15 @@
           "role": "Work",
           "name": "Weighted Dip",
           "note": "Strength · 1 warm-up (8-10) → 3 × 5",
+          "type": "Straight",
+          "cfg": {},
           "mins": 8,
           "items": [
             {
               "ex": "weighted_dip",
               "pres": "3 × 5",
-              "note": "150s rest"
+              "note": "150s rest",
+              "rest": 150
             }
           ]
         },
@@ -229,6 +258,10 @@
           "role": "Finish",
           "name": "Push-Up AMRAP",
           "note": "Volume",
+          "type": "AMRAP",
+          "cfg": {
+            "cap": 3
+          },
           "mins": 3,
           "items": [
             {
@@ -249,17 +282,21 @@
           "role": "Prime",
           "name": "Glute Activation",
           "note": "Sidewalks (continuous) + bird dogs",
+          "type": "Straight",
+          "cfg": {},
           "mins": 3,
           "items": [
             {
               "ex": "banded_sidewalk",
               "pres": "120s",
-              "note": "15s rest"
+              "note": "15s rest",
+              "rest": 15
             },
             {
               "ex": "bird_dog_crunch",
               "pres": "2 × 8 each side",
-              "note": "20s rest"
+              "note": "20s rest",
+              "rest": 20
             }
           ]
         },
@@ -267,12 +304,15 @@
           "role": "Work",
           "name": "Hip Thrust",
           "note": "Strength loader — add load weekly",
+          "type": "Straight",
+          "cfg": {},
           "mins": 8,
           "items": [
             {
               "ex": "hip_thrust",
               "pres": "4 × 5",
-              "note": "150s rest"
+              "note": "150s rest",
+              "rest": 150
             }
           ]
         },
@@ -280,12 +320,15 @@
           "role": "Work",
           "name": "Single-Leg RDL",
           "note": "Size — per side, progress load/reps · alternating sides = built-in rest",
+          "type": "Straight",
+          "cfg": {},
           "mins": 8,
           "items": [
             {
               "ex": "single_leg_rdl",
               "pres": "3 × 8 each side",
-              "note": "90s rest"
+              "note": "90s rest",
+              "rest": 90
             }
           ]
         },
@@ -293,12 +336,15 @@
           "role": "Work",
           "name": "Nordic Curl",
           "note": "Hamstring eccentric — progress ROM → load · 3rd anchor",
+          "type": "Straight",
+          "cfg": {},
           "mins": 8,
           "items": [
             {
               "ex": "nordic_curl",
               "pres": "3 × 6",
-              "note": "90s rest"
+              "note": "90s rest",
+              "rest": 90
             }
           ]
         },
@@ -306,6 +352,11 @@
           "role": "Finish",
           "name": "Tabata — Swing + Jump Squat",
           "note": "20/10, 5 cycles (~5 min)",
+          "type": "Tabata",
+          "cfg": {
+            "work": 20,
+            "rounds": 5
+          },
           "mins": 3,
           "items": [
             {
@@ -331,27 +382,33 @@
           "role": "Prime",
           "name": "Pulling Prep",
           "note": "Forearm-light",
+          "type": "Straight",
+          "cfg": {},
           "mins": 3,
           "items": [
             {
               "ex": "banded_pullapart",
               "pres": "1 × 20",
-              "note": "10s rest"
+              "note": "10s rest",
+              "rest": 10
             },
             {
               "ex": "scap_pullup",
               "pres": "1 × 15",
-              "note": ""
+              "note": "",
+              "rest": 0
             },
             {
               "ex": "active_hang",
               "pres": "30s",
-              "note": "20s rest"
+              "note": "20s rest",
+              "rest": 20
             },
             {
               "ex": "dragon_flag",
               "pres": "30s",
-              "note": "15s rest"
+              "note": "15s rest",
+              "rest": 15
             }
           ]
         },
@@ -359,12 +416,15 @@
           "role": "Work",
           "name": "Front Lever",
           "note": "TUT holds · advanced-tuck or banded straddle (set Week 1)",
+          "type": "Straight",
+          "cfg": {},
           "mins": 8,
           "items": [
             {
               "ex": "front_lever_tuck",
               "pres": "10s",
-              "note": "60s rest"
+              "note": "60s rest",
+              "rest": 60
             }
           ]
         },
@@ -372,12 +432,15 @@
           "role": "Work",
           "name": "Weighted Chin-Up",
           "note": "Strength · supinated · 1 warm-up (8-10) → 3 × 5",
+          "type": "Straight",
+          "cfg": {},
           "mins": 8,
           "items": [
             {
               "ex": "weighted_chinup",
               "pres": "3 × 5",
-              "note": "150s rest"
+              "note": "150s rest",
+              "rest": 150
             }
           ]
         },
@@ -385,12 +448,15 @@
           "role": "Work",
           "name": "Single-Arm Row",
           "note": "Horizontal · unilateral · per side · alternating sides = built-in rest",
+          "type": "Straight",
+          "cfg": {},
           "mins": 8,
           "items": [
             {
               "ex": "single_arm_row",
               "pres": "3 × 8 each side",
-              "note": "90s rest"
+              "note": "90s rest",
+              "rest": 90
             }
           ]
         },
@@ -398,6 +464,10 @@
           "role": "Finish",
           "name": "L-Sit Pull-ups + Skin the Cat",
           "note": "5 min, minimal rest",
+          "type": "AMRAP",
+          "cfg": {
+            "cap": 5
+          },
           "mins": 3,
           "items": [
             {
@@ -423,6 +493,10 @@
           "role": "Work",
           "name": "Block 1 · Tempo AMRAP",
           "note": "15 min, target ~4 rounds — all 5 patterns",
+          "type": "AMRAP",
+          "cfg": {
+            "cap": 15
+          },
           "mins": 15,
           "items": [
             {
@@ -456,6 +530,11 @@
           "role": "Work",
           "name": "Block 2 · Explosive Intervals",
           "note": "40s on / 20s off · ~3 rounds · all 5 patterns",
+          "type": "Tabata",
+          "cfg": {
+            "work": 40,
+            "rounds": 3
+          },
           "mins": 15,
           "items": [
             {

@@ -21,46 +21,134 @@
 <meta name="apple-mobile-web-app-title" content="Fitness">
 <style>
 /* ============================================================
-   COACH CONSOLE — where the program actually gets built.
+   THREE MODES, ONE SET OF NAMES.
 
-   Not a client screen. This is the workbench: Nicolas on one
-   side, me on the other, Ozzy's answers in the middle, and
-   Galpin's ten program-design steps as the scaffold we build
-   in layers.
+   The console was painted dark, in literals: #7c8794 thirty-three times,
+   rgba(255,255,255,.09) wherever a hairline was wanted. That is fine
+   until somebody wants to work in daylight, at which point there is no
+   single place to change and no way to be sure you found them all.
 
-   Three things have to be true on every layer, in this order:
-     WHAT HE SAID    — his raw answers, unedited, so the
-                       interpretation can always be checked
-                       against the source.
-     HOW I READ IT   — my inference, stated as inference.
-     WHAT I PROPOSE  — the actual call, with the protocol it
-                       comes from.
-   Then Nicolas decides. Nothing reaches Ozzy until he does.
+   Every colour is a ROLE now. Dark stays the default because the console
+   is meant to sit in the same room as the app it writes for. Light is the
+   same roles with different values — a proper paper ground, cards that
+   are lighter than the desk they sit on rather than darker, and ink that
+   is nearly black instead of nearly white. System follows the machine.
+
+   Nothing below this block may name a colour directly. That is the rule
+   that keeps the two modes in step, and it is the rule that was missing.
    ============================================================ */
-
 :root{
   --bg:#131619;
   --bg2:#171A1E;
   --card:#1E232A;
   --card2:#242A33;
+  /* a surface lifted off its ground, and a field sunk into it */
+  --tint:rgba(255,255,255,.035);
+  --tint2:rgba(255,255,255,.065);
+  --desk:rgba(0,0,0,.16);
+  --sunk:rgba(0,0,0,.26);
   --line:#2C333C;
   --line2:#39414C;
   --ink:#ECEFF3;
   --ink2:#A9B2BC;
   --ink3:#818A95;
+  --ink4:#67717c;
   --accent:#3ECBA8;
+  --accent-deep:#2E7D5B;
+  --accent-ink:#EAF6F0;
   --accent-soft:rgba(62,203,168,.12);
   --gold:#D9A94C;
   --gold-soft:rgba(217,169,76,.12);
   --red:#F0857A;
   --red-soft:rgba(240,133,122,.11);
+  /* how hard a block is, easy to relentless */
+  --l1:#5E9BD1; --l2:#4FBF9B; --l3:#C7C15A; --l4:#E39A4E; --l5:#DC6B5A;
+  /* ink that sits ON a filled accent/gold/red chip, and the deep grounds
+     those chips use — the one place a colour is chosen for contrast
+     against another colour rather than against the page */
+  --accent-on:#0C1512; --gold-deep:#1A1305; --red-deep:#2A0F0C;
   /* the 80s layer — structure and glow only, never body text */
   --neon:#FF5FA2;
   --neon-soft:rgba(255,95,162,.13);
   --neon-line:rgba(255,95,162,.34);
   --r:14px;
+  /* the two frosted bars that float over the page */
+  --veil:rgba(16,19,23,.92);
   --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.26);
 }
+
+/* LIGHT. Not the dark palette inverted — the middle column is a desk and
+   the blocks are cards on it, so the desk is deliberately darker than the
+   paper. A white card on a white desk is not a card, which is the mistake
+   that makes most light modes unreadable at a glance. */
+:root[data-theme="light"]{
+  --bg:#EFF2F1;
+  --bg2:#E7ECEA;
+  --card:#FFFFFF;
+  --card2:#F4F7F6;
+  /* A CARD IS LIGHTER THAN ITS DESK, in both modes. These were the dark
+     values with the channel flipped, which makes a light-mode card
+     DARKER than the ground it sits on — the exact thing that stops a
+     card reading as a card. In light the tints go towards white and the
+     middle column's desk goes down instead. */
+  --tint:rgba(255,255,255,.78);
+  --tint2:#FFFFFF;
+  --desk:rgba(20,26,25,.055);
+  --sunk:rgba(20,26,25,.055);
+  --line:#D2DAD7;
+  --line2:#B4C0BC;
+  --ink:#141A19;
+  --ink2:#3F4B49;
+  --ink3:#6B7876;
+  --ink4:#8B9694;
+  --accent:#12876C;
+  --accent-deep:#0E6B56;
+  --accent-ink:#FFFFFF;
+  --accent-soft:rgba(18,135,108,.10);
+  --gold:#8A6A00;
+  --gold-soft:rgba(138,106,0,.10);
+  --red:#B3402F;
+  --red-soft:rgba(179,64,47,.09);
+  --l1:#3B72A8; --l2:#12876C; --l3:#8A7A18; --l4:#B26A18; --l5:#B3402F;
+  --accent-on:#FFFFFF; --gold-deep:#FBF3DC; --red-deep:#FBE7E3;
+  --neon:#C7196B;
+  --neon-soft:rgba(199,25,107,.09);
+  --neon-line:rgba(199,25,107,.28);
+  --veil:rgba(247,249,248,.93);
+  --shadow:0 1px 2px rgba(20,26,25,.07),0 10px 30px rgba(20,26,25,.08);
+}
+
+/* SYSTEM is the absence of a choice: no data-theme at all, so the machine
+   decides. Guarded against [data-theme="dark"] so an explicit dark choice
+   still wins on a machine set to light. */
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#EFF2F1; --bg2:#E7ECEA; --card:#FFFFFF; --card2:#F4F7F6;
+    --tint:rgba(255,255,255,.78); --tint2:#FFFFFF;
+    --desk:rgba(20,26,25,.055); --sunk:rgba(20,26,25,.055);
+    --line:#D2DAD7; --line2:#B4C0BC;
+    --ink:#141A19; --ink2:#3F4B49; --ink3:#6B7876; --ink4:#8B9694;
+    --accent:#12876C; --accent-deep:#0E6B56; --accent-ink:#FFFFFF;
+    --accent-soft:rgba(18,135,108,.10);
+    --gold:#8A6A00; --gold-soft:rgba(138,106,0,.10);
+    --red:#B3402F; --red-soft:rgba(179,64,47,.09);
+    --l1:#3B72A8; --l2:#12876C; --l3:#8A7A18; --l4:#B26A18; --l5:#B3402F;
+    --accent-on:#FFFFFF; --gold-deep:#FBF3DC; --red-deep:#FBE7E3;
+    --neon:#C7196B; --neon-soft:rgba(199,25,107,.09); --neon-line:rgba(199,25,107,.28);
+    --veil:rgba(247,249,248,.93);
+    --shadow:0 1px 2px rgba(20,26,25,.07),0 10px 30px rgba(20,26,25,.08);
+  }
+}
+
+/* THE SWITCH. Three states because "system" is a real answer and a
+   two-way toggle cannot express it. */
+.tmode{ margin-left:auto; flex:none; display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden }
+.tmode button{ background:none; border:none; cursor:pointer; padding:6px 10px;
+  font:600 9px ui-monospace,monospace; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--ink3) }
+.tmode button+button{ border-left:1px solid var(--line) }
+.tmode button.on{ background:var(--accent-soft); color:var(--accent) }
+
 
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
@@ -129,8 +217,8 @@ header:after{
 .panel .pad{padding:14px 16px 16px}
 .who{display:flex;align-items:center;gap:13px;padding:16px}
 .who .av{width:44px;height:44px;border-radius:13px;flex:none;display:flex;align-items:center;
-  justify-content:center;font-size:18px;font-weight:600;color:#0C1512;
-  background:linear-gradient(140deg,var(--accent),#7ee0c6);
+  justify-content:center;font-size:18px;font-weight:600;color:var(--accent-on);
+  background:linear-gradient(140deg,var(--accent),var(--accent));
   box-shadow:0 0 0 1px rgba(255,95,162,.35),0 0 18px rgba(255,95,162,.28)}
 .who b{font-size:18px;font-weight:550;letter-spacing:-.015em;display:block}
 .who small{font-size:12px;color:var(--ink3);display:block;margin-top:2px}
@@ -174,9 +262,9 @@ header:after{
 .lnum{width:29px;height:29px;border-radius:9px;flex:none;display:flex;align-items:center;
   justify-content:center;font-size:12.5px;font-weight:650;background:var(--card2);
   color:var(--ink3);border:1px solid var(--line2);margin-top:1px}
-.layer.ok .lnum{background:var(--accent);color:#0C1512;border-color:var(--accent)}
-.layer.work .lnum{background:var(--gold);color:#1A1305;border-color:var(--gold)}
-.layer.blocked .lnum{background:var(--red);color:#2A0F0C;border-color:var(--red)}
+.layer.ok .lnum{background:var(--accent);color:var(--accent-on);border-color:var(--accent)}
+.layer.work .lnum{background:var(--gold);color:var(--gold-deep);border-color:var(--gold)}
+.layer.blocked .lnum{background:var(--red);color:var(--red-deep);border-color:var(--red)}
 .lhead .tx{flex:1;min-width:0}
 .lhead .tx b{font-size:15.5px;font-weight:550;letter-spacing:-.012em;display:block}
 .lhead .tx small{font-size:12px;color:var(--ink3);display:block;margin-top:3px}
@@ -204,7 +292,7 @@ header:after{
 .h-why{color:var(--gold)}
 
 .quotes{display:flex;flex-wrap:wrap;gap:7px}
-.q{font-size:12.5px;background:rgba(255,255,255,.04);border:1px solid var(--line);
+.q{font-size:12.5px;background:var(--tint);border:1px solid var(--line);
   border-radius:9px;padding:7px 11px;color:var(--ink2)}
 .q b{color:var(--ink);font-weight:600}
 
@@ -232,11 +320,11 @@ header:after{
   border:1px solid var(--line2);background:var(--card2);color:var(--ink2);cursor:pointer;
   transition:all .16s}
 .btn:hover{border-color:var(--ink3)}
-.btn.on-ok{background:var(--accent);border-color:var(--accent);color:#0C1512}
-.btn.on-work{background:var(--gold);border-color:var(--gold);color:#1A1305}
-.btn.on-blocked{background:var(--red);border-color:var(--red);color:#2A0F0C}
+.btn.on-ok{background:var(--accent);border-color:var(--accent);color:var(--accent-on)}
+.btn.on-work{background:var(--gold);border-color:var(--gold);color:var(--gold-deep)}
+.btn.on-blocked{background:var(--red);border-color:var(--red);color:var(--red-deep)}
 .decide .sp{flex:1}
-textarea{width:100%;margin-top:10px;background:rgba(255,255,255,.035);border:1px solid var(--line);
+textarea{width:100%;margin-top:10px;background:var(--tint);border:1px solid var(--line);
   border-radius:10px;padding:11px 12px;color:var(--ink);font:inherit;font-size:13.5px;
   min-height:62px;resize:vertical;outline:none}
 textarea:focus{border-color:var(--neon)}
@@ -254,18 +342,18 @@ textarea::placeholder{color:var(--ink3)}
   background:var(--ink3);transition:all .22s}
 .sw.on{background:var(--accent);border-color:var(--accent);
   box-shadow:0 0 16px rgba(62,203,168,.3)}
-.sw.on:after{left:21px;background:#0C1512}
+.sw.on:after{left:21px;background:var(--accent-on)}
 
 /* ---------- footer actions ---------- */
 .dock{position:fixed;left:0;right:0;bottom:0;z-index:40;
-  background:rgba(19,22,25,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  background:var(--veil);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
   border-top:1px solid var(--line);padding:13px 28px}
 .dock:before{content:"";position:absolute;left:0;right:0;top:-1px;height:1px;
   background:linear-gradient(90deg,transparent,var(--neon-line) 30%,var(--neon-line) 70%,transparent)}
 .dockin{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .dockin .st{font-size:12.5px;color:var(--ink3);flex:1;min-width:200px}
 .dockin .st b{color:var(--ink)}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:#0C1512;font-weight:600}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-on);font-weight:600}
 .btn.neon{background:transparent;border-color:var(--neon-line);color:var(--neon)}
 .btn.neon:hover{background:var(--neon-soft);border-color:var(--neon)}
 
@@ -344,14 +432,14 @@ select.pin{appearance:none;cursor:pointer}
 
 /* the jump bar — sticky, quiet, and the program is the one that is lit */
 #jump{position:sticky;top:0;z-index:40;display:flex;gap:4px;align-items:center;
-  padding:8px 14px;background:rgba(16,19,23,.92);backdrop-filter:blur(10px);
-  border-bottom:1px solid rgba(255,255,255,.09);overflow-x:auto}
+  padding:8px 14px;background:var(--veil);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);overflow-x:auto}
 #jump a{flex:none;font:inherit;font-size:12.5px;font-weight:600;letter-spacing:-.01em;
-  color:var(--dim,#8B949E);text-decoration:none;padding:7px 11px;border-radius:9px;
+  color:var(--dim,var(--ink3));text-decoration:none;padding:7px 11px;border-radius:9px;
   border:1px solid transparent;white-space:nowrap}
-#jump a:hover{color:#fff;background:rgba(255,255,255,.06)}
-#jump a.hot{color:#0F1417;background:var(--ok,#3ECBA8);border-color:transparent}
-#jump a.on{color:#fff;border-color:rgba(255,255,255,.2)}
+#jump a:hover{color:var(--ink);background:var(--tint2)}
+#jump a.hot{color:var(--bg);background:var(--ok,var(--accent));border-color:transparent}
+#jump a.on{color:var(--ink);border-color:var(--line2)}
 /* anything jumped to must clear the sticky bar */
 #top,#prog,#releasePanel,#layers{scroll-margin-top:64px}
 
@@ -364,7 +452,7 @@ select.pin{appearance:none;cursor:pointer}
    what the page opens on. */
 #reason{margin-top:30px;border:1px solid var(--line);border-radius:14px;overflow:hidden}
 #reason>summary{cursor:pointer;list-style:none;padding:16px 18px;display:flex;gap:12px;
-  align-items:center;background:rgba(255,255,255,.02)}
+  align-items:center;background:var(--tint)}
 #reason>summary::-webkit-details-marker{display:none}
 #reason>summary b{font-size:15px;letter-spacing:-.01em}
 #reason>summary small{display:block;color:var(--ink3);font-size:12.5px;margin-top:2px}
@@ -386,80 +474,80 @@ select.pin{appearance:none;cursor:pointer}
    with the console's own styling, which the other tabs still use.
    ============================================================ */
 .nbcols{ display:grid; grid-template-columns:225px minmax(320px,1fr) 250px; gap:1px;
-         background:var(--line,#2A313A); border-radius:10px; overflow:hidden;
+         background:var(--line); border-radius:10px; overflow:hidden;
          height:calc(100vh - 250px); min-height:520px; margin-top:10px; }
-.nbcol{ background:var(--bg,#12151a); padding:14px 13px 40px; overflow-y:auto; min-width:0; }
-.nbcol.mid{ background:rgba(0,0,0,.16); }
+.nbcol{ background:var(--bg); padding:14px 13px 40px; overflow-y:auto; min-width:0; }
+.nbcol.mid{ background:var(--desk); }
 .nbcol::-webkit-scrollbar{ width:9px; }
-.nbcol::-webkit-scrollbar-thumb{ background:#39424D; border-radius:5px; border:3px solid transparent; background-clip:content-box; }
+.nbcol::-webkit-scrollbar-thumb{ background:var(--line2); border-radius:5px; border:3px solid transparent; background-clip:content-box; }
 @media (max-width:1100px){ .nbcols{ grid-template-columns:1fr; height:auto; } .nbcol{ overflow:visible; } }
 
 .nblbl{ font:600 10px/1.3 ui-monospace,monospace; letter-spacing:.14em; text-transform:uppercase;
-        color:#7c8794; margin:0 0 8px; }
+        color:var(--ink3); margin:0 0 8px; }
 .nblbl.mt{ margin-top:20px; }
-.nbmut{ color:#7c8794; font-size:11.6px; margin:6px 0 0; }
-.nbempty{ color:#7c8794; font-size:12px; padding:12px 2px; }
+.nbmut{ color:var(--ink3); font-size:11.6px; margin:6px 0 0; }
+.nbempty{ color:var(--ink3); font-size:12px; padding:12px 2px; }
 
-.nbgoal{ display:grid; grid-template-columns:auto 1fr; gap:8px; padding:7px 0; border-bottom:1px solid rgba(255,255,255,.07); }
-.nbgoal i{ width:5px; height:5px; border-radius:50%; background:var(--accent,#3ECBA8); margin-top:6px; }
+.nbgoal{ display:grid; grid-template-columns:auto 1fr; gap:8px; padding:7px 0; border-bottom:1px solid var(--tint2); }
+.nbgoal i{ width:5px; height:5px; border-radius:50%; background:var(--accent,var(--accent)); margin-top:6px; }
 .nbgoal b{ font-weight:600; font-size:12.6px; }
 .nbrule{ padding:8px 10px; margin-bottom:6px; border-radius:5px;
-         background:rgba(255,255,255,.03); border-left:2px solid #FF7A6B; }
-.nbrule p{ margin:0; font-size:11.8px; color:#c3ccd4; }
+         background:var(--tint); border-left:2px solid var(--red); }
+.nbrule p{ margin:0; font-size:11.8px; color:var(--ink2); }
 .nbrule.bad{ margin-top:8px; }
 
-.nbchk{ display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid rgba(255,255,255,.07); }
+.nbchk{ display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid var(--tint2); }
 .nbchk .dot{ width:7px; height:7px; border-radius:50%; flex:none; }
 .nbchk .tx{ flex:1; font-size:12.2px; } .nbchk .n{ font:600 11.5px ui-monospace,monospace; }
-.nbchk.ok .dot{ background:#3ECBA8 } .nbchk.ok .n{ color:#3ECBA8 }
-.nbchk.warn .dot{ background:#F2C94C } .nbchk.warn .n{ color:#F2C94C }
-.nbchk.bad .dot{ background:#FF7A6B } .nbchk.bad .n{ color:#FF7A6B }
+.nbchk.ok .dot{ background:var(--accent) } .nbchk.ok .n{ color:var(--accent) }
+.nbchk.warn .dot{ background:var(--gold) } .nbchk.warn .n{ color:var(--gold) }
+.nbchk.bad .dot{ background:var(--red) } .nbchk.bad .n{ color:var(--red) }
 
 .nbmixrow{ margin-bottom:12px; }
 .nbmixlbl{ display:flex; justify-content:space-between; font:600 9.5px ui-monospace,monospace;
-           letter-spacing:.09em; text-transform:uppercase; color:#7c8794; margin:0 0 5px; }
-.nbmixbar{ display:flex; height:9px; border-radius:5px; overflow:hidden; background:rgba(255,255,255,.07); }
+           letter-spacing:.09em; text-transform:uppercase; color:var(--ink3); margin:0 0 5px; }
+.nbmixbar{ display:flex; height:9px; border-radius:5px; overflow:hidden; background:var(--tint2); }
 .nbmixkey{ display:flex; flex-wrap:wrap; gap:3px 9px; margin-top:5px; }
-.nbmixkey span{ font-size:10px; color:#7c8794; display:flex; align-items:center; gap:4px; }
+.nbmixkey span{ font-size:10px; color:var(--ink3); display:flex; align-items:center; gap:4px; }
 .nbmixkey i{ width:7px; height:7px; border-radius:2px; }
 
 .nbcovhead{ display:flex; align-items:center; gap:8px; margin-top:20px; margin-bottom:8px; }
-.nbseg{ display:flex; gap:2px; background:rgba(0,0,0,.3); border-radius:6px; padding:2px; }
+.nbseg{ display:flex; gap:2px; background:var(--sunk); border-radius:6px; padding:2px; }
 .nbseg button{ font:600 9px ui-monospace,monospace; letter-spacing:.05em; text-transform:uppercase;
-               color:#7c8794; background:none; border:none; border-radius:4px; padding:4px 6px; cursor:pointer; }
-.nbseg button.on{ background:var(--accent,#3ECBA8); color:#0C1512; }
+               color:var(--ink3); background:none; border:none; border-radius:4px; padding:4px 6px; cursor:pointer; }
+.nbseg button.on{ background:var(--accent,var(--accent)); color:var(--accent-on); }
 .nbdials{ display:flex; flex-wrap:wrap; gap:8px 6px; }
 .nbdial{ width:52px; text-align:center; }
-.nbdial .bg{ stroke:rgba(255,255,255,.12) } .nbdial .fg{ stroke:var(--c) }
-.nbdial .mid{ font:600 10px ui-monospace,monospace; fill:#e9edf1 }
-.nbdial u{ display:block; font-size:9px; text-decoration:none; color:#7c8794; text-transform:capitalize; }
+.nbdial .bg{ stroke:var(--line2) } .nbdial .fg{ stroke:var(--c) }
+.nbdial .mid{ font:600 10px ui-monospace,monospace; fill:var(--ink) }
+.nbdial u{ display:block; font-size:9px; text-decoration:none; color:var(--ink3); text-transform:capitalize; }
 .nbbody{ display:flex; align-items:center; gap:8px; padding:3px 0; }
-.nbbody .nm{ width:70px; font-size:11px; color:#c3ccd4; }
-.nbbody .bar{ flex:1; height:7px; border-radius:4px; background:rgba(255,255,255,.08); overflow:hidden; }
-.nbbody .bar i{ display:block; height:100%; background:var(--accent,#3ECBA8); }
-.nbbody .n{ font:600 10px ui-monospace,monospace; color:#7c8794; width:16px; text-align:right; }
+.nbbody .nm{ width:70px; font-size:11px; color:var(--ink2); }
+.nbbody .bar{ flex:1; height:7px; border-radius:4px; background:var(--line); overflow:hidden; }
+.nbbody .bar i{ display:block; height:100%; background:var(--accent,var(--accent)); }
+.nbbody .n{ font:600 10px ui-monospace,monospace; color:var(--ink3); width:16px; text-align:right; }
 
 .nbdays{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
-.nbday{ flex:1; min-width:96px; text-align:left; padding:8px 10px; cursor:pointer; color:#c3ccd4;
-        background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.09); border-radius:8px; }
-.nbday.on{ border-color:var(--accent,#3ECBA8); background:rgba(62,203,168,.10); color:#e9edf1; }
+.nbday{ flex:1; min-width:96px; text-align:left; padding:8px 10px; cursor:pointer; color:var(--ink2);
+        background:var(--tint); border:1px solid var(--line); border-radius:8px; }
+.nbday.on{ border-color:var(--accent,var(--accent)); background:var(--accent-soft); color:var(--ink); }
 .nbday.add{ flex:0 0 40px; min-width:40px; text-align:center; font-size:16px; }
 .nbday b{ display:block; font-size:12.5px; font-weight:650; }
-.nbday .parts, .nbday .mn{ display:block; font:400 9.5px ui-monospace,monospace; color:#7c8794;
+.nbday .parts, .nbday .mn{ display:block; font:400 9.5px ui-monospace,monospace; color:var(--ink3);
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-transform:capitalize; }
 
 .nbdayhead{ display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-bottom:6px; }
 .nbdayhead .t{ flex:1; min-width:140px; display:flex; flex-direction:column; }
-.nbdn{ font:700 18px/1.2 inherit; background:none; border:none; color:#e9edf1; padding:2px 3px; border-radius:4px; }
-.nbdayhead small{ font-size:11px; color:#7c8794; text-transform:capitalize; padding-left:3px; }
-.nbtag{ width:110px; font:400 11px ui-monospace,monospace; color:#c3ccd4; background:rgba(0,0,0,.25);
-        border:1px solid rgba(255,255,255,.10); border-radius:5px; padding:5px 7px; }
-.nbwhy{ width:100%; font:400 12px inherit; color:#c3ccd4; background:rgba(0,0,0,.22);
-        border:1px solid rgba(255,255,255,.09); border-radius:6px; padding:7px 9px; margin-bottom:12px; }
-.nbmin{ font:600 12px ui-monospace,monospace; color:#e9edf1; white-space:nowrap; }
-.nbmin em{ font-style:normal; font-size:9px; color:#7c8794; margin-left:2px; }
+.nbdn{ font:700 18px/1.2 inherit; background:none; border:none; color:var(--ink); padding:2px 3px; border-radius:4px; }
+.nbdayhead small{ font-size:11px; color:var(--ink3); text-transform:capitalize; padding-left:3px; }
+.nbtag{ width:110px; font:400 11px ui-monospace,monospace; color:var(--ink2); background:var(--sunk);
+        border:1px solid var(--line); border-radius:5px; padding:5px 7px; }
+.nbwhy{ width:100%; font:400 12px inherit; color:var(--ink2); background:var(--sunk);
+        border:1px solid var(--line); border-radius:6px; padding:7px 9px; margin-bottom:12px; }
+.nbmin{ font:600 12px ui-monospace,monospace; color:var(--ink); white-space:nowrap; }
+.nbmin em{ font-style:normal; font-size:9px; color:var(--ink3); margin-left:2px; }
 
-.nbblock{ background:rgba(255,255,255,.035); border:1px solid rgba(255,255,255,.09);
+.nbblock{ background:var(--tint); border:1px solid var(--line);
           border-left:3px solid var(--rc); border-radius:9px; margin-bottom:10px; overflow:hidden; }
 .nbblock.sel{ border-color:var(--rc); box-shadow:0 0 0 2px color-mix(in srgb, var(--rc) 30%, transparent); }
 .nbblock.locked{ opacity:.85 } .nbblock.locked .nbaddit{ display:none }
@@ -468,74 +556,74 @@ select.pin{appearance:none;cursor:pointer}
    and the minutes it runs between. Monospace because the numbers are
    scanned down a column rather than read. */
 .nbstep{ display:flex; flex-direction:column; align-items:center; line-height:1.05;
-         font:600 11px ui-monospace,monospace; color:#c3ccd4; min-width:40px;
-         padding:3px 5px; border-radius:6px; background:rgba(0,0,0,.22); cursor:default }
-.nbstep b{ font-size:13px } .nbstep em{ font-style:normal; font-size:9px; color:#7c8794 }
-.nbstep i{ font-style:normal; font-size:8px; color:#67717c; margin-top:2px; letter-spacing:-.02em }
+         font:600 11px ui-monospace,monospace; color:var(--ink2); min-width:40px;
+         padding:3px 5px; border-radius:6px; background:var(--sunk); cursor:default }
+.nbstep b{ font-size:13px } .nbstep em{ font-style:normal; font-size:9px; color:var(--ink3) }
+.nbstep i{ font-style:normal; font-size:8px; color:var(--ink4); margin-top:2px; letter-spacing:-.02em }
 
 /* HOW HARD, IN FIVE STEPS. The bars carry the colour; the word carries
    the meaning. Both, because five bars alone is a puzzle and a word
    alone does not sort at a glance. */
 .nbload{ display:flex; align-items:center; gap:5px; cursor:default }
-.nbload s{ width:3px; height:11px; border-radius:1px; background:rgba(255,255,255,.13);
+.nbload s{ width:3px; height:11px; border-radius:1px; background:var(--line2);
            text-decoration:none; display:block }
 .nbload em{ font-style:normal; font:600 9px ui-monospace,monospace; letter-spacing:.06em;
-            text-transform:uppercase; color:#7c8794 }
-.nbload.l1 s.on{ background:#5E9BD1 } .nbload.l1 em{ color:#5E9BD1 }
-.nbload.l2 s.on{ background:#4FBF9B } .nbload.l2 em{ color:#4FBF9B }
-.nbload.l3 s.on{ background:#C7C15A } .nbload.l3 em{ color:#C7C15A }
-.nbload.l4 s.on{ background:#E39A4E } .nbload.l4 em{ color:#E39A4E }
-.nbload.l5 s.on{ background:#DC6B5A } .nbload.l5 em{ color:#DC6B5A }
+            text-transform:uppercase; color:var(--ink3) }
+.nbload.l1 s.on{ background:var(--l1) } .nbload.l1 em{ color:var(--l1) }
+.nbload.l2 s.on{ background:var(--l2) } .nbload.l2 em{ color:var(--l2) }
+.nbload.l3 s.on{ background:var(--l3) } .nbload.l3 em{ color:var(--l3) }
+.nbload.l4 s.on{ background:var(--l4) } .nbload.l4 em{ color:var(--l4) }
+.nbload.l5 s.on{ background:var(--l5) } .nbload.l5 em{ color:var(--l5) }
 
 /* A LOCKED BLOCK IS A BANNER. One row, the whole thing clickable, and
    nothing under it until you ask — the point of locking is to clear the
    way down to the block you are still working on. */
-.nbblock.fold{ opacity:1; margin-bottom:6px; background:rgba(255,255,255,.02); position:relative }
+.nbblock.fold{ opacity:1; margin-bottom:6px; background:var(--tint); position:relative }
 .nbfold{ display:flex; flex-wrap:wrap; align-items:center; gap:6px 9px; width:100%;
          text-align:left; cursor:pointer; padding:7px 34px 7px 10px; border:none;
          background:color-mix(in srgb, var(--rc) 7%, transparent); }
 .nbfold .nbnw{ flex:1 1 120px; }
 .nbfold .nbmin{ margin-left:auto }
 .nbfold:hover{ background:color-mix(in srgb, var(--rc) 13%, transparent) }
-.nbchev{ font-style:normal; font-size:8px; color:#7c8794 }
+.nbchev{ font-style:normal; font-size:8px; color:var(--ink3) }
 .nblock.inlock{ position:absolute; top:8px; right:8px }
 .nbfoldlist{ list-style:none; margin:0; padding:6px 10px 8px; display:flex;
-             flex-direction:column; gap:3px; border-top:1px solid rgba(255,255,255,.07) }
-.nbfoldlist li{ display:flex; align-items:center; gap:7px; font-size:12px; color:#c3ccd4 }
+             flex-direction:column; gap:3px; border-top:1px solid var(--tint2) }
+.nbfoldlist li{ display:flex; align-items:center; gap:7px; font-size:12px; color:var(--ink2) }
 .nbfoldlist li span{ width:6px; height:6px; border-radius:2px; background:var(--c); flex:none }
 .nbfoldlist li b{ font-weight:600; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis;
                   white-space:nowrap }
-.nbfoldlist li em{ font-style:normal; font:600 11px ui-monospace,monospace; color:#7c8794 }
+.nbfoldlist li em{ font-style:normal; font:600 11px ui-monospace,monospace; color:var(--ink3) }
 
 /* A FOLDED BLOCK IS ONE LINE. No body, no bottom border under the head,
    and the whole row goes quiet - a finished block should read as settled
    rather than as another thing wanting attention. It still carries its
    role colour down the left edge, which is how you find it again. */
-.nbfn{ font:650 13px inherit; color:#cdd5dd; padding:1px 3px; }
+.nbfn{ font:650 13px inherit; color:var(--ink2); padding:1px 3px; }
 .nbrole.tag{ cursor:default; opacity:.8 }
-.nbpeek{ cursor:pointer; border:1px solid rgba(255,255,255,.16); border-radius:6px;
+.nbpeek{ cursor:pointer; border:1px solid var(--line2); border-radius:6px;
          font:600 9px ui-monospace,monospace; letter-spacing:.09em; text-transform:uppercase;
-         padding:5px 8px; color:#9fa9b4; background:rgba(0,0,0,.22); }
-.nbpeek:hover{ color:#e9edf1; border-color:rgba(255,255,255,.3) }
+         padding:5px 8px; color:var(--ink2); background:var(--sunk); }
+.nbpeek:hover{ color:var(--ink); border-color:var(--line2) }
 /* THE PROGRAM BAR. Name, state, and the two save doors on one line, so
    "which program am I editing and is it written down" is answered
    without reading anything. */
 .pbar{ display:flex; align-items:end; gap:10px; flex-wrap:wrap }
 .pbn{ flex:1; min-width:220px; display:flex; flex-direction:column; gap:4px;
       font:600 10px ui-monospace,monospace; letter-spacing:.11em;
-      text-transform:uppercase; color:#7c8794 }
-.pbn input{ font:650 15px inherit; text-transform:none; letter-spacing:0; color:#e9edf1;
-            background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.12);
+      text-transform:uppercase; color:var(--ink3) }
+.pbn input{ font:650 15px inherit; text-transform:none; letter-spacing:0; color:var(--ink);
+            background:var(--sunk); border:1px solid var(--line2);
             border-radius:7px; padding:8px 10px; width:100% }
 .pbn input:disabled{ opacity:.4 }
 .pstate{ font:600 9px ui-monospace,monospace; letter-spacing:.1em; text-transform:uppercase;
          padding:6px 9px; border-radius:6px; white-space:nowrap; align-self:center }
-.pstate.clean{ color:#7FD8A8; background:rgba(127,216,168,.12) }
-.pstate.dirty{ color:#E8B04B; background:rgba(232,176,75,.13) }
-.btn.primary{ background:#2E7D5B; border-color:#2E7D5B; color:#EAF6F0 }
-.lnk{ background:none; border:none; padding:0; cursor:pointer; color:#7c8794;
+.pstate.clean{ color:var(--accent); background:var(--accent-soft) }
+.pstate.dirty{ color:var(--gold); background:var(--gold-soft) }
+.btn.primary{ background:var(--accent-deep); border-color:var(--accent-deep); color:var(--accent-ink) }
+.lnk{ background:none; border:none; padding:0; cursor:pointer; color:var(--ink3);
       font:inherit; font-size:inherit; text-decoration:underline }
-.lnk:hover{ color:#e9edf1 }
+.lnk:hover{ color:var(--ink) }
 .nbempty h3{ margin:0 0 6px; font-size:16px }
 .nbempty p{ margin:0 0 14px; max-width:52ch }
 .nbdoors{ display:flex; gap:9px; flex-wrap:wrap }
@@ -546,46 +634,46 @@ select.pin{appearance:none;cursor:pointer}
    keeps every part usable at any width. */
 .nbbhead{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 9px;
           padding:8px 10px; background:color-mix(in srgb, var(--rc) 12%, transparent);
-          border-bottom:1px solid rgba(255,255,255,.08); }
+          border-bottom:1px solid var(--line); }
 .nbbhead .nbnw{ flex:1 1 150px; }
 .nbbhead .nbctl{ flex:0 0 auto; margin-left:auto; }
 .nbrole{ appearance:none; border:none; cursor:pointer; border-radius:5px; color:var(--rc);
          font:600 9px ui-monospace,monospace; letter-spacing:.11em; text-transform:uppercase;
          padding:5px 7px; background:color-mix(in srgb, var(--rc) 22%, transparent); }
 .nbnw{ display:flex; flex-direction:column; min-width:0; }
-.nbbn{ font:650 13px inherit; background:none; border:none; color:#e9edf1; padding:1px 3px; border-radius:4px; width:100%; }
-.nbnw small{ font-size:10px; color:#7c8794; padding-left:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.nbbn{ font:650 13px inherit; background:none; border:none; color:var(--ink); padding:1px 3px; border-radius:4px; width:100%; }
+.nbnw small{ font-size:10px; color:var(--ink3); padding-left:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .nbctl{ display:flex; align-items:center; gap:6px; }
-.nbtype{ appearance:none; cursor:pointer; border:1px solid rgba(255,255,255,.14); border-radius:6px;
+.nbtype{ appearance:none; cursor:pointer; border:1px solid var(--line2); border-radius:6px;
          font:600 10px ui-monospace,monospace; letter-spacing:.05em; text-transform:uppercase;
-         padding:5px 8px; color:#c3ccd4; background:rgba(0,0,0,.25); }
+         padding:5px 8px; color:var(--ink2); background:var(--sunk); }
 .nbcfg{ display:flex; align-items:center; gap:3px; }
-.nbcfg input{ width:36px; text-align:center; font:600 11px ui-monospace,monospace; color:#e9edf1;
-              background:rgba(0,0,0,.3); border:1px solid rgba(255,255,255,.1); border-radius:5px; padding:4px 2px; }
-.nbcfg em{ font-style:normal; font:400 9px ui-monospace,monospace; color:#7c8794; }
+.nbcfg input{ width:36px; text-align:center; font:600 11px ui-monospace,monospace; color:var(--ink);
+              background:var(--sunk); border:1px solid var(--line); border-radius:5px; padding:4px 2px; }
+.nbcfg em{ font-style:normal; font:400 9px ui-monospace,monospace; color:var(--ink3); }
 .nblock{ background:none; border:none; cursor:pointer; font-size:12px; padding:2px 3px; filter:grayscale(1) opacity(.55); }
 .nblock:hover,.nblock.on{ filter:none }
 
 .nbit{ display:grid; grid-template-columns:14px 20px minmax(0,1fr) auto auto 22px; align-items:center;
        gap:8px; padding:7px 9px; border-left:3px solid var(--c); }
-.nbit + .nbit{ border-top:1px solid rgba(255,255,255,.06) }
+.nbit + .nbit{ border-top:1px solid var(--tint2) }
 .nbit:hover{ background:color-mix(in srgb, var(--c) 9%, transparent) }
-.nbit .hand{ color:#5d6873; cursor:grab; font-size:12px }
-.nbit .ss{ font:600 9.5px ui-monospace,monospace; color:#7c8794; text-align:center }
+.nbit .hand{ color:var(--ink4); cursor:grab; font-size:12px }
+.nbit .ss{ font:600 9.5px ui-monospace,monospace; color:var(--ink3); text-align:center }
 .nbit .nm{ cursor:pointer; min-width:0 }
-.nbit .nm b{ font-weight:550; font-size:12.6px } .nbit .nm i{ font-style:normal; font-size:8px; color:#5d6873 }
-.nbit .nm small{ display:block; font-size:10px; color:#7c8794 }
+.nbit .nm b{ font-weight:550; font-size:12.6px } .nbit .nm i{ font-style:normal; font-size:8px; color:var(--ink4) }
+.nbit .nm small{ display:block; font-size:10px; color:var(--ink3) }
 .nbnums{ display:grid; grid-template-columns:32px 12px 32px 40px; align-items:center; gap:2px; justify-items:center;
-         background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.09); border-radius:6px; padding:3px 5px; }
+         background:var(--sunk); border:1px solid var(--line); border-radius:6px; padding:3px 5px; }
 .nbnums.rest{ grid-template-columns:32px 28px; border-style:dashed }
 .nbnums.rest.off{ opacity:.4 }
-.nbnums input{ width:32px; background:none; border:none; color:#e9edf1; text-align:center;
+.nbnums input{ width:32px; background:none; border:none; color:var(--ink); text-align:center;
                font:600 11.5px ui-monospace,monospace; padding:2px 0 }
 .nbnums input::-webkit-outer-spin-button,.nbnums input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0 }
-.nbnums em{ font-style:normal; font:400 9px ui-monospace,monospace; color:#7c8794; white-space:nowrap }
-.nbnums .gh{ color:#5d6873; font:600 11.5px ui-monospace,monospace }
-.nbx{ border:none; background:none; color:#7c8794; cursor:pointer; font-size:15px }
-.nbx:hover{ color:#FF7A6B }
+.nbnums em{ font-style:normal; font:400 9px ui-monospace,monospace; color:var(--ink3); white-space:nowrap }
+.nbnums .gh{ color:var(--ink4); font:600 11.5px ui-monospace,monospace }
+.nbx{ border:none; background:none; color:var(--ink3); cursor:pointer; font-size:15px }
+.nbx:hover{ color:var(--red) }
 
 .nbss{ display:grid; grid-template-columns:20px 1fr; margin:5px 7px; border:1.5px solid var(--sc);
        border-radius:8px; overflow:hidden; background:color-mix(in srgb, var(--sc) 8%, transparent); }
@@ -595,68 +683,68 @@ select.pin{appearance:none;cursor:pointer}
 .nbss .nbit{ border-left:none }
 .nblink{ display:flex; justify-content:center; margin:2px 0 }
 .nblink button{ font:600 9px ui-monospace,monospace; letter-spacing:.08em; text-transform:uppercase;
-                color:#7c8794; background:rgba(0,0,0,.25); border:1px dashed rgba(255,255,255,.14);
+                color:var(--ink3); background:var(--sunk); border:1px dashed var(--line2);
                 border-radius:20px; padding:3px 10px; cursor:pointer }
-.nblink button.on{ color:#0C1512; background:var(--accent,#3ECBA8); border-style:solid; border-color:transparent }
-.nbnone{ margin:0; padding:10px 11px 2px; color:#7c8794; font-size:11.8px; font-style:italic }
+.nblink button.on{ color:var(--accent-on); background:var(--accent,var(--accent)); border-style:solid; border-color:transparent }
+.nbnone{ margin:0; padding:10px 11px 2px; color:var(--ink3); font-size:11.8px; font-style:italic }
 .nbaddit{ display:block; margin:6px 10px 8px; padding:5px 11px; background:none;
-          border:1px dashed rgba(255,255,255,.16); border-radius:14px; color:#7c8794;
+          border:1px dashed var(--line2); border-radius:14px; color:var(--ink3);
           font:600 10.5px inherit; cursor:pointer }
-.nbaddit:hover,.nbaddit.sel{ color:var(--accent,#3ECBA8); border-color:var(--accent,#3ECBA8) }
-.nbbnote{ padding:7px 11px; border-top:1px solid rgba(255,255,255,.07); color:#7c8794; font-size:11.5px }
+.nbaddit:hover,.nbaddit.sel{ color:var(--accent,var(--accent)); border-color:var(--accent,var(--accent)) }
+.nbbnote{ padding:7px 11px; border-top:1px solid var(--tint2); color:var(--ink3); font-size:11.5px }
 
 .nbcard{ display:grid; grid-template-columns:auto 1fr; gap:11px; padding:10px 11px 11px 28px;
-         background:rgba(0,0,0,.25); border-top:1px solid rgba(255,255,255,.07) }
-.nbpic{ width:86px; height:86px; border-radius:7px; background:rgba(255,255,255,.05);
+         background:var(--sunk); border-top:1px solid var(--tint2) }
+.nbpic{ width:86px; height:86px; border-radius:7px; background:var(--tint2);
         display:grid; place-items:center; overflow:hidden }
 .nbpic img{ width:100%; height:100%; object-fit:contain }
-.nbpic.none{ border:1px dashed rgba(255,255,255,.15) }
+.nbpic.none{ border:1px dashed var(--line2) }
 .nbpic.none span{ font:600 9px ui-monospace,monospace; letter-spacing:.06em; text-transform:uppercase; color:var(--c) }
 .nbcard h4{ margin:0 0 4px; font-size:14px; font-weight:700 }
 .nbchips{ display:flex; flex-wrap:wrap; gap:4px; margin-bottom:7px }
 .nbchips i{ font:400 9px ui-monospace,monospace; letter-spacing:.04em; text-transform:uppercase; font-style:normal;
-            padding:2px 6px; border-radius:3px; background:rgba(255,255,255,.07); color:#7c8794 }
+            padding:2px 6px; border-radius:3px; background:var(--tint2); color:var(--ink3) }
 .nbchips i.g{ background:color-mix(in srgb, var(--c) 24%, transparent); color:var(--c) }
-.nbchips i.mus{ color:#c3ccd4 } .nbchips i.dem{ background:rgba(255,122,107,.14); color:#FF7A6B }
-.nbcard p{ margin:0 0 8px; font-size:12px; color:#c3ccd4 } .nbcard p.why{ color:#7c8794; font-size:11.5px }
-.nbswapbtn{ font:600 11px inherit; color:#e9edf1; background:rgba(255,255,255,.07);
-            border:1px solid rgba(255,255,255,.14); border-radius:6px; padding:6px 11px; cursor:pointer }
-.nbalts{ margin-top:9px; border-top:1px solid rgba(255,255,255,.08); padding-top:8px }
+.nbchips i.mus{ color:var(--ink2) } .nbchips i.dem{ background:var(--red-soft); color:var(--red) }
+.nbcard p{ margin:0 0 8px; font-size:12px; color:var(--ink2) } .nbcard p.why{ color:var(--ink3); font-size:11.5px }
+.nbswapbtn{ font:600 11px inherit; color:var(--ink); background:var(--tint2);
+            border:1px solid var(--line2); border-radius:6px; padding:6px 11px; cursor:pointer }
+.nbalts{ margin-top:9px; border-top:1px solid var(--line); padding-top:8px }
 #nbaltlist{ max-height:280px; overflow-y:auto }
-.nbladder{ margin-bottom:9px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,.08) }
+.nbladder{ margin-bottom:9px; padding-bottom:8px; border-bottom:1px solid var(--line) }
 .nbrung,.nbalt{ display:grid; grid-template-columns:auto 1fr auto; gap:8px; align-items:center;
                 padding:6px 8px; border-radius:6px; cursor:pointer }
-.nbrung{ border:1px solid rgba(255,255,255,.1); margin-bottom:5px }
+.nbrung{ border:1px solid var(--line); margin-bottom:5px }
 .nbrung:hover,.nbalt:hover{ background:color-mix(in srgb, var(--c) 12%, transparent) }
 .nbrung .ar{ font-size:13px; color:var(--c); width:16px; text-align:center }
 .nbalt .dot,.nbmv .dot{ width:7px; height:7px; border-radius:2px; background:var(--c) }
 .nbrung b,.nbalt b,.nbmv b{ font-weight:550; font-size:12.4px }
-.nbrung small,.nbalt small,.nbmv small{ color:#7c8794; font:400 10px ui-monospace,monospace }
-.nbrung .go,.nbalt .go{ color:var(--accent,#3ECBA8); font:600 10px inherit; opacity:0 }
+.nbrung small,.nbalt small,.nbmv small{ color:var(--ink3); font:400 10px ui-monospace,monospace }
+.nbrung .go,.nbalt .go{ color:var(--accent,var(--accent)); font:600 10px inherit; opacity:0 }
 .nbrung:hover .go,.nbalt:hover .go{ opacity:1 }
-.nbrung.no b,.nbalt.no b,.nbmv.no b{ color:#7c8794 }
-.nbrung.no small,.nbalt.no small,.nbmv.no small{ color:#FF7A6B }
+.nbrung.no b,.nbalt.no b,.nbmv.no b{ color:var(--ink3) }
+.nbrung.no small,.nbalt.no small,.nbmv.no small{ color:var(--red) }
 
 .nbtarget{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:8px; padding:7px 9px;
-           border-radius:6px; background:rgba(255,255,255,.04); border:1px solid var(--accent,#3ECBA8) }
-.nbtarget.none{ border-color:rgba(255,255,255,.12); border-style:dashed }
-.nbtarget span{ font:600 9px ui-monospace,monospace; letter-spacing:.1em; text-transform:uppercase; color:#7c8794 }
-.nbtarget select{ flex:1; min-width:110px; font:600 12px inherit; color:var(--accent,#3ECBA8);
-                  background:rgba(0,0,0,.3); border:1px solid rgba(255,255,255,.1); border-radius:5px; padding:4px 6px }
-.nbsearch{ width:100%; padding:8px 10px; background:rgba(0,0,0,.3); border:1px solid rgba(255,255,255,.11);
-           border-radius:7px; color:#e9edf1; font:400 12.5px inherit }
+           border-radius:6px; background:var(--tint); border:1px solid var(--accent,var(--accent)) }
+.nbtarget.none{ border-color:var(--line2); border-style:dashed }
+.nbtarget span{ font:600 9px ui-monospace,monospace; letter-spacing:.1em; text-transform:uppercase; color:var(--ink3) }
+.nbtarget select{ flex:1; min-width:110px; font:600 12px inherit; color:var(--accent,var(--accent));
+                  background:var(--sunk); border:1px solid var(--line); border-radius:5px; padding:4px 6px }
+.nbsearch{ width:100%; padding:8px 10px; background:var(--sunk); border:1px solid var(--line);
+           border-radius:7px; color:var(--ink); font:400 12.5px inherit }
 .nbsearch.sm{ padding:6px 9px; font-size:12px }
 .nbfilters{ display:flex; flex-wrap:wrap; gap:5px; margin:9px 0 }
 .nbf{ font:400 9.5px ui-monospace,monospace; letter-spacing:.05em; text-transform:uppercase; padding:4px 7px;
-      border-radius:20px; cursor:pointer; border:1px solid rgba(255,255,255,.14); background:none; color:#7c8794 }
-.nbf.on{ color:#0C1512; background:var(--c,#3ECBA8); border-color:transparent }
-.nbf.fund{ border-color:#FFE24A; color:#FFE24A } .nbf.fund.on{ background:#FFE24A; color:#1a1600 }
-.nbf.body{ text-transform:none; letter-spacing:.02em } .nbf.body.on{ background:#c3ccd4; color:#12151a }
-.nbbreak{ flex-basis:100%; height:1px; background:rgba(255,255,255,.08); margin:3px 0 1px }
+      border-radius:20px; cursor:pointer; border:1px solid var(--line2); background:none; color:var(--ink3) }
+.nbf.on{ color:var(--accent-on); background:var(--c,var(--accent)); border-color:transparent }
+.nbf.fund{ border-color:var(--gold); color:var(--gold) } .nbf.fund.on{ background:var(--gold); color:var(--gold-deep) }
+.nbf.body{ text-transform:none; letter-spacing:.02em } .nbf.body.on{ background:var(--ink2); color:var(--bg) }
+.nbbreak{ flex-basis:100%; height:1px; background:var(--line); margin:3px 0 1px }
 .nbmv{ display:grid; grid-template-columns:auto 1fr auto; gap:8px; align-items:center;
        padding:7px 8px; border-radius:6px; cursor:pointer }
-.nbmv:hover{ background:rgba(255,255,255,.05) }
-.nbmv .plus{ color:#5d6873; font-size:15px } .nbmv:hover .plus{ color:var(--accent,#3ECBA8) }
+.nbmv:hover{ background:var(--tint2) }
+.nbmv .plus{ color:var(--ink4); font-size:15px } .nbmv:hover .plus{ color:var(--accent,var(--accent)) }
 
 
 </style>
@@ -695,7 +783,26 @@ select.pin{appearance:none;cursor:pointer}
   <a href="#prog" data-j="prog" class="hot">The program</a>
   <a href="#reason" data-j="reason">The reasoning</a>
   <a href="#releasePanel" data-j="releasePanel">Send it</a>
+  <span class="tmode" id="tmode" role="group" aria-label="Appearance">
+    <button data-t="light" title="Light">Light</button>
+    <button data-t="system" title="Follow this machine">Auto</button>
+    <button data-t="dark" title="Dark">Dark</button>
+  </span>
 </nav>
+
+<script>
+/* BEFORE THE FIRST PAINT. Reading the choice after the stylesheet has
+   already painted means a dark page flashing white, or the reverse, on
+   every single load — so this runs inline, in the body, ahead of
+   everything. "system" writes no attribute at all, which is what lets the
+   prefers-color-scheme rule take over. */
+(function(){
+  try{
+    var m = localStorage.getItem('fj.coach.theme') || 'system';
+    if(m === 'light' || m === 'dark') document.documentElement.setAttribute('data-theme', m);
+  }catch(e){}
+})();
+</script>
 
 <div class="wrap">
 
@@ -1843,7 +1950,7 @@ function drawLayers(){
    Regenerate with:  node tools/port-programs.mjs && node tools/build-coach-library.mjs
    Source of truth:  spine/programs/*.json
    6 programs, built 2026-08-30. */
-const LIBRARY = {"back_to_basics_1":{"id":"back_to_basics_1","version":1,"name":"Back to Basics 1","family":"back_to_basics","level":1,"who":"Anyone starting","source":"written 27 Aug 2026 as the program a new person gets before anything is known about them. Built from the fundamentals list in the exercise database, bodyweight first, nothing that needs a gym.","duration":20,"fixed":true,"trainDays":[1,3,5],"units":"lb","equipment":["bw","mat","band","db","pullupbar"],"weeks":4,"entryIf":"Start here unless you can already do 3 × 10 bodyweight squats and 3 × 8 push-ups from the floor with good shape.","methods":[{"name":"Straight sets","what":"Sets and reps, one movement at a time, generous rest.","why":"Level 1 has exactly one variable and it is the movement itself. Everything else - tempo, the clock, failure - waits until the shape is owned."}],"arc":[{"week":1,"focus":"Learn the shapes","rule":"Every set stops two reps before it gets hard. This week is about where your body goes, not what it can do."},{"week":2,"focus":"Same work, better","rule":"Same numbers as week 1. Slower down, full range, no bouncing. If week 1 felt easy this is where it starts to bite."},{"week":3,"focus":"One more set","rule":"Add a set to the first work block of each day. Everything else stays."},{"week":4,"focus":"Write a number down","rule":"Squat, push and hinge get one honest hard set. That number is where the next program starts."}],"constraints":{"unknown":"nothing is known about this person yet - so nothing here loads a spine heavily, nothing jumps, and every movement has an easier version one tap away","time":"30 minutes, three days. A fourth day is a decision for week five, not week one."},"goals":["Learn the six shapes everything else is built from","Turn up three times a week for four weeks","Finish week 4 with a number on the squat, the push and the hinge","Leave knowing which movements you want more of"],"habits":[],"days":{"d1":{"name":"Squat & Push","tag":"lower · push","why":"The two shapes you use most and think about least - standing up out of a chair, and pushing a door. Everything is done where you can already do it well; the point of week one is a rep you would be happy to show someone.","blocks":[{"role":"Prime","name":"Loosen off","note":"Straight through, no rest. Two rounds if you have time.","mins":4,"items":[{"ex":"cat_cow","pres":"8","note":"Slow. Breathe out as you round."},{"ex":"ankle_mobility","pres":"8 each side","note":"Knee travels over the toes, heel stays down."},{"ex":"arm_circles","pres":"20","note":""},{"ex":"deep_squat_rock","pres":"10","note":"Sit into the bottom of a squat and rock. If you cannot get down, hold a doorframe."}],"type":"Straight"},{"role":"Work","name":"A · Bodyweight Squat","note":"3 × 10, rest 60s. Sit back like there is a chair behind you. Stop the set the moment the knees fall inward.","mins":4,"items":[{"ex":"bodyweight_squat","pres":"3 × 10","note":"60s rest · hold a doorframe if balance is the problem"}],"type":"Straight"},{"role":"Work","name":"B · Incline Push-Up","note":"3 × 8, rest 60s. Hands on a counter or a wall. Higher hands is easier - start easier than you think.","mins":4,"items":[{"ex":"incline_push_up","pres":"3 × 8","note":"60s rest · body in one line from ear to heel"}],"type":"Straight"},{"role":"Work","name":"C · Glute Bridge","note":"3 × 12, rest 45s. The one that makes the squat better.","mins":4,"items":[{"ex":"glute_bridge","pres":"3 × 12","note":"45s rest · squeeze at the top, ribs down"}],"type":"Straight"},{"role":"Finish","name":"Middle","note":"Straight through, 45s between rounds. Two rounds.","mins":4,"items":[{"ex":"forearm_plank","pres":"2 × 20s","note":"Stop when the hips drop, not at the time."},{"ex":"dead_bug","pres":"2 × 8 each side","note":"Lower back stays flat on the floor the whole time."}],"type":"Straight"}]},"d2":{"name":"Hinge & Pull","tag":"lower · pull","why":"Picking something up, and pulling something towards you. The hinge is the one people get wrong and the one that protects a back, so it gets the most attention and the strictest stop rule.","blocks":[{"role":"Prime","name":"Hips and shoulders","note":"Straight through, no rest.","mins":4,"items":[{"ex":"hip_90_90","pres":"8 each side","note":""},{"ex":"worlds_greatest_stretch","pres":"5 each side","note":""},{"ex":"banded_pullapart","pres":"15","note":"Arms straight, squeeze the shoulder blades."},{"ex":"bird_dog","pres":"8 each side","note":"Slow. Nothing else moves."}],"type":"Straight"},{"role":"Work","name":"A · Romanian Deadlift","note":"3 × 10, rest 75s. Push the hips back, not down. The set ends the rep your back changes shape.","mins":5,"items":[{"ex":"db_rdl","pres":"3 × 10","note":"75s rest · light. Weight is not the point in week one."}],"type":"Straight"},{"role":"Work","name":"B · Incline Row","note":"3 × 8, rest 60s. Under a bar or a table, feet forward. The higher the bar, the easier it is.","mins":4,"items":[{"ex":"incline_row","pres":"3 × 8","note":"60s rest · chest to the bar, elbows past the ribs"}],"type":"Straight"},{"role":"Work","name":"C · Farmer's Carry","note":"3 rounds of 30 seconds, rest 45s. Heavy enough that the last ten seconds are honest.","mins":3,"items":[{"ex":"farmers_carry","pres":"3 × 30s","note":"45s rest · tall, shoulders down, do not lean"}],"type":"Straight"},{"role":"Finish","name":"Side and grip","note":"Two rounds, 45s between.","mins":4,"items":[{"ex":"side_plank","pres":"2 × 20s each side","note":"Knees down is a real option."},{"ex":"dead_hang","pres":"2 × 15s","note":"Feet on the floor taking some weight is fine."}],"type":"Straight"}]},"d3":{"name":"Full Body","tag":"full body","why":"The same six shapes, loaded a little differently, so week one has repetition without being the same session three times. This is the day where you find out which movements you actually like.","blocks":[{"role":"Prime","name":"Everything, briefly","note":"Straight through, no rest.","mins":4,"items":[{"ex":"down_dog_up_dog","pres":"6","note":""},{"ex":"ankle_mobility","pres":"8 each side","note":""},{"ex":"glute_bridge","pres":"12","note":"Waking them up, not training them."},{"ex":"arm_circles","pres":"20","note":""}],"type":"Straight"},{"role":"Work","name":"A · Goblet Squat","note":"3 × 10, rest 75s. Holding a weight at the chest makes the squat easier to do well, not harder.","mins":5,"items":[{"ex":"goblet_squat","pres":"3 × 10","note":"75s rest · elbows inside the knees at the bottom"}],"type":"Straight"},{"role":"Work","name":"B · Knee Push-Up","note":"3 × 10, rest 60s. Knees down on purpose - it lets you do more good reps than a hard version does.","mins":4,"items":[{"ex":"knee_push_up","pres":"3 × 10","note":"60s rest · hips in line with the shoulders, not up"}],"type":"Straight"},{"role":"Work","name":"C · Single-Leg Bridge","note":"3 × 8 each side, rest 45s. One leg finds the side that is asleep.","mins":4,"items":[{"ex":"single_leg_bridge","pres":"3 × 8 each side","note":"45s rest · hips stay level"}],"type":"Straight"},{"role":"Finish","name":"Hold","note":"Two rounds, 45s between.","mins":4,"items":[{"ex":"hollow_hold","pres":"2 × 15s","note":"Knees bent and hands by the hips is the starting version."},{"ex":"suitcase_carry","pres":"2 × 20s each side","note":"One weight. Do not let the ribs tip."}],"type":"Straight"}]}}},"back_to_basics_2":{"id":"back_to_basics_2","version":1,"name":"Back to Basics 2","family":"back_to_basics","level":2,"who":"Someone who owns the shapes","source":"written 28 Aug 2026. Level 2 of three. Same six shapes as level 1 at the next rung, and the first level where HOW you do a rep is part of the prescription.","duration":29,"fixed":true,"trainDays":[1,3,5],"units":"lb","equipment":["bw","mat","band","db","kb","pullupbar","bench"],"weeks":4,"entryIf":"You can do 3 × 10 bodyweight squats, 3 × 8 push-ups from the floor and hold a 30 second plank without the hips dropping. If any of those is a maybe, level 1 first.","methods":[{"name":"Tempo","what":"A count on the way down. 3-1-1 is three seconds lowering, one at the bottom, one up.","why":"Time under load without more load. The cheapest way to make a movement harder while it is still being learned."},{"name":"Pause","what":"A full stop at the hardest position, then move.","why":"Kills the bounce. What is left is what you can actually do."},{"name":"Unilateral","what":"One side at a time.","why":"The strong side stops covering for the weak one. This is where most people find out."},{"name":"Superset","what":"Two movements back to back, one rest after the pair.","why":"More work in the same half hour, without turning it into conditioning."}],"constraints":{"time":"30 minutes, three days. The extra ten minutes over level 1 is the tempo, not more exercises."},"goals":["Own the six shapes at full range and under control","Find the weak side and stop hiding it","Hold a tempo without counting out loud by week 4","Arrive at level 3 able to be tested"],"habits":[],"days":{"d1":{"name":"Squat & Push","tag":"lower · push","why":"Same day as level 1, done properly. The squat gets a three second lower and a pause at the bottom, which is where the honest version of the movement lives. The push-up comes off the counter and onto the floor.","blocks":[{"role":"Prime","name":"Loosen off","note":"Straight through, no rest.","type":"Straight","mins":4,"items":[{"ex":"cat_cow","pres":"8","note":""},{"ex":"ankle_mobility","pres":"8 each side","note":""},{"ex":"deep_squat_rock","pres":"10","note":""},{"ex":"glute_bridge","pres":"12","note":"Waking them up."}]},{"role":"Work","name":"A · Goblet Squat, tempo","note":"4 × 8, tempo 3-1-1, rest 90s. Three down, one at the bottom, one up. Stop the set when the tempo goes, not when the reps do.","type":"Tempo","mins":7,"items":[{"ex":"goblet_squat","pres":"4 × 8","note":"90s rest · tempo 3-1-1 · elbows inside the knees at the bottom"}]},{"role":"Work","name":"B · Push-Up + Ring Row","note":"B1 into B2 with no rest, then 75s. Two shapes in one block.","type":"Superset","cfg":{"rounds":3,"rest":75},"mins":8,"items":[{"ex":"pushup","pres":"3 × 8","note":"superset B1 · from the floor. Knees down for the last reps beats stopping at six."},{"ex":"ring_row","pres":"3 × 10","note":"superset B2 · walk the feet forward to make it harder"}]},{"role":"Work","name":"C · Single-Leg Bridge","note":"3 × 10 each side, rest 45s. One side at a time.","type":"Straight","mins":5,"items":[{"ex":"single_leg_bridge","pres":"3 × 10 each side","note":"45s rest · hips stay level. The side that shakes is the side that needed this."}]},{"role":"Finish","name":"Middle","note":"Two rounds, 45s between.","type":"Straight","mins":5,"items":[{"ex":"hollow_hold","pres":"2 × 20s","note":"Knees bent is still the right version if the back lifts."},{"ex":"side_plank","pres":"2 × 25s each side","note":""}]}]},"d2":{"name":"Hinge & Pull","tag":"lower · pull","why":"The hinge takes load for the first time and the pull moves toward a bar. The RDL keeps the strictest rule in the program: the set ends the rep the back changes shape.","blocks":[{"role":"Prime","name":"Hips and shoulders","note":"Straight through.","type":"Straight","mins":4,"items":[{"ex":"hip_90_90","pres":"8 each side","note":""},{"ex":"worlds_greatest_stretch","pres":"5 each side","note":""},{"ex":"banded_pullapart","pres":"15","note":""},{"ex":"scap_pullup","pres":"8","note":"Hang, pull the shoulders down, arms stay straight."}]},{"role":"Work","name":"A · Romanian Deadlift, paused","note":"4 × 8, rest 90s. Pause one second at the bottom of every rep — the stretch is the point, the bounce is not.","type":"Tempo","mins":7,"items":[{"ex":"db_rdl","pres":"4 × 8","note":"90s rest · 1s pause at the bottom · the set ends the rep the back rounds"}]},{"role":"Work","name":"B · Wide Inverted Row","note":"4 × 8, rest 75s. Lower the bar as it gets easier.","type":"Straight","mins":6,"items":[{"ex":"wide_inverted_row","pres":"4 × 8","note":"75s rest · chest to the bar, body in one line"}]},{"role":"Work","name":"C · Suitcase Carry","note":"3 rounds of 40 seconds per side, rest 45s. One weight — the point is the side that is not holding it.","type":"Straight","mins":6,"items":[{"ex":"suitcase_carry","pres":"3 × 40s each side","note":"45s rest · do not let the ribs tip"}]},{"role":"Finish","name":"Hang","note":"Two rounds, 45s between.","type":"Straight","mins":4,"items":[{"ex":"hanging_knee_raise","pres":"2 × 10","note":"Slow down, no swing."},{"ex":"dead_hang","pres":"2 × 25s","note":""}]}]},"d3":{"name":"Full Body","tag":"full body","why":"The day that puts it together. A superset opens it, a unilateral squat finds the weak leg, and it closes on a carry — the shape nobody trains and everybody needs.","blocks":[{"role":"Prime","name":"Everything, briefly","note":"Straight through.","type":"Straight","mins":4,"items":[{"ex":"down_dog_up_dog","pres":"6","note":""},{"ex":"ankle_mobility","pres":"8 each side","note":""},{"ex":"bird_dog","pres":"8 each side","note":""},{"ex":"banded_pullapart","pres":"15","note":""}]},{"role":"Work","name":"A · Kettlebell Swing + Push-Up","note":"A1 into A2, no rest, then 75s. Fast then slow — the swing is hips, the push-up is control.","type":"Superset","cfg":{"rounds":4,"rest":75},"mins":12,"items":[{"ex":"kb_swing","pres":"4 × 12","note":"superset A1 · snap the hips, the bell floats"},{"ex":"pushup","pres":"4 × 8","note":"superset A2 · slow down, one count up"}]},{"role":"Work","name":"B · Bulgarian Split Squat","note":"3 × 8 each side, rest 75s. Back foot on a bench. This is the one that tells you the truth.","type":"Straight","mins":6,"items":[{"ex":"bulgarian_split","pres":"3 × 8 each side","note":"75s rest · front foot takes the weight, knee tracks the toes"}]},{"role":"Work","name":"C · Hip Thrust","note":"3 × 12, rest 60s. Squeeze and hold a second at the top.","type":"Straight","mins":4,"items":[{"ex":"hip_thrust","pres":"3 × 12","note":"60s rest · 1s hold at the top, ribs down"}]},{"role":"Finish","name":"Carry","note":"Three rounds, 45s between.","type":"Straight","mins":4,"items":[{"ex":"farmers_carry","pres":"3 × 40s","note":"45s rest · heavy enough that the last ten seconds are honest"}]}]}}},"back_to_basics_3":{"id":"back_to_basics_3","version":1,"name":"Back to Basics 3","family":"back_to_basics","level":3,"who":"Someone ready to be tested","source":"written 28 Aug 2026. Level 3 of three. The same six shapes at their real version, and the level where the clock and the failure point become part of the prescription.","duration":33,"fixed":true,"trainDays":[1,3,5],"units":"lb","equipment":["bw","mat","band","db","kb","bb","pullupbar","bench","rings","parallettes"],"weeks":4,"entryIf":"You can hold a 3-1-1 tempo squat for 4 × 8, do 10 push-ups from the floor, and hang for 45 seconds. Level 3 asks what you have; it does not teach you what to do.","methods":[{"name":"EMOM","what":"One set on the top of every minute. The rest is whatever is left of that minute.","why":"The clock sets the rest, not how you feel. It makes pacing a skill instead of a mood."},{"name":"AMRAP","what":"As many rounds as possible inside a time cap.","why":"Density you can compare week to week. The number IS the progress."},{"name":"Max set","what":"One set to honest failure, recorded.","why":"Four weeks of work needs a number at the end of it, or nothing was measured."},{"name":"Rest-pause","what":"One load, short breaks, keep going to a rep target.","why":"More hard reps than straight sets allow, without adding a set."},{"name":"Circuit","what":"Straight through every movement, then rest, then again.","why":"The conditioning cost of strength work, kept in one block so the rest of the session stays clean."},{"name":"Complex","what":"Several movements with the same implement, no putting it down.","why":"Grip, breathing and technique under fatigue, all at once."}],"constraints":{"time":"40 minutes, three days. Week 4 is a test week and it is shorter, not longer."},"goals":["Put a number on all six shapes","Hold a pace set by a clock rather than by feel","Finish a hard set without the shape falling apart","Know which of the six is your weakest, with evidence"],"habits":[],"days":{"d1":{"name":"Squat & Push","tag":"lower · push","why":"A heavy squat opens it while you are fresh, then the pushing goes on the clock. The EMOM is the point of the day — the same eight reps get harder every minute without the weight changing.","blocks":[{"role":"Prime","name":"Loosen off","note":"Two rounds, straight through.","type":"Straight","mins":5,"items":[{"ex":"cat_cow","pres":"8","note":""},{"ex":"ankle_mobility","pres":"8 each side","note":""},{"ex":"deep_squat_rock","pres":"10","note":""},{"ex":"glute_bridge","pres":"15","note":""},{"ex":"arm_circles","pres":"20","note":""}]},{"role":"Work","name":"A · Goblet Squat","note":"5 × 5, rest 120s. Heavy for five. Week 4 this becomes one max set.","type":"Straight","mins":10,"items":[{"ex":"goblet_squat","pres":"5 × 5","note":"120s rest · TEST in week 4 · stop one rep before the shape goes"}]},{"role":"Work","name":"B · Push-Up EMOM","note":"8 reps on the top of every minute for 10 minutes. If you cannot finish a minute, stop the block and write down which minute it was.","type":"EMOM","cfg":{"mins":10,"interval":60},"mins":10,"items":[{"ex":"pushup","pres":"8","note":"the rest is whatever is left of the minute"}]},{"role":"Work","name":"C · Bulgarian Split Squat","note":"3 × 8 each side, rest 75s.","type":"Straight","mins":6,"items":[{"ex":"bulgarian_split","pres":"3 × 8 each side","note":"75s rest · knee tracks the toes"}]},{"role":"Finish","name":"Hollow","note":"Rest-pause. One long hold, break when you must, back on until the clock says 90 seconds of work.","type":"Rest-pause","mins":3,"items":[{"ex":"hollow_hold","pres":"3 × 30s","note":"20s rest · lower back stays on the floor or the set is over"}]}]},"d2":{"name":"Hinge & Pull","tag":"lower · pull","why":"The heaviest day. The deadlift pattern gets real load and the longest rest in the program, then the pulling is tested with a max set — because a pull-up number is the one people actually remember.","blocks":[{"role":"Prime","name":"Hips and shoulders","note":"Two rounds, unhurried. Longer than the others on purpose.","type":"Straight","mins":5,"items":[{"ex":"hip_90_90","pres":"8 each side","note":""},{"ex":"worlds_greatest_stretch","pres":"5 each side","note":""},{"ex":"single_leg_bridge","pres":"10 each side","note":"Glutes on before the bar."},{"ex":"scap_pullup","pres":"10","note":""},{"ex":"active_hang","pres":"30s","note":""}]},{"role":"Work","name":"A · Romanian Deadlift","note":"4 × 6, rest 150s. The strictest stop rule in the program: the set ends the rep the back changes shape, not the rep after.","type":"Straight","mins":9,"items":[{"ex":"romanian_deadlift","pres":"4 × 6","note":"150s rest · TEST in week 4 · hips back, flat back, slow down"}]},{"role":"Work","name":"B · Pull-Up, max set","note":"One warm-up set of half your best, then ONE set to honest failure. Write the number down.","type":"Test","mins":4,"items":[{"ex":"pullup","pres":"2 × 5","note":"180s rest · the second set is the test — go to failure and record it"}]},{"role":"Work","name":"C · Kettlebell Swing","note":"6 × 12, rest 45s. Fast, and the short rest is the work.","type":"Straight","mins":8,"items":[{"ex":"kb_swing","pres":"6 × 12","note":"45s rest · hips, not arms"}]},{"role":"Finish","name":"Grip","note":"Three rounds, 45s between.","type":"Straight","mins":4,"items":[{"ex":"dead_hang","pres":"3 × 40s","note":"45s rest · no straps, ever"}]}]},"d3":{"name":"Full Body","tag":"full body","why":"The engine day. An AMRAP covering all six shapes, then a carry complex to finish — the number of rounds is the thing you compare in four weeks, not how it felt.","blocks":[{"role":"Prime","name":"Everything","note":"Two rounds.","type":"Straight","mins":4,"items":[{"ex":"down_dog_up_dog","pres":"6","note":""},{"ex":"bird_dog","pres":"8 each side","note":""},{"ex":"banded_pullapart","pres":"15","note":""},{"ex":"deep_squat_rock","pres":"10","note":""}]},{"role":"Work","name":"A · Dip + Ring Row","note":"A1 into A2, no rest, then 90s. The two shapes level 1 could not touch.","type":"Superset","cfg":{"rounds":4,"rest":90},"mins":13,"items":[{"ex":"dip","pres":"4 × 6","note":"superset A1 · bench dip is the honest regression, not a failure"},{"ex":"ring_row","pres":"4 × 10","note":"superset A2 · feet forward to make it harder"}]},{"role":"Work","name":"B · Six Shapes AMRAP","note":"15 minutes. As many rounds as possible. Write the number down — that number is the whole point of this block.","type":"AMRAP","cfg":{"cap":15},"mins":15,"items":[{"ex":"goblet_squat","pres":"10","note":""},{"ex":"pushup","pres":"8","note":""},{"ex":"wide_inverted_row","pres":"8","note":""},{"ex":"kb_swing","pres":"12","note":""},{"ex":"hanging_knee_raise","pres":"8","note":""}]},{"role":"Finish","name":"Carry complex","note":"Three rounds. Farmer's carry 30 seconds straight into a suitcase carry 20 seconds each side, without putting the weight down.","type":"Circuit","cfg":{"rounds":3,"rest":60},"mins":2,"items":[{"ex":"farmers_carry","pres":"30s","note":"do not put it down between the two"},{"ex":"suitcase_carry","pres":"20s each side","note":""}]}]}}},"beginner_return":{"id":"beginner_return","version":1,"name":"Come Back Strong","who":"Sevan","source":"ported from js/data/sessions.js — the program Sevan is actually on","duration":45,"fixed":true,"trainDays":[1,3,5],"units":"lb","equipment":["bw","db","bb","band","bench","rack","pullupbar","machine","cable","kb","mat"],"constraints":{"knee":"no running, no jumping, no deep knee flexion under load"},"goals":["Show up three times a week","Build muscle, armour the joints","Lose weight over time"],"habits":[{"id":"walk","label":"20 min walk after a meal","daily":true},{"id":"no8pm","label":"No eating after 8pm","daily":true},{"id":"protein","label":"First meal was high protein","daily":true},{"id":"sport","label":"Sport session","daily":false,"note":"weekly — tick it on the day you do it"}],"days":{"d1":{"name":"Day 1 · Upper","tag":"upper","why":"","blocks":[{"role":"Prime","name":"Warm-up A · Loosen up","note":"Never rushed, but no stopping — flow straight through. This is the part that protects the joints.","mins":3,"items":[{"ex":"arm_circles","pres":"20","note":""},{"ex":"down_dog_up_dog","pres":"5","note":""},{"ex":"hip_90_90","pres":"8","note":""}]},{"role":"Prime","name":"Warm-up A · Circuit","note":"3 rounds, continuous — no rest inside a round","mins":3,"items":[{"ex":"pushup","pres":"3-5 reps","note":"Hands under your shoulders, body in one straight line."},{"ex":"dead_hang","pres":"20s","note":"Just hang from the bar with straight arms and let your shoulders stretch out."},{"ex":"banded_pullapart","pres":"10-15 reps","note":"Band in both hands, arms straight out in front."},{"ex":"mountain_climber","pres":"10","note":"Push-up position."}]},{"role":"Work","name":"A · Push-Ups + Lat Pulldown","note":"A1 straight into A2 with no rest, then rest 75 sec, then go again.","mins":9,"items":[{"ex":"straight_bar_push_up","pres":"10-15 reps","note":"Straight Bar Push-Up · superset A1 · Set a bar in the rack about waist height."},{"ex":"lat_pulldown","pres":"10","note":"superset A2"}]},{"role":"Work","name":"B · Assisted Dip + Cable Row","note":"B1 straight into B2 with no rest, then rest 75 sec.","mins":9,"items":[{"ex":"assisted_dip","pres":"8","note":"superset B1"},{"ex":"seated_cable_row","pres":"10","note":"superset B2"}]},{"role":"Work","name":"C · Lateral Raise + Pushdown","note":"C1 into C2, no rest, then 75 sec.","mins":9,"items":[{"ex":"lateral_raise","pres":"12","note":"superset C1"},{"ex":"triceps_pushdown","pres":"12","note":"superset C2"}]},{"role":"Work","name":"D · Reverse Fly + Curl","note":"D1 into D2, no rest, then 75 sec. Reverse fly is never heavy — light and slow.","mins":9,"items":[{"ex":"reverse_fly","pres":"12-15 reps","note":"superset D1 · Chest flat on an incline bench, light dumbbells hanging."},{"ex":"barbell_curl","pres":"12","note":"superset D2"}]},{"role":"Finish","name":"Finisher · Kettlebell Swings","note":"3 rounds of 12, rest 20 sec between rounds.","mins":3,"items":[{"ex":"kb_swing","pres":"12","note":""}]}]},"d2":{"name":"Day 2 · Upper","tag":"upper","why":"","blocks":[{"role":"Prime","name":"Warm-up A · Loosen up","note":"Never rushed, but no stopping — flow straight through. This is the part that protects the joints.","mins":4,"items":[{"ex":"arm_circles","pres":"20","note":""},{"ex":"down_dog_up_dog","pres":"5","note":""},{"ex":"hip_90_90","pres":"8","note":""}]},{"role":"Prime","name":"Warm-up A · Circuit","note":"3 rounds, continuous — no rest inside a round","mins":4,"items":[{"ex":"pushup","pres":"3-5 reps","note":"Hands under your shoulders, body in one straight line."},{"ex":"dead_hang","pres":"20s","note":"Just hang from the bar with straight arms and let your shoulders stretch out."},{"ex":"banded_pullapart","pres":"10-15 reps","note":"Band in both hands, arms straight out in front."},{"ex":"mountain_climber","pres":"10","note":"Push-up position."}]},{"role":"Work","name":"A · Chest Press + Row","note":"A1 into A2, no rest, then rest 75 sec.","mins":11,"items":[{"ex":"chest_press_machine","pres":"10","note":"superset A1"},{"ex":"chest_supported_row","pres":"12","note":"superset A2"}]},{"role":"Work","name":"B · Shoulder Press + Pullover","note":"B1 into B2, no rest, then rest 75 sec.","mins":11,"items":[{"ex":"shoulder_press_machine","pres":"10","note":"superset B1"},{"ex":"db_pullover","pres":"12","note":"superset B2 · Lie on the bench, elbows slightly bent and fixed."}]},{"role":"Work","name":"C · Back Extension + Dip Hold","note":"C1 into C2, no rest, then rest 75 sec.","mins":11,"items":[{"ex":"back_extension_45","pres":"12","note":"superset C1"},{"ex":"dip_support_hold","pres":"20s","note":"superset C2 · Hold yourself up on the dip bars with your arms locked straight."}]},{"role":"Finish","name":"Finisher · Farmer's Carry","note":"4 rounds · walk 30-40 m · rest 45-60 sec between rounds. No straps — grip is the point. Start 40-50 lb per hand.","mins":4,"items":[{"ex":"farmers_carry","pres":"40s","note":"Farmer's Carry · A dumbbell in each hand, no straps."}]}]},"d3":{"name":"Day 3 · Full Body","tag":"full body","why":"","blocks":[{"role":"Prime","name":"Warm-up B · Sequence 1","note":"Flow straight through, no stopping.","mins":8,"items":[{"ex":"arm_circles","pres":"20","note":""},{"ex":"down_dog_up_dog","pres":"5","note":""},{"ex":"hip_90_90","pres":"8","note":""}]},{"role":"Prime","name":"Warm-up B · Sequence 2","note":"2 rounds, continuous — no rest inside a round","mins":8,"items":[{"ex":"banded_sidewalk","pres":"60s","note":"Banded Side-Step March · Band around your legs, stay low in a quarter-squat, step sideways without letting your feet click together."},{"ex":"pushup","pres":"3-5 reps","note":"Hands under your shoulders, body in one straight line."},{"ex":"dead_hang","pres":"20s","note":"Just hang from the bar with straight arms and let your shoulders stretch out."},{"ex":"superman","pres":"10-15 reps","note":"Superman · Lie face down, arms stretched out in front, thumbs pointing up."},{"ex":"mountain_climber","pres":"10","note":"Push-up position."}]},{"role":"Work","name":"Full Body Circuit","note":"Straight through, 3-5 rounds. Rest 90 sec between rounds ONLY — no rest between exercises. One pair of dumbbells: start 25-30 lb per hand (the shoulder press is the limiter). The RDL and row will feel light on purpose for now — that is fine for the first month.","mins":21,"items":[{"ex":"db_rdl","pres":"8","note":"DB Romanian Deadlift · Push your hips back, slide the dumbbells down the front of your legs, knees almost straight."},{"ex":"db_shoulder_press","pres":"6","note":"Sit or stand tall, dumbbells at shoulder height."},{"ex":"bent_over_row","pres":"6","note":"DB Bent-Over Row · Hinge at the hips, flat back, dumbbells hanging."},{"ex":"pushup_on_dumbbells","pres":"6","note":"DB Push-Ups · Hands gripping the two dumbbells on the floor so your wrists stay straight."},{"ex":"forearm_plank","pres":"30s","note":"Plank Hold · Elbows under your shoulders, body in one straight line."},{"ex":"wall_sit","pres":"30s","note":"Wall Sit · Back flat on the wall, slide down until your thighs are somewhere comfortable — the higher you stay, the easier on the knee."}]},{"role":"Finish","name":"Finisher · Core Circuit","note":"30 sec each, no rest between exercises. 2-3 rounds, 45 sec between rounds.","mins":8,"items":[{"ex":"dead_bug","pres":"30s","note":"On your back, arms up, knees over hips."},{"ex":"side_plank","pres":"30s each side","note":"On your side, elbow under your shoulder, knees bent at 90°."},{"ex":"side_plank","pres":"30s each side","note":"On your side, elbow under your shoulder, knees bent at 90°."},{"ex":"bird_dog","pres":"30s","note":"On hands and knees."},{"ex":"lying_leg_raise","pres":"30s","note":"Leg Raises · On your back, hands under your hips."}]}]}}},"fundamentals":{"id":"fundamentals","version":1,"name":"The Fundamentals","who":"Nicolas","source":"built in the coach console from survey v6 (25 Aug 2026) and the Foundation Block that ran before it. Days corrected after the Monday/Sunday indexing bug.","duration":40,"fixed":false,"trainDays":[1,2,4,5],"units":"lb","equipment":["bw","db","kb","bb","pullupbar","bench","rack","rings","dipbars","parallettes"],"constraints":{"lowerback":"hinge is loaded but never rounded - the set ends the rep the back changes shape, not the rep after","knee":"no jumping, no deep loaded knee flexion cold; the knee circuit runs before every lower day","capacity":"4 of 10 to training and 7.75 h recovery - four sessions is the ceiling, not the floor","sport":"a team sport, 45 min, SUNDAYS - that is a fifth session and it is already in the week. Monday is upper only because of it."},"goals":["Build muscle, get stronger","Put a first number on all seven untested lifts","Every fundamental pattern trained twice a week inside 160 minutes","Still lift heavy, say yes to any hike"],"habits":[],"days":{"d1":{"name":"Push & Pull A","tag":"upper · bench","why":"Monday, the day after Sunday's match. Upper only on purpose - legs that just played do not want a barbell on them. Bench is one of your seven unknowns, so the top set is the test: ramp to a hard 6 and write the number down. Everything after it is volume around that.","blocks":[{"role":"Prime","name":"Shoulders and wrists","note":"Straight through, no rest. The wrists matter because dips and the front rack both load them cold.","mins":6,"items":[{"ex":"arm_circles","pres":"20","note":""},{"ex":"thoracic_rotation","pres":"8 each side","note":"Open the mid back before anything presses."},{"ex":"wrist_prep","pres":"30s","note":""},{"ex":"scap_pullup","pres":"10","note":"Hang, then pull the shoulders down without bending the arms."},{"ex":"shoulder_tap","pres":"20","note":"Push-up position, no hip sway."}]},{"role":"Work","name":"A · Bench Press","note":"4 × 6, rest 150s. TEST: weeks 1 and 2, ramp to a hard 6 that leaves 1 in the tank and record it. That number is what everything after week 2 progresses from.","mins":12,"items":[{"ex":"bench_press","pres":"4 × 6","note":"150s rest · stop 1 rep short, every set"}]},{"role":"Work","name":"B · Dip + Single-Arm Row","note":"B1 into B2 with no rest, then 90s. Two of your fundamentals in one 9-minute block.","mins":9,"items":[{"ex":"dip","pres":"3 × 8","note":"superset B1 · parallettes, controlled to depth the shoulder likes"},{"ex":"single_arm_row","pres":"3 × 10 each side","note":"superset B2 · TEST the load · chest supported on the bench so the lower back stays out of it"}]},{"role":"Work","name":"C · Shoulder Press + Y-T-W","note":"C1 into C2, no rest, then 75s. The Y-T-W is never heavy - it is there to pay for the pressing.","mins":8,"items":[{"ex":"db_shoulder_press","pres":"3 × 10","note":"superset C1 · seated, back supported"},{"ex":"prone_ytw","pres":"3 × 8","note":"superset C2 · light, slow, chest on an incline bench"}]},{"role":"Finish","name":"Core","note":"Straight through, 45s between rounds.","mins":5,"items":[{"ex":"hanging_knee_raise","pres":"3 × 15","note":"You tested at 25. These are slow, not max."},{"ex":"side_plank","pres":"3 × 45s each side","note":"Anti-side-bend. This is lower back work."}]}]},"d2":{"name":"Hinge & Swing","tag":"lower · deadlift","why":"Tuesday. The deadlift is the lift your lower back has the most to say about, so it gets the longest prime, the longest rest and the strictest stop rule. Placed here rather than late in the week so it sits as far from Sunday's match as the week allows in one direction, and two full days after it in the other. Then the swing, which is the same pattern moving fast.","blocks":[{"role":"Prime","name":"Spine and hips","note":"2 rounds, unhurried. This one is longer than the others on purpose.","mins":7,"items":[{"ex":"cat_cow","pres":"8","note":""},{"ex":"hip_90_90","pres":"8 each side","note":""},{"ex":"worlds_greatest_stretch","pres":"5 each side","note":""},{"ex":"single_leg_bridge","pres":"12 each side","note":"Glutes on before the bar, so they are not the thing that switches on late."},{"ex":"dead_bug","pres":"8 each side","note":"Ribs down, back flat on the floor."}]},{"role":"Work","name":"A · Deadlift","note":"4 × 5, rest 180s. TEST, and the most conservative test in the program: ramp to a hard 5 that leaves 2 in the tank. Weeks 1 and 2 will feel too easy. That is correct.","mins":13,"items":[{"ex":"deadlift","pres":"4 × 5","note":"180s rest · TEST · the set ends the rep the back changes shape, not the rep after"}]},{"role":"Work","name":"B · Kettlebell Swing","note":"5 × 12, rest 45s. TEST the bell. Hips, not arms - the bell floats, you do not lift it.","mins":8,"items":[{"ex":"kb_swing","pres":"5 × 12","note":"45s rest · TEST · snap the hips, chest tall"}]},{"role":"Work","name":"C · Goblet Squat","note":"3 × 12, rest 75s. Light on purpose - the squat pattern's second exposure this week, and the knees have already had Monday.","mins":7,"items":[{"ex":"goblet_squat","pres":"3 × 12","note":"75s rest · slow down, pause at the bottom"}]},{"role":"Finish","name":"Burpees","note":"3 rounds of 10, 45s between. You tested at 30 unbroken, so this is conditioning, not a max.","mins":5,"items":[{"ex":"burpee","pres":"3 × 10","note":"Step back rather than jump back if the knee prefers it."}]}]},"d3":{"name":"Push & Pull B","tag":"upper · press and row","why":"Thursday, after Wednesday off. Two more unknowns tested back to back - overhead press and the barbell row - and the pull-up finally gets loaded rather than counted. You do 15, so sets of 8 are strength work, not endurance.","blocks":[{"role":"Prime","name":"Overhead and grip","note":"Straight through. The dead hang is prep and a test of how the shoulder feels today.","mins":6,"items":[{"ex":"arm_circles","pres":"20","note":""},{"ex":"down_dog_up_dog","pres":"5","note":""},{"ex":"wrist_prep","pres":"30s","note":""},{"ex":"dead_hang","pres":"30s","note":""},{"ex":"bird_dog","pres":"8 each side","note":"Braced before anything goes overhead."}]},{"role":"Work","name":"A · Overhead Press","note":"4 × 6, rest 150s. TEST. Strict, standing, ribs down - if the lower back arches to finish the rep, the set is over.","mins":12,"items":[{"ex":"overhead_press","pres":"4 × 6","note":"150s rest · TEST · strict, no leg drive"}]},{"role":"Work","name":"B · Barbell Row","note":"4 × 8, rest 90s. TEST. Hinged and flat backed - this is the one row that asks something of the lower back, so it comes on the day the deadlift does not.","mins":10,"items":[{"ex":"bent_over_row","pres":"4 × 8","note":"90s rest · TEST · flat back, stop the set if it changes shape"}]},{"role":"Work","name":"C · Pull-Up + Ring Push-Up","note":"C1 into C2, no rest, then 90s. Add load to the pull-up as soon as 3 × 8 is comfortable - a dumbbell between the feet does the job without a vest.","mins":7,"items":[{"ex":"pullup","pres":"3 × 8","note":"superset C1 · load it once 8 is easy"},{"ex":"ring_pushup","pres":"3 × 10","note":"superset C2 · rings low, turn the hands out at the top"}]},{"role":"Finish","name":"Core","note":"45s between rounds.","mins":5,"items":[{"ex":"hanging_leg_raise","pres":"3 × 12","note":"Straight legs, no swing."},{"ex":"copenhagen_plank","pres":"2 × 20s each side","note":"Top foot on the bench. Start with the knee bent."}]}]},"d4":{"name":"Squat & Carry","tag":"lower · squat","why":"Friday, and the last session before Sunday's match, which is why the squat is here and the deadlift is not: 48 hours is enough to walk into a game off a heavy squat and would be thin off heavy pulls. The knee circuit is not a warm-up you can skip - it is the reason this day repeats. Squat is the test; the split squat already has a number from your survey.","blocks":[{"role":"Prime","name":"Knee armour","note":"2 rounds, controlled. Carried over from the Foundation Block because it worked and you actually did it.","mins":7,"items":[{"ex":"leg_swings","pres":"10 each way","note":""},{"ex":"ankle_mobility","pres":"8 each side","note":"Ankles first - a stiff ankle is a knee problem."},{"ex":"deep_squat_rock","pres":"10","note":""},{"ex":"touchdown_squat","pres":"15 each side","note":""},{"ex":"tibialis_raise","pres":"25","note":""},{"ex":"kot_calf","pres":"25","note":""}]},{"role":"Work","name":"A · Back Squat","note":"4 × 5, rest 150s. TEST: ramp to a hard 5. If the knee talks on the way down, switch to a box squat at a height it likes and test that instead - a number you can repeat beats a number you cannot.","mins":12,"items":[{"ex":"back_squat","pres":"4 × 5","note":"150s rest · TEST · box squat is the regression, not a failure"}]},{"role":"Work","name":"B · Single-Leg RDL","note":"3 × 10 each side, alternating - the other leg is the rest. Hinge without loading the spine, which is the point on a squat day.","mins":8,"items":[{"ex":"single_leg_rdl","pres":"3 × 10 each side","note":"Push the hip back, flat back, slow down"}]},{"role":"Work","name":"C · Bulgarian Split Squat","note":"3 × 8 each side, rest 90s. You logged 40 lb × 10 in the survey, so this one starts with a real number instead of a guess.","mins":8,"items":[{"ex":"bulgarian_split","pres":"3 × 8 each side","note":"Start at 40 lb · 90s rest"}]},{"role":"Finish","name":"Suitcase Carry","note":"3 rounds, 40s per side, 45s between rounds. One of your seven unknowns and the cheapest lower-back insurance in the program.","mins":5,"items":[{"ex":"suitcase_carry","pres":"3 × 40s each side","note":"TEST the load · one kettlebell, do not let the ribs tip"}]}]}},"sport":{"acts":["team"],"days":[0],"minutes":45,"note":"Sunday-based, same convention as trainDays. Written down as data because the constraint text alone cannot put it on the week."}},"main":{"id":"main","version":1,"name":"Foundation Block","who":"Nicolas","source":"ported from js/data/sessions.js — the program this person is actually on","duration":30,"fixed":false,"trainDays":[1,2,3,4,5],"units":"lb","equipment":["bw","db","bb","rings","parallettes","band","vest","slantboard","rack","pullupbar","bench","sliders"],"constraints":{"forearm":"supinated_neutral"},"goals":["Lower-body size","Strength (upper + lower)","Rep-max endurance","Zone-5 conditioning","Skills (handstand / front lever)","Mobility / into the stretch"],"habits":[],"days":{"d1":{"name":"Quads & Knees","tag":"hypertrophy","why":"","blocks":[{"role":"Prime","name":"Knee Armor Circuit","note":"2 rounds, controlled","mins":3,"items":[{"ex":"touchdown_squat","pres":"25 each side","note":""},{"ex":"tibialis_raise","pres":"25","note":""},{"ex":"kot_calf","pres":"50","note":""},{"ex":"slant_pulse","pres":"20","note":""}]},{"role":"Work","name":"Bulgarian Split Squat","note":"To failure, per side · 3 sets base (up to 4 on strong days)","mins":8,"items":[{"ex":"bulgarian_split","pres":"10 reps to failure each side","note":""}]},{"role":"Work","name":"Slant-Board Squat","note":"Strength, tempo 3-1-1","mins":8,"items":[{"ex":"slant_board_squat","pres":"3 × 6 · tempo 3-1-1","note":"90s rest"}]},{"role":"Work","name":"Assisted Reverse Nordic Curl","note":"Quad eccentric · limited rest · 3rd anchor","mins":8,"items":[{"ex":"reverse_nordic","pres":"3 × 8","note":"45s rest"}]},{"role":"Finish","name":"Iso Burner — Horse Stance + Side Plank","note":"3 rounds, continuous (no rest)","mins":3,"items":[{"ex":"horse_stance","pres":"40s","note":""},{"ex":"side_plank","pres":"30s each side","note":""},{"ex":"side_plank","pres":"30s each side","note":""}]}]},"d2":{"name":"Push & Handstand","tag":"push","why":"","blocks":[{"role":"Prime","name":"Core + Compression Prep","note":"2 rounds · handstand-ready","mins":3,"items":[{"ex":"long_lever_plank","pres":"30s","note":""},{"ex":"walk_up_plank","pres":"8","note":""},{"ex":"side_plank","pres":"30s each side","note":""},{"ex":"shoulder_tap","pres":"20","note":""},{"ex":"pike_compression","pres":"10","note":""}]},{"role":"Work","name":"Handstand Practice","note":"Fresh — quality over fatigue","mins":8,"items":[{"ex":"kick_up_practice","pres":"2 min","note":""},{"ex":"wall_handstand_hold","pres":"30s","note":"45s rest"},{"ex":"handstand","pres":"2 min","note":""}]},{"role":"Work","name":"Deep Parallette Pike Push-Up","note":"To failure","mins":8,"items":[{"ex":"deep_pike_pushup","pres":"8 reps to failure","note":""}]},{"role":"Work","name":"Weighted Dip","note":"Strength · 1 warm-up (8-10) → 3 × 5","mins":8,"items":[{"ex":"weighted_dip","pres":"3 × 5","note":"150s rest"}]},{"role":"Finish","name":"Push-Up AMRAP","note":"Volume","mins":3,"items":[{"ex":"pushup","pres":"—","note":""}]}]},"d3":{"name":"Hinge & Posterior","tag":"strength","why":"","blocks":[{"role":"Prime","name":"Glute Activation","note":"Sidewalks (continuous) + bird dogs","mins":3,"items":[{"ex":"banded_sidewalk","pres":"120s","note":"15s rest"},{"ex":"bird_dog_crunch","pres":"2 × 8 each side","note":"20s rest"}]},{"role":"Work","name":"Hip Thrust","note":"Strength loader — add load weekly","mins":8,"items":[{"ex":"hip_thrust","pres":"4 × 5","note":"150s rest"}]},{"role":"Work","name":"Single-Leg RDL","note":"Size — per side, progress load/reps · alternating sides = built-in rest","mins":8,"items":[{"ex":"single_leg_rdl","pres":"3 × 8 each side","note":"90s rest"}]},{"role":"Work","name":"Nordic Curl","note":"Hamstring eccentric — progress ROM → load · 3rd anchor","mins":8,"items":[{"ex":"nordic_curl","pres":"3 × 6","note":"90s rest"}]},{"role":"Finish","name":"Tabata — Swing + Jump Squat","note":"20/10, 5 cycles (~5 min)","mins":3,"items":[{"ex":"db_swing","pres":"—","note":""},{"ex":"jump_squat","pres":"—","note":""}]}]},"d4":{"name":"Pull & Front Lever","tag":"pull","why":"","blocks":[{"role":"Prime","name":"Pulling Prep","note":"Forearm-light","mins":3,"items":[{"ex":"banded_pullapart","pres":"1 × 20","note":"10s rest"},{"ex":"scap_pullup","pres":"1 × 15","note":""},{"ex":"active_hang","pres":"30s","note":"20s rest"},{"ex":"dragon_flag","pres":"30s","note":"15s rest"}]},{"role":"Work","name":"Front Lever","note":"TUT holds · advanced-tuck or banded straddle (set Week 1)","mins":8,"items":[{"ex":"front_lever_tuck","pres":"10s","note":"60s rest"}]},{"role":"Work","name":"Weighted Chin-Up","note":"Strength · supinated · 1 warm-up (8-10) → 3 × 5","mins":8,"items":[{"ex":"weighted_chinup","pres":"3 × 5","note":"150s rest"}]},{"role":"Work","name":"Single-Arm Row","note":"Horizontal · unilateral · per side · alternating sides = built-in rest","mins":8,"items":[{"ex":"single_arm_row","pres":"3 × 8 each side","note":"90s rest"}]},{"role":"Finish","name":"L-Sit Pull-ups + Skin the Cat","note":"5 min, minimal rest","mins":3,"items":[{"ex":"l_sit_pullup","pres":"5 reps","note":""},{"ex":"skin_the_cat","pres":"5 reps","note":""}]}]},"d5":{"name":"Full Body Engine","tag":"conditioning","why":"","blocks":[{"role":"Work","name":"Block 1 · Tempo AMRAP","note":"15 min, target ~4 rounds — all 5 patterns","mins":15,"items":[{"ex":"chin_up","pres":"5 reps · 5s hold / 5s down / 5s dead-hang","note":""},{"ex":"dip","pres":"5 reps","note":""},{"ex":"goblet_squat","pres":"8 reps · slow + pause","note":""},{"ex":"banded_glute_bridge","pres":"30s","note":""},{"ex":"l_sit","pres":"20s","note":""}]},{"role":"Work","name":"Block 2 · Explosive Intervals","note":"40s on / 20s off · ~3 rounds · all 5 patterns","mins":15,"items":[{"ex":"explosive_chinup","pres":"—","note":""},{"ex":"deadstop_pushup","pres":"—","note":""},{"ex":"jump_squat","pres":"—","note":""},{"ex":"db_swing","pres":"—","note":""},{"ex":"mountain_climber","pres":"—","note":""}]}]}}}};
+const LIBRARY = {"back_to_basics_1":{"id":"back_to_basics_1","version":1,"name":"Back to Basics 1","family":"back_to_basics","level":1,"who":"Anyone starting","source":"written 27 Aug 2026 as the program a new person gets before anything is known about them. Built from the fundamentals list in the exercise database, bodyweight first, nothing that needs a gym.","duration":20,"fixed":true,"trainDays":[1,3,5],"units":"lb","equipment":["bw","mat","band","db","pullupbar"],"weeks":4,"entryIf":"Start here unless you can already do 3 × 10 bodyweight squats and 3 × 8 push-ups from the floor with good shape.","methods":[{"name":"Straight sets","what":"Sets and reps, one movement at a time, generous rest.","why":"Level 1 has exactly one variable and it is the movement itself. Everything else - tempo, the clock, failure - waits until the shape is owned."}],"arc":[{"week":1,"focus":"Learn the shapes","rule":"Every set stops two reps before it gets hard. This week is about where your body goes, not what it can do."},{"week":2,"focus":"Same work, better","rule":"Same numbers as week 1. Slower down, full range, no bouncing. If week 1 felt easy this is where it starts to bite."},{"week":3,"focus":"One more set","rule":"Add a set to the first work block of each day. Everything else stays."},{"week":4,"focus":"Write a number down","rule":"Squat, push and hinge get one honest hard set. That number is where the next program starts."}],"constraints":{"unknown":"nothing is known about this person yet - so nothing here loads a spine heavily, nothing jumps, and every movement has an easier version one tap away","time":"30 minutes, three days. A fourth day is a decision for week five, not week one."},"goals":["Learn the six shapes everything else is built from","Turn up three times a week for four weeks","Finish week 4 with a number on the squat, the push and the hinge","Leave knowing which movements you want more of"],"habits":[],"days":{"d1":{"name":"Squat & Push","tag":"lower · push","why":"The two shapes you use most and think about least - standing up out of a chair, and pushing a door. Everything is done where you can already do it well; the point of week one is a rep you would be happy to show someone.","blocks":[{"role":"Prime","name":"Loosen off","note":"Straight through, no rest. Two rounds if you have time.","mins":4,"items":[{"ex":"cat_cow","pres":"8","note":"Slow. Breathe out as you round."},{"ex":"ankle_mobility","pres":"8 each side","note":"Knee travels over the toes, heel stays down."},{"ex":"arm_circles","pres":"20","note":""},{"ex":"deep_squat_rock","pres":"10","note":"Sit into the bottom of a squat and rock. If you cannot get down, hold a doorframe."}],"type":"Straight"},{"role":"Work","name":"A · Bodyweight Squat","note":"3 × 10, rest 60s. Sit back like there is a chair behind you. Stop the set the moment the knees fall inward.","mins":4,"items":[{"ex":"bodyweight_squat","pres":"3 × 10","note":"60s rest · hold a doorframe if balance is the problem"}],"type":"Straight"},{"role":"Work","name":"B · Incline Push-Up","note":"3 × 8, rest 60s. Hands on a counter or a wall. Higher hands is easier - start easier than you think.","mins":4,"items":[{"ex":"incline_push_up","pres":"3 × 8","note":"60s rest · body in one line from ear to heel"}],"type":"Straight"},{"role":"Work","name":"C · Glute Bridge","note":"3 × 12, rest 45s. The one that makes the squat better.","mins":4,"items":[{"ex":"glute_bridge","pres":"3 × 12","note":"45s rest · squeeze at the top, ribs down"}],"type":"Straight"},{"role":"Finish","name":"Middle","note":"Straight through, 45s between rounds. Two rounds.","mins":4,"items":[{"ex":"forearm_plank","pres":"2 × 20s","note":"Stop when the hips drop, not at the time."},{"ex":"dead_bug","pres":"2 × 8 each side","note":"Lower back stays flat on the floor the whole time."}],"type":"Straight"}]},"d2":{"name":"Hinge & Pull","tag":"lower · pull","why":"Picking something up, and pulling something towards you. The hinge is the one people get wrong and the one that protects a back, so it gets the most attention and the strictest stop rule.","blocks":[{"role":"Prime","name":"Hips and shoulders","note":"Straight through, no rest.","mins":4,"items":[{"ex":"hip_90_90","pres":"8 each side","note":""},{"ex":"worlds_greatest_stretch","pres":"5 each side","note":""},{"ex":"banded_pullapart","pres":"15","note":"Arms straight, squeeze the shoulder blades."},{"ex":"bird_dog","pres":"8 each side","note":"Slow. Nothing else moves."}],"type":"Straight"},{"role":"Work","name":"A · Romanian Deadlift","note":"3 × 10, rest 75s. Push the hips back, not down. The set ends the rep your back changes shape.","mins":5,"items":[{"ex":"db_rdl","pres":"3 × 10","note":"75s rest · light. Weight is not the point in week one."}],"type":"Straight"},{"role":"Work","name":"B · Incline Row","note":"3 × 8, rest 60s. Under a bar or a table, feet forward. The higher the bar, the easier it is.","mins":4,"items":[{"ex":"incline_row","pres":"3 × 8","note":"60s rest · chest to the bar, elbows past the ribs"}],"type":"Straight"},{"role":"Work","name":"C · Farmer's Carry","note":"3 rounds of 30 seconds, rest 45s. Heavy enough that the last ten seconds are honest.","mins":3,"items":[{"ex":"farmers_carry","pres":"3 × 30s","note":"45s rest · tall, shoulders down, do not lean"}],"type":"Straight"},{"role":"Finish","name":"Side and grip","note":"Two rounds, 45s between.","mins":4,"items":[{"ex":"side_plank","pres":"2 × 20s each side","note":"Knees down is a real option."},{"ex":"dead_hang","pres":"2 × 15s","note":"Feet on the floor taking some weight is fine."}],"type":"Straight"}]},"d3":{"name":"Full Body","tag":"full body","why":"The same six shapes, loaded a little differently, so week one has repetition without being the same session three times. This is the day where you find out which movements you actually like.","blocks":[{"role":"Prime","name":"Everything, briefly","note":"Straight through, no rest.","mins":4,"items":[{"ex":"down_dog_up_dog","pres":"6","note":""},{"ex":"ankle_mobility","pres":"8 each side","note":""},{"ex":"glute_bridge","pres":"12","note":"Waking them up, not training them."},{"ex":"arm_circles","pres":"20","note":""}],"type":"Straight"},{"role":"Work","name":"A · Goblet Squat","note":"3 × 10, rest 75s. Holding a weight at the chest makes the squat easier to do well, not harder.","mins":5,"items":[{"ex":"goblet_squat","pres":"3 × 10","note":"75s rest · elbows inside the knees at the bottom"}],"type":"Straight"},{"role":"Work","name":"B · Knee Push-Up","note":"3 × 10, rest 60s. Knees down on purpose - it lets you do more good reps than a hard version does.","mins":4,"items":[{"ex":"knee_push_up","pres":"3 × 10","note":"60s rest · hips in line with the shoulders, not up"}],"type":"Straight"},{"role":"Work","name":"C · Single-Leg Bridge","note":"3 × 8 each side, rest 45s. One leg finds the side that is asleep.","mins":4,"items":[{"ex":"single_leg_bridge","pres":"3 × 8 each side","note":"45s rest · hips stay level"}],"type":"Straight"},{"role":"Finish","name":"Hold","note":"Two rounds, 45s between.","mins":4,"items":[{"ex":"hollow_hold","pres":"2 × 15s","note":"Knees bent and hands by the hips is the starting version."},{"ex":"suitcase_carry","pres":"2 × 20s each side","note":"One weight. Do not let the ribs tip."}],"type":"Straight"}]}}},"back_to_basics_2":{"id":"back_to_basics_2","version":1,"name":"Back to Basics 2","family":"back_to_basics","level":2,"who":"Someone who owns the shapes","source":"written 28 Aug 2026. Level 2 of three. Same six shapes as level 1 at the next rung, and the first level where HOW you do a rep is part of the prescription.","duration":29,"fixed":true,"trainDays":[1,3,5],"units":"lb","equipment":["bw","mat","band","db","kb","pullupbar","bench"],"weeks":4,"entryIf":"You can do 3 × 10 bodyweight squats, 3 × 8 push-ups from the floor and hold a 30 second plank without the hips dropping. If any of those is a maybe, level 1 first.","methods":[{"name":"Tempo","what":"A count on the way down. 3-1-1 is three seconds lowering, one at the bottom, one up.","why":"Time under load without more load. The cheapest way to make a movement harder while it is still being learned."},{"name":"Pause","what":"A full stop at the hardest position, then move.","why":"Kills the bounce. What is left is what you can actually do."},{"name":"Unilateral","what":"One side at a time.","why":"The strong side stops covering for the weak one. This is where most people find out."},{"name":"Superset","what":"Two movements back to back, one rest after the pair.","why":"More work in the same half hour, without turning it into conditioning."}],"constraints":{"time":"30 minutes, three days. The extra ten minutes over level 1 is the tempo, not more exercises."},"goals":["Own the six shapes at full range and under control","Find the weak side and stop hiding it","Hold a tempo without counting out loud by week 4","Arrive at level 3 able to be tested"],"habits":[],"days":{"d1":{"name":"Squat & Push","tag":"lower · push","why":"Same day as level 1, done properly. The squat gets a three second lower and a pause at the bottom, which is where the honest version of the movement lives. The push-up comes off the counter and onto the floor.","blocks":[{"role":"Prime","name":"Loosen off","note":"Straight through, no rest.","type":"Straight","mins":4,"items":[{"ex":"cat_cow","pres":"8","note":""},{"ex":"ankle_mobility","pres":"8 each side","note":""},{"ex":"deep_squat_rock","pres":"10","note":""},{"ex":"glute_bridge","pres":"12","note":"Waking them up."}]},{"role":"Work","name":"A · Goblet Squat, tempo","note":"4 × 8, tempo 3-1-1, rest 90s. Three down, one at the bottom, one up. Stop the set when the tempo goes, not when the reps do.","type":"Tempo","mins":7,"items":[{"ex":"goblet_squat","pres":"4 × 8","note":"90s rest · tempo 3-1-1 · elbows inside the knees at the bottom"}]},{"role":"Work","name":"B · Push-Up + Ring Row","note":"B1 into B2 with no rest, then 75s. Two shapes in one block.","type":"Superset","cfg":{"rounds":3,"rest":75},"mins":8,"items":[{"ex":"pushup","pres":"3 × 8","note":"superset B1 · from the floor. Knees down for the last reps beats stopping at six."},{"ex":"ring_row","pres":"3 × 10","note":"superset B2 · walk the feet forward to make it harder"}]},{"role":"Work","name":"C · Single-Leg Bridge","note":"3 × 10 each side, rest 45s. One side at a time.","type":"Straight","mins":5,"items":[{"ex":"single_leg_bridge","pres":"3 × 10 each side","note":"45s rest · hips stay level. The side that shakes is the side that needed this."}]},{"role":"Finish","name":"Middle","note":"Two rounds, 45s between.","type":"Straight","mins":5,"items":[{"ex":"hollow_hold","pres":"2 × 20s","note":"Knees bent is still the right version if the back lifts."},{"ex":"side_plank","pres":"2 × 25s each side","note":""}]}]},"d2":{"name":"Hinge & Pull","tag":"lower · pull","why":"The hinge takes load for the first time and the pull moves toward a bar. The RDL keeps the strictest rule in the program: the set ends the rep the back changes shape.","blocks":[{"role":"Prime","name":"Hips and shoulders","note":"Straight through.","type":"Straight","mins":4,"items":[{"ex":"hip_90_90","pres":"8 each side","note":""},{"ex":"worlds_greatest_stretch","pres":"5 each side","note":""},{"ex":"banded_pullapart","pres":"15","note":""},{"ex":"scap_pullup","pres":"8","note":"Hang, pull the shoulders down, arms stay straight."}]},{"role":"Work","name":"A · Romanian Deadlift, paused","note":"4 × 8, rest 90s. Pause one second at the bottom of every rep — the stretch is the point, the bounce is not.","type":"Tempo","mins":7,"items":[{"ex":"db_rdl","pres":"4 × 8","note":"90s rest · 1s pause at the bottom · the set ends the rep the back rounds"}]},{"role":"Work","name":"B · Wide Inverted Row","note":"4 × 8, rest 75s. Lower the bar as it gets easier.","type":"Straight","mins":6,"items":[{"ex":"wide_inverted_row","pres":"4 × 8","note":"75s rest · chest to the bar, body in one line"}]},{"role":"Work","name":"C · Suitcase Carry","note":"3 rounds of 40 seconds per side, rest 45s. One weight — the point is the side that is not holding it.","type":"Straight","mins":6,"items":[{"ex":"suitcase_carry","pres":"3 × 40s each side","note":"45s rest · do not let the ribs tip"}]},{"role":"Finish","name":"Hang","note":"Two rounds, 45s between.","type":"Straight","mins":4,"items":[{"ex":"hanging_knee_raise","pres":"2 × 10","note":"Slow down, no swing."},{"ex":"dead_hang","pres":"2 × 25s","note":""}]}]},"d3":{"name":"Full Body","tag":"full body","why":"The day that puts it together. A superset opens it, a unilateral squat finds the weak leg, and it closes on a carry — the shape nobody trains and everybody needs.","blocks":[{"role":"Prime","name":"Everything, briefly","note":"Straight through.","type":"Straight","mins":4,"items":[{"ex":"down_dog_up_dog","pres":"6","note":""},{"ex":"ankle_mobility","pres":"8 each side","note":""},{"ex":"bird_dog","pres":"8 each side","note":""},{"ex":"banded_pullapart","pres":"15","note":""}]},{"role":"Work","name":"A · Kettlebell Swing + Push-Up","note":"A1 into A2, no rest, then 75s. Fast then slow — the swing is hips, the push-up is control.","type":"Superset","cfg":{"rounds":4,"rest":75},"mins":12,"items":[{"ex":"kb_swing","pres":"4 × 12","note":"superset A1 · snap the hips, the bell floats"},{"ex":"pushup","pres":"4 × 8","note":"superset A2 · slow down, one count up"}]},{"role":"Work","name":"B · Bulgarian Split Squat","note":"3 × 8 each side, rest 75s. Back foot on a bench. This is the one that tells you the truth.","type":"Straight","mins":6,"items":[{"ex":"bulgarian_split","pres":"3 × 8 each side","note":"75s rest · front foot takes the weight, knee tracks the toes"}]},{"role":"Work","name":"C · Hip Thrust","note":"3 × 12, rest 60s. Squeeze and hold a second at the top.","type":"Straight","mins":4,"items":[{"ex":"hip_thrust","pres":"3 × 12","note":"60s rest · 1s hold at the top, ribs down"}]},{"role":"Finish","name":"Carry","note":"Three rounds, 45s between.","type":"Straight","mins":4,"items":[{"ex":"farmers_carry","pres":"3 × 40s","note":"45s rest · heavy enough that the last ten seconds are honest"}]}]}}},"back_to_basics_3":{"id":"back_to_basics_3","version":1,"name":"Back to Basics 3","family":"back_to_basics","level":3,"who":"Someone ready to be tested","source":"written 28 Aug 2026. Level 3 of three. The same six shapes at their real version, and the level where the clock and the failure point become part of the prescription.","duration":33,"fixed":true,"trainDays":[1,3,5],"units":"lb","equipment":["bw","mat","band","db","kb","bb","pullupbar","bench","rings","parallettes"],"weeks":4,"entryIf":"You can hold a 3-1-1 tempo squat for 4 × 8, do 10 push-ups from the floor, and hang for 45 seconds. Level 3 asks what you have; it does not teach you what to do.","methods":[{"name":"EMOM","what":"One set on the top of every minute. The rest is whatever is left of that minute.","why":"The clock sets the rest, not how you feel. It makes pacing a skill instead of a mood."},{"name":"AMRAP","what":"As many rounds as possible inside a time cap.","why":"Density you can compare week to week. The number IS the progress."},{"name":"Max set","what":"One set to honest failure, recorded.","why":"Four weeks of work needs a number at the end of it, or nothing was measured."},{"name":"Rest-pause","what":"One load, short breaks, keep going to a rep target.","why":"More hard reps than straight sets allow, without adding a set."},{"name":"Circuit","what":"Straight through every movement, then rest, then again.","why":"The conditioning cost of strength work, kept in one block so the rest of the session stays clean."},{"name":"Complex","what":"Several movements with the same implement, no putting it down.","why":"Grip, breathing and technique under fatigue, all at once."}],"constraints":{"time":"40 minutes, three days. Week 4 is a test week and it is shorter, not longer."},"goals":["Put a number on all six shapes","Hold a pace set by a clock rather than by feel","Finish a hard set without the shape falling apart","Know which of the six is your weakest, with evidence"],"habits":[],"days":{"d1":{"name":"Squat & Push","tag":"lower · push","why":"A heavy squat opens it while you are fresh, then the pushing goes on the clock. The EMOM is the point of the day — the same eight reps get harder every minute without the weight changing.","blocks":[{"role":"Prime","name":"Loosen off","note":"Two rounds, straight through.","type":"Straight","mins":5,"items":[{"ex":"cat_cow","pres":"8","note":""},{"ex":"ankle_mobility","pres":"8 each side","note":""},{"ex":"deep_squat_rock","pres":"10","note":""},{"ex":"glute_bridge","pres":"15","note":""},{"ex":"arm_circles","pres":"20","note":""}]},{"role":"Work","name":"A · Goblet Squat","note":"5 × 5, rest 120s. Heavy for five. Week 4 this becomes one max set.","type":"Straight","mins":10,"items":[{"ex":"goblet_squat","pres":"5 × 5","note":"120s rest · TEST in week 4 · stop one rep before the shape goes"}]},{"role":"Work","name":"B · Push-Up EMOM","note":"8 reps on the top of every minute for 10 minutes. If you cannot finish a minute, stop the block and write down which minute it was.","type":"EMOM","cfg":{"mins":10,"interval":60},"mins":10,"items":[{"ex":"pushup","pres":"8","note":"the rest is whatever is left of the minute"}]},{"role":"Work","name":"C · Bulgarian Split Squat","note":"3 × 8 each side, rest 75s.","type":"Straight","mins":6,"items":[{"ex":"bulgarian_split","pres":"3 × 8 each side","note":"75s rest · knee tracks the toes"}]},{"role":"Finish","name":"Hollow","note":"Rest-pause. One long hold, break when you must, back on until the clock says 90 seconds of work.","type":"Rest-pause","mins":3,"items":[{"ex":"hollow_hold","pres":"3 × 30s","note":"20s rest · lower back stays on the floor or the set is over"}]}]},"d2":{"name":"Hinge & Pull","tag":"lower · pull","why":"The heaviest day. The deadlift pattern gets real load and the longest rest in the program, then the pulling is tested with a max set — because a pull-up number is the one people actually remember.","blocks":[{"role":"Prime","name":"Hips and shoulders","note":"Two rounds, unhurried. Longer than the others on purpose.","type":"Straight","mins":5,"items":[{"ex":"hip_90_90","pres":"8 each side","note":""},{"ex":"worlds_greatest_stretch","pres":"5 each side","note":""},{"ex":"single_leg_bridge","pres":"10 each side","note":"Glutes on before the bar."},{"ex":"scap_pullup","pres":"10","note":""},{"ex":"active_hang","pres":"30s","note":""}]},{"role":"Work","name":"A · Romanian Deadlift","note":"4 × 6, rest 150s. The strictest stop rule in the program: the set ends the rep the back changes shape, not the rep after.","type":"Straight","mins":9,"items":[{"ex":"romanian_deadlift","pres":"4 × 6","note":"150s rest · TEST in week 4 · hips back, flat back, slow down"}]},{"role":"Work","name":"B · Pull-Up, max set","note":"One warm-up set of half your best, then ONE set to honest failure. Write the number down.","type":"Test","mins":4,"items":[{"ex":"pullup","pres":"2 × 5","note":"180s rest · the second set is the test — go to failure and record it"}]},{"role":"Work","name":"C · Kettlebell Swing","note":"6 × 12, rest 45s. Fast, and the short rest is the work.","type":"Straight","mins":8,"items":[{"ex":"kb_swing","pres":"6 × 12","note":"45s rest · hips, not arms"}]},{"role":"Finish","name":"Grip","note":"Three rounds, 45s between.","type":"Straight","mins":4,"items":[{"ex":"dead_hang","pres":"3 × 40s","note":"45s rest · no straps, ever"}]}]},"d3":{"name":"Full Body","tag":"full body","why":"The engine day. An AMRAP covering all six shapes, then a carry complex to finish — the number of rounds is the thing you compare in four weeks, not how it felt.","blocks":[{"role":"Prime","name":"Everything","note":"Two rounds.","type":"Straight","mins":4,"items":[{"ex":"down_dog_up_dog","pres":"6","note":""},{"ex":"bird_dog","pres":"8 each side","note":""},{"ex":"banded_pullapart","pres":"15","note":""},{"ex":"deep_squat_rock","pres":"10","note":""}]},{"role":"Work","name":"A · Dip + Ring Row","note":"A1 into A2, no rest, then 90s. The two shapes level 1 could not touch.","type":"Superset","cfg":{"rounds":4,"rest":90},"mins":13,"items":[{"ex":"dip","pres":"4 × 6","note":"superset A1 · bench dip is the honest regression, not a failure"},{"ex":"ring_row","pres":"4 × 10","note":"superset A2 · feet forward to make it harder"}]},{"role":"Work","name":"B · Six Shapes AMRAP","note":"15 minutes. As many rounds as possible. Write the number down — that number is the whole point of this block.","type":"AMRAP","cfg":{"cap":15},"mins":15,"items":[{"ex":"goblet_squat","pres":"10","note":""},{"ex":"pushup","pres":"8","note":""},{"ex":"wide_inverted_row","pres":"8","note":""},{"ex":"kb_swing","pres":"12","note":""},{"ex":"hanging_knee_raise","pres":"8","note":""}]},{"role":"Finish","name":"Carry complex","note":"Three rounds. Farmer's carry 30 seconds straight into a suitcase carry 20 seconds each side, without putting the weight down.","type":"Circuit","cfg":{"rounds":3,"rest":60},"mins":2,"items":[{"ex":"farmers_carry","pres":"30s","note":"do not put it down between the two"},{"ex":"suitcase_carry","pres":"20s each side","note":""}]}]}}},"beginner_return":{"id":"beginner_return","version":1,"name":"Come Back Strong","who":"Sevan","source":"ported from js/data/sessions-beginner.js — the program Sevan is actually on","duration":45,"fixed":true,"trainDays":[1,3,5],"units":"lb","equipment":["bw","db","bb","band","bench","rack","pullupbar","machine","cable","kb","mat"],"constraints":{"knee":"no running, no jumping, no deep knee flexion under load"},"goals":["Show up three times a week","Build muscle, armour the joints","Lose weight over time"],"habits":[{"id":"walk","label":"20 min walk after a meal","daily":true},{"id":"no8pm","label":"No eating after 8pm","daily":true},{"id":"protein","label":"First meal was high protein","daily":true},{"id":"sport","label":"Sport session","daily":false,"note":"weekly — tick it on the day you do it"}],"days":{"d1":{"name":"Day 1 · Upper","tag":"upper","why":"","blocks":[{"role":"Prime","name":"Warm-up A · Loosen up","note":"Never rushed, but no stopping — flow straight through. This is the part that protects the joints.","type":"Circuit","cfg":{"rounds":1,"rest":0},"mins":3,"items":[{"ex":"arm_circles","pres":"20","note":""},{"ex":"down_dog_up_dog","pres":"5","note":""},{"ex":"hip_90_90","pres":"8","note":""}]},{"role":"Prime","name":"Warm-up A · Circuit","note":"3 rounds, continuous — no rest inside a round","type":"Circuit","cfg":{"rounds":3,"rest":0},"mins":3,"items":[{"ex":"pushup","pres":"3-5","note":"Hands under your shoulders, body in one straight line."},{"ex":"dead_hang","pres":"20s","note":"Just hang from the bar with straight arms and let your shoulders stretch out."},{"ex":"banded_pullapart","pres":"10-15","note":"Band in both hands, arms straight out in front."},{"ex":"mountain_climber","pres":"10","note":"Push-up position."}]},{"role":"Work","name":"A · Push-Ups + Lat Pulldown","note":"A1 straight into A2 with no rest, then rest 75 sec, then go again.","type":"Superset","cfg":{"rounds":3,"rest":75},"mins":9,"items":[{"ex":"straight_bar_push_up","pres":"10-15","note":"Straight Bar Push-Up · superset A1 · Set a bar in the rack about waist height.","sg":1},{"ex":"lat_pulldown","pres":"10","note":"superset A2","sg":1}]},{"role":"Work","name":"B · Assisted Dip + Cable Row","note":"B1 straight into B2 with no rest, then rest 75 sec.","type":"Superset","cfg":{"rounds":3,"rest":75},"mins":9,"items":[{"ex":"assisted_dip","pres":"8","note":"superset B1","sg":1},{"ex":"seated_cable_row","pres":"10","note":"superset B2","sg":1}]},{"role":"Work","name":"C · Lateral Raise + Pushdown","note":"C1 into C2, no rest, then 75 sec.","type":"Superset","cfg":{"rounds":3,"rest":75},"mins":9,"items":[{"ex":"lateral_raise","pres":"12","note":"superset C1","sg":1},{"ex":"triceps_pushdown","pres":"12","note":"superset C2","sg":1}]},{"role":"Work","name":"D · Reverse Fly + Curl","note":"D1 into D2, no rest, then 75 sec. Reverse fly is never heavy — light and slow.","type":"Superset","cfg":{"rounds":2,"rest":75},"mins":9,"items":[{"ex":"reverse_fly","pres":"12-15","note":"superset D1 · Chest flat on an incline bench, light dumbbells hanging.","sg":1},{"ex":"barbell_curl","pres":"12","note":"superset D2","sg":1}]},{"role":"Finish","name":"Finisher · Kettlebell Swings","note":"3 rounds of 12, rest 20 sec between rounds.","type":"Circuit","cfg":{"rounds":3,"rest":20},"mins":3,"items":[{"ex":"kb_swing","pres":"12","note":""}]}]},"d2":{"name":"Day 2 · Upper","tag":"upper","why":"","blocks":[{"role":"Prime","name":"Warm-up A · Loosen up","note":"Never rushed, but no stopping — flow straight through. This is the part that protects the joints.","type":"Circuit","cfg":{"rounds":1,"rest":0},"mins":4,"items":[{"ex":"arm_circles","pres":"20","note":""},{"ex":"down_dog_up_dog","pres":"5","note":""},{"ex":"hip_90_90","pres":"8","note":""}]},{"role":"Prime","name":"Warm-up A · Circuit","note":"3 rounds, continuous — no rest inside a round","type":"Circuit","cfg":{"rounds":3,"rest":0},"mins":4,"items":[{"ex":"pushup","pres":"3-5","note":"Hands under your shoulders, body in one straight line."},{"ex":"dead_hang","pres":"20s","note":"Just hang from the bar with straight arms and let your shoulders stretch out."},{"ex":"banded_pullapart","pres":"10-15","note":"Band in both hands, arms straight out in front."},{"ex":"mountain_climber","pres":"10","note":"Push-up position."}]},{"role":"Work","name":"A · Chest Press + Row","note":"A1 into A2, no rest, then rest 75 sec.","type":"Superset","cfg":{"rounds":3,"rest":75},"mins":11,"items":[{"ex":"chest_press_machine","pres":"10","note":"superset A1","sg":1},{"ex":"chest_supported_row","pres":"12","note":"superset A2","sg":1}]},{"role":"Work","name":"B · Shoulder Press + Pullover","note":"B1 into B2, no rest, then rest 75 sec.","type":"Superset","cfg":{"rounds":3,"rest":75},"mins":11,"items":[{"ex":"shoulder_press_machine","pres":"10","note":"superset B1","sg":1},{"ex":"db_pullover","pres":"12","note":"superset B2 · Lie on the bench, elbows slightly bent and fixed.","sg":1}]},{"role":"Work","name":"C · Back Extension + Dip Hold","note":"C1 into C2, no rest, then rest 75 sec.","type":"Superset","cfg":{"rounds":3,"rest":75},"mins":11,"items":[{"ex":"back_extension_45","pres":"12","note":"superset C1","sg":1},{"ex":"dip_support_hold","pres":"20s","note":"superset C2 · Hold yourself up on the dip bars with your arms locked straight.","sg":1}]},{"role":"Finish","name":"Finisher · Farmer's Carry","note":"4 rounds · walk 30-40 m · rest 45-60 sec between rounds. No straps — grip is the point. Start 40-50 lb per hand.","type":"Circuit","cfg":{"rounds":4,"rest":60},"mins":4,"items":[{"ex":"farmers_carry","pres":"40s","note":"Farmer's Carry · A dumbbell in each hand, no straps."}]}]},"d3":{"name":"Day 3 · Full Body","tag":"full body","why":"","blocks":[{"role":"Prime","name":"Warm-up B · Sequence 1","note":"Flow straight through, no stopping.","type":"Circuit","cfg":{"rounds":1,"rest":0},"mins":8,"items":[{"ex":"arm_circles","pres":"20","note":""},{"ex":"down_dog_up_dog","pres":"5","note":""},{"ex":"hip_90_90","pres":"8","note":""}]},{"role":"Prime","name":"Warm-up B · Sequence 2","note":"2 rounds, continuous — no rest inside a round","type":"Circuit","cfg":{"rounds":2,"rest":0},"mins":8,"items":[{"ex":"banded_sidewalk","pres":"60s","note":"Banded Side-Step March · Band around your legs, stay low in a quarter-squat, step sideways without letting your feet click together."},{"ex":"pushup","pres":"3-5","note":"Hands under your shoulders, body in one straight line."},{"ex":"dead_hang","pres":"20s","note":"Just hang from the bar with straight arms and let your shoulders stretch out."},{"ex":"superman","pres":"10-15","note":"Superman · Lie face down, arms stretched out in front, thumbs pointing up."},{"ex":"mountain_climber","pres":"10","note":"Push-up position."}]},{"role":"Work","name":"Full Body Circuit","note":"Straight through, 3-5 rounds. Rest 90 sec between rounds ONLY — no rest between exercises. One pair of dumbbells: start 25-30 lb per hand (the shoulder press is the limiter). The RDL and row will feel light on purpose for now — that is fine for the first month.","type":"Circuit","cfg":{"rounds":4,"rest":90},"mins":21,"items":[{"ex":"db_rdl","pres":"8","note":"DB Romanian Deadlift · Push your hips back, slide the dumbbells down the front of your legs, knees almost straight."},{"ex":"db_shoulder_press","pres":"6","note":"Sit or stand tall, dumbbells at shoulder height."},{"ex":"bent_over_row","pres":"6","note":"DB Bent-Over Row · Hinge at the hips, flat back, dumbbells hanging."},{"ex":"pushup_on_dumbbells","pres":"6","note":"DB Push-Ups · Hands gripping the two dumbbells on the floor so your wrists stay straight."},{"ex":"forearm_plank","pres":"30s","note":"Plank Hold · Elbows under your shoulders, body in one straight line."},{"ex":"wall_sit","pres":"30s","note":"Wall Sit · Back flat on the wall, slide down until your thighs are somewhere comfortable — the higher you stay, the easier on the knee."}]},{"role":"Finish","name":"Finisher · Core Circuit","note":"30 sec each, no rest between exercises. 2-3 rounds, 45 sec between rounds.","type":"Circuit","cfg":{"rounds":3,"rest":45},"mins":8,"items":[{"ex":"dead_bug","pres":"30s","note":"On your back, arms up, knees over hips."},{"ex":"side_plank","pres":"30s each side","note":"On your side, elbow under your shoulder, knees bent at 90°."},{"ex":"side_plank","pres":"30s each side","note":"On your side, elbow under your shoulder, knees bent at 90°."},{"ex":"bird_dog","pres":"30s","note":"On hands and knees."},{"ex":"lying_leg_raise","pres":"30s","note":"Leg Raises · On your back, hands under your hips."}]}]}}},"fundamentals":{"id":"fundamentals","version":1,"name":"The Fundamentals","who":"Nicolas","source":"built in the coach console from survey v6 (25 Aug 2026) and the Foundation Block that ran before it. Days corrected after the Monday/Sunday indexing bug.","duration":40,"fixed":false,"trainDays":[1,2,4,5],"units":"lb","equipment":["bw","db","kb","bb","pullupbar","bench","rack","rings","dipbars","parallettes"],"constraints":{"lowerback":"hinge is loaded but never rounded - the set ends the rep the back changes shape, not the rep after","knee":"no jumping, no deep loaded knee flexion cold; the knee circuit runs before every lower day","capacity":"4 of 10 to training and 7.75 h recovery - four sessions is the ceiling, not the floor","sport":"a team sport, 45 min, SUNDAYS - that is a fifth session and it is already in the week. Monday is upper only because of it."},"goals":["Build muscle, get stronger","Put a first number on all seven untested lifts","Every fundamental pattern trained twice a week inside 160 minutes","Still lift heavy, say yes to any hike"],"habits":[],"days":{"d1":{"name":"Push & Pull A","tag":"upper · bench","why":"Monday, the day after Sunday's match. Upper only on purpose - legs that just played do not want a barbell on them. Bench is one of your seven unknowns, so the top set is the test: ramp to a hard 6 and write the number down. Everything after it is volume around that.","blocks":[{"role":"Prime","name":"Shoulders and wrists","note":"Straight through, no rest. The wrists matter because dips and the front rack both load them cold.","mins":6,"items":[{"ex":"arm_circles","pres":"20","note":""},{"ex":"thoracic_rotation","pres":"8 each side","note":"Open the mid back before anything presses."},{"ex":"wrist_prep","pres":"30s","note":""},{"ex":"scap_pullup","pres":"10","note":"Hang, then pull the shoulders down without bending the arms."},{"ex":"shoulder_tap","pres":"20","note":"Push-up position, no hip sway."}]},{"role":"Work","name":"A · Bench Press","note":"4 × 6, rest 150s. TEST: weeks 1 and 2, ramp to a hard 6 that leaves 1 in the tank and record it. That number is what everything after week 2 progresses from.","mins":12,"items":[{"ex":"bench_press","pres":"4 × 6","note":"150s rest · stop 1 rep short, every set"}]},{"role":"Work","name":"B · Dip + Single-Arm Row","note":"B1 into B2 with no rest, then 90s. Two of your fundamentals in one 9-minute block.","mins":9,"items":[{"ex":"dip","pres":"3 × 8","note":"superset B1 · parallettes, controlled to depth the shoulder likes"},{"ex":"single_arm_row","pres":"3 × 10 each side","note":"superset B2 · TEST the load · chest supported on the bench so the lower back stays out of it"}]},{"role":"Work","name":"C · Shoulder Press + Y-T-W","note":"C1 into C2, no rest, then 75s. The Y-T-W is never heavy - it is there to pay for the pressing.","mins":8,"items":[{"ex":"db_shoulder_press","pres":"3 × 10","note":"superset C1 · seated, back supported"},{"ex":"prone_ytw","pres":"3 × 8","note":"superset C2 · light, slow, chest on an incline bench"}]},{"role":"Finish","name":"Core","note":"Straight through, 45s between rounds.","mins":5,"items":[{"ex":"hanging_knee_raise","pres":"3 × 15","note":"You tested at 25. These are slow, not max."},{"ex":"side_plank","pres":"3 × 45s each side","note":"Anti-side-bend. This is lower back work."}]}]},"d2":{"name":"Hinge & Swing","tag":"lower · deadlift","why":"Tuesday. The deadlift is the lift your lower back has the most to say about, so it gets the longest prime, the longest rest and the strictest stop rule. Placed here rather than late in the week so it sits as far from Sunday's match as the week allows in one direction, and two full days after it in the other. Then the swing, which is the same pattern moving fast.","blocks":[{"role":"Prime","name":"Spine and hips","note":"2 rounds, unhurried. This one is longer than the others on purpose.","mins":7,"items":[{"ex":"cat_cow","pres":"8","note":""},{"ex":"hip_90_90","pres":"8 each side","note":""},{"ex":"worlds_greatest_stretch","pres":"5 each side","note":""},{"ex":"single_leg_bridge","pres":"12 each side","note":"Glutes on before the bar, so they are not the thing that switches on late."},{"ex":"dead_bug","pres":"8 each side","note":"Ribs down, back flat on the floor."}]},{"role":"Work","name":"A · Deadlift","note":"4 × 5, rest 180s. TEST, and the most conservative test in the program: ramp to a hard 5 that leaves 2 in the tank. Weeks 1 and 2 will feel too easy. That is correct.","mins":13,"items":[{"ex":"deadlift","pres":"4 × 5","note":"180s rest · TEST · the set ends the rep the back changes shape, not the rep after"}]},{"role":"Work","name":"B · Kettlebell Swing","note":"5 × 12, rest 45s. TEST the bell. Hips, not arms - the bell floats, you do not lift it.","mins":8,"items":[{"ex":"kb_swing","pres":"5 × 12","note":"45s rest · TEST · snap the hips, chest tall"}]},{"role":"Work","name":"C · Goblet Squat","note":"3 × 12, rest 75s. Light on purpose - the squat pattern's second exposure this week, and the knees have already had Monday.","mins":7,"items":[{"ex":"goblet_squat","pres":"3 × 12","note":"75s rest · slow down, pause at the bottom"}]},{"role":"Finish","name":"Burpees","note":"3 rounds of 10, 45s between. You tested at 30 unbroken, so this is conditioning, not a max.","mins":5,"items":[{"ex":"burpee","pres":"3 × 10","note":"Step back rather than jump back if the knee prefers it."}]}]},"d3":{"name":"Push & Pull B","tag":"upper · press and row","why":"Thursday, after Wednesday off. Two more unknowns tested back to back - overhead press and the barbell row - and the pull-up finally gets loaded rather than counted. You do 15, so sets of 8 are strength work, not endurance.","blocks":[{"role":"Prime","name":"Overhead and grip","note":"Straight through. The dead hang is prep and a test of how the shoulder feels today.","mins":6,"items":[{"ex":"arm_circles","pres":"20","note":""},{"ex":"down_dog_up_dog","pres":"5","note":""},{"ex":"wrist_prep","pres":"30s","note":""},{"ex":"dead_hang","pres":"30s","note":""},{"ex":"bird_dog","pres":"8 each side","note":"Braced before anything goes overhead."}]},{"role":"Work","name":"A · Overhead Press","note":"4 × 6, rest 150s. TEST. Strict, standing, ribs down - if the lower back arches to finish the rep, the set is over.","mins":12,"items":[{"ex":"overhead_press","pres":"4 × 6","note":"150s rest · TEST · strict, no leg drive"}]},{"role":"Work","name":"B · Barbell Row","note":"4 × 8, rest 90s. TEST. Hinged and flat backed - this is the one row that asks something of the lower back, so it comes on the day the deadlift does not.","mins":10,"items":[{"ex":"bent_over_row","pres":"4 × 8","note":"90s rest · TEST · flat back, stop the set if it changes shape"}]},{"role":"Work","name":"C · Pull-Up + Ring Push-Up","note":"C1 into C2, no rest, then 90s. Add load to the pull-up as soon as 3 × 8 is comfortable - a dumbbell between the feet does the job without a vest.","mins":7,"items":[{"ex":"pullup","pres":"3 × 8","note":"superset C1 · load it once 8 is easy"},{"ex":"ring_pushup","pres":"3 × 10","note":"superset C2 · rings low, turn the hands out at the top"}]},{"role":"Finish","name":"Core","note":"45s between rounds.","mins":5,"items":[{"ex":"hanging_leg_raise","pres":"3 × 12","note":"Straight legs, no swing."},{"ex":"copenhagen_plank","pres":"2 × 20s each side","note":"Top foot on the bench. Start with the knee bent."}]}]},"d4":{"name":"Squat & Carry","tag":"lower · squat","why":"Friday, and the last session before Sunday's match, which is why the squat is here and the deadlift is not: 48 hours is enough to walk into a game off a heavy squat and would be thin off heavy pulls. The knee circuit is not a warm-up you can skip - it is the reason this day repeats. Squat is the test; the split squat already has a number from your survey.","blocks":[{"role":"Prime","name":"Knee armour","note":"2 rounds, controlled. Carried over from the Foundation Block because it worked and you actually did it.","mins":7,"items":[{"ex":"leg_swings","pres":"10 each way","note":""},{"ex":"ankle_mobility","pres":"8 each side","note":"Ankles first - a stiff ankle is a knee problem."},{"ex":"deep_squat_rock","pres":"10","note":""},{"ex":"touchdown_squat","pres":"15 each side","note":""},{"ex":"tibialis_raise","pres":"25","note":""},{"ex":"kot_calf","pres":"25","note":""}]},{"role":"Work","name":"A · Back Squat","note":"4 × 5, rest 150s. TEST: ramp to a hard 5. If the knee talks on the way down, switch to a box squat at a height it likes and test that instead - a number you can repeat beats a number you cannot.","mins":12,"items":[{"ex":"back_squat","pres":"4 × 5","note":"150s rest · TEST · box squat is the regression, not a failure"}]},{"role":"Work","name":"B · Single-Leg RDL","note":"3 × 10 each side, alternating - the other leg is the rest. Hinge without loading the spine, which is the point on a squat day.","mins":8,"items":[{"ex":"single_leg_rdl","pres":"3 × 10 each side","note":"Push the hip back, flat back, slow down"}]},{"role":"Work","name":"C · Bulgarian Split Squat","note":"3 × 8 each side, rest 90s. You logged 40 lb × 10 in the survey, so this one starts with a real number instead of a guess.","mins":8,"items":[{"ex":"bulgarian_split","pres":"3 × 8 each side","note":"Start at 40 lb · 90s rest"}]},{"role":"Finish","name":"Suitcase Carry","note":"3 rounds, 40s per side, 45s between rounds. One of your seven unknowns and the cheapest lower-back insurance in the program.","mins":5,"items":[{"ex":"suitcase_carry","pres":"3 × 40s each side","note":"TEST the load · one kettlebell, do not let the ribs tip"}]}]}},"sport":{"acts":["team"],"days":[0],"minutes":45,"note":"Sunday-based, same convention as trainDays. Written down as data because the constraint text alone cannot put it on the week."}},"main":{"id":"main","version":1,"name":"Foundation Block","who":"Nicolas","source":"ported from js/data/sessions.js — the program this person is actually on","duration":30,"fixed":false,"trainDays":[1,2,3,4,5],"units":"lb","equipment":["bw","db","bb","rings","parallettes","band","vest","slantboard","rack","pullupbar","bench","sliders"],"constraints":{"forearm":"supinated_neutral"},"goals":["Lower-body size","Strength (upper + lower)","Rep-max endurance","Zone-5 conditioning","Skills (handstand / front lever)","Mobility / into the stretch"],"habits":[],"days":{"d1":{"name":"Quads & Knees","tag":"hypertrophy","why":"","blocks":[{"role":"Prime","name":"Knee Armor Circuit","note":"2 rounds, controlled","type":"Circuit","cfg":{"rounds":2},"mins":3,"items":[{"ex":"touchdown_squat","pres":"25 each side","note":""},{"ex":"tibialis_raise","pres":"25","note":""},{"ex":"kot_calf","pres":"50","note":""},{"ex":"slant_pulse","pres":"20","note":""}]},{"role":"Work","name":"Bulgarian Split Squat","note":"To failure, per side · 3 sets base (up to 4 on strong days)","type":"Straight","cfg":{},"mins":8,"items":[{"ex":"bulgarian_split","pres":"10 reps to failure each side","note":""}]},{"role":"Work","name":"Slant-Board Squat","note":"Strength, tempo 3-1-1","type":"Straight","cfg":{},"mins":8,"items":[{"ex":"slant_board_squat","pres":"3 × 6 · tempo 3-1-1","note":"90s rest","rest":90}]},{"role":"Work","name":"Assisted Reverse Nordic Curl","note":"Quad eccentric · limited rest · 3rd anchor","type":"Straight","cfg":{},"mins":8,"items":[{"ex":"reverse_nordic","pres":"3 × 8","note":"45s rest","rest":45}]},{"role":"Finish","name":"Iso Burner — Horse Stance + Side Plank","note":"3 rounds, continuous (no rest)","type":"Circuit","cfg":{"rounds":3,"rest":0},"mins":3,"items":[{"ex":"horse_stance","pres":"40s","note":""},{"ex":"side_plank","pres":"30s each side","note":""},{"ex":"side_plank","pres":"30s each side","note":""}]}]},"d2":{"name":"Push & Handstand","tag":"push","why":"","blocks":[{"role":"Prime","name":"Core + Compression Prep","note":"2 rounds · handstand-ready","type":"Circuit","cfg":{"rounds":2},"mins":3,"items":[{"ex":"long_lever_plank","pres":"30s","note":""},{"ex":"walk_up_plank","pres":"8","note":""},{"ex":"side_plank","pres":"30s each side","note":""},{"ex":"shoulder_tap","pres":"20","note":""},{"ex":"pike_compression","pres":"10","note":""}]},{"role":"Work","name":"Handstand Practice","note":"Fresh — quality over fatigue","type":"Straight","cfg":{},"mins":8,"items":[{"ex":"kick_up_practice","pres":"2 min","note":""},{"ex":"wall_handstand_hold","pres":"30s","note":"45s rest","rest":45},{"ex":"handstand","pres":"2 min","note":""}]},{"role":"Work","name":"Deep Parallette Pike Push-Up","note":"To failure","type":"Straight","cfg":{},"mins":8,"items":[{"ex":"deep_pike_pushup","pres":"8 reps to failure","note":""}]},{"role":"Work","name":"Weighted Dip","note":"Strength · 1 warm-up (8-10) → 3 × 5","type":"Straight","cfg":{},"mins":8,"items":[{"ex":"weighted_dip","pres":"3 × 5","note":"150s rest","rest":150}]},{"role":"Finish","name":"Push-Up AMRAP","note":"Volume","type":"AMRAP","cfg":{"cap":3},"mins":3,"items":[{"ex":"pushup","pres":"—","note":""}]}]},"d3":{"name":"Hinge & Posterior","tag":"strength","why":"","blocks":[{"role":"Prime","name":"Glute Activation","note":"Sidewalks (continuous) + bird dogs","type":"Straight","cfg":{},"mins":3,"items":[{"ex":"banded_sidewalk","pres":"120s","note":"15s rest","rest":15},{"ex":"bird_dog_crunch","pres":"2 × 8 each side","note":"20s rest","rest":20}]},{"role":"Work","name":"Hip Thrust","note":"Strength loader — add load weekly","type":"Straight","cfg":{},"mins":8,"items":[{"ex":"hip_thrust","pres":"4 × 5","note":"150s rest","rest":150}]},{"role":"Work","name":"Single-Leg RDL","note":"Size — per side, progress load/reps · alternating sides = built-in rest","type":"Straight","cfg":{},"mins":8,"items":[{"ex":"single_leg_rdl","pres":"3 × 8 each side","note":"90s rest","rest":90}]},{"role":"Work","name":"Nordic Curl","note":"Hamstring eccentric — progress ROM → load · 3rd anchor","type":"Straight","cfg":{},"mins":8,"items":[{"ex":"nordic_curl","pres":"3 × 6","note":"90s rest","rest":90}]},{"role":"Finish","name":"Tabata — Swing + Jump Squat","note":"20/10, 5 cycles (~5 min)","type":"Tabata","cfg":{"work":20,"rounds":5},"mins":3,"items":[{"ex":"db_swing","pres":"—","note":""},{"ex":"jump_squat","pres":"—","note":""}]}]},"d4":{"name":"Pull & Front Lever","tag":"pull","why":"","blocks":[{"role":"Prime","name":"Pulling Prep","note":"Forearm-light","type":"Straight","cfg":{},"mins":3,"items":[{"ex":"banded_pullapart","pres":"1 × 20","note":"10s rest","rest":10},{"ex":"scap_pullup","pres":"1 × 15","note":"","rest":0},{"ex":"active_hang","pres":"30s","note":"20s rest","rest":20},{"ex":"dragon_flag","pres":"30s","note":"15s rest","rest":15}]},{"role":"Work","name":"Front Lever","note":"TUT holds · advanced-tuck or banded straddle (set Week 1)","type":"Straight","cfg":{},"mins":8,"items":[{"ex":"front_lever_tuck","pres":"10s","note":"60s rest","rest":60}]},{"role":"Work","name":"Weighted Chin-Up","note":"Strength · supinated · 1 warm-up (8-10) → 3 × 5","type":"Straight","cfg":{},"mins":8,"items":[{"ex":"weighted_chinup","pres":"3 × 5","note":"150s rest","rest":150}]},{"role":"Work","name":"Single-Arm Row","note":"Horizontal · unilateral · per side · alternating sides = built-in rest","type":"Straight","cfg":{},"mins":8,"items":[{"ex":"single_arm_row","pres":"3 × 8 each side","note":"90s rest","rest":90}]},{"role":"Finish","name":"L-Sit Pull-ups + Skin the Cat","note":"5 min, minimal rest","type":"AMRAP","cfg":{"cap":5},"mins":3,"items":[{"ex":"l_sit_pullup","pres":"5 reps","note":""},{"ex":"skin_the_cat","pres":"5 reps","note":""}]}]},"d5":{"name":"Full Body Engine","tag":"conditioning","why":"","blocks":[{"role":"Work","name":"Block 1 · Tempo AMRAP","note":"15 min, target ~4 rounds — all 5 patterns","type":"AMRAP","cfg":{"cap":15},"mins":15,"items":[{"ex":"chin_up","pres":"5 reps · 5s hold / 5s down / 5s dead-hang","note":""},{"ex":"dip","pres":"5 reps","note":""},{"ex":"goblet_squat","pres":"8 reps · slow + pause","note":""},{"ex":"banded_glute_bridge","pres":"30s","note":""},{"ex":"l_sit","pres":"20s","note":""}]},{"role":"Work","name":"Block 2 · Explosive Intervals","note":"40s on / 20s off · ~3 rounds · all 5 patterns","type":"Tabata","cfg":{"work":40,"rounds":3},"mins":15,"items":[{"ex":"explosive_chinup","pres":"—","note":""},{"ex":"deadstop_pushup","pres":"—","note":""},{"ex":"jump_squat","pres":"—","note":""},{"ex":"db_swing","pres":"—","note":""},{"ex":"mountain_climber","pres":"—","note":""}]}]}}}};
 /* <<< END GENERATED PROGRAM LIBRARY */
 
 let CAT = {};           /* the movement catalogue, for the pickers */
@@ -2200,10 +2307,18 @@ function nbBlockSec(b){
     const r = cfg.rounds ?? NB_DEF.rounds;
     return r*items.reduce((t,it)=>t+nbWork(it)+NB_TRANS,0) + Math.max(0,r-1)*(cfg.rest ?? NB_DEF.rest);
   }
+  /* A SUPERSET STATES ITS ROUNDS ON THE BLOCK, not on the rows — that is
+     what the rounds box in its banner is, and it is why its rows show
+     reps only. This read the row's set count anyway, found the 1 that a
+     bare "10-15" parses to, and reported a three-round superset as one
+     time through. The block is asked first for exactly the types whose
+     spec puts rounds there. */
+  const stated = ['Superset','Circuit'].indexOf(b.type) >= 0
+    ? (cfg.rounds ?? NB_DEF.rounds) : null;
   let sec = 0;
   for(const grp of nbGroups(b)){
     const its = grp.idx.map(i=>items[i]);
-    const sets = Math.max(...its.map(it=>nbParse(it.pres).sets||1));
+    const sets = stated ?? Math.max(...its.map(it=>nbParse(it.pres).sets||1));
     const through = its.reduce((t,it)=>t+nbWork(it),0) + (its.length-1)*NB_TRANS;
     const rest = its.length>1 ? (cfg.rest ?? NB_DEF.rest)
                               : (nbRestOf(its[0],b) ?? NB_REST[b.role] ?? 60);
@@ -2242,10 +2357,11 @@ function nbWorkSec(b){
   /* AMRAP is handled in nbLoad — how many rounds somebody gets through
      is the question the block exists to answer, so we do not answer it */
   if(b.type === 'AMRAP') return null;
+  const stated = b.type === 'Superset' ? (cfg.rounds ?? NB_DEF.rounds) : null;
   let sec = 0;
   for(const grp of nbGroups(b)){
     const its = grp.idx.map(i => items[i]);
-    const sets = Math.max(...its.map(it => nbParse(it.pres).sets || 1));
+    const sets = stated ?? Math.max(...its.map(it => nbParse(it.pres).sets || 1));
     sec += sets * its.reduce((t, it) => t + nbWork(it), 0);
   }
   return sec;
@@ -2296,8 +2412,12 @@ function nbWhere(day, bi){
    wrote a length on it, that length is the better answer and it stands.
    The moment a set count is typed into any row, derivation takes over —
    which is exactly when the coach starts wanting the clock to move. */
+/* Superset belongs in this list for the same reason Circuit does: its set
+   count is stated, just on the block rather than on the row. Leaving it
+   out had a fully specified three-round superset fall back to whatever
+   minutes someone typed, and show no load meter at all. */
 const nbDerivable = b => (b.items||[]).some(it => nbParse(it.pres).told)
-  || ['EMOM','AMRAP','Tabata','Circuit'].indexOf(b.type) >= 0;
+  || ['Superset','Circuit','EMOM','AMRAP','Tabata'].indexOf(b.type) >= 0;
 /* ONE LENGTH, ASKED ONCE. nbMins used to be the only caller of this and
    the load meter divided by nbBlockSec instead — two different answers to
    "how long is this block", which is how the meter came to read 100% for
@@ -2712,14 +2832,14 @@ function nbMiddle(){
     + `<button class="nbday add" onclick="addDay()">+</button></div>`;
 
   h += `<div class="nbdayhead">
-      <span class="t"><input class="nbdn" value="${esc(day.name||'')}" placeholder="Name this day"
+      <span class="t"><input class="nbdn" data-a="day.name" value="${esc(day.name||'')}" placeholder="Name this day"
               onchange="PROG.days[PDAY].name=this.value;nbSave()">
         <small>${nbDayParts(PDAY).join(' · ') || 'nothing in this day yet'}</small></span>
-      <input class="nbtag" value="${esc(day.tag||'')}" placeholder="tag"
+      <input class="nbtag" data-a="day.tag" value="${esc(day.tag||'')}" placeholder="tag"
              onchange="PROG.days[PDAY].tag=this.value;nbSave()">
       <span class="nbmin"><b>${nbDayMins(day)}</b><em>min</em></span>
       <button class="btn sm" onclick="delDay()">Delete day</button></div>
-    <textarea class="nbwhy" rows="2" placeholder="Why this session exists"
+    <textarea class="nbwhy" data-a="day.why" rows="2" placeholder="Why this session exists"
       onchange="PROG.days[PDAY].why=this.value;nbSave()">${esc(day.why||'')}</textarea>`;
 
   (day.blocks||[]).forEach((b,bi)=>{
@@ -2747,7 +2867,7 @@ function nbMiddle(){
        editor stays behind the lock, where you put it. */
     if(b.locked){
       const peek = nbPeek.has(bi);
-      h += `<div class="nbblock locked fold ${peek?'peek':''}" style="--rc:${RC}">
+      h += `<div class="nbblock locked fold ${peek?'peek':''}" data-bi="${bi}" style="--rc:${RC}">
         <button class="nbfold" onclick="nbTogglePeek(${bi})">
           <span class="nbrole tag">${esc(b.role)}</span>
           ${stamp}
@@ -2766,13 +2886,13 @@ function nbMiddle(){
       return;
     }
 
-    h += `<div class="nbblock ${sel?'sel':''} ${b.locked?'locked':''}" style="--rc:${RC}"
+    h += `<div class="nbblock ${sel?'sel':''} ${b.locked?'locked':''}" data-bi="${bi}" style="--rc:${RC}"
             onclick="${b.locked?'':'nbSel='+bi+';drawProgram()'}">
       <div class="nbbhead">
         <select class="nbrole" onclick="event.stopPropagation()" onchange="nbSetBlock(${bi},'role',this.value)">
           ${['Prime','Work','Finish'].map(r=>`<option ${b.role===r?'selected':''}>${r}</option>`).join('')}</select>
         ${stamp}
-        <span class="nbnw"><input class="nbbn" value="${esc(b.name||'')}" placeholder="Name this block"
+        <span class="nbnw"><input class="nbbn" data-a="b${bi}.name" value="${esc(b.name||'')}" placeholder="Name this block"
             onclick="event.stopPropagation()" onchange="nbSetBlock(${bi},'name',this.value)">
           <small>${spec.blurb}</small></span>
         ${meter}
@@ -2780,7 +2900,7 @@ function nbMiddle(){
           <select class="nbtype" onchange="nbSetType(${bi},this.value)">
             ${NB_TYPES.map(t=>`<option ${b.type===t?'selected':''}>${t}</option>`).join('')}</select>
           ${spec.block.map(k=>{const f=NB_FIELD[k];
-            return `<span class="nbcfg" title="${f[0]}"><input type="number" min="0" max="600"
+            return `<span class="nbcfg" title="${f[0]}"><input type="number" data-a="b${bi}.cfg.${k}" min="0" max="600"
               value="${b.cfg[k] != null ? b.cfg[k] : NB_DEF[k]}"
               onchange="nbSetCfg(${bi},'${k}',this.value)"><em>${f[1]||f[0]}</em></span>`;}).join('')}
           <span class="nbmin"><b>${nbMins(b)}</b><em>min</em></span>
@@ -2806,15 +2926,15 @@ function nbMiddle(){
             <small>${esc([m.g,(m.p||[])[0],(m.mus||[]).slice(0,2).join('/')].filter(Boolean).join(' · '))}${m.lat==='unilateral'?' · per side':''}</small></span>
           <span class="nbnums" onclick="event.stopPropagation()">
             ${spec.item.indexOf('sets')>=0
-              ? `<input type="number" min="1" max="20" value="${pr.sets}" title="sets"
+              ? `<input type="number" data-a="b${bi}i${ii}.sets" min="1" max="20" value="${pr.sets}" title="sets"
                         onchange="nbSetNum(${bi},${ii},'sets',this.value)"><em>×</em>`
               : `<span class="gh">—</span><em>×</em>`}
-            <input type="number" min="1" max="600" value="${pr.val}" title="${pr.hold?'seconds':'reps'}"
+            <input type="number" data-a="b${bi}i${ii}.val" min="1" max="600" value="${pr.val}" title="${pr.hold?'seconds':'reps'}"
                    onchange="nbSetNum(${bi},${ii},'val',this.value)">
             <em>${pr.hold?'s':'reps'}${pr.side?'/side':''}</em></span>
           <span class="nbnums rest ${spec.item.indexOf('rest')>=0?'':'off'}" onclick="event.stopPropagation()">
             ${spec.item.indexOf('rest')>=0
-              ? `<input type="number" min="0" max="600" step="15" placeholder="—" value="${rest != null ? rest : ''}"
+              ? `<input type="number" data-a="b${bi}i${ii}.rest" min="0" max="600" step="15" placeholder="—" value="${rest != null ? rest : ''}"
                         onchange="nbSetNum(${bi},${ii},'rest',this.value)">`
               : `<span class="gh">—</span>`}<em>rest</em></span>
           <button class="nbx" onclick="event.stopPropagation();nbDel(${bi},${ii})">×</button></div>`;
@@ -2846,27 +2966,76 @@ function nbMiddle(){
   return h;
 }
 
-/* KEEP THE PAGE WHERE IT WAS.
+/* KEEP THE PAGE WHERE IT WAS, AND THE CURSOR WHERE IT WAS.
 
-   Every edit in the builder ends at drawProgram(), and drawProgram()
-   rebuilds the whole panel — `host.innerHTML = ...` first, then the three
-   columns are filled in on the lines after it. For those few milliseconds
-   the panel is an empty box, the document collapses to almost nothing, and
-   the browser does the only thing it can: it clamps the scroll position to
-   the new maximum, which is zero. Then the content comes back and the page
-   is at the top.
+   Every edit ends at drawProgram(), which rebuilds the whole panel. The
+   first attempt at this saved window.scrollY and put it back, which fixed
+   the case where the document briefly collapses to nothing — and did not
+   fix the case that actually happens, because THE CONTENT MOVES. Open a
+   card and everything below it shifts down; a numeric scroll position then
+   holds the viewport still while the block you were working on slides out
+   from under it. The page has not jumped. What you were reading has.
 
-   So opening a movement to swap it threw you back to the top of the
-   console and you had to scroll down again to see what you had just done.
-   The edit worked every time. It just took the page with it.
+   So the anchor is an element, not a number: whichever block is at the top
+   of the viewport keeps its exact distance from the top of the viewport,
+   however much grows or shrinks above it.
 
-   The fix is not to redraw less — it is to put the scroll back. */
+   And the cursor comes back. Every field carries a data-a that survives the
+   rebuild — b3i0.sets is the same box before and after — so typing in a rep
+   count and hitting Enter leaves you in that rep count, rather than at the
+   top of a page with nothing focused. That second half is most of what made
+   this maddening: it was never only the scroll.
+
+   Nothing is captured when nothing is focused, and a block that was deleted
+   falls back to the old numeric restore rather than guessing. */
+function nbCapture(){
+  const host = document.getElementById('prog');
+  if(!host) return null;
+  const ae = document.activeElement;
+  const key = (ae && ae.dataset && ae.dataset.a && host.contains(ae)) ? ae.dataset.a : null;
+  let sel = null;
+  if(key){ try{ sel = [ae.selectionStart, ae.selectionEnd]; }catch(e){ /* number inputs refuse */ } }
+
+  /* THE BLOCK YOU ARE IN, or failing that the first one still on screen.
+     Reading down a day, the topmost visible block is the one your eye is
+     on; typing in a field, it is the block that field belongs to, which
+     may be further down. Asking about focus first means an edit low in the
+     viewport holds its own block rather than one above it. */
+  let anchor = null;
+  const inField = ae && host.contains(ae) && ae.closest && ae.closest('[data-bi]');
+  if(inField) anchor = { bi: inField.dataset.bi, top: inField.getBoundingClientRect().top };
+  else for(const el of host.querySelectorAll('[data-bi]')){
+    const r = el.getBoundingClientRect();
+    if(r.bottom > 0){ anchor = { bi: el.dataset.bi, top: r.top }; break; }
+  }
+  return { key, sel, anchor, y: window.scrollY };
+}
+
+function nbRestore(st){
+  if(!st) return;
+  const host = document.getElementById('prog');
+  const el = st.anchor && host && host.querySelector(`[data-bi="${st.anchor.bi}"]`);
+  if(el){
+    const d = el.getBoundingClientRect().top - st.anchor.top;
+    if(Math.abs(d) > 0.5) window.scrollBy(0, d);
+  } else if(window.scrollY !== st.y){
+    window.scrollTo(0, st.y);
+  }
+  if(st.key && host){
+    const f = host.querySelector(`[data-a="${st.key}"]`);
+    if(f){
+      f.focus({preventScroll:true});
+      if(st.sel && st.sel[0] != null){
+        try{ f.setSelectionRange(st.sel[0], st.sel[1]); }catch(e){ /* number inputs refuse */ }
+      }
+    }
+  }
+}
+
 function drawProgram(){
-  const y = window.scrollY;
+  const st = nbCapture();
   drawProgramBody();
-  /* only if something moved it: an unconditional scrollTo would fight the
-     browser on the first paint, when y is 0 and the page is already there */
-  if(window.scrollY !== y) window.scrollTo(0, y);
+  nbRestore(st);
 }
 
 function drawProgramBody(){
@@ -3520,6 +3689,23 @@ takeLinkFromAddressBar();
    a same-document navigation - the page does not reload and boot never
    runs again, so the link appeared to do nothing. */
 addEventListener('hashchange', takeLinkFromAddressBar);
+
+/* ---- appearance ---- */
+function setTheme(m){
+  try{ localStorage.setItem('fj.coach.theme', m); }catch(e){}
+  if(m === 'system') document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme', m);
+  drawTheme();
+}
+function drawTheme(){
+  let m = 'system';
+  try{ m = localStorage.getItem('fj.coach.theme') || 'system'; }catch(e){}
+  document.querySelectorAll('#tmode button').forEach(b =>
+    b.classList.toggle('on', b.dataset.t === m));
+}
+document.querySelectorAll('#tmode button').forEach(b =>
+  b.onclick = () => setTheme(b.dataset.t));
+drawTheme();
 
 drawRail(); drawInbox(); drawLayers(); drawDock();
 loadProgram().then(() => { drawClients(); drawAddClient(); drawRelease2(); });

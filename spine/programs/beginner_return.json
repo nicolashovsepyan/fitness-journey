@@ -3,7 +3,7 @@
   "version": 1,
   "name": "Come Back Strong",
   "who": "Sevan",
-  "source": "ported from js/data/sessions.js — the program Sevan is actually on",
+  "source": "ported from js/data/sessions-beginner.js — the program Sevan is actually on",
   "duration": 45,
   "fixed": true,
   "trainDays": [
@@ -66,6 +66,11 @@
           "role": "Prime",
           "name": "Warm-up A · Loosen up",
           "note": "Never rushed, but no stopping — flow straight through. This is the part that protects the joints.",
+          "type": "Circuit",
+          "cfg": {
+            "rounds": 1,
+            "rest": 0
+          },
           "mins": 3,
           "items": [
             {
@@ -89,11 +94,16 @@
           "role": "Prime",
           "name": "Warm-up A · Circuit",
           "note": "3 rounds, continuous — no rest inside a round",
+          "type": "Circuit",
+          "cfg": {
+            "rounds": 3,
+            "rest": 0
+          },
           "mins": 3,
           "items": [
             {
               "ex": "pushup",
-              "pres": "3-5 reps",
+              "pres": "3-5",
               "note": "Hands under your shoulders, body in one straight line."
             },
             {
@@ -103,7 +113,7 @@
             },
             {
               "ex": "banded_pullapart",
-              "pres": "10-15 reps",
+              "pres": "10-15",
               "note": "Band in both hands, arms straight out in front."
             },
             {
@@ -117,17 +127,24 @@
           "role": "Work",
           "name": "A · Push-Ups + Lat Pulldown",
           "note": "A1 straight into A2 with no rest, then rest 75 sec, then go again.",
+          "type": "Superset",
+          "cfg": {
+            "rounds": 3,
+            "rest": 75
+          },
           "mins": 9,
           "items": [
             {
               "ex": "straight_bar_push_up",
-              "pres": "10-15 reps",
-              "note": "Straight Bar Push-Up · superset A1 · Set a bar in the rack about waist height."
+              "pres": "10-15",
+              "note": "Straight Bar Push-Up · superset A1 · Set a bar in the rack about waist height.",
+              "sg": 1
             },
             {
               "ex": "lat_pulldown",
               "pres": "10",
-              "note": "superset A2"
+              "note": "superset A2",
+              "sg": 1
             }
           ]
         },
@@ -135,17 +152,24 @@
           "role": "Work",
           "name": "B · Assisted Dip + Cable Row",
           "note": "B1 straight into B2 with no rest, then rest 75 sec.",
+          "type": "Superset",
+          "cfg": {
+            "rounds": 3,
+            "rest": 75
+          },
           "mins": 9,
           "items": [
             {
               "ex": "assisted_dip",
               "pres": "8",
-              "note": "superset B1"
+              "note": "superset B1",
+              "sg": 1
             },
             {
               "ex": "seated_cable_row",
               "pres": "10",
-              "note": "superset B2"
+              "note": "superset B2",
+              "sg": 1
             }
           ]
         },
@@ -153,17 +177,24 @@
           "role": "Work",
           "name": "C · Lateral Raise + Pushdown",
           "note": "C1 into C2, no rest, then 75 sec.",
+          "type": "Superset",
+          "cfg": {
+            "rounds": 3,
+            "rest": 75
+          },
           "mins": 9,
           "items": [
             {
               "ex": "lateral_raise",
               "pres": "12",
-              "note": "superset C1"
+              "note": "superset C1",
+              "sg": 1
             },
             {
               "ex": "triceps_pushdown",
               "pres": "12",
-              "note": "superset C2"
+              "note": "superset C2",
+              "sg": 1
             }
           ]
         },
@@ -171,17 +202,24 @@
           "role": "Work",
           "name": "D · Reverse Fly + Curl",
           "note": "D1 into D2, no rest, then 75 sec. Reverse fly is never heavy — light and slow.",
+          "type": "Superset",
+          "cfg": {
+            "rounds": 2,
+            "rest": 75
+          },
           "mins": 9,
           "items": [
             {
               "ex": "reverse_fly",
-              "pres": "12-15 reps",
-              "note": "superset D1 · Chest flat on an incline bench, light dumbbells hanging."
+              "pres": "12-15",
+              "note": "superset D1 · Chest flat on an incline bench, light dumbbells hanging.",
+              "sg": 1
             },
             {
               "ex": "barbell_curl",
               "pres": "12",
-              "note": "superset D2"
+              "note": "superset D2",
+              "sg": 1
             }
           ]
         },
@@ -189,6 +227,11 @@
           "role": "Finish",
           "name": "Finisher · Kettlebell Swings",
           "note": "3 rounds of 12, rest 20 sec between rounds.",
+          "type": "Circuit",
+          "cfg": {
+            "rounds": 3,
+            "rest": 20
+          },
           "mins": 3,
           "items": [
             {
@@ -209,6 +252,11 @@
           "role": "Prime",
           "name": "Warm-up A · Loosen up",
           "note": "Never rushed, but no stopping — flow straight through. This is the part that protects the joints.",
+          "type": "Circuit",
+          "cfg": {
+            "rounds": 1,
+            "rest": 0
+          },
           "mins": 4,
           "items": [
             {
@@ -232,11 +280,16 @@
           "role": "Prime",
           "name": "Warm-up A · Circuit",
           "note": "3 rounds, continuous — no rest inside a round",
+          "type": "Circuit",
+          "cfg": {
+            "rounds": 3,
+            "rest": 0
+          },
           "mins": 4,
           "items": [
             {
               "ex": "pushup",
-              "pres": "3-5 reps",
+              "pres": "3-5",
               "note": "Hands under your shoulders, body in one straight line."
             },
             {
@@ -246,7 +299,7 @@
             },
             {
               "ex": "banded_pullapart",
-              "pres": "10-15 reps",
+              "pres": "10-15",
               "note": "Band in both hands, arms straight out in front."
             },
             {
@@ -260,17 +313,24 @@
           "role": "Work",
           "name": "A · Chest Press + Row",
           "note": "A1 into A2, no rest, then rest 75 sec.",
+          "type": "Superset",
+          "cfg": {
+            "rounds": 3,
+            "rest": 75
+          },
           "mins": 11,
           "items": [
             {
               "ex": "chest_press_machine",
               "pres": "10",
-              "note": "superset A1"
+              "note": "superset A1",
+              "sg": 1
             },
             {
               "ex": "chest_supported_row",
               "pres": "12",
-              "note": "superset A2"
+              "note": "superset A2",
+              "sg": 1
             }
           ]
         },
@@ -278,17 +338,24 @@
           "role": "Work",
           "name": "B · Shoulder Press + Pullover",
           "note": "B1 into B2, no rest, then rest 75 sec.",
+          "type": "Superset",
+          "cfg": {
+            "rounds": 3,
+            "rest": 75
+          },
           "mins": 11,
           "items": [
             {
               "ex": "shoulder_press_machine",
               "pres": "10",
-              "note": "superset B1"
+              "note": "superset B1",
+              "sg": 1
             },
             {
               "ex": "db_pullover",
               "pres": "12",
-              "note": "superset B2 · Lie on the bench, elbows slightly bent and fixed."
+              "note": "superset B2 · Lie on the bench, elbows slightly bent and fixed.",
+              "sg": 1
             }
           ]
         },
@@ -296,17 +363,24 @@
           "role": "Work",
           "name": "C · Back Extension + Dip Hold",
           "note": "C1 into C2, no rest, then rest 75 sec.",
+          "type": "Superset",
+          "cfg": {
+            "rounds": 3,
+            "rest": 75
+          },
           "mins": 11,
           "items": [
             {
               "ex": "back_extension_45",
               "pres": "12",
-              "note": "superset C1"
+              "note": "superset C1",
+              "sg": 1
             },
             {
               "ex": "dip_support_hold",
               "pres": "20s",
-              "note": "superset C2 · Hold yourself up on the dip bars with your arms locked straight."
+              "note": "superset C2 · Hold yourself up on the dip bars with your arms locked straight.",
+              "sg": 1
             }
           ]
         },
@@ -314,6 +388,11 @@
           "role": "Finish",
           "name": "Finisher · Farmer's Carry",
           "note": "4 rounds · walk 30-40 m · rest 45-60 sec between rounds. No straps — grip is the point. Start 40-50 lb per hand.",
+          "type": "Circuit",
+          "cfg": {
+            "rounds": 4,
+            "rest": 60
+          },
           "mins": 4,
           "items": [
             {
@@ -334,6 +413,11 @@
           "role": "Prime",
           "name": "Warm-up B · Sequence 1",
           "note": "Flow straight through, no stopping.",
+          "type": "Circuit",
+          "cfg": {
+            "rounds": 1,
+            "rest": 0
+          },
           "mins": 8,
           "items": [
             {
@@ -357,6 +441,11 @@
           "role": "Prime",
           "name": "Warm-up B · Sequence 2",
           "note": "2 rounds, continuous — no rest inside a round",
+          "type": "Circuit",
+          "cfg": {
+            "rounds": 2,
+            "rest": 0
+          },
           "mins": 8,
           "items": [
             {
@@ -366,7 +455,7 @@
             },
             {
               "ex": "pushup",
-              "pres": "3-5 reps",
+              "pres": "3-5",
               "note": "Hands under your shoulders, body in one straight line."
             },
             {
@@ -376,7 +465,7 @@
             },
             {
               "ex": "superman",
-              "pres": "10-15 reps",
+              "pres": "10-15",
               "note": "Superman · Lie face down, arms stretched out in front, thumbs pointing up."
             },
             {
@@ -390,6 +479,11 @@
           "role": "Work",
           "name": "Full Body Circuit",
           "note": "Straight through, 3-5 rounds. Rest 90 sec between rounds ONLY — no rest between exercises. One pair of dumbbells: start 25-30 lb per hand (the shoulder press is the limiter). The RDL and row will feel light on purpose for now — that is fine for the first month.",
+          "type": "Circuit",
+          "cfg": {
+            "rounds": 4,
+            "rest": 90
+          },
           "mins": 21,
           "items": [
             {
@@ -428,6 +522,11 @@
           "role": "Finish",
           "name": "Finisher · Core Circuit",
           "note": "30 sec each, no rest between exercises. 2-3 rounds, 45 sec between rounds.",
+          "type": "Circuit",
+          "cfg": {
+            "rounds": 3,
+            "rest": 45
+          },
           "mins": 8,
           "items": [
             {
