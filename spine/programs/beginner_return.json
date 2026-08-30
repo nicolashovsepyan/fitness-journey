@@ -2,8 +2,8 @@
   "id": "beginner_return",
   "version": 1,
   "name": "Come Back Strong",
-  "who": "Training partner",
-  "source": "ported from js/data/sessions.js — the program this person is actually on",
+  "who": "Sevan",
+  "source": "ported from js/data/sessions.js — the program Sevan is actually on",
   "duration": 45,
   "fixed": true,
   "trainDays": [
