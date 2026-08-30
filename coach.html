@@ -478,6 +478,25 @@ select.pin{appearance:none;cursor:pointer}
          font:600 9px ui-monospace,monospace; letter-spacing:.09em; text-transform:uppercase;
          padding:5px 8px; color:#9fa9b4; background:rgba(0,0,0,.22); }
 .nbpeek:hover{ color:#e9edf1; border-color:rgba(255,255,255,.3) }
+/* THE PROGRAM BAR. Name, state, and the two save doors on one line, so
+   "which program am I editing and is it written down" is answered
+   without reading anything. */
+.pbar{ display:flex; align-items:end; gap:10px; flex-wrap:wrap }
+.pbn{ flex:1; min-width:220px; display:flex; flex-direction:column; gap:4px;
+      font:600 10px ui-monospace,monospace; letter-spacing:.11em;
+      text-transform:uppercase; color:#7c8794 }
+.pbn input{ font:650 15px inherit; text-transform:none; letter-spacing:0; color:#e9edf1;
+            background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.12);
+            border-radius:7px; padding:8px 10px; width:100% }
+.pbn input:disabled{ opacity:.4 }
+.pstate{ font:600 9px ui-monospace,monospace; letter-spacing:.1em; text-transform:uppercase;
+         padding:6px 9px; border-radius:6px; white-space:nowrap; align-self:center }
+.pstate.clean{ color:#7FD8A8; background:rgba(127,216,168,.12) }
+.pstate.dirty{ color:#E8B04B; background:rgba(232,176,75,.13) }
+.btn.primary{ background:#2E7D5B; border-color:#2E7D5B; color:#EAF6F0 }
+.lnk{ background:none; border:none; padding:0; cursor:pointer; color:#7c8794;
+      font:inherit; font-size:inherit; text-decoration:underline }
+.lnk:hover{ color:#e9edf1 }
 .nbempty h3{ margin:0 0 6px; font-size:16px }
 .nbempty p{ margin:0 0 14px; max-width:52ch }
 .nbdoors{ display:flex; gap:9px; flex-wrap:wrap }
@@ -1803,6 +1822,13 @@ async function loadProgram(){
      "Add a day" builds from nothing. Both are deliberate choices. */
   if(S.program && S.program.days) PROG = S.program;
   if(!PROG) PROG = {days:{}};
+  /* A PROGRAM THAT ARRIVED WITHOUT A NAME STILL HAS ONE. Drafts written
+     before the program bar existed, and programs carried in a handoff
+     link, record `from` and no name — which left the name box empty and
+     every toast saying "Saved undefined". The template it came off knows
+     what it is called; ask that before falling back to a placeholder. */
+  if(Object.keys(PROG.days||{}).length && !PROG.name)
+    PROG.name = (PROG.from && LIBRARY[PROG.from] && LIBRARY[PROG.from].name) || 'Untitled program';
   PDAY = PDAY || Object.keys(PROG.days)[0] || null;
   drawProgram();
 }
@@ -1828,23 +1854,161 @@ function mvOptions(sel){
    on. Loading one here makes it this person's, editable, and it is what the
    link then carries to their phone. Loading REPLACES; it does not merge,
    because a half-swapped program is worse than either whole one. */
+/* ============================================================
+   SAVED PROGRAMS.
+
+   Until now there were two kinds of program and no way to make the
+   second kind. The LIBRARY above is read-only — six files under
+   spine/programs/, generated into this page — and S.program is one
+   scratch draft per client, overwritten the next time you pick
+   something off the shelf. So a program you built by hand for
+   somebody was not a thing that existed. It was the current contents
+   of one person's editor, and picking a template threw it away.
+
+   A saved program is a document. It has a name, it lives in
+   fj.v1.savedPrograms alongside the templates in the picker, it can
+   be re-opened for anyone, and editing it and pressing Save changes
+   THAT program rather than a copy of it.
+
+   TWO DOORS, DELIBERATELY DIFFERENT:
+     Save          writes back to the program that is open
+     Save as new   makes a second one and leaves the first alone
+
+   Opening a template makes a draft, not a saved program. Save turns
+   it into one — so nothing is created by browsing, and the first
+   Save is the moment you decided this was worth keeping.
+
+   PROG.savedId records which saved program is open. Absent means
+   this draft came off a template or was built from nothing, and Save
+   will create rather than overwrite. That one field is the whole
+   difference between "save" and "save as", and it is why Save can be
+   safe: it can only ever overwrite something you saved yourself. */
+const SAVED_LS = 'fj.v1.savedPrograms';
+const savedPrograms = () => lsGet(SAVED_LS);
+const writeSaved = list => { try{ localStorage.setItem(SAVED_LS, JSON.stringify(list)); }catch(e){} };
+const savedById = id => savedPrograms().find(p => p.id === id) || null;
+
+/* Has the open draft moved away from what was saved? Compared on the
+   days alone — the name is edited in its own box and saving is not
+   the only reason to change it. */
+function progDirty(){
+  if(!PROG || !Object.keys(PROG.days||{}).length) return false;
+  const src = PROG.savedId ? savedById(PROG.savedId) : null;
+  if(!src) return true;                       /* never saved = everything is unsaved */
+  return JSON.stringify(src.days) !== JSON.stringify(PROG.days)
+      || String(src.name||'') !== String(PROG.name||'');
+}
+
+/* OPENING ONE. Templates are copied; saved programs are opened. The
+   difference matters: editing a template must never write back into
+   the shelf everyone else picks from, and editing a saved program
+   must write back into exactly the thing you opened. */
+function openProgram(key){
+  if(!key) return;
+  if(progDirty() && !confirm(
+      `${PROG.name || 'The open program'} has changes that are not saved. Open something else anyway?`)){
+    const sel = document.getElementById('libPick'); if(sel) sel.value = PROG.savedId || PROG.from || '';
+    return;
+  }
+  const sp = savedById(key);
+  if(sp){
+    PROG = structuredClone({ savedId:sp.id, from:sp.from||null, name:sp.name,
+                             version:sp.version||1, days:sp.days });
+  } else {
+    const src = LIBRARY[key]; if(!src) return;
+    /* no savedId: a copy of the shelf, and Save will make it its own thing */
+    PROG = structuredClone({ savedId:null, from:key, name:src.name,
+                             version:src.version, days:src.days });
+  }
+  PDAY = Object.keys(PROG.days)[0] || null;
+  nbSel = null; nbOpen = null; nbSwap = null; nbPeek = new Set();
+  S.program = PROG; save(1); drawProgram();
+  toast(`Opened ${PROG.name}`);
+}
+
+function saveProgram(){
+  if(!PROG || !Object.keys(PROG.days||{}).length) return toast('Nothing to save yet');
+  const list = savedPrograms();
+  if(PROG.savedId){
+    const i = list.findIndex(x => x.id === PROG.savedId);
+    if(i >= 0){
+      list[i] = Object.assign({}, list[i], { name:PROG.name, days:structuredClone(PROG.days),
+        savedAt:new Date().toISOString() });
+      writeSaved(list); save(1); drawProgram();
+      return toast(`Saved ${PROG.name}`);
+    }
+    /* it was deleted underneath us - fall through and make it again */
+  }
+  return saveProgramAs(PROG.name);
+}
+
+function saveProgramAs(suggested){
+  if(!PROG || !Object.keys(PROG.days||{}).length) return toast('Nothing to save yet');
+  const name = (prompt('Save this program as:', suggested || PROG.name || 'New program') || '').trim();
+  if(!name) return;
+  const list = savedPrograms();
+  const rec = { id:'sp_' + Date.now(), name, from:PROG.from || null, version:PROG.version || 1,
+                days:structuredClone(PROG.days), savedAt:new Date().toISOString(),
+                bornFor:(A && A.name) || CLIENT_ID || null };
+  list.unshift(rec); writeSaved(list);
+  PROG.savedId = rec.id; PROG.name = name;
+  S.program = PROG; save(1); drawProgram();
+  toast(`Saved as ${name}`);
+}
+
+function deleteSavedProgram(id){
+  const sp = savedById(id); if(!sp) return;
+  if(!confirm(`Delete "${sp.name}"? Any client already running it keeps their copy.`)) return;
+  writeSaved(savedPrograms().filter(x => x.id !== id));
+  if(PROG && PROG.savedId === id) PROG.savedId = null;   /* the draft becomes unsaved, not lost */
+  S.program = PROG; save(1); drawProgram();
+  toast(`Deleted ${sp.name}`);
+}
+
 function libRow(){
-  const ids = Object.keys(LIBRARY);
-  if(!ids.length) return '';
+  const tpl   = Object.keys(LIBRARY);
+  const saved = savedPrograms();
+  const open  = PROG.savedId || PROG.from || '';
+  const dirty = progDirty();
+  const has   = Object.keys((PROG && PROG.days) || {}).length;
+
+  const opt = (v, t, on) => `<option value="${esc(v)}" ${on?'selected':''}>${esc(t)}</option>`;
   return `<div class="panel"><div class="pad">
-    <div class="pgrid">
-      <label>Start from a program
+    <div class="pbar">
+      <label class="pbn">Program
+        <input id="progName" value="${esc(PROG.name || '')}" placeholder="Name this program"
+               ${has?'':'disabled'}></label>
+      <span class="pstate ${dirty?'dirty':'clean'}">${
+        !has ? 'nothing open'
+        : dirty ? (PROG.savedId ? 'unsaved changes' : 'not saved yet')
+        : 'saved'}</span>
+      <button class="btn ${dirty?'primary':''}" id="progSave" ${has?'':'disabled'}>Save</button>
+      <button class="btn" id="progSaveAs" ${has?'':'disabled'}>Save as new</button>
+    </div>
+
+    <div class="pgrid" style="margin-top:10px">
+      <label>Open a program
         <select class="pin" id="libPick">
-          <option value=""> - pick one - </option>
-          ${ids.map(id=>`<option value="${esc(id)}">${esc(LIBRARY[id].name)} · ${
-            Object.keys(LIBRARY[id].days).length} days · written for ${esc(LIBRARY[id].who)}</option>`).join('')}
+          ${opt('', ' - pick one - ', !open)}
+          ${saved.length ? `<optgroup label="Yours">${saved.map(p =>
+            opt(p.id, `${p.name} \u00B7 ${Object.keys(p.days||{}).length} days${
+              p.bornFor ? ' \u00B7 built for ' + p.bornFor : ''}`, open===p.id)).join('')}</optgroup>` : ''}
+          <optgroup label="Templates">${tpl.map(id =>
+            opt(id, `${LIBRARY[id].name} \u00B7 ${Object.keys(LIBRARY[id].days).length} days \u00B7 written for ${
+              LIBRARY[id].who}`, open===id)).join('')}</optgroup>
         </select></label>
       <label style="align-self:end">
-        <button class="btn" id="libGo" style="width:100%">Give it to ${esc(A.name||CLIENT_ID)}</button></label>
+        <button class="btn" id="libGo" style="width:100%" ${has?'':'disabled'}>Give it to ${
+          esc(A.name||CLIENT_ID)}</button></label>
     </div>
-    <p class="micro" style="margin:8px 0 0">This replaces whatever is below with a copy that belongs to
-      ${esc(A.name||CLIENT_ID)}. Edit it freely - the library file is not touched.</p>
-    ${Object.keys((PROG&&PROG.days)||{}).length ? `
+    <p class="micro" style="margin:8px 0 0">Picking one opens it in the builder below straight away.
+      <b>Templates</b> open as a copy — editing them never touches the shelf, and the first <b>Save</b>
+      turns the copy into a program of your own. <b>Yours</b> open for real: Save writes back into that
+      program. <b>Give it to ${esc(A.name||CLIENT_ID)}</b> is the separate step that releases it to
+      their phone.${saved.length ? `
+      <button class="lnk" id="progDel">Delete the open program</button>` : ''}</p>
+
+    ${has ? `
       <div style="border-top:1px solid var(--line);margin-top:12px;padding-top:12px">
         <button class="btn" id="nextBlock">Start the next block from this one</button>
         <p class="micro" style="margin:7px 0 0">Files ${esc(PROG.name || 'the current program')} with what
@@ -1855,21 +2019,31 @@ function libRow(){
 function libWire(){
   const nb = document.getElementById('nextBlock');
   if(nb) nb.onclick = startNextBlock;
-  const go = document.getElementById('libGo'), pick = document.getElementById('libPick');
-  if(!go || !pick) return;
-  go.onclick = () => {
-    const id = pick.value; if(!id) return toast('Pick a program first');
-    const src = LIBRARY[id];
-    if(Object.keys(PROG.days||{}).length &&
-       !confirm(`Replace ${A.name||CLIENT_ID}'s current program with "${src.name}"?`)) return;
-    PROG = structuredClone({ from:id, name:src.name, version:src.version, days:src.days });
-    PDAY = Object.keys(PROG.days)[0] || null;
-    S.program = PROG;
+
+  const nm = document.getElementById('progName');
+  if(nm) nm.onchange = () => { PROG.name = nm.value.trim(); S.program = PROG; save(1); drawProgram(); };
+
+  const sv = document.getElementById('progSave');   if(sv) sv.onclick = saveProgram;
+  const sa = document.getElementById('progSaveAs'); if(sa) sa.onclick = () => saveProgramAs();
+  const dl = document.getElementById('progDel');
+  if(dl) dl.onclick = () => PROG.savedId ? deleteSavedProgram(PROG.savedId)
+                                         : toast('This one is not saved, so there is nothing to delete');
+
+  /* PICKING ONE OPENS IT. This used to do nothing at all until the button
+     beside it was pressed, so selecting a program left the blocks below
+     showing the previous one and the page looked broken. */
+  const pick = document.getElementById('libPick');
+  if(pick) pick.onchange = () => openProgram(pick.value);
+
+  const go = document.getElementById('libGo');
+  if(go) go.onclick = () => {
+    if(!Object.keys(PROG.days||{}).length) return toast('Open a program first');
+    if(!confirm(`Release ${PROG.name || 'this program'} to ${A.name||CLIENT_ID}? Every day of it becomes visible on their phone.`)) return;
     /* a program handed over is a program to run — release every day of it,
        otherwise the phone shows a plan it is not allowed to open */
     S.released = Object.assign({shape:true}, ...Object.keys(PROG.days).map(k=>({[k]:true})));
     save(1); drawProgram(); if(typeof drawRelease2==='function') drawRelease2();
-    toast(`${src.name} is now ${A.name||CLIENT_ID}'s`);
+    toast(`${PROG.name} is now ${A.name||CLIENT_ID}'s`);
   };
 }
 
@@ -2855,6 +3029,28 @@ function importIntake(p){
     derived:{tier:a.tier??null, levels:a.levels??null},
     submittedAt:p.at||new Date().toISOString() });
   localStorage.setItem(INTAKES_LS, JSON.stringify(itk));
+  /* AND THE PROGRAM RIDES ALONG WITH THEM.
+
+     A handoff link is not only answers. make-link.mjs writes the person's
+     program and which of its days are released into the same payload, and
+     this read the answers and threw the rest away — so importing Sevan,
+     whose link carries the three days he is actually training, produced a
+     client with an empty builder and a console that had no idea he was
+     already running something.
+
+     Written into that client's own drawer, which is the same key the
+     console will read for them a moment later when it reloads. Not merged
+     into whatever is open now: this is their program arriving, and the
+     draft on screen belongs to whoever is currently selected. */
+  if(p.program && p.program.days && Object.keys(p.program.days).length){
+    try{
+      const key = `fj.v1.${uid}.coach`;
+      const cur = JSON.parse(localStorage.getItem(key) || 'null') || structuredClone(blank);
+      cur.program = p.program;
+      if(p.released) cur.released = p.released;
+      localStorage.setItem(key, JSON.stringify(cur));
+    }catch(e){ /* a program we cannot store must not lose us the client */ }
+  }
   /* an imported client is a real one - the seeding flag stops the example
      from being re-added underneath them on a later visit */
   localStorage.setItem('fj.coach.seeded','1');
