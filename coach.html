@@ -3077,11 +3077,27 @@ function drawClients(){
   const nameEl = document.getElementById('whoName'), subEl = document.getElementById('whoSub');
   if(nameEl) nameEl.textContent = A.name || CLIENT_ID;
   if(subEl){
+    /* WHICH SURVEY, AND WHEN. This said "from their survey" for everybody,
+       including a client who has never filled one in — the one line on the
+       page whose whole job is to say where these answers came from, saying
+       nothing. It is also the fastest way to catch a stale record: if this
+       reads v5, the answers below it were given to a different set of
+       questions and every panel on the page is reading them hopefully. */
+    const itk = coachIntakes().filter(i => i.userId === CLIENT_ID)
+      .sort((x,y)=>String(y.submittedAt).localeCompare(String(x.submittedAt)))[0];
+    const v = itk && itk.version;
+    const when = itk && itk.submittedAt
+      ? new Date(itk.submittedAt).toLocaleDateString(undefined,{day:'numeric',month:'short'}) : null;
+    const src = !itk ? null
+      : v === 0 ? 'no survey yet'
+      : v === PAYLOAD_V ? `survey v${v}${when ? ', ' + when : ''}`
+      : `survey v${v} \u2014 OUT OF DATE${when ? ', ' + when : ''}`;
     subEl.textContent = HAS_CLIENT
       ? [A.age && A.age+'', A.sex==='f'?'female':A.sex==='m'?'male':null,
          A.tierName || (A.levels && A.levels.gym!=null ? 'level '+A.levels.gym : null),
-         'from their survey'].filter(Boolean).join(' · ')
+         src].filter(Boolean).join(' \u00B7 ')
       : 'Nobody selected';
+    subEl.style.color = (v != null && v !== 0 && v !== PAYLOAD_V) ? '#E8B04B' : '';
   }
   const av = document.querySelector('.who .av');
   if(av) av.textContent = ((A.name||'?').trim()[0]||'?').toUpperCase();
