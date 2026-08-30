@@ -98,6 +98,15 @@ reads('12 reps', { sets: 1, reps: 12 });
 reads('8 slow',  { sets: 1, reps: 8 });
 reads('20',      { sets: 1, reps: 20 });
 
+group('one named side is not both sides');
+/* "30s each side" is one set covering left and right. "30s left" is the
+   left one, written as its own row so it gets its own timer. Reading the
+   second as the first doubles the work and loses the side. */
+reads('30s left',    { sets: 1, hold: 30, side: 'left' });
+reads('30s right',   { sets: 1, hold: 30, side: 'right' });
+reads('30s each side',{ sets: 1, hold: 30, perSide: true });
+reads('12 left',     { sets: 1, reps: 12, side: 'left' });
+
 group('what it still refuses to guess at');
 t('empty is unparsed',      parsePrescription('').unparsed === true);
 t('prose is unparsed',      parsePrescription('as many as you can').unparsed === true);

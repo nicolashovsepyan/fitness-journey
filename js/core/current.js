@@ -101,6 +101,12 @@ function toSession(dayId, day, fixed) {
       if (p.reps != null) o.reps = p.reps;
       if (p.hold != null) o.hold = p.hold;
       if (p.perSide) o.perSide = true;
+      /* WHICH SIDE, when the coach named one. `perSide` is one set covering
+         both; `side` is a row that IS the left one, with its own row for the
+         right underneath. The runner and the day screen have both read
+         `it.side` all along — it never arrived, because the port was
+         flattening a named side into "each side" before it got here. */
+      if (p.side) o.side = p.side;
       return o;
     }),
   })).filter(b => b.items.length);

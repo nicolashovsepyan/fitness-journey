@@ -33,7 +33,16 @@ const { PROGRAM, BEGINNER_PROGRAM, BEGINNER_PROFILE, PROFILE } =
    The dashboard's own scaler reads "<sets> × <rest>", so anything with a
    set count keeps that exact shape or it silently stops scaling. */
 function presc(it, block) {
-  const per  = it.perSide || it.side ? ' each side' : '';
+  /* `perSide: true` means DO BOTH SIDES in this set. `side: 'L'` means THIS
+     ROW IS THE LEFT ONE — the coach wrote two rows on purpose, left then
+     right, and each is thirty seconds.
+
+     These were treated as the same thing, so a 30-second left-side plank
+     and a 30-second right-side plank both came out as "30s each side":
+     the work doubled, and which side you were on disappeared. Four rows
+     across the two programs, and two of them are Sevan's. */
+  const per  = it.perSide === true || it.side === true ? ' each side'
+             : it.side === 'L' ? ' left' : it.side === 'R' ? ' right' : '';
   const reps = it.repsText || it.reps;
   let base;
 

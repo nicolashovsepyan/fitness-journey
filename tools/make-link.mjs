@@ -24,12 +24,32 @@ import { dirname, join } from 'node:path';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const p = (...x) => join(ROOT, ...x);
 
-const [, , progId, personName, baseArg] = process.argv;
+const [, , progId, personName, baseArg, whereArg] = process.argv;
 if (!progId || !personName) {
-  console.error('\n  usage: node tools/make-link.mjs <programId> <name> [baseUrl]\n');
+  console.error('\n  usage: node tools/make-link.mjs <programId> <name> [baseUrl] [coach|client]\n');
   process.exit(1);
 }
-const base = (baseArg || 'https://REPLACE-WITH-YOUR-SITE/').replace(/\/?$/, '/');
+const base = (baseArg || 'https://nicolashovsepyan.github.io/fitness-journey/').replace(/\/?$/, '/');
+
+/* WHICH DOOR THE LINK OPENS.
+
+   The payload is identical either way — the same person, the same program,
+   the same released days. Only the page it lands on differs, and it matters
+   which:
+
+     client   dashboard.html   provisions THAT PHONE as this person. The
+                               link you send them.
+     coach    coach.html       imports this person into the console. The
+                               link YOU open, or paste into the add-a-client
+                               box.
+
+   This used to write the client form only, so the file sitting in the repo
+   for the coach to drop into his console was a link that, if he clicked it,
+   would have turned his own dashboard into Sevan's. Both forms paste into
+   the console's box — readPastedIntake reads the fragment and ignores the
+   page — but a link should do the right thing when it is clicked, too. */
+const where = (whereArg || 'coach') === 'client' ? 'dashboard.html' : 'coach.html';
+const key   = where === 'coach.html' ? '#fj=' : '#';
 
 const prog = JSON.parse(readFileSync(p('spine/programs', progId + '.json'), 'utf8'));
 
@@ -85,8 +105,8 @@ const payload = {
 const b64url = o => Buffer.from(JSON.stringify(o), 'utf8')
   .toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 
-const frag = '#' + b64url(payload);
-const link = base + 'dashboard.html' + frag;
+const frag = key + b64url(payload);
+const link = base + where + frag;
 
 const out = p('spine/programs', `link.${uid}.txt`);
 writeFileSync(out, link + '\n');
@@ -95,5 +115,6 @@ console.log(`\n  ${personName} -> ${prog.name}`);
 console.log(`  uid          ${uid}`);
 console.log(`  days         ${Object.keys(prog.days).length}${days ? '  on ' + days.join(',') + ' (0=Sun)' : ''}`);
 console.log(`  units        ${a.unit}`);
+console.log(`  opens        ${where}${where === 'coach.html' ? '  (imports into your console)' : '  (provisions their phone)'}`);
 console.log(`  link length  ${link.length} characters`);
 console.log(`  written to   spine/programs/link.${uid}.txt\n`);

@@ -117,6 +117,24 @@ export function parsePrescription(pres) {
   const holdSide = head.match(new RegExp('^(\\d+)\\s*(?:s|sec|secs)\\s*' + SIDE + '$', 'i'));
   if (holdSide) return done({ sets: 1, hold: +holdSide[1], perSide: true });
 
+  /* ONE NAMED SIDE, WHICH IS NOT THE SAME AS BOTH OF THEM.
+
+     "30s each side" is one set covering left and right. "30s left" is the
+     left one, and somewhere below it there is a row that says right —
+     the coach wrote two rows on purpose so each side gets its own timer
+     and its own place in the order.
+
+     These used to arrive as "each side" for both rows, which doubled the
+     work and lost which side you were on. Now the port keeps the side and
+     this reads it, so the runner can say Side plank · left and mean it. */
+  const oneSideHold = head.match(/^(\d+)\s*(?:s|sec|secs)\s+(left|right|l|r)$/i);
+  if (oneSideHold) return done({ sets: 1, hold: +oneSideHold[1],
+    side: /^l/i.test(oneSideHold[2]) ? 'left' : 'right' });
+
+  const oneSideReps = head.match(/^(\d+)\s+(left|right)$/i);
+  if (oneSideReps) return done({ sets: 1, reps: +oneSideReps[1],
+    side: /^l/i.test(oneSideReps[2]) ? 'left' : 'right' });
+
   const hold = head.match(/^(\d+)\s*(s|sec|secs)$/i);
   if (hold) return done({ sets: 1, hold: +hold[1] });
 
