@@ -464,14 +464,53 @@ select.pin{appearance:none;cursor:pointer}
 .nbblock.sel{ border-color:var(--rc); box-shadow:0 0 0 2px color-mix(in srgb, var(--rc) 30%, transparent); }
 .nbblock.locked{ opacity:.85 } .nbblock.locked .nbaddit{ display:none }
 
+/* WHERE AM I IN THIS SESSION. A tiny stamp: which block of how many,
+   and the minutes it runs between. Monospace because the numbers are
+   scanned down a column rather than read. */
+.nbstep{ display:flex; flex-direction:column; align-items:center; line-height:1.05;
+         font:600 11px ui-monospace,monospace; color:#c3ccd4; min-width:40px;
+         padding:3px 5px; border-radius:6px; background:rgba(0,0,0,.22); cursor:default }
+.nbstep b{ font-size:13px } .nbstep em{ font-style:normal; font-size:9px; color:#7c8794 }
+.nbstep i{ font-style:normal; font-size:8px; color:#67717c; margin-top:2px; letter-spacing:-.02em }
+
+/* HOW HARD, IN FIVE STEPS. The bars carry the colour; the word carries
+   the meaning. Both, because five bars alone is a puzzle and a word
+   alone does not sort at a glance. */
+.nbload{ display:flex; align-items:center; gap:5px; cursor:default }
+.nbload s{ width:3px; height:11px; border-radius:1px; background:rgba(255,255,255,.13);
+           text-decoration:none; display:block }
+.nbload em{ font-style:normal; font:600 9px ui-monospace,monospace; letter-spacing:.06em;
+            text-transform:uppercase; color:#7c8794 }
+.nbload.l1 s.on{ background:#5E9BD1 } .nbload.l1 em{ color:#5E9BD1 }
+.nbload.l2 s.on{ background:#4FBF9B } .nbload.l2 em{ color:#4FBF9B }
+.nbload.l3 s.on{ background:#C7C15A } .nbload.l3 em{ color:#C7C15A }
+.nbload.l4 s.on{ background:#E39A4E } .nbload.l4 em{ color:#E39A4E }
+.nbload.l5 s.on{ background:#DC6B5A } .nbload.l5 em{ color:#DC6B5A }
+
+/* A LOCKED BLOCK IS A BANNER. One row, the whole thing clickable, and
+   nothing under it until you ask — the point of locking is to clear the
+   way down to the block you are still working on. */
+.nbblock.fold{ opacity:1; margin-bottom:6px; background:rgba(255,255,255,.02); position:relative }
+.nbfold{ display:flex; flex-wrap:wrap; align-items:center; gap:6px 9px; width:100%;
+         text-align:left; cursor:pointer; padding:7px 34px 7px 10px; border:none;
+         background:color-mix(in srgb, var(--rc) 7%, transparent); }
+.nbfold .nbnw{ flex:1 1 120px; }
+.nbfold .nbmin{ margin-left:auto }
+.nbfold:hover{ background:color-mix(in srgb, var(--rc) 13%, transparent) }
+.nbchev{ font-style:normal; font-size:8px; color:#7c8794 }
+.nblock.inlock{ position:absolute; top:8px; right:8px }
+.nbfoldlist{ list-style:none; margin:0; padding:6px 10px 8px; display:flex;
+             flex-direction:column; gap:3px; border-top:1px solid rgba(255,255,255,.07) }
+.nbfoldlist li{ display:flex; align-items:center; gap:7px; font-size:12px; color:#c3ccd4 }
+.nbfoldlist li span{ width:6px; height:6px; border-radius:2px; background:var(--c); flex:none }
+.nbfoldlist li b{ font-weight:600; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis;
+                  white-space:nowrap }
+.nbfoldlist li em{ font-style:normal; font:600 11px ui-monospace,monospace; color:#7c8794 }
+
 /* A FOLDED BLOCK IS ONE LINE. No body, no bottom border under the head,
    and the whole row goes quiet - a finished block should read as settled
    rather than as another thing wanting attention. It still carries its
    role colour down the left edge, which is how you find it again. */
-.nbblock.fold{ opacity:1; margin-bottom:6px; background:rgba(255,255,255,.02); }
-.nbblock.fold .nbbhead{ border-bottom:none; padding:7px 10px;
-                        background:color-mix(in srgb, var(--rc) 7%, transparent); }
-.nbblock.fold .nbnw small{ color:#8d97a3 }
 .nbfn{ font:650 13px inherit; color:#cdd5dd; padding:1px 3px; }
 .nbrole.tag{ cursor:default; opacity:.8 }
 .nbpeek{ cursor:pointer; border:1px solid rgba(255,255,255,.16); border-radius:6px;
@@ -500,9 +539,16 @@ select.pin{appearance:none;cursor:pointer}
 .nbempty h3{ margin:0 0 6px; font-size:16px }
 .nbempty p{ margin:0 0 14px; max-width:52ch }
 .nbdoors{ display:flex; gap:9px; flex-wrap:wrap }
-.nbbhead{ display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:9px;
+/* WRAP, DO NOT SQUEEZE. This was a five-column grid, and five columns in
+   a 374px builder column left the block's NAME 31 pixels wide — the one
+   field you have to be able to read. Flex with a real minimum on the name
+   means the controls drop to a second line instead, which costs a row and
+   keeps every part usable at any width. */
+.nbbhead{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 9px;
           padding:8px 10px; background:color-mix(in srgb, var(--rc) 12%, transparent);
           border-bottom:1px solid rgba(255,255,255,.08); }
+.nbbhead .nbnw{ flex:1 1 150px; }
+.nbbhead .nbctl{ flex:0 0 auto; margin-left:auto; }
 .nbrole{ appearance:none; border:none; cursor:pointer; border-radius:5px; color:var(--rc);
          font:600 9px ui-monospace,monospace; letter-spacing:.11em; text-transform:uppercase;
          padding:5px 7px; background:color-mix(in srgb, var(--rc) 22%, transparent); }
@@ -2165,6 +2211,77 @@ function nbBlockSec(b){
   }
   return sec;
 }
+/* HOW MUCH OF THIS BLOCK IS ACTUALLY WORK.
+
+   Everything the console knows about a block's difficulty is already in
+   it — how long each set takes, how long you stand around afterwards —
+   and none of it was being said. Density is work seconds over total
+   seconds, which is the one number that separates a heavy triple from a
+   circuit that lasts the same nine minutes.
+
+   Deliberately NOT a judgement about load on the bar, which we cannot
+   see. It answers "how much of this block are you moving", and that is
+   why a Prime block reads easy even when it is long, and why dropping
+   the rest from 90 seconds to 45 moves it two steps without changing a
+   single rep. A coach shortening rest knows they made it harder; this
+   just says so out loud while they do it. */
+function nbWorkSec(b){
+  const items = b.items || [];
+  if(!items.length) return 0;
+  const cfg = b.cfg || {};
+  const per = items.reduce((t, it) => t + nbWork(it), 0);
+  if(b.type === 'Tabata')
+    return (cfg.rounds ?? NB_DEF.rounds) * items.length * (cfg.work ?? NB_DEF.work);
+  if(b.type === 'Circuit') return (cfg.rounds ?? NB_DEF.rounds) * per;
+  if(b.type === 'EMOM'){
+    /* one movement on the top of each interval, so the work is however
+       many intervals fit in the block times what one of them costs */
+    const rounds = Math.max(1, Math.floor(((cfg.mins ?? NB_DEF.mins) * 60) / (cfg.interval ?? NB_DEF.interval)));
+    return rounds * (per / items.length);
+  }
+  /* AMRAP is handled in nbLoad — how many rounds somebody gets through
+     is the question the block exists to answer, so we do not answer it */
+  if(b.type === 'AMRAP') return null;
+  let sec = 0;
+  for(const grp of nbGroups(b)){
+    const its = grp.idx.map(i => items[i]);
+    const sets = Math.max(...its.map(it => nbParse(it.pres).sets || 1));
+    sec += sets * its.reduce((t, it) => t + nbWork(it), 0);
+  }
+  return sec;
+}
+
+const NB_LOAD = ['Easy', 'Steady', 'Firm', 'Hard', 'Relentless'];
+/* Five bands, and Prime never climbs past the second however dense it is:
+   a mobility flow with no rest in it is not the hard part of anybody's
+   session, and saying so would make the meter useless everywhere else.
+
+   NOTHING IS SHOWN WHEN NOTHING CAN BE MEASURED. A block whose set counts
+   live in prose derives as one set of everything, so its density would be
+   a small number presented with total confidence — the first version of
+   this read "Relentless, 100%" for every block of Sevan's program, which
+   is the meter agreeing with itself rather than with the training. No set
+   counts, no meter, and it appears the moment one is typed. */
+function nbLoad(b){
+  if(!nbDerivable(b) || b.type === 'AMRAP') return null;
+  const tot = nbTotalSec(b), w = nbWorkSec(b);
+  if(!tot || w == null) return null;
+  const d = Math.min(1, w / tot);
+  let n = d >= 0.72 ? 5 : d >= 0.55 ? 4 : d >= 0.4 ? 3 : d >= 0.25 ? 2 : 1;
+  if(b.role === 'Prime') n = Math.min(n, 2);
+  return { n, label: NB_LOAD[n - 1], pct: Math.round(d * 100) };
+}
+
+/* WHERE THIS BLOCK SITS IN THE SESSION. Which one of how many, and the
+   minute it starts on — the two things a coach is holding in their head
+   while they read down a day and cannot get from a list of names. */
+function nbWhere(day, bi){
+  const bs = (day && day.blocks) || [];
+  let start = 0;
+  for(let i = 0; i < bi; i++) start += nbMins(bs[i]);
+  return { i: bi + 1, of: bs.length, start, end: start + nbMins(bs[bi]) };
+}
+
 /* WHOSE NUMBER IS THIS.
 
    Derived, whenever there is anything to derive from — that is the whole
@@ -2181,8 +2298,12 @@ function nbBlockSec(b){
    which is exactly when the coach starts wanting the clock to move. */
 const nbDerivable = b => (b.items||[]).some(it => nbParse(it.pres).told)
   || ['EMOM','AMRAP','Tabata','Circuit'].indexOf(b.type) >= 0;
-const nbMins = b => (!nbDerivable(b) && +b.mins > 0)
-  ? +b.mins : Math.max(1, Math.round(nbBlockSec(b)/60));
+/* ONE LENGTH, ASKED ONCE. nbMins used to be the only caller of this and
+   the load meter divided by nbBlockSec instead — two different answers to
+   "how long is this block", which is how the meter came to read 100% for
+   a block whose written length was five times its derived one. */
+const nbTotalSec = b => (!nbDerivable(b) && +b.mins > 0) ? +b.mins * 60 : nbBlockSec(b);
+const nbMins = b => Math.max(1, Math.round(nbTotalSec(b)/60));
 const nbDayMins = d => (d && d.blocks || []).reduce((t,b)=>t+nbMins(b),0);
 
 /* ---- search: every word against everything a movement IS ---- */
@@ -2607,23 +2728,41 @@ function nbMiddle(){
     const RC = { Prime:'#4E7A2E', Work:'#1D6FC7', Finish:'#C24A3B' }[b.role] || '#999';
     const sel = nbSel===bi;
 
-    /* FOLDED. A finished block is one line: what it is, what is in it, and
-       how long it takes. Everything you need to know it is still right,
-       and none of the room it took to build it. */
-    if(b.locked && !nbPeek.has(bi)){
-      const names = (b.items||[]).map(it=>MV(it.ex).n);
-      const shown = names.slice(0,3).join(', ') + (names.length>3 ? ` +${names.length-3}` : '');
-      h += `<div class="nbblock locked fold" style="--rc:${RC}">
-        <div class="nbbhead">
+    /* WHERE THIS BLOCK SITS, AND WHAT IT COSTS. Two lines of the banner
+       that were never there: which block of how many and the minute it
+       starts on, and how much of its own length is work. Both are read
+       straight off the block, so shortening the rest moves the meter
+       while you are doing it. */
+    const W = nbWhere(day, bi), LD = nbLoad(b);
+    const stamp = `<span class="nbstep" title="Block ${W.i} of ${W.of} \u00B7 minute ${W.start} to ${W.end}">
+        <b>${W.i}</b><em>/${W.of}</em><i>${W.start}\u2013${W.end}m</i></span>`;
+    const meter = LD ? `<span class="nbload l${LD.n}" title="${LD.pct}% of this block is work, the rest is rest">
+        ${[1,2,3,4,5].map(n=>`<s class="${n<=LD.n?'on':''}"></s>`).join('')}
+        <em>${LD.label}</em></span>` : '';
+
+    /* FOLDED. A locked block is a banner and nothing else — that is what
+       locking is for, to clear the way down to the block you are still
+       working on. The chevron opens a plain list of what is in it, which
+       is the question you actually ask of a finished block; the full
+       editor stays behind the lock, where you put it. */
+    if(b.locked){
+      const peek = nbPeek.has(bi);
+      h += `<div class="nbblock locked fold ${peek?'peek':''}" style="--rc:${RC}">
+        <button class="nbfold" onclick="nbTogglePeek(${bi})">
           <span class="nbrole tag">${esc(b.role)}</span>
-          <span class="nbnw"><b class="nbfn">${esc(b.name||'Block')}</b>
-            <small>${esc(b.type)} &middot; ${names.length||'no'} movement${names.length===1?'':'s'}${
-              shown ? ' &middot; ' + esc(shown) : ''}</small></span>
-          <span class="nbctl">
-            <span class="nbmin"><b>${nbMins(b)}</b><em>min</em></span>
-            <button class="nbpeek" onclick="nbTogglePeek(${bi})">Show</button>
-            <button class="nblock on" title="Unlock" onclick="nbToggleLock(${bi})">&#128274;</button>
-          </span></div></div>`;
+          ${stamp}
+          <span class="nbnw"><b class="nbfn">${esc(b.name||'Block')}</b></span>
+          ${meter}
+          <span class="nbmin"><b>${nbMins(b)}</b><em>min</em></span>
+          <i class="nbchev">${peek?'\u25B2':'\u25BC'}</i>
+        </button>
+        <button class="nblock on inlock" title="Unlock and edit"
+                onclick="event.stopPropagation();nbToggleLock(${bi})">&#128274;</button>
+        ${peek ? `<ol class="nbfoldlist">${(b.items||[]).map(it=>{
+            const m = MV(it.ex);
+            return `<li><span style="--c:${NBC(m.g)}"></span><b>${esc(m.n)}</b><em>${esc(it.pres||'')}</em></li>`;
+          }).join('')}</ol>` : ''}
+      </div>`;
       return;
     }
 
@@ -2632,9 +2771,11 @@ function nbMiddle(){
       <div class="nbbhead">
         <select class="nbrole" onclick="event.stopPropagation()" onchange="nbSetBlock(${bi},'role',this.value)">
           ${['Prime','Work','Finish'].map(r=>`<option ${b.role===r?'selected':''}>${r}</option>`).join('')}</select>
+        ${stamp}
         <span class="nbnw"><input class="nbbn" value="${esc(b.name||'')}" placeholder="Name this block"
             onclick="event.stopPropagation()" onchange="nbSetBlock(${bi},'name',this.value)">
           <small>${spec.blurb}</small></span>
+        ${meter}
         <span class="nbctl" onclick="event.stopPropagation()">
           <select class="nbtype" onchange="nbSetType(${bi},this.value)">
             ${NB_TYPES.map(t=>`<option ${b.type===t?'selected':''}>${t}</option>`).join('')}</select>
@@ -2643,9 +2784,8 @@ function nbMiddle(){
               value="${b.cfg[k] != null ? b.cfg[k] : NB_DEF[k]}"
               onchange="nbSetCfg(${bi},'${k}',this.value)"><em>${f[1]||f[0]}</em></span>`;}).join('')}
           <span class="nbmin"><b>${nbMins(b)}</b><em>min</em></span>
-          ${b.locked ? `<button class="nbpeek" onclick="event.stopPropagation();nbTogglePeek(${bi})">Hide</button>` : ''}
-          <button class="nblock ${b.locked?'on':''}" title="${b.locked?'Unlock':'Lock and fold away'}"
-                  onclick="nbToggleLock(${bi})">${b.locked?'&#128274;':'&#128275;'}</button>
+          <button class="nblock" title="Lock and fold this away"
+                  onclick="event.stopPropagation();nbToggleLock(${bi})">&#128275;</button>
         </span></div>`;
 
     const GS = nbGroups(b);
