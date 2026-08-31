@@ -552,28 +552,27 @@ select.pin{appearance:none;cursor:pointer}
 .nbblock.sel{ border-color:var(--rc); box-shadow:0 0 0 2px color-mix(in srgb, var(--rc) 30%, transparent); }
 .nbblock.locked{ opacity:.85 } .nbblock.locked .nbaddit{ display:none }
 
-/* WHERE AM I IN THIS SESSION. A tiny stamp: which block of how many,
-   and the minutes it runs between. Monospace because the numbers are
-   scanned down a column rather than read. */
-.nbstep{ display:flex; flex-direction:column; align-items:center; line-height:1.05;
-         font:600 11px ui-monospace,monospace; color:var(--ink2); min-width:40px;
-         padding:3px 5px; border-radius:6px; background:var(--sunk); cursor:default }
-.nbstep b{ font-size:13px } .nbstep em{ font-style:normal; font-size:9px; color:var(--ink3) }
-.nbstep i{ font-style:normal; font-size:8px; color:var(--ink4); margin-top:2px; letter-spacing:-.02em }
+/* WHERE AM I IN THIS SESSION. One segment per block, filled for the ones
+   behind you, lit for this one, empty ahead. No numbers, no slash, no box
+   — you read your position the way you read a progress bar, which is
+   without reading. */
+.nbstep{ display:flex; gap:2px; align-items:center; cursor:default; flex:none }
+.nbstep s{ width:9px; height:5px; border-radius:1px; text-decoration:none; display:block;
+           background:var(--line2) }
+.nbstep s.done{ background:var(--s); opacity:.45 }
+.nbstep s.now{ background:var(--s); height:11px; border-radius:2px }
 
-/* HOW HARD, IN FIVE STEPS. The bars carry the colour; the word carries
-   the meaning. Both, because five bars alone is a puzzle and a word
-   alone does not sort at a glance. */
-.nbload{ display:flex; align-items:center; gap:5px; cursor:default }
+/* HOW HARD, IN FIVE STEPS. Bars only — the word was a third piece of text
+   in a banner that already had too much, and the colour says it faster.
+   The percentage is in the tooltip for when you want the number. */
+.nbload{ display:flex; align-items:center; gap:2px; cursor:default; flex:none }
 .nbload s{ width:3px; height:11px; border-radius:1px; background:var(--line2);
            text-decoration:none; display:block }
-.nbload em{ font-style:normal; font:600 9px ui-monospace,monospace; letter-spacing:.06em;
-            text-transform:uppercase; color:var(--ink3) }
-.nbload.l1 s.on{ background:var(--l1) } .nbload.l1 em{ color:var(--l1) }
-.nbload.l2 s.on{ background:var(--l2) } .nbload.l2 em{ color:var(--l2) }
-.nbload.l3 s.on{ background:var(--l3) } .nbload.l3 em{ color:var(--l3) }
-.nbload.l4 s.on{ background:var(--l4) } .nbload.l4 em{ color:var(--l4) }
-.nbload.l5 s.on{ background:var(--l5) } .nbload.l5 em{ color:var(--l5) }
+.nbload.l1 s.on{ background:var(--l1) }
+.nbload.l2 s.on{ background:var(--l2) }
+.nbload.l3 s.on{ background:var(--l3) }
+.nbload.l4 s.on{ background:var(--l4) }
+.nbload.l5 s.on{ background:var(--l5) }
 
 /* A LOCKED BLOCK IS A BANNER. One row, the whole thing clickable, and
    nothing under it until you ask — the point of locking is to clear the
@@ -2154,6 +2153,10 @@ function libRow(){
         <button class="btn" id="libGo" style="width:100%" ${has?'':'disabled'}>Give it to ${
           esc(A.name||CLIENT_ID)}</button></label>
     </div>
+    ${PROG.from && LIBRARY[PROG.from] ? `<p class="micro" style="margin:8px 0 0">
+      This came from the <b>${esc(LIBRARY[PROG.from].name)}</b> template.
+      <button class="lnk" id="progRefresh">Take a fresh copy</button> if that template
+      has been corrected since.</p>` : ''}
     <p class="micro" style="margin:8px 0 0">Picking one opens it in the builder below straight away.
       <b>Templates</b> open as a copy — editing them never touches the shelf, and the first <b>Save</b>
       turns the copy into a program of your own. <b>Yours</b> open for real: Save writes back into that
@@ -2178,6 +2181,29 @@ function libWire(){
 
   const sv = document.getElementById('progSave');   if(sv) sv.onclick = saveProgram;
   const sa = document.getElementById('progSaveAs'); if(sa) sa.onclick = () => saveProgramAs();
+  /* A COPY DOES NOT KNOW ITS ORIGINAL CHANGED.
+
+     Opening a template copies it, which is right — but when the template
+     itself is corrected, every copy already sitting in somebody's console
+     goes on being wrong, and there is no way to tell from looking. That is
+     exactly how a program with its supersets flattened stayed on screen
+     after the file behind it had been fixed.
+
+     One button, no cleverness: take the shelf copy again. It asks first,
+     because it throws away whatever was done to this one. */
+  const rf = document.getElementById('progRefresh');
+  if(rf) rf.onclick = () => {
+    const src = LIBRARY[PROG.from]; if(!src) return;
+    if(!confirm(`Replace this with a fresh copy of ${src.name}? Anything changed here is lost.`)) return;
+    const keepId = PROG.savedId, keepName = PROG.name;
+    PROG = structuredClone({ savedId:keepId, from:PROG.from, name:keepName,
+                             version:src.version, days:src.days });
+    PDAY = Object.keys(PROG.days)[0] || null;
+    nbSel=null; nbOpen=null; nbSwap=null; nbPeek=new Set();
+    S.program = PROG; save(1); drawProgram();
+    toast(`Fresh copy of ${src.name}`);
+  };
+
   const dl = document.getElementById('progDel');
   if(dl) dl.onclick = () => PROG.savedId ? deleteSavedProgram(PROG.savedId)
                                          : toast('This one is not saved, so there is nothing to delete');
@@ -2529,10 +2555,24 @@ let nbSel = null, nbOpen = null, nbSwap = null, nbSwapQ = '',
    of the way of the one you are still working on - but you have to be able
    to check what is in there without unlocking it and losing the lock. */
 let nbPeek = new Set();
+/* WHICH BLOCK THIS EDIT IS ABOUT.
+
+   The redraw holds one block still and lets everything else move around
+   it, so which block it holds decides whether the page feels steady or
+   possessed. Guessing "the first one on screen" gets it wrong exactly
+   when it matters: expand a card in block 3 while block 4 happens to be
+   the guess, and holding block 4 still drags block 3 upwards — the edit
+   you were making moves and nothing else does.
+
+   Every mutation knows which block it is about. It says so here, and the
+   capture prefers it over any guess. Cleared after each restore, so a
+   redraw that nobody asked for falls back to the guess honestly. */
+let nbAnchorBi = null;
+const nbAt = bi => { nbAnchorBi = bi; return true; };
 const nbSave = () => { S.program = PROG; save(1); drawProgram(); };
 
 /* ---- mutations. Every one ends at nbSave, which is S.program + save(1). ---- */
-function nbSetNum(bi,ii,f,raw){
+function nbSetNum(bi,ii,f,raw){ nbAt(bi);
   const it = PROG.days[PDAY].blocks[bi].items[ii];
   const v = raw==='' ? null : Math.max(0, parseInt(raw,10)||0);
   if(f==='rest'){ it.rest = v; return nbSave(); }
@@ -2541,9 +2581,9 @@ function nbSetNum(bi,ii,f,raw){
   if(f==='val')  p.val  = Math.max(1, v||1);
   it.pres = nbFmt(p); nbSave();
 }
-function nbSetBlock(bi,k,v){ const b=PROG.days[PDAY].blocks[bi];
+function nbSetBlock(bi,k,v){ nbAt(bi); const b=PROG.days[PDAY].blocks[bi];
   b[k] = (k==='mins') ? Math.max(0,parseInt(v,10)||0) : v; nbSave(); }
-function nbSetCfg(bi,k,v){ const b=PROG.days[PDAY].blocks[bi];
+function nbSetCfg(bi,k,v){ nbAt(bi); const b=PROG.days[PDAY].blocks[bi];
   (b.cfg ||= {})[k] = v==='' ? null : Math.max(0,parseInt(v,10)||0); nbSave(); }
 const NB_TYPES = ['Straight','Superset','Circuit','EMOM','AMRAP','Tabata'];
 const NB_SPEC = {
@@ -2556,35 +2596,60 @@ const NB_SPEC = {
 };
 const NB_FIELD = { rounds:['rounds',''], rest:['rest','s'], mins:['length','min'],
                    interval:['every','s'], cap:['cap','min'], work:['work','s'], off:['off','s'] };
-function nbSetType(bi,t){ const b=PROG.days[PDAY].blocks[bi]; b.type=t;
+function nbSetType(bi,t){ nbAt(bi); const b=PROG.days[PDAY].blocks[bi]; b.type=t;
   const cfg = b.cfg ||= {};
   for(const k of NB_SPEC[t].block) if(cfg[k]==null) cfg[k]=NB_DEF[k];
   nbSel=bi; nbSave(); }
-function nbDel(bi,ii){ const b=PROG.days[PDAY].blocks[bi];
+function nbDel(bi,ii){ nbAt(bi); const b=PROG.days[PDAY].blocks[bi];
   b.items.splice(ii,1); if(!b.items.length) PROG.days[PDAY].blocks.splice(bi,1);
   nbSel=null; nbOpen=null; nbSave(); }
 function nbAdd(id){
   if(nbSel==null || !PROG.days[PDAY].blocks[nbSel])
     return toast('Pick a block first — hit "+ Add a movement" on the one you want');
+  nbAt(nbSel);
   const b = PROG.days[PDAY].blocks[nbSel], m = MV(id), no = nbForbidden(m);
   b.items.push({ ex:id, pres: m.meas==='hold' ? '3 × 30s' : '3 × 8', note:'' });
   nbSave(); toast(no ? `${m.n} added — but it breaks: ${no}` : `${m.n} → ${b.name||'block'}`);
 }
-function nbPickInto(bi){ nbSel=bi; nbOpen=null; drawProgram();
-  const q=document.getElementById('nbq'); if(q){ q.focus(); q.select(); } }
+/* ARM THE BLOCK, DO NOT MOVE THE PAGE.
+
+   This focused the library search so you could type straight away, which
+   is right — but a bare focus() scrolls that element into view, and the
+   library is a whole column away. Pressing "+ Add a movement" threw the
+   page nineteen hundred pixels. It is the button you press most while
+   building, so this was most of the jumping.
+
+   The search box is usually already on screen, beside the block you just
+   armed, and then nothing needs to move at all. It is only below the fold
+   on a narrow window, where the columns stack — and there the smallest
+   possible nudge is right, not a jump to centre. */
+function nbPickInto(bi){ nbAt(bi);
+  nbSel=bi; nbOpen=null; drawProgram();
+  const q=document.getElementById('nbq'); if(!q) return;
+  /* Bring it into ITS OWN column if it is out of sight there. On a desktop
+     that column is beside the block you just armed and usually nothing
+     moves at all; the window is never scrolled either way, because the
+     page moving is the thing that makes this feel broken. */
+  const col = q.closest('.nbcol');
+  if(col && col.scrollHeight > col.clientHeight){
+    const cr = col.getBoundingClientRect(), qr = q.getBoundingClientRect();
+    if(qr.top < cr.top || qr.bottom > cr.bottom) col.scrollTop += qr.top - cr.top - 8;
+  }
+  q.focus({preventScroll:true}); q.select();
+}
 function nbNewBlock(){ (PROG.days[PDAY].blocks ||= [])
   .push({ role:'Work', name:'New block', note:'', type:'Straight', cfg:{}, items:[] });
-  nbSel = PROG.days[PDAY].blocks.length-1; nbSave(); toast('Now pick movements on the right'); }
-function nbToggleCard(bi,ii){ const k=bi+':'+ii;
+  nbSel = PROG.days[PDAY].blocks.length-1; nbAt(nbSel); nbSave(); toast('Now pick movements on the right'); }
+function nbToggleCard(bi,ii){ nbAt(bi); const k=bi+':'+ii;
   nbOpen = (nbOpen===k) ? null : k; if(nbOpen!==k) nbSwap=null; drawProgram(); }
-function nbToggleJoin(bi,ii){
+function nbToggleJoin(bi,ii){ nbAt(bi);
   const items = PROG.days[PDAY].blocks[bi].items, a=items[ii], b2=items[ii+1];
   if(a.sg!=null && b2.sg===a.sg){ const old=a.sg, fresh=Date.now()%100000;
     for(let k=ii+1;k<items.length && items[k].sg===old;k++) items[k].sg=fresh; }
   else { a.sg = a.sg ?? (Date.now()%100000); b2.sg = a.sg; }
   nbSave();
 }
-function nbToggleLock(bi){ const b=PROG.days[PDAY].blocks[bi]; b.locked=!b.locked;
+function nbToggleLock(bi){ nbAt(bi); const b=PROG.days[PDAY].blocks[bi]; b.locked=!b.locked;
   if(b.locked && nbSel===bi) nbSel=null;
   /* unlocking ends the peek: the block is open on its own terms now */
   nbPeek.delete(bi); nbSave(); }
@@ -2595,12 +2660,12 @@ function nbJumpToPicker(){
   el.scrollIntoView({behavior:'smooth', block:'center'});
   setTimeout(()=>{ el.focus(); }, 320);
 }
-function nbTogglePeek(bi){ nbPeek.has(bi) ? nbPeek.delete(bi) : nbPeek.add(bi); drawProgram(); }
-function nbSwapTo(bi,ii,id){ PROG.days[PDAY].blocks[bi].items[ii].ex=id;
+function nbTogglePeek(bi){ nbAt(bi); nbPeek.has(bi) ? nbPeek.delete(bi) : nbPeek.add(bi); drawProgram(); }
+function nbSwapTo(bi,ii,id){ nbAt(bi); PROG.days[PDAY].blocks[bi].items[ii].ex=id;
   nbSwap=null; nbSwapQ=''; nbOpen=bi+':'+ii; nbSave(); toast('Swapped in '+MV(id).n); }
 function nbDragStart(e,bi,ii){ nbDrag={bi,ii}; e.dataTransfer.effectAllowed='move'; }
 function nbDragOver(e,bi){ if(nbDrag && nbDrag.bi===bi){ e.preventDefault(); e.dataTransfer.dropEffect='move'; } }
-function nbDrop(e,bi,ii){ if(!nbDrag||nbDrag.bi!==bi) return; e.preventDefault();
+function nbDrop(e,bi,ii){ if(!nbDrag||nbDrag.bi!==bi) return; nbAt(bi); e.preventDefault();
   const items=PROG.days[PDAY].blocks[bi].items;
   const [m]=items.splice(nbDrag.ii,1); items.splice(ii,0,m); nbDrag=null; nbOpen=null; nbSave(); }
 
@@ -2853,12 +2918,28 @@ function nbMiddle(){
        starts on, and how much of its own length is work. Both are read
        straight off the block, so shortening the rest moves the meter
        while you are doing it. */
+    /* WHERE YOU ARE, AS A SHAPE RATHER THAN A SENTENCE.
+
+       This was "3 /7" stacked over "10-19m" in a bordered box — three
+       numbers and a slash in the busiest corner of the banner, and the
+       one thing you actually want from it, how far through the session
+       this block sits, was something you had to work out.
+
+       It is a bar now. Seven segments for seven blocks, the ones behind
+       you filled, this one lit, the rest empty. You read your position
+       without reading anything. The numbers are still there, in the
+       tooltip, for when you want them.
+
+       The role colour carries through, so a day reads as a shape too:
+       green at the front, blue through the middle, red at the end. */
     const W = nbWhere(day, bi), LD = nbLoad(b);
-    const stamp = `<span class="nbstep" title="Block ${W.i} of ${W.of} \u00B7 minute ${W.start} to ${W.end}">
-        <b>${W.i}</b><em>/${W.of}</em><i>${W.start}\u2013${W.end}m</i></span>`;
+    const segs = (day.blocks||[]).map((ob,oi)=>{
+      const c = { Prime:'#4E7A2E', Work:'#1D6FC7', Finish:'#C24A3B' }[ob.role] || '#999';
+      return `<s class="${oi<bi?'done':oi===bi?'now':''}" style="--s:${c}"></s>`;
+    }).join('');
+    const stamp = `<span class="nbstep" title="Block ${W.i} of ${W.of} \u00B7 minute ${W.start} to ${W.end}">${segs}</span>`;
     const meter = LD ? `<span class="nbload l${LD.n}" title="${LD.pct}% of this block is work, the rest is rest">
-        ${[1,2,3,4,5].map(n=>`<s class="${n<=LD.n?'on':''}"></s>`).join('')}
-        <em>${LD.label}</em></span>` : '';
+        ${[1,2,3,4,5].map(n=>`<s class="${n<=LD.n?'on':''}"></s>`).join('')}</span>` : '';
 
     /* FOLDED. A locked block is a banner and nothing else — that is what
        locking is for, to clear the way down to the block you are still
@@ -2869,7 +2950,6 @@ function nbMiddle(){
       const peek = nbPeek.has(bi);
       h += `<div class="nbblock locked fold ${peek?'peek':''}" data-bi="${bi}" style="--rc:${RC}">
         <button class="nbfold" onclick="nbTogglePeek(${bi})">
-          <span class="nbrole tag">${esc(b.role)}</span>
           ${stamp}
           <span class="nbnw"><b class="nbfn">${esc(b.name||'Block')}</b></span>
           ${meter}
@@ -2894,10 +2974,10 @@ function nbMiddle(){
         ${stamp}
         <span class="nbnw"><input class="nbbn" data-a="b${bi}.name" value="${esc(b.name||'')}" placeholder="Name this block"
             onclick="event.stopPropagation()" onchange="nbSetBlock(${bi},'name',this.value)">
-          <small>${spec.blurb}</small></span>
+          ${sel ? `<small>${spec.blurb}</small>` : ''}</span>
         ${meter}
         <span class="nbctl" onclick="event.stopPropagation()">
-          <select class="nbtype" onchange="nbSetType(${bi},this.value)">
+          <select class="nbtype" title="${esc(spec.blurb)}" onchange="nbSetType(${bi},this.value)">
             ${NB_TYPES.map(t=>`<option ${b.type===t?'selected':''}>${t}</option>`).join('')}</select>
           ${spec.block.map(k=>{const f=NB_FIELD[k];
             return `<span class="nbcfg" title="${f[0]}"><input type="number" data-a="b${bi}.cfg.${k}" min="0" max="600"
@@ -2996,32 +3076,63 @@ function nbCapture(){
   let sel = null;
   if(key){ try{ sel = [ae.selectionStart, ae.selectionEnd]; }catch(e){ /* number inputs refuse */ } }
 
-  /* THE BLOCK YOU ARE IN, or failing that the first one still on screen.
-     Reading down a day, the topmost visible block is the one your eye is
-     on; typing in a field, it is the block that field belongs to, which
-     may be further down. Asking about focus first means an edit low in the
-     viewport holds its own block rather than one above it. */
+  /* EVERY SCROLLER, NOT JUST THE WINDOW.
+
+     This is the whole bug. On a desktop the three columns are a fixed-height
+     grid and each one scrolls INSIDE ITSELF — the page barely scrolls at
+     all. Rebuilding the panel throws those columns away and the new ones
+     start at zero, so every single edit snapped the middle column back to
+     the top of the day. The first version of this restored window.scrollY
+     faithfully and window.scrollY had not moved. I was measuring the one
+     thing that was already correct.
+
+     Each column keeps its own id across the rebuild, so its scroll position
+     can be handed back to it. */
+  const cols = {};
+  host.querySelectorAll('.nbcol,#nbaltlist').forEach(c => { if(c.id) cols[c.id] = c.scrollTop; });
+
+  /* THE BLOCK YOU ARE IN, or the first one on screen — and "on screen" now
+     means inside its own column, not inside the window. */
   let anchor = null;
-  const inField = ae && host.contains(ae) && ae.closest && ae.closest('[data-bi]');
-  if(inField) anchor = { bi: inField.dataset.bi, top: inField.getBoundingClientRect().top };
-  else for(const el of host.querySelectorAll('[data-bi]')){
-    const r = el.getBoundingClientRect();
-    if(r.bottom > 0){ anchor = { bi: el.dataset.bi, top: r.top }; break; }
+  let el = (nbAnchorBi != null) ? host.querySelector(`[data-bi="${nbAnchorBi}"]`) : null;
+  if(!el) el = ae && host.contains(ae) && ae.closest && ae.closest('[data-bi]');
+  if(!el){
+    for(const b of host.querySelectorAll('[data-bi]')){
+      const sc = b.closest('.nbcol');
+      const lim = sc ? sc.getBoundingClientRect().top : 0;
+      if(b.getBoundingClientRect().bottom > lim){ el = b; break; }
+    }
   }
-  return { key, sel, anchor, y: window.scrollY };
+  if(el){
+    const sc = el.closest('.nbcol');
+    anchor = { bi: el.dataset.bi, top: el.getBoundingClientRect().top,
+               scroller: sc && sc.id ? sc.id : null };
+  }
+  return { key, sel, anchor, cols, y: window.scrollY };
 }
 
 function nbRestore(st){
   if(!st) return;
   const host = document.getElementById('prog');
-  const el = st.anchor && host && host.querySelector(`[data-bi="${st.anchor.bi}"]`);
+  if(!host) return;
+
+  /* columns first — coarse, and right in the common case */
+  for(const id in st.cols){ const c = document.getElementById(id); if(c) c.scrollTop = st.cols[id]; }
+  if(window.scrollY !== st.y) window.scrollTo(0, st.y);
+
+  /* then the fine correction, against whatever actually scrolls: a block
+     that grew or shrank moves the ones after it, and the column's old
+     scrollTop cannot know that */
+  const el = st.anchor && host.querySelector(`[data-bi="${st.anchor.bi}"]`);
   if(el){
     const d = el.getBoundingClientRect().top - st.anchor.top;
-    if(Math.abs(d) > 0.5) window.scrollBy(0, d);
-  } else if(window.scrollY !== st.y){
-    window.scrollTo(0, st.y);
+    if(Math.abs(d) > 0.5){
+      const sc = st.anchor.scroller && document.getElementById(st.anchor.scroller);
+      if(sc) sc.scrollTop += d; else window.scrollBy(0, d);
+    }
   }
-  if(st.key && host){
+
+  if(st.key){
     const f = host.querySelector(`[data-a="${st.key}"]`);
     if(f){
       f.focus({preventScroll:true});
@@ -3030,6 +3141,7 @@ function nbRestore(st){
       }
     }
   }
+  nbAnchorBi = null;
 }
 
 function drawProgram(){
