@@ -163,11 +163,16 @@ body{
 a{color:var(--accent)}
 
 /* ---------- masthead ---------- */
-header{
+header{--hpad:14px;
   position:relative;overflow:hidden;
-  background:linear-gradient(150deg,#1B2028,#141820 70%);
+  /* THE LAST TWO LITERALS IN THE FILE, AND THEY BIT. A fixed dark
+     gradient meant that in light mode the masthead stayed dark while its
+     title took the light theme's near-black ink — the page title,
+     invisible, on the one surface that never changed with the rest. It
+     is a token now like everything else. */
+  background:linear-gradient(150deg,var(--card2),var(--bg2) 70%);
   border-bottom:1px solid var(--line);
-  padding:26px 28px 24px;
+  padding:11px 20px;
 }
 /* one 80s flourish, and only one: a horizon grid bleeding off the masthead */
 header:after{
@@ -180,12 +185,12 @@ header:after{
   -webkit-mask-image:linear-gradient(180deg,transparent,#000 62%);
   opacity:.5;
 }
-.mast{position:relative;z-index:2;display:flex;align-items:flex-start;gap:20px;
+.mast{position:relative;z-index:2;display:flex;align-items:center;gap:16px;
   max-width:1180px;margin:0 auto;flex-wrap:wrap}
-.mast .mk{width:62px;height:31px;flex:none;margin-top:5px;
+.mast .mk{width:50px;height:25px;flex:none;
   filter:drop-shadow(0 0 10px rgba(255,95,162,.45))}
 .mast .mk path{fill:none;stroke:var(--accent);stroke-linecap:round}
-.mast h1{font-size:25px;font-weight:550;letter-spacing:-.022em;line-height:1.15}
+.mast h1{font-size:16px;font-weight:600;letter-spacing:-.012em;line-height:1.2}
 .mast .kick{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;
   color:var(--neon);margin-bottom:8px}
 .mast .sub{font-size:13px;color:var(--ink2);margin-top:7px;max-width:56ch}
@@ -202,9 +207,15 @@ header:after{
    builder is three columns of working surface sitting beside a client
    rail, which is four columns fighting over 840px of it. The page keeps
    its rail and takes the room it needs instead. */
-.wrap{max-width:1560px;margin:0 auto;padding:24px 28px;display:grid;
-  grid-template-columns:308px 1fr;gap:26px;align-items:start}
-@media (max-width:940px){ .wrap{grid-template-columns:1fr;padding:20px 18px} .rail{position:static!important} }
+.wrap{max-width:1780px;margin:0 auto;padding:14px 20px;display:grid;
+  grid-template-columns:308px 1fr;gap:22px;align-items:start}
+/* SHUT, THE BUILDER TAKES THE WHOLE PAGE. Not a narrower rail - no rail. */
+.wrap.norail{grid-template-columns:1fr}
+.wrap.norail > .rail{display:none}
+@media (max-width:940px){ .wrap{grid-template-columns:1fr;padding:14px} .rail{position:static!important} }
+/* the drawer's own handle, in the jump bar */
+#railBtn{margin-left:auto}
+.tmode{margin-left:10px}
 
 /* ---------- the client rail ---------- */
 /* clears the sticky jump bar (52px) rather than pinning underneath it -
@@ -473,9 +484,9 @@ select.pin{appearance:none;cursor:pointer}
    THE BUILDER. Prefixed nb- throughout so nothing here can collide
    with the console's own styling, which the other tabs still use.
    ============================================================ */
-.nbcols{ display:grid; grid-template-columns:225px minmax(320px,1fr) 250px; gap:1px;
+.nbcols{ display:grid; grid-template-columns:236px minmax(360px,1fr) 262px; gap:1px;
          background:var(--line); border-radius:10px; overflow:hidden;
-         height:calc(100vh - 250px); min-height:520px; margin-top:10px; }
+         height:calc(100vh - 168px); min-height:560px; margin-top:10px; }
 .nbcol{ background:var(--bg); padding:14px 13px 40px; overflow-y:auto; min-width:0; }
 .nbcol.mid{ background:var(--desk); }
 .nbcol::-webkit-scrollbar{ width:9px; }
@@ -604,6 +615,7 @@ select.pin{appearance:none;cursor:pointer}
          font:600 9px ui-monospace,monospace; letter-spacing:.09em; text-transform:uppercase;
          padding:5px 8px; color:var(--ink2); background:var(--sunk); }
 .nbpeek:hover{ color:var(--ink); border-color:var(--line2) }
+#railBtn.on{ color:var(--accent); border-color:var(--accent); background:var(--accent-soft) }
 /* THE PROGRAM BAR. Name, state, and the two save doors on one line, so
    "which program am I editing and is it written down" is answered
    without reading anything. */
@@ -619,6 +631,7 @@ select.pin{appearance:none;cursor:pointer}
          padding:6px 9px; border-radius:6px; white-space:nowrap; align-self:center }
 .pstate.clean{ color:var(--accent); background:var(--accent-soft) }
 .pstate.dirty{ color:var(--gold); background:var(--gold-soft) }
+.pstate.copy{ color:var(--ink3); background:var(--tint2) }
 .btn.primary{ background:var(--accent-deep); border-color:var(--accent-deep); color:var(--accent-ink) }
 .lnk{ background:none; border:none; padding:0; cursor:pointer; color:var(--ink3);
       font:inherit; font-size:inherit; text-decoration:underline }
@@ -626,6 +639,8 @@ select.pin{appearance:none;cursor:pointer}
 .nbempty h3{ margin:0 0 6px; font-size:16px }
 .nbempty p{ margin:0 0 14px; max-width:52ch }
 .nbdoors{ display:flex; gap:9px; flex-wrap:wrap }
+.pacts{ display:flex; gap:14px; margin:9px 0 0 }
+.pacts:empty{ display:none }
 /* WRAP, DO NOT SQUEEZE. This was a five-column grid, and five columns in
    a 374px builder column left the block's NAME 31 pixels wide — the one
    field you have to be able to read. Flex with a real minimum on the name
@@ -754,6 +769,12 @@ select.pin{appearance:none;cursor:pointer}
 <body>
 
 <header>
+  <!-- A MASTHEAD IS NOT A WORKBENCH. This carried a 25px headline and a
+       three-line paragraph explaining what the page is - 189 pixels of
+       something you have read a thousand times, above the thing you came
+       to use. The sentence lives in the reasoning section now, which is
+       where an explanation belongs; the name and the score stay, because
+       those change. -->
   <div class="mast">
     <svg class="mk" viewBox="0 0 260 130">
       <path d="M86 65 H174" stroke-width="7" opacity=".55"/>
@@ -761,13 +782,7 @@ select.pin{appearance:none;cursor:pointer}
       <path d="M66.8 40.7 V89.3" stroke-width="9.9"/><path d="M193.2 40.7 V89.3" stroke-width="9.9"/>
       <path d="M52.4 47.5 V82.5" stroke-width="7.13"/><path d="M207.6 47.5 V82.5" stroke-width="7.13"/>
     </svg>
-    <div class="grow">
-      <div class="kick">Coach console</div>
-      <h1>Building Ozzy's first program</h1>
-      <div class="sub">The program is the page: every session, every block, every movement, editable
-        in place. Under it are the ten layers in Galpin's order - the reasoning, kept, and out of the way.
-        Nothing reaches their app until you release it.</div>
-    </div>
+    <div class="grow"><h1>Building <span id="mastWho">Ozzy</span>'s program</h1></div>
     <div class="meter">
       <div class="big tnum"><span id="mOk">0</span><i>/10</i></div>
       <div class="lbl">Layers agreed</div>
@@ -785,6 +800,7 @@ select.pin{appearance:none;cursor:pointer}
   <a href="#prog" data-j="prog" class="hot">The program</a>
   <a href="#reason" data-j="reason">The reasoning</a>
   <a href="#releasePanel" data-j="releasePanel">Send it</a>
+  <button id="railBtn" class="nbpeek" title="The client's answers, kit, history and release switches">Client</button>
   <span class="tmode" id="tmode" role="group" aria-label="Appearance">
     <button data-t="light" title="Light">Light</button>
     <button data-t="system" title="Follow this machine">Auto</button>
@@ -806,13 +822,24 @@ select.pin{appearance:none;cursor:pointer}
 })();
 </script>
 
-<div class="wrap">
+<div class="wrap" id="wrap">
 
   <!-- ================= THE CLIENT =================
        id="top" is load-bearing. The jump bar's first link has always
        pointed at #top and nothing on the page has ever carried that id,
        so "Client" was a link to nowhere - it did nothing, on every click,
        for every client. -->
+  <!-- THE CLIENT, WHEN YOU WANT THE CLIENT.
+
+       This rail was 2,267 pixels tall beside a 700-pixel builder. Three
+       times the height of the thing the page is for, permanently on
+       screen, and half of it said what the builder's own left column
+       already says: the constraints were rendered twice and the release
+       switches appeared both here and in their own section below.
+
+       It is a drawer now, shut by default. Everything is still in it and
+       one click still opens it - it just no longer competes with the
+       program for the page. -->
   <aside class="rail" id="top">
     <div class="panel">
       <div class="who">
@@ -865,12 +892,8 @@ select.pin{appearance:none;cursor:pointer}
          different client to reach the four fields you came to change. The
          reasoning still matters and is still here - it is just no longer
          the thing standing between you and the work. -->
-    <div class="lead" id="progLead">
-      <h2>The program, day by day</h2>
-      <p>Every session, every block, every movement, editable in place. Change anything here and it is
-        what lands in the app the next time that day is released - there is no second copy anywhere.
-        The reasoning behind it is below.</p>
-    </div>
+    <!-- The paragraph that used to sit here said the program is editable in
+         place. So does the program, by being editable in place. -->
     <div id="prog"></div>
 
     <details id="reason">
@@ -889,11 +912,9 @@ select.pin{appearance:none;cursor:pointer}
          different problem: an installed iOS app has its own storage
          container, so nothing written here is visible to it. Until the
          backend lands, the program travels in a link the person opens. -->
-    <div class="lead" style="margin-top:30px">
+    <div class="lead" style="margin-top:26px">
       <h2>Send it to their phone</h2>
-      <p>The switches above decide what is visible. This is how it gets there. Their installed app
-        cannot read this browser, so the program travels in a link - open it on the phone once and
-        the app takes it in, sets them to active and opens on their week.</p>
+      <p>Their installed app cannot read this browser, so the program travels in a link.</p>
     </div>
     <div class="panel" id="releasePanel"><div class="pad"></div></div>
   </main>
@@ -1982,6 +2003,7 @@ async function loadProgram(){
      link, record `from` and no name — which left the name box empty and
      every toast saying "Saved undefined". The template it came off knows
      what it is called; ask that before falling back to a placeholder. */
+  if(Object.keys(PROG.days||{}).length) nbNormalise(PROG.days);
   if(Object.keys(PROG.days||{}).length && !PROG.name)
     PROG.name = (PROG.from && LIBRARY[PROG.from] && LIBRARY[PROG.from].name) || 'Untitled program';
   PDAY = PDAY || Object.keys(PROG.days)[0] || null;
@@ -2046,11 +2068,31 @@ const savedById = id => savedPrograms().find(p => p.id === id) || null;
 /* Has the open draft moved away from what was saved? Compared on the
    days alone — the name is edited in its own box and saving is not
    the only reason to change it. */
+/* DIRTY MEANS THERE IS WORK TO LOSE, not that nothing has been saved.
+
+   This asked only "does a SAVED program match this", so a fresh copy of a
+   template was dirty the moment it opened — nothing touched, an exact copy
+   of a file still sitting on the shelf, and every attempt to look at a
+   different program threw a confirm. Dismiss it and the dropdown snapped
+   back to where it was, which reads exactly like a picker that does not
+   work. It was a picker guarding work that did not exist.
+
+   A copy is compared to whatever it is a copy OF. A saved program to its
+   saved version, a template copy to the template. Only a program built
+   from nothing and never saved is dirty on sight, because for that one
+   there really is nowhere to get it back from. */
+function progOrigin(){
+  if(PROG && PROG.savedId) return savedById(PROG.savedId);
+  if(PROG && PROG.from && LIBRARY[PROG.from]) return LIBRARY[PROG.from];
+  return null;
+}
 function progDirty(){
   if(!PROG || !Object.keys(PROG.days||{}).length) return false;
-  const src = PROG.savedId ? savedById(PROG.savedId) : null;
-  if(!src) return true;                       /* never saved = everything is unsaved */
-  return JSON.stringify(src.days) !== JSON.stringify(PROG.days)
+  const src = progOrigin();
+  if(!src) return true;
+  /* normalised, because the open copy is — comparing a raw template to a
+     normalised copy reports every program as changed the moment it opens */
+  return JSON.stringify(nbNormalise(structuredClone(src.days))) !== JSON.stringify(PROG.days)
       || String(src.name||'') !== String(PROG.name||'');
 }
 
@@ -2075,6 +2117,7 @@ function openProgram(key){
     PROG = structuredClone({ savedId:null, from:key, name:src.name,
                              version:src.version, days:src.days });
   }
+  nbNormalise(PROG.days);
   PDAY = Object.keys(PROG.days)[0] || null;
   nbSel = null; nbOpen = null; nbSwap = null; nbPeek = new Set();
   S.program = PROG; save(1); drawProgram();
@@ -2133,10 +2176,11 @@ function libRow(){
       <label class="pbn">Program
         <input id="progName" value="${esc(PROG.name || '')}" placeholder="Name this program"
                ${has?'':'disabled'}></label>
-      <span class="pstate ${dirty?'dirty':'clean'}">${
+      <span class="pstate ${!has ? '' : dirty ? 'dirty' : PROG.savedId ? 'clean' : 'copy'}">${
         !has ? 'nothing open'
         : dirty ? (PROG.savedId ? 'unsaved changes' : 'not saved yet')
-        : 'saved'}</span>
+        : PROG.savedId ? 'saved'
+        : 'untouched copy'}</span>
       <button class="btn ${dirty?'primary':''}" id="progSave" ${has?'':'disabled'}>Save</button>
       <button class="btn" id="progSaveAs" ${has?'':'disabled'}>Save as new</button>
     </div>
@@ -2156,23 +2200,18 @@ function libRow(){
         <button class="btn" id="libGo" style="width:100%" ${has?'':'disabled'}>Give it to ${
           esc(A.name||CLIENT_ID)}</button></label>
     </div>
-    ${PROG.from && LIBRARY[PROG.from] ? `<p class="micro" style="margin:8px 0 0">
-      This came from the <b>${esc(LIBRARY[PROG.from].name)}</b> template.
-      <button class="lnk" id="progRefresh">Take a fresh copy</button> if that template
-      has been corrected since.</p>` : ''}
-    <p class="micro" style="margin:8px 0 0">Picking one opens it in the builder below straight away.
-      <b>Templates</b> open as a copy — editing them never touches the shelf, and the first <b>Save</b>
-      turns the copy into a program of your own. <b>Yours</b> open for real: Save writes back into that
-      program. <b>Give it to ${esc(A.name||CLIENT_ID)}</b> is the separate step that releases it to
-      their phone.${saved.length ? `
-      <button class="lnk" id="progDel">Delete the open program</button>` : ''}</p>
-
-    ${has ? `
-      <div style="border-top:1px solid var(--line);margin-top:12px;padding-top:12px">
-        <button class="btn" id="nextBlock">Start the next block from this one</button>
-        <p class="micro" style="margin:7px 0 0">Files ${esc(PROG.name || 'the current program')} with what
-          the log says about it, then hands you a copy to change. The old block is kept, not overwritten.</p>
-      </div>` : ''}
+    <!-- THREE PARAGRAPHS EXPLAINING THE TWO BUTTONS ABOVE THEM. They were
+         true and they were read once. What is left is the actions
+         themselves, on one line, with the explanations moved onto their
+         titles where they are there for the one time you want them. -->
+    <p class="micro pacts">
+      ${PROG.from && LIBRARY[PROG.from] ? `<button class="lnk" id="progRefresh"
+        title="Replace this with a fresh copy of the ${esc(LIBRARY[PROG.from].name)} template. Anything changed here is lost.">Fresh copy</button>` : ''}
+      ${has ? `<button class="lnk" id="nextBlock"
+        title="Files ${esc(PROG.name || 'this program')} with what the log says about it, then hands you a copy to change. The old block is kept.">Next block from this</button>` : ''}
+      ${saved.length ? `<button class="lnk" id="progDel"
+        title="Delete the open program. A client already running it keeps their copy.">Delete</button>` : ''}
+    </p>
   </div></div>`;
 }
 function libWire(){
@@ -2305,11 +2344,42 @@ const nbFmt = p => `${p.sets} × ${p.val}${p.hold?'s':''}${p.side?' each side':'
 /* ---- time, derived from what is prescribed ---- */
 const NB_SPR = 3, NB_TRANS = 8;
 const NB_REST = { Prime:15, Work:90, Finish:45 };
-function nbRestOf(it, b){
-  if(it.rest != null) return it.rest;
+/* READING A PROGRAM MUST NOT WRITE TO IT.
+
+   This cached its answer onto the item — `it.rest = …` — so drawing a
+   program added a field to it. Between that and nbMiddle filling in
+   `type` and `cfg` as it rendered, merely LOOKING at a template made the
+   copy differ from the template, which made it permanently "unsaved",
+   which made the picker guard fire on every switch. A whole class of bug
+   from three convenience assignments inside render code.
+
+   Defaults are filled in once, on open, by nbNormalise. This only
+   reads. */
+function nbRestFromNote(it){
   const m = String(it.note||'').match(/(\d+)\s*s(?:ec)?\s*rest|rest\s*(\d+)/i);
-  it.rest = m ? +(m[1]||m[2]) : null;
-  return it.rest;
+  return m ? +(m[1]||m[2]) : null;
+}
+function nbRestOf(it, b){
+  return it.rest != null ? it.rest : nbRestFromNote(it);
+}
+
+/* The shape every program is held in once it is open, so that nothing
+   downstream has to guess and nothing downstream has to patch. Applied
+   when a program is opened and to the thing it is compared against. */
+function nbNormalise(days){
+  for(const d of Object.values(days || {})){
+    /* swept up after the picker bug above, which wrote this into the open
+       day every time somebody tried to change program */
+    delete d['undefined'];
+  }
+  for(const d of Object.values(days || {}))
+    for(const b of (d.blocks || [])){
+      if(!b.type) b.type = 'Straight';
+      if(!b.cfg)  b.cfg  = {};
+      for(const it of (b.items || []))
+        if(it.rest == null){ const r = nbRestFromNote(it); if(r != null) it.rest = r; }
+    }
+  return days;
 }
 function nbWork(it){
   const m = MV(it.ex), p = nbParse(it.pres);
@@ -2327,7 +2397,7 @@ function nbGroups(b){
 }
 const NB_DEF = { rounds:3, rest:90, mins:10, interval:60, cap:12, work:20, off:10 };
 function nbBlockSec(b){
-  const cfg = b.cfg || (b.cfg = {}), items = b.items || [];
+  const cfg = b.cfg || {}, items = b.items || [];
   if(!items.length) return 0;
   if(b.type==='EMOM')   return (cfg.mins ?? NB_DEF.mins)*60;
   if(b.type==='AMRAP')  return (cfg.cap  ?? NB_DEF.cap)*60;
@@ -2832,17 +2902,27 @@ function nbLeft(){
     ['Sessions', `${ids.length}${A.days?' / '+A.days:''}`, !A.days || ids.length<=+A.days ? 'ok':'bad'],
     ['Weekly minutes', want ? `${total} / ${want}` : `${total}`, !want || total<=want*1.1 ? 'ok':'warn'],
   ];
-  const broken = [], watch = [];
+  /* GROUPED BY REASON, NOT LISTED BY MOVEMENT. Eleven lines that each
+     ended "and they report knee pain" is one fact printed eleven times.
+     The reason is the thing you read; the movements are the detail under
+     it, and there is only ever a handful of reasons. */
+  const bag = { breaks:{}, check:{} };
   for(const id of ids) for(const b of (PROG.days[id].blocks||[])) for(const it of b.items||[]){
     const no = nbForbidden(MV(it.ex)); if(!no) continue;
-    (no.level === 'breaks' ? broken : watch).push(`${PROG.days[id].name} · ${MV(it.ex).n} — ${no.why}`);
+    (bag[no.level][no.why] ??= new Set()).add(MV(it.ex).n);
   }
-  rows.push(['Breaks a rule', broken.length ? broken.length+' found' : 'clear', broken.length?'bad':'ok']);
-  if(watch.length) rows.push(['Worth a look', watch.length, 'warn']);
+  const lines = g => Object.entries(g).map(([why, set]) => {
+    const xs = [...set];
+    return `<b>${esc(why)}</b><br>${esc(xs.slice(0,4).join(', '))}${xs.length>4 ? ` +${xs.length-4}` : ''}`;
+  });
+  const broken = lines(bag.breaks), watch = lines(bag.check);
+  const count = g => Object.values(g).reduce((n, set) => n + set.size, 0);
+  rows.push(['Breaks a rule', broken.length ? count(bag.breaks)+' found' : 'clear', broken.length?'bad':'ok']);
+  if(watch.length) rows.push(['Worth a look', count(bag.check), 'warn']);
   h += rows.map(([t,n,k])=>`<div class="nbchk ${k}"><span class="dot"></span>
         <span class="tx">${t}</span><span class="n">${n}</span></div>`).join('');
-  if(broken.length) h += `<div class="nbrule bad"><p>${broken.map(esc).join('<br>')}</p></div>`;
-  if(watch.length)  h += `<div class="nbrule warn"><p>${watch.map(esc).join('<br>')}</p></div>`;
+  for(const l of broken) h += `<div class="nbrule bad"><p>${l}</p></div>`;
+  for(const l of watch)  h += `<div class="nbrule warn"><p>${l}</p></div>`;
 
   h += `<p class="nblbl mt">Training balance</p><div id="nbmix"></div>`;
   h += `<div class="nbcovhead"><p class="nblbl" style="margin:0;flex:1">${
@@ -2950,8 +3030,7 @@ function nbMiddle(){
       onchange="PROG.days[PDAY].why=this.value;nbSave()">${esc(day.why||'')}</textarea>`;
 
   (day.blocks||[]).forEach((b,bi)=>{
-    b.type = b.type || 'Straight'; b.cfg = b.cfg || {};
-    const spec = NB_SPEC[b.type] || NB_SPEC.Straight;
+    const spec = NB_SPEC[b.type || 'Straight'] || NB_SPEC.Straight;
     const RC = { Prime:'#4E7A2E', Work:'#1D6FC7', Finish:'#C24A3B' }[b.role] || '#999';
     const sel = nbSel===bi;
 
@@ -3252,17 +3331,23 @@ function drawProgramBody(){
      or renaming a day cannot leave the panel describing the old shape */
   syncRelease(); drawRelease();
   host.querySelectorAll('[data-pday]').forEach(b=>b.onclick=()=>{ PDAY=b.dataset.pday; drawProgram(); });
-  host.querySelectorAll('.pin').forEach(el=>{
-    el.onchange = () => {
-      const f = el.dataset.f, bi = el.dataset.b, ii = el.dataset.i;
-      const day = PROG.days[PDAY];
-      if(bi == null)      day[f] = el.value;
-      else if(ii == null) day.blocks[+bi][f] = (f==='mins' ? +el.value : el.value);
-      else                day.blocks[+bi].items[+ii][f] = el.value;
-      S.program = PROG; save(1); checkProgram();
-      if(f==='name' || f==='mins') drawProgram();
-    };
-  });
+  /* THE OLD EDITOR'S WIRING, WHICH OUTLIVED THE OLD EDITOR.
+
+     This wired every `.pin` element to a handler that reads data-f, data-b
+     and data-i off it and writes the value into the day, the block or the
+     item. That was right when the program was a stack of labelled text
+     inputs. The builder replaced all of them, and `data-f` now appears
+     nowhere in this file — so the only `.pin` left on the page is the
+     LIBRARY PICKER, which wears the class for its styling.
+
+     So this loop had exactly one effect: it ran after libWire() and
+     overwrote the picker's onchange with itself. Choosing a program did
+     not open it. It wrote `day[undefined] = "main"` into whatever day
+     happened to be open and saved that, which is why the first pick of a
+     session worked (the empty state does not run this) and every pick
+     after it silently did nothing but add a junk key.
+
+     Deleted rather than repaired. There is nothing left for it to wire. */
   checkProgram();
 }
 
@@ -3843,6 +3928,23 @@ takeLinkFromAddressBar();
    a same-document navigation - the page does not reload and boot never
    runs again, so the link appeared to do nothing. */
 addEventListener('hashchange', takeLinkFromAddressBar);
+
+/* ---- the client drawer ---- */
+/* Shut is the default and the choice is remembered, because whichever way
+   you work you work that way every day. */
+function setRail(open){
+  document.getElementById('wrap').classList.toggle('norail', !open);
+  const b = document.getElementById('railBtn');
+  if(b) b.classList.toggle('on', open);
+  try{ localStorage.setItem('fj.coach.rail', open ? '1' : '0'); }catch(e){}
+}
+(function(){
+  let open = false;
+  try{ open = localStorage.getItem('fj.coach.rail') === '1'; }catch(e){}
+  setRail(open);
+  const b = document.getElementById('railBtn');
+  if(b) b.onclick = () => setRail(document.getElementById('wrap').classList.contains('norail'));
+})();
 
 /* ---- appearance ---- */
 function setTheme(m){
