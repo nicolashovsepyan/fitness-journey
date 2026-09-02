@@ -3,7 +3,7 @@
   "version": 1,
   "name": "Foundation Block",
   "who": "Nicolas",
-  "source": "ported from js/data/sessions.js — the program this person is actually on",
+  "source": "ported from js/data/sessions.js — the program Nicolas is actually on",
   "duration": 30,
   "fixed": false,
   "trainDays": [

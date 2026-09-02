@@ -1,6 +1,6 @@
 {
  "version": 1,
- "built": "2026-08-28",
+ "built": "2026-09-02",
  "art": {
   "bodyweight_squat": {
    "name": "Bodyweight Squat",
@@ -559,6 +559,11 @@
   },
   "incline_row": {
    "name": "Incline Row",
+   "file": null,
+   "status": "missing"
+  },
+  "scap_pushup": {
+   "name": "Scapular Push-Up",
    "file": null,
    "status": "missing"
   },

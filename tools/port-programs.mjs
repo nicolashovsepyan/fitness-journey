@@ -194,7 +194,7 @@ function build(id, prog, profile, who) {
   });
   const out = {
     id, version: 1, name: prog.name, who,
-    source: 'ported from js/data/sessions.js — the program this person is actually on',
+    source: `ported from js/data/${id === 'main' ? 'sessions' : 'sessions-beginner'}.js — the program ${who} is actually on`,
     duration: prog.defaultDuration,
     fixed: !!prog.fixed,
     /* 0 = Sunday, the convention the dashboard counts in.
@@ -222,7 +222,11 @@ function build(id, prog, profile, who) {
 console.log('\nPORTING PROGRAMS');
 const used = new Set();
 for (const id of [...build('main', PROGRAM, PROFILE, 'Nicolas')]) used.add(id);
-for (const id of [...build('beginner_return', BEGINNER_PROGRAM, BEGINNER_PROFILE, 'Training partner')]) used.add(id);
+/* Named, not described. He was "Training partner" while there was only
+   one, and every re-port quietly renamed him back to it after the file
+   had been corrected by hand — a label belongs in the tool that writes
+   it, not in a patch applied afterwards. */
+for (const id of [...build('beginner_return', BEGINNER_PROGRAM, BEGINNER_PROFILE, 'Sevan')]) used.add(id);
 
 /* THE INDEX IS THE DIRECTORY, NOT WHAT THIS SCRIPT JUST PORTED.
    It used to hardcode the two ported ids, so any program written by hand

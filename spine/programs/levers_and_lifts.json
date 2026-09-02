@@ -1,0 +1,673 @@
+{
+  "id": "levers_and_lifts",
+  "version": 1,
+  "name": "Levers & Lifts",
+  "who": "Nicolas",
+  "source": "written 1 Sep 2026 to replace The Fundamentals, which had been built as a general barbell block and did not match the athlete. Restores the straight-arm and handstand work from the Foundation Block that ran before it.",
+  "duration": 40,
+  "fixed": false,
+  "trainDays": [
+    1,
+    2,
+    4,
+    5
+  ],
+  "units": "lb",
+  "equipment": [
+    "bw",
+    "db",
+    "kb",
+    "bb",
+    "pullupbar",
+    "bench",
+    "rack",
+    "rings",
+    "dipbars",
+    "parallettes",
+    "band",
+    "vest",
+    "slantboard"
+  ],
+  "level": "adv",
+  "entryIf": "You can already hold a 20-second chest-to-wall handstand, do 8 strict pull-ups and 8 dips, and deadlift bodyweight. If any of those is not true yet, Back to Basics 3 is the block before this one.",
+  "constraints": {
+    "lowerback": "hinge is loaded but never rounded - the set ends the rep the back changes shape, not the rep after",
+    "knee": "no jumping and no impact anywhere in this block; the knee circuit runs before every lower day",
+    "forearm": "straight-arm work is the load the forearm feels most - drop a rung rather than push through it",
+    "capacity": "four sessions is the ceiling, not the floor",
+    "sport": "a team sport, 45 min, SUNDAYS. Monday is upper only because of it and Friday is the last hard leg day before it."
+  },
+  "goals": [
+    "Build muscle and get stronger without leaving the rings",
+    "Own an advanced-tuck front lever and a 30-second free handstand",
+    "Every fundamental pattern trained twice a week inside 160 minutes",
+    "Still lift heavy, say yes to any hike"
+  ],
+  "methods": [
+    {
+      "name": "Straight-arm skill first",
+      "what": "Planche and lever holds at the front of the session, short sets, full rest, never to failure.",
+      "why": "These are nervous-system skills, not muscle work. Trained fresh they progress in weeks; trained tired they do not progress at all and they punish the elbows."
+    },
+    {
+      "name": "Antagonist supersets",
+      "what": "One push and one pull in every work block, alternating with the rest between.",
+      "why": "The pull recovers while the push works. It is the only way to fit two heavy patterns into forty minutes without cutting the rest that makes them heavy."
+    },
+    {
+      "name": "Eccentric knee armour",
+      "what": "Nordic and reverse Nordic, tibialis and KOT calf work, before and inside every lower day.",
+      "why": "The knee gets robust through lengthening under load, not through avoiding the range. It is also the reason there is no jumping anywhere in this block."
+    },
+    {
+      "name": "Five-minute finishers",
+      "what": "One capped block, four movements, as much quality work as fits.",
+      "why": "A finisher is a density test, not extra volume. Capping it means it cannot quietly become a fourth work block, which is exactly what the last one did."
+    }
+  ],
+  "arc": [
+    {
+      "week": 1,
+      "focus": "Set the marks",
+      "rule": "Every hold stops with the shape intact. Write down the seconds and the round counts - the whole block is measured against week 1."
+    },
+    {
+      "week": 2,
+      "focus": "Same shapes, more of them",
+      "rule": "Add one round to the skill pair. Loads and everything else stay exactly where they were."
+    },
+    {
+      "week": 3,
+      "focus": "Load the strength pair",
+      "rule": "Add weight to the dip and the chin, and to the squat and deadlift. The skill pair does not change."
+    },
+    {
+      "week": 4,
+      "focus": "Climb a rung",
+      "rule": "Take the next step up on ONE skill - advanced tuck to single-leg lever, or wall handstand to a freestanding attempt. One only, and the rest of the block holds still."
+    }
+  ],
+  "sport": {
+    "acts": [
+      "team"
+    ],
+    "days": [
+      0
+    ],
+    "minutes": 45,
+    "note": "Sunday-based, same convention as trainDays."
+  },
+  "habits": [],
+  "days": {
+    "d1": {
+      "name": "Push & Pull A",
+      "tag": "upper · straight-arm",
+      "why": "Monday, the day after the match. Upper only, because your legs played 45 minutes yesterday. The straight-arm pair goes first while you are fresh: lever and planche work is nervous-system work, not muscle work, and it is worthless tired.",
+      "blocks": [
+        {
+          "role": "Prime",
+          "name": "Scaps and wrists",
+          "note": "Two rounds, continuous.",
+          "type": "Circuit",
+          "cfg": {
+            "rounds": 2,
+            "rest": 0
+          },
+          "items": [
+            {
+              "ex": "arm_circles",
+              "pres": "15",
+              "note": ""
+            },
+            {
+              "ex": "wrist_prep",
+              "pres": "30s",
+              "note": "Both directions. The wrists carry everything today."
+            },
+            {
+              "ex": "scap_pushup",
+              "pres": "10",
+              "note": "Arms locked. Spread the blades, then let the chest sink."
+            },
+            {
+              "ex": "scap_pullup",
+              "pres": "8",
+              "note": "The same movement upside down."
+            },
+            {
+              "ex": "thoracic_rotation",
+              "pres": "6 each side",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "A · Planche Lean + Front Lever",
+          "note": "Never to failure. Stop the set when the shape goes, not when the strength does.",
+          "type": "Superset",
+          "cfg": {
+            "rounds": 5,
+            "rest": 90
+          },
+          "items": [
+            {
+              "ex": "planche_lean",
+              "pres": "20s",
+              "note": "Lean until it is hard, not until you fall. Shoulders past the hands.",
+              "sg": 1
+            },
+            {
+              "ex": "adv_tuck_front_lever",
+              "pres": "12s",
+              "note": "Ribs down, arms straight. Drop to the band version the moment the elbows bend.",
+              "sg": 1
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "B · Weighted Dip + Weighted Chin",
+          "note": "The heavy pair. Two minutes between rounds and use all of it.",
+          "type": "Superset",
+          "cfg": {
+            "rounds": 4,
+            "rest": 120
+          },
+          "items": [
+            {
+              "ex": "weighted_dip",
+              "pres": "6",
+              "note": "Vest or belt. Shoulders below the elbows, no bounce.",
+              "sg": 1
+            },
+            {
+              "ex": "weighted_chinup",
+              "pres": "6",
+              "note": "TEST the load. Dead hang, chin over.",
+              "sg": 1
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "C · Pseudo Planche + Ring Row",
+          "note": "The volume pair. Lighter, closer together, chase the pump.",
+          "type": "Superset",
+          "cfg": {
+            "rounds": 3,
+            "rest": 75
+          },
+          "items": [
+            {
+              "ex": "pseudo_planche_push_up",
+              "pres": "8",
+              "note": "Hands at the hips, lean forward. This is the planche you can do reps of.",
+              "sg": 1
+            },
+            {
+              "ex": "feet_elevated_ring_row",
+              "pres": "10",
+              "note": "Body one line, rings to the ribs.",
+              "sg": 1
+            }
+          ]
+        },
+        {
+          "role": "Finish",
+          "name": "D · Five minutes",
+          "note": "As many rounds as you can hold the shapes for. Write the round count down.",
+          "type": "AMRAP",
+          "cfg": {
+            "cap": 5
+          },
+          "items": [
+            {
+              "ex": "ring_dip",
+              "pres": "6",
+              "note": ""
+            },
+            {
+              "ex": "explosive_pullup",
+              "pres": "5",
+              "note": "Chest to the bar if it comes."
+            },
+            {
+              "ex": "hollow_rocks",
+              "pres": "12",
+              "note": ""
+            },
+            {
+              "ex": "l_sit",
+              "pres": "15s",
+              "note": "Parallettes. Tuck it when the legs drop."
+            }
+          ]
+        }
+      ]
+    },
+    "d2": {
+      "name": "Hinge & Posterior",
+      "tag": "lower · deadlift",
+      "why": "The deadlift is the lift your lower back has the most to say about, so it goes on the freshest day of the week and it goes first. The Nordic pair after it is knee-flexion and knee-extension strength, which is the insurance policy on both the knee and the hamstring.",
+      "blocks": [
+        {
+          "role": "Prime",
+          "name": "Spine, hips, glutes",
+          "note": "One thorough round.",
+          "type": "Circuit",
+          "cfg": {
+            "rounds": 1,
+            "rest": 0
+          },
+          "items": [
+            {
+              "ex": "cat_cow",
+              "pres": "8",
+              "note": ""
+            },
+            {
+              "ex": "hip_90_90",
+              "pres": "6 each side",
+              "note": ""
+            },
+            {
+              "ex": "single_leg_bridge",
+              "pres": "10 each side",
+              "note": "Glutes on before the bar."
+            },
+            {
+              "ex": "dead_bug",
+              "pres": "6 each side",
+              "note": "Ribs down, back flat."
+            },
+            {
+              "ex": "tibialis_raise",
+              "pres": "20",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "A · Deadlift",
+          "note": "Three minutes between sets. This is the one lift that earns them.",
+          "type": "Straight",
+          "cfg": {},
+          "items": [
+            {
+              "ex": "deadlift",
+              "pres": "4 × 5",
+              "note": "The set ends the rep your back changes shape, not the rep after.",
+              "rest": 180
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "B · Nordic + Reverse Nordic",
+          "note": "Hamstring lengthening against quad lengthening. Both eccentric, both knee armour.",
+          "type": "Superset",
+          "cfg": {
+            "rounds": 4,
+            "rest": 90
+          },
+          "items": [
+            {
+              "ex": "nordic_curl",
+              "pres": "5",
+              "note": "Band or a partner. Lower as slowly as you can, push back up.",
+              "sg": 1
+            },
+            {
+              "ex": "reverse_nordic",
+              "pres": "8",
+              "note": "Knees to the floor, lean back, hips locked. Quads under stretch.",
+              "sg": 1
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "C · Swing + Hanging Leg Raise",
+          "note": "Hip power against anti-extension. The hinge pattern twice in one week, loaded two different ways.",
+          "type": "Superset",
+          "cfg": {
+            "rounds": 4,
+            "rest": 60
+          },
+          "items": [
+            {
+              "ex": "kb_swing",
+              "pres": "15",
+              "note": "Snap the hips, chest tall, bell floats.",
+              "sg": 1
+            },
+            {
+              "ex": "hanging_leg_raise",
+              "pres": "8",
+              "note": "Straight legs, no swing.",
+              "sg": 1
+            }
+          ]
+        },
+        {
+          "role": "Finish",
+          "name": "D · Five minutes",
+          "note": "As many rounds as fit. Nothing in it touches the floor hard.",
+          "type": "AMRAP",
+          "cfg": {
+            "cap": 5
+          },
+          "items": [
+            {
+              "ex": "kb_swing",
+              "pres": "12",
+              "note": "Hips, not arms. Heavy bell."
+            },
+            {
+              "ex": "farmers_carry",
+              "pres": "25s",
+              "note": "Heaviest pair you own."
+            },
+            {
+              "ex": "hollow_hold",
+              "pres": "20s",
+              "note": ""
+            },
+            {
+              "ex": "tibialis_raise",
+              "pres": "20",
+              "note": ""
+            }
+          ]
+        }
+      ]
+    },
+    "d3": {
+      "name": "Push & Pull B",
+      "tag": "upper · vertical",
+      "why": "Thursday, after Wednesday off. Vertical this time, and the skill pair is the handstand against the muscle-up: the two things that make an intermediate look advanced, and the two that need a fresh nervous system more than anything else in the week.",
+      "blocks": [
+        {
+          "role": "Prime",
+          "name": "Overhead and grip",
+          "note": "Two rounds, continuous.",
+          "type": "Circuit",
+          "cfg": {
+            "rounds": 2,
+            "rest": 0
+          },
+          "items": [
+            {
+              "ex": "arm_circles",
+              "pres": "15",
+              "note": ""
+            },
+            {
+              "ex": "wrist_prep",
+              "pres": "30s",
+              "note": ""
+            },
+            {
+              "ex": "dead_hang",
+              "pres": "25s",
+              "note": "Decompress before you load overhead."
+            },
+            {
+              "ex": "scap_pushup",
+              "pres": "10",
+              "note": ""
+            },
+            {
+              "ex": "bird_dog",
+              "pres": "6 each side",
+              "note": "Braced before anything goes upside down."
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "A · Handstand + Muscle-Up Negative",
+          "note": "Skill first, fresh, never to failure.",
+          "type": "Superset",
+          "cfg": {
+            "rounds": 5,
+            "rest": 90
+          },
+          "items": [
+            {
+              "ex": "chest_to_wall_handstand_hold",
+              "pres": "25s",
+              "note": "Belly to the wall. Ribs down, push the floor away.",
+              "sg": 1
+            },
+            {
+              "ex": "negative_muscle_up_bar",
+              "pres": "3",
+              "note": "Lower as slowly as you can through the transition.",
+              "sg": 1
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "B · Pike Push-Up + Pull-Up",
+          "note": "The vertical strength pair.",
+          "type": "Superset",
+          "cfg": {
+            "rounds": 4,
+            "rest": 120
+          },
+          "items": [
+            {
+              "ex": "deep_pike_pushup",
+              "pres": "8",
+              "note": "Parallettes, head below the hands. This is the handstand push-up in training.",
+              "sg": 1
+            },
+            {
+              "ex": "pullup",
+              "pres": "8",
+              "note": "Add weight the moment 8 is comfortable.",
+              "sg": 1
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "C · Ring Dip + Archer Row",
+          "note": "The volume pair.",
+          "type": "Superset",
+          "cfg": {
+            "rounds": 3,
+            "rest": 75
+          },
+          "items": [
+            {
+              "ex": "ring_dip",
+              "pres": "8",
+              "note": "Rings turned out at the top.",
+              "sg": 1
+            },
+            {
+              "ex": "archer_row",
+              "pres": "6 each side",
+              "note": "One arm pulls, the other stays long.",
+              "sg": 1
+            }
+          ]
+        },
+        {
+          "role": "Finish",
+          "name": "D · Five minutes",
+          "note": "As many rounds as the shapes hold. Write the round count down.",
+          "type": "AMRAP",
+          "cfg": {
+            "cap": 5
+          },
+          "items": [
+            {
+              "ex": "ring_push_up",
+              "pres": "10",
+              "note": "Turn the hands out at the top."
+            },
+            {
+              "ex": "single_arm_ring_row",
+              "pres": "6 each side",
+              "note": ""
+            },
+            {
+              "ex": "hanging_leg_raise",
+              "pres": "8",
+              "note": "Straight legs, no swing."
+            },
+            {
+              "ex": "german_hang",
+              "pres": "15s",
+              "note": "Slowly in, slowly out."
+            }
+          ]
+        }
+      ]
+    },
+    "d4": {
+      "name": "Squat & Carry",
+      "tag": "lower · squat",
+      "why": "Friday, two days before the match. The squat is here rather than later in the week for exactly that reason, and the finisher is loaded carries rather than anything savage: brutal while you are doing it, and gone by Sunday morning.",
+      "blocks": [
+        {
+          "role": "Prime",
+          "name": "Knee armour",
+          "note": "One thorough round. Nothing loaded until it is done.",
+          "type": "Circuit",
+          "cfg": {
+            "rounds": 1,
+            "rest": 0
+          },
+          "items": [
+            {
+              "ex": "ankle_mobility",
+              "pres": "8 each side",
+              "note": "Ankles first. A stiff ankle is a knee problem."
+            },
+            {
+              "ex": "tibialis_raise",
+              "pres": "20",
+              "note": ""
+            },
+            {
+              "ex": "kot_calf",
+              "pres": "20",
+              "note": ""
+            },
+            {
+              "ex": "touchdown_squat",
+              "pres": "10 each side",
+              "note": ""
+            },
+            {
+              "ex": "deep_squat_rock",
+              "pres": "8",
+              "note": ""
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "A · Back Squat",
+          "note": "Two and a half minutes between sets.",
+          "type": "Straight",
+          "cfg": {},
+          "items": [
+            {
+              "ex": "back_squat",
+              "pres": "4 × 5",
+              "note": "Below parallel, controlled down. Box squat is the regression if the knee talks.",
+              "rest": 150
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "B · Bulgarian + Single-Leg RDL",
+          "note": "Knee-dominant against hip-dominant, one leg at a time.",
+          "type": "Superset",
+          "cfg": {
+            "rounds": 3,
+            "rest": 90
+          },
+          "items": [
+            {
+              "ex": "bulgarian_split",
+              "pres": "8 each side",
+              "note": "Back foot up. Front shin travels — that is the point.",
+              "sg": 1
+            },
+            {
+              "ex": "single_leg_rdl",
+              "pres": "10 each side",
+              "note": "Hip back, flat back, slow down.",
+              "sg": 1
+            }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "C · Sissy Squat + Hip Thrust",
+          "note": "The two ends of the thigh, one after the other.",
+          "type": "Superset",
+          "cfg": {
+            "rounds": 4,
+            "rest": 60
+          },
+          "items": [
+            {
+              "ex": "sissy_squat",
+              "pres": "8",
+              "note": "Knees forward, hips locked, assisted if you need it.",
+              "sg": 1
+            },
+            {
+              "ex": "hip_thrust",
+              "pres": "10",
+              "note": "Chin tucked, ribs down, squeeze at the top.",
+              "sg": 1
+            }
+          ]
+        },
+        {
+          "role": "Finish",
+          "name": "D · Five minutes",
+          "note": "Hard on the lungs, quiet on the legs. You play on Sunday.",
+          "type": "AMRAP",
+          "cfg": {
+            "cap": 5
+          },
+          "items": [
+            {
+              "ex": "suitcase_carry",
+              "pres": "25s each side",
+              "note": "One bell. Do not let the ribs flare."
+            },
+            {
+              "ex": "kot_calf",
+              "pres": "20",
+              "note": ""
+            },
+            {
+              "ex": "copenhagen_plank",
+              "pres": "20s each side",
+              "note": "Top foot on the bench. Knee bent to start."
+            },
+            {
+              "ex": "hollow_hold",
+              "pres": "20s",
+              "note": ""
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
