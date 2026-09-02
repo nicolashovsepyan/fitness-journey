@@ -3,7 +3,7 @@
   "version": 1,
   "name": "Levers & Lifts",
   "who": "Nicolas",
-  "source": "written 1 Sep 2026 to replace The Fundamentals, which had been built as a general barbell block and did not match the athlete. Restores the straight-arm and handstand work from the Foundation Block that ran before it.",
+  "source": "written 1 Sep 2026 to replace The Fundamentals, which had been built as a general barbell block and did not match the athlete. Restores the straight-arm and handstand work from the Foundation Block that ran before it, and follows the coaches in \"Fitness journey - youtube channels for fundementals.xlsx\" rather than a generic template.",
   "duration": 40,
   "fixed": false,
   "trainDays": [
@@ -45,24 +45,34 @@
   ],
   "methods": [
     {
-      "name": "Straight-arm skill first",
-      "what": "Planche and lever holds at the front of the session, short sets, full rest, never to failure.",
-      "why": "These are nervous-system skills, not muscle work. Trained fresh they progress in weeks; trained tired they do not progress at all and they punish the elbows."
+      "name": "Straight-arm skill first, never to failure",
+      "after": "FitnessFAQs · Paul Twyman · Bodyweight Warrior",
+      "what": "Planche lean against front lever on Monday, chest-to-wall handstand against muscle-up negative on Thursday. Short holds, full rest, at the front of the session.",
+      "why": "Straight-arm strength is the thing that separates intermediate from advanced and almost nobody trains it. Twyman builds the handstand facing the wall long before freestanding, and that order is deliberate: it is nervous-system work, so trained fresh it moves in weeks and trained tired it does not move at all."
+    },
+    {
+      "name": "Weighted calisthenics over the barbell press",
+      "after": "FitnessFAQs",
+      "what": "Weighted dips and weighted chin-ups carry the heavy upper work. The barbell keeps the deadlift and the squat and nothing else.",
+      "why": "Vadnal’s whole argument is that calisthenics stops progressing when you stop adding load, not when you run out of movements. A weighted dip builds more usable pressing strength than a bench press for somebody who owns rings, and it is kinder to the shoulder."
     },
     {
       "name": "Antagonist supersets",
-      "what": "One push and one pull in every work block, alternating with the rest between.",
-      "why": "The pull recovers while the push works. It is the only way to fit two heavy patterns into forty minutes without cutting the rest that makes them heavy."
+      "after": "Jeff Nippard",
+      "what": "One push and one pull in every work block, alternating, with the rest between the pairs.",
+      "why": "The pull recovers while the push works. It is the highest stimulus-to-fatigue arrangement available when the clock is the binding constraint, and it is the only honest way to fit two heavy patterns into forty minutes without cutting the rest that makes them heavy."
     },
     {
-      "name": "Eccentric knee armour",
-      "what": "Nordic and reverse Nordic, tibialis and KOT calf work, before and inside every lower day.",
-      "why": "The knee gets robust through lengthening under load, not through avoiding the range. It is also the reason there is no jumping anywhere in this block."
+      "name": "Earn the range, then earn the jump",
+      "after": "Knees Over Toes Guy · Squat University",
+      "what": "Tibialis and KOT calf work before every lower session, Nordic and reverse Nordic inside them, ankles before knees in the warm-up. No jumping and no landing anywhere in this block.",
+      "why": "Patrick’s position is that the knee gets robust by being loaded through its full range, not by avoiding it — which is why deep knee flexion is deliberately in here rather than deliberately out. The same position is why the jumping you like is not in week one: it is the thing you earn at the far end of that ladder, and the ankle and tibialis work is the entry fee."
     },
     {
-      "name": "Five-minute finishers",
-      "what": "One capped block, four movements, as much quality work as fits.",
-      "why": "A finisher is a density test, not extra volume. Capping it means it cannot quietly become a fourth work block, which is exactly what the last one did."
+      "name": "Five-minute finishers, capped",
+      "after": "Pavel Tsatsouline",
+      "what": "One AMRAP, four movements, five minutes, hard. Swings are heavy and snappy rather than long and tired.",
+      "why": "A finisher is a density test, not extra volume. Capping it is the only thing that stops it quietly becoming a fourth work block, which is exactly what the last one did — ten minutes of core wearing the word finisher."
     }
   ],
   "arc": [
@@ -84,7 +94,7 @@
     {
       "week": 4,
       "focus": "Climb a rung",
-      "rule": "Take the next step up on ONE skill - advanced tuck to single-leg lever, or wall handstand to a freestanding attempt. One only, and the rest of the block holds still."
+      "rule": "Take the next step up on ONE skill — advanced tuck to single-leg lever, or wall handstand to a freestanding attempt. One only, and everything else holds still. If the knee has been quiet for four weeks, block two is where the jumping starts, at the bottom of the ladder."
     }
   ],
   "sport": {

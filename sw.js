@@ -15,7 +15,7 @@
    Training data lives in localStorage, not here, so an update never
    touches a logged session.
    ============================================================ */
-const VERSION = '5bcd2cf3c1';
+const VERSION = '2cde9ac551';
 const CACHE = 'fj-' + VERSION;
 const ASSETS = [
   "./coach.html",
@@ -100,6 +100,7 @@ const ASSETS = [
   "./spine/programs/beginner_return.json",
   "./spine/programs/fundamentals.json",
   "./spine/programs/index.json",
+  "./spine/programs/levers_and_lifts.json",
   "./spine/programs/main.json",
   "./spine/theme.json",
   "./styles.css"
