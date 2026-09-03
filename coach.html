@@ -63,6 +63,12 @@
   --red-soft:rgba(240,133,122,.11);
   /* how hard a block is, easy to relentless */
   --l1:#5E9BD1; --l2:#4FBF9B; --l3:#C7C15A; --l4:#E39A4E; --l5:#DC6B5A;
+  /* WHAT KIND OF WORK. Mobility was olive and aerobic was teal, thirty
+     degrees of hue apart on a nine-pixel swatch — indistinguishable, and
+     the two that most need telling apart. Spread across the wheel now:
+     blue, violet, cyan, green, orange. */
+  --q-strength:#4A8BE8; --q-hypertrophy:#A96BE0; --q-aerobic:#17B3B3;
+  --q-mobility:#6FBF3A;  --q-explosive:#E8804A;
   /* ink that sits ON a filled accent/gold/red chip, and the deep grounds
      those chips use — the one place a colour is chosen for contrast
      against another colour rather than against the page */
@@ -110,6 +116,8 @@
   --red:#B3402F;
   --red-soft:rgba(179,64,47,.09);
   --l1:#3B72A8; --l2:#12876C; --l3:#8A7A18; --l4:#B26A18; --l5:#B3402F;
+  --q-strength:#2A63BE; --q-hypertrophy:#7B3FC0; --q-aerobic:#0A8585;
+  --q-mobility:#4A8A16;  --q-explosive:#C25A1E;
   --accent-on:#FFFFFF; --gold-deep:#FBF3DC; --red-deep:#FBE7E3;
   --neon:#C7196B;
   --neon-soft:rgba(199,25,107,.09);
@@ -133,6 +141,8 @@
     --gold:#8A6A00; --gold-soft:rgba(138,106,0,.10);
     --red:#B3402F; --red-soft:rgba(179,64,47,.09);
     --l1:#3B72A8; --l2:#12876C; --l3:#8A7A18; --l4:#B26A18; --l5:#B3402F;
+    --q-strength:#2A63BE; --q-hypertrophy:#7B3FC0; --q-aerobic:#0A8585;
+    --q-mobility:#4A8A16;  --q-explosive:#C25A1E;
     --accent-on:#FFFFFF; --gold-deep:#FBF3DC; --red-deep:#FBE7E3;
     --neon:#C7196B; --neon-soft:rgba(199,25,107,.09); --neon-line:rgba(199,25,107,.28);
     --veil:rgba(247,249,248,.93);
@@ -712,6 +722,21 @@ select.pin{appearance:none;cursor:pointer}
 .nbpic{ width:86px; height:86px; border-radius:7px; background:var(--tint2);
         display:grid; place-items:center; overflow:hidden }
 .nbpic img{ width:100%; height:100%; object-fit:contain }
+.nbpic.zoom{ cursor:zoom-in }
+.nbpic.zoom:hover{ outline:2px solid var(--accent); outline-offset:2px }
+#nbzoom{ position:fixed; inset:0; z-index:90; display:none; place-items:center;
+         background:color-mix(in srgb, var(--bg) 88%, transparent);
+         backdrop-filter:blur(6px); cursor:zoom-out }
+#nbzoom.on{ display:grid }
+#nbzoom figure{ margin:0; max-width:min(76vw,720px); max-height:86vh; display:flex;
+                flex-direction:column; gap:10px; align-items:center }
+#nbzoom img{ max-width:100%; max-height:76vh; object-fit:contain;
+             background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px }
+#nbzoom figcaption{ font:650 15px inherit; color:var(--ink) }
+.nbwatch{ float:right; font:600 9px ui-monospace,monospace; letter-spacing:.08em;
+          text-transform:uppercase; color:var(--accent); text-decoration:none;
+          border:1px solid var(--accent); border-radius:5px; padding:3px 6px }
+.nbwatch:hover{ background:var(--accent-soft) }
 .nbpic.none{ border:1px dashed var(--line2) }
 .nbpic.none span{ font:600 9px ui-monospace,monospace; letter-spacing:.06em; text-transform:uppercase; color:var(--c) }
 .nbcard h4{ margin:0 0 4px; font-size:14px; font-weight:700 }
@@ -2316,7 +2341,8 @@ function nbBuildLibrary(){
       /* a rung that points at itself or at nothing is not a rung */
       ez:(m.easier && m.easier!==m.id && CAT[m.easier]) ? m.easier : null,
       hd:(m.harder && m.harder!==m.id && CAT[m.harder]) ? m.harder : null,
-      art:(m.art && m.art.status==='drawn') ? m.art.file : null };
+      art:(m.art && m.art.status==='drawn') ? m.art.file : null,
+      vid:m.video || null };
   }).sort((a,b)=>a.n.localeCompare(b.n));
   MVMAP = {}; MOVES.forEach(m=>MVMAP[m.id]=m);
 }
@@ -2613,16 +2639,25 @@ function nbBodyCounts(){
   return t;
 }
 const NB_Q = ['strength','hypertrophy','aerobic','mobility','explosive'];
-const NB_QC = { strength:'#1D6FC7', hypertrophy:'#7B4FCB', aerobic:'#0E7F76',
-                mobility:'#4E7A2E', explosive:'#C24A3B' };
+const NB_QC = { strength:'var(--q-strength)', hypertrophy:'var(--q-hypertrophy)',
+                aerobic:'var(--q-aerobic)', mobility:'var(--q-mobility)',
+                explosive:'var(--q-explosive)' };
 function nbQuality(it,b){
   const m = MV(it.ex), p = nbParse(it.pres), cfg = b.cfg || {};
+  /* WHAT IT IS BEATS HOW IT IS ARRANGED, and this had it the other way
+     round. The block-type tests came first, so a warm-up written as a
+     continuous circuit — which is how every warm-up in every program here
+     is written — was classified by its short rest as aerobic conditioning.
+     A program with two mobility circuits a day reported mobility at 0%.
+
+     A Prime block is preparation and a mobility movement is mobility, in
+     any arrangement. Only once that is settled does the format decide. */
+  if(b.role==='Prime' || m.g==='mobility') return 'mobility';
   if(b.type==='Tabata') return 'explosive';
   if(b.type==='AMRAP')  return 'aerobic';
   if(b.type==='EMOM')   return (cfg.interval ?? 60) <= 60 ? 'aerobic' : 'hypertrophy';
   if(b.type==='Circuit')return (cfg.rest ?? 60) < 60 ? 'aerobic' : 'hypertrophy';
   const rest = b.type==='Superset' ? (cfg.rest ?? 75) : (nbRestOf(it,b) ?? NB_REST[b.role] ?? 60);
-  if(b.role==='Prime' || m.g==='mobility') return 'mobility';
   if(m.g==='power' || /jump|swing|clean|burpee|snatch/i.test(m.n)) return 'explosive';
   if(p.hold) return rest>=60 ? 'strength' : 'aerobic';
   if(p.val<=6  && rest>=120) return 'strength';
@@ -2764,21 +2799,135 @@ function nbJumpToPicker(){
   el.scrollIntoView({behavior:'smooth', block:'center'});
   setTimeout(()=>{ el.focus(); }, 320);
 }
+/* BIGGER, WHEN YOU ASK. One element, reused, removed on any click or
+   Escape — a drawing you cannot see the shape of is not doing its job. */
+function nbZoom(src, name){
+  let el = document.getElementById('nbzoom');
+  if(!el){
+    el = document.createElement('div'); el.id = 'nbzoom';
+    el.onclick = () => el.classList.remove('on');
+    document.body.appendChild(el);
+    addEventListener('keydown', e => { if(e.key === 'Escape') el.classList.remove('on'); });
+  }
+  el.innerHTML = `<figure><img src="${src}" alt=""><figcaption>${name}</figcaption></figure>`;
+  el.classList.add('on');
+}
+
 function nbTogglePeek(bi){ nbAt(bi); nbPeek.has(bi) ? nbPeek.delete(bi) : nbPeek.add(bi); drawProgram(); }
-function nbSwapTo(bi,ii,id){ nbAt(bi); PROG.days[PDAY].blocks[bi].items[ii].ex=id;
-  nbSwap=null; nbSwapQ=''; nbOpen=bi+':'+ii; nbSave(); toast('Swapped in '+MV(id).n); }
+/* THE NAME FOLLOWS THE MOVEMENTS — WHEN THE NAME IS MADE OF THEM.
+
+   Swapping a Bulgarian split squat for a step-up left the block still
+   called "C · Bulgarian Split Squat", which is worse than an unhelpful
+   name: it is a wrong one, and it is the line you read when you are
+   scanning the day rather than the block.
+
+   But a block called "Loosen off" or "Iso Burner" is a coach's title and
+   renaming it would be vandalism. So the rule is narrow and it is about
+   evidence: rename only where the name demonstrably contains the old
+   movement's name, or where the whole name is exactly what this function
+   would have generated for the old contents.
+
+   Anything else is left alone, and you can still type over it. */
+/* WHERE THIS MOVEMENT IS MENTIONED IN THE BLOCK'S NAME, IF IT IS.
+
+   A block called "B · Weighted Dip + Weighted Chin" is naming a movement
+   the database calls "Weighted Chin-Up". Coaches abbreviate, and an exact
+   match misses every time they do.
+
+   So: the full name first, then the longest leading run of its words that
+   appears at a word boundary — but only while that run is most of the
+   name. That threshold is the whole safety of this. Without it "Dip"
+   would stand in for "Ring Dip" and swapping one would rewrite the
+   other. */
+function nbNameRef(cur, full){
+  if(cur.includes(full)) return full;
+  /* Cut at any word OR hyphen boundary, longest first. Splitting on
+     spaces alone was not enough: "Weighted Chin-Up" is two whitespace
+     tokens, so the only candidate it could offer was "Weighted" — half
+     the name, under the threshold, and the abbreviation the block
+     actually used never got tried. */
+  const cuts = [...full.matchAll(/[\s\u2010-\u2015-]/g)].map(m => m.index).reverse();
+  for(const i of cuts){
+    const part = full.slice(0, i);
+    if(part.length / full.length < 0.6) break;
+    const esc = part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    if(new RegExp('(^|[^A-Za-z0-9])' + esc + '($|[^A-Za-z0-9])').test(cur)) return part;
+  }
+  return null;
+}
+
+/* The name this block would be given if nobody had typed one. */
+function nbAutoName(items){
+  const ns = (items||[]).map(it => MV(it.ex).n);
+  return ns.slice(0,3).join(' + ') + (ns.length > 3 ? ` +${ns.length-3}` : '');
+}
+function nbSwapTo(bi,ii,id){
+  nbAt(bi);
+  const b = PROG.days[PDAY].blocks[bi];
+  const oldName = MV(b.items[ii].ex).n, newName = MV(id).n;
+  const cur = String(b.name || '');
+  /* "A · " or "B - " is the BLOCK'S letter and survives any rename */
+  const pre = (cur.match(/^([A-Z]\s*[\u00B7\-]\s*)/) || [])[1] || '';
+  const wasAuto = !!cur && cur === pre + nbAutoName(b.items);
+
+  b.items[ii].ex = id;
+
+  let renamed = false;
+  const ref = cur ? nbNameRef(cur, oldName) : null;
+  if(ref){ b.name = cur.replace(ref, newName); renamed = true; }
+  else if(wasAuto){ b.name = pre + nbAutoName(b.items); renamed = true; }
+
+  nbSwap = null; nbSwapQ = ''; nbOpen = bi + ':' + ii; nbSave();
+  toast(`Swapped in ${newName}${renamed ? ` \u2014 block is now "${b.name}"` : ''}`);
+}
 function nbDragStart(e,bi,ii){ nbDrag={bi,ii}; e.dataTransfer.effectAllowed='move'; }
 function nbDragOver(e,bi){ if(nbDrag && nbDrag.bi===bi){ e.preventDefault(); e.dataTransfer.dropEffect='move'; } }
 function nbDrop(e,bi,ii){ if(!nbDrag||nbDrag.bi!==bi) return; nbAt(bi); e.preventDefault();
   const items=PROG.days[PDAY].blocks[bi].items;
   const [m]=items.splice(nbDrag.ii,1); items.splice(ii,0,m); nbDrag=null; nbOpen=null; nbSave(); }
 
+/* SOMEWHERE TO GO AND WATCH IT.
+
+   spine/videos.json exists and one movement out of 308 has an entry in
+   it, so "show me this movement" had nowhere to go for the other 307.
+   Filling that file in by hand is a real job and it is not done.
+
+   Until it is: every movement gets a search, and the search is pointed at
+   the coaches from "Fitness journey - youtube channels for fundementals",
+   picked by what kind of movement it is. A front lever asks FitnessFAQs,
+   a tibialis raise asks The Knees Over Toes Guy, a squat asks Squat
+   University. That is a better answer than a bare YouTube search and a far
+   better one than nothing, and a real link in videos.json still wins over
+   it the moment somebody adds one. */
+const NB_CHANNEL = [
+  [m => /handstand|planche|press to hand/i.test(m.n),              'Bodyweight Warrior'],
+  [m => /lever|muscle-?up|l-?sit|dragon|skin the cat|german hang/i.test(m.n), 'FitnessFAQs'],
+  [m => (m.dem||[]).includes('deep-knee-flexion') || /tibialis|calf|nordic|slant|sissy|touchdown|atg/i.test(m.n), 'The Knees Over Toes Guy'],
+  [m => /squat|deadlift|hinge|rdl|lunge|split squat|hip thrust/i.test(m.n), 'Squat University'],
+  [m => /kettlebell|swing|turkish|get-?up/i.test(m.n),             'kettlebell Pavel Tsatsouline'],
+  [m => m.g === 'mobility',                                        'Strength Side'],
+  [m => m.mod === 'bodyweight' || /ring|dip|pull-?up|chin-?up|push-?up/i.test(m.n), 'Calisthenic Movement'],
+];
+function nbWatch(m){
+  if(m.vid) return m.vid;
+  const hit = NB_CHANNEL.find(([test]) => { try { return test(m); } catch(e){ return false; } });
+  const who = hit ? hit[1] : 'Jeff Nippard';
+  return 'https://www.youtube.com/results?search_query=' + encodeURIComponent(`${who} ${m.n}`);
+}
+
 /* ---- the movement card, and the ladder around a fundamental ---- */
 function nbCard(m, extra){
-  const pic = m.art ? `<div class="nbpic"><img src="${m.art}" alt=""></div>`
-                    : `<div class="nbpic none" style="--c:${NBC(m.g)}"><span>${(m.p||[])[0]||m.g}</span></div>`;
+  /* the drawing opens full size on a click — at 86px it is an icon, and
+     the whole point of having drawn it is to be able to check the shape */
+  const pic = m.art
+    ? `<div class="nbpic zoom" title="Click to see it bigger"
+         onclick="event.stopPropagation();nbZoom('${esc(m.art)}','${esc(m.n)}')"><img src="${m.art}" alt=""></div>`
+    : `<div class="nbpic none" style="--c:${NBC(m.g)}"><span>${(m.p||[])[0]||m.g}</span></div>`;
   return `<div class="nbcard" style="--c:${NBC(m.g)}" onclick="event.stopPropagation()">${pic}
-    <div><h4>${esc(m.n)}${m.f?' ★':''}</h4>
+    <div><h4>${esc(m.n)}${m.f?' ★':''}
+      <a class="nbwatch" href="${esc(nbWatch(m))}" target="_blank" rel="noopener"
+         onclick="event.stopPropagation()" title="${m.vid ? 'The demo for this movement' : 'Search the coaches you follow'}"
+         >${m.vid ? 'Watch' : 'Find it'} \u2197</a></h4>
       <div class="nbchips"><i class="g">${m.g}</i>
         ${(m.p||[]).map(x=>`<i>${esc(x)}</i>`).join('')}
         ${(m.mus||[]).slice(0,4).map(x=>`<i class="mus">${esc(x)}</i>`).join('')}
@@ -2932,16 +3081,37 @@ function nbLeft(){
       <div id="nbcov"></div>`;
   return h;
 }
+/* ONE GAUGE PER KIND OF WORK.
+
+   This was a single stacked bar with a five-colour key underneath, and
+   two problems came with it. Reading any one share meant finding its
+   colour in the key and then finding the same colour in the bar — and two
+   of the five colours were barely different. And a stacked bar is a
+   composition, so nothing in it can be read on its own: you could not see
+   "aerobic is a fifth of the week" without doing the comparison yourself.
+
+   Five rings, the same shape as the pattern dials beside them, each one
+   its own number. Day or week, because both are real questions and
+   showing both at once is ten rings in a 236-pixel column. */
+let nbMixView = 'week';
 function nbMixHTML(){
   const ids = Object.keys(PROG.days||{});
-  const bar = (label, m) => {
-    if(!m.total) return '';
-    const seg = NB_Q.filter(q=>m.t[q]>0).map(q=>`<i style="flex:${m.t[q]};background:${NB_QC[q]}"></i>`).join('');
-    const key = NB_Q.filter(q=>m.t[q]>0).map(q=>`<span><i style="background:${NB_QC[q]}"></i>${q} ${Math.round(m.t[q]/m.total*100)}%</span>`).join('');
-    return `<div class="nbmixrow"><p class="nbmixlbl">${label}<b>${Math.round(m.total)} min</b></p>
-      <div class="nbmixbar">${seg}</div><div class="nbmixkey">${key}</div></div>`;
-  };
-  return bar('This day', nbMix([PDAY])) + bar('The week', nbMix(ids));
+  const m = nbMixView === 'day' ? nbMix([PDAY]) : nbMix(ids);
+  const head = `<div class="nbcovhead"><p class="nblbl" style="margin:0;flex:1">${
+      Math.round(m.total)} min ${nbMixView === 'day' ? 'this day' : 'this week'}</p>
+    <span class="nbseg">${['day','week'].map(v=>
+      `<button class="${nbMixView===v?'on':''}" onclick="nbMixView='${v}';drawProgram()">${v}</button>`).join('')}</span></div>`;
+  if(!m.total) return head + `<p class="nbmut">Nothing in there yet.</p>`;
+  const R = 15, C = 2*Math.PI*R;
+  return head + `<div class="nbdials">` + NB_Q.map(q=>{
+    const pct = m.t[q]/m.total, n = Math.round(pct*100);
+    return `<div class="nbdial" style="--c:${NB_QC[q]}" title="${q}: ${n}% of ${Math.round(m.total)} min">
+      <svg width="36" height="36" viewBox="0 0 38 38">
+        <circle class="bg" cx="19" cy="19" r="${R}" fill="none" stroke-width="3.5"/>
+        <circle class="fg" cx="19" cy="19" r="${R}" fill="none" stroke-width="3.5" stroke-linecap="round"
+          transform="rotate(-90 19 19)" stroke-dasharray="${(C*pct).toFixed(1)} ${C.toFixed(1)}"/>
+        <text class="mid" x="19" y="23" text-anchor="middle">${n}</text></svg><u>${q}</u></div>`;
+  }).join('') + `</div>`;
 }
 function nbCovHTML(){
   if(nbView==='body'){
