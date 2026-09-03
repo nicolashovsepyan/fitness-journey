@@ -51,6 +51,27 @@ const base = (baseArg || 'https://nicolashovsepyan.github.io/fitness-journey/').
 const where = (whereArg || 'coach') === 'client' ? 'dashboard.html' : 'coach.html';
 const key   = where === 'coach.html' ? '#fj=' : '#';
 
+/* PROGRAM ONLY — FOR A PHONE THAT ALREADY KNOWS WHO IT IS.
+
+   A normal link carries a person AND their program, which is right for
+   provisioning a new phone and wrong for handing a new block to somebody
+   already using the app: this tool cannot know their survey answers, so
+   the record it writes is a thin one, and importing it would replace a
+   real profile with a stub.
+
+   dashboard.html already has the path for this — a payload with a program
+   and no answers adopts the profile the device is already on — and
+   nothing could produce such a payload until now.
+
+   Pass `programonly` as the fifth argument. It only makes sense with the
+   client form, because it is the client's own device that supplies the
+   half this link leaves out. */
+const PROGRAM_ONLY = String(process.argv[6] || '').toLowerCase() === 'programonly';
+if (PROGRAM_ONLY && where !== 'dashboard.html') {
+  console.error('\n  programonly needs the client form: … <baseUrl> client programonly\n');
+  process.exit(1);
+}
+
 const prog = JSON.parse(readFileSync(p('spine/programs', progId + '.json'), 'utf8'));
 
 /* the uid has to be stable, or the same person gets a new drawer every link */
@@ -81,8 +102,9 @@ const a = {
 const payload = {
   v: 6,
   at: new Date().toISOString(),
-  uid, userId: uid, name: personName,
-  a,
+  /* no uid on a program-only link: the device fills in whoever it is
+     already, and naming somebody here would only fight it */
+  ...(PROGRAM_ONLY ? {} : { uid, userId: uid, name: personName, a }),
   /* NAME AND DURATION TRAVEL WITH IT.
      They used to be left behind, and the dashboard has a card that names the
      program the person is on. With nothing to read, that card showed the one
@@ -115,6 +137,8 @@ console.log(`\n  ${personName} -> ${prog.name}`);
 console.log(`  uid          ${uid}`);
 console.log(`  days         ${Object.keys(prog.days).length}${days ? '  on ' + days.join(',') + ' (0=Sun)' : ''}`);
 console.log(`  units        ${a.unit}`);
-console.log(`  opens        ${where}${where === 'coach.html' ? '  (imports into your console)' : '  (provisions their phone)'}`);
+console.log(`  opens        ${where}${
+  PROGRAM_ONLY ? '  (adds the program, keeps the profile already on the phone)'
+  : where === 'coach.html' ? '  (imports into your console)' : '  (provisions their phone)'}`);
 console.log(`  link length  ${link.length} characters`);
 console.log(`  written to   spine/programs/link.${uid}.txt\n`);
