@@ -61,6 +61,46 @@ const FORMAT = {
   Test: 'max_test', Volume: 'volume',
 };
 
+/* THE TWO SIDES SPELL THE SAME IDEAS DIFFERENTLY.
+
+   The console's editor names a block's settings the way its own boxes are
+   labelled: a Tabata has `work` and `off`, an AMRAP has a `cap`, an EMOM
+   has an `interval` and a length in `mins`. The runner reads them off the
+   block using ITS names: `work` and `rest`, `minutes`, and a round count.
+
+   Those were never reconciled. `...b.cfg` spread the console's words onto
+   the block and the runner looked for its own, found nothing, and used a
+   default — so four of the seven settings a coach can type went nowhere.
+   An EMOM written as twelve minutes on a ninety-second interval ran at
+   sixty seconds, a Tabata's rest was always ten, an AMRAP's cap was
+   always five. Nothing threw, because a missing field and a field that
+   happens to equal the default look identical from the outside.
+
+   This is the translation, in one place, per type. It is the only thing
+   allowed to know both vocabularies. */
+function runnerCfg(type, cfg, nItems) {
+  const c = cfg || {};
+  const n = Math.max(1, nItems || 1);
+  switch (type) {
+    case 'Superset': return { rounds: c.rounds, rest: c.rest };
+    /* a circuit's rest is between ROUNDS, and that is what the runner
+       calls it — `rest` on a circuit means something else there */
+    case 'Circuit':  return { rounds: c.rounds, roundRest: c.rest };
+    case 'AMRAP':    return { minutes: c.cap };
+    case 'Tabata':   return { rounds: c.rounds, work: c.work, rest: c.off };
+    /* The runner has no notion of "twelve minutes of EMOM": it counts
+       intervals, cycling the items, `rounds` times through. So the
+       coach's length becomes the round count that fills it. */
+    case 'EMOM': {
+      const iv = c.interval || 60;
+      const mins = c.mins;
+      return { work: iv, rest: 0,
+               ...(mins ? { rounds: Math.max(1, Math.round((mins * 60) / (iv * n))) } : {}) };
+    }
+    default: return {};
+  }
+}
+
 /* One console day, in the shape the screens already understand.
 
    The console writes prose — "3 × 8 each side" — and the screens want
@@ -68,6 +108,32 @@ const FORMAT = {
    so it happens here too rather than growing a second dialect. A
    prescription it cannot read keeps its text and simply carries no
    numbers, which is the same promise the runner makes. */
+/* A1, A2, B1, B2 — THE SAME IDEA UNDER TWO NAMES.
+
+   The console groups a superset by writing `sg` on each row; the runner
+   labels the movement you are on with `item.pair`. Neither knew about the
+   other, so the brackets a coach drew in the builder reached the app as
+   nothing at all and every movement in a superset ran unlabelled.
+
+   The grouping becomes the label here. What it does NOT yet do is make
+   the runner rest between one pair and the next: renderSuperset walks
+   every item in the block before it rests, so a block holding two pairs
+   is still run as one long set. The label is right; the execution is the
+   next piece of work, and it is a real one rather than a rename. */
+function pairLabels(items) {
+  const order = [], seen = new Map();
+  for (const it of items) {
+    if (it.sg == null) { order.push(null); continue; }
+    if (!seen.has(it.sg)) seen.set(it.sg, { letter: String.fromCharCode(65 + seen.size), n: 0 });
+    const g = seen.get(it.sg);
+    order.push(g.letter + (++g.n));
+  }
+  /* a "group" of one is not a superset and gets no label */
+  const counts = {};
+  order.forEach(l => { if (l) counts[l[0]] = (counts[l[0]] || 0) + 1; });
+  return order.map(l => (l && counts[l[0]] > 1) ? l : null);
+}
+
 function toSession(dayId, day, fixed) {
   const blocks = (day.blocks || []).map((b, i) => ({
     id: `${dayId}b${i}`,
@@ -83,20 +149,25 @@ function toSession(dayId, day, fixed) {
        A block that says nothing is still straight sets, which is the
        right default and what every existing program means. */
     format: FORMAT[b.type] || 'straight',
-    /* whatever the type needs: rounds, a cap, an interval, work/rest */
-    ...(b.cfg || {}),
+    /* translated into the runner's words, not spread in the console's */
+    ...runnerCfg(b.type, b.cfg, (b.items || []).length),
     name: b.name || b.role || 'Block',
     note: b.note || '',
-    minutes: +b.mins || 0,
+    /* `minutes` is the AMRAP's cap to the runner and the block's length to
+       everything else. runnerCfg has already set it for an AMRAP, so this
+       must not overwrite that with the block's display minutes. */
+    ...(b.type === 'AMRAP' ? {} : { minutes: +b.mins || 0 }),
     /* A HUMAN CHOSE THIS NUMBER. blockMinutes() estimates a block's length
        from sets, reps and rest, which is right for a session assembled by
        the app and wrong for one a coach wrote: they already said how long
        it takes. Without this the day screen re-derived 27 minutes for a
        session the dashboard calls 40, which is two numbers for one thing. */
     coachMinutes: +b.mins > 0,
-    items: (b.items || []).map(it => {
+    items: (b.items || []).map((it, j) => {
       const p = parsePrescription(it.pres);
       const o = { ex: it.ex, note: it.note || '', pres: p.raw };
+      const lbl = pairLabels(b.items || [])[j];
+      if (lbl) o.pair = lbl;
       if (p.sets != null) o.sets = p.sets;
       if (p.reps != null) o.reps = p.reps;
       if (p.hold != null) o.hold = p.hold;

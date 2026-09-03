@@ -71,7 +71,16 @@ function scaleForDuration(session, duration) {
       nb.items.forEach(it => { if (typeof it.sets === 'number') it.sets = clamp(it.sets + dSets, 2, 6); });
     }
     if (nb.role === 'Primer' || nb.role === 'Finisher') {
-      if (typeof nb.rounds === 'number') nb.rounds = clamp(nb.rounds + dRounds, 1, 5);
+      /* ROUNDS ARE A VOLUME DIAL IN A CIRCUIT AND A PROTOCOL IN A TABATA.
+         Eight rounds of twenty on and ten off is what the word Tabata
+         means; an EMOM's round count is however many intervals fill the
+         time the coach asked for. Clamping those to five did not shorten
+         the session, it turned the protocol into something else wearing
+         the same name — and silently, because five rounds is a perfectly
+         plausible number to see. Only the formats where rounds really are
+         volume get scaled. */
+      const roundsAreVolume = !nb.format || nb.format === 'circuit' || nb.format === 'superset';
+      if (roundsAreVolume && typeof nb.rounds === 'number') nb.rounds = clamp(nb.rounds + dRounds, 1, 5);
       if (duration <= 20 && nb.role === 'Primer' && nb.format === 'straight' && nb.items.length > 2)
         nb.items = nb.items.slice(0, Math.max(2, nb.items.length - 2));
     }

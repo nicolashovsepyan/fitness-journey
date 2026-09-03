@@ -82,6 +82,8 @@ node test/store.test.mjs
 node test/program-adapter.test.mjs   # every prescription in every program is runnable
 node test/current-program.test.mjs   # every screen reads the program the coach released
 node test/port-fidelity.test.mjs     # the ported programs still say what the source said
+node test/block-formats.test.mjs     # every block type reaches the runner as the runner spells it
+node tools/check-wiring.mjs          # fields written by one layer and read by none
 node tools/check-surveys.mjs         # no screen reads an answer the survey stopped asking
 node build-sw.mjs                        # rebuild the offline shell
 ```

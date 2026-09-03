@@ -719,6 +719,10 @@ select.pin{appearance:none;cursor:pointer}
          border-left:3px solid var(--c) }
 .nbprow{ display:flex; align-items:center; gap:6px }
 .nbprow .n{ width:14px; text-align:center; font:600 9px ui-monospace,monospace; color:var(--ink4) }
+.nbplandrop{ align-self:flex-start; margin:2px 0 0 20px; font-size:10px }
+.nbplantag{ text-decoration:none; font:600 8.5px ui-monospace,monospace; letter-spacing:.05em;
+            text-transform:uppercase; color:var(--accent); background:var(--accent-soft);
+            border-radius:4px; padding:1px 5px; margin-left:6px }
 
 .nbcolsw{ display:inline-flex; gap:2px; background:var(--sunk); border-radius:6px; padding:2px }
 .nbcolsw button{ font:600 9px ui-monospace,monospace; letter-spacing:.05em; text-transform:uppercase;
@@ -2803,14 +2807,32 @@ function nbFitPlan(it){
     p.val = it.plan[0].v; p.told = true; p.sets = n; it.pres = nbFmt(p);
   }
 }
+/* HIDING IS NOT DELETING, and this deleted.
+
+   The button that opened the per-set rows also threw them away when you
+   pressed it again — type four sets of different weights, collapse them
+   to see the day, and the numbers were gone. Nothing warned you and
+   nothing could bring them back.
+
+   Opening and closing is a VIEW; it lives in nbPlanOpen and touches
+   nothing. Removing the plan is a separate, deliberate act with a
+   confirm, and it says how much work it is about to discard. */
+let nbPlanOpen = new Set();
 function nbTogglePlan(bi,ii){ nbAt(bi);
-  const it = PROG.days[PDAY].blocks[bi].items[ii];
-  if(it.plan){ delete it.plan; }
-  else {
+  const it = PROG.days[PDAY].blocks[bi].items[ii], k = bi+':'+ii;
+  if(!it.plan){
     const p = nbParse(it.pres), n = Math.max(1, p.sets || 1);
     it.plan = Array.from({length:n}, () => ({ v:p.val, ...(it.weight!=null?{w:it.weight}:{}) }));
+    nbPlanOpen.add(k); return nbSave();
   }
-  nbSave();
+  nbPlanOpen.has(k) ? nbPlanOpen.delete(k) : nbPlanOpen.add(k);
+  drawProgram();
+}
+function nbDropPlan(bi,ii){ nbAt(bi);
+  const it = PROG.days[PDAY].blocks[bi].items[ii];
+  const n = (it.plan||[]).length;
+  if(!confirm(`Go back to one prescription for every set? The ${n} set${n===1?'':'s'} you wrote here are discarded.`)) return;
+  delete it.plan; nbPlanOpen.delete(bi+':'+ii); nbSave();
 }
 function nbSetPlan(bi,ii,si,f,raw){ nbAt(bi);
   const it = PROG.days[PDAY].blocks[bi].items[ii];
@@ -2879,8 +2901,15 @@ const NB_SPEC = {
 const NB_FIELD = { rounds:['rounds',''], rest:['rest','s'], mins:['length','min'],
                    interval:['every','s'], cap:['cap','min'], work:['work','s'], off:['off','s'] };
 function nbSetType(bi,t){ nbAt(bi); const b=PROG.days[PDAY].blocks[bi]; b.type=t;
-  const cfg = b.cfg ||= {};
-  for(const k of NB_SPEC[t].block) if(cfg[k]==null) cfg[k]=NB_DEF[k];
+  /* KEEP ONLY WHAT THIS TYPE OWNS. This filled in the new type's missing
+     settings and never removed the old type's, so a block moved Superset
+     -> Tabata kept `rest: 75` sitting in its cfg where nothing reads it —
+     invisible on screen, saved into the program, and waiting to be read
+     as something else by whatever comes next. */
+  const keep = NB_SPEC[t].block;
+  const cfg = {};
+  for(const k of keep) cfg[k] = (b.cfg && b.cfg[k] != null) ? b.cfg[k] : NB_DEF[k];
+  b.cfg = cfg;
   nbSel=bi; nbSave(); }
 function nbDel(bi,ii){ nbAt(bi); const b=PROG.days[PDAY].blocks[bi];
   b.items.splice(ii,1); if(!b.items.length) PROG.days[PDAY].blocks.splice(bi,1);
@@ -3442,16 +3471,29 @@ function nbMiddle(){
             ondrop="nbDrop(event,${bi},${ii})">
           <span class="hand">⠿</span><span class="ss">${ss}</span>
           <span class="nm" onclick="event.stopPropagation();nbToggleCard(${bi},${ii})">
-            <b>${esc(m.n)}${m.f?' ★':''}</b> <i>${isOpen?'▲':'▼'}</i>
+            <b>${esc(m.n)}${m.f?' ★':''}</b> <i>${isOpen?'▲':'▼'}</i>${
+              it.plan && !nbPlanOpen.has(key) ? `<u class="nbplantag" title="${
+                it.plan.map((st,n)=>`set ${n+1}: ${st.v??'—'}${st.w!=null?' @ '+st.w:''}`).join(', ')
+              }">${it.plan.length} sets written</u>` : ''}
             <small>${esc([m.g,(m.p||[])[0],(m.mus||[]).slice(0,2).join('/')].filter(Boolean).join(' · '))}${m.lat==='unilateral'?' · per side':''}</small></span>
           <span class="nbnums" onclick="event.stopPropagation()">
             ${spec.item.indexOf('sets')>=0
               ? nbNum({a:`b${bi}i${ii}.sets`, min:1, max:20, val:pr.sets, unit:'\u00D7', title:'sets',
                        on:`nbSetNum(${bi},${ii},'sets',this.value)`})
               : nbGhost('\u00D7','the rounds are on the block')}
-            ${nbNum({a:`b${bi}i${ii}.val`, min:1, max:600, val:pr.val,
-                     unit:(pr.hold?'s':'reps')+(pr.side?'/side':''), title:pr.hold?'seconds':'reps',
-                     on:`nbSetNum(${bi},${ii},'val',this.value)`})}
+            ${spec.item.indexOf('val')>=0
+              ? nbNum({a:`b${bi}i${ii}.val`, min:1, max:600, val:pr.val,
+                       unit:(pr.hold?'s':'reps')+(pr.side?'/side':''), title:pr.hold?'seconds':'reps',
+                       on:`nbSetNum(${bi},${ii},'val',this.value)`})
+              /* A TABATA'S ROW HAS NO NUMBER OF ITS OWN. The clock decides:
+                 twenty seconds on, ten off, and the movement fills them.
+                 This box rendered regardless of the block type, so a row
+                 sat under a 20-second Tabata offering to edit "30s" —
+                 a number nothing would ever read, contradicting the block
+                 above it. It shows what the block says now, and says it is
+                 the block's. */
+              : `<span class="nbnum off" title="the clock is on the block">
+                   <span class="gh">${b.cfg && b.cfg.work ? b.cfg.work : NB_DEF.work}</span><em>s on</em></span>`}
             ${nbCols.has('weight') ? nbNum({a:`b${bi}i${ii}.weight`, min:0, max:900, step:5, val:it.weight,
                      ph:'\u2014', unit:'lb', title:'starting weight', cls:'wt',
                      on:`nbSetNum(${bi},${ii},'weight',this.value)`}) : ''}
@@ -3464,12 +3506,12 @@ function nbMiddle(){
                        on:`nbSetNum(${bi},${ii},'rest',this.value)`})
               : nbGhost('rest','the rest is on the block')}</span>
           <button class="nbps ${it.plan?'on':''}" title="${it.plan
-              ? 'One prescription for every set'
+              ? (nbPlanOpen.has(key) ? 'Fold the sets away — nothing is lost' : 'Show the sets again')
               : 'Give each set its own reps and weight'}"
             onclick="event.stopPropagation();nbTogglePlan(${bi},${ii})">\u2263</button>
           <button class="nbx" onclick="event.stopPropagation();nbDel(${bi},${ii})">\u00D7</button></div>`;
 
-        if(it.plan) h += `<div class="nbplan" onclick="event.stopPropagation()">${
+        if(it.plan && nbPlanOpen.has(key)) h += `<div class="nbplan" onclick="event.stopPropagation()">${
           it.plan.map((st,si)=>`<div class="nbprow">
             <span class="n">${si+1}</span>
             ${nbNum({a:`b${bi}i${ii}s${si}.v`, min:1, max:600, val:st.v,
@@ -3478,7 +3520,8 @@ function nbMiddle(){
             ${nbNum({a:`b${bi}i${ii}s${si}.w`, min:0, max:900, step:5, val:st.w, ph:'\u2014',
                      unit:'lb', title:`set ${si+1} weight`, cls:'wt',
                      on:`nbSetPlan(${bi},${ii},${si},'w',this.value)`})}
-          </div>`).join('')}</div>`;
+          </div>`).join('')}
+          <button class="lnk nbplandrop" onclick="nbDropPlan(${bi},${ii})">same for every set</button></div>`;
         if(isOpen){
           const so = nbSwap===key;
           const btn = `<button class="nbswapbtn" onclick="event.stopPropagation();nbSwapQ='';nbSwap=${so?'null':"'"+key+"'"};drawProgram()">${so?'Cancel':'⇄ Swap this movement'}</button>`;
