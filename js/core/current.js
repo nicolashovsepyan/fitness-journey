@@ -107,6 +107,30 @@ function toSession(dayId, day, fixed) {
          `it.side` all along — it never arrived, because the port was
          flattening a named side into "each side" before it got here. */
       if (p.side) o.side = p.side;
+      /* WHAT THE COACH PRESCRIBED, AS OPPOSED TO WHAT THE PERSON DID.
+
+         The runner has always shown a weight box on a weighted movement
+         and always filled it from the last set that person logged — which
+         is right for a movement they have done and empty for one they
+         have not. A coach can now say "start at forty", and js/runner
+         seeds the field with it when there is no history to beat.
+
+         `tempo` needed nothing on the runner's side: it has printed
+         item.tempo beside the movement all along, and nothing upstream
+         ever put one there. */
+      if (it.weight != null) o.weight = it.weight;
+      if (it.tempo) o.tempo = it.tempo;
+      /* SETS THAT ARE NOT ALL THE SAME. `pres` can only say "four sets of
+         five", and a top set with three back-offs is not that. When the
+         console has written a per-set plan it travels as one, and the
+         runner reads the entry for the set the person is on; `sets` and
+         `reps` stay in step with it so everything that has not learned
+         about plans still gets a true summary. */
+      if (Array.isArray(it.plan) && it.plan.length) {
+        o.plan = it.plan.map(st => ({ ...(st.v != null ? { reps: st.v } : {}),
+                                      ...(st.w != null ? { weight: st.w } : {}) }));
+        o.sets = it.plan.length;
+      }
       return o;
     }),
   })).filter(b => b.items.length);

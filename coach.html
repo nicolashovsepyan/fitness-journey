@@ -678,7 +678,7 @@ select.pin{appearance:none;cursor:pointer}
 .nblock{ background:none; border:none; cursor:pointer; font-size:12px; padding:2px 3px; filter:grayscale(1) opacity(.55); }
 .nblock:hover,.nblock.on{ filter:none }
 
-.nbit{ display:grid; grid-template-columns:14px 20px minmax(0,1fr) auto auto 22px; align-items:center;
+.nbit{ display:grid; grid-template-columns:14px 20px minmax(90px,1fr) auto 22px; align-items:center;
        gap:8px; padding:7px 9px; border-left:3px solid var(--c); }
 .nbit + .nbit{ border-top:1px solid var(--tint2) }
 .nbit:hover{ background:color-mix(in srgb, var(--c) 9%, transparent) }
@@ -687,15 +687,44 @@ select.pin{appearance:none;cursor:pointer}
 .nbit .nm{ cursor:pointer; min-width:0 }
 .nbit .nm b{ font-weight:550; font-size:12.6px } .nbit .nm i{ font-style:normal; font-size:8px; color:var(--ink4) }
 .nbit .nm small{ display:block; font-size:10px; color:var(--ink3) }
-.nbnums{ display:grid; grid-template-columns:32px 12px 32px 40px; align-items:center; gap:2px; justify-items:center;
-         background:var(--sunk); border:1px solid var(--line); border-radius:6px; padding:3px 5px; }
-.nbnums.rest{ grid-template-columns:32px 28px; border-style:dashed }
-.nbnums.rest.off{ opacity:.4 }
-.nbnums input{ width:32px; background:none; border:none; color:var(--ink); text-align:center;
-               font:600 11.5px ui-monospace,monospace; padding:2px 0 }
-.nbnums input::-webkit-outer-spin-button,.nbnums input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0 }
-.nbnums em{ font-style:normal; font:400 9px ui-monospace,monospace; color:var(--ink3); white-space:nowrap }
-.nbnums .gh{ color:var(--ink4); font:600 11.5px ui-monospace,monospace }
+.nbnums{ display:flex; align-items:center; gap:5px; flex-wrap:wrap; justify-content:flex-end }
+/* ONE NUMBER, WITH A MINUS AND A PLUS. The steppers only show on hover or
+   focus, so a row at rest is still a row of numbers rather than a row of
+   buttons — and they are keyboard-skipped, because Tab should walk the
+   values, not step over two buttons between each one. */
+.nbnum{ display:inline-flex; align-items:center; gap:1px;
+        background:var(--sunk); border:1px solid var(--line); border-radius:6px; padding:2px 4px }
+.nbnum.rest{ border-style:dashed }
+.nbnum.off{ opacity:.4 }
+.nbnum input{ width:34px; background:none; border:none; color:var(--ink); text-align:center;
+              font:600 11.5px ui-monospace,monospace; padding:2px 0 }
+.nbnum.tempo input{ width:44px }
+.nbnum input::-webkit-outer-spin-button,.nbnum input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0 }
+.nbnum button{ width:14px; height:18px; flex:none; border:none; border-radius:3px; cursor:pointer;
+               background:none; color:var(--ink3); font:600 12px ui-monospace,monospace; line-height:1;
+               opacity:0; transition:opacity .12s }
+.nbnum:hover button, .nbnum:focus-within button{ opacity:1 }
+.nbnum button:hover{ background:var(--tint2); color:var(--ink) }
+.nbnum em{ font-style:normal; font:400 9px ui-monospace,monospace; color:var(--ink3); white-space:nowrap; padding-left:1px }
+.nbnum .gh{ color:var(--ink4); font:600 11.5px ui-monospace,monospace; width:34px; text-align:center }
+.nbnum.wt input{ color:var(--gold) }
+
+/* PER SET. Indented under the movement it belongs to, numbered down the
+   left, and deliberately quiet — it is detail on a row, not a new row. */
+.nbps{ border:none; background:none; cursor:pointer; color:var(--ink4);
+       font-size:13px; line-height:1; padding:2px 3px }
+.nbps:hover{ color:var(--ink2) }
+.nbps.on{ color:var(--accent) }
+.nbplan{ display:flex; flex-direction:column; gap:3px; padding:2px 9px 8px 34px;
+         border-left:3px solid var(--c) }
+.nbprow{ display:flex; align-items:center; gap:6px }
+.nbprow .n{ width:14px; text-align:center; font:600 9px ui-monospace,monospace; color:var(--ink4) }
+
+.nbcolsw{ display:inline-flex; gap:2px; background:var(--sunk); border-radius:6px; padding:2px }
+.nbcolsw button{ font:600 9px ui-monospace,monospace; letter-spacing:.05em; text-transform:uppercase;
+                 color:var(--ink3); background:none; border:none; border-radius:4px;
+                 padding:4px 7px; cursor:pointer }
+.nbcolsw button.on{ background:var(--accent); color:var(--accent-on) }
 .nbx{ border:none; background:none; color:var(--ink3); cursor:pointer; font-size:15px }
 .nbx:hover{ color:var(--red) }
 
@@ -2365,7 +2394,17 @@ function nbParse(p){
   if(m) return { sets:1, val:+m[1], hold:!!m[2], side:!!m[3], told:false };
   return { sets:1, val:0, hold:false, side:false, told:false };
 }
-const nbFmt = p => `${p.sets} × ${p.val}${p.hold?'s':''}${p.side?' each side':''}`;
+/* A ROW THAT NEVER STATED A SET COUNT MUST NOT ACQUIRE ONE.
+
+   This always wrote "N × M". In a superset or a circuit the rounds live
+   on the BLOCK and the row carries reps only — so nudging the reps on a
+   superset row rewrote "6" as "1 × 7", inventing a set count of one for a
+   block that runs three rounds, and every clock and meter downstream then
+   believed it. `told` already records whether anybody stated a count;
+   this now respects it. */
+const nbFmt = p => (p.told === false && (p.sets == null || p.sets === 1))
+  ? `${p.val}${p.hold?'s':''}${p.side?' each side':''}`
+  : `${p.sets} \u00D7 ${p.val}${p.hold?'s':''}${p.side?' each side':''}`;
 
 /* ---- time, derived from what is prescribed ---- */
 const NB_SPR = 3, NB_TRANS = 8;
@@ -2707,15 +2746,122 @@ let nbAnchorBi = null;
 const nbAt = bi => { nbAnchorBi = bi; return true; };
 const nbSave = () => { S.program = PROG; save(1); drawProgram(); };
 
+/* A NUMBER YOU CAN NUDGE.
+
+   Every figure in a block is typed, which is right when you know the
+   answer and wrong when you are feeling for it — going from 8 reps to 10
+   meant select, delete, type, tab. One component for all of them: minus,
+   the field, plus. The field keeps its data-a, so the focus and scroll
+   anchoring already built on that keeps working.
+
+   The buttons drive the input rather than the model, then fire its own
+   change handler, so there is exactly one path from a number to the
+   program however the number got there. */
+function nbBump(a, dir, step){
+  const el = document.querySelector(`#prog [data-a="${a}"]`);
+  if(!el) return;
+  const cur = el.value === '' ? (dir > 0 ? 0 : +el.min || 0) : +el.value;
+  const s = step || +el.step || 1;
+  let v = cur + dir * s;
+  if(el.min !== '') v = Math.max(+el.min, v);
+  if(el.max !== '') v = Math.min(+el.max, v);
+  el.value = v;
+  el.dispatchEvent(new Event('change'));
+}
+const nbNum = (o) => `<span class="nbnum ${o.cls||''}" title="${esc(o.title)}">
+    <button tabindex="-1" onclick="event.stopPropagation();nbBump('${o.a}',-1${o.step?','+o.step:''})">\u2212</button>
+    <input type="number" data-a="${o.a}" min="${o.min}" max="${o.max}"${o.step?` step="${o.step}"`:''}
+           placeholder="${o.ph||''}" value="${o.val==null?'':o.val}" title="${esc(o.title)}"
+           onchange="${o.on}"><button tabindex="-1"
+      onclick="event.stopPropagation();nbBump('${o.a}',1${o.step?','+o.step:''})">+</button>
+    <em>${o.unit}</em></span>`;
+const nbGhost = (unit, title) => `<span class="nbnum off" title="${esc(title)}"><span class="gh">\u2014</span><em>${unit}</em></span>`;
+
+/* SETS THAT ARE NOT ALL THE SAME.
+
+   "4 × 5" says four identical sets, and almost no real strength work is
+   four identical sets. A top set and three back-offs, a wave, a ramp —
+   the model could not say any of it, so a coach either wrote it in the
+   note where nothing reads it, or flattened it into an average.
+
+   `it.plan` is an array, one entry per set: { v, w }. It is OPTIONAL and
+   absent by default, so every existing program is untouched and one
+   prescription for all sets stays the simple case. `pres` remains the
+   summary — the block clock, the meters and anything that has not learned
+   about plans go on reading it, and the plan's first entry keeps it
+   honest.
+
+   Turning it on copies the current numbers into every set, so the moment
+   it appears it says exactly what the row said before it. */
+function nbFitPlan(it){
+  if(!it.plan) return;
+  const p = nbParse(it.pres), n = Math.max(1, p.sets || 1);
+  while(it.plan.length > n) it.plan.pop();
+  while(it.plan.length < n) it.plan.push({ ...(it.plan[it.plan.length-1] || { v:p.val }) });
+  /* the summary follows the first set, so nothing downstream drifts */
+  if(it.plan[0] && it.plan[0].v != null && it.plan[0].v !== p.val){
+    p.val = it.plan[0].v; p.told = true; p.sets = n; it.pres = nbFmt(p);
+  }
+}
+function nbTogglePlan(bi,ii){ nbAt(bi);
+  const it = PROG.days[PDAY].blocks[bi].items[ii];
+  if(it.plan){ delete it.plan; }
+  else {
+    const p = nbParse(it.pres), n = Math.max(1, p.sets || 1);
+    it.plan = Array.from({length:n}, () => ({ v:p.val, ...(it.weight!=null?{w:it.weight}:{}) }));
+  }
+  nbSave();
+}
+function nbSetPlan(bi,ii,si,f,raw){ nbAt(bi);
+  const it = PROG.days[PDAY].blocks[bi].items[ii];
+  if(!it.plan || !it.plan[si]) return;
+  const v = raw==='' ? null : Math.max(0, parseInt(raw,10)||0);
+  if(v == null) delete it.plan[si][f]; else it.plan[si][f] = v;
+  if(si === 0 && f === 'v' && v != null){
+    const p = nbParse(it.pres); p.val = v; it.pres = nbFmt(p);
+  }
+  nbSave();
+}
+
+/* WHICH COLUMNS ARE ON. Sets, reps and rest are always there. Weight and
+   tempo are not always the point — a mobility flow has neither — so they
+   are opt-in per coach rather than four more boxes on every row forever. */
+let nbCols = (() => { try { return new Set(JSON.parse(localStorage.getItem('fj.coach.cols') || '[]')); }
+                      catch(e){ return new Set(); } })();
+function nbToggleCol(c){
+  nbCols.has(c) ? nbCols.delete(c) : nbCols.add(c);
+  try{ localStorage.setItem('fj.coach.cols', JSON.stringify([...nbCols])); }catch(e){}
+  drawProgram();
+}
+
 /* ---- mutations. Every one ends at nbSave, which is S.program + save(1). ---- */
 function nbSetNum(bi,ii,f,raw){ nbAt(bi);
   const it = PROG.days[PDAY].blocks[bi].items[ii];
   const v = raw==='' ? null : Math.max(0, parseInt(raw,10)||0);
   if(f==='rest'){ it.rest = v; return nbSave(); }
+  /* A STARTING WEIGHT IS A PRESCRIPTION, NOT A LOG. The runner has always
+     had a weight box; it filled it from the last set that person logged,
+     so a new movement opened empty and a coach had no way to say "start
+     at forty". This is that number. Cleared to nothing, it goes back to
+     following the log. */
+  if(f==='weight'){ if(v==null) delete it.weight; else it.weight = v; return nbSave(); }
   const p = nbParse(it.pres);
-  if(f==='sets') p.sets = Math.max(1, v||1);
+  /* typing a set count IS stating one, whatever the row said before */
+  if(f==='sets'){ p.sets = Math.max(1, v||1); p.told = true; }
   if(f==='val')  p.val  = Math.max(1, v||1);
-  it.pres = nbFmt(p); nbSave();
+  it.pres = nbFmt(p);
+  if(it.plan) nbFitPlan(it);
+  nbSave();
+}
+/* Down-pause-up, in seconds. Kept as the coach types it — the runner
+   prints it beside the movement and a person reads "3-1-1" directly. An
+   empty box removes it rather than storing an empty string, so a block
+   with no tempo does not carry a field pretending it has one. */
+function nbSetTempo(bi,ii,raw){ nbAt(bi);
+  const it = PROG.days[PDAY].blocks[bi].items[ii];
+  const t = String(raw||'').trim();
+  if(t) it.tempo = t; else delete it.tempo;
+  nbSave();
 }
 function nbSetBlock(bi,k,v){ nbAt(bi); const b=PROG.days[PDAY].blocks[bi];
   b[k] = (k==='mins') ? Math.max(0,parseInt(v,10)||0) : v; nbSave(); }
@@ -3195,6 +3341,9 @@ function nbMiddle(){
       <input class="nbtag" data-a="day.tag" value="${esc(day.tag||'')}" placeholder="tag"
              onchange="PROG.days[PDAY].tag=this.value;nbSave()">
       <span class="nbmin"><b>${nbDayMins(day)}</b><em>min</em></span>
+      <span class="nbcolsw" title="Extra columns on every movement row">
+        ${['weight','tempo'].map(c=>`<button class="${nbCols.has(c)?'on':''}"
+          onclick="nbToggleCol('${c}')">${c}</button>`).join('')}</span>
       <button class="btn sm" onclick="delDay()">Delete day</button></div>
     <textarea class="nbwhy" data-a="day.why" rows="2" placeholder="Why this session exists"
       onchange="PROG.days[PDAY].why=this.value;nbSave()">${esc(day.why||'')}</textarea>`;
@@ -3297,18 +3446,39 @@ function nbMiddle(){
             <small>${esc([m.g,(m.p||[])[0],(m.mus||[]).slice(0,2).join('/')].filter(Boolean).join(' · '))}${m.lat==='unilateral'?' · per side':''}</small></span>
           <span class="nbnums" onclick="event.stopPropagation()">
             ${spec.item.indexOf('sets')>=0
-              ? `<input type="number" data-a="b${bi}i${ii}.sets" min="1" max="20" value="${pr.sets}" title="sets"
-                        onchange="nbSetNum(${bi},${ii},'sets',this.value)"><em>×</em>`
-              : `<span class="gh">—</span><em>×</em>`}
-            <input type="number" data-a="b${bi}i${ii}.val" min="1" max="600" value="${pr.val}" title="${pr.hold?'seconds':'reps'}"
-                   onchange="nbSetNum(${bi},${ii},'val',this.value)">
-            <em>${pr.hold?'s':'reps'}${pr.side?'/side':''}</em></span>
-          <span class="nbnums rest ${spec.item.indexOf('rest')>=0?'':'off'}" onclick="event.stopPropagation()">
+              ? nbNum({a:`b${bi}i${ii}.sets`, min:1, max:20, val:pr.sets, unit:'\u00D7', title:'sets',
+                       on:`nbSetNum(${bi},${ii},'sets',this.value)`})
+              : nbGhost('\u00D7','the rounds are on the block')}
+            ${nbNum({a:`b${bi}i${ii}.val`, min:1, max:600, val:pr.val,
+                     unit:(pr.hold?'s':'reps')+(pr.side?'/side':''), title:pr.hold?'seconds':'reps',
+                     on:`nbSetNum(${bi},${ii},'val',this.value)`})}
+            ${nbCols.has('weight') ? nbNum({a:`b${bi}i${ii}.weight`, min:0, max:900, step:5, val:it.weight,
+                     ph:'\u2014', unit:'lb', title:'starting weight', cls:'wt',
+                     on:`nbSetNum(${bi},${ii},'weight',this.value)`}) : ''}
+            ${nbCols.has('tempo') ? `<span class="nbnum tempo" title="Seconds under tension: down, pause, up. 3-1-1 is three seconds down.">
+                <input type="text" data-a="b${bi}i${ii}.tempo" placeholder="3-1-1" value="${esc(it.tempo||'')}"
+                       onchange="nbSetTempo(${bi},${ii},this.value)"><em>tempo</em></span>` : ''}
             ${spec.item.indexOf('rest')>=0
-              ? `<input type="number" data-a="b${bi}i${ii}.rest" min="0" max="600" step="15" placeholder="—" value="${rest != null ? rest : ''}"
-                        onchange="nbSetNum(${bi},${ii},'rest',this.value)">`
-              : `<span class="gh">—</span>`}<em>rest</em></span>
-          <button class="nbx" onclick="event.stopPropagation();nbDel(${bi},${ii})">×</button></div>`;
+              ? nbNum({a:`b${bi}i${ii}.rest`, min:0, max:600, step:15, val:rest, ph:'\u2014',
+                       unit:'rest', title:'rest between sets, in seconds', cls:'rest',
+                       on:`nbSetNum(${bi},${ii},'rest',this.value)`})
+              : nbGhost('rest','the rest is on the block')}</span>
+          <button class="nbps ${it.plan?'on':''}" title="${it.plan
+              ? 'One prescription for every set'
+              : 'Give each set its own reps and weight'}"
+            onclick="event.stopPropagation();nbTogglePlan(${bi},${ii})">\u2263</button>
+          <button class="nbx" onclick="event.stopPropagation();nbDel(${bi},${ii})">\u00D7</button></div>`;
+
+        if(it.plan) h += `<div class="nbplan" onclick="event.stopPropagation()">${
+          it.plan.map((st,si)=>`<div class="nbprow">
+            <span class="n">${si+1}</span>
+            ${nbNum({a:`b${bi}i${ii}s${si}.v`, min:1, max:600, val:st.v,
+                     unit:pr.hold?'s':'reps', title:`set ${si+1}`,
+                     on:`nbSetPlan(${bi},${ii},${si},'v',this.value)`})}
+            ${nbNum({a:`b${bi}i${ii}s${si}.w`, min:0, max:900, step:5, val:st.w, ph:'\u2014',
+                     unit:'lb', title:`set ${si+1} weight`, cls:'wt',
+                     on:`nbSetPlan(${bi},${ii},${si},'w',this.value)`})}
+          </div>`).join('')}</div>`;
         if(isOpen){
           const so = nbSwap===key;
           const btn = `<button class="nbswapbtn" onclick="event.stopPropagation();nbSwapQ='';nbSwap=${so?'null':"'"+key+"'"};drawProgram()">${so?'Cancel':'⇄ Swap this movement'}</button>`;

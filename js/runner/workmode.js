@@ -557,9 +557,27 @@ function renderSets() {
   } else {                                              // reps set → tap-to-type, weight + R/L
     const weighted = item.load === 'weighted';
     const uni = item.laterality === 'unilateral' || item.perSide;
-    const base = failureSet ? (item.reps || 0) : (item.reps || item.target || 0);
+    /* THE SET YOU ARE ON, WHEN THE COACH WROTE THEM SEPARATELY. Without
+       a plan every set shows the same target, which is right for
+       "3 x 10" and wrong for a top set with back-offs — the shape most
+       real strength work has. */
+    const step = Array.isArray(item.plan) ? item.plan[S.si] : null;
+    const base = failureSet ? (item.reps || 0)
+               : (step && step.reps != null ? step.reps : (item.reps || item.target || 0));
     curVal = base;
-    const lastW = item.exId ? (store.getLast(item.exId)?.weight ?? '') : '';
+    /* WHAT YOU DID LAST TIME, OR WHAT THE COACH SAID TO START AT.
+
+       This only ever offered the last logged weight, which is exactly
+       right for a movement with a history and blank for one without — so
+       the first session on anything new opened an empty box and the
+       coach's intended load lived nowhere. A prescribed weight fills it
+       when there is no history; history still wins once there is one,
+       because by then the person's own numbers are the better answer. */
+    /* a weight written for THIS set outranks both the log and the
+       movement-wide starting weight, because it is the most specific
+       thing anybody said */
+    const lastW = (step && step.weight != null) ? step.weight
+                : (item.exId ? (store.getLast(item.exId)?.weight ?? '') : '') || (item.weight ?? '');
     const wField = weighted
       ? `<div class="wfield"><input id="wMain" type="number" inputmode="decimal" placeholder="weight" value="${lastW}" onfocus="this.select()"/><span class="u">${WUNIT}</span></div>` : '';
     const inputArea = uni
@@ -732,7 +750,9 @@ function renderSuperset() {
   const weighted = item.load === 'weighted';
   const base = Number(item.reps) || 0;
   curVal = base;
-  const lastW = item.exId ? (store.getLast(item.exId)?.weight ?? '') : '';
+  /* same rule as the straight-set path: history first, the coach's
+     starting weight when there is none */
+  const lastW = (item.exId ? (store.getLast(item.exId)?.weight ?? '') : '') || (item.weight ?? '');
   const wField = weighted
     ? `<div class="wfield"><input id="wMain" type="number" inputmode="decimal" placeholder="weight" value="${lastW}" onfocus="this.select()"/><span class="u">${WUNIT}</span></div>` : '';
   const unitLbl = `${UNIT[item.measure]}${item.repsText ? ` · aim ${item.repsText}` : ''}`;
