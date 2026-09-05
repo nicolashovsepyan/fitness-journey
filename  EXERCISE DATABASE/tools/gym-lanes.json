@@ -218,11 +218,30 @@
    ],
    "harder": [],
    "why": "Already a cable movement. The gym is where anti-rotation is easiest to load precisely."
+  },
+  "crawl": {
+   "anchor": "sled_push",
+   "easier": [
+    "farmers_carry"
+   ],
+   "harder": [
+    "sled_drag"
+   ],
+   "why": "The sled is loaded ground locomotion \u2014 the gym's version of crawling. Same job: move your body (and more) horizontally while the trunk resists collapsing. Nothing else in a gym does it."
+  },
+  "lateral": {
+   "anchor": "kb_cossack_squat",
+   "easier": [
+    "hip_adduction_machine"
+   ],
+   "harder": [
+    "dumbbell_walking_lunge"
+   ],
+   "why": "The cossack takes a bell or a dumbbell, so the loaded version IS the movement. This closes the lateral-plane gap I flagged as unfixable last week \u2014 your animal batch made the cossack a real entry rather than a stretch."
   }
  },
  "no_lane": {
   "handstand": "Balance is the whole point. A loaded overhead press builds the strength but not the skill, and pretending otherwise would let the engine swap a handstand for a shoulder press and call it done.",
-  "lateral": "No loaded lateral-lunge or cossack pattern exists in the library. The hip abduction machine trains the muscle but not the pattern \u2014 it is seated and single-joint. Worth adding a lateral lunge rather than faking it.",
   "core_dragon": "Nothing in a gym replicates a full-body anti-extension lever. Cable crunch and decline sit-up are spinal flexion, which is the opposite demand.",
   "core_compression": "Straight-leg compression at the hip has no loaded gym analogue in the library. A captain's chair leg raise would be the closest and we do not have one.",
   "mobility": "Mobility work does not need a loaded substitute."

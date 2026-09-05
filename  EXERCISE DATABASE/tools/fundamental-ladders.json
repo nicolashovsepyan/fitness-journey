@@ -88,7 +88,8 @@
    "cossack_squat",
    [
     "deep_squat_rock",
-    "banded_sidewalk"
+    "duck_walk",
+    "monkey_lateral"
    ],
    []
   ],
@@ -351,6 +352,25 @@
    ]
   ],
   [
+   "crawl",
+   "Bear Crawl",
+   "locomotion",
+   1,
+   "bear_crawl",
+   [
+    "inchworm",
+    "crab_hold",
+    "bear_hold",
+    "loaded_beast"
+   ],
+   [
+    "crab_walk",
+    "bear_crawl_back",
+    "sit_through",
+    "lizard_crawl"
+   ]
+  ],
+  [
    "full_body",
    "Burpee",
    "full-body",
@@ -415,9 +435,11 @@
    "worlds_greatest_stretch",
    [
     "cat_cow",
+    "scorpion_reach",
     "hip_90_90"
    ],
    [
+    "crab_reach",
     "deep_squat_thoracic",
     "jefferson_curl"
    ]
@@ -481,5 +503,8 @@
   "CARRY: suitcase carry moved from regression to progression \u2014 it is the harder one to stabilise.",
   "BURPEE gains the 5- and 7-pump Navy Seals.",
   "JUMP SQUAT gains the lateral bound (the skater jump you meant) and the jumping reverse lunge."
+ ],
+ "_changes_28aug": [
+  "ANIMAL LOCOMOTION folded in. New CRAWLING ladder anchored on the bear crawl \u2014 gait is one of the seven primal patterns and it was the only one with no fundamental. Your chain kept as written: bear hold -> loaded beast -> bear crawl -> backward -> sit-through -> lizard. Duck walk and lateral monkey went onto the Cossack ladder, which is where your easier/harder links pointed."
  ]
 }

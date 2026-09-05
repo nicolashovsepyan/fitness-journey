@@ -59,6 +59,27 @@ function patterns(id, m) {
   const f = fam(m), n = nm(m), out = [];
   const add = p => { if (p && !out.includes(p)) out.push(p); };
 
+  /* ANIMAL LOCOMOTION — added to the source 28 Aug. Without this they fall
+     through to the core branch and every crawl lands as anti-extension, which
+     misses the whole point: a crawl is GAIT under load. Gait is one of the
+     seven primal patterns and it is the one the fundamentals list never had. */
+  if (f.has('animal')) {
+    switch (id) {
+      case 'loaded_beast':                       add('anti-extension'); add('anti-rotation'); return out;
+      case 'bear_crawl': case 'bear_crawl_back':
+      case 'lizard_crawl':                       add('locomotion'); add('anti-rotation'); add('anti-extension'); return out;
+      case 'sit_through':                        add('locomotion'); add('rotation'); return out;
+      case 'crab_hold':                          add('extension'); return out;
+      case 'crab_reach':                         add('extension'); add('rotation'); return out;
+      case 'crab_walk':                          add('locomotion'); add('extension'); return out;
+      case 'duck_walk':                          add('locomotion'); add('squat'); return out;
+      case 'monkey_lateral':                     add('locomotion'); add('lunge'); return out;
+      case 'cossack_squat':                      add('lunge'); add('squat'); return out;
+      case 'scorpion_reach':                     add('rotation'); return out;
+      case 'inchworm':                           add('locomotion'); add('anti-extension'); return out;
+    }
+  }
+
   switch (m.pattern) {
     case 'push':
       if (f.has('planche') || /planche|straight-arm/.test(n)) add('straight-arm-push');
@@ -162,8 +183,16 @@ function muscles(id, m, pats) {
 /* ------------------------------------------------------------
    role[] — where in a session it is allowed to land
    ------------------------------------------------------------ */
+const ANIMAL_WORK = new Set(['loaded_beast','bear_crawl','bear_crawl_back','sit_through',
+  'crab_hold','crab_reach','crab_walk','lizard_crawl','duck_walk','monkey_lateral','cossack_squat']);
+
 function role(id, m) {
   const f = fam(m), n = nm(m);
+  /* these are tagged pattern:'mobility' in the source but they are loaded
+     ground work — leaving them joint-prep only means the engine can never
+     put a bear crawl or a cossack squat in a main block. */
+  if (ANIMAL_WORK.has(id)) return ['working-set', 'conditioning'];
+  if (id === 'scorpion_reach' || id === 'inchworm') return ['joint-prep', 'activation'];
   if (m.pattern === 'mobility') return /cars|circles|swings|cat-cow|cat cow|wrist|ankle|90\/90|thoracic/.test(n) ? ['joint-prep'] : ['joint-prep', 'activation'];
   if (/stretch/.test(n)) return ['joint-prep'];
   if (/band(ed)? (pull-apart|pullapart)|face pull|wall slide|scap|ytw|arm circle/.test(n)) return ['joint-prep', 'activation'];

@@ -2372,6 +2372,18 @@ function nbBuildLibrary(){
       mus:(m.muscles||[]).concat(m.musclesAlso||[]).slice(0,6),
       mod:m.modality||'', role:m.role||'', dem:m.demands||[],
       f:!!m.fundamental, fam:m.fundFamily||null,
+      /* THE FAMILY, WHICH THE SEARCH COULD NOT SEE.
+
+         `fam` above is fundFamily — which fundamental a movement belongs
+         under — and it is a different field from `family`, the name of the
+         group a movement is a member of: animal, planche, push-up, plank,
+         dip, handstand, hollow. Thirty-nine of them in the database and
+         the library never carried one, so the only families you could
+         search for were the ones whose name happens to appear in the
+         movements themselves. "planche" found the planches by accident.
+         "animal" found nothing, because no animal movement is called
+         one. */
+      fml:m.family||null,
       meas:m.measure||'reps', lat:m.laterality||'bilateral', spr:m.secPerRep||null,
       eq:(m.equipment||[]).slice(0,3), cue:m.cue||'',
       why:((m.coaching&&m.coaching.why)||'').slice(0,180),
@@ -2617,7 +2629,7 @@ const NB_SYN = {
 function nbHay(m){
   if(m._h) return m._h;
   m._h = [m.n,m.g,m.mod,m.role,...(m.p||[]),...(m.mus||[]),...(m.dem||[]),...(m.eq||[]),
-          m.fam||'', m.f?'fundamental':''].join(' ').toLowerCase();
+          m.fam||'', m.fml||'', m.f?'fundamental':''].join(' ').toLowerCase();
   return m._h;
 }
 const nbWords = q => String(q||'').toLowerCase().split(/\s+/).filter(Boolean);

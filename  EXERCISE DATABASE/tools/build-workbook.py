@@ -13,8 +13,8 @@ Re-running REBUILDS from js/data/exercises.js and overwrites the file.
 Once Nicolas starts editing, the flow reverses: the workbook becomes the
 source and tools/xlsx-to-js.mjs regenerates exercises.js.
 """
-import json, os, re
-from openpyxl import Workbook
+import json, os, re, shutil, glob, datetime
+from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.worksheet.datavalidation import DataValidation
 from openpyxl.utils import get_column_letter
@@ -794,8 +794,36 @@ def main():
     with open(os.path.join(WB_DIR, '_derived.json')) as f:
         rows = json.load(f)
 
-    wb = Workbook()
-    wb.remove(wb.active)
+    OWNED = ['DO THIS NEXT', 'FUNDAMENTALS', 'CALIBRATION', 'MOVEMENTS',
+             'TRACKS', 'GYM LIBRARY', 'LISTS']
+
+    # ---- 1. back up whatever is on disk BEFORE touching it -------------
+    kept = []
+    if os.path.exists(OUT):
+        arch = os.path.join(HERE, '..', '_archive')
+        os.makedirs(arch, exist_ok=True)
+        stamp = datetime.datetime.now().strftime('%Y-%m-%d_%H%M%S')
+        shutil.copy2(OUT, os.path.join(arch, f'EXERCISES.{stamp}.xlsx'))
+        # keep only the last 10 so the folder does not grow forever
+        old = sorted(glob.glob(os.path.join(arch, 'EXERCISES.*.xlsx')))
+        for f_ in old[:-10]:
+            os.remove(f_)
+
+    # ---- 2. build on TOP of the existing file, never from scratch ------
+    # Anything Nicolas adds by hand — a program sheet, a scratch tab — is a
+    # sheet this script does not own. Starting from a blank Workbook silently
+    # deleted four of his sheets on 28 Aug. Never again: load what is there,
+    # replace only the sheets this script generates, leave the rest alone.
+    if os.path.exists(OUT):
+        wb = load_workbook(OUT)
+        kept = [n for n in wb.sheetnames if n not in OWNED]
+        for n in OWNED:
+            if n in wb.sheetnames:
+                del wb[n]
+    else:
+        wb = Workbook()
+        wb.remove(wb.active)
+
     build_movements(wb, rows)
     build_tracks(wb, rows)
     _, ncal = build_calibration(wb, rows)
@@ -804,15 +832,18 @@ def main():
     build_enums(wb)
     build_do_next(wb, rows, ncal, nfund, nfundmiss)
 
-    # the order Nicolas reads them in: queue, then the two he works in, then reference
-    order = ['DO THIS NEXT', 'FUNDAMENTALS', 'CALIBRATION', 'MOVEMENTS', 'TRACKS', 'GYM LIBRARY', 'LISTS']
-    wb._sheets = [wb[n] for n in order if n in wb.sheetnames]
+    # generated sheets first, in reading order; anything of his after them
+    order = [n for n in OWNED if n in wb.sheetnames] + \
+            [n for n in wb.sheetnames if n not in OWNED]
+    wb._sheets = [wb[n] for n in order]
     wb.active = 0
     wb.save(OUT)
     _verify(OUT)
 
     print(f'wrote {OUT}')
     print(f'  sheets       {len(wb.sheetnames)}  ' + ' | '.join(wb.sheetnames))
+    if kept:
+        print(f'  YOURS KEPT   {len(kept)}  ' + ' | '.join(kept))
     print(f'  MOVEMENTS    {len(rows)} rows, {sum(1 for r in rows if r["status"]=="REVIEW")} flagged')
     print(f'  FUNDAMENTALS {nfund} movements, {nfundmiss} still absent from the database')
     print(f'  CALIBRATION  {ncal} rows')

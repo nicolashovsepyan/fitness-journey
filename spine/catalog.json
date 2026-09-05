@@ -5841,13 +5841,24 @@
    "coaching": null,
    "fundamental": false,
    "fundFamily": null,
-   "patterns": [],
-   "muscles": [],
-   "musclesAlso": [],
-   "modality": null,
-   "role": null,
-   "demands": [],
-   "secPerRep": null,
+   "patterns": [
+    "h-push"
+   ],
+   "muscles": [
+    "chest",
+    "triceps"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "serratus",
+    "abs"
+   ],
+   "modality": "bodyweight",
+   "role": "joint-prep, activation",
+   "demands": [
+    "wrist-extension"
+   ],
+   "secPerRep": 3,
    "art": {
     "file": null,
     "status": "missing"
@@ -8880,11 +8891,19 @@
    "coaching": null,
    "fundamental": false,
    "fundFamily": null,
-   "patterns": [],
-   "muscles": [],
-   "musclesAlso": [],
-   "modality": null,
-   "role": null,
+   "patterns": [
+    "anti-extension",
+    "anti-rotation"
+   ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "obliques",
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, conditioning",
    "demands": [],
    "secPerRep": null,
    "art": {
@@ -8917,14 +8936,27 @@
    "gymOnly": false,
    "cue": "Knees an inch off the floor, opposite hand and foot together, hips low and quiet. If the hips swing side to side the steps are too long. Forward and back in a small space.",
    "coaching": null,
-   "fundamental": false,
-   "fundFamily": null,
-   "patterns": [],
-   "muscles": [],
-   "musclesAlso": [],
-   "modality": null,
-   "role": null,
-   "demands": [],
+   "fundamental": true,
+   "fundFamily": "locomotion",
+   "patterns": [
+    "locomotion",
+    "anti-rotation",
+    "anti-extension"
+   ],
+   "muscles": [
+    "abs",
+    "quad"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "calf"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, conditioning",
+   "demands": [
+    "wrist-extension",
+    "floor-to-stand"
+   ],
    "secPerRep": null,
    "art": {
     "file": null,
@@ -8958,12 +8990,25 @@
    "coaching": null,
    "fundamental": false,
    "fundFamily": null,
-   "patterns": [],
-   "muscles": [],
-   "musclesAlso": [],
-   "modality": null,
-   "role": null,
-   "demands": [],
+   "patterns": [
+    "locomotion",
+    "anti-rotation",
+    "anti-extension"
+   ],
+   "muscles": [
+    "abs",
+    "quad"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "calf"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, conditioning",
+   "demands": [
+    "wrist-extension",
+    "floor-to-stand"
+   ],
    "secPerRep": null,
    "art": {
     "file": null,
@@ -8997,13 +9042,24 @@
    "coaching": null,
    "fundamental": false,
    "fundFamily": null,
-   "patterns": [],
-   "muscles": [],
-   "musclesAlso": [],
-   "modality": null,
-   "role": null,
-   "demands": [],
-   "secPerRep": null,
+   "patterns": [
+    "locomotion",
+    "rotation"
+   ],
+   "muscles": [
+    "abs",
+    "quad"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "calf"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, conditioning",
+   "demands": [
+    "deep-knee-flexion"
+   ],
+   "secPerRep": 3,
    "art": {
     "file": null,
     "status": "missing"
@@ -9036,11 +9092,18 @@
    "coaching": null,
    "fundamental": false,
    "fundFamily": null,
-   "patterns": [],
-   "muscles": [],
-   "musclesAlso": [],
-   "modality": null,
-   "role": null,
+   "patterns": [
+    "extension"
+   ],
+   "muscles": [
+    "lower-back",
+    "glute"
+   ],
+   "musclesAlso": [
+    "hamstring"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, conditioning",
    "demands": [],
    "secPerRep": null,
    "art": {
@@ -9075,13 +9138,21 @@
    "coaching": null,
    "fundamental": false,
    "fundFamily": null,
-   "patterns": [],
-   "muscles": [],
-   "musclesAlso": [],
-   "modality": null,
-   "role": null,
+   "patterns": [
+    "extension",
+    "rotation"
+   ],
+   "muscles": [
+    "lower-back",
+    "glute"
+   ],
+   "musclesAlso": [
+    "hamstring"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, conditioning",
    "demands": [],
-   "secPerRep": null,
+   "secPerRep": 3,
    "art": {
     "file": null,
     "status": "missing"
@@ -9114,11 +9185,20 @@
    "coaching": null,
    "fundamental": false,
    "fundFamily": null,
-   "patterns": [],
-   "muscles": [],
-   "musclesAlso": [],
-   "modality": null,
-   "role": null,
+   "patterns": [
+    "locomotion",
+    "extension"
+   ],
+   "muscles": [
+    "abs",
+    "quad"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "calf"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, conditioning",
    "demands": [],
    "secPerRep": null,
    "art": {
@@ -9153,12 +9233,25 @@
    "coaching": null,
    "fundamental": false,
    "fundFamily": null,
-   "patterns": [],
-   "muscles": [],
-   "musclesAlso": [],
-   "modality": null,
-   "role": null,
-   "demands": [],
+   "patterns": [
+    "locomotion",
+    "anti-rotation",
+    "anti-extension"
+   ],
+   "muscles": [
+    "abs",
+    "quad"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "calf"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, conditioning",
+   "demands": [
+    "wrist-extension",
+    "floor-to-stand"
+   ],
    "secPerRep": null,
    "art": {
     "file": null,
@@ -9192,12 +9285,23 @@
    "coaching": null,
    "fundamental": false,
    "fundFamily": null,
-   "patterns": [],
-   "muscles": [],
-   "musclesAlso": [],
-   "modality": null,
-   "role": null,
-   "demands": [],
+   "patterns": [
+    "locomotion",
+    "squat"
+   ],
+   "muscles": [
+    "abs",
+    "quad"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "calf"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, conditioning",
+   "demands": [
+    "deep-knee-flexion"
+   ],
    "secPerRep": null,
    "art": {
     "file": null,
@@ -9231,12 +9335,23 @@
    "coaching": null,
    "fundamental": false,
    "fundFamily": null,
-   "patterns": [],
-   "muscles": [],
-   "musclesAlso": [],
-   "modality": null,
-   "role": null,
-   "demands": [],
+   "patterns": [
+    "locomotion",
+    "lunge"
+   ],
+   "muscles": [
+    "abs",
+    "quad"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "calf"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set, conditioning",
+   "demands": [
+    "deep-knee-flexion"
+   ],
    "secPerRep": null,
    "art": {
     "file": null,
@@ -9278,14 +9393,15 @@
    ],
    "muscles": [
     "quad",
-    "adductor"
+    "glute"
    ],
    "musclesAlso": [
-    "glute",
-    "hamstring"
+    "hamstring",
+    "adductor",
+    "abs"
    ],
-   "modality": "bodyweight",
-   "role": "working-set",
+   "modality": "kettlebell",
+   "role": "working-set, conditioning",
    "demands": [
     "deep-knee-flexion"
    ],
@@ -9322,13 +9438,15 @@
    "coaching": null,
    "fundamental": false,
    "fundFamily": null,
-   "patterns": [],
+   "patterns": [
+    "rotation"
+   ],
    "muscles": [],
    "musclesAlso": [],
-   "modality": null,
-   "role": null,
+   "modality": "bodyweight",
+   "role": "joint-prep, activation",
    "demands": [],
-   "secPerRep": null,
+   "secPerRep": 3,
    "art": {
     "file": null,
     "status": "missing"
@@ -9361,13 +9479,22 @@
    "coaching": null,
    "fundamental": false,
    "fundFamily": null,
-   "patterns": [],
-   "muscles": [],
-   "musclesAlso": [],
-   "modality": null,
-   "role": null,
+   "patterns": [
+    "locomotion",
+    "anti-extension"
+   ],
+   "muscles": [
+    "abs",
+    "quad"
+   ],
+   "musclesAlso": [
+    "front-delt",
+    "calf"
+   ],
+   "modality": "bodyweight",
+   "role": "joint-prep, activation",
    "demands": [],
-   "secPerRep": null,
+   "secPerRep": 3,
    "art": {
     "file": null,
     "status": "missing"
@@ -9383,7 +9510,7 @@
    "id": "bear_hold",
    "name": "Bear Hold",
    "pattern": "core",
-   "family": null,
+   "family": "animal",
    "equipment": [
     "bw"
    ],
@@ -9909,7 +10036,7 @@
    "id": "alternating_single_leg_l_sit",
    "name": "Alternating Single-Leg L-Sit",
    "pattern": "core",
-   "family": "lsit",
+   "family": "l-sit",
    "equipment": [
     "bw"
    ],
@@ -9958,7 +10085,7 @@
    "id": "bear_hold_taps",
    "name": "Bear Hold Taps",
    "pattern": "core",
-   "family": "bear",
+   "family": "animal",
    "equipment": [
     "bw"
    ],
@@ -10591,7 +10718,7 @@
    "id": "bear_limb_lift",
    "name": "Bear Limb Lift",
    "pattern": "core",
-   "family": "bear",
+   "family": "animal",
    "equipment": [
     "bw"
    ],
@@ -10639,7 +10766,7 @@
    "id": "bear_opposing_limb_lift",
    "name": "Bear Opposing Limb Lift",
    "pattern": "core",
-   "family": "bear",
+   "family": "animal",
    "equipment": [
     "bw"
    ],
@@ -11885,7 +12012,7 @@
    "id": "one_leg_l_sit",
    "name": "One-Leg L-Sit",
    "pattern": "core",
-   "family": "lsit",
+   "family": "l-sit",
    "equipment": [
     "bw"
    ],
@@ -12270,7 +12397,7 @@
    "id": "one_leg_v_sit",
    "name": "One-Leg V-Sit",
    "pattern": "core",
-   "family": "vsit",
+   "family": "v-sit",
    "equipment": [
     "bw"
    ],
@@ -12510,7 +12637,7 @@
    "id": "straddle_v_sit",
    "name": "Straddle V-Sit",
    "pattern": "core",
-   "family": "vsit",
+   "family": "v-sit",
    "equipment": [
     "bw"
    ],

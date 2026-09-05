@@ -133,11 +133,38 @@ function report(kind, vocab) {
   return orphans;
 }
 
+/* ONE IDEA, TWO SPELLINGS.
+
+   The same failure as cfg.off against b.rest, one level down in the data:
+   `l-sit` and `lsit` were two families, `v-sit` and `vsit` were two more,
+   and a coach searching for one found half the movements. Nothing was
+   broken enough to notice — the search returned results, just not all of
+   them, which is the worst kind of wrong answer.
+
+   Families are typed by hand into js/data/exercises.js, so this is the
+   check that they were typed the same way twice. */
+function checkFamilies() {
+  const cat = JSON.parse(readFileSync(join(ROOT, 'spine/catalog.json'), 'utf8')).movements;
+  const byName = {}, byShape = {};
+  for (const m of Object.values(cat)) {
+    if (!m.family) continue;
+    byName[m.family] = (byName[m.family] || 0) + 1;
+    (byShape[m.family.toLowerCase().replace(/[^a-z0-9]/g, '')] ??= new Set()).add(m.family);
+  }
+  const split = Object.values(byShape).filter(v => v.size > 1).map(v => [...v]);
+  console.log(`\nMOVEMENT FAMILIES — ${Object.keys(byName).length} of them, every one searchable`);
+  if (!split.length) { console.log('  no family is spelled two ways.'); return 0; }
+  console.log('  SPLIT BY SPELLING — a search for one finds only half:');
+  for (const g of split) console.log('    ' + g.map(f => `${f} (${byName[f]})`).join('  vs  '));
+  return split.length;
+}
+const famSplit = checkFamilies();
+
 const o1 = report('block', VOCAB.block);
 const o2 = report('item', VOCAB.item);
 
 console.log('\n' + '-'.repeat(74));
-const all = [...o1, ...o2];
+const all = [...o1, ...o2, ...Array.from({ length: famSplit }, (_, i) => ['family', 'spelled two ways'])];
 if (!all.length) {
   console.log('\nEvery field is written somewhere and read somewhere.\n');
 } else {
