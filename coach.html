@@ -3535,7 +3535,13 @@ function nbMiddle(){
                        on:`nbSetNum(${bi},${ii},'sets',this.value)`})
               : nbGhost('\u00D7','the rounds are on the block')}
             ${spec.item.indexOf('val')>=0
-              ? nbNum({a:`b${bi}i${ii}.val`, min:1, max:600, val:pr.val,
+              /* SECONDS MOVE IN FIVES. Nobody writes a 23-second hold, so
+                 stepping one at a time means five clicks to get anywhere
+                 useful. Reps stay at one, because 8 to 9 is a real
+                 decision and 8 to 13 is not. The snap on the unit switch
+                 already lands on multiples of five, so the two agree. */
+              ? nbNum({a:`b${bi}i${ii}.val`, min:pr.hold?5:1, max:600, val:pr.val,
+                       ...(pr.hold ? {step:5} : {}),
                        unit:`<button class="nbunit" title="${pr.hold?'Counted in reps instead':'Held for time instead'}"
                               onclick="event.stopPropagation();nbToggleUnit(${bi},${ii})"
                               >${pr.hold?'sec':'reps'}</button>${pr.side?'/side':''}`,
@@ -3570,7 +3576,8 @@ function nbMiddle(){
         if(it.plan && nbPlanOpen.has(key)) h += `<div class="nbplan" onclick="event.stopPropagation()">${
           it.plan.map((st,si)=>`<div class="nbprow">
             <span class="n">${si+1}</span>
-            ${nbNum({a:`b${bi}i${ii}s${si}.v`, min:1, max:600, val:st.v,
+            ${nbNum({a:`b${bi}i${ii}s${si}.v`, min:pr.hold?5:1, max:600, val:st.v,
+                     ...(pr.hold ? {step:5} : {}),
                      unit:pr.hold?'sec':'reps', title:`set ${si+1}`,
                      on:`nbSetPlan(${bi},${ii},${si},'v',this.value)`})}
             ${nbNum({a:`b${bi}i${ii}s${si}.w`, min:0, max:900, step:5, val:st.w, ph:'\u2014',
