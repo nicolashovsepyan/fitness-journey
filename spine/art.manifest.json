@@ -1,6 +1,6 @@
 {
  "version": 1,
- "built": "2026-09-02",
+ "built": "2026-09-05",
  "art": {
   "bodyweight_squat": {
    "name": "Bodyweight Squat",
@@ -854,6 +854,71 @@
   },
   "lying_knee_tuck": {
    "name": "Lying Knee Tuck",
+   "file": null,
+   "status": "missing"
+  },
+  "loaded_beast": {
+   "name": "Loaded Beast",
+   "file": null,
+   "status": "missing"
+  },
+  "bear_crawl": {
+   "name": "Bear Crawl",
+   "file": null,
+   "status": "missing"
+  },
+  "bear_crawl_back": {
+   "name": "Backward Bear Crawl",
+   "file": null,
+   "status": "missing"
+  },
+  "sit_through": {
+   "name": "Sit-Through",
+   "file": null,
+   "status": "missing"
+  },
+  "crab_hold": {
+   "name": "Crab Hold",
+   "file": null,
+   "status": "missing"
+  },
+  "crab_reach": {
+   "name": "Crab Reach",
+   "file": null,
+   "status": "missing"
+  },
+  "crab_walk": {
+   "name": "Crab Walk",
+   "file": null,
+   "status": "missing"
+  },
+  "lizard_crawl": {
+   "name": "Lizard Crawl",
+   "file": null,
+   "status": "missing"
+  },
+  "duck_walk": {
+   "name": "Duck Walk",
+   "file": null,
+   "status": "missing"
+  },
+  "monkey_lateral": {
+   "name": "Lateral Monkey",
+   "file": null,
+   "status": "missing"
+  },
+  "cossack_squat": {
+   "name": "Cossack Squat",
+   "file": null,
+   "status": "missing"
+  },
+  "scorpion_reach": {
+   "name": "Scorpion Reach",
+   "file": null,
+   "status": "missing"
+  },
+  "inchworm": {
+   "name": "Inchworm",
    "file": null,
    "status": "missing"
   },

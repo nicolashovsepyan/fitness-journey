@@ -708,6 +708,10 @@ select.pin{appearance:none;cursor:pointer}
 .nbnum em{ font-style:normal; font:400 9px ui-monospace,monospace; color:var(--ink3); white-space:nowrap; padding-left:1px }
 .nbnum .gh{ color:var(--ink4); font:600 11.5px ui-monospace,monospace; width:34px; text-align:center }
 .nbnum.wt input{ color:var(--gold) }
+/* the unit is a switch, and looks like one only when you go near it */
+.nbunit{ border:none; background:none; cursor:pointer; padding:0 1px; border-radius:3px;
+         font:inherit; color:inherit; border-bottom:1px dotted var(--line2) }
+.nbunit:hover{ color:var(--accent); border-bottom-color:var(--accent); background:var(--accent-soft) }
 
 /* PER SET. Indented under the movement it belongs to, numbered down the
    left, and deliberately quiet — it is detail on a row, not a new row. */
@@ -2879,6 +2883,43 @@ function nbSetNum(bi,ii,f,raw){ nbAt(bi);
    prints it beside the movement and a person reads "3-1-1" directly. An
    empty box removes it rather than storing an empty string, so a block
    with no tempo does not carry a field pretending it has one. */
+/* REPS OR SECONDS, YOUR CALL.
+
+   The database has an opinion about every movement — a bear limb lift is
+   measured in reps — and that opinion is a sensible default and nothing
+   more. Held for time it is a different exercise, and a coach deciding
+   that should not have to argue with a spreadsheet.
+
+   The prescription has always been able to say it: "8" and "8s" are
+   different strings and the parser has always told them apart. There was
+   just no way to change one into the other except by retyping, and
+   nothing carried the decision to the runner — that is the `measure`
+   override in js/core/current.js.
+
+   A sensible number comes with the switch, because 8 seconds is not the
+   same intent as 8 reps and neither is 30 reps. Multiplying by four is
+   the rough exchange rate of a rep to a second, rounded to something a
+   human would have written. */
+const NB_SEC_STEPS = [10, 15, 20, 30, 40, 45, 60, 90];
+function nbToggleUnit(bi,ii){ nbAt(bi);
+  const it = PROG.days[PDAY].blocks[bi].items[ii];
+  const p = nbParse(it.pres);
+  if(p.hold){
+    p.val = Math.max(1, Math.round(p.val / 4));
+  } else {
+    const want = p.val * 4;
+    p.val = NB_SEC_STEPS.reduce((a,b) => Math.abs(b-want) < Math.abs(a-want) ? b : a);
+  }
+  p.hold = !p.hold;
+  it.pres = nbFmt(p);
+  /* a per-set plan is in the same unit as the row it belongs to */
+  if(it.plan) it.plan.forEach(st => { if(st.v != null)
+    st.v = p.hold ? NB_SEC_STEPS.reduce((a,b)=>Math.abs(b-st.v*4)<Math.abs(a-st.v*4)?b:a)
+                  : Math.max(1, Math.round(st.v/4)); });
+  nbSave();
+  toast(p.hold ? `${MV(it.ex).n} is timed now` : `${MV(it.ex).n} is counted now`);
+}
+
 function nbSetTempo(bi,ii,raw){ nbAt(bi);
   const it = PROG.days[PDAY].blocks[bi].items[ii];
   const t = String(raw||'').trim();
@@ -3483,7 +3524,10 @@ function nbMiddle(){
               : nbGhost('\u00D7','the rounds are on the block')}
             ${spec.item.indexOf('val')>=0
               ? nbNum({a:`b${bi}i${ii}.val`, min:1, max:600, val:pr.val,
-                       unit:(pr.hold?'s':'reps')+(pr.side?'/side':''), title:pr.hold?'seconds':'reps',
+                       unit:`<button class="nbunit" title="${pr.hold?'Counted in reps instead':'Held for time instead'}"
+                              onclick="event.stopPropagation();nbToggleUnit(${bi},${ii})"
+                              >${pr.hold?'sec':'reps'}</button>${pr.side?'/side':''}`,
+                       title:pr.hold?'seconds':'reps',
                        on:`nbSetNum(${bi},${ii},'val',this.value)`})
               /* A TABATA'S ROW HAS NO NUMBER OF ITS OWN. The clock decides:
                  twenty seconds on, ten off, and the movement fills them.
@@ -3515,7 +3559,7 @@ function nbMiddle(){
           it.plan.map((st,si)=>`<div class="nbprow">
             <span class="n">${si+1}</span>
             ${nbNum({a:`b${bi}i${ii}s${si}.v`, min:1, max:600, val:st.v,
-                     unit:pr.hold?'s':'reps', title:`set ${si+1}`,
+                     unit:pr.hold?'sec':'reps', title:`set ${si+1}`,
                      on:`nbSetPlan(${bi},${ii},${si},'v',this.value)`})}
             ${nbNum({a:`b${bi}i${ii}s${si}.w`, min:0, max:900, step:5, val:st.w, ph:'\u2014',
                      unit:'lb', title:`set ${si+1} weight`, cls:'wt',

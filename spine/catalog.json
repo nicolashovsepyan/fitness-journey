@@ -1,7 +1,7 @@
 {
  "version": 1,
- "built": "2026-09-02",
- "count": 308,
+ "built": "2026-09-05",
+ "count": 321,
  "movements": {
   "bodyweight_squat": {
    "id": "bodyweight_squat",
@@ -8859,6 +8859,526 @@
     "dashboard": null
    }
   },
+  "loaded_beast": {
+   "id": "loaded_beast",
+   "name": "Loaded Beast",
+   "pattern": "core",
+   "family": "animal",
+   "equipment": [
+    "bw"
+   ],
+   "measure": "hold",
+   "load": "bw",
+   "laterality": "bilateral",
+   "level": "beg",
+   "diff": 3,
+   "easier": "bear_hold",
+   "harder": "bear_crawl",
+   "noPR": false,
+   "gymOnly": false,
+   "cue": "Bear position, then sit the hips back towards the heels without letting the knees touch or the back round. Rock forward to the start. All the tension of a bear hold with the shoulders and hips actually moving.",
+   "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [],
+   "muscles": [],
+   "musclesAlso": [],
+   "modality": null,
+   "role": null,
+   "demands": [],
+   "secPerRep": null,
+   "art": {
+    "file": null,
+    "status": "missing"
+   },
+   "video": null,
+   "benchmark": null,
+   "aliases": {
+    "deck": [],
+    "dashboard": null
+   }
+  },
+  "bear_crawl": {
+   "id": "bear_crawl",
+   "name": "Bear Crawl",
+   "pattern": "core",
+   "family": "animal",
+   "equipment": [
+    "bw"
+   ],
+   "measure": "hold",
+   "load": "bw",
+   "laterality": "bilateral",
+   "level": "int",
+   "diff": 4,
+   "easier": "loaded_beast",
+   "harder": "bear_crawl_back",
+   "noPR": false,
+   "gymOnly": false,
+   "cue": "Knees an inch off the floor, opposite hand and foot together, hips low and quiet. If the hips swing side to side the steps are too long. Forward and back in a small space.",
+   "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [],
+   "muscles": [],
+   "musclesAlso": [],
+   "modality": null,
+   "role": null,
+   "demands": [],
+   "secPerRep": null,
+   "art": {
+    "file": null,
+    "status": "missing"
+   },
+   "video": null,
+   "benchmark": null,
+   "aliases": {
+    "deck": [],
+    "dashboard": null
+   }
+  },
+  "bear_crawl_back": {
+   "id": "bear_crawl_back",
+   "name": "Backward Bear Crawl",
+   "pattern": "core",
+   "family": "animal",
+   "equipment": [
+    "bw"
+   ],
+   "measure": "hold",
+   "load": "bw",
+   "laterality": "bilateral",
+   "level": "int",
+   "diff": 5,
+   "easier": "bear_crawl",
+   "harder": "sit_through",
+   "noPR": false,
+   "gymOnly": false,
+   "cue": "The same shape going backwards, which is where most people find out their shoulders were doing the work. Slower than forward, always.",
+   "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [],
+   "muscles": [],
+   "musclesAlso": [],
+   "modality": null,
+   "role": null,
+   "demands": [],
+   "secPerRep": null,
+   "art": {
+    "file": null,
+    "status": "missing"
+   },
+   "video": null,
+   "benchmark": null,
+   "aliases": {
+    "deck": [],
+    "dashboard": null
+   }
+  },
+  "sit_through": {
+   "id": "sit_through",
+   "name": "Sit-Through",
+   "pattern": "core",
+   "family": "animal",
+   "equipment": [
+    "bw"
+   ],
+   "measure": "reps",
+   "load": "bw",
+   "laterality": "bilateral",
+   "level": "int",
+   "diff": 5,
+   "easier": "bear_crawl",
+   "harder": "lizard_crawl",
+   "noPR": false,
+   "gymOnly": false,
+   "cue": "From the bear, lift one hand and thread the opposite leg through underneath, finishing on the hip facing up. Reverse it. The rotational half of ground movement and the one everybody skips.",
+   "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [],
+   "muscles": [],
+   "musclesAlso": [],
+   "modality": null,
+   "role": null,
+   "demands": [],
+   "secPerRep": null,
+   "art": {
+    "file": null,
+    "status": "missing"
+   },
+   "video": null,
+   "benchmark": null,
+   "aliases": {
+    "deck": [],
+    "dashboard": null
+   }
+  },
+  "crab_hold": {
+   "id": "crab_hold",
+   "name": "Crab Hold",
+   "pattern": "core",
+   "family": "animal",
+   "equipment": [
+    "bw"
+   ],
+   "measure": "hold",
+   "load": "bw",
+   "laterality": "bilateral",
+   "level": "beg",
+   "diff": 2,
+   "easier": null,
+   "harder": "crab_reach",
+   "noPR": false,
+   "gymOnly": false,
+   "cue": "Sit, hands behind you with the fingers pointing at your feet, lift the hips to a table top. Chest open, glutes on. The shoulder extension almost nothing else in a program asks for.",
+   "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [],
+   "muscles": [],
+   "musclesAlso": [],
+   "modality": null,
+   "role": null,
+   "demands": [],
+   "secPerRep": null,
+   "art": {
+    "file": null,
+    "status": "missing"
+   },
+   "video": null,
+   "benchmark": null,
+   "aliases": {
+    "deck": [],
+    "dashboard": null
+   }
+  },
+  "crab_reach": {
+   "id": "crab_reach",
+   "name": "Crab Reach",
+   "pattern": "core",
+   "family": "animal",
+   "equipment": [
+    "bw"
+   ],
+   "measure": "reps",
+   "load": "bw",
+   "laterality": "unilateral",
+   "level": "beg",
+   "diff": 3,
+   "easier": "crab_hold",
+   "harder": "crab_walk",
+   "noPR": false,
+   "gymOnly": false,
+   "cue": "From the crab, drive the hips up and reach one arm back over your head, turning the chest to the ceiling. The single best thing in here for a desk-bound thoracic spine.",
+   "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [],
+   "muscles": [],
+   "musclesAlso": [],
+   "modality": null,
+   "role": null,
+   "demands": [],
+   "secPerRep": null,
+   "art": {
+    "file": null,
+    "status": "missing"
+   },
+   "video": null,
+   "benchmark": null,
+   "aliases": {
+    "deck": [],
+    "dashboard": null
+   }
+  },
+  "crab_walk": {
+   "id": "crab_walk",
+   "name": "Crab Walk",
+   "pattern": "core",
+   "family": "animal",
+   "equipment": [
+    "bw"
+   ],
+   "measure": "hold",
+   "load": "bw",
+   "laterality": "bilateral",
+   "level": "int",
+   "diff": 4,
+   "easier": "crab_reach",
+   "harder": null,
+   "noPR": false,
+   "gymOnly": false,
+   "cue": "Hips stay up the whole way. The moment they drop the set is over — a crab walk with a sagging hip is just sitting down slowly.",
+   "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [],
+   "muscles": [],
+   "musclesAlso": [],
+   "modality": null,
+   "role": null,
+   "demands": [],
+   "secPerRep": null,
+   "art": {
+    "file": null,
+    "status": "missing"
+   },
+   "video": null,
+   "benchmark": null,
+   "aliases": {
+    "deck": [],
+    "dashboard": null
+   }
+  },
+  "lizard_crawl": {
+   "id": "lizard_crawl",
+   "name": "Lizard Crawl",
+   "pattern": "core",
+   "family": "animal",
+   "equipment": [
+    "bw"
+   ],
+   "measure": "hold",
+   "load": "bw",
+   "laterality": "bilateral",
+   "level": "adv",
+   "diff": 6,
+   "easier": "sit_through",
+   "harder": null,
+   "noPR": false,
+   "gymOnly": false,
+   "cue": "Chest low, elbows bending, the knee coming outside the hand on every step. The lowest and hardest of the crawls — hip mobility and pressing endurance at once.",
+   "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [],
+   "muscles": [],
+   "musclesAlso": [],
+   "modality": null,
+   "role": null,
+   "demands": [],
+   "secPerRep": null,
+   "art": {
+    "file": null,
+    "status": "missing"
+   },
+   "video": null,
+   "benchmark": null,
+   "aliases": {
+    "deck": [],
+    "dashboard": null
+   }
+  },
+  "duck_walk": {
+   "id": "duck_walk",
+   "name": "Duck Walk",
+   "pattern": "mobility",
+   "family": "animal",
+   "equipment": [
+    "bw"
+   ],
+   "measure": "hold",
+   "load": "bw",
+   "laterality": "bilateral",
+   "level": "int",
+   "diff": 4,
+   "easier": "deep_squat_rock",
+   "harder": "monkey_lateral",
+   "noPR": false,
+   "gymOnly": false,
+   "cue": "Deepest squat you own, heels down if they will go, walk forward without standing up. Loads the knee through its full range on purpose, which is the point — build up to it rather than starting here.",
+   "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [],
+   "muscles": [],
+   "musclesAlso": [],
+   "modality": null,
+   "role": null,
+   "demands": [],
+   "secPerRep": null,
+   "art": {
+    "file": null,
+    "status": "missing"
+   },
+   "video": null,
+   "benchmark": null,
+   "aliases": {
+    "deck": [],
+    "dashboard": null
+   }
+  },
+  "monkey_lateral": {
+   "id": "monkey_lateral",
+   "name": "Lateral Monkey",
+   "pattern": "mobility",
+   "family": "animal",
+   "equipment": [
+    "bw"
+   ],
+   "measure": "hold",
+   "load": "bw",
+   "laterality": "bilateral",
+   "level": "int",
+   "diff": 5,
+   "easier": "duck_walk",
+   "harder": null,
+   "noPR": false,
+   "gymOnly": false,
+   "cue": "Deep squat, both hands down to one side, then hop the feet across to meet them. Land quiet and stay low. Deep squat position plus the shoulders taking bodyweight.",
+   "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [],
+   "muscles": [],
+   "musclesAlso": [],
+   "modality": null,
+   "role": null,
+   "demands": [],
+   "secPerRep": null,
+   "art": {
+    "file": null,
+    "status": "missing"
+   },
+   "video": null,
+   "benchmark": null,
+   "aliases": {
+    "deck": [],
+    "dashboard": null
+   }
+  },
+  "cossack_squat": {
+   "id": "cossack_squat",
+   "name": "Cossack Squat",
+   "pattern": "mobility",
+   "family": "animal",
+   "equipment": [
+    "bw",
+    "kb",
+    "db"
+   ],
+   "measure": "reps",
+   "load": "bw",
+   "laterality": "unilateral",
+   "level": "int",
+   "diff": 4,
+   "easier": "deep_squat_rock",
+   "harder": null,
+   "noPR": false,
+   "gymOnly": false,
+   "cue": "Wide stance, sit into one hip with that heel down, the other leg straight with the toes up. Adductors and ankles, the range nothing else in a program reaches.",
+   "coaching": null,
+   "fundamental": true,
+   "fundFamily": "frontal-plane",
+   "patterns": [
+    "lunge",
+    "squat"
+   ],
+   "muscles": [
+    "quad",
+    "adductor"
+   ],
+   "musclesAlso": [
+    "glute",
+    "hamstring"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
+   "demands": [
+    "deep-knee-flexion"
+   ],
+   "secPerRep": 4,
+   "art": {
+    "file": null,
+    "status": "missing"
+   },
+   "video": null,
+   "benchmark": null,
+   "aliases": {
+    "deck": [],
+    "dashboard": null
+   }
+  },
+  "scorpion_reach": {
+   "id": "scorpion_reach",
+   "name": "Scorpion Reach",
+   "pattern": "mobility",
+   "family": "animal",
+   "equipment": [
+    "bw"
+   ],
+   "measure": "reps",
+   "load": "bw",
+   "laterality": "unilateral",
+   "level": "beg",
+   "diff": 2,
+   "easier": null,
+   "harder": null,
+   "noPR": true,
+   "gymOnly": false,
+   "cue": "Face down, arms wide, take one heel across the body towards the opposite hand and let the hip roll. Both shoulders stay down. Slow — this one is a stretch, not a swing.",
+   "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [],
+   "muscles": [],
+   "musclesAlso": [],
+   "modality": null,
+   "role": null,
+   "demands": [],
+   "secPerRep": null,
+   "art": {
+    "file": null,
+    "status": "missing"
+   },
+   "video": null,
+   "benchmark": null,
+   "aliases": {
+    "deck": [],
+    "dashboard": null
+   }
+  },
+  "inchworm": {
+   "id": "inchworm",
+   "name": "Inchworm",
+   "pattern": "mobility",
+   "family": "animal",
+   "equipment": [
+    "bw"
+   ],
+   "measure": "reps",
+   "load": "bw",
+   "laterality": "bilateral",
+   "level": "beg",
+   "diff": 2,
+   "easier": null,
+   "harder": "bear_crawl",
+   "noPR": true,
+   "gymOnly": false,
+   "cue": "Fold to the floor with straight legs, walk the hands out to a plank, walk the feet back up to the hands. Hamstrings on the way down, shoulders at the far end.",
+   "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [],
+   "muscles": [],
+   "musclesAlso": [],
+   "modality": null,
+   "role": null,
+   "demands": [],
+   "secPerRep": null,
+   "art": {
+    "file": null,
+    "status": "missing"
+   },
+   "video": null,
+   "benchmark": null,
+   "aliases": {
+    "deck": [],
+    "dashboard": null
+   }
+  },
   "bear_hold": {
    "id": "bear_hold",
    "name": "Bear Hold",
@@ -12671,7 +13191,7 @@
    "level": null,
    "diff": null,
    "easier": null,
-   "harder": null,
+   "harder": "cossack_squat",
    "noPR": true,
    "gymOnly": false,
    "cue": "Sit deep, rock side to side.",

@@ -171,6 +171,29 @@ function toSession(dayId, day, fixed) {
       if (p.sets != null) o.sets = p.sets;
       if (p.reps != null) o.reps = p.reps;
       if (p.hold != null) o.hold = p.hold;
+      /* A PRESCRIPTION IN SECONDS MAKES IT A TIMED MOVEMENT, whatever the
+         library calls it.
+
+         resolve.js was built for this — it spreads the session item OVER
+         the library record and its own comment names the case: "a session
+         may override the library measure (e.g. Dead Bug held for 30s
+         instead of counted in reps)". Nothing ever sent the override. So
+         `hold: 30` arrived on a movement the library measures in reps, the
+         runner asked `measure === 'hold'`, got false, went to the reps
+         branch and found no rep count.
+
+         It showed a target of ZERO. Eight movements across four programs
+         were doing this, three of them in a client's live day 3, and it
+         has never once thrown. */
+      if (p.hold != null) o.measure = 'hold';
+      else if (p.reps != null) o.measure = 'reps';
+      /* An em-dash means "as many as you get" — a real answer inside a
+         Tabata or an AMRAP, where the clock decides and a rep target
+         would be a lie. The parser has always produced this flag and
+         this path dropped it, so the distinction between "no target on
+         purpose" and "no target by accident" did not survive the trip.
+         Nothing reads it yet; carrying it is what makes it possible to. */
+      if (p.untargeted) o.untargeted = true;
       if (p.perSide) o.perSide = true;
       /* WHICH SIDE, when the coach named one. `perSide` is one set covering
          both; `side` is a row that IS the left one, with its own row for the

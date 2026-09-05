@@ -21,7 +21,7 @@
    The third is the whole point. It is not enough for the data to be
    loaded; the path the screens take has to reach it.
    ============================================================ */
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'node:path';
 import { StorageAdapter, setAdapter } from '../js/core/storage.js';
@@ -141,6 +141,64 @@ t('a movement with no plan has none', !sw.plan);
 t('  and still has its sets',        sw.sets === 3);
 
 /* put the fixture back for the checks below */
+setAdapter(new OneProgram({
+  id: 'prg_test', assignedTo: 'nicolas', name: fundamentals.name,
+  profile: { source: 'console', raw: {
+    from: fundamentals.id, version: fundamentals.version, name: fundamentals.name,
+    duration: fundamentals.duration, fixed: fundamentals.fixed, days: fundamentals.days } },
+}));
+await loadCurrentProgram('nicolas');
+
+/* ---------------------------------------------------------- */
+/* A PRESCRIPTION IN SECONDS MAKES IT A TIMED MOVEMENT.
+
+   resolve.js spreads the session item over the library record precisely
+   so a session can override the library's measure — its own comment names
+   the case, "Dead Bug held for 30s instead of counted in reps". Nothing
+   ever sent the override, so `hold: 30` landed on a movement the library
+   measures in reps, the runner asked `measure === 'hold'`, got false, took
+   the reps branch and found no rep count.
+
+   It showed a target of ZERO. Eight movements across four programs, three
+   of them in a client's live day 3, and it never threw once.
+
+   This walks every program on the shelf and checks the two things that
+   have to hold: a movement prescribed in seconds resolves as timed, and
+   nothing resolves with a target of nothing. */
+group('seconds and reps, in every program on the shelf');
+{
+  const dir = join(ROOT, 'spine', 'programs');
+  const files = readdirSync(dir).filter(f => f.endsWith('.json') && f !== 'index.json');
+  const wrong = [], zero = [];
+  for (const f of files) {
+    const prog = JSON.parse(readFileSync(join(dir, f), 'utf8'));
+    setAdapter(new OneProgram({ id: 'p', assignedTo: 'x', name: prog.name,
+      profile: { source: 'console', raw: { from: prog.id, name: prog.name,
+        duration: prog.duration, fixed: prog.fixed, days: prog.days } } }));
+    await loadCurrentProgram('x');
+    for (const d of program().week) {
+      const r = resolveSession(d.sessionId, { duration: prog.duration });
+      for (const b of r.blocks) for (const it of b.items) {
+        const secs = /^(\d+\s*[×x]\s*)?\d+\s*s(\b|ec)/.test(String(it.pres || ''));
+        if (secs && it.measure !== 'hold')
+          wrong.push(`${prog.name}/${it.exId} "${it.pres}" -> ${it.measure}`);
+        /* A timed block sets its own clock, and an em-dash inside one is
+           a deliberate "as many as you get". Everything else must carry a
+           number somebody chose. */
+        const timed = ['tabata', 'amrap', 'emom'].includes(b.format);
+        const target = it.measure === 'hold' ? it.hold : (it.reps ?? it.target);
+        if (!it.untargeted && !timed && !target)
+          zero.push(`${prog.name}/${it.exId} "${it.pres}" -> ${it.measure} with no target`);
+      }
+    }
+  }
+  for (const x of wrong.slice(0, 8)) console.log('        ' + x);
+  t('seconds always resolve as a timed movement', wrong.length === 0);
+  for (const x of zero.slice(0, 8)) console.log('        ' + x);
+  t('nothing resolves with a target of nothing', zero.length === 0);
+}
+
+/* put the fixture back */
 setAdapter(new OneProgram({
   id: 'prg_test', assignedTo: 'nicolas', name: fundamentals.name,
   profile: { source: 'console', raw: {
