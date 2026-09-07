@@ -58,23 +58,71 @@ If you would rather paste it: `coach.html` → client rail →
 
 ---
 
-## STEP BY STEP — start your own profile from scratch
+## STEP BY STEP — start fresh, and train off it
 
-1. On your phone, open
-   `https://nicolashovsepyan.github.io/fitness-journey/onboarding.html`
-2. Fill it in properly. Roughly four minutes.
-3. At the end, tap **Add it to my home screen**. Your icon is the
-   triangle-and-dumbbell now, not an "F" — if you still have the old one,
-   **delete it and add it again**. iOS does not update an icon in place.
-4. Then tap **Copy link** on that same last screen and mail it to yourself.
-5. On your laptop, open that link. You land in the console, as you.
-6. Check the line under your name in the client rail. It should read
-   **`survey v6`** and today's date. If it says **`v5 — OUT OF DATE`** in
-   amber, an old record got in — tell me.
-7. Your old profile: client rail → **Remove Nicolas**. That clears the
-   console's copy. It does not touch your training log.
+Do the whole thing **on your laptop, in the browser you run the console
+in**. The survey writes into the same storage the console reads, so
+nothing has to be pasted. One link at the very end goes to your phone.
 
----
+### 1 · Clear the old record first
+
+The Nicolas in your console did not come from a survey. It was minted by
+`make-link` from a program file — a name, a unit, a week and an equipment
+list — which is why the rail shows two lines and none of your stats.
+
+Console → client rail → **Client** → **Remove Nicolas**.
+
+That clears the console's copy only. Your training log is untouched.
+
+> Do this *before* the survey, not after. A fresh survey builds its id from
+> your email; the old record's id came from your name. Skip this and you
+> get **two Nicolases** in the picker.
+
+### 2 · Fill the survey
+
+`https://nicolashovsepyan.github.io/fitness-journey/onboarding.html`
+
+Same browser, same laptop. About four minutes. Use your real email — it is
+what ties the record to you if you ever refill it.
+
+At the end it offers **Add to home screen** and **Send to Nico**. On the
+laptop you need neither. Just finish it.
+
+### 3 · Open the console
+
+`https://nicolashovsepyan.github.io/fitness-journey/coach.html`
+
+You are already in the picker. Check the line under your name — it should
+read **`38 · male · … · survey v6`** and today's date.
+
+If it says **`from a link, not a survey`** in amber, step 1 did not take.
+If it says **`v5 — OUT OF DATE`**, tell me.
+
+### 4 · Build the program
+
+**The program** → **Open a program** → pick one. It loads underneath
+straight away.
+
+The left column is now reading *your* answers: your goals, your
+constraints, sessions against the days you asked for, weekly minutes
+against your budget. Edit until those read the way you want.
+
+**Save as new** when you are happy, so it becomes yours rather than a copy
+of a template.
+
+### 5 · Release it
+
+**Give it to Nicolas.** That makes every day of it visible.
+
+### 6 · Get it onto your phone
+
+**Send it** → **Copy the link** → AirDrop or message it to yourself →
+open it on the phone.
+
+That link carries your answers *and* the program *and* which days are
+released. Opening it sets you to active and the dashboard opens on your
+week. It is around 13,000 characters — long, because there is no server
+yet; that is the trade.
 
 ## STEP BY STEP — get Sevan into your console
 

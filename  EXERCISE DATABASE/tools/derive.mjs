@@ -27,6 +27,9 @@ const { EXERCISES } = await import(join(ROOT, 'js/data/exercises.js'));
    ------------------------------------------------------------ */
 const LAD  = JSON.parse(readFileSync(join(HERE, 'fundamental-ladders.json'), 'utf8'));
 const GYM_LANES = JSON.parse(readFileSync(join(HERE, 'gym-lanes.json'), 'utf8'));
+/* FLOWS — an ordered sequence worked through in one session, aimed at one
+   skill. Not a ladder, not a complex, not a protocol. */
+const FLOWS = JSON.parse(readFileSync(join(HERE, 'flows.json'), 'utf8')).flows;
 /* A fundamental is now a LADDER: one anchor (the destination), regressions
    below it so anyone can enter, progressions above so nobody runs out.
    Nicolas, 19 Aug: "Main exercise and regression / progression on level of
@@ -404,6 +407,7 @@ for (const [id, m] of Object.entries(EXERCISES)) {
     /* a fundamental is a movement we promise to teach and track to mastery.
        Every one of these needs a card and a picture; nothing else does yet. */
     ladder: '', ladder_role: '', ladder_pos: '',
+    flow: '', flow_step: '',
     gym_lane: '', gym_role: '', gym_pos: '',
     fundamental: fundById[id] ? String(fundById[id][0].tier) : '',
     fund_no: fundById[id] ? fundById[id].map(f => f.no).join(', ') : '',
@@ -524,6 +528,18 @@ for (const [lid, lane] of Object.entries(GYM_LANES.lanes)) {
   lane.harder.forEach((id, i) => put(id, 'harder', i + 1));
 }
 
+/* stamp flow membership so a movement knows the sequences it appears in */
+let flowed = 0;
+for (const f of FLOWS) {
+  f.steps.forEach(([id], i) => {
+    const r = rows.find(x => x.id === id);
+    if (!r) return;
+    r.flow = r.flow ? `${r.flow}, ${f.id}` : f.id;
+    r.flow_step = i + 1;
+    flowed++;
+  });
+}
+
 /* bridges — a gym movement points at the fundamental we mean to reach.
    Also applied to anything already in the database that has a pairing. */
 let bridged = 0;
@@ -561,6 +577,7 @@ const missingFund = FUND.filter(([, , , , id]) => !id || !finalIds.has(id));
 console.log(`\n  duplicates merged       ${deduped}`);
 console.log(`  levels filled in        ${levelled}`);
 console.log(`  gym lanes               ${Object.keys(GYM_LANES.lanes).length} of ${LAD.ladders.length}   (${laned} movements, ${Object.keys(GYM_LANES.no_lane).length} ladders have none)`);
+console.log(`  flows                   ${FLOWS.length}   (${flowed} movement slots)`);
 console.log(`  ladders                 ${LAD.ladders.length}   (${onLadder} movements sit on one)`);
 console.log(`  fundamentals in the DB  ${FUND.length - missingFund.length} / ${FUND.length}`);
 if (missingFund.length) {

@@ -104,6 +104,7 @@ COLS = [
  ('ladder',           'Ladder',          'RELATIONS',   16, None,          False),
  ('ladder_role',      'Rung',            'RELATIONS',   12, 'ladder_role', False),
  ('ladder_pos',       'Pos',             'RELATIONS',    6, None,          False),
+ ('flow',             'Flow',            'RELATIONS',   14, None,          False),
  ('gym_lane',         'Gym lane',        'RELATIONS',   16, None,          False),
  ('gym_role',         'Gym rung',        'RELATIONS',   12, 'gym_role',    False),
 
@@ -510,6 +511,39 @@ def build_fundamentals(wb, rows):
         w.font = Font(size=9, italic=True); w.alignment = Alignment(wrap_text=True, vertical='top')
         ws.row_dimensions[j].height = 34
         j += 1
+
+    # ---- FLOWS — ordered sequences aimed at one skill ----
+    FLOWS = json.load(open(os.path.join(HERE, 'flows.json')))['flows']
+    if FLOWS:
+        j += 1
+        c = ws.cell(row=j, column=1, value=(
+            'FLOWS — an ordered sequence you work through in one session, aimed at one skill. '
+            'Not a ladder (one movement getting harder), not a complex (a loaded circuit). '
+            'Drafted from the documented prerequisites, NOT from watching the video — check it.'))
+        c.font = Font(bold=True, italic=True, size=10)
+        ws.merge_cells(start_row=j, start_column=1, end_row=j, end_column=17)
+        j += 1
+        for fl in FLOWS:
+            hd = ws.cell(row=j, column=1, value=fl['name'])
+            hd.font = Font(bold=True, size=11)
+            ws.cell(row=j, column=2, value=fl['level'])
+            ws.cell(row=j, column=3, value=f"{fl['minutes']}m")
+            src = ws.cell(row=j, column=9, value=fl['source'])
+            src.font = Font(size=9, italic=True)
+            u = ws.cell(row=j, column=19, value=fl['url']); u.font = Font(size=9, color='1B5B70')
+            w = ws.cell(row=j, column=20, value=fl['why'])
+            w.font = Font(size=9, italic=True); w.alignment = Alignment(wrap_text=True, vertical='top')
+            ws.row_dimensions[j].height = 30
+            j += 1
+            for k, (mid, dose, note) in enumerate(fl['steps'], start=1):
+                nm = byid.get(mid, {}).get('name', mid)
+                for i, v in enumerate(['   ' + str(k), '', '', '', '', '', '', '', nm], start=1):
+                    cc = ws.cell(row=j, column=i, value=v); cc.font = Font(size=9)
+                d_ = ws.cell(row=j, column=15, value=dose); d_.font = Font(size=9, bold=True)
+                nt = ws.cell(row=j, column=20, value=note)
+                nt.font = Font(size=9); nt.alignment = Alignment(wrap_text=True, vertical='top')
+                ws.row_dimensions[j].height = 26
+                j += 1
 
     # Nicolas's kettlebell videos, rescued from the same file
     res = KBLIB.get('resources') or {}

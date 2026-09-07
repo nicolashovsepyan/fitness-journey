@@ -1,0 +1,28 @@
+{
+  "_what": "FLOWS — a new record type. Nicolas, 5 Sep: 'I would also create this video as a flow.'",
+  "_definition": "A flow is an ORDERED SEQUENCE worked through in one session, aimed at one skill. It is not a ladder (that is one movement getting harder), not a complex (that is a loaded circuit for conditioning), and not a protocol (that is a prescription like Zone 2). A flow is how you spend a session when the goal is to learn something.",
+  "_honesty": "The flare flow below is built from the DOCUMENTED prerequisites for the move — straddle flexibility, straddle strength, planche-position arm support, hip circles — not from watching the video, which I cannot do. Check it against the tutorial and tell me what is missing or out of order.",
+  "flows": [
+    {
+      "id": "flare_flow",
+      "name": "The Flare",
+      "goal": "Break dance flare",
+      "source": "Leo Moves — Break Dance Flare, step-by-step tutorial",
+      "url": "https://www.youtube.com/watch?v=lxj0NtGAZsM",
+      "level": "adv",
+      "kit": "floor, optional parallettes",
+      "minutes": 30,
+      "why": "The flare is a compression skill wearing a dance costume. Almost all of the work is straddle strength and the shoulder shift — the spin is the last five percent.",
+      "steps": [
+        ["wrist_prep",                 "2 min",        "Non-negotiable. Every rung below puts bodyweight through an extended wrist."],
+        ["pancake_fold",               "3 x 45 sec",   "Open the straddle first. You cannot train a range you do not have."],
+        ["straddle_compression_lift",  "3 x 8",        "Turn that range into strength. This is the single most transferable drill here."],
+        ["straddle_l_sit",             "3 x 20 sec",   "Hold what you just lifted. Hands down, legs up and wide."],
+        ["planche_lean",               "3 x 15 sec",   "The flare lives in a planche-lean shoulder position. Build the support before the spin."],
+        ["hip_circles",                "5 x 3 circles","Slow. The whole skill is the weight transfer from hand to hand."],
+        ["half_flare",                 "6 x 2 each side", "Front half only, set down, reset. Quality over continuity."],
+        ["flare",                      "attempts",     "Five honest attempts, then stop. This is a skill session, not a conditioning session."]
+      ]
+    }
+  ]
+}

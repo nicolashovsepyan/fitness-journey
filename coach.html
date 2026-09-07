@@ -4276,10 +4276,27 @@ function drawClients(){
     const itk = coachIntakes().filter(i => i.userId === CLIENT_ID)
       .sort((x,y)=>String(y.submittedAt).localeCompare(String(x.submittedAt)))[0];
     const v = itk && itk.version;
+    /* A VERSION NUMBER IS NOT EVIDENCE OF A SURVEY.
+
+       tools/make-link.mjs mints a record from a program file — a name, a
+       unit, a week, an equipment list — and stamps it `v: 6` because that
+       is the payload format. It is not a survey and it never was: no age,
+       no goals, no PAR-Q, no pain, no sleep. The console read the 6 and
+       reported "survey v6, Aug 25" underneath a rail with two lines in it,
+       which is the console vouching for answers nobody ever gave.
+
+       The questions only a real survey asks are the evidence. Three of
+       them present is a survey; fewer is a record that arrived some other
+       way, and the difference is worth a word on screen. */
+    const REAL_SURVEY = ['age','sex','driver','parq','sleep','shape','blockers','trained','deck'];
+    const answered = itk && itk.answers
+      ? REAL_SURVEY.filter(k => itk.answers[k] != null && itk.answers[k] !== '').length : 0;
+    const thin = itk && v !== 0 && answered < 3;
     const when = itk && itk.submittedAt
       ? new Date(itk.submittedAt).toLocaleDateString(undefined,{day:'numeric',month:'short'}) : null;
     const src = !itk ? null
       : v === 0 ? 'no survey yet'
+      : thin ? `from a link, not a survey${when ? ' \u00B7 ' + when : ''}`
       : v === PAYLOAD_V ? `survey v${v}${when ? ', ' + when : ''}`
       : `survey v${v} \u2014 OUT OF DATE${when ? ', ' + when : ''}`;
     subEl.textContent = HAS_CLIENT
@@ -4287,7 +4304,8 @@ function drawClients(){
          A.tierName || (A.levels && A.levels.gym!=null ? 'level '+A.levels.gym : null),
          src].filter(Boolean).join(' \u00B7 ')
       : 'Nobody selected';
-    subEl.style.color = (v != null && v !== 0 && v !== PAYLOAD_V) ? '#E8B04B' : '';
+    subEl.style.color = (thin || (v != null && v !== 0 && v !== PAYLOAD_V))
+      ? 'var(--gold)' : '';
   }
   const av = document.querySelector('.who .av');
   if(av) av.textContent = ((A.name||'?').trim()[0]||'?').toUpperCase();
