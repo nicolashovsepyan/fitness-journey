@@ -934,3 +934,20 @@ html, body { touch-action: manipulation; }      /* kill double-tap-to-zoom (keep
 .cc-sub { color:var(--muted); font-size:12px; }
 .claim-card .cc-name + .cc-sub { display:block; }
 .claim-foot { color:var(--faint); font-size:12px; margin-top:18px; }
+
+/* ── the way in, when this device knows nobody ──────────────────
+   An installed app has its own storage container, so a phone that has
+   just been installed legitimately knows no one — the survey ran in
+   Safari, in a different box. The link is the bridge and this is where
+   it gets pasted. */
+.claim-paste{ margin-top:22px; display:flex; flex-direction:column; gap:10px; align-items:stretch }
+.claim-paste p{ margin:0; font-size:14px; line-height:1.45 }
+.claim-paste textarea{ width:100%; box-sizing:border-box; resize:vertical;
+  font:inherit; font-size:13px; line-height:1.4; padding:11px 12px;
+  color:var(--ink,#ECEFF3); background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.14); border-radius:12px }
+.claim-paste textarea:focus{ outline:none; border-color:var(--accent,#3ECBA8) }
+.claim-paste .btn{ align-self:flex-start }
+.claim-paste .btn[disabled]{ opacity:.5 }
+.claim-err{ min-height:1em; color:#F0857A; font-size:13px }
+.claim-err:empty{ display:none }

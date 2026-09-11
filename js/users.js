@@ -46,6 +46,20 @@ const SEED = {
    person data, and they move to records when programs do (Phase 4). */
 const PROFILE_FOR = { main: PROFILE, beginner_return: BEGINNER_PROFILE };
 
+/* Has this device ever held anything for that person? Their training,
+   their display name, or a workout they left running. Any one of the
+   three is evidence; none of them is an empty device. */
+async function deviceKnows(s, id) {
+  try {
+    if (await s.getDisplayName(id)) return true;
+  } catch (e) {}
+  try {
+    for (const k of [`fj.v1.${id}`, `fj.v1.${id}.hist`, `fj.run.${id}`, `fj.name.${id}`])
+      if (localStorage.getItem(k) != null) return true;
+  } catch (e) {}
+  return false;
+}
+
 let users = {};        // id -> record, loaded at boot
 let active = null;     // resolved once, at boot
 let ready = false;
@@ -59,10 +73,26 @@ export async function loadUsers() {
 
   let list = await s.listUsers();
   if (!list.length) {
-    /* First run on this device — or an upgrade from the version where
-       these two were compile-time constants. Same ids, so their
-       existing training under fj.v1.nico is picked up untouched. */
-    for (const seed of Object.values(SEED)) list.push(await s.saveUser(seed));
+    /* SEEDS ARE AN UPGRADE PATH, NOT A WELCOME MAT.
+
+       These two were compile-time constants once, and writing them on an
+       empty device is how a phone that already held training under
+       fj.v1.nico keeps it. That is still worth doing — for a phone that
+       has that training.
+
+       On a phone that does not, it put two strangers on the first screen
+       a new person ever sees and asked them to pick one. Nicolas filled
+       the survey as Nick, installed the app, and was offered "Nicolas"
+       and "Training Partner" — neither of them him, both with programs
+       he had never been given. The claim screen was doing exactly what it
+       was told; it was told the wrong thing.
+
+       So: seed only where there is evidence the seed belongs. A device
+       with none of their data starts empty, and the claim screen asks for
+       a link instead of offering a stranger. */
+    for (const seed of Object.values(SEED)) {
+      if (await deviceKnows(s, seed.id)) list.push(await s.saveUser(seed));
+    }
   }
   users = Object.fromEntries(list.map(u => [u.id, u]));
 
@@ -96,6 +126,35 @@ export async function loadUsers() {
 }
 
 export function usersLoaded() { return ready; }
+
+/* ── forget everyone on this device ──────────────────────────
+   Removes the PEOPLE and the device's claim, and nothing else. Each
+   person's training lives under its own key and is left alone: losing
+   a name is a mistake you can recover from by pasting a link again,
+   and losing a training log is not.
+
+   After this the app has nobody, which is the state a freshly installed
+   app is in — so it asks whose phone this is and offers the paste box,
+   which is exactly the way back in. */
+export async function forgetEveryone() {
+  const s = storage();
+  const ids = Object.keys(users);
+  /* The adapter can save a user and read them back but has never been
+     able to delete one — there was no caller until now. Written through
+     the roster it does expose: an empty list IS no people. */
+  try { await s.saveUsers?.([]); } catch (e) {}
+  for (const id of ids) {
+    try { localStorage.removeItem(`fj.name.${id}`); } catch (e) {}
+  }
+  try { await s.setActiveUserId(null); } catch (e) {}
+  /* and the keys underneath, because an adapter that grew a cache would
+     otherwise hand the same people back on the next read */
+  try {
+    localStorage.removeItem('fj.users');
+    localStorage.removeItem('fj.user');
+  } catch (e) {}
+  users = {}; active = null;
+}
 
 /* ── who is here ─────────────────────────────────────────────
    Never guessed. A null active user means the claim screen runs —

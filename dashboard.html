@@ -6144,13 +6144,30 @@ function act(a,el){
     return toast('Downloaded - that is everything');
   }
   if(cmd==='wipe'){
-    if(!confirm('Delete everything on this device - your answers, your log, your photos? This cannot be undone.')) return;
+    /* "DELETE EVERYTHING" DID NOT DELETE EVERYTHING.
+
+       It cleared this page's own drawers and left the app's roster —
+       fj.users and fj.user — untouched. So a phone wiped by this button
+       still knew the same people, and the next open still asked which of
+       them you were. A button promising completeness and quietly keeping
+       something is worse than one that admits its scope.
+
+       Everything person-shaped goes now: the roster, the claim, the
+       display names, any workout left running, and every profile and log
+       on the device.
+
+       WHAT IT STILL LEAVES, ON PURPOSE: fj.coach.* and the saved
+       programs. Those belong to the coach console, which is a different
+       job that happens to share a browser — and destroying a coach's
+       clients from inside a client app is not what anybody pressing this
+       is asking for. */
+    if(!confirm('Delete everything on this device - your answers, your log, your photos, and who this phone belongs to? This cannot be undone.')) return;
     if(!confirm('Really? There is no copy anywhere else.')) return;
     try{
-      [KEY, COACH_KEY, 'fj.v1.profile.'+USER].forEach(k=>localStorage.removeItem(k));
-      localStorage.removeItem('fj.v1.current');
-      const people = JSON.parse(localStorage.getItem('fj.v1.people')||'[]').filter(x=>x.uid!==USER);
-      localStorage.setItem('fj.v1.people', JSON.stringify(people));
+      const KEEP = /^fj\.coach\.|^fj\.v1\.savedPrograms$/;
+      const PERSON = /^fj\.(v1\.|users$|user$|name\.|run\.|intakes$|programs$)/;
+      for(const k of Object.keys(localStorage))
+        if(PERSON.test(k) && !KEEP.test(k)) localStorage.removeItem(k);
     }catch(e){}
     return location.reload();
   }

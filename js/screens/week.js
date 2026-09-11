@@ -8,7 +8,7 @@
 import { program, sessions } from '../core/current.js';
 import { store } from '../store.js';
 import { setVoice, isVoiceOn, listVoices, getVoiceName, setVoiceName, say, initAudio } from '../timer.js';
-import { USERS, activeUser, switchUser } from '../users.js';
+import { USERS, activeUser, switchUser, forgetEveryone } from '../users.js';
 
 const DAY_IMG = {
   quads_knees: 'images/day-leg.png',
@@ -111,7 +111,8 @@ export function renderWeek(host, { onOpenDay, onOpenHistory }) {
         </div>
         <div class="goal-row" style="margin-top:14px;"><span class="goal-name">Export my data</span>
           <div class="focus"><button id="exportBtn">Export</button></div></div>
-        <button class="btn ghost" id="resetBtn" style="margin-top:14px;">Reset all data</button>
+        <button class="btn ghost" id="forgetBtn" style="margin-top:14px;">Forget everyone on this phone</button>
+        <button class="btn ghost" id="resetBtn" style="margin-top:8px;">Reset all data</button>
         <button class="btn" id="settingsClose" style="margin-top:8px;">Done</button>
       </div>`;
     host.appendChild(ov);
@@ -137,6 +138,24 @@ export function renderWeek(host, { onOpenDay, onOpenHistory }) {
       const blob = new Blob([store.exportJSON()], { type: 'application/json' });
       const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'fitness-journey-backup.json'; a.click();
     });
+    /* SOMEBODY ELSE'S NAME ON YOUR PHONE, AND NO WAY TO TAKE IT OFF.
+
+       Settings could switch between people and never remove one, so a
+       device that ended up holding the wrong person held them for good —
+       the only way out was deleting the installed app and adding it back.
+       That is a real thing to ask of somebody who just wants to train.
+
+       This forgets the people and the device's claim. It leaves each
+       person's TRAINING where it is: logs live under their own key and
+       deleting those is a different decision, with its own button right
+       underneath this one. */
+    ov.querySelector('#forgetBtn').addEventListener('click', async () => {
+      const names = Object.values(USERS).map(u => u.name).join(', ');
+      if (!confirm(`Forget ${names} on this phone? You will be asked whose phone this is, and can paste your link. Training logs are kept.`)) return;
+      await forgetEveryone();
+      location.reload();
+    });
+
     ov.querySelector('#resetBtn').addEventListener('click', () => {
       if (confirm('Erase all logs, PRs and goals?')) { store.reset(); ov.remove(); renderWeek(host, { onOpenDay }); }
     });

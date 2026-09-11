@@ -66,6 +66,37 @@ function uiFor(a) {
 export async function consumeSurveyHandoff() {
   const raw = readFragment('fj');
   if (!raw) return null;
+  const id = await applySurveyPayload(raw);
+  /* Take it out of the address bar. It has been read, it is health data,
+     and leaving it there puts it in the back button and in any screenshot
+     of the app. */
+  if (id) clearFragment();
+  return id;
+}
+
+/* THE SAME ARRIVAL, FROM A PASTE RATHER THAN THE ADDRESS BAR.
+
+   An installed iOS app gets its own storage container. The survey runs in
+   Safari, so everything it wrote — the person, their answers, their
+   claim — is in a different box from the one the home-screen icon opens.
+   And the icon opens start_url with no fragment, so the hand-off above
+   never runs there.
+
+   That is not a bug with a fix in the survey. It is the shape of an
+   installed web app, and the only way across is for the app to accept
+   the link itself. Hence a function that takes the payload from
+   anywhere: the address bar, or somebody pasting what they were sent.
+
+   Tolerant about what it is given — a whole URL, a bare fragment, or the
+   payload on its own — because a link that has been through a message
+   bubble is not always the link that was sent. */
+export async function applySurveyPayload(input) {
+  const str = String(input || '').trim();
+  if (!str) return null;
+  const raw = (str.match(/[#&]fj=([A-Za-z0-9_\-]+)/) ||
+               str.match(/#([A-Za-z0-9_\-]{24,})/) ||
+               str.match(/^([A-Za-z0-9_\-]{24,})$/) || [])[1];
+  if (!raw) return null;
 
   let payload;
   try {
@@ -76,6 +107,7 @@ export async function consumeSurveyHandoff() {
     console.warn('[intake] hand-off could not be read, ignoring', e);
     return null;
   }
+  if (!payload || !payload.a) return null;
 
   const a = (payload && payload.a) || {};
   const s = storage();
@@ -116,11 +148,5 @@ export async function consumeSurveyHandoff() {
   }));
 
   await claimDevice(SELF, user.displayName);
-
-  /* Take it out of the address bar. It has been read, it is health data,
-     and leaving it there puts it in the back button and in any screenshot
-     of the app. */
-  clearFragment();
-
   return SELF;
 }
