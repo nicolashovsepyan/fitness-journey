@@ -1,7 +1,7 @@
 {
  "version": 1,
- "built": "2026-09-05",
- "count": 321,
+ "built": "2026-09-11",
+ "count": 322,
  "movements": {
   "bodyweight_squat": {
    "id": "bodyweight_squat",
@@ -1091,8 +1091,8 @@
    ],
    "secPerRep": 3,
    "art": {
-    "file": null,
-    "status": "missing"
+    "file": "images/exercises/nordic_curl.png",
+    "status": "drawn"
    },
    "video": null,
    "benchmark": null,
@@ -1225,8 +1225,8 @@
    "demands": [],
    "secPerRep": 3,
    "art": {
-    "file": null,
-    "status": "missing"
+    "file": "images/exercises/tibialis_raise.png",
+    "status": "drawn"
    },
    "video": null,
    "benchmark": null,
@@ -3194,8 +3194,8 @@
    ],
    "secPerRep": 3,
    "art": {
-    "file": null,
-    "status": "missing"
+    "file": "images/exercises/ring_push_up.png",
+    "status": "drawn"
    },
    "video": null,
    "benchmark": null,
@@ -3795,8 +3795,8 @@
    ],
    "secPerRep": 3,
    "art": {
-    "file": null,
-    "status": "missing"
+    "file": "images/exercises/diamond_push_up_on_kettlebell.png",
+    "status": "drawn"
    },
    "video": null,
    "benchmark": null,
@@ -6035,8 +6035,8 @@
    ],
    "secPerRep": 4,
    "art": {
-    "file": null,
-    "status": "missing"
+    "file": "images/exercises/band_assisted_pullup.png",
+    "status": "drawn"
    },
    "video": null,
    "benchmark": null,
@@ -6289,8 +6289,8 @@
    ],
    "secPerRep": null,
    "art": {
-    "file": null,
-    "status": "missing"
+    "file": "images/exercises/band_front_lever.png",
+    "status": "drawn"
    },
    "video": null,
    "benchmark": null,
@@ -6800,8 +6800,8 @@
    ],
    "secPerRep": 3,
    "art": {
-    "file": null,
-    "status": "missing"
+    "file": "images/exercises/skin_the_cat.png",
+    "status": "drawn"
    },
    "video": null,
    "benchmark": null,
@@ -7356,8 +7356,8 @@
    ],
    "secPerRep": 4,
    "art": {
-    "file": null,
-    "status": "missing"
+    "file": "images/exercises/high_pullup.png",
+    "status": "drawn"
    },
    "video": null,
    "benchmark": null,
@@ -10103,14 +10103,14 @@
    "fundamental": false,
    "fundFamily": null,
    "patterns": [
-    "anti-rotation"
+    "anti-extension"
    ],
    "muscles": [
-    "obliques",
     "abs"
    ],
    "musclesAlso": [
-    "glute"
+    "obliques",
+    "front-delt"
    ],
    "modality": "bodyweight",
    "role": "working-set",
@@ -10621,7 +10621,7 @@
    "level": "beg",
    "diff": 3,
    "easier": "forearm_plank",
-   "harder": "side_plank",
+   "harder": "side_plank_hip_dip",
    "noPR": false,
    "gymOnly": false,
    "cue": "Knees bent 90°. Hip stacked, not sagging. Free hand on hip or extended up. 30-60 sec per side.",
@@ -10658,8 +10658,8 @@
    ],
    "secPerRep": null,
    "art": {
-    "file": null,
-    "status": "missing"
+    "file": "images/exercises/side_plank.png",
+    "status": "drawn"
    },
    "video": null,
    "benchmark": null,
@@ -10736,14 +10736,14 @@
    "fundamental": false,
    "fundFamily": null,
    "patterns": [
-    "anti-rotation"
+    "anti-extension"
    ],
    "muscles": [
-    "obliques",
     "abs"
    ],
    "musclesAlso": [
-    "glute"
+    "obliques",
+    "front-delt"
    ],
    "modality": "bodyweight",
    "role": "working-set",
@@ -10784,14 +10784,14 @@
    "fundamental": false,
    "fundFamily": null,
    "patterns": [
-    "anti-rotation"
+    "anti-extension"
    ],
    "muscles": [
-    "obliques",
     "abs"
    ],
    "musclesAlso": [
-    "glute"
+    "obliques",
+    "front-delt"
    ],
    "modality": "bodyweight",
    "role": "working-set",
@@ -10802,6 +10802,45 @@
    "art": {
     "file": null,
     "status": "missing"
+   },
+   "video": null,
+   "benchmark": null,
+   "aliases": {
+    "deck": [],
+    "dashboard": null
+   }
+  },
+  "full_dragon_flag": {
+   "id": "full_dragon_flag",
+   "name": "Full Dragon Flag",
+   "pattern": "core",
+   "family": "dragonflag",
+   "equipment": [
+    "bench"
+   ],
+   "measure": "hold",
+   "load": "bw",
+   "laterality": "bilateral",
+   "level": "adv",
+   "diff": 8,
+   "easier": "single_leg_dragon_flag",
+   "harder": null,
+   "noPR": false,
+   "gymOnly": false,
+   "cue": "Body straight from shoulders to toes, only the shoulders on the bench, hips locked and lower back flat. Lower under control; the set ends the moment the hips break, not the rep after.",
+   "coaching": null,
+   "fundamental": false,
+   "fundFamily": null,
+   "patterns": [],
+   "muscles": [],
+   "musclesAlso": [],
+   "modality": null,
+   "role": null,
+   "demands": [],
+   "secPerRep": null,
+   "art": {
+    "file": "images/exercises/full_dragon_flag.png",
+    "status": "drawn"
    },
    "video": null,
    "benchmark": null,
@@ -11470,8 +11509,8 @@
    ],
    "secPerRep": 3,
    "art": {
-    "file": null,
-    "status": "missing"
+    "file": "images/exercises/hanging_leg_raise.png",
+    "status": "drawn"
    },
    "video": null,
    "benchmark": null,
@@ -11998,8 +12037,8 @@
    ],
    "secPerRep": null,
    "art": {
-    "file": null,
-    "status": "missing"
+    "file": "images/exercises/l_sit.png",
+    "status": "drawn"
    },
    "video": null,
    "benchmark": null,
@@ -12261,7 +12300,7 @@
    "laterality": "bilateral",
    "level": "adv",
    "diff": 6,
-   "easier": "tuck_dragon_flag_hold",
+   "easier": "dragon_flag",
    "harder": "single_leg_dragon_flag",
    "noPR": false,
    "gymOnly": false,
@@ -12553,7 +12592,7 @@
    "level": "adv",
    "diff": 7,
    "easier": "tuck_dragon_flag_hold",
-   "harder": "dragon_flag",
+   "harder": "full_dragon_flag",
    "noPR": false,
    "gymOnly": false,
    "cue": "One leg straight (locked knee, pointed toe), the other knee tucked. Keeping a dead-rigid waistline, lower until parallel to the bench. Switch legs. Slow negatives (reps) OR hold. Bridges tuck → full.",
@@ -13202,9 +13241,8 @@
    ],
    "secPerRep": 5,
    "art": {
-    "file": null,
-    "status": "source",
-    "source": "burpee-five-stage-transparent.png"
+    "file": "images/exercises/burpee.png",
+    "status": "drawn"
    },
    "video": null,
    "benchmark": null,
@@ -14840,8 +14878,8 @@
    "demands": [],
    "secPerRep": 3,
    "art": {
-    "file": null,
-    "status": "missing"
+    "file": "images/exercises/worlds_greatest_stretch.png",
+    "status": "drawn"
    },
    "video": null,
    "benchmark": null,
@@ -16260,8 +16298,8 @@
    "demands": [],
    "secPerRep": null,
    "art": {
-    "file": null,
-    "status": "missing"
+    "file": "images/exercises/hollow_heels_down.png",
+    "status": "drawn"
    },
    "video": null,
    "benchmark": null,

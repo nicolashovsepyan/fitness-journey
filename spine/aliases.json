@@ -1,6 +1,6 @@
 {
  "version": 1,
- "built": "2026-09-05",
+ "built": "2026-09-11",
  "resolve": {
   "bodyweight_squat": "bodyweight_squat",
   "deck:bwsquat": "bodyweight_squat",
@@ -231,6 +231,7 @@
   "tuck_up": "tuck_up",
   "bear_limb_lift": "bear_limb_lift",
   "bear_opposing_limb_lift": "bear_opposing_limb_lift",
+  "full_dragon_flag": "full_dragon_flag",
   "dragon_flag_candlestick": "dragon_flag_candlestick",
   "pike_compression": "pike_compression",
   "plank_leg_lift": "plank_leg_lift",

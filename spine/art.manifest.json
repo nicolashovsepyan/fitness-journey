@@ -1,6 +1,6 @@
 {
  "version": 1,
- "built": "2026-09-05",
+ "built": "2026-09-11",
  "art": {
   "bodyweight_squat": {
    "name": "Bodyweight Squat",
@@ -99,8 +99,8 @@
   },
   "nordic_curl": {
    "name": "Nordic Curl",
-   "file": null,
-   "status": "missing"
+   "file": "images/exercises/nordic_curl.png",
+   "status": "drawn"
   },
   "sliding_ham_curl": {
    "name": "Sliding Hamstring Curl",
@@ -114,8 +114,8 @@
   },
   "tibialis_raise": {
    "name": "Tibialis Raise",
-   "file": null,
-   "status": "missing"
+   "file": "images/exercises/tibialis_raise.png",
+   "status": "drawn"
   },
   "bench_press": {
    "name": "Bench Press",
@@ -304,8 +304,8 @@
   },
   "ring_push_up": {
    "name": "Ring Push-Up",
-   "file": null,
-   "status": "missing"
+   "file": "images/exercises/ring_push_up.png",
+   "status": "drawn"
   },
   "seated_straight_leg_raises": {
    "name": "Seated Straight Leg Raises",
@@ -364,8 +364,8 @@
   },
   "diamond_push_up_on_kettlebell": {
    "name": "Diamond Push-Up on Kettlebell",
-   "file": null,
-   "status": "missing"
+   "file": "images/exercises/diamond_push_up_on_kettlebell.png",
+   "status": "drawn"
   },
   "frog_planche": {
    "name": "Frog Planche",
@@ -579,8 +579,8 @@
   },
   "band_assisted_pullup": {
    "name": "Band-Assisted Pull-Up",
-   "file": null,
-   "status": "missing"
+   "file": "images/exercises/band_assisted_pullup.png",
+   "status": "drawn"
   },
   "jumping_pullup": {
    "name": "Jumping Pull-Up",
@@ -604,8 +604,8 @@
   },
   "band_front_lever": {
    "name": "Band-Assisted Front Lever",
-   "file": null,
-   "status": "missing"
+   "file": "images/exercises/band_front_lever.png",
+   "status": "drawn"
   },
   "chin_up": {
    "name": "Chin-up",
@@ -649,8 +649,8 @@
   },
   "skin_the_cat": {
    "name": "Skin the Cat",
-   "file": null,
-   "status": "missing"
+   "file": "images/exercises/skin_the_cat.png",
+   "status": "drawn"
   },
   "towel_hang": {
    "name": "Towel Hang",
@@ -704,8 +704,8 @@
   },
   "high_pullup": {
    "name": "High Pull-Up",
-   "file": null,
-   "status": "missing"
+   "file": "images/exercises/high_pullup.png",
+   "status": "drawn"
   },
   "pull_over": {
    "name": "Pull-Over",
@@ -1034,8 +1034,8 @@
   },
   "side_plank": {
    "name": "Side Plank",
-   "file": null,
-   "status": "missing"
+   "file": "images/exercises/side_plank.png",
+   "status": "drawn"
   },
   "tuck_up": {
    "name": "Tuck-Up",
@@ -1051,6 +1051,11 @@
    "name": "Bear Opposing Limb Lift",
    "file": null,
    "status": "missing"
+  },
+  "full_dragon_flag": {
+   "name": "Full Dragon Flag",
+   "file": "images/exercises/full_dragon_flag.png",
+   "status": "drawn"
   },
   "dragon_flag_candlestick": {
    "name": "Dragon Flag Candlestick",
@@ -1119,8 +1124,8 @@
   },
   "hanging_leg_raise": {
    "name": "Hanging Leg Raise",
-   "file": null,
-   "status": "missing"
+   "file": "images/exercises/hanging_leg_raise.png",
+   "status": "drawn"
   },
   "hollow_rocks": {
    "name": "Hollow Rocks",
@@ -1174,8 +1179,8 @@
   },
   "l_sit": {
    "name": "L-Sit Hold",
-   "file": null,
-   "status": "missing"
+   "file": "images/exercises/l_sit.png",
+   "status": "drawn"
   },
   "one_leg_l_sit": {
    "name": "One-Leg L-Sit",
@@ -1294,9 +1299,8 @@
   },
   "burpee": {
    "name": "Burpee",
-   "file": null,
-   "status": "source",
-   "source": "burpee-five-stage-transparent.png"
+   "file": "images/exercises/burpee.png",
+   "status": "drawn"
   },
   "ankle_mobility": {
    "name": "Ankle Mobility",
@@ -1460,8 +1464,8 @@
   },
   "worlds_greatest_stretch": {
    "name": "World's Greatest Stretch",
-   "file": null,
-   "status": "missing"
+   "file": "images/exercises/worlds_greatest_stretch.png",
+   "status": "drawn"
   },
   "lat_pulldown": {
    "name": "Lat Pulldown",
@@ -1600,8 +1604,8 @@
   },
   "hollow_heels_down": {
    "name": "Hollow Hold (heels down)",
-   "file": null,
-   "status": "missing"
+   "file": "images/exercises/hollow_heels_down.png",
+   "status": "drawn"
   },
   "incline_side_plank": {
    "name": "Side Plank (hand on bar)",

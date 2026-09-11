@@ -74,6 +74,33 @@ if (kept.length) {
   for (const [t, h] of kept) console.log(`  ${nm(t).padEnd(30)} keeps ${nm(h)}`);
 }
 
+/* A LADDER HAS TO END SOMEWHERE.
+
+   single_leg_dragon_flag pointed its `harder` back at a movement three
+   steps BELOW it, because the top of that family — the full dragon flag —
+   had no entry in the database and the link had nowhere else to go.
+   Walking the chain came back to where it started. side_plank named
+   ITSELF as harder, which can only ever mean nobody filled it in.
+
+   Neither throws. Both make the console offer a next step that is not
+   one, which is a worse answer than offering nothing. */
+const selfLinks = Object.entries(EXERCISES)
+  .filter(([id, m]) => m.easier === id || m.harder === id).map(([id]) => id);
+const cycles = [];
+for (const start of Object.keys(EXERCISES)) {
+  const seen = new Set(); let k = start;
+  while (k && EXERCISES[k] && !seen.has(k)) { seen.add(k); k = EXERCISES[k].harder; }
+  if (k && seen.has(k) && k !== start) continue;        /* joins a chain we will report from its own head */
+  if (k && seen.has(k)) cycles.push([...seen].map(x => nm(x)).join(' -> ') + ' -> ' + nm(k));
+}
+if (selfLinks.length || cycles.length) {
+  console.log('\nLADDERS THAT DO NOT END');
+  for (const id of selfLinks) console.log(`  ${nm(id)} names itself`);
+  for (const c of cycles)     console.log(`  loops: ${c}`);
+} else {
+  console.log('\nEvery ladder ends. No self-links, no loops.');
+}
+
 if (!WRITE) { console.log(`\n  dry run. Add --write to apply.\n`); process.exit(0); }
 
 let src = readFileSync(FILE, 'utf8'), done = 0;
