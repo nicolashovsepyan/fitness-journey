@@ -245,10 +245,56 @@ if (PNG && !CHECK) {
   console.log(`  ${rasterised} PNG(s) written.`);
 }
 
+/* ============================================================
+   THE HOME-SCREEN ICON, WHICH WAS AN "F" FOR WEEKS.
+
+   Everything looked right. The apple-touch-icon tag was on every page,
+   icon-180.png served as a valid 180x180 PNG, and iOS drew a grey square
+   with a letter in it.
+
+   The manifest listed the SVG with `"sizes": "any"`. "any" is the
+   strongest match a browser can be offered — it scales to whatever is
+   needed, so it wins against every fixed size. iOS Safari cannot
+   rasterise an SVG from a manifest. It chose the one icon it could not
+   use, failed, and fell back to generating a letter from short_name:
+   "Fitness". F.
+
+   It also explains why adding apple-touch-icon to every page did not fix
+   it: from iOS 16.4 the manifest wins for a standalone app, so the tag
+   was never consulted.
+
+   Two rules, and neither is a matter of taste on iOS:
+     no SVG in the manifest icon list
+     no `sizes: "any"`, which outranks the sizes that work
+   ============================================================ */
+function checkManifest() {
+  const f = join(ROOT, 'manifest.webmanifest');
+  if (!existsSync(f)) { console.log('  ! no manifest.webmanifest'); return 1; }
+  let m; try { m = JSON.parse(readFileSync(f, 'utf8')); }
+  catch (e) { console.log('  ! manifest is not valid JSON: ' + e.message); return 1; }
+  const icons = m.icons || [];
+  let bad = 0;
+  for (const i of icons) {
+    if (/\.svg$/i.test(i.src || '') || /svg/i.test(i.type || '')) {
+      console.log(`  ! manifest icon ${i.src} is an SVG — iOS cannot rasterise it and will fall back to a letter`);
+      bad++;
+    }
+    if (String(i.sizes) === 'any') {
+      console.log(`  ! manifest icon ${i.src} claims sizes:"any", which outranks every real size`);
+      bad++;
+    }
+  }
+  if (!icons.some(i => String(i.sizes) === '180x180'))
+    { console.log('  ! no 180x180 icon in the manifest — that is the size iOS wants'); bad++; }
+  if (!bad) console.log(`  manifest: ${icons.length} icons, all raster, none claiming "any".`);
+  return bad;
+}
+
 if (CHECK) {
-  const total = drift + assetDrift;
+  const manifestDrift = checkManifest();
+  const total = drift + assetDrift + manifestDrift;
   console.log(total ? `\n${total} item(s) out of step. Reconcile before working on the logo.\n`
-                    : '\nlogo/, onboarding.html and the exported assets all agree.\n');
+                    : '\nlogo/, onboarding.html, the exported assets and the manifest all agree.\n');
   process.exitCode = total ? 1 : 0;
 } else if (changed) {
   /* A single-file app is easy to destroy with a bad slice. This is the seat
