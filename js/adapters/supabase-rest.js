@@ -271,7 +271,12 @@ export class Supabase {
     const url = `${this.#url}/rest/v1/${table}${qs ? '?' + qs : ''}`;
     const s = await this.#fresh();
     const headers = { ...extra };
-    if (s?.access_token) headers.Authorization = `Bearer ${s.access_token}`;
+    // Signed in, we are that person. Signed out, we are explicitly the
+    // anonymous role rather than nobody — PostgREST reads the role from
+    // this header, and without it a request with no session is refused
+    // before any policy gets a chance to deny it, which turns "you may
+    // not see this" into "something is broken".
+    headers.Authorization = `Bearer ${s?.access_token || this.#key}`;
     try {
       return await this.#send(url, method, body, headers);
     } catch (e) {

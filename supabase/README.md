@@ -10,7 +10,7 @@ Paste each into the Supabase **SQL Editor**, press Run, clear the box, next one.
 | 3 | `01c-links-and-indexes.sql` | the links between them | Success. No rows returned |
 | 4 | `01d-stamps.sql` | keeps "last updated" true | Success. No rows returned |
 | 5 | `02-rls.sql` | locks every table, opens 26 doors | Success. No rows returned |
-| 6 | `03-verify-rls.sql` | **the proof** | 11 rows, each PASS or FAIL |
+| 6 | `03-verify-rls.sql` | **the proof**, in three pastes | 6 rows, then 3, then 3 — all PASS |
 
 ## Why it is split up
 
@@ -53,8 +53,15 @@ of housekeeping the database used to do free: sweeping up a person's row when
 their login is deleted, and refusing a row whose id has no login. Both belong
 to the app now.
 
+## Done
+
+Applied to project `dmpxtzjlhccxisuofxhd` on 2026-09-11. All twelve gate lines
+said PASS, and the publishable key is in `js/config.js`. `node
+test/supabase-live.test.mjs` re-proves the whole path against the real database
+any time you want it.
+
 ## The gate
 
-`03-verify-rls.sql` prints 11 lines. **Every one must say PASS.** If any says
+`03-verify-rls.sql` prints 12 lines across three runs. **Every one must say PASS.** If any says
 FAIL, no key goes near the code until it is fixed. The repo is public and this
 database holds PAR-Q answers and injury maps.

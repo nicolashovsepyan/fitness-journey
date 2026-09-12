@@ -1,10 +1,17 @@
 # Turning the backend on
 
-Everything on the code side is built and tested. What is left is the part
-that needs your account, and it is about twenty minutes.
+**DONE, 2026-09-11.** All six steps below were carried out on project
+`dmpxtzjlhccxisuofxhd`. Kept as the record of what was done, and as the
+instructions for the next project, should there ever be one.
 
-Do it in this order. Do not skip step 5 — it is the one that decides whether
-a key is safe to publish, and this repository is public.
+What is live: eight tables, 26 policies, anonymous sign-in on, the site and
+redirect URLs set, all twelve gate lines PASS, and the publishable key in
+`js/config.js`.
+
+`node test/supabase-live.test.mjs` proves the whole path end to end against
+the real database, using only the key that ships in the app. It signs in the
+way the survey does, writes what a person writes, checks it cannot see anybody
+else, and deletes itself afterwards.
 
 ---
 
@@ -78,7 +85,12 @@ anywhere else is refused, which is the behaviour you want.
 
 Back to the **SQL Editor**. Paste `03-verify-rls.sql` and run it.
 
-**It prints 11 lines. Every single one must say PASS.**
+**Three pastes, twelve lines. Every single one must say PASS.**
+
+The file is in three parts because the role has to change between them and
+because the Supabase editor shows only the LAST result set — which is how the
+first version of this file managed to print one line out of eleven and hide
+the ten that mattered.
 
 If any line says FAIL, stop. Send me the output. No key goes near the code
 until all 11 pass, and that is not caution for its own sake — this database

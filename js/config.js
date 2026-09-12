@@ -13,8 +13,13 @@
 
    That is true ONLY while row level security is on and correct. So:
 
-     supabase/03-verify-rls.sql must print 11 lines and every one of
+     supabase/03-verify-rls.sql must print its checks and every one of
      them must say PASS. Until it does, these stay null.
+
+   That happened on 2026-09-11, on project dmpxtzjlhccxisuofxhd. All
+   twelve lines said PASS: a client cannot read another clients intake,
+   user row or per-user document; a coach cannot read a client who is
+   not theirs; and the key below, alone, reads nothing at all.
 
    That is not caution for its own sake. This database holds PAR-Q
    answers — heart conditions, medication, pregnancy — and injury maps
@@ -29,11 +34,18 @@
    ============================================================ */
 
 export const BACKEND = {
-  /** e.g. 'https://abcdefgh.supabase.co' — null means device-only. */
-  url: null,
+  /** null means device-only. */
+  url: 'https://dmpxtzjlhccxisuofxhd.supabase.co',
 
-  /** The anon / publishable key. Null means device-only. */
-  anonKey: null,
+  /** The publishable key. Supabase renamed these: what the docs still
+   *  call the anon key is now sb_publishable_..., and it means the same
+   *  thing — it names the project and authorises nothing by itself.
+   *
+   *  Committed 2026-09-11, after the gate ran green on all twelve
+   *  checks, three of which exist only to prove that THIS key, with no
+   *  session behind it, reads no intakes, no people and no per-user
+   *  documents. */
+  anonKey: 'sb_publishable_E8asr1sjaGKyVeMhtG35EQ_5bvzQ2Qz',
 
   /** Where a magic link comes back to. Null means wherever the app is
    *  being served from, which is right in every case except a local
