@@ -6,11 +6,11 @@ Paste each into the Supabase **SQL Editor**, press Run, clear the box, next one.
 |---|---|---|---|
 | 0 | `00-check.sql` | one line, proves the editor works | one row: "the editor works" |
 | 1 | `01a-users.sql` | the people table | Success. No rows returned |
-| 2 | `01b-tables.sql` | the other six tables | Success. No rows returned |
+| 2 | `01b-tables.sql` | the other seven tables | Success. No rows returned |
 | 3 | `01c-links-and-indexes.sql` | the links between them | Success. No rows returned |
 | 4 | `01d-stamps.sql` | keeps "last updated" true | Success. No rows returned |
-| 5 | `02-rls.sql` | locks every table, opens 24 doors | Success. No rows returned |
-| 6 | `03-verify-rls.sql` | **the proof** | 8 rows, each PASS or FAIL |
+| 5 | `02-rls.sql` | locks every table, opens 26 doors | Success. No rows returned |
+| 6 | `03-verify-rls.sql` | **the proof** | 11 rows, each PASS or FAIL |
 
 ## Why it is split up
 
@@ -55,6 +55,6 @@ to the app now.
 
 ## The gate
 
-`03-verify-rls.sql` prints 8 lines. **Every one must say PASS.** If any says
+`03-verify-rls.sql` prints 11 lines. **Every one must say PASS.** If any says
 FAIL, no key goes near the code until it is fixed. The repo is public and this
 database holds PAR-Q answers and injury maps.

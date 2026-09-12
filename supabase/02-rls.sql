@@ -26,6 +26,7 @@ alter table public.sessions enable row level security;
 alter table public.logs     enable row level security;
 alter table public.prs      enable row level security;
 alter table public.messages enable row level security;
+alter table public.user_state enable row level security;
 
 -- Force it even for the table owner, so a mistake in a migration cannot
 -- quietly bypass the policies.
@@ -36,6 +37,7 @@ alter table public.sessions force row level security;
 alter table public.logs     force row level security;
 alter table public.prs      force row level security;
 alter table public.messages force row level security;
+alter table public.user_state force row level security;
 
 -- ---------------------------------------------------------------
 -- "Is this client mine?"
@@ -132,3 +134,18 @@ create policy messages_send_as_self on public.messages
 -- Marking read is the only update, and only by the recipient.
 create policy messages_mark_read on public.messages
   for update using (to_user_id = auth.uid()) with check (to_user_id = auth.uid());
+
+-- ---------------- user_state : one document, one owner ----------------
+-- Nobody but the person. Not even their coach.
+--
+-- This row is settings, streaks, the schedule and the swaps somebody made.
+-- A coach who wants to know whether a client is training reads the logs,
+-- which is the record of what actually happened, and which the two policies
+-- above already open to them. This row is how the app feels to the person
+-- using it, and there is no question a coach needs to answer that requires
+-- reading it. Deny is the default, so leaving the door shut costs one line
+-- of comment and closes a whole category of accident.
+create policy user_state_read_own on public.user_state
+  for select using (user_id = auth.uid());
+create policy user_state_write_own on public.user_state
+  for all using (user_id = auth.uid()) with check (user_id = auth.uid());

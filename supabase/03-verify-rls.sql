@@ -36,6 +36,11 @@ insert into public.intakes (user_id, answers) values
 insert into public.intakes (user_id, answers) values
   ('aaaaaaaa-0000-0000-0000-000000000001', '{"name":"Client A"}'::jsonb);
 
+-- And both of them have a per-user document: settings, streak, schedule.
+insert into public.user_state (user_id, state) values
+  ('bbbbbbbb-0000-0000-0000-000000000002', '{"streak":9,"sound":false}'::jsonb),
+  ('aaaaaaaa-0000-0000-0000-000000000001', '{"streak":2,"sound":true}'::jsonb);
+
 -- ---- become Client A, an ordinary signed-in user ----
 set local role authenticated;
 select set_config('request.jwt.claims',
@@ -62,19 +67,37 @@ select case when count(*) <= 1
             else 'FAIL  a bare select on intakes returned ' || count(*) || ' rows' end as test_4
 from public.intakes;
 
+select case when count(*) = 0
+            then 'PASS  client A cannot read client B''s per-user document'
+            else 'FAIL  CLIENT A READ CLIENT B''S USER STATE' end as test_5
+from public.user_state where user_id = 'bbbbbbbb-0000-0000-0000-000000000002';
+
+select case when count(*) = 1
+            then 'PASS  client A can read their own per-user document'
+            else 'FAIL  client A cannot read their own user state' end as test_6
+from public.user_state where user_id = 'aaaaaaaa-0000-0000-0000-000000000001';
+
 -- ---- become the Trainer, who owns client A but NOT client B ----
 select set_config('request.jwt.claims',
   '{"sub":"cccccccc-0000-0000-0000-000000000003","role":"authenticated"}', true);
 
 select case when count(*) = 1
             then 'PASS  trainer can read their own client''s intake'
-            else 'FAIL  trainer cannot read their own client (' || count(*) || ')' end as test_5
+            else 'FAIL  trainer cannot read their own client (' || count(*) || ')' end as test_7
 from public.intakes where user_id = 'aaaaaaaa-0000-0000-0000-000000000001';
 
 select case when count(*) = 0
             then 'PASS  trainer cannot read a client who is not theirs'
-            else 'FAIL  TRAINER READ A CLIENT WHO IS NOT THEIRS' end as test_6
+            else 'FAIL  TRAINER READ A CLIENT WHO IS NOT THEIRS' end as test_8
 from public.intakes where user_id = 'bbbbbbbb-0000-0000-0000-000000000002';
+
+-- The shut door, on purpose. A coach reads the logs, which is the record of
+-- what happened. The per-user document is how the app feels to the person
+-- using it, and no coaching question needs it.
+select case when count(*) = 0
+            then 'PASS  trainer cannot read even their own client per-user document'
+            else 'FAIL  trainer read a client per-user document' end as test_9
+from public.user_state where user_id = 'aaaaaaaa-0000-0000-0000-000000000001';
 
 -- ---- become nobody: the anon key with no session ----
 set local role anon;
@@ -82,12 +105,12 @@ select set_config('request.jwt.claims', '{"role":"anon"}', true);
 
 select case when count(*) = 0
             then 'PASS  the anon key alone reads nothing'
-            else 'FAIL  THE ANON KEY READ ' || count(*) || ' ROWS - DO NOT PUBLISH IT' end as test_7
+            else 'FAIL  THE ANON KEY READ ' || count(*) || ' ROWS - DO NOT PUBLISH IT' end as test_10
 from public.intakes;
 
 select case when count(*) = 0
             then 'PASS  the anon key alone sees no people'
-            else 'FAIL  THE ANON KEY READ ' || count(*) || ' USER ROWS' end as test_8
+            else 'FAIL  THE ANON KEY READ ' || count(*) || ' USER ROWS' end as test_11
 from public.users;
 
 rollback;

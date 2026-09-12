@@ -1,5 +1,5 @@
 -- STEP 1d. Keeps "last updated" true on every row.
--- This is the part that broke twice. It is now one plain function and seven
+-- This is the part that broke twice. It is now one plain function and eight
 -- plain triggers, with a named delimiter, and no dollar pair anywhere else in
 -- the file including the comments.
 create or replace function public.touch_updated_at() returns trigger
@@ -36,4 +36,8 @@ create trigger touch_prs before update on public.prs
 
 drop trigger if exists touch_messages on public.messages;
 create trigger touch_messages before update on public.messages
+  for each row execute function public.touch_updated_at();
+
+drop trigger if exists touch_user_state on public.user_state;
+create trigger touch_user_state before update on public.user_state
   for each row execute function public.touch_updated_at();

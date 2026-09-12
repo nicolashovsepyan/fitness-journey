@@ -1,4 +1,4 @@
--- STEP 1b. The other six tables. No links to the Supabase login table here,
+-- STEP 1b. The other seven tables. No links to the Supabase login table here,
 -- so if 1a failed and this one passes, we have found it exactly.
 create table if not exists public.intakes (
   id            uuid primary key default gen_random_uuid(),
@@ -64,6 +64,23 @@ create table if not exists public.messages (
   context_type  text,
   context_id    text,
   read_at       timestamptz,
+  created_at    timestamptz not null default now(),
+  updated_at    timestamptz not null default now()
+);
+
+-- The per-user document. js/core/storage.js explains why this is one row and
+-- not fifteen tables: settings, streaks, the schedule, the swaps a person has
+-- made. Nobody queries across them. They are read and written whole.
+--
+-- What does NOT belong in here is logs and prs. They are above, in real
+-- tables with real columns, because they are the irreplaceable data and a
+-- coach needs to ask questions of them per person and per date. The contract
+-- keeps them as separate methods for exactly this reason.
+--
+-- One row per person, so user_id is the key and there is no id column.
+create table if not exists public.user_state (
+  user_id       uuid primary key,
+  state         jsonb not null default '{}'::jsonb,
   created_at    timestamptz not null default now(),
   updated_at    timestamptz not null default now()
 );
