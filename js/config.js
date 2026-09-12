@@ -65,8 +65,14 @@ export const BACKEND = {
    *  direction.
    *
    *  Null means a finished survey still saves to the phone and still
-   *  travels by link, it simply does not land in a console by itself. */
-  coachId: null,
+   *  travels by link, it simply does not land in a console by itself.
+   *
+   *  Set on 2026-09-11 from the identity the console signed in as the
+   *  first time it opened. It has a row in public.users with role
+   *  trainer, which it has to: a trainer_id is a foreign key, and
+   *  pointing a client at an id with no row behind it is refused at
+   *  the moment they finish answering a PAR-Q. */
+  coachId: '51bd9f81-a199-4dba-be3f-3351e48830aa',
 };
 
 /** True when there is something to sync to. Every caller asks this
