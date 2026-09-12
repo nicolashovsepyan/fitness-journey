@@ -105,8 +105,16 @@ group('the key that ships in the app');
 {
   // The published gate proves this in SQL. This proves it over HTTP,
   // which is the way somebody would actually try it.
+  //
+  // A CLIENT OF ITS OWN, with nowhere to have kept a session. When the
+  // identities above started being cached between runs this check
+  // quietly began using one, so "the key alone" was a signed-in person
+  // reading their own intake, and it failed for the right reason with
+  // the wrong name on it. The whole point is that nobody is signed in.
+  const nobody = new Supabase({ url: BACKEND.url, anonKey: BACKEND.anonKey,
+                                sessionStore: memorySessionStore() });
   let rows = null, err = null;
-  try { rows = await client.select('intakes'); } catch (e) { err = e; }
+  try { rows = await nobody.select('intakes'); } catch (e) { err = e; }
   t('reaches the project at all', !(err instanceof SupabaseError && err.isOffline));
   t('and on its own reads no intakes', Array.isArray(rows) && rows.length === 0);
 }
@@ -256,14 +264,16 @@ group('a survey on one device reaches a console on another');
      matched no rows — there is no delete policy on public.users — and
      PostgREST answered 204. Success, no error, nothing changed.
 
-     It unassigns now: the client keeps every log and record they have,
-     and this coach stops being able to see any of it the moment
-     trainer_id stops pointing here. */
+     It archives now. Unassigning was the obvious fix and it is refused:
+     the table has FORCE ROW LEVEL SECURITY, so Postgres applies the
+     SELECT policies to the NEW row too, and a coach may not update a
+     row into a state where they can no longer see it. Setting
+     trainer_id to null does exactly that. */
   const laptopAdapter = new SupabaseAdapter({ client: laptop, device: new LocalAdapter() });
   await laptopAdapter.removeUser(pushed.uid);
   const afterDrop = await pullClients({ client: laptop });
-  t('a coach can drop a client', afterDrop.ok
-    && !afterDrop.clients.some(c => c.user.id === pushed.uid));
+  t('a coach can drop a client' + (afterDrop.ok ? '' : ` — ${afterDrop.reason}`),
+    afterDrop.ok && !afterDrop.clients.some(c => c.user.id === pushed.uid));
 
   const stillTheirs = new SupabaseAdapter({ client: phone, device: new LocalAdapter() });
   t('  and the client still has their own record', !!(await stillTheirs.getUser(pushed.uid)));

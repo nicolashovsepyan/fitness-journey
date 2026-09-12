@@ -137,8 +137,12 @@ export class SupabaseAdapter extends StorageAdapter {
   }
 
   async listUsers() {
-    // No filter, deliberately. See note 2 at the top of this file.
-    const rows = await this.#sb.select('users', { order: 'created_at.asc' });
+    // WHO, not WHICH: no trainer filter, deliberately — see note 2 at
+    // the top of this file. Archived is different. That is not the
+    // database deciding who may be seen, it is this roster saying who
+    // is still on it, which is the question listUsers asks.
+    const rows = await this.#sb.select('users',
+      { status: 'neq.archived', order: 'created_at.asc' });
     return rows.map(r => toRec('users', r));
   }
 
@@ -150,49 +154,54 @@ export class SupabaseAdapter extends StorageAdapter {
   }
 
   async removeUser(id) {
-    /* NOT A DELETE, AND THAT IS THE CONTRACT BEING KEPT RATHER THAN
-       BROKEN.
+    /* ARCHIVES. It does not delete, and it does not unassign either,
+       and the second of those took some finding.
 
-       js/core/storage.js says this removes the PERSON, not their
-       training: "logs and intakes are addressed separately and
-       deleting those is a different decision with different
-       consequences." On a phone that is true for free, because
-       removing somebody from a device roster touches nothing else.
+       WHAT THE CONTRACT ASKS FOR. js/core/storage.js says this removes
+       the PERSON, not their training: "logs and intakes are addressed
+       separately and deleting those is a different decision with
+       different consequences." On a phone that is free, because a
+       device roster is just a list of names.
 
-       A delete here would not be that. Every foreign key in
-       01c-links-and-indexes.sql cascades from users, so one statement
-       would take their intakes, their logs, their records and their
-       settings with it. That is the opposite of what the method
-       promises.
+       WHY NOT DELETE. Every foreign key in 01c cascades from users, so
+       one statement would take their intakes, logs, records and
+       settings. There is no delete policy on public.users for exactly
+       that reason — and because there was none, this used to send a
+       DELETE that matched zero rows and got 204 back. Success, no
+       error, nothing changed.
 
-       What a coach actually means by removing a client is that this
-       person is no longer theirs. So that is what it does. The client
-       keeps everything they have ever done, and this coach stops being
-       able to see any of it, which is what row level security decides
-       the moment trainer_id stops pointing here.
+       WHY NOT UNASSIGN, WHICH IS THE OBVIOUS FIX. Setting trainer_id
+       to null is refused, and not by the policy that governs it —
+       04-release-a-client.sql allows it explicitly. It is refused
+       because the table has FORCE ROW LEVEL SECURITY, and under that
+       Postgres applies the SELECT policies to the NEW row as well: you
+       may not update a row into a state where you can no longer see
+       it. A coach sees a client through trainer_id, so the instant it
+       goes null the row is gone from view and the write is rejected —
+       as 42501, "new row violates row-level security policy", which
+       names no policy and reads like the wrong one is in force.
 
-       IT ALSO USED TO DO NOTHING AT ALL, SILENTLY. There is no delete
-       policy on public.users, so the delete matched zero rows and
-       PostgREST answered 204 — success, no error, nothing changed. A
-       method that reports success and does nothing is worse than one
-       that throws, so this one throws. */
+       The fix is not to open a hole. Letting a coach see unassigned
+       people means letting ANY signed-in person see every unclaimed
+       person, which is a list of names and emails belonging to
+       strangers.
+
+       SO: status becomes archived. The row stays visible to the coach
+       exactly as before, which is what keeps the write legal, and
+       listUsers below stops returning them — and listUsers is the
+       roster the contract is talking about. The client keeps
+       everything, including their coach, which is the truth anyway:
+       being archived is not the same as never having been trained. */
     if (id === this.#sb.userId) {
       throw new Error(
-        'removeUser will not delete your own account. That is a bigger decision '
-        + 'than this method makes, and it would take every log and record with it.');
+        'removeUser will not archive your own account. That is a bigger decision '
+        + 'than this method makes.');
     }
-    /* Ask first, rather than judge by what comes back. The obvious way
-       is to update and count the returned rows, and it does not work
-       here: asking for the rows back makes PostgREST add a RETURNING,
-       which needs permission to read the row AFTER the change - and
-       after this change the coach cannot, which is the entire point.
-       The write lands and the read is refused, and it surfaces as 42501
-       insufficient privilege, looking exactly like a refused write. */
     const mine = await this.getUser(id);
     if (!mine) {
       throw new Error(`removeUser(${id}) changed nothing — they are not your client.`);
     }
-    await this.#sb.update('users', { id: `eq.${id}` }, { trainer_id: null }, { minimal: true });
+    await this.#sb.update('users', { id: `eq.${id}` }, { status: 'archived' }, { minimal: true });
   }
 
   /* ---- names are the device's, by contract ---------------------- */

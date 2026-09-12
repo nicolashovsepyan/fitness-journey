@@ -228,11 +228,34 @@ turning up: something that looks like it worked and did not.
   answered 204. The test that "proved" it worked read the row back after
   signing out, which finds nothing whatever the truth is.
 
-That last one also turned out to be the wrong operation. `js/core/storage.js`
-says `removeUser` takes the person and not their training; on the server every
-foreign key cascades from `users`, so a delete would have taken their intakes,
-logs, records and settings. It unassigns now — `04-release-a-client.sql` — and
-the client keeps everything.
+That last one also turned out to be the wrong operation, twice over.
+`js/core/storage.js` says `removeUser` takes the person and not their
+training; on the server every foreign key cascades from `users`, so a delete
+would have taken their intakes, logs, records and settings.
+
+The obvious fix — unassign, set `trainer_id` to null — is **also** refused, and
+finding out why was the most useful thing in the whole exercise:
+
+> **These tables have `force row level security`, and under it Postgres applies
+> the SELECT policies to the NEW row as well. You may not update a row into a
+> state where you can no longer see it.**
+
+A coach sees a client through `trainer_id`, so the instant it goes null the row
+leaves their view and the write is rejected — as `42501`, "new row violates
+row-level security policy", which names no policy and reads exactly like the
+wrong one being in force. Widening the WITH CHECK to allow null is correct and
+changes nothing.
+
+It was found by adding, inside a transaction that rolled back, a SELECT policy
+making unassigned rows visible; the same update then succeeded immediately.
+That is not the fix — a policy for unassigned people lets every signed-in
+person read every unclaimed person, which is a list of names and emails
+belonging to strangers.
+
+So the app **archives**: `status` becomes `archived`, the row stays exactly as
+visible as it was — which is what keeps the write legal — and `listUsers` stops
+returning them. The client keeps everything, their coach included, which is the
+truth anyway. Being archived is not the same as never having been trained.
 
 **Still local:** the app itself. A program released from the console still
 travels to the phone by link. That is the next piece.
