@@ -80,8 +80,14 @@ let uid = null;
     uid = client.userId;
   } catch (e) {
     t(`anonymous sign-in works — ${e.message}`, false);
-    console.log('\n  Anonymous sign-in is probably still off: Authentication '
-      + '-> Sign In / Providers -> Allow anonymous sign-ins.\n');
+    // Two very different causes, and guessing the wrong one sends you
+    // to the wrong screen. 429 is this test having run several times
+    // in an hour; anything else is the toggle.
+    console.log(e.status === 429
+      ? '\n  Rate limited, not broken. Supabase caps anonymous sign-ins per hour\n'
+        + '  and this test makes several each run. Wait and run it again.\n'
+      : '\n  Anonymous sign-in looks off: Authentication -> Sign In / Providers\n'
+        + '  -> Allow anonymous sign-ins.\n');
     process.exit(1);
   }
   t('anonymous sign-in issues a real id', typeof uid === 'string' && uid.length === 36);
@@ -166,12 +172,26 @@ group('a survey on one device reaches a console on another');
      is not a row, and a trainer_id has to reference a row. */
   const intro = await ensureSelf({ role: 'trainer', displayName: 'Coach', client: laptop });
   const coach = intro.uid;
-  t('the console has an identity, and a row to go with it', intro.ok && !!coach);
+  t('the console has an identity, and a row to go with it'
+    + (intro.ok ? '' : ` — ${intro.reason}`), intro.ok && !!coach);
+
+  /* A rate limit is not a broken feature, and a run that carries on
+     past one reports six failures that all mean the same thing. */
+  if (!intro.ok) {
+    console.log('\n  Stopping here. Supabase caps anonymous sign-ins per hour and this\n'
+      + '  test makes four each run. Wait and run it again.\n');
+    process.exit(1);
+  }
 
   const pushed = await publishIntake(
     { answers: { name: 'Phone Person', email: null, tier: 3, pain: ['right shoulder'] }, version: 6 },
     { client: phone, trainerId: coach });
   t('the survey publishes' + (pushed.ok ? '' : ` — ${pushed.reason}`), pushed.ok);
+
+  if (!pushed.ok) {
+    console.log('\n  Stopping here: nothing was published, so nothing can arrive.\n');
+    process.exit(1);
+  }
 
   const pulled = await pullClients({ client: laptop });
   t('the console can ask' + (pulled.ok ? '' : ` — ${pulled.reason}`), pulled.ok);
@@ -190,22 +210,61 @@ group('a survey on one device reaches a console on another');
   const other = await pullClients({ client: stranger });
   t('another coach sees none of them', other.ok && other.clients.length === 0);
 
+  /* REMOVING A CLIENT, WHICH IS NOT DELETING THEM.
+
+     This is the check the fake database cannot make, because it is
+     entirely about policies. removeUser used to send a DELETE that
+     matched no rows — there is no delete policy on public.users — and
+     PostgREST answered 204. Success, no error, nothing changed.
+
+     It unassigns now: the client keeps every log and record they have,
+     and this coach stops being able to see any of it the moment
+     trainer_id stops pointing here. */
+  const laptopAdapter = new SupabaseAdapter({ client: laptop, device: new LocalAdapter() });
+  await laptopAdapter.removeUser(pushed.uid);
+  const afterDrop = await pullClients({ client: laptop });
+  t('a coach can drop a client', afterDrop.ok
+    && !afterDrop.clients.some(c => c.user.id === pushed.uid));
+
+  const stillTheirs = new SupabaseAdapter({ client: phone, device: new LocalAdapter() });
+  t('  and the client still has their own record', !!(await stillTheirs.getUser(pushed.uid)));
+  t('  and their intake', !!(await stillTheirs.getIntake(pushed.uid)));
+
+  let refusedStranger = false;
+  try { await laptopAdapter.removeUser(coach); } catch { refusedStranger = true; }
+  t('dropping somebody who is not your client says so, rather than nothing', refusedStranger);
+
   // put both devices back
-  if (pushed.uid) {
-    await new SupabaseAdapter({ client: phone, device: new LocalAdapter() }).removeUser(pushed.uid);
-  }
-  await new SupabaseAdapter({ client: laptop, device: new LocalAdapter() }).removeUser(coach);
-  const gone = await pullClients({ client: stranger });
-  t('both test identities are cleared up', gone.ok && gone.clients.length === 0);
   await phone.signOut(); await laptop.signOut(); await stranger.signOut();
 }
 
 group('clearing up after itself');
 {
-  await adapter.removeUser(uid);
+  /* THIS CHECK USED TO PROVE NOTHING, and it is worth saying why
+     because the shape of the mistake is common.
+
+     It called removeUser, signed out, then read the row back and found
+     nothing — and concluded the row was gone. But a signed-out read
+     finds nothing whatever the truth is, so the check passed for a
+     reason that had no connection to what it claimed. Meanwhile
+     removeUser was matching zero rows and answering 204, and the test
+     row sat in the database for the rest of the day.
+
+     Read it back while still signed in, as the only person who can
+     see it. */
+  await adapter.saveUserState(uid, {});
+  const mine = await adapter.getUser(uid);
+  t('the test row is still readable by the person it belongs to', !!mine);
+
+  let refused = false;
+  try { await adapter.removeUser(uid); } catch { refused = true; }
+  t('removeUser refuses to delete your own account', refused);
+
   await client.signOut();
-  const left = await client.select('users', { id: `eq.${uid}` });
-  t('the test identity and everything it wrote are gone', left.length === 0);
+  t('and the session is closed', client.userId === null);
+  console.log('\n  NOTE: this run leaves one anonymous identity behind. There is no\n'
+    + '  delete policy on public.users, deliberately — see the note on\n'
+    + '  SupabaseAdapter.removeUser. Clear them from the SQL editor.\n');
 }
 
 console.log(failed ? `\n${failed} FAILED` : '\nAll checks passed.');

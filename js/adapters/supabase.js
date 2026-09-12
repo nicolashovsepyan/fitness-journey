@@ -150,11 +150,41 @@ export class SupabaseAdapter extends StorageAdapter {
   }
 
   async removeUser(id) {
-    // The PERSON, not their training. The contract is explicit that
-    // deleting what somebody did is a different decision; the cascades
-    // in 01c do follow this one, which is why it is never called to
-    // mean "switch away from them" — that is setActiveUserId(null).
-    await this.#sb.remove('users', { id: `eq.${id}` });
+    /* NOT A DELETE, AND THAT IS THE CONTRACT BEING KEPT RATHER THAN
+       BROKEN.
+
+       js/core/storage.js says this removes the PERSON, not their
+       training: "logs and intakes are addressed separately and
+       deleting those is a different decision with different
+       consequences." On a phone that is true for free, because
+       removing somebody from a device roster touches nothing else.
+
+       A delete here would not be that. Every foreign key in
+       01c-links-and-indexes.sql cascades from users, so one statement
+       would take their intakes, their logs, their records and their
+       settings with it. That is the opposite of what the method
+       promises.
+
+       What a coach actually means by removing a client is that this
+       person is no longer theirs. So that is what it does. The client
+       keeps everything they have ever done, and this coach stops being
+       able to see any of it, which is what row level security decides
+       the moment trainer_id stops pointing here.
+
+       IT ALSO USED TO DO NOTHING AT ALL, SILENTLY. There is no delete
+       policy on public.users, so the delete matched zero rows and
+       PostgREST answered 204 — success, no error, nothing changed. A
+       method that reports success and does nothing is worse than one
+       that throws, so this one throws. */
+    if (id === this.#sb.userId) {
+      throw new Error(
+        'removeUser will not delete your own account. That is a bigger decision '
+        + 'than this method makes, and it would take every log and record with it.');
+    }
+    const changed = await this.#sb.update('users', { id: `eq.${id}` }, { trainer_id: null });
+    if (!changed.length) {
+      throw new Error(`removeUser(${id}) changed nothing — they are not your client.`);
+    }
   }
 
   /* ---- names are the device's, by contract ---------------------- */

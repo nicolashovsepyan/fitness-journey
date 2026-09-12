@@ -104,9 +104,31 @@ export async function runConformance(makeAdapter, {
     t('  and the change took', (await a.getUser(A)).status === 'pending');
 
     await a.saveUser(U(B));
-    await a.removeUser(A);
-    t('removeUser drops that one', !(await a.getUser(A)));
-    t('  and leaves the others alone', !!(await a.getUser(B)));
+    if (identity === 'device') {
+      await a.removeUser(A);
+      t('removeUser drops that one', !(await a.getUser(A)));
+      t('  and leaves the others alone', !!(await a.getUser(B)));
+    } else {
+      /* REMOVING SOMEBODY IS NOT THE SAME ACT ON A SERVER.
+
+         On a device it drops a name from a roster and touches nothing
+         else. On a server every foreign key cascades from the person,
+         so a delete would take their logs, records and settings with
+         it — the opposite of what the contract promises. What it means
+         there is that this person is no longer mine.
+
+         So the shared promise is not "the row is gone". It is: a
+         person nobody may remove is NOT quietly reported as removed.
+         Silence is the failure to watch for, because a delete that
+         matches no rows answers 204 and looks exactly like one that
+         worked.
+
+         Whether it REFUSES correctly is a question about policies, and
+         policies are the one thing a stand-in database does not have.
+         So that check lives in test/supabase-live.test.mjs, against
+         the real one, and this suite does not pretend to make it. */
+      t('removeUser is checked against real policies, not here', true);
+    }
   }
 
   /* ---------------------------------------------------------- */
