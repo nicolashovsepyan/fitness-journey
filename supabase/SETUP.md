@@ -5,8 +5,12 @@
 instructions for the next project, should there ever be one.
 
 What is live: eight tables, 26 policies, anonymous sign-in on, the site and
-redirect URLs set, all twelve gate lines PASS, and the publishable key in
-`js/config.js`.
+redirect URLs set, all twelve gate lines PASS, the publishable key in
+`js/config.js`, and `04-release-a-client.sql` applied on top.
+
+The survey now publishes to it and the console reads from it. A survey
+finished on a phone appears in the console on a laptop, without a link and
+without a tap.
 
 `node test/supabase-live.test.mjs` proves the whole path end to end against
 the real database, using only the key that ships in the app. It signs in the
@@ -127,6 +131,19 @@ names a backend — and the app starts syncing. Until they are there, both
 fields are `null` and everything runs exactly as it does today, on the device.
 
 ---
+
+## Two things worth knowing
+
+**Anonymous sign-ins are capped at 30 per hour from one IP address.** That is
+the Supabase default and it is left alone, because it is plenty for real use:
+a client signs in once per device. It is only a problem when a test makes four
+identities a run, which is how it was found.
+
+**There is no delete policy on `public.users`, on purpose.** Every foreign key
+cascades from a person, so deleting one would take their intakes, logs,
+records and settings with it. Removing a client unassigns them instead: they
+keep everything, and they stop being visible to that coach. Genuinely erasing
+somebody is a decision for the SQL editor, made deliberately.
 
 ## What is already done, so you know what you are switching on
 

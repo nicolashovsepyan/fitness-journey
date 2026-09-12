@@ -11,6 +11,7 @@ Paste each into the Supabase **SQL Editor**, press Run, clear the box, next one.
 | 4 | `01d-stamps.sql` | keeps "last updated" true | Success. No rows returned |
 | 5 | `02-rls.sql` | locks every table, opens 26 doors | Success. No rows returned |
 | 6 | `03-verify-rls.sql` | **the proof**, in three pastes | 6 rows, then 3, then 3 — all PASS |
+| 7 | `04-release-a-client.sql` | lets a coach drop a client | 4 rows, all PASS |
 
 ## Why it is split up
 

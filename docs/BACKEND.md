@@ -202,6 +202,43 @@ halfway through the conversion.
 
 ---
 
+## What is live, 2026-09-11
+
+Project `dmpxtzjlhccxisuofxhd`. Eight tables, 26 policies, anonymous sign-in
+on, the gate green on all twelve lines, and the publishable key in
+`js/config.js`.
+
+**The survey publishes and the console reads.** A survey finished on a phone
+appears in the console on a laptop, with no link and no tap. That was the
+whole point of the exercise, and `test/supabase-live.test.mjs` runs it as two
+devices — two clients, two session stores, one publishes and the other pulls.
+
+Three things building it found, all of the same family the audit keeps
+turning up: something that looks like it worked and did not.
+
+- **The console called the module bridge before the bridge existed.** Classic
+  scripts run at parse time and modules are deferred, so the pull returned
+  quietly and the console never asked the database anything. It looked fine.
+- **Signing in is not the same as existing.** Supabase issues an auth
+  identity; `public.users` is our table and starts empty. A client whose
+  `trainer_id` pointed at a coach with no row was rejected outright, at the
+  moment somebody had just finished answering a PAR-Q.
+- **`removeUser` reported success and changed nothing.** There is no delete
+  policy on `public.users`, so the DELETE matched zero rows and PostgREST
+  answered 204. The test that "proved" it worked read the row back after
+  signing out, which finds nothing whatever the truth is.
+
+That last one also turned out to be the wrong operation. `js/core/storage.js`
+says `removeUser` takes the person and not their training; on the server every
+foreign key cascades from `users`, so a delete would have taken their intakes,
+logs, records and settings. It unassigns now — `04-release-a-client.sql` — and
+the client keeps everything.
+
+**Still local:** the app itself. A program released from the console still
+travels to the phone by link. That is the next piece.
+
+---
+
 ## Still open
 
 - **Which variant is the benchmark** for `row` and `plank`, and confirmation of
