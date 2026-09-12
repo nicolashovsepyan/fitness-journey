@@ -132,15 +132,41 @@ export class LocalAdapter extends StorageAdapter {
     return next;
   }
 
+  async removeUser(id) {
+    const users = await this.listUsers();
+    this.#writeJSON(USERS_KEY, users.filter(u => u.id !== id));
+    /* the display name is this device's, and it goes with the person */
+    this.#del(NAME_KEY(id));
+    /* a device that forgets who it belongs to must not keep pointing at
+       them — the claim screen is the honest state, not a dangling id */
+    if (await this.getActiveUserId() === id) await this.setActiveUserId(null);
+  }
+
   /* Never guessed. A null here means ASK — it is what the claim screen
      is for, and guessing is what once put one person's program on
      another person's phone. */
   async getActiveUserId() {
-    return this.#get(ACTIVE_KEY) || null;
+    const v = this.#get(ACTIVE_KEY);
+    /* A device written by the version above, before null released
+       properly, has the literal string in it. Read it as what it was
+       always meant to mean rather than leaving those devices claimed by
+       a person who does not exist. */
+    if (v == null || v === 'null' || v === 'undefined' || v === '') return null;
+    return v;
   }
 
+
   async setActiveUserId(userId) {
-    this.#set(ACTIVE_KEY, userId);
+    /* NULL RELEASES THE DEVICE. It does not store the word "null".
+
+       localStorage stringifies whatever it is given, so setItem(key,
+       null) writes the four characters n-u-l-l — which reads back as a
+       truthy string and makes the device believe it belongs to somebody
+       called "null". Releasing a claim was therefore impossible, and
+       "null means ASK" — the rule the whole claim screen rests on —
+       could not be expressed through the adapter that owns it. */
+    if (userId == null) { this.#del(ACTIVE_KEY); return; }
+    this.#set(ACTIVE_KEY, String(userId));
   }
 
   /* Display name, stored per user on this device and never in source —
@@ -227,12 +253,18 @@ export class LocalAdapter extends StorageAdapter {
      laptop. */
 
   async getDevicePref(key, fallback = null) {
-    const v = this.#get(PREF_KEY(key));
-    return v === null ? fallback : v;
+    const raw = this.#get(PREF_KEY(key));
+    if (raw === null) return fallback;
+    // Values written since the JSON change parse cleanly. Anything older was
+    // written with String(value), so it is bare text that JSON rejects — hand
+    // it back as the string it always was rather than losing the setting.
+    try { return JSON.parse(raw); } catch { return raw; }
   }
 
   async setDevicePref(key, value) {
-    this.#set(PREF_KEY(key), String(value));
+    // JSON, not String(). String(false) reads back as "false", which is
+    // truthy, so turning something off would never stick.
+    this.#set(PREF_KEY(key), JSON.stringify(value));
   }
 
   /* ---- intakes, programs, sessions, messages --------------------

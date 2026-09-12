@@ -69,6 +69,37 @@ export class StorageAdapter {
   /** Create or update. Must stamp updatedAt. @returns {Promise<User>} */
   saveUser(user) { return this.#todo('saveUser'); }
 
+  /** Remove one person from this device's roster.
+   *
+   *  MISSING UNTIL NOW, AND IT SHOWED. Settings could switch between
+   *  people and never drop one, so a device holding the wrong person
+   *  held them permanently — the only way out was deleting the installed
+   *  app. The first caller that wanted this had to reach around the
+   *  adapter and delete localStorage keys by hand, which is the exact
+   *  thing this contract exists to stop.
+   *
+   *  It removes the PERSON, not their training. Logs and intakes are
+   *  addressed separately and deleting those is a different decision
+   *  with different consequences.
+   *  @returns {Promise<void>} */
+  removeUser(id) { return this.#todo('removeUser'); }
+
+  /* The name shown on screen, which is NOT user.displayName.
+     DEVICE-LOCAL ON PURPOSE. The record carries the name the survey or
+     the coach gave; this is what this device calls them, set from the
+     ?name= on an invite link. The repo is public, so no real name lives
+     in source and the record can stay generic while the phone says
+     "Nick". js/users.js has read these since before the contract
+     existed — they were implemented in the local adapter and never
+     written down here, which meant a second adapter would have been
+     missing two methods the app calls on every boot. */
+
+  /** @returns {Promise<string|null>} */
+  getDisplayName(id) { return this.#todo('getDisplayName'); }
+
+  /** @returns {Promise<void>} */
+  setDisplayName(id, name) { return this.#todo('setDisplayName'); }
+
   /* Which user this DEVICE belongs to.
      Deliberately separate from listUsers(): "who exists" and "whose
      phone is this" are different questions, and conflating them is
@@ -221,7 +252,10 @@ export class StorageAdapter {
      device, not the person — the voice available on an iPhone is not
      the one on a laptop — so it never syncs either. */
 
-  /** @returns {Promise<*>} */
+  /** Values must be JSON-serialisable, and come back the type they went in
+      as. false is an answer, not an absence: only a key that was never set
+      yields the fallback.
+      @returns {Promise<*>} */
   getDevicePref(key, fallback = null) { return this.#todo('getDevicePref'); }
 
   /** @returns {Promise<void>} */

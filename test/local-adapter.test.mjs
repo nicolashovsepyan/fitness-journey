@@ -9,6 +9,7 @@
    ============================================================ */
 import { LocalAdapter } from '../js/adapters/local.js';
 import { StorageAdapter } from '../js/core/storage.js';
+import { runConformance } from './adapter-conformance.mjs';
 
 /* Minimal localStorage. Node has none, and the point of these tests is
    to inspect the raw keys afterwards, which a real one would not let
@@ -25,6 +26,18 @@ let failed = 0;
 const t = (name, cond) => { console.log((cond ? '  ok    ' : '  FAIL  ') + name); if (!cond) failed++; };
 const group = n => console.log(`\n${n}`);
 const reset = () => store.clear();
+
+/* THE CONTRACT FIRST, THEN THIS FILE'S OWN JOB.
+
+   Everything below this line checks that the LocalAdapter writes the
+   exact keys and shapes today's app already reads — migration work,
+   true of this adapter and no other. The shared suite above it checks
+   the promise every adapter makes, and is the one the Supabase adapter
+   will run unchanged. Keeping them apart is what stops the contract's
+   tests quietly growing localStorage assumptions. */
+await runConformance(async () => { store.clear(); return new LocalAdapter(); },
+  { label: 'LocalAdapter', t, group });
+reset();
 
 /* A blob in exactly the shape store.js writes today. */
 const legacyBlob = () => JSON.stringify({

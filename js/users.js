@@ -138,21 +138,13 @@ export function usersLoaded() { return ready; }
    which is exactly the way back in. */
 export async function forgetEveryone() {
   const s = storage();
-  const ids = Object.keys(users);
-  /* The adapter can save a user and read them back but has never been
-     able to delete one — there was no caller until now. Written through
-     the roster it does expose: an empty list IS no people. */
-  try { await s.saveUsers?.([]); } catch (e) {}
-  for (const id of ids) {
-    try { localStorage.removeItem(`fj.name.${id}`); } catch (e) {}
-  }
-  try { await s.setActiveUserId(null); } catch (e) {}
-  /* and the keys underneath, because an adapter that grew a cache would
-     otherwise hand the same people back on the next read */
-  try {
-    localStorage.removeItem('fj.users');
-    localStorage.removeItem('fj.user');
-  } catch (e) {}
+  /* THROUGH THE CONTRACT, NOT AROUND IT. The first version of this
+     reached past the adapter and deleted localStorage keys directly,
+     because removeUser() did not exist — which worked on the one adapter
+     that happens to be localStorage and would have done nothing at all
+     on a server. The contract has the method now and this uses it. */
+  for (const id of Object.keys(users)) await s.removeUser(id);
+  await s.setActiveUserId(null);
   users = {}; active = null;
 }
 
