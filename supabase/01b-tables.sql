@@ -37,6 +37,10 @@ create table if not exists public.logs (
   id            uuid primary key default gen_random_uuid(),
   user_id       uuid not null,
   session_id    uuid,
+  -- What they called it on the day. LogEntry.name in js/core/schema.js has
+  -- always carried this and there was no column for it, so every logged
+  -- workout would have synced up as an untitled one.
+  name          text not null default '',
   performed_on  date not null default current_date,
   blocks        jsonb not null default '[]'::jsonb,
   duration_sec  int,
@@ -50,6 +54,12 @@ create table if not exists public.prs (
   value         numeric,
   unit          text,
   weight        numeric,
+  -- Per-side records. The contract spells the PR bag as
+  -- { value, unit, date, weight?, l?, r? } and single-limb work fills l and
+  -- r rather than value. Without these two columns a pistol squat record
+  -- would sync as a record of nothing.
+  l             numeric,
+  r             numeric,
   achieved_on   date not null default current_date,
   created_at    timestamptz not null default now(),
   updated_at    timestamptz not null default now(),
