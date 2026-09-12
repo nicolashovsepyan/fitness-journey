@@ -5397,7 +5397,8 @@ function paneMe(){
     <div class="micro just">Everything this app knows about you is on this device. Nothing has
       been sent anywhere. You can take it with you, or destroy it - both, right now, without
       asking anyone.</div>
-    <button class="go ghost" style="margin-top:12px" data-act="exportdata">Download everything</button>
+    <button class="go" style="margin-top:12px" data-act="tocoach">Send my answers to my coach</button>
+    <button class="go ghost" style="margin-top:8px" data-act="exportdata">Download everything</button>
     <button class="go ghost danger" style="margin-top:8px" data-act="wipe">Delete everything</button>
   </div>`, {icon: I.gear, sub: 'Units, reminders, your data'});
   /* A VISIBLE BUILD STAMP.
@@ -6129,6 +6130,46 @@ function act(a,el){
   if(cmd==='setunit'){
     A.unit = arg; saveProfile();
     return location.reload();          /* U is read once at boot, by design */
+  }
+  if(cmd==='tocoach'){
+    /* THE SURVEY COULD DO THIS AND THE APP COULD NOT.
+
+       onboarding.html ends with "Send to Nico" and a Copy link, and then
+       the person taps into the app and that screen is gone forever. From
+       inside the app the only way out was a JSON download — a file, on a
+       phone, in a shape the console does not read.
+
+       So a survey filled on a phone could not reach a console on a
+       laptop unless the very last screen was used exactly right, once.
+       Nicolas filled it as Nick, opened the app, and the link was on the
+       wrong device with no way to send it.
+
+       Same payload, same shape the console already imports, available
+       for as long as the app is installed. navigator.share is what makes
+       it cross the gap: on a phone that is AirDrop and Messages, which
+       is how a link gets to a laptop. */
+    const payload = {v:6, at:new Date().toISOString(), uid:USER, userId:USER,
+      name:(A&&A.name)||USER, a:A};
+    let link;
+    try{
+      const json = JSON.stringify(payload);
+      const b64 = btoa(unescape(encodeURIComponent(json)))
+        .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+      link = location.href.split('#')[0].replace(/(dashboard|index)\.html.*$/,'') + 'coach.html#fj=' + b64;
+    }catch(e){ return toast('Could not build the link'); }
+
+    if(navigator.share){
+      navigator.share({ title:'My Fitness Journey answers', text:'My survey answers for the console', url:link })
+        .then(()=>toast('Sent \u2014 open it on the computer with the console'))
+        .catch(()=>{});
+      return;
+    }
+    /* no share sheet: put it on the clipboard and say what to do with it */
+    const done = () => toast('Link copied \u2014 paste it into the console');
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(link).then(done).catch(()=>prompt('Copy this link:', link));
+    } else prompt('Copy this link:', link);
+    return;
   }
   if(cmd==='exportdata'){
     /* Every record this app holds for this person, in one readable file.

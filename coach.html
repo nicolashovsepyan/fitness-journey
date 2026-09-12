@@ -4129,6 +4129,15 @@ function readPastedIntake(v){
       /* both shapes the app writes: {v,at,a} from the survey, and the
          bare answers object someone copied out of it */
       if(o && o.a) return o;
+      /* THE APP'S OWN EXPORT FILE. "Download everything" writes
+         { exported, uid, profile, dashboard, coach } and calls the
+         answers `profile`, not `a` — so the one file the app can hand a
+         person was the one shape this refused. Somebody with their data
+         in their hand and a console in front of them could not get one
+         into the other. */
+      if(o && o.profile && (o.profile.name || o.profile.age || o.profile.days))
+        return {v:o.v || PAYLOAD_V, at:o.exported || new Date().toISOString(),
+                uid:o.uid || null, a:o.profile};
       if(o && (o.name || o.days || o.focus)) return {v:PAYLOAD_V, at:new Date().toISOString(), a:o};
     }catch(e){}
   }
