@@ -15,7 +15,7 @@
    Training data lives in localStorage, not here, so an update never
    touches a logged session.
    ============================================================ */
-const VERSION = '78b7b10603';
+const VERSION = 'dd1594c22f';
 const CACHE = 'fj-' + VERSION;
 const ASSETS = [
   "./coach.html",
@@ -147,6 +147,73 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('message', (e) => {
   if (e.data && e.data.type === 'skip-waiting') self.skipWaiting();
+  // The app tells the worker what the badge should say when it opens or
+  // closes, because the count lives in the database, not in here.
+  if (e.data && e.data.type === 'badge') setBadge(e.data.count);
+});
+
+/* ============================================================
+   PUSH. What arrives when the app is closed.
+
+   iOS delivers this only to an app that has been added to the home
+   screen and has been granted permission. Everywhere else it is the
+   ordinary Web Push contract.
+
+   TWO THINGS HAPPEN, AND THE ORDER MATTERS. The notification is shown
+   first, because iOS terminates a push handler that resolves without
+   showing one, and repeated offences stop delivery to the app
+   altogether. The badge is second, and is allowed to fail.
+   ============================================================ */
+function setBadge(n) {
+  try {
+    if (!('setAppBadge' in self.navigator)) return;
+    if (n > 0) self.navigator.setAppBadge(n); else self.navigator.clearAppBadge();
+  } catch (err) { /* unsupported, or denied. Never worth failing over. */ }
+}
+
+self.addEventListener('push', (e) => {
+  /* A push with no readable payload is still a push, and still has to
+     show something. Silent failure here is the one thing iOS punishes. */
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch (err) {
+    try { d = { body: e.data ? e.data.text() : '' }; } catch (err2) { d = {}; }
+  }
+  const title = d.title || 'Fitness Journey';
+  const body  = d.body  || 'Something new from your coach.';
+  const url   = d.url   || './index.html';
+
+  e.waitUntil((async () => {
+    await self.registration.showNotification(title, {
+      body,
+      icon: './icon-192.png',
+      badge: './icon-192.png',
+      // Same tag replaces rather than stacks, so a coach saving twice
+      // does not leave two identical notifications on the lock screen.
+      tag: d.tag || 'fj',
+      renotify: true,
+      data: { url },
+    });
+    setBadge(typeof d.count === 'number' ? d.count : 1);
+  })());
+});
+
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  const url = (e.notification.data && e.notification.data.url) || './index.html';
+  e.waitUntil((async () => {
+    const all = await clients.matchAll({ type: 'window', includeUncontrolled: true });
+    /* Focus the app if it is already open rather than opening a second
+       copy of it. A person who taps a notification expects to land in
+       the app they already have, not a new one beside it. */
+    for (const c of all) {
+      if (c.url.includes(self.location.origin)) {
+        await c.focus();
+        if ('navigate' in c) { try { await c.navigate(url); } catch (err) { /* same page */ } }
+        return;
+      }
+    }
+    await clients.openWindow(url);
+  })());
 });
 
 self.addEventListener('fetch', (e) => {

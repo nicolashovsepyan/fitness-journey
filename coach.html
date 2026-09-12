@@ -2172,7 +2172,40 @@ function drawRelease(){
     const id=b.dataset.rel;
     S.released[id]=!S.released[id]; save(1); drawRelease(); drawDock();
     toast(S.released[id]?'Released - it is live in his app now':'Hidden from his app again');
+    if(S.released[id]) tellThem(id);
   });
+}
+
+/* ---- and they find out ---------------------------------------------
+   A release that nobody is told about is a release nobody opens. This
+   is what turns the switch above into a message on their phone.
+
+   IT IS ALLOWED TO FAIL, SILENTLY. The program is released whether or
+   not a phone buzzed about it, the notification is read on next open
+   anyway, and a coach who has just released something must not be
+   shown an error about push plumbing. Only a real refusal, which means
+   the client is not theirs, is worth a word. */
+let TELL_TIMER = null, TELL_QUEUE = [];
+function tellThem(what){
+  if(typeof window.fjNotify !== 'function') return;
+  if(!CLIENT_ID || CLIENT_ID === 'ozzy') return;      // the built-in example has no phone
+  TELL_QUEUE.push(what);
+  /* Releasing 5 days is 5 taps in 10 seconds, and that is 1 piece of
+     news, not 5. The message waits a moment for the rest of them. */
+  clearTimeout(TELL_TIMER);
+  TELL_TIMER = setTimeout(async () => {
+    const n = TELL_QUEUE.length; TELL_QUEUE = [];
+    const name = (A.name || '').split(' ')[0] || 'there';
+    const r = await window.fjNotify({
+      to: CLIENT_ID,
+      title: `${name}, your program is ready`,
+      body: n > 1 ? `${n} new parts are live in your app.` : 'Something new is live in your app.',
+      kind: 'release',
+    });
+    if(r && !r.ok && /not your client/i.test(r.reason || '')){
+      toast('Released here, but they are not linked to this console yet');
+    }
+  }, 2500);
 }
 
 function drawLayers(){
@@ -5212,12 +5245,13 @@ addEventListener('visibilitychange', function(){
      open whether or not there is a database behind it.
      ============================================================ -->
 <script type="module">
-  import { pullClients, cloudUserId, cloudSignIn, cloudAttachEmail }
+  import { pullClients, cloudUserId, cloudSignIn, cloudAttachEmail, notify }
     from './js/core/backend.js';
   window.fjPullClients = pullClients;
   window.fjCloudUserId = cloudUserId;
   window.fjCloudSignIn = cloudSignIn;
   window.fjCloudAttachEmail = cloudAttachEmail;
+  window.fjNotify = notify;
 
   /* The console is already drawn by now — see the note beside
      fjOnCloudReady. This is the handshake back. */

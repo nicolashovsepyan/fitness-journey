@@ -289,6 +289,79 @@ group('a survey on one device reaches a console on another');
      spending three more of the hourly allowance. */
 }
 
+/* ============================================================
+   NOTIFYING SOMEBODY, which is the one thing in this product that
+   runs on a server.
+
+   The push itself cannot be checked from here: it needs a real phone
+   that has granted permission and subscribed. What CAN be checked, and
+   is the part that would hurt, is who the function agrees to notify.
+   It runs as the service role, above every policy, so if it took the
+   recipient on trust anybody could message anybody.
+   ============================================================ */
+group('the notifier, and who it refuses');
+{
+  const phone  = new Supabase({ url: BACKEND.url, anonKey: BACKEND.anonKey,
+                                sessionStore: fileSessionStore('phone') });
+  const laptop = new Supabase({ url: BACKEND.url, anonKey: BACKEND.anonKey,
+                                sessionStore: fileSessionStore('laptop') });
+  const stranger = new Supabase({ url: BACKEND.url, anonKey: BACKEND.anonKey,
+                                  sessionStore: fileSessionStore('stranger') });
+
+  /* A CACHED TOKEN IS USUALLY AN EXPIRED ONE. Access tokens last an
+     hour and these are reused between runs, so a request built from
+     session.access_token directly gets a 401 that looks exactly like a
+     broken function. One read forces the refresh first. */
+  for (const c of [phone, laptop, stranger]) { try { await c.select('users', { limit: 1 }); } catch {} }
+
+  const intro = await ensureSelf({ role: 'trainer', displayName: 'Coach', client: laptop });
+  const client = await ensureSelf({ role: 'client', displayName: 'Phone Person', client: phone });
+  // point the client at this coach, so there is a real relationship to test
+  if (intro.ok && client.ok) {
+    try {
+      await new SupabaseAdapter({ client: phone, device: new LocalAdapter() })
+        .saveUser({ id: client.uid, role: 'client', status: 'pending', displayName: 'Phone Person',
+                    email: null, ui: 'pro', programId: null, trainerId: intro.uid, accent: null,
+                    createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+    } catch { /* already theirs */ }
+  }
+
+  const post = (c, body) => fetch(`${BACKEND.url}/functions/v1/notify`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', apikey: BACKEND.anonKey,
+               Authorization: `Bearer ${c?.session?.access_token || 'none'}` },
+    body: JSON.stringify(body),
+  }).then(async r => ({ status: r.status, body: await r.json().catch(() => ({})) }));
+
+  const mine = await post(laptop, { to: client.uid, title: 'Your program is ready',
+                                    body: 'Day 1 is live.', kind: 'release' });
+  t('a coach can notify their own client' + (mine.status === 200 ? '' : ` — ${mine.body.error}`),
+    mine.status === 200 && mine.body.ok);
+
+  const theirs = await post(stranger, { to: client.uid, title: 'Nope', body: 'refuse me' });
+  t('a stranger cannot notify somebody elses client', theirs.status === 403);
+
+  const nobody = await post(null, { to: client.uid, title: 'Nope' });
+  t('and an unsigned request gets nowhere', nobody.status === 401);
+
+  /* The record is what the badge counts and what the app shows on next
+     open, so it matters more than the push. */
+  const inbox = await phone.select('notifications', { read_at: 'is.null', order: 'created_at.desc' });
+  t('the client can read what they were told', inbox.length >= 1);
+  t('  and it says what the coach sent', inbox.some(n => n.title === 'Your program is ready'));
+
+  const others = await stranger.select('notifications');
+  t('nobody else can read their notifications', others.length === 0);
+
+  // leave the badge at zero, which also exercises marking read
+  if (inbox.length) {
+    await phone.update('notifications', { id: `in.(${inbox.map(n => n.id).join(',')})` },
+      { read_at: new Date().toISOString() }, { minimal: true });
+  }
+  const after = await phone.select('notifications', { read_at: 'is.null' });
+  t('marking read clears the badge', after.length === 0);
+}
+
 group('clearing up after itself');
 {
   /* THIS CHECK USED TO PROVE NOTHING, and it is worth saying why

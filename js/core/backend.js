@@ -215,6 +215,43 @@ export async function publishIntake({ answers = {}, version = 6, at = null } = {
   }
 }
 
+/* Tell somebody something, on their phone.
+ *
+ *  Goes through the notify function rather than writing the row here,
+ *  for one reason: sending a push means signing it with the VAPID
+ *  private key, and that key can never be in a page. The function
+ *  holds it, checks that this client is really yours, records the
+ *  notification and pushes it.
+ *
+ *  IT IS ALLOWED TO FAIL AND THE CALLER SHOULD USUALLY CARRY ON. A
+ *  program that was released is released whether or not a phone buzzed
+ *  about it, and the notification is read on next open either way.
+ *
+ *  @returns {Promise<{ok:boolean, sent?:number, reason?:string}>} */
+export async function notify({ to, title, body, url = null, kind = 'message' }) {
+  const c = cloud();
+  if (!c) return { ok: false, reason: 'no backend configured' };
+  const signed = await cloudSignIn();
+  if (!signed.ok) return signed;
+  if (!to) return { ok: false, reason: 'no recipient' };
+  try {
+    const r = await fetch(`${BACKEND.url}/functions/v1/notify`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: BACKEND.anonKey,
+        Authorization: `Bearer ${c.session?.access_token || BACKEND.anonKey}`,
+      },
+      body: JSON.stringify({ to, title, body, url, kind }),
+    });
+    const out = await r.json().catch(() => ({}));
+    if (!r.ok) return { ok: false, reason: out.error || `notify failed (${r.status})` };
+    return { ok: true, ...out };
+  } catch (e) {
+    return { ok: false, reason: e?.message || 'Could not reach the notifier.' };
+  }
+}
+
 /* ============================================================
    THE CONSOLE SIDE.
    ============================================================ */

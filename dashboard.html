@@ -5391,8 +5391,8 @@ function paneMe(){
     <div class="arow"><span class="k">Units</span><span class="v">
       <button class="unitbtn ${U==='kg'?'on':''}" data-act="setunit:kg">kg</button>
       <button class="unitbtn ${U==='lb'?'on':''}" data-act="setunit:lb">lb</button></span></div>
-    <div class="arow"><span class="k">Reminders</span><span class="v">Not yet
-      <em> - needs notifications, which need the app installed</em></span></div>
+    <div class="arow" id="pushRow"><span class="k">Messages from your coach</span>
+      <span class="v" id="pushState">Checking&hellip;</span></div>
     <div class="eqsplit">Your data</div>
     <div class="micro just">Everything this app knows about you is on this device. Nothing has
       been sent anywhere. You can take it with you, or destroy it - both, right now, without
@@ -6522,6 +6522,65 @@ loadTheme().then(()=>go(S.tab||'today'));   /* then again from the spine, if rea
     }
   }catch(err){}
 })();
+</script>
+<!-- ============================================================
+     NOTIFICATIONS. The bridge to the module that does the work.
+
+     This file is one classic script and the push code is an ES module,
+     so the doorway is the same shape as the console one: import, hang
+     the functions on window, then tell the page they are there.
+     ============================================================ -->
+<script type="module">
+  import { pushPossible, pushState, pushExplain, pushEnable, pushDisable, refreshBadge }
+    from './js/core/push.js';
+
+  /* THE ROW FILLS ITSELF IN, WHEREVER AND WHENEVER IT APPEARS.
+
+     Settings is rebuilt by a function that returns a string, so there
+     is no single moment after which the row is guaranteed to exist.
+     Rather than thread a callback through the render pipeline for one
+     row, this watches for it. Cheap, and it cannot go stale. */
+  function draw() {
+    const cell = document.getElementById('pushState');
+    if (!cell) return;
+    const state = pushState();
+    if (state === 'unavailable' || state === 'denied') {
+      cell.innerHTML = `<em>${pushExplain()}</em>`;
+      return;
+    }
+    const on = state === 'granted';
+    cell.innerHTML = `<button class="unitbtn ${on ? 'on' : ''}" id="pushBtn">${on ? 'On' : 'Turn on'}</button>`;
+    /* THE PROMPT HAS TO COME FROM A TAP. iOS refuses a permission
+       request that is not inside a user gesture, and on some versions
+       counts the attempt against you. So it is a button, always, and
+       never something that happens on load. */
+    cell.querySelector('#pushBtn').onclick = async () => {
+      const btn = cell.querySelector('#pushBtn');
+      btn.disabled = true; btn.textContent = on ? 'Turning off\u2026' : 'Asking\u2026';
+      const r = on ? await pushDisable() : await pushEnable();
+      if (!r.ok && r.reason) {
+        cell.innerHTML = `<em>${r.reason}</em>`;
+        return;
+      }
+      draw();
+      if (!on) refreshBadge();
+    };
+  }
+
+  Object.assign(window, { fjPushPossible: pushPossible, fjPushState: pushState,
+    fjPushExplain: pushExplain, fjPushEnable: pushEnable, fjPushDisable: pushDisable,
+    fjRefreshBadge: refreshBadge, fjDrawPushRow: draw });
+
+  new MutationObserver(() => draw()).observe(document.body, { childList: true, subtree: true });
+  draw();
+
+  /* The badge is a count of unread notifications and the count lives in
+     the database, so opening the app is the moment to agree with it.
+     This covers the phone that was off when the push was sent. */
+  refreshBadge();
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') refreshBadge();
+  });
 </script>
 </body>
 </html>

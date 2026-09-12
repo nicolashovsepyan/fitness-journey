@@ -73,6 +73,20 @@ export const BACKEND = {
    *  pointing a client at an id with no row behind it is refused at
    *  the moment they finish answering a PAR-Q. */
   coachId: '51bd9f81-a199-4dba-be3f-3351e48830aa',
+
+  /** THE PUBLIC HALF OF THE PUSH SIGNING KEY.
+   *
+   *  Web Push will not deliver an anonymous message, so every push is
+   *  signed. This is the half a phone needs in order to subscribe at
+   *  all, and it authorises nothing on its own.
+   *
+   *  The private half lives in Supabase as an Edge Function secret and
+   *  nowhere else. Not in this file, not in this repository, not in a
+   *  message. Anybody holding it can send a notification to every
+   *  phone that ever subscribed, as us.
+   *
+   *  Null turns push off everywhere, quietly and completely. */
+  vapidPublicKey: 'BEFBSD_PcIjrSaKoq6ffTj7fY3A7qpau1PVf-hoMTV015QQaRdwCSmUGxNQkZtCoSbuJ4Tcnn6gnyfo7jQJrTi4',
 };
 
 /** True when there is something to sync to. Every caller asks this
