@@ -309,6 +309,15 @@ header:after{
 .step > h4:before{content:"";width:14px;height:2px;border-radius:2px;background:currentColor;opacity:.55}
 .h-said{color:var(--ink3)}
 .h-read{color:var(--neon)}
+/* A DRAFT HAS TO LOOK LIKE ONE. The whole risk of writing a first pass
+   for the coach is that it gets mistaken for the coach own judgment, so
+   it is chipped, it is dimmer, and it says who wrote it. */
+.draftchip{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:2px 6px;border-radius:99px;border:1px solid var(--neon-line);
+  color:var(--neon);opacity:.85;vertical-align:2px;margin-left:6px}
+.draftbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px}
+.draftbar .mut{font-size:12px}
+.draftbar .btn{padding:5px 12px;font-size:12px}
 .h-prop{color:var(--accent)}
 .h-why{color:var(--gold)}
 
@@ -1643,6 +1652,201 @@ function saidFor(stepId, a){
   return q;
 }
 
+/* ============================================================
+   THE FIRST PASS, WRITTEN FROM THEIR ANSWERS.
+
+   WHY THIS EXISTS. The ten layers showed a client answers and then an
+   empty box, because rendering Ozzy reasoning for somebody else is the
+   single worst thing this page could do: a confident inference about
+   the wrong person. Empty was the honest state. It was also a blank
+   page every single time, which is the slowest possible start.
+
+   So this writes a draft, and it is a DRAFT: derived only from what
+   this person actually said, shown with a mark on it, and it is not
+   the coach reasoning until the coach presses Use this. Nothing here
+   is saved, released, or shown to a client until that happens.
+
+   WHERE THE NUMBERS COME FROM. Galpin, the same places the "Where it
+   comes from" line under each layer already cites. Where his answers
+   do not reach, this says so rather than inventing the middle.
+   ============================================================ */
+
+/* Working sets a week the budget can actually buy, and what that is per
+   muscle. Roughly 60% of a session is working sets once warm-up, setup
+   and transitions are paid for, and a set plus its rest is about a
+   minute at the tight end of the hypertrophy range. Across the 6 big
+   patterns that gives sets per muscle, which is the number Galpin
+   states a range for. Checked against Ozzy: 4 x 20 gives 8 a muscle,
+   which is what his layer says by hand. */
+function doseMath(a){
+  const days = +a.days || 0, len = +a.length || 0;
+  if(!days || !len) return null;
+  const weekly = days * len;
+  const sets = Math.round(weekly * 0.6);
+  const per = sets / 6;
+  return { days, len, weekly, sets, lo: Math.floor(per), hi: Math.ceil(per + 1) };
+}
+
+function draftFor(id, a){
+  const R = [], P = [];                      // read sentences, proposals
+  const nm = esc(a.name || 'They');
+  const say = t => R.push(t);
+  const prop = (t, flag) => P.push([t, flag || '']);
+  const has = x => Array.isArray(x) && x.length;
+  const d = deckRead(a);
+  const dose = doseMath(a);
+  const pains = has(a.pain) ? lblList(a.pain, 6) : '';
+
+  switch(id){
+
+  case 'assess': {
+    const known = d.done.length, unknown = d.test.length;
+    if(known || unknown){
+      say(`${known ? `<b>${known}</b> movement${known===1?' has':'s have'} a real number` :
+        'Not one movement has a real number yet'}${unknown ?
+        `, and <b>${unknown}</b> ${unknown===1?'is':'are'} marked to test` : ''}. ` +
+        (known ? 'That is a baseline, not a guess, and it is what step 1 asks for.' :
+         'Step 1 asks for a measurement, so the first block has to produce one before anything is prescribed.'));
+    } else {
+      say('The movement deck came back empty, so there is nothing measured to build on yet.');
+    }
+    if(a.aerobic != null) say(`Aerobic screen: <b>${lbl(a.aerobic)}</b>.`);
+    if(a.trained) say(`Training history: <b>${lbl(a.trained)}</b>.`);
+    if(unknown) prop(`<b>Test the ${unknown} unknown${unknown===1?'':'s'} in week 1</b>, inside the session rather than as a separate day.`);
+    if(known) prop(`<b>Treat the ${known} known number${known===1?'':'s'} as the starting load</b> and do not progress them until week 3.`);
+    prop('<b>Nothing is prescribed above a measured number</b> in block 1. Where there is no number, the first session makes one.', 'flag');
+    break; }
+
+  case 'goals': {
+    const f = has(a.focus) ? lblList(a.focus, 4) : '';
+    if(f) say(`Stated focus: <b>${f}</b>. The first one named is the 90 day priority; the rest are what we protect, not what we chase.`);
+    if(has(a.driver)) say(`The real driver underneath it is <b>${lblList(a.driver, 3)}</b>, which is what the weekly note should speak to, not the scale.`);
+    if(has(a.horizon)) say(`Ten years out they want <b>${lblList(a.horizon, 3)}</b>. That is the thing block 1 has to not get in the way of.`);
+    if(a.weightKg) prop(`<b>Bodyweight ${a.weightKg} kg</b> recorded as the start line. Weighed once a week, same morning, not daily.`);
+    if(f) prop(`<b>Make it measurable:</b> name a number for "${f.split(' · ')[0]}" that can be tested in 12 weeks.`, 'flag');
+    prop('<b>1 goal leads.</b> Two priorities inside one 12 week block usually buys neither.');
+    break; }
+
+  case 'defenders': {
+    if(has(a.blockers)){
+      say(`What has stopped them before: <b>${lblList(a.blockers, 5, 'blockers')}</b>. These are the things to design around, not to out-discipline.`);
+      (a.blockers||[]).slice(0,4).forEach(b => {
+        const k = String(b);
+        if(/time|busy/i.test(k)) prop('<b>Time:</b> every session has a 2 movement minimum that still counts as done.');
+        else if(/injur|pain|hurt/i.test(k)) prop('<b>Injury:</b> nothing enters the program that has not been pain free for 2 sessions.', 'flag');
+        else if(/bor|motiv|interest/i.test(k)) prop('<b>Boredom:</b> the movement changes every 4 weeks, the pattern does not.');
+        else if(/travel/i.test(k)) prop('<b>Travel:</b> a bodyweight version of every day, no kit needed.');
+        else prop(`<b>${esc(lbl(k,'blockers'))}:</b> name the countermeasure here before block 1 starts.`, 'flag');
+      });
+    } else {
+      say('Nothing named as a past blocker. That is worth a direct question before block 1, because everybody has one.');
+      prop('<b>Ask what stopped it last time</b> and write the answer here.', 'flag');
+    }
+    if(a.when) say(`They train <b>${lbl(a.when)}</b>, so that is the slot to protect.`);
+    if(a.note) say(`In their words: &ldquo;${esc(String(a.note).slice(0,220))}&rdquo;`);
+    break; }
+
+  case 'quadrant': {
+    if(a.capacity != null){
+      const c = +a.capacity;
+      say(`They put <b>${c} of 10</b> points on training. ` + (c <= 3
+        ? 'That is a small allocation and the program has to be honest about it: consistency is the adaptation we are buying.'
+        : c >= 7 ? 'That is a large allocation, so the limit is more likely recovery than willingness.'
+        : 'That is a middling allocation, enough for real progress if nothing is wasted.'));
+      prop(`<b>Hold the dose inside ${c} of 10.</b> If it needs more, something else in the week has to give first, and they say what.`, 'flag');
+    } else {
+      say('The quadrant was not filled in, so how much of their week training is allowed to take is still unknown.');
+      prop('<b>Ask for the allocation</b> before setting the dose.', 'flag');
+    }
+    if(has(a.rodLocks)) say(`Locked and not negotiable: <b>${lblList(a.rodLocks, 4)}</b>.`);
+    break; }
+
+  case 'time': {
+    if(dose){
+      say(`<b>${dose.days} sessions of ${dose.len} minutes</b> is <b>${dose.weekly} minutes a week</b>, warm-ups included. That is the whole budget and it is the constraint every other layer bends around.`);
+      prop(`<b>Warm-up capped at ${Math.max(4, Math.round(dose.len*0.2))} minutes</b>, leaving about ${Math.round(dose.len*0.6)} minutes of working sets.`);
+      if(dose.len <= 30) prop('<b>No session runs long.</b> At this length, an overrun is the whole session, not a rounding error.', 'flag');
+    } else {
+      say('Days and session length are not both answered, so the weekly budget cannot be worked out yet.');
+      prop('<b>Get days and length</b> before anything else is decided.', 'flag');
+    }
+    if(has(a.otherAct)){
+      const l = a.otherLoad || {};
+      say(`They already do <b>${lblList(a.otherAct, 3)}</b>${l.freq ? `, ${l.freq}x a week for ${l.mins} minutes` : ''}. That is load the program does not get to ignore.`);
+      prop('<b>Count the other sport as training,</b> not as a bonus. It goes in the recovery maths.', 'flag');
+    }
+    if(has(a.trainDays)) prop(`<b>Days fixed as ${(a.trainDays||[]).map(x=>DOW[x]||x).join(', ')}</b>, so no muscle is hit twice inside 48 hours.`);
+    break; }
+
+  case 'select': {
+    if(has(a.kit)) say(`Kit: <b>${lblList(a.kit, 10)}</b>. That is what the patterns have to be built from.`);
+    else say('No kit recorded, so this is a bodyweight program until we know otherwise.');
+    if(pains){
+      say(`Pain reported at <b>${pains}</b>${a.painNote ? `, described as &ldquo;${esc(String(a.painNote).slice(0,140))}&rdquo;` : ''}. Nothing loads through that until it has been quiet for 2 sessions.`);
+      prop(`<b>Nothing enters that loads ${pains}</b> in block 1. A pain free variant of the same pattern instead.`, 'flag');
+    } else {
+      say('No pain reported, so selection is led by the patterns rather than by what has to be avoided.');
+    }
+    prop('<b>6 patterns, every week:</b> squat, hinge, push, pull, carry, brace. The movement can change, the pattern does not.');
+    if(has(a.toTest)) prop(`<b>They asked to be tested on ${lblList(a.toTest, 4)}.</b> Those go in as benchmarks, not as training.`);
+    break; }
+
+  case 'dose': {
+    if(dose){
+      const inRange = dose.lo >= 10;
+      say(`Galpin puts hypertrophy at <b>10 to 25 working sets per muscle per week</b>. Inside ${dose.weekly} minutes, across 6 patterns, this lands at roughly <b>${dose.lo} to ${dose.hi} sets per muscle</b>.`);
+      say(inRange
+        ? 'That is inside the range, so the dose is real and the job is making it survive contact with the week.'
+        : 'That is <b>below the stated minimum</b>, and it should be said plainly rather than rounded up. In block 1 the adaptation being bought is technique and adherence. Hypertrophy is a block 2 conversation, once the sessions are habitual.');
+      if(!inRange) prop('<b>Say the shortfall out loud.</b> A person who knows block 1 is deliberately under the growth threshold does not read week 4 as failure.', 'flag');
+      prop('<b>Reps 8 to 15</b>, stopping about 2 short of failure.');
+      prop(`<b>Rest 45 to 75 seconds</b>, per the time efficient variant, because ${dose.len} minutes makes the clock the binding constraint.`);
+    } else {
+      say('Without days and length there is no budget, and without a budget there is no honest dose.');
+      prop('<b>Set the time budget first.</b>', 'flag');
+    }
+    if(a.intensity) say(`They asked to be handled as <b>${lbl(a.intensity)}</b>, which is how hard the copy pushes, not how heavy the bar is.`);
+    break; }
+
+  case 'progress': {
+    const oneLoad = has(a.kit) && a.kit.length <= 2;
+    say(oneLoad
+      ? 'With very little kit there is effectively <b>1 load</b>, which removes the obvious progression lever. Progression has to come from reps, then tempo, then leverage, then density, in that order.'
+      : 'There is enough kit to progress by load, which is the simplest lever and the one to use first.');
+    prop('<b>Weeks 1 to 2, calibrate.</b> Find the real numbers. Nothing progresses, we are collecting a baseline.');
+    prop('<b>Weeks 3 to 4, add reps</b> inside the band, same load, same tempo.');
+    prop('<b>Weeks 5 to 8, add tempo and range</b> before adding anything else.');
+    prop('<b>Week 9, reassess</b>, and only then decide what unlocks. Conditional, not promised.', 'flag');
+    if(a.intensity) prop(`<b>3 to 5% a week</b> before a deload, paced for &ldquo;${esc(lbl(a.intensity))}&rdquo;.`);
+    break; }
+
+  case 'recover': {
+    if(a.sleep) say(`Sleep: <b>${lbl(a.sleep)}</b>. ` + (/lt6|poor|bad|5/i.test(String(a.sleep))
+      ? 'That is the ceiling on everything else, and it caps the dose more than any training variable does.'
+      : 'That supports the dose above.'));
+    if(has(a.parq)){
+      say(`Health flags: <b>${lblList(a.parq, 5, 'parq')}</b>. These are not footnotes, they set what the program is allowed to ask for.`);
+      prop('<b>Medical clearance named here</b> before anything maximal is prescribed.', 'flag');
+    }
+    if(a.rods && a.rods.recovery != null) say(`Their own recovery allocation: <b>${rodText(RODS[2], a.rods.recovery)}</b>.`);
+    prop('<b>Deload every 4th week</b>, same movements, about half the volume.');
+    prop('<b>48 hours between sessions for the same muscle</b>, which the day split above already respects.');
+    if(pains) prop(`<b>${pains} checked at every session</b>. 2 quiet sessions before it progresses, 1 bad one and it comes out.`, 'flag');
+    break; }
+
+  case 'review': {
+    say('The other 9 layers are guesses until this one runs. Block 1 is a hypothesis, and the review is what makes it correctable.');
+    prop('<b>Weekly:</b> sessions done out of sessions planned. That is the only number that matters in block 1.');
+    prop('<b>Every 4 weeks:</b> retest 1 benchmark, not all of them.');
+    prop('<b>At week 12:</b> retest everything measured in week 1, and compare like for like.');
+    if(dose && dose.days) prop(`<b>If 2 of ${dose.days} sessions are missed twice running</b>, the program is wrong, not the person. Cut the dose.`, 'flag');
+    break; }
+  }
+
+  if(!R.length && !P.length) return null;
+  return { read: R.join(' '), prop: P };
+}
+
 /* The live ten, for whoever is selected: the step, their answers, and any
    reasoning that has been done for them. Saved work beats the seed. */
 function layersFor(a, id){
@@ -1653,7 +1857,10 @@ function layersFor(a, id){
     return Object.assign({}, F, {
       said: saidFor(F.id, a).length ? saidFor(F.id, a) : (sd.said || []),
       read: sv.read != null ? sv.read : (sd.read || ''),
-      prop: sv.prop || sd.prop || []
+      prop: sv.prop || sd.prop || [],
+      /* Only ever a suggestion. Seeded clients keep their written
+         reasoning; everybody else gets a first pass to react to. */
+      draft: draftFor(F.id, a)
     });
   });
 }
@@ -1901,7 +2108,13 @@ function startNextBlock(){
   toast(`${PROG.name} started from the last one`);
 }
 
-const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+/* A FUNCTION DECLARATION, NOT A CONST, AND ON PURPOSE. It is defined
+   here, low in the file, but LAYERS is built near the top and the first
+   pass it writes escapes client answers. A const is in the temporal
+   dead zone until its line runs, so that threw "Cannot access esc
+   before initialization" and took the whole console down at load. A
+   declaration hoists, which is what this position needs. */
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 const strip=h=>String(h).replace(/<[^>]*>/g,'');
 
 /* ============================================================
@@ -1976,15 +2189,20 @@ function drawLayers(){
              do: a confident inference about the wrong person. Empty is the
              honest state for a client nobody has thought about yet. -->
         <div class="step">
-          <h4 class="h-read">How I read it</h4>
-          <div class="read">${L.read || `<span class="mut">Not read yet for ${
-            esc(A.name||'this client')}. Their answers are above; put your thinking in the box below
-            and it goes into the brief.</span>`}</div>
+          <h4 class="h-read">How I read it${L.read ? '' : (L.draft ? ' <span class="draftchip">Draft</span>' : '')}</h4>
+          <div class="read">${L.read || (L.draft ? L.draft.read
+            : `<span class="mut">Not read yet for ${esc(A.name||'this client')}. Their answers are above; put your thinking in the box below
+            and it goes into the brief.</span>`)}</div>
+          ${!L.read && L.draft ? `<div class="draftbar">
+            <span class="mut">Written from their answers, not agreed by you.</span>
+            <button class="btn" data-draft="${L.id}">Use this</button>
+          </div>` : ''}
         </div>
 
-        ${L.prop.length ? `<div class="step">
-          <h4 class="h-prop">What I propose</h4>
-          <ul class="prop">${L.prop.map(([t,f])=>`<li class="${f}">${t}</li>`).join('')}</ul>
+        ${(L.prop.length || (!L.read && L.draft && L.draft.prop.length)) ? `<div class="step">
+          <h4 class="h-prop">What I propose${L.prop.length ? '' : ' <span class="draftchip">Draft</span>'}</h4>
+          <ul class="prop">${(L.prop.length ? L.prop : L.draft.prop)
+            .map(([t,f])=>`<li class="${f}">${t}</li>`).join('')}</ul>
         </div>` : ''}
 
         <div class="step">
@@ -2016,6 +2234,21 @@ function drawLayers(){
   document.querySelectorAll('[data-note]').forEach(t=>{
     t.oninput=()=>{ S.notes[t.dataset.note]=t.value; save(1); drawDock(); };
     t.onclick=e=>e.stopPropagation();
+  });
+  /* ACCEPTING A DRAFT IS WHAT MAKES IT YOURS. Until this is pressed the
+     draft is on screen and nowhere else: not saved, not in the brief,
+     not visible to the client. Pressing it copies the words into this
+     client own record, where they can be edited like anything else. */
+  document.querySelectorAll('[data-draft]').forEach(b=>b.onclick=e=>{
+    e.stopPropagation();
+    const id = b.dataset.draft;
+    const L = LAYERS.find(x => x.id === id);
+    if(!L || !L.draft) return;
+    S.layers = S.layers || {};
+    S.layers[id] = { read: L.draft.read, prop: L.draft.prop };
+    L.read = L.draft.read; L.prop = L.draft.prop;
+    save(1); drawLayers(); drawDock();
+    toast('Added to the brief. Edit it like anything else.');
   });
 }
 
