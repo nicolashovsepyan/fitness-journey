@@ -544,6 +544,28 @@ select.pin{appearance:none;cursor:pointer}
 .nbchk.warn .dot{ background:var(--gold) } .nbchk.warn .n{ color:var(--gold) }
 .nbchk.bad .dot{ background:var(--red) } .nbchk.bad .n{ color:var(--red) }
 
+/* THE DIALS, ON TOP. Three cells side by side on a wide window, and
+   they stack before they get cramped rather than after. */
+.nbtoppanel{ margin-top:10px; }
+.nbweak{ font-size:11.5px; line-height:1.5; color:var(--ink2); margin:10px 2px 0; }
+.nbweak b{ color:var(--ink); }
+.nbweak.ok{ color:var(--ink3); }
+.nbdial.thin u{ opacity:1; font-weight:700; }
+.nbtopgrid{ display:grid; gap:22px 30px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); }
+.nbtopcell{ min-width:0; }
+.nbcols.one{ display:block; }
+.nbcols.one .nbcol.mid{ width:auto; max-width:none; }
+
+/* Picking a movement, in the block that wants one. */
+.nbaddpanel{ margin-top:8px; border:1px solid var(--line); border-radius:12px;
+  padding:10px; background:var(--tint); }
+.nbaddlbl{ font:600 9.5px ui-monospace,monospace; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--ink3); margin:8px 2px 6px; }
+.nbaddlist{ max-height:340px; overflow-y:auto; display:flex; flex-direction:column; gap:4px; }
+.nbaddclose{ margin-top:8px; width:100%; background:transparent; border:1px solid var(--line);
+  border-radius:8px; padding:6px; font:inherit; font-size:11px; color:var(--ink3); cursor:pointer; }
+.nbaddclose:hover{ color:var(--ink); }
+
 .nbmixrow{ margin-bottom:12px; }
 .nbmixlbl{ display:flex; justify-content:space-between; font:600 9.5px ui-monospace,monospace;
            letter-spacing:.09em; text-transform:uppercase; color:var(--ink3); margin:0 0 5px; }
@@ -3484,7 +3506,10 @@ function nbDayParts(id){
 
 /* ---- editor state. Nothing here is the program; the program is PROG. ---- */
 let nbSel = null, nbOpen = null, nbSwap = null, nbSwapQ = '',
-    nbFilter = null, nbBody = null, nbFund = false, nbView = 'patterns', nbDrag = null;
+    nbView = 'patterns', nbDrag = null;
+/* nbFilter, nbBody and nbFund went with the movement column they
+   filtered. The picker inside a block sorts by what fits the slot and
+   then searches everything, which is what those 3 switches were for. */
 /* Which locked blocks are being looked at anyway. Locking folds a block
    down to one line - that is the point of it, to get a finished block out
    of the way of the one you are still working on - but you have to be able
@@ -3709,7 +3734,7 @@ function nbDel(bi,ii){ nbAt(bi); const b=PROG.days[PDAY].blocks[bi];
   nbSel=null; nbOpen=null; nbSave(); }
 function nbAdd(id){
   if(nbSel==null || !PROG.days[PDAY].blocks[nbSel])
-    return toast('Pick a block first — hit "+ Add a movement" on the one you want');
+    return toast('Pick a block first, with "+ Add a movement" on the one you want');
   nbAt(nbSel);
   const b = PROG.days[PDAY].blocks[nbSel], m = MV(id), no = nbForbidden(m);
   b.items.push({ ex:id, pres: m.meas==='hold' ? '3 × 30s' : '3 × 8', note:'' });
@@ -3730,19 +3755,107 @@ function nbAdd(id){
    armed, and then nothing needs to move at all. It is only below the fold
    on a narrow window, where the columns stack — and there the smallest
    possible nudge is right, not a jump to centre. */
+/* ============================================================
+   PICKING A MOVEMENT, INSIDE THE BLOCK THAT WANTS ONE.
+
+   This used to arm the block and send you to a permanent column on the
+   far side of the window. That column existed all day for something
+   you touch for 3 seconds, and the act of using it was a journey
+   across the screen and back.
+
+   It opens here instead, under the block, and it opens with
+   SUGGESTIONS rather than an empty search box. What it suggests is
+   worked out from the slot: what the block already holds, what the day
+   is short of, and what this person can actually do. Typing anything
+   abandons all of that and searches the whole library, which is the
+   other half of the promise: a suggestion is an offer, never a fence.
+   ============================================================ */
+let nbAddQ = '';
+
+/* What would suit this block, best first.
+   Order, and each rule is here because the alternative is worse:
+     1. nothing that breaks one of their rules, ever
+     2. patterns this DAY has not covered yet, because a missing
+        pattern is the most likely thing to be wrong with a week
+     3. fundamentals before variations, which is the house rule
+     4. near the difficulty they should be working at */
+function nbSuggest(bi){
+  const b = PROG.days[PDAY].blocks[bi] || {};
+  const here = new Set((b.items||[]).map(x=>x.ex));
+  const day = PROG.days[PDAY] || {};
+  const covered = new Set();
+  for(const blk of day.blocks||[]) for(const it of blk.items||[])
+    for(const pat of (MV(it.ex).p||[])) covered.add(pat);
+
+  const target = (typeof genTarget === 'function') ? genTarget(A) : 3;
+  const kit    = (typeof genKit === 'function') ? genKit(A) : null;
+  const avoid  = (typeof genAvoid === 'function') ? genAvoid(A) : new Set();
+
+  return MOVES
+    .filter(m => !here.has(m.id))
+    .filter(m => /working-set|skill/.test(m.role||'') || (b.role||'') === 'Prime')
+    .filter(m => !kit || !(m.eq||[]).length || (m.eq||[]).some(e=>kit.has(e)))
+    .filter(m => !(m.dem||[]).some(d=>avoid.has(d)))
+    .map(m => {
+      const fresh = (m.p||[]).some(pat => !covered.has(pat));
+      const gap = m.df == null ? 3 : Math.abs(m.df - target);
+      return { m, score: (fresh ? 0 : 10) + (m.f ? 0 : 4) + gap };
+    })
+    .sort((x,y) => x.score - y.score || x.m.n.localeCompare(y.m.n))
+    .slice(0, 18)
+    .map(x => x.m);
+}
+
+function nbAddPanel(bi){
+  const w = nbWords(nbAddQ);
+  const searching = w.length > 0;
+  const b = PROG.days[PDAY].blocks[bi] || {};
+  const here = new Set((b.items||[]).map(x=>x.ex));
+  const list = searching
+    ? MOVES.filter(m => !here.has(m.id) && nbMatch(m, w))
+           .sort((a,c)=>(c.f?1:0)-(a.f?1:0)||a.n.localeCompare(c.n)).slice(0,40)
+    : nbSuggest(bi);
+
+  return `<div class="nbaddpanel" onclick="event.stopPropagation()">
+    <input class="nbsearch" id="nbaddq" autocomplete="off"
+      placeholder="Search all ${MOVES.length}, or take one of these"
+      value="${esc(nbAddQ)}" oninput="nbAddSearch(${bi}, this.value)">
+    <p class="nbaddlbl">${searching
+      ? `${list.length} match${list.length===1?'':'es'}`
+      : 'Fits this slot'}${searching ? '' : ' &middot; fundamentals first, patterns this day is missing first'}</p>
+    ${list.length ? `<div class="nbaddlist">${list.map(m=>`
+      <div class="nbalt ${nbFlagCls(m)}" style="--c:${NBC(m.g)}"
+        onclick="event.stopPropagation();nbAdd('${m.id}')">
+        <span class="dot"></span><span><b>${esc(m.n)}${m.f?' \u2605':''}</b><br>
+          <small>${esc(nbFlagWhy(m) || [m.g,(m.mus||[]).slice(0,2).join('/'),m.mod].filter(Boolean).join(' \u00B7 '))}</small>
+        </span><span class="go">add</span></div>`).join('')}</div>`
+      : `<p class="nbempty">Nothing matches those words.</p>`}
+    <button class="nbaddclose" onclick="event.stopPropagation();nbSel=null;nbAddQ='';drawProgram()">Close</button>
+  </div>`;
+}
+
+/* Typing redraws only the list, so the caret is never lost and the page
+   never moves. Rebuilding the whole panel would blur the box on every
+   keystroke, which makes a search box feel broken. */
+function nbAddSearch(bi, v){
+  nbAddQ = v;
+  const panel = document.querySelector('.nbaddpanel');
+  if(!panel) return drawProgram();
+  const fresh = document.createElement('div');
+  fresh.innerHTML = nbAddPanel(bi);
+  const list = panel.querySelector('.nbaddlist'), lbl = panel.querySelector('.nbaddlbl');
+  const nl = fresh.querySelector('.nbaddlist'), nlbl = fresh.querySelector('.nbaddlbl');
+  if(lbl && nlbl) lbl.innerHTML = nlbl.innerHTML;
+  if(list) list.replaceWith(nl || fresh.querySelector('.nbempty') || document.createElement('div'));
+  else panel.querySelector('.nbempty')?.replaceWith(nl || document.createElement('div'));
+}
+
 function nbPickInto(bi){ nbAt(bi);
-  nbSel=bi; nbOpen=null; drawProgram();
-  const q=document.getElementById('nbq'); if(!q) return;
-  /* Bring it into ITS OWN column if it is out of sight there. On a desktop
-     that column is beside the block you just armed and usually nothing
-     moves at all; the window is never scrolled either way, because the
-     page moving is the thing that makes this feel broken. */
-  const col = q.closest('.nbcol');
-  if(col && col.scrollHeight > col.clientHeight){
-    const cr = col.getBoundingClientRect(), qr = q.getBoundingClientRect();
-    if(qr.top < cr.top || qr.bottom > cr.bottom) col.scrollTop += qr.top - cr.top - 8;
-  }
-  q.focus({preventScroll:true}); q.select();
+  nbAddQ = '';
+  nbSel = (nbSel === bi) ? null : bi;
+  nbOpen = null; drawProgram();
+  const q = document.getElementById('nbaddq'); if(q) q.focus({ preventScroll:true });
+  return;
 }
 function nbNewBlock(){ (PROG.days[PDAY].blocks ||= [])
   .push({ role:'Work', name:'New block', note:'', type:'Straight', cfg:{}, items:[] });
@@ -3961,23 +4074,6 @@ function nbSwapSearch(bi,ii,v){
 
    The console already derives constraints properly, in constraintsFor(),
    and has done all along. The builder simply was not asking it. */
-function nbGoals(){
-  /* A CLIENT MAY HAVE BEEN WRITTEN BY HAND. Sevan predates the survey —
-     his record was typed straight into a handoff link, with goalsText and
-     constraintsText saying in a sentence what a survey would have
-     assembled from a dozen taps. Those are not stale fields to be cleaned
-     up; they are the only answers that person ever gave, and a console
-     that ignored them would show his program next to an empty panel.
-     Written wins where it exists, because somebody meant it. */
-  const written = [].concat(A.goalsText || []).filter(Boolean);
-  if(written.length) return [...new Set(written)];
-  const out = [];
-  /* ninety days first — it is the horizon the program is actually for */
-  [].concat(A.focus || []).forEach(v => out.push(lbl(v)));
-  [].concat(A.driver || []).filter(Boolean).forEach(v => out.push(lbl(v)));
-  [].concat(A.horizon || []).slice(0, 2).forEach(v => out.push(lbl(v)));
-  return [...new Set(out)].filter(Boolean);
-}
 /* constraintsFor() returns [title, prose, hard] — the builder wants one
    short line each, and only the ones that actually bind. */
 const NB_ENT = { '&middot;':'\u00B7', '&times;':'\u00D7', '&amp;':'&', '&nbsp;':' ',
@@ -3999,22 +4095,35 @@ function nbCons(){
       .map(c => `${c[0]} \u2014 ${nbPlain(c[1])}`));
 }
 
-function nbLeft(){
-  const goals = nbGoals();
-  const cons  = nbCons();
+/* ============================================================
+   THE DIALS, ON TOP OF THE PROGRAM RATHER THAN BESIDE IT.
+
+   WHAT MOVED AND WHY. This was a column called nbLeft, and it opened
+   with "What they asked for" and "Hard constraints" — both of which
+   the client drawer already shows, a few pixels to its left. The same
+   facts twice, side by side, costing a third of the width of the
+   screen you build in.
+
+   The goals and the rules live in the drawer now, which opens and
+   shuts. What is left is the part that CHANGES as you build: the
+   balance of the week, where the work lands, and what it currently
+   breaks. That belongs above the program, full width, where it can be
+   watched while the thing it measures is being made.
+   ============================================================ */
+function nbTop(){
   const ids   = Object.keys(PROG.days||{});
   const total = ids.reduce((t,id)=>t+nbDayMins(PROG.days[id]),0);
   const want  = +(A.length||0) * (ids.length||1);
 
-  let h = `<p class="nblbl">What they asked for</p>`;
-  h += goals.length ? goals.map(g=>`<div class="nbgoal"><i></i><b>${esc(g)}</b></div>`).join('')
-                    : `<p class="nbmut">No goals in this survey.</p>`;
-  if(cons.length){
-    h += `<p class="nblbl mt">Hard constraints</p>`;
-    h += cons.map(c=>`<div class="nbrule"><p>${esc(c)}</p></div>`).join('');
-  }
+  let h = `<div class="nbtopgrid">`;
+  h += `<div class="nbtopcell"><p class="nblbl">Training balance</p><div id="nbmix"></div></div>`;
+  h += `<div class="nbtopcell"><div class="nbcovhead"><p class="nblbl" style="margin:0;flex:1">${
+        nbView==='patterns'?'A full ring is twice this week':'Where the work lands'}</p>
+      <span class="nbseg">${['patterns','body'].map(v=>
+        `<button class="${nbView===v?'on':''}" onclick="nbView='${v}';drawProgram()">${v==='body'?'body':'patterns'}</button>`).join('')}</span></div>
+      <div id="nbcov"></div></div>`;
 
-  h += `<p class="nblbl mt">Does the week obey them?</p>`;
+  h += `<div class="nbtopcell"><p class="nblbl">Does the week obey them?</p>`;
   const rows = [
     ['Sessions', `${ids.length}${A.days?' / '+A.days:''}`, !A.days || ids.length<=+A.days ? 'ok':'bad'],
     ['Weekly minutes', want ? `${total} / ${want}` : `${total}`, !want || total<=want*1.1 ? 'ok':'warn'],
@@ -4040,13 +4149,7 @@ function nbLeft(){
         <span class="tx">${t}</span><span class="n">${n}</span></div>`).join('');
   for(const l of broken) h += `<div class="nbrule bad"><p>${l}</p></div>`;
   for(const l of watch)  h += `<div class="nbrule warn"><p>${l}</p></div>`;
-
-  h += `<p class="nblbl mt">Training balance</p><div id="nbmix"></div>`;
-  h += `<div class="nbcovhead"><p class="nblbl" style="margin:0;flex:1">${
-        nbView==='patterns'?'A full ring is twice this week':'Where the work lands'}</p>
-      <span class="nbseg">${['patterns','body'].map(v=>
-        `<button class="${nbView===v?'on':''}" onclick="nbView='${v}';drawProgram()">${v==='body'?'body':'patterns'}</button>`).join('')}</span></div>
-      <div id="nbcov"></div>`;
+  h += `</div></div>`;
   return h;
 }
 /* ONE GAUGE PER KIND OF WORK.
@@ -4093,56 +4196,28 @@ function nbCovHTML(){
       + (thin.length?`<p class="nbmut">Once this week: ${thin.join(', ')}.</p>`:'');
   }
   const c = nbCounts(), R = 15, C = 2*Math.PI*R;
+  /* WHICH ONES ARE SHORT, SAID IN WORDS.
+
+     7 part-filled rings tell you the answer is in there somewhere. The
+     question actually being asked is "what do I need to add", and that
+     deserves a sentence rather than a comparison you do by eye. Mobility
+     is left out: it is not a pattern the week owes 2 of. */
+  const short = NB_GROUPS.filter(g => g !== 'mobility' && c[g] < 2);
+  const none  = short.filter(g => !c[g]);
+  const thin  = short.filter(g => c[g]);
+  const weak = short.length
+    ? `<p class="nbweak">${none.length ? `<b>Missing:</b> ${none.join(', ')}. ` : ''}${
+        thin.length ? `<b>Once only:</b> ${thin.join(', ')}.` : ''}</p>`
+    : `<p class="nbweak ok">Every pattern is trained at least twice.</p>`;
   return `<div class="nbdials">` + NB_GROUPS.map(g=>{
     const n=c[g], frac=Math.min(1,n/2);
-    return `<div class="nbdial" style="--c:${NBC(g)}" title="${g}: ${n} this week, aiming for 2">
+    return `<div class="nbdial ${g!=='mobility'&&n<2?'thin':''}" style="--c:${NBC(g)}" title="${g}: ${n} this week, aiming for 2">
       <svg width="36" height="36" viewBox="0 0 38 38">
         <circle class="bg" cx="19" cy="19" r="${R}" fill="none" stroke-width="3.5"/>
         <circle class="fg" cx="19" cy="19" r="${R}" fill="none" stroke-width="3.5" stroke-linecap="round"
           transform="rotate(-90 19 19)" stroke-dasharray="${(C*frac).toFixed(1)} ${C.toFixed(1)}"/>
         <text class="mid" x="19" y="23" text-anchor="middle">${n}×</text></svg><u>${g}</u></div>`;
-  }).join('') + `</div>`;
-}
-
-function nbRight(){
-  const b = nbSel!=null ? PROG.days[PDAY].blocks[nbSel] : null;
-  const opts = (PROG.days[PDAY].blocks||[]).map((x,i)=>
-    `<option value="${i}" ${i===nbSel?'selected':''}>${esc(x.role)} · ${esc(x.name||'block')}</option>`).join('');
-  const w = nbWords((document.getElementById('nbq')||{}).value||'');
-  const inBody = m => !nbBody || (m.mus||[]).some(mu=>(NB_BODY[nbBody]||[]).includes(mu));
-  const hits = MOVES.filter(m => (!nbFilter||m.g===nbFilter) && (!nbFund||m.f) && inBody(m) && nbMatch(m,w));
-  return `<p class="nblbl">Movements · ${hits.length} of ${MOVES.length}</p>
-    <div class="nbtarget ${b?'':'none'}"><span>Adding to</span>
-      <select onchange="nbSel = this.value===''?null:+this.value; drawProgram()">
-        <option value="" ${b?'':'selected'}>— pick a block —</option>${opts}</select></div>
-    <input class="nbsearch" id="nbq" placeholder="leg explosive · kettlebell hinge · abs…"
-           value="${esc((document.getElementById('nbq')||{}).value||'')}" oninput="nbRedrawList()">
-    <div class="nbfilters">
-      <button class="nbf fund ${nbFund?'on':''}" onclick="nbFund=!nbFund;drawProgram()">★ fundamentals</button>
-      ${NB_GROUPS.map(g=>`<button class="nbf ${nbFilter===g?'on':''}" style="--c:${NBC(g)}"
-        onclick="nbFilter = nbFilter==='${g}'?null:'${g}'; drawProgram()">${g}</button>`).join('')}
-      <span class="nbbreak"></span>
-      ${Object.keys(NB_BODY).map(part=>`<button class="nbf body ${nbBody===part?'on':''}"
-        onclick="nbBody = nbBody==='${part}'?null:'${part}'; drawProgram()">${part}</button>`).join('')}
-    </div>
-    <div id="nblist">${nbListHTML(hits)}</div>`;
-}
-function nbListHTML(hits){
-  const list = (hits||[]).sort((a,b)=>(b.f?1:0)-(a.f?1:0)||a.n.localeCompare(b.n));
-  if(!list.length) return `<p class="nbempty">Nothing matches all of those words.</p>`;
-  return list.slice(0,120).map(m=>`<div class="nbmv ${nbFlagCls(m)}" style="--c:${NBC(m.g)}"
-      onclick="nbAdd('${m.id}')"><span class="dot"></span>
-      <span><b>${esc(m.n)}${m.f?' ★':''}</b><br><small>${esc(nbFlagWhy(m) ? '\u26A0 '+nbFlagWhy(m)
-        : [m.g,(m.mus||[]).slice(0,2).join('/'),m.mod].filter(Boolean).join(' · '))}</small></span>
-      <span class="plus">+</span></div>`).join('')
-    + (list.length>120 ? `<p class="nbmut">${list.length-120} more — keep typing to narrow it.</p>` : '');
-}
-function nbRedrawList(){
-  const w = nbWords(document.getElementById('nbq').value);
-  const inBody = m => !nbBody || (m.mus||[]).some(mu=>(NB_BODY[nbBody]||[]).includes(mu));
-  const hits = MOVES.filter(m => (!nbFilter||m.g===nbFilter) && (!nbFund||m.f) && inBody(m) && nbMatch(m,w));
-  const host = document.getElementById('nblist');
-  if(host) host.innerHTML = nbListHTML(hits);
+  }).join('') + `</div>` + weak;
 }
 
 /* ---- the middle: the day, its blocks, its movements ---- */
@@ -4344,7 +4419,8 @@ function nbMiddle(){
     });
 
     if(!(b.items||[]).length) h += `<p class="nbnone">Nothing in this block yet.</p>`;
-    h += `<button class="nbaddit ${sel?'sel':''}" onclick="event.stopPropagation();nbPickInto(${bi})">+ Add a movement${sel?' · searching':''}</button>`;
+    h += `<button class="nbaddit ${sel?'sel':''}" onclick="event.stopPropagation();nbPickInto(${bi})">+ Add a movement</button>`;
+    if(sel) h += nbAddPanel(bi);
     if(b.note) h += `<div class="nbbnote">${esc(b.note)}</div>`;
     h += `</div>`;
   });
@@ -4503,14 +4579,26 @@ function drawProgramBody(){
   if(!MOVES.length) nbBuildLibrary();
   if(PDAY == null || !PROG.days[PDAY]) PDAY = days[0];
 
-  host.innerHTML = libRow() + `<div class="nbcols">
-      <div class="nbcol left" id="nbleft"></div>
+  /* ONE COLUMN, WITH THE DIALS ABOVE IT.
+
+     It was three: goals and rules on the left, the program in the
+     middle, a movement library on the right. The left repeated the
+     client drawer sitting next to it, and the right was a permanent
+     column for a thing you touch for 3 seconds at a time, so the
+     program itself, the only part anybody edits, had a third of the
+     window.
+
+     The dials are on top now, full width, where they can be watched
+     while the thing they measure is being built. Movements are picked
+     inside the block that wants one. What is left is the program, and
+     it gets the whole screen. */
+  host.innerHTML = libRow()
+    + `<div class="panel nbtoppanel"><div class="pad" id="nbtop"></div></div>`
+    + `<div class="nbcols one">
       <div class="nbcol mid"  id="nbmid"></div>
-      <div class="nbcol right" id="nbright"></div>
     </div><div class="pwarn" id="pwarn"></div>`;
-  document.getElementById('nbleft').innerHTML  = nbLeft();
+  document.getElementById('nbtop').innerHTML    = nbTop();
   document.getElementById('nbmid').innerHTML   = nbMiddle();
-  document.getElementById('nbright').innerHTML = nbRight();
   document.getElementById('nbmix').innerHTML   = nbMixHTML();
   document.getElementById('nbcov').innerHTML   = nbCovHTML();
 
