@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "built": "2026-09-12",
+  "count": 2,
+  "icons": [
+    {
+      "id": "rounded",
+      "name": "Rounded",
+      "src": "icons/rounded-180.png",
+      "srcset": {
+        "180": "icons/rounded-180.png",
+        "192": "icons/rounded-192.png",
+        "512": "icons/rounded-512.png"
+      },
+      "manifest": "manifest-rounded.webmanifest"
+    },
+    {
+      "id": "the-original",
+      "name": "The Original",
+      "src": "icons/the-original-180.png",
+      "srcset": {
+        "180": "icons/the-original-180.png",
+        "192": "icons/the-original-192.png",
+        "512": "icons/the-original-512.png"
+      },
+      "manifest": "manifest-the-original.webmanifest"
+    }
+  ]
+}

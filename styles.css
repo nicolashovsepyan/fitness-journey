@@ -910,6 +910,20 @@ html, body { touch-action: manipulation; }      /* kill double-tap-to-zoom (keep
 .install-card { background:var(--accent-dim); border:1px solid var(--accent); border-radius:var(--radius);
   padding:14px 16px; margin-bottom:14px; }
 .install-card.warn { background:rgba(255,184,77,.1); border-color:var(--warn); }
+
+/* THE ICON ROW. Only ever on the install card, because the choice only
+   works before the app is added. See js/install.js. */
+.ic-icons { margin:14px 0 4px; }
+.ic-iclbl { font-size:13px; font-weight:600; margin-bottom:8px; }
+.ic-iclbl span { display:block; font-weight:400; font-size:11.5px; opacity:.72; margin-top:2px; }
+.ic-icrow { display:flex; flex-wrap:wrap; gap:10px; }
+.ic-ic { display:flex; flex-direction:column; align-items:center; gap:5px; padding:7px;
+  border:1.5px solid transparent; border-radius:14px; background:transparent;
+  cursor:pointer; color:inherit; font:inherit; min-width:68px; }
+.ic-ic img { border-radius:13px; display:block; }
+.ic-ic span { font-size:10.5px; opacity:.75; text-align:center; line-height:1.2; }
+.ic-ic.on { border-color:var(--accent); background:var(--accent-dim); }
+.ic-ic.on span { opacity:1; font-weight:600; }
 .install-card .ic-top { display:flex; gap:11px; align-items:flex-start; }
 .install-card .ico { font-size:20px; line-height:1.1; flex:0 0 auto; }
 .install-card .ic-title { font-size:15px; font-weight:750; }

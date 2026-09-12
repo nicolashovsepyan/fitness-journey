@@ -82,3 +82,68 @@ export function installGuidance() {
   return { state: 'desktop', title: 'Add to your home screen',
     body: 'On your phone, open this link and use your browser menu to add it to the home screen.' };
 }
+
+/* ============================================================
+   WHICH ICON LANDS ON THEIR PHONE.
+
+   WHY THIS IS HERE AND NOT IN SETTINGS. iOS reads the icon ONCE, at
+   the moment somebody taps Add to Home Screen, and then keeps it. A
+   picker inside the installed app would be a control that silently
+   does nothing until the app is deleted and re-added, which is worse
+   than not offering one. So the choice is offered on the way in, and
+   only while it can still take effect.
+
+   The list comes from spine/app-icons.json, which tools/build-app-icons.mjs
+   writes from whatever is in images/app-icons/. Adding a design is
+   dropping a file in and running that. Nothing here knows any icon by
+   name.
+   ============================================================ */
+
+let _icons = null;
+
+/** The choices, or an empty list. Never throws: an install screen that
+ *  fails because an icon manifest is missing is a worse outcome than
+ *  one that quietly offers no choice. */
+export async function iconChoices() {
+  if (_icons) return _icons;
+  try {
+    const r = await fetch('spine/app-icons.json', { cache: 'no-cache' });
+    _icons = r.ok ? ((await r.json()).icons || []) : [];
+  } catch { _icons = []; }
+  return _icons;
+}
+
+export function chosenIconId() {
+  try { return localStorage.getItem('fj.appIcon') || null; } catch { return null; }
+}
+
+/** Point the document at this icon, so the add that follows picks it up.
+ *
+ *  BOTH LINKS, because the two platforms read different ones: iOS takes
+ *  apple-touch-icon, Android takes the icons in the manifest. Swapping
+ *  only the first would give an iPhone the chosen icon and an Android
+ *  the default, which is the kind of half-working nobody reports. */
+export async function applyIcon(id) {
+  const list = await iconChoices();
+  const icon = list.find(i => i.id === id);
+  if (!icon) return false;
+  try { localStorage.setItem('fj.appIcon', id); } catch { /* private mode */ }
+
+  const head = document.head;
+  const set = (sel, attrs) => {
+    let el = head.querySelector(sel);
+    if (!el) { el = document.createElement('link'); head.appendChild(el); }
+    Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+  };
+  set('link[rel="apple-touch-icon"]', { rel: 'apple-touch-icon', sizes: '180x180', href: icon.srcset['180'] });
+  set('link[rel="manifest"]', { rel: 'manifest', href: icon.manifest });
+  return true;
+}
+
+/** Put the stored choice back on the page. Called on boot, because a
+ *  person who picked an icon, closed Safari, and came back to install
+ *  should not silently get the default. */
+export async function restoreIcon() {
+  const id = chosenIconId();
+  if (id) await applyIcon(id);
+}

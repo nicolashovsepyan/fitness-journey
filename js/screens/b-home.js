@@ -16,7 +16,8 @@ import {
 import { blockMinutes } from '../core/resolve.js';
 import { USERS, activeUser, switchUser } from '../users.js';
 import { weeklyPromptDue } from '../coach.js';
-import { isInstalled, canPromptInstall, promptInstall, installGuidance, onInstallStateChange } from '../install.js';
+import { isInstalled, canPromptInstall, promptInstall, installGuidance, onInstallStateChange,
+         iconChoices, chosenIconId, applyIcon, restoreIcon } from '../install.js';
 
 export function renderBHome(host, { onOpenDay, onOpenSummary, onOpenHistory }) {
   function draw() {
@@ -157,6 +158,10 @@ export function renderBHome(host, { onOpenDay, onOpenSummary, onOpenHistory }) {
       store.setSetting('installSnoozed', new Date().toISOString());
       draw();
     });
+    /* draw() rebuilds the card, so the icon row has to be refilled with
+       it. Fire and forget: the card is already on screen and correct
+       without it. */
+    drawIconPicker();
   }
 
   function openSettings() {
@@ -235,6 +240,7 @@ export function renderBHome(host, { onOpenDay, onOpenSummary, onOpenHistory }) {
             <div class="ic-body">${g.body}</div></div>
         </div>
         ${stepsHtml}
+        <div id="iconPick"></div>
         <div class="ic-actions">
           ${g.state === 'can-prompt' ? `<button class="btn sm" id="installNow">Install</button>` : ''}
           <button class="mini" id="installLater">Not now</button>
@@ -252,7 +258,35 @@ export function renderBHome(host, { onOpenDay, onOpenSummary, onOpenHistory }) {
     } catch (e) { return ''; }
   }
 
+  /* THE ICON ROW, FILLED IN AFTER THE CARD IS DRAWN.
+
+     It is async because the list is a file, and the card must not wait
+     on a fetch to appear. Below 2 choices it stays empty, which is
+     right: one option is not a choice, it is a statement. */
+  async function drawIconPicker() {
+    const host = document.getElementById('iconPick');
+    if (!host) return;
+    const list = await iconChoices();
+    if (list.length < 2) return;
+    const cur = chosenIconId() || list[0].id;
+    if (!chosenIconId()) await applyIcon(cur);
+    host.innerHTML = `<div class="ic-icons">
+      <div class="ic-iclbl">Pick the icon you want on your phone
+        <span>Choose before you add it. iPhone keeps whichever one it sees.</span></div>
+      <div class="ic-icrow">${list.map(i => `
+        <button class="ic-ic ${i.id === cur ? 'on' : ''}" data-icon="${i.id}" title="${i.name}">
+          <img src="${i.srcset['180']}" alt="${i.name}" width="52" height="52">
+          <span>${i.name}</span>
+        </button>`).join('')}</div>
+    </div>`;
+    host.querySelectorAll('[data-icon]').forEach(b => b.onclick = async () => {
+      await applyIcon(b.dataset.icon);
+      host.querySelectorAll('[data-icon]').forEach(x => x.classList.toggle('on', x === b));
+    });
+  }
+
   store.startDate();      // stamp day one on first ever open
+  restoreIcon();          // a choice made before a reload is still their choice
   onInstallStateChange(() => draw());   // Chrome fires beforeinstallprompt late
   draw();
 }

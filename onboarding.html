@@ -1005,6 +1005,19 @@ h1.q{text-align:center}
 .patcard .pn{font-size:24px}
 
 /* the add-to-home-screen card, and the logo on the last screen */
+/* the icon choice, on the only screen where it can still take effect */
+.iconpick{margin-top:18px;opacity:0;transform:translateY(6px);animation:ipin .5s .35s forwards}
+@keyframes ipin{to{opacity:1;transform:none}}
+.iconpick>b{display:block;font-size:14px}
+.iconpick>span{display:block;font-size:12px;opacity:.66;margin:2px 0 10px;line-height:1.45}
+.iprow{display:flex;flex-wrap:wrap;gap:10px}
+.ipic{display:flex;flex-direction:column;align-items:center;gap:6px;padding:7px;
+  border:1.5px solid transparent;border-radius:15px;background:transparent;
+  color:inherit;font:inherit;cursor:pointer;min-width:70px;-webkit-tap-highlight-color:transparent}
+.ipic img{border-radius:13px;display:block}
+.ipic span{font-size:10.5px;opacity:.7;text-align:center;line-height:1.2}
+.ipic.on{border-color:currentColor;background:rgba(255,255,255,.06)}
+.ipic.on span{opacity:1;font-weight:600}
 .addbox{display:flex;align-items:center;gap:13px;margin-top:16px;padding:13px 15px;
   background:var(--card);border:1px solid var(--line);border-radius:16px;
   opacity:0;transform:translateY(9px);transition:opacity .45s,transform .45s}
@@ -6914,7 +6927,8 @@ function nextsteps(s){
     <div class="addbox" id="addbox">
       <div class="addmark">${MARK}</div>
       <div><b>Fitness Journey</b><span>${how}</span></div>
-    </div></div>`);
+    </div>
+    <div id="iconPick"></div></div>`);
 
   const bubs=[].slice.call(d.querySelectorAll('.cbub')), typing=d.querySelector('#typing'),
         addbox=d.querySelector('#addbox');
@@ -6931,8 +6945,64 @@ function nextsteps(s){
       later(step, 240);
     }, Math.min(950, 340 + chars*6));
   }
+  /* WHICH ICON LANDS ON THE PHONE, ASKED HERE AND NOWHERE ELSE.
+
+     iPhone reads the icon once, at the moment somebody taps Add to
+     Home Screen, and then keeps it. So this is the only screen in the
+     whole product where the question can still be answered. A picker
+     in settings, after the app is installed, would be a control that
+     silently does nothing.
+
+     The list is a file that tools/build-app-icons.mjs writes from
+     whatever sits in images/app-icons/. Nothing here knows an icon by
+     name, so adding a design is dropping a file in and running that.
+     Under 2 choices this draws nothing, because 1 option is not a
+     choice. */
+  function iconPicker(){
+    const host = d.querySelector('#iconPick');
+    if(!host || already) return;
+    fetch('spine/app-icons.json', {cache:'no-cache'})
+      .then(r => r.ok ? r.json() : null)
+      .then(j => {
+        const list = (j && j.icons) || [];
+        if(list.length < 2) return;
+        let cur = null;
+        try{ cur = localStorage.getItem('fj.appIcon'); }catch(e){}
+        if(!list.some(i=>i.id===cur)) cur = list[0].id;
+        const apply = id => {
+          const ic = list.find(i=>i.id===id); if(!ic) return;
+          try{ localStorage.setItem('fj.appIcon', id); }catch(e){}
+          /* BOTH LINKS. iPhone reads apple-touch-icon, Android reads the
+             icons inside the manifest. Swapping only one gives half the
+             people the wrong icon, which is the kind of half-working
+             that never gets reported. */
+          const set = (sel, attrs) => {
+            let el = document.head.querySelector(sel);
+            if(!el){ el = document.createElement('link'); document.head.appendChild(el); }
+            Object.keys(attrs).forEach(k => el.setAttribute(k, attrs[k]));
+          };
+          set('link[rel="apple-touch-icon"]', {rel:'apple-touch-icon', sizes:'180x180', href:ic.srcset['180']});
+          set('link[rel="manifest"]', {rel:'manifest', href:ic.manifest});
+        };
+        apply(cur);
+        host.innerHTML = '<div class="iconpick"><b>Pick your icon</b>'
+          + '<span>Choose before you add it. Your phone keeps whichever one it sees.</span>'
+          + '<div class="iprow">' + list.map(i =>
+              '<button class="ipic' + (i.id===cur?' on':'') + '" data-icon="' + i.id + '">'
+              + '<img src="' + i.srcset['180'] + '" alt="" width="54" height="54">'
+              + '<span>' + i.name + '</span></button>').join('')
+          + '</div></div>';
+        host.querySelectorAll('[data-icon]').forEach(b => b.onclick = () => {
+          apply(b.dataset.icon); haptic(12);
+          host.querySelectorAll('[data-icon]').forEach(x => x.classList.toggle('on', x === b));
+        });
+      })
+      .catch(function(){ /* no list, no picker, survey unaffected */ });
+  }
+
   function land(){
     addbox.classList.add('on');
+    iconPicker();
     if(foot.querySelector('.cta')) return;
     const label = already ? 'Carry on' : canInstall ? s.cta : 'I have added it';
     setFoot(`<button class="cta accent">${label}</button>`);
