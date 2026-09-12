@@ -1,6 +1,6 @@
 {
  "version": 1,
- "built": "2026-09-11",
+ "built": "2026-09-12",
  "count": 322,
  "movements": {
   "bodyweight_squat": {
@@ -1577,7 +1577,9 @@
    ],
    "modality": "bodyweight",
    "role": "working-set",
-   "demands": [],
+   "demands": [
+    "wrist-extension"
+   ],
    "secPerRep": 3,
    "art": {
     "file": null,
@@ -2195,7 +2197,9 @@
    "modality": "bodyweight",
    "role": "working-set, skill-strength",
    "demands": [
-    "overhead-rom"
+    "overhead-rom",
+    "wrist-extension",
+    "inversion"
    ],
    "secPerRep": null,
    "art": {
@@ -3434,7 +3438,9 @@
    "modality": "bodyweight",
    "role": "working-set, skill-strength",
    "demands": [
-    "overhead-rom"
+    "overhead-rom",
+    "wrist-extension",
+    "inversion"
    ],
    "secPerRep": 3,
    "art": {
@@ -4653,6 +4659,7 @@
    "role": "working-set, skill-strength",
    "demands": [
     "overhead-rom",
+    "wrist-extension",
     "inversion"
    ],
    "secPerRep": 6,
@@ -5208,7 +5215,9 @@
    "modality": "bodyweight",
    "role": "skill-practice",
    "demands": [
-    "overhead-rom"
+    "overhead-rom",
+    "wrist-extension",
+    "inversion"
    ],
    "secPerRep": null,
    "art": {
@@ -6234,7 +6243,10 @@
    ],
    "modality": "band",
    "role": "working-set",
-   "demands": [],
+   "demands": [
+    "grip",
+    "hang"
+   ],
    "secPerRep": 3,
    "art": {
     "file": null,
@@ -6795,6 +6807,7 @@
    "modality": "bodyweight",
    "role": "working-set",
    "demands": [
+    "grip",
     "hang",
     "inversion"
    ],
@@ -6997,7 +7010,10 @@
    ],
    "modality": "bodyweight",
    "role": "working-set",
-   "demands": [],
+   "demands": [
+    "grip",
+    "hang"
+   ],
    "secPerRep": 3,
    "art": {
     "file": null,
@@ -7300,7 +7316,8 @@
    "role": "working-set",
    "demands": [
     "grip",
-    "hang"
+    "hang",
+    "inversion"
    ],
    "secPerRep": null,
    "art": {
@@ -7402,7 +7419,8 @@
    "modality": "bodyweight",
    "role": "working-set, skill-strength",
    "demands": [
-    "grip"
+    "grip",
+    "hang"
    ],
    "secPerRep": 4,
    "art": {
@@ -7806,7 +7824,10 @@
    ],
    "modality": "bodyweight",
    "role": "working-set",
-   "demands": [],
+   "demands": [
+    "grip",
+    "hang"
+   ],
    "secPerRep": 3,
    "art": {
     "file": null,
@@ -7906,6 +7927,7 @@
    "modality": "bodyweight",
    "role": "working-set",
    "demands": [
+    "grip",
     "hang",
     "inversion"
    ],
@@ -8212,7 +8234,10 @@
    ],
    "modality": "bodyweight",
    "role": "working-set, skill-strength",
-   "demands": [],
+   "demands": [
+    "grip",
+    "hang"
+   ],
    "secPerRep": 3,
    "art": {
     "file": null,
@@ -8260,7 +8285,10 @@
    ],
    "modality": "bodyweight",
    "role": "working-set",
-   "demands": [],
+   "demands": [
+    "grip",
+    "hang"
+   ],
    "secPerRep": 3,
    "art": {
     "file": null,
@@ -8461,7 +8489,10 @@
    ],
    "modality": "bodyweight",
    "role": "working-set",
-   "demands": [],
+   "demands": [
+    "grip",
+    "hang"
+   ],
    "secPerRep": 3,
    "art": {
     "file": null,
@@ -10208,7 +10239,9 @@
    ],
    "modality": "bodyweight",
    "role": "working-set",
-   "demands": [],
+   "demands": [
+    "wrist-extension"
+   ],
    "secPerRep": null,
    "art": {
     "file": null,
@@ -10831,11 +10864,18 @@
    "coaching": null,
    "fundamental": false,
    "fundFamily": null,
-   "patterns": [],
-   "muscles": [],
-   "musclesAlso": [],
-   "modality": null,
-   "role": null,
+   "patterns": [
+    "anti-extension"
+   ],
+   "muscles": [
+    "abs"
+   ],
+   "musclesAlso": [
+    "obliques",
+    "front-delt"
+   ],
+   "modality": "bodyweight",
+   "role": "working-set",
    "demands": [],
    "secPerRep": null,
    "art": {
@@ -13163,7 +13203,9 @@
    ],
    "modality": "bodyweight",
    "role": "working-set, conditioning",
-   "demands": [],
+   "demands": [
+    "wrist-extension"
+   ],
    "secPerRep": 3,
    "art": {
     "file": "images/exercises/mountain_climber.png",

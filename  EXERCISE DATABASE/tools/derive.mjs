@@ -254,14 +254,35 @@ const isSkill = (id, m) => {
    constraints — the injury routing that does not exist today
    ------------------------------------------------------------ */
 function demands(id, m, pats) {
-  const n = nm(m), d = new Set();
-  if (pats.some(p => p === 'v-push') || /overhead|handstand|hspu|press|halo/.test(n)) d.add('overhead-rom');
-  if (/push-up|plank|planche|handstand|bear|pike|dip|burpee|crawl/.test(n) || pats.includes('straight-arm-push')) d.add('wrist-extension');
+  const n = nm(m), d = new Set(), f = fam(m);
+  /* THE FAMILY COUNTS, NOT ONLY THE NAME.
+
+     These rules read the name and nothing else, so a movement whose
+     name does not happen to contain the word missed the demand its
+     whole family carries. "Shorties" is a bottom-half push-up, sits in
+     the push-up family, and came out as the ONLY floor push-up in the
+     database with no wrist-extension demand.
+
+     That is not cosmetic. The console routes around injuries by these
+     demands, so a person who reported wrist pain had every push-up
+     correctly withheld and was then handed Shorties as the main push
+     of the day. Found when the program writer did exactly that.
+
+     A movement in a family inherits what the family demands. */
+  const inFam = (...names) => names.some(x => f.has(x));
+  if (pats.some(p => p === 'v-push') || /overhead|handstand|hspu|press|halo/.test(n)
+      || inFam('handstand', 'press')) d.add('overhead-rom');
+  if (/push-up|plank|planche|handstand|bear|pike|dip|burpee|crawl/.test(n)
+      || pats.includes('straight-arm-push')
+      || inFam('push-up', 'plank', 'planche', 'handstand', 'dip', 'bear', 'crawl')) d.add('wrist-extension');
   if (pats.some(p => ['squat', 'lunge'].includes(p)) || /squat|lunge|sit|pistol/.test(n)) d.add('deep-knee-flexion');
   if (pats.includes('hinge') || /deadlift|rdl|hinge|swing|good morning/.test(n)) d.add('hip-hinge');
-  if (/hang|pull-up|pullup|chin|lever|muscle-up|toes to bar|bar/.test(n) || pats.includes('v-pull')) d.add('grip');
-  if (/hang|pull-up|pullup|chin|lever|muscle-up|toes to bar|skin the cat/.test(n)) d.add('hang');
-  if (/handstand|hspu|inverted|skin the cat|candle/.test(n)) d.add('inversion');
+  if (/hang|pull-up|pullup|chin|lever|muscle-up|toes to bar|bar/.test(n) || pats.includes('v-pull')
+      || inFam('pull-up', 'front-lever', 'front-lever-raise', 'muscle-up', 'skin-cat')) d.add('grip');
+  if (/hang|pull-up|pullup|chin|lever|muscle-up|toes to bar|skin the cat/.test(n)
+      || inFam('pull-up', 'front-lever', 'front-lever-raise', 'muscle-up', 'skin-cat')) d.add('hang');
+  if (/handstand|hspu|inverted|skin the cat|candle/.test(n)
+      || inFam('handstand', 'skin-cat')) d.add('inversion');
   if (/jump|plyo|clap|burpee|hop|box/.test(n)) d.add('impact');
   if (/burpee|get-up|getup|man-maker|devil|crawl|turkish/.test(n)) d.add('floor-to-stand');
   return [...d];

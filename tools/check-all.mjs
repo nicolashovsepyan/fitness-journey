@@ -28,6 +28,7 @@ const CHECKS = [
   ['tools/check-wiring.mjs', 'fields written by one layer and read by none'],
   ['tools/check-sql.mjs', 'the SQL editor can actually swallow these files'],
   ['tools/check-surveys.mjs', 'the survey asks what the console reads'],
+  ['tools/check-demands.mjs', 'no movement is missing an injury tag its family carries'],
 ];
 
 const tests = readdirSync(join(root, 'test'))

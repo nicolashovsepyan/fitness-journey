@@ -312,6 +312,17 @@ header:after{
 /* A DRAFT HAS TO LOOK LIKE ONE. The whole risk of writing a first pass
    for the coach is that it gets mistaken for the coach own judgment, so
    it is chipped, it is dimmer, and it says who wrote it. */
+/* the program writer */
+.genwrap{margin-top:16px;text-align:left}
+.genread{font-size:13px;line-height:1.65;color:var(--ink2);border-left:2px solid var(--neon-line);
+  padding:10px 0 10px 12px;margin-bottom:14px}
+.genshapes{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.genshape{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--card)}
+.genshape.rec{border-color:var(--neon-line)}
+.gshead{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.genshape p{font-size:12.5px;line-height:1.6;margin:0 0 10px}
+.gsdays{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.gsdays .q{font-size:11px}
 .draftchip{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
   padding:2px 6px;border-radius:99px;border:1px solid var(--neon-line);
   color:var(--neon);opacity:.85;vertical-align:2px;margin-left:6px}
@@ -2596,6 +2607,369 @@ const NB_BODY = {
   'Hip flexors':['hip-flexor'], Grip:['grip'],
 };
 let MOVES = [], MVMAP = {};
+/* ============================================================
+   THE PROGRAM WRITER.
+
+   Answers in, a whole week out, every choice explained and every one
+   editable the moment it lands. The builder to the right of it did not
+   change: this writes into PROG and then gets out of the way.
+
+   WHAT IT IS FOR. A blank builder asks a coach to remember 6 patterns,
+   24 fundamentals, somebody kit, their sore knee, and Galpin volume
+   ranges, all at once, every time. Most of that is derivable. So it is
+   derived, offered as 2 or 3 shapes, and handed over as a draft.
+
+   FUNDAMENTALS FIRST, AND IT IS A RULE NOT A PREFERENCE. The catalog
+   marks 24 movements fundamental, 1 or 2 per family: squat, hinge,
+   h-push, v-push, h-pull, v-pull, carry, core, locomotion, explosive.
+   Those are what a week is built from unless something in the answers
+   says otherwise, and when something does, the reason is written on
+   the day rather than left for the coach to reconstruct.
+
+   IT IS ALWAYS A DRAFT. Nothing here is saved until the coach presses
+   Save in the bar above, and every set, rep, movement and note is
+   editable the second it appears.
+   ============================================================ */
+
+/* Pain maps onto what a movement DEMANDS, not onto muscle names. The
+   catalog tags each movement with what it asks of you: deep knee
+   flexion, overhead range, hanging, wrist extension. That is the
+   honest join between "my knee hurts" and "not this one". */
+const GEN_PAIN = {
+  knee:  ['deep-knee-flexion','impact'],
+  hip:   ['deep-knee-flexion','hip-hinge'],
+  low:   ['hip-hinge'],
+  shldr: ['overhead-rom','inversion'],
+  arm:   ['wrist-extension','hang','grip'],
+  neck:  ['inversion'],
+  ankle: ['impact','floor-to-stand'],
+  mid:   [],
+};
+
+/* The 6 slots a week is built from, and which catalog patterns fill
+   each. Everything else is an accessory to one of these. */
+const GEN_SLOT = {
+  squat: ['squat','lunge'],
+  hinge: ['hinge'],
+  push:  ['h-push','v-push','straight-arm-push'],
+  pull:  ['h-pull','v-pull','straight-arm-pull'],
+  core:  ['anti-extension','anti-rotation','anti-lateral-flexion','compression','flexion'],
+  carry: ['carry','locomotion'],
+};
+
+function genKit(a){
+  const kit = new Set(['bw']);
+  (a.kit || []).forEach(k => kit.add(k));
+  const where = [].concat(a.where || []);
+  // A full gym has everything, and saying so beats asking somebody to
+  // tick 14 boxes they already told us about in one word.
+  if(where.includes('gym')) ['db','kb','bb','rack','bench','pullupbar','dipbars',
+    'parallettes','band','vest','machine','cable','rings','slantboard'].forEach(k=>kit.add(k));
+  if(where.includes('hotel')) ['db','bench','machine','cable'].forEach(k=>kit.add(k));
+  return kit;
+}
+
+function genAvoid(a){
+  const out = new Set();
+  (a.pain || []).forEach(p => (GEN_PAIN[p] || []).forEach(d => out.add(d)));
+  // A joint or bone flag on the PAR-Q is a reason to stay off impact
+  // whatever they drew on the body map.
+  if((a.parq || []).includes('joint')) out.add('impact');
+  return out;
+}
+
+/* 0 to 4 from the survey becomes a difficulty to aim at. Deliberately
+   conservative: somebody shown a movement they cannot do stops, and
+   somebody shown one that is too easy adds a rep. */
+function genTarget(a){
+  const t = typeof a.tier === 'number' ? a.tier : null;
+  if(t != null) return [2, 3, 4, 5, 6][Math.max(0, Math.min(4, Math.round(t)))];
+  const tr = a.trained;
+  if(tr === '5plus') return 5;
+  if(tr === '1to5') return 4;
+  if(tr === 'lt1') return 3;
+  return 2;
+}
+
+/* Can this person do this movement at all, today. */
+function genAllowed(mv, kit, avoid){
+  if(!mv) return false;
+  if((mv.eq || []).length && !(mv.eq || []).some(e => kit.has(e))) return false;
+  if((mv.dem || []).some(d => avoid.has(d))) return false;
+  return true;
+}
+
+/* Walk the easier/harder chain to the closest thing this person can
+   actually do, at about the difficulty they should be doing. The chain
+   is the progression the catalog already knows about, which is why
+   this does not invent one. */
+function genScale(id, target, kit, avoid, seen){
+  seen = seen || new Set();
+  const root = MVMAP[id];
+  const rootPats = (root && root.p) || [];
+  let best = null, bestGap = Infinity;
+  const walk = (curId, depth) => {
+    if(!curId || seen.has(curId) || depth > 6) return;
+    seen.add(curId);
+    const mv = MVMAP[curId];
+    if(!mv) return;
+    /* IT HAS TO STILL BE THE SAME MOVEMENT, EASIER.
+
+       Walking the chain on difficulty alone put Shorties, a knee prep
+       drill, in as the main push of the day, because it happened to
+       share a tag and sat at the right number. A rung on a ladder is
+       only a rung if it is the same ladder: same pattern, and still
+       something you do working sets of. */
+    const samePattern = !rootPats.length || (mv.p || []).some(p => rootPats.includes(p));
+    const isWork = /working-set/.test(mv.role || '');
+    if(samePattern && isWork && genAllowed(mv, kit, avoid)){
+      /* Distance from the right difficulty decides, and when two rungs
+         are equally close the one nearer the movement we actually
+         wanted wins. Without that tie-break, scaling a pike push-up
+         for a beginner offered the wall walk above it as readily as
+         the version below it. */
+      const fit = genFit(mv, target);
+      const gap = fit < GEN_UNKNOWN ? fit * 10 + depth : GEN_UNKNOWN;
+      if(gap < bestGap){ bestGap = gap; best = mv; }
+    }
+    walk(mv.ez, depth + 1);
+    walk(mv.hd, depth + 1);
+  };
+  walk(id, 0);
+  return best;
+}
+
+/* HOW WRONG IS THIS MOVEMENT FOR THIS PERSON.
+
+   Lower is better. Two things it has to get right that the first
+   version did not:
+
+   Unknown difficulty is not average difficulty. Treating a null as 3
+   let "Freestanding Handstand Attempts", which carries no score, beat
+   every scored movement for a deconditioned beginner and land as the
+   main push of the day. Unknown now sorts last.
+
+   And nothing more than 2 rungs above target is offered at all. Too
+   easy costs a rep. Too hard costs the session, and sometimes more
+   than the session. */
+const GEN_UNKNOWN = 99;
+function genFit(mv, target){
+  if(mv.df == null) return GEN_UNKNOWN;
+  if(mv.df > target + 2) return GEN_UNKNOWN;      // out of reach, not a candidate
+  return Math.abs(mv.df - target);
+}
+
+/* The fundamentals that fill a slot, best first. */
+function genPick(slot, target, kit, avoid, used){
+  const pats = GEN_SLOT[slot] || [];
+  const cands = MOVES.filter(m => m.f && (m.p || []).some(p => pats.includes(p)));
+  const out = [];
+  cands.forEach(c => {
+    const m = genAllowed(c, kit, avoid) ? c : genScale(c.id, target, kit, avoid);
+    if(m && !used.has(m.id)) out.push({ mv: m, from: c, swapped: m.id !== c.id });
+  });
+  out.sort((x,y) => genFit(x.mv, target) - genFit(y.mv, target));
+  return out.filter(x => genFit(x.mv, target) < GEN_UNKNOWN);
+}
+
+/* Anything at all in this slot, for when no fundamental survives the
+   kit and the joints. Still sorted toward the right difficulty. */
+function genAny(slot, target, kit, avoid, used){
+  const pats = GEN_SLOT[slot] || [];
+  return MOVES
+    .filter(m => (m.p||[]).some(p => pats.includes(p)) && m.role !== 'joint-prep'
+                 && genAllowed(m, kit, avoid) && !used.has(m.id))
+    .sort((x,y) => genFit(x, target) - genFit(y, target))
+    .filter(m => genFit(m, target) < GEN_UNKNOWN);
+}
+
+/* Prime is joint prep, chosen for what the day is about to ask for. */
+function genPrime(kit, avoid, n, focus, offset){
+  /* PREPARE WHAT THE DAY IS ABOUT TO ASK FOR. The first version took
+     the first 4 joint-prep movements in the library, so every day of
+     every program opened with the same 4, and a pull day warmed up the
+     ankles. Matched to the day patterns, and rotated by day so two
+     upper days do not read identically. */
+  const want = (focus || []).reduce((acc, sl) => acc.concat(GEN_SLOT[sl] || []), []);
+  const prep = MOVES.filter(m => /joint-prep|activation/.test(m.role || '') && genAllowed(m, kit, avoid));
+  const onPoint = prep.filter(m => (m.p || []).some(p => want.includes(p)));
+  const rest = prep.filter(m => !onPoint.includes(m));
+  const pool = onPoint.concat(rest);
+  if(!pool.length) return MOVES.filter(m => m.g === 'mobility' && genAllowed(m, kit, avoid)).slice(0, n);
+  const start = (offset || 0) % pool.length;
+  return Array.from({length: Math.min(n, pool.length)}, (_,i) => pool[(start + i) % pool.length]);
+}
+
+/* ---- how hard, how many, how long -------------------------------
+   Galpin, with the goal deciding which end of his ranges to sit at. */
+function genDose(a){
+  const focus = [].concat(a.focus || []);
+  const protectFirst = a.intensity === 'protect';
+  let reps = [8,12], rest = 75, tempo = '3 down, 1 pause, 1 up', why = 'hypertrophy, the middle of the range';
+  if(focus.includes('strong')) { reps = [4,6];  rest = 150; why = 'strength, so heavy and rested'; }
+  else if(focus.includes('lean') || focus.includes('wind')) { reps = [12,15]; rest = 45; why = 'lean and wind, so lighter and tighter'; }
+  else if(focus.includes('muscle')) { reps = [8,12]; rest = 90; why = 'hypertrophy, Galpin 8 to 15 band'; }
+  if(focus.includes('pain')) { reps = [10,12]; rest = 90; tempo = '3 down, 2 pause, 1 up'; why = 'pain free range first, so slow and controlled'; }
+  if(protectFirst) rest = Math.max(rest, 90);
+  let sets = protectFirst ? 3 : 4;
+
+  /* AND IT HAS TO FIT IN THE SESSION, which is the part a template
+     never checks. 4 sets at 150 seconds rest is 10 minutes for one
+     movement, and Ozzy sessions are 20. Written straight out, that is
+     a program nobody can run and every week reads as a failure.
+
+     So the clock gets the last word. Rest comes down first, because a
+     shorter rest costs the least; then sets; and what is left is what
+     the blocks below are allowed to spend. Galpin time-efficient
+     variant is exactly this trade, made on purpose. */
+  const len = +a.length || 45;
+  const work = Math.max(6, len - 4 - 3);          // minus prime, minus finish
+  const blocks = len <= 25 ? 2 : len <= 40 ? 3 : len <= 60 ? 4 : 5;
+  const perSet = () => (reps[1] * 3) + rest;      // about 3 seconds a rep
+  let budget = work * 60 / blocks;
+  let guard = 0;
+  while(sets * perSet() > budget && guard++ < 40){
+    if(rest > 45) rest -= 15;
+    else if(sets > 2) sets -= 1;
+    else break;
+  }
+  const tight = sets <= 2 || rest <= 45;
+  return { reps, rest, tempo, sets, why, protectFirst, blocks, tight,
+           perBlockMin: Math.round(sets * perSet() / 60) };
+}
+
+/* ---- the shapes on offer ---------------------------------------- */
+function genShapes(a){
+  const days = Math.max(1, Math.min(6, +a.days || 3));
+  const len = +a.length || 45;
+  const S = [];
+  const all = ['squat','hinge','push','pull','core','carry'];
+
+  if(days <= 2){
+    S.push({ id:'fb', name:'Full body, every session', rec:true,
+      why:'With '+days+' session'+(days===1?'':'s')+' a week, every pattern has to appear every time. Anything split leaves a pattern trained once a fortnight.',
+      days: Array.from({length:days}, (_,i)=>({ name:'Full Body '+String.fromCharCode(65+i), tag:'all 6 patterns', focus:all })) });
+  } else if(days === 3){
+    S.push({ id:'fb3', name:'Full body, 3 times', rec:true,
+      why:'Every pattern 3 times a week, which is the most reliable way to learn movements and the easiest to miss a day from without losing anything.',
+      days:[0,1,2].map(i=>({ name:'Full Body '+'ABC'[i], tag:'all 6 patterns', focus:all })) });
+    S.push({ id:'ppl', name:'Push, pull, legs', rec:false,
+      why:'More volume per pattern per session, less frequency. Better once the movements are known, worse while they are being learned.',
+      days:[{name:'Push', tag:'push · core', focus:['push','core']},
+            {name:'Pull', tag:'pull · carry', focus:['pull','carry']},
+            {name:'Legs', tag:'squat · hinge · core', focus:['squat','hinge','core']}] });
+  } else if(days === 4){
+    S.push({ id:'ul', name:'Upper, lower, twice each', rec:true,
+      why:'Every pattern twice a week with room to go deeper than a full body day allows, and 48 hours between sessions for the same muscle by construction.',
+      days:[{name:'Upper A', tag:'push · pull', focus:['push','pull','core']},
+            {name:'Lower A', tag:'squat · hinge', focus:['squat','hinge','carry']},
+            {name:'Upper B', tag:'push · pull', focus:['push','pull','core']},
+            {name:'Lower B', tag:'squat · hinge', focus:['squat','hinge','carry']}] });
+    S.push({ id:'fb4', name:'Full body, 4 times', rec:false,
+      why:'Highest frequency per pattern. Best for learning, hardest to fit inside a short session.',
+      days:[0,1,2,3].map(i=>({ name:'Full Body '+'ABCD'[i], tag:'all 6 patterns', focus:all })) });
+  } else {
+    S.push({ id:'ulf', name:'Upper, lower, and a full day', rec:true,
+      why:days+' sessions is enough to split and still hit everything twice. The full day catches whatever the split under-trains.',
+      days:[{name:'Upper A', tag:'push · pull', focus:['push','pull','core']},
+            {name:'Lower A', tag:'squat · hinge', focus:['squat','hinge','carry']},
+            {name:'Full Body', tag:'all 6 patterns', focus:all},
+            {name:'Upper B', tag:'push · pull', focus:['push','pull','core']},
+            {name:'Lower B', tag:'squat · hinge', focus:['squat','hinge','carry']}]
+            .slice(0, days) });
+    S.push({ id:'fbn', name:'Full body, every session', rec:false,
+      why:'Simplest to run and simplest to miss a day from. Costs depth per pattern.',
+      days:Array.from({length:days}, (_,i)=>({ name:'Full Body '+String.fromCharCode(65+i), tag:'all 6 patterns', focus:all })) });
+  }
+  const fit = genDose(a);
+  S.forEach(s => { s.len = len; s.blocks = fit.blocks; });
+  return S;
+}
+
+/* ---- and the week itself ---------------------------------------- */
+function genProgram(a, shape){
+  if(!MOVES.length) nbBuildLibrary();
+  const kit = genKit(a), avoid = genAvoid(a), target = genTarget(a), dose = genDose(a);
+  const used = new Set();
+  const notes = [];                       // what was changed, and why
+  const days = {};
+
+  shape.days.forEach((D, di) => {
+    const key = 'd' + (di + 1);
+    const blocks = [];
+
+    /* PRIME. Short, always there, never optional. */
+    const prime = genPrime(kit, avoid, 4, D.focus, di * 2);
+    if(prime.length) blocks.push({
+      role:'Prime', name:'Wake it up', type:'Circuit',
+      note:'2 rounds, continuous. This is not a warm-up to rush.',
+      cfg:{ rounds:2, rest:0 },
+      items: prime.map(m => ({ ex:m.id, pres: m.meas === 'hold' ? '30s' : '10', note: m.cue || '' }))
+    });
+
+    /* WORK. One block per slot this day covers, best fundamental
+       first, up to what the session length can pay for. */
+    const slots = D.focus.slice(0, shape.blocks + 1);
+    let n = 0;
+    slots.forEach(slot => {
+      if(n >= shape.blocks) return;
+      let picks = genPick(slot, target, kit, avoid, used);
+      let fell = false;
+      if(!picks.length){ picks = genAny(slot, target, kit, avoid, used).map(m=>({mv:m, from:m, swapped:false})); fell = true; }
+      if(!picks.length){
+        notes.push(`<b>${D.name}, ${slot}:</b> nothing in the library survives their kit and their joints. That slot is empty and needs a decision.`);
+        return;
+      }
+      const p = picks[0];
+      used.add(p.mv.id);
+      if(p.swapped) notes.push(`<b>${D.name}:</b> ${p.from.n} became <b>${p.mv.n}</b>, the same pattern at a level they can hold today.`);
+      if(fell) notes.push(`<b>${D.name}, ${slot}:</b> no fundamental fits, so this is the closest movement that does.`);
+
+      const isHold = p.mv.meas === 'hold';
+      /* ONE REP RANGE DOES NOT FIT EVERY MOVEMENT. The dose is set from
+         the goal, which is right for a press and wrong for a swing:
+         explosive and conditioning work is fast and repeated, never
+         heavy and slow, and 4 to 6 kettlebell swings is not a set of
+         anything. Carries are measured in time, not reps. */
+      const explosive = /conditioning/.test(p.mv.role || '') || p.mv.fam === 'explosive';
+      const carry = p.mv.fam === 'carry-grip' || (p.mv.p || []).includes('carry');
+      const pres = isHold ? Math.max(15, 10 + target * 5) + 's'
+                 : carry ? '30s'
+                 : explosive ? '12 to 15'
+                 : dose.reps[0] + ' to ' + dose.reps[1];
+      const tempoNote = (isHold || carry) ? ''
+                 : explosive ? ' Fast and repeatable. Stop when speed drops, not when you are tired.'
+                 : ` Tempo ${dose.tempo}. Stop about 2 short of failure.`;
+      blocks.push({
+        role:'Work', name:String.fromCharCode(65 + n) + ' · ' + p.mv.n, type:'Straight',
+        note: n === 0 ? 'The main lift of the day. Do it first, fresh.' : '',
+        cfg:{ rounds: dose.sets, rest: dose.rest },
+        items:[{ ex:p.mv.id, pres, note: (p.mv.cue || '') + tempoNote }]
+      });
+      n++;
+    });
+
+    /* FINISH. Core or carry, whichever the day has not had. */
+    const fin = genPick(D.focus.includes('core') ? 'carry' : 'core', target, kit, avoid, used)[0]
+             || genAny('core', target, kit, avoid, used).map(m=>({mv:m}))[0];
+    if(fin && fin.mv){
+      used.add(fin.mv.id);
+      blocks.push({ role:'Work', name:'Finish · ' + fin.mv.n, type:'Straight',
+        note:'Short. The last thing, not the hard thing.',
+        cfg:{ rounds:3, rest:45 },
+        items:[{ ex:fin.mv.id, pres: fin.mv.meas === 'hold' ? '30s' : '10 to 15', note: fin.mv.cue || '' }] });
+    }
+
+    days[key] = { name:D.name, tag:D.tag,
+      why:`${D.why || ''} ${dose.why}, at ${dose.reps[0]} to ${dose.reps[1]} reps and ${dose.rest} seconds rest.`.trim(),
+      blocks };
+  });
+
+  return { program:{ days, name: shape.name + ' · ' + (a.name || 'client'), from:null, savedId:null, version:1 },
+           notes, dose, target,
+           kit:[...kit], avoid:[...avoid] };
+}
+
 function nbBuildLibrary(){
   MOVES = Object.values(CAT).map(m=>{
     const ps = (m.patterns && m.patterns.length ? m.patterns : [m.pattern]).filter(Boolean);
@@ -2624,10 +2998,75 @@ function nbBuildLibrary(){
       ez:(m.easier && m.easier!==m.id && CAT[m.easier]) ? m.easier : null,
       hd:(m.harder && m.harder!==m.id && CAT[m.harder]) ? m.harder : null,
       art:(m.art && m.art.status==='drawn') ? m.art.file : null,
+      /* HOW HARD IT IS, which the library never carried. The catalog has
+         scored every movement 1 to 10 since it was built and nothing read
+         it, so a picker could offer a beginner an L-sit and a 5 year
+         lifter a wall push-up with equal confidence. The writer below
+         picks by it. */
+      df:(typeof m.diff === 'number' ? m.diff : null),
+      lvl:m.level || null,
       vid:m.video || null };
   }).sort((a,b)=>a.n.localeCompare(b.n));
   MVMAP = {}; MOVES.forEach(m=>MVMAP[m.id]=m);
 }
+
+/* ---- the chooser --------------------------------------------------
+   Shapes first, then a week. Two decisions, in that order, because
+   which shape a week has is the only one that cannot be fixed by
+   editing a movement afterwards. */
+function genOpen(){
+  const host = document.getElementById('genpanel');
+  if(!host) return;
+  if(host.dataset.open === '1'){ host.innerHTML = ''; host.dataset.open = '0'; return; }
+  host.dataset.open = '1';
+  if(!MOVES.length) nbBuildLibrary();
+
+  const shapes = genShapes(A);
+  const dose = genDose(A);
+  const kit = genKit(A), avoid = genAvoid(A), target = genTarget(A);
+  const painList = (A.pain || []).map(p => lbl(p)).join(', ');
+
+  host.innerHTML = `<div class="genwrap">
+    <div class="genread">
+      <b>What I am working from.</b>
+      ${A.days && A.length ? `${A.days} sessions of ${A.length} minutes. ` : 'No time budget answered, so this assumes 3 by 45. '}
+      Difficulty aimed at <b>${target} of 10</b>${A.tierName ? ` (${esc(A.tierName)})` : ''}.
+      ${dose.why.charAt(0).toUpperCase() + dose.why.slice(1)}, so <b>${dose.reps[0]} to ${dose.reps[1]} reps</b>,
+      <b>${dose.rest}s rest</b>, <b>${dose.sets} sets</b>.
+      ${painList ? `Staying off what loads <b>${esc(painList)}</b>. ` : ''}
+      Kit: ${[...kit].filter(k=>k!=='bw').length ? [...kit].filter(k=>k!=='bw').map(k=>esc(lbl(k))).join(', ') : 'bodyweight only'}.
+    </div>
+    <div class="genshapes">${shapes.map((sh,i) => `
+      <div class="genshape${sh.rec?' rec':''}">
+        <div class="gshead"><b>${esc(sh.name)}</b>${sh.rec?'<span class="draftchip">Suggested</span>':''}</div>
+        <p class="mut">${esc(sh.why)}</p>
+        <div class="gsdays">${sh.days.map(d=>`<span class="q">${esc(d.name)} &middot; <b>${esc(d.tag)}</b></span>`).join('')}</div>
+        <button class="btn ${sh.rec?'primary':''}" data-shape="${i}">Write this week</button>
+      </div>`).join('')}</div>
+  </div>`;
+
+  host.querySelectorAll('[data-shape]').forEach(b => b.onclick = () => {
+    genApply(shapes[+b.dataset.shape]);
+  });
+}
+
+/* Writing it is not saving it. PROG changes, the builder redraws, and
+   the Save button in the bar above is still the only thing that
+   commits anything. */
+function genApply(shape){
+  const built = genProgram(A, shape);
+  if(!Object.keys(built.program.days).length){ toast('Nothing could be built from these answers'); return; }
+  PROG = built.program;
+  S.program = PROG;
+  GEN_NOTES = built.notes;
+  save(1);
+  drawProgram();
+  drawRelease2 && drawRelease2();
+  toast(shape.days.length + ' days written. Nothing is saved until you press Save.');
+}
+
+let GEN_NOTES = [];
+
 const MV = id => MVMAP[id] || { id, n:(CAT[id]&&CAT[id].name)||id, g:'mobility', p:[], mus:[], dem:[], eq:[], meas:'reps', lat:'bilateral' };
 const NBC = g => ({ lower:'#B3651A', push:'#1D6FC7', pull:'#7B4FCB', core:'#8A6A00',
                     carry:'#0E7F76', power:'#C24A3B', mobility:'#4E7A2E' })[g] || '#888';
@@ -3981,12 +4420,14 @@ function drawProgramBody(){
      start with an empty day. Nothing is written until one is chosen. */
   if(!days.length){ host.innerHTML = libRow() + `<div class="panel"><div class="pad nbempty">
     <h3>Nothing built for ${esc(A.name || 'them')} yet</h3>
-    <p class="mut">The builder opens as soon as there is a day in here. Two ways in — and the
-      picker above drops a whole program in at once, which is usually the faster start.</p>
+    <p class="mut">The builder opens as soon as there is a day in here. Three ways in. The first
+      reads what they answered and writes a whole week, fundamentals first, which you then argue with.</p>
     <div class="nbdoors">
-      <button class="btn primary" onclick="addDay()">Start an empty day</button>
+      <button class="btn primary" onclick="genOpen()">Build it from their answers</button>
       <button class="btn" onclick="nbJumpToPicker()">Pick a program above</button>
-    </div></div></div>`;
+      <button class="btn" onclick="addDay()">Start an empty day</button>
+    </div>
+    <div id="genpanel"></div></div></div>`;
     libWire(); syncRelease(); drawRelease(); return; }
 
   /* THE THREE COLUMNS. Same PROG, same PDAY, same save - it just stopped
