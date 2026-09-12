@@ -108,6 +108,43 @@ export class Supabase {
     return s;
   }
 
+  /** An identity with no email and no password, issued on the spot.
+   *
+   *  THIS IS WHAT MAKES THE SURVEY WORK, AND IT IS NOT A SHORTCUT.
+   *
+   *  Somebody fills in the survey before they have an account, because
+   *  asking a person to make an account before they have seen anything
+   *  is how you lose them. But an intake row needs an owner, and row
+   *  level security means the owner has to be a real signed-in id.
+   *
+   *  So the survey signs in anonymously at the moment it submits. The
+   *  id it gets is a real auth.uid from the first second, which means
+   *  the person that lands in the coach console IS the person on the
+   *  phone, with no id to reconcile later.
+   *
+   *  That last part is the whole reason. The alternative is a local id
+   *  now and a server id later, and every reference written in between
+   *  pointing at the wrong one. There is no migration here because
+   *  there is never a second id.
+   *
+   *  linkEmail() below turns this into a permanent account later,
+   *  keeping the same id. Needs Anonymous Sign-In enabled in the
+   *  project, which supabase/SETUP.md spells out. */
+  async signInAnonymously() {
+    return this.#setSession(await this.#auth('/signup', {}));
+  }
+
+  /** Give a signed-in identity an email, so a magic link can bring it
+   *  back on another device. The id does not change, which is the
+   *  point: everything already written stays pointing at the same
+   *  person. */
+  async linkEmail(email) {
+    const s = await this.#fresh();
+    if (!s?.access_token) throw new Error('linkEmail needs somebody signed in');
+    return this.#send(`${this.#url}/auth/v1/user`, 'PUT', { email },
+      { Authorization: `Bearer ${s.access_token}` });
+  }
+
   /** Send a sign-in link to an email address. Nothing is created here
    *  and nothing is signed in yet; the link in the mail is what does
    *  that, which is the point of a magic link. */

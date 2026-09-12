@@ -17,9 +17,9 @@ realtime, reachable from a static page with a JS client.
 
 - **The site stays as it is.** Static, on GitHub Pages, no server to run, deploy
   or pay for. Nothing about the current publishing model changes.
-- **Magic-link auth *is* the survey flow.** The client gets a link, clicks it, is
-  signed in. No password for a fitness client to forget, and no password for us
-  to store — which matters given we are handling their health data.
+- **No password for a fitness client to forget**, and none for us to store —
+  which matters given we are handling their health data. See the correction
+  below: magic links are how somebody *returns*, not how they arrive.
 - **Row-level security is enforced by the database, not by front-end code.** A
   client can read their own rows and nothing else, and that stays true even if a
   screen has a bug.
@@ -31,6 +31,47 @@ realtime, reachable from a static page with a JS client.
 only because SQL keeps a program's structure legible, and a program is a
 structure the owner needs to read and reason about. A custom server is the wrong
 trade: hosting, deployment and security work for no capability gain here.
+
+---
+
+## Correction, 2026-09-11: how somebody actually arrives
+
+This document originally said magic-link auth *is* the survey flow — the
+client gets a link, clicks it, is signed in. Building it showed that is the
+wrong way round, and the reason is worth writing down because it is the
+hardest bug in the feature and it is avoidable rather than fixable.
+
+A person fills in the survey **before** they have an account. That is the
+whole point of the survey. But every row needs an owner that row-level
+security recognises, so the intake cannot be written as nobody.
+
+Magic-link-first means: hold the answers somewhere, send an email, wait for a
+click, then write them. That is a wait in the middle of the one flow that must
+not have one, it fails entirely if the mail lands in spam, and it means the
+answers exist under a temporary identity before they exist under a real one.
+
+**So the survey signs in anonymously at the moment it submits.** Supabase
+issues a real `auth.uid()` with no email and no password. The intake is
+written by its actual owner, immediately, and the person appears in the coach
+console the second they press Finish — which is the thing that was asked for.
+
+The decisive part is not the convenience. It is that **there is never a second
+id.** Any scheme where identity starts local and becomes real later has to
+reconcile everything written in between — the intake, the program assigned to
+them, every log — and every one of those references is a chance to point at
+the wrong person. Anonymous-first has no reconciliation step because there is
+nothing to reconcile.
+
+Magic links keep their job, which is **returning**: `linkEmail()` attaches an
+email to an identity that already exists, and **the id does not change**. So a
+person can come back on a new phone, or replace a lost one, and everything
+they have done is still theirs. That is what magic links are good at, and it
+is a different question from how they arrive.
+
+Cost: anonymous sign-in has to be enabled in the project, one toggle,
+`supabase/SETUP.md` step 3. An identity with no email is unrecoverable if the
+device is lost before an email is attached — which is exactly why attaching
+one is offered, and why nothing irreplaceable lives only on the server.
 
 ---
 
@@ -102,12 +143,27 @@ fit is a Phase 1 bug.
 | `intakes` | `id`, `user_id`, `version`, `answers` (jsonb), `derived` (jsonb), `submitted_at` | read own; trainer reads their clients' |
 | `programs` | `id`, `owner_id`, `assigned_to`, `name`, `status`, `days` (jsonb), `profile` (jsonb) | client reads where `assigned_to = auth.uid()`; trainer writes where `owner_id = auth.uid()` |
 | `sessions` | `id`, `program_id`, `name`, `pattern`, `blocks` (jsonb) | readable via the program that owns it |
-| `logs` | `id`, `user_id`, `session_id`, `date`, `blocks` (jsonb), `duration_sec` | insert + read own; trainer reads their clients' |
-| `prs` | `user_id`, `ex_id`, `value`, `unit`, `weight`, `date` | as `logs` |
+| `logs` | `id`, `user_id`, `session_id`, `name`, `date`, `blocks` (jsonb), `duration_sec` | insert + read own; trainer reads their clients' |
+| `prs` | `user_id`, `ex_id`, `value`, `unit`, `weight`, `l`, `r`, `date` | as `logs` |
 | `messages` | `id`, `from_user_id`, `to_user_id`, `body`, `context_type`, `context_id`, `read_at` | read where you are either party |
 
 Every table also carries `created_at` and `updated_at`, matching the schema rule
 that every record is stamped.
+
+| `user_state` | `user_id`, `state` (jsonb) | the person only, not their coach |
+
+Two columns in that table were added after this sketch, by mapping each record
+field onto a column **by hand** rather than by a naming rule. `logs` had no
+`name`, so every workout would have synced up untitled. `prs` had no `l` and
+`r`, so a single-limb record would have synced as a record of nothing. Neither
+would have thrown. That is the whole argument for writing the map out one
+field at a time: a field with nowhere to go is a missing line you can see.
+
+`user_state` is the per-user document `js/core/storage.js` always said would
+be "a single jsonb row, not fifteen tables" on a server. Its policies open it
+to the person and to nobody else, coach included — a coach who wants to know
+whether somebody is training reads the logs, which is the record of what
+happened.
 
 **Deliberately absent:** no table for run state or device preferences. They are
 device-local and syncing them would be a bug, not a feature.
