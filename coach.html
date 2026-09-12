@@ -2544,6 +2544,15 @@ function libRow(){
          themselves, on one line, with the explanations moved onto their
          titles where they are there for the one time you want them. -->
     <p class="micro pacts">
+      <!-- THE WRITER, ON THE BAR THAT IS ALWAYS THERE.
+
+           It used to live only on the empty state, which meant it
+           vanished the moment a client had a single day in their
+           program, and was therefore invisible to every client who
+           already had one. A door you can only use before you need it
+           is not a door. -->
+      <button class="lnk" id="genWrite"
+        title="Read their answers and write a week: days, blocks, sets, reps, rest, cues. Fundamentals first. You edit everything after.">Write it from their answers</button>
       ${PROG.from && LIBRARY[PROG.from] ? `<button class="lnk" id="progRefresh"
         title="Replace this with a fresh copy of the ${esc(LIBRARY[PROG.from].name)} template. Anything changed here is lost.">Fresh copy</button>` : ''}
       ${has ? `<button class="lnk" id="nextBlock"
@@ -2554,6 +2563,9 @@ function libRow(){
   </div></div>`;
 }
 function libWire(){
+  const gw = document.getElementById('genWrite');
+  if(gw) gw.onclick = () => genOpen(true);
+
   const nb = document.getElementById('nextBlock');
   if(nb) nb.onclick = startNextBlock;
 
@@ -3047,8 +3059,21 @@ function nbBuildLibrary(){
    Shapes first, then a week. Two decisions, in that order, because
    which shape a week has is the only one that cannot be fixed by
    editing a movement afterwards. */
-function genOpen(){
-  const host = document.getElementById('genpanel');
+function genOpen(floating){
+  /* TWO PLACES IT CAN OPEN, AND ONE OF THEM HAS TO BE MADE.
+
+     On the empty state there is a #genpanel waiting for it. From the
+     bar, which is always on screen, there is nothing yet, so a panel
+     is put directly under the bar. Without this the writer existed
+     only for clients who did not have a program, which is the one
+     group least likely to need help writing one. */
+  let host = document.getElementById('genpanel');
+  if(!host && floating){
+    host = document.createElement('div');
+    host.id = 'genpanel';
+    const bar = document.querySelector('.pacts');
+    (bar ? bar.parentNode : document.getElementById('build'))?.appendChild(host);
+  }
   if(!host) return;
   if(host.dataset.open === '1'){ host.innerHTML = ''; host.dataset.open = '0'; return; }
   host.dataset.open = '1';
@@ -3087,6 +3112,16 @@ function genOpen(){
    the Save button in the bar above is still the only thing that
    commits anything. */
 function genApply(shape){
+  /* WRITING OVER SOMETHING IS A DIFFERENT ACT FROM WRITING ON A BLANK
+     PAGE, and it has to be asked about. The writer is on the bar now,
+     which means it is one stray click away from a program somebody
+     spent an evening on. */
+  const had = Object.keys((PROG && PROG.days) || {}).length;
+  if(had && !confirm(
+      `This replaces the ${had} day${had===1?'':'s'} open now with a freshly written week.\n\n`
+      + `${progDirty() ? 'There are unsaved changes and they will be lost. ' : ''}`
+      + `Saved programs are untouched, and you can open one again from the picker.`)) return;
+
   const built = genProgram(A, shape);
   if(!Object.keys(built.program.days).length){ toast('Nothing could be built from these answers'); return; }
   PROG = built.program;
