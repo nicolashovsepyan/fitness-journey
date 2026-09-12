@@ -252,8 +252,22 @@ export class Supabase {
       { Prefer: `resolution=merge-duplicates,return=representation` });
   }
 
-  async update(table, params, patch) {
-    return this.#rest('PATCH', table, params, patch, { Prefer: 'return=representation' });
+  /** @param {{minimal?:boolean}} [opts] `minimal` asks for no rows back.
+   *
+   *  WHY THAT OPTION EXISTS, because it is not an optimisation.
+   *
+   *  return=representation makes PostgREST add a RETURNING, and a
+   *  RETURNING needs permission to SELECT the row AFTER the change. So
+   *  an update that moves a row out of your own view succeeds and then
+   *  fails on the way back, with 42501 insufficient privilege - which
+   *  reads as though the write was refused when the write was fine.
+   *
+   *  A coach releasing a client is exactly that update: the moment
+   *  trainer_id stops pointing at them they can no longer see the row
+   *  they just wrote. */
+  async update(table, params, patch, { minimal = false } = {}) {
+    return this.#rest('PATCH', table, params, patch,
+      { Prefer: minimal ? 'return=minimal' : 'return=representation' });
   }
 
   async remove(table, params) {

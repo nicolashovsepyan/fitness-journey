@@ -29,6 +29,9 @@
    deletes at the end. It cannot touch anybody else because the
    policies will not let it, which is the thing being tested.
    ============================================================ */
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { BACKEND, backendConfigured } from '../js/config.js';
 import { publishIntake, pullClients, ensureSelf } from '../js/core/backend.js';
 import { Supabase, memorySessionStore, SupabaseError } from '../js/adapters/supabase-rest.js';
@@ -52,8 +55,44 @@ let failed = 0;
 const t = (name, cond) => { console.log((cond ? '  ok    ' : '  FAIL  ') + name); if (!cond) failed++; };
 const group = n => console.log(`\n${n}`);
 
+/* ---- identities that survive between runs --------------------------
+   THIS TEST USED TO EXHAUST ITS OWN QUOTA.
+
+   Supabase caps anonymous sign-ins at 30 an hour from one address. The
+   test needs four identities - the survey, the console, a stranger,
+   and one for the single-person checks - so it could run seven times
+   an hour, and a handful of quick reruns while fixing something took
+   it over. The failure then reads "Too Many Requests" on the first
+   check, which looks exactly like a broken backend.
+
+   So the sessions are kept in a file and reused. The refresh token
+   outlives the access token, so later runs refresh instead of signing
+   in, and the cost after the first run is zero.
+
+   Deleted or missing, the next run simply signs in again. Set
+   FJ_FRESH_IDENTITIES=1 to force that. */
+const HERE = dirname(fileURLToPath(import.meta.url));
+const IDENTITY_DIR = join(HERE, '.identities');
+const FRESH = process.env.FJ_FRESH_IDENTITIES === '1';
+
+function fileSessionStore(name) {
+  const file = join(IDENTITY_DIR, `${name}.json`);
+  return {
+    read() {
+      if (FRESH) return null;
+      try { return JSON.parse(readFileSync(file, 'utf8')); } catch { return null; }
+    },
+    write(v) {
+      try {
+        mkdirSync(IDENTITY_DIR, { recursive: true });
+        writeFileSync(file, JSON.stringify(v, null, 2));
+      } catch { /* a cache that cannot be written is just a slower test */ }
+    },
+  };
+}
+
 const client = new Supabase({
-  url: BACKEND.url, anonKey: BACKEND.anonKey, sessionStore: memorySessionStore(),
+  url: BACKEND.url, anonKey: BACKEND.anonKey, sessionStore: fileSessionStore('solo'),
 });
 
 /** Sign a given client in, and hand back its id. */
@@ -162,9 +201,9 @@ group('and nothing that is not theirs');
 group('a survey on one device reaches a console on another');
 {
   const phone  = new Supabase({ url: BACKEND.url, anonKey: BACKEND.anonKey,
-                                sessionStore: memorySessionStore() });
+                                sessionStore: fileSessionStore('phone') });
   const laptop = new Supabase({ url: BACKEND.url, anonKey: BACKEND.anonKey,
-                                sessionStore: memorySessionStore() });
+                                sessionStore: fileSessionStore('laptop') });
 
   /* The console introduces itself before anybody is pointed at it.
      Skipping this is what produced "violates foreign key constraint
@@ -206,7 +245,7 @@ group('a survey on one device reaches a console on another');
      clients. A second coach, pointed at by nobody, must come back
      empty however hard it asks. */
   const stranger = new Supabase({ url: BACKEND.url, anonKey: BACKEND.anonKey,
-                                  sessionStore: memorySessionStore() });
+                                  sessionStore: fileSessionStore('stranger') });
   const other = await pullClients({ client: stranger });
   t('another coach sees none of them', other.ok && other.clients.length === 0);
 
@@ -235,7 +274,9 @@ group('a survey on one device reaches a console on another');
   t('dropping somebody who is not your client says so, rather than nothing', refusedStranger);
 
   // put both devices back
-  await phone.signOut(); await laptop.signOut(); await stranger.signOut();
+  /* Deliberately NOT signed out. signOut revokes the refresh token,
+     and the refresh token is the thing that stops the next run
+     spending three more of the hourly allowance. */
 }
 
 group('clearing up after itself');
@@ -260,11 +301,11 @@ group('clearing up after itself');
   try { await adapter.removeUser(uid); } catch { refused = true; }
   t('removeUser refuses to delete your own account', refused);
 
-  await client.signOut();
-  t('and the session is closed', client.userId === null);
-  console.log('\n  NOTE: this run leaves one anonymous identity behind. There is no\n'
-    + '  delete policy on public.users, deliberately — see the note on\n'
-    + '  SupabaseAdapter.removeUser. Clear them from the SQL editor.\n');
+  t('and the identity is kept for the next run', client.userId !== null);
+  console.log('\n  NOTE: four anonymous identities are kept in test/.identities/ and\n'
+    + '  reused, so repeat runs cost none of the hourly sign-in allowance.\n'
+    + '  Delete that folder to start clean. There is no delete policy on\n'
+    + '  public.users, deliberately — see SupabaseAdapter.removeUser.\n');
 }
 
 console.log(failed ? `\n${failed} FAILED` : '\nAll checks passed.');

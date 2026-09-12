@@ -181,10 +181,18 @@ export class SupabaseAdapter extends StorageAdapter {
         'removeUser will not delete your own account. That is a bigger decision '
         + 'than this method makes, and it would take every log and record with it.');
     }
-    const changed = await this.#sb.update('users', { id: `eq.${id}` }, { trainer_id: null });
-    if (!changed.length) {
+    /* Ask first, rather than judge by what comes back. The obvious way
+       is to update and count the returned rows, and it does not work
+       here: asking for the rows back makes PostgREST add a RETURNING,
+       which needs permission to read the row AFTER the change - and
+       after this change the coach cannot, which is the entire point.
+       The write lands and the read is refused, and it surfaces as 42501
+       insufficient privilege, looking exactly like a refused write. */
+    const mine = await this.getUser(id);
+    if (!mine) {
       throw new Error(`removeUser(${id}) changed nothing — they are not your client.`);
     }
+    await this.#sb.update('users', { id: `eq.${id}` }, { trainer_id: null }, { minimal: true });
   }
 
   /* ---- names are the device's, by contract ---------------------- */
