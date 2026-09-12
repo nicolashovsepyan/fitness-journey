@@ -15,7 +15,7 @@
    Training data lives in localStorage, not here, so an update never
    touches a logged session.
    ============================================================ */
-const VERSION = '4b4be88da6';
+const VERSION = '903fd02a14';
 const CACHE = 'fj-' + VERSION;
 const ASSETS = [
   "./coach.html",
@@ -38,11 +38,15 @@ const ASSETS = [
   "./images/stamp-triangle.svg",
   "./index.html",
   "./js/adapters/local.js",
+  "./js/adapters/supabase-rest.js",
+  "./js/adapters/supabase.js",
   "./js/app.js",
   "./js/beginner.js",
   "./js/carrier.js",
   "./js/coach.js",
   "./js/composer.js",
+  "./js/config.js",
+  "./js/core/backend.js",
   "./js/core/current.js",
   "./js/core/persist.js",
   "./js/core/resolve.js",

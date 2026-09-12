@@ -3996,8 +3996,9 @@ function coachUidFor(a){
 
 /* One writer for an arriving intake, whether it came from the address bar
    or from the paste box. They used to be the same code twice. */
-function importIntake(p){
+function importIntake(p, forcedUid, opts){
   const a = p.a || {};
+  opts = opts || {};
   /* A DISTINCT ID PER PERSON, and this matters more here than on a phone.
      js/intake.js uses the fixed id 'me' because a phone belongs to one
      person and a second survey on it is that person correcting themselves.
@@ -4005,7 +4006,15 @@ function importIntake(p){
      the second quietly overwrite the first. Derived from the email when
      there is one so re-importing the same person updates rather than
      duplicates, and from the name plus a stamp when there is not. */
-  const uid = coachUidFor(a);
+  /* WHEN THE DATABASE ALREADY NAMED THEM, USE THAT NAME.
+
+     A client pulled from Supabase arrives with the id the survey signed
+     in as. Deriving a second one here from their email would give the
+     same human two ids: the real one in the database, a made-up one in
+     this browser, and a console listing them twice with no way to tell
+     which is which. The derivation below is for intakes that arrive by
+     link or paste, which have no database id to carry. */
+  const uid = forcedUid || coachUidFor(a);
   const users = lsGet(USERS_LS).filter(u => u.id !== uid);
   users.push({ id:uid, role:'client', status:'pending', displayName:a.name||'', email:a.email||null,
     ui:'pro', programId:null, trainerId:null, accent:'#3ECBA8',
@@ -4048,7 +4057,7 @@ function importIntake(p){
   /* an imported client is a real one - the seeding flag stops the example
      from being re-added underneath them on a later visit */
   localStorage.setItem('fj.coach.seeded','1');
-  toast('Imported ' + (a.name || 'the client'));
+  if(!opts.quiet) toast('Imported ' + (a.name || 'the client'));
   return uid;
 }
 
@@ -4176,7 +4185,15 @@ function addClientByName(name, email){
   name = String(name||'').trim(); email = String(email||'').trim();
   if(!name) return toast('They need a name at least');
   const a = { name, email: email || null };
-  const uid = coachUidFor(a);
+  /* WHEN THE DATABASE ALREADY NAMED THEM, USE THAT NAME.
+
+     A client pulled from Supabase arrives with the id the survey signed
+     in as. Deriving a second one here from their email would give the
+     same human two ids: the real one in the database, a made-up one in
+     this browser, and a console listing them twice with no way to tell
+     which is which. The derivation below is for intakes that arrive by
+     link or paste, which have no database id to carry. */
+  const uid = forcedUid || coachUidFor(a);
   const users = lsGet(USERS_LS).filter(u => u.id !== uid);
   users.push({ id:uid, role:'client', status:'no-survey', displayName:name, email:email||null,
     ui:'pro', programId:null, trainerId:null, accent:'#3ECBA8',
@@ -4439,6 +4456,61 @@ drawTheme();
 drawRail(); drawInbox(); drawLayers(); drawDock();
 loadProgram().then(() => { drawClients(); drawAddClient(); drawRelease2(); });
 
+/* ---- clients who never touched this computer ----------------------
+   THE REASON THIS WHOLE BACKEND EXISTS.
+
+   Somebody fills in the survey on their phone. Everything the survey
+   wrote went into THEIR browser, and a console on a different machine
+   has no way to see it - which is why the only handoff used to be a
+   link, and why a survey finished on a phone while the console was
+   open on a laptop simply never arrived.
+
+   This asks the database instead. The policies decide what comes back:
+   this coach, and the clients whose trainer_id is this coach. Nothing
+   is filtered here, because a filter here would be a weaker second
+   copy of a rule already enforced where it cannot be bypassed.
+
+   It runs on open and it is allowed to fail. No backend, no signal, no
+   answer: the console carries on with what this browser already knows,
+   because a coach who cannot reach the internet still has to be able
+   to write a program. */
+function pullFromCloud(announce){
+  if(typeof window.fjPullClients !== 'function') return Promise.resolve();
+  return window.fjPullClients().then(function(r){
+    if(!r || !r.ok){
+      if(announce && r && r.reason) toast(r.reason);
+      return;
+    }
+    const known = new Set(lsGet(INTAKES_LS).map(i => i.userId));
+    let fresh = 0;
+    r.clients.forEach(function(c){
+      if(!c.intake) return;                    // a person with no answers yet
+      if(!known.has(c.user.id)) fresh++;
+      importIntake({ v:c.intake.version, at:c.intake.submittedAt, a:c.intake.answers },
+                   c.user.id, { quiet:true });
+    });
+    drawRail(); drawInbox(); drawClients(); drawAddClient();
+    if(fresh) toast(fresh + (fresh === 1 ? ' new client arrived' : ' new clients arrived'));
+    else if(announce) toast('Up to date');
+  }).catch(function(){ /* the console opens either way */ });
+}
+/* AND THE ORDER THESE TWO RUN IN, WHICH IS NOT THE ORDER THEY ARE
+   WRITTEN IN. Everything in this file is a classic script and runs at
+   parse time. The module that defines fjPullClients is deferred, like
+   every module, so it runs AFTER all of this. Calling the pull here
+   directly found no bridge and returned quietly - the console looked
+   fine and simply never asked the database anything.
+
+   So the module calls us, once it is ready. */
+window.fjOnCloudReady = function(){ pullFromCloud(false); };
+
+/* And again whenever the coach comes back to the tab, because the
+   common case is exactly this: the console is open on a laptop while
+   somebody fills in the survey on a phone. */
+addEventListener('visibilitychange', function(){
+  if(document.visibilityState === 'visible') pullFromCloud(false);
+});
+
 /* the jump bar lights whichever section is on screen */
 (function(){
   const links = [...document.querySelectorAll('#jump a')];
@@ -4452,6 +4524,30 @@ loadProgram().then(() => { drawClients(); drawAddClient(); drawRelease2(); });
   }, { rootMargin: '-60px 0px -70% 0px' });
   targets.forEach(t => io.observe(t));
 })();
+</script>
+<!-- ============================================================
+     THE DOORWAY TO THE DATABASE.
+
+     This file is one classic script; the adapter and the client are ES
+     modules, and a classic script cannot reach a module. So this is the
+     one module the console loads, and all it does is hang three
+     functions on window for the code above to call.
+
+     Everything it exposes is safe to call with no backend: each answers
+     { ok:false, reason } rather than throwing, because a console must
+     open whether or not there is a database behind it.
+     ============================================================ -->
+<script type="module">
+  import { pullClients, cloudUserId, cloudSignIn, cloudAttachEmail }
+    from './js/core/backend.js';
+  window.fjPullClients = pullClients;
+  window.fjCloudUserId = cloudUserId;
+  window.fjCloudSignIn = cloudSignIn;
+  window.fjCloudAttachEmail = cloudAttachEmail;
+
+  /* The console is already drawn by now — see the note beside
+     fjOnCloudReady. This is the handshake back. */
+  if (typeof window.fjOnCloudReady === 'function') window.fjOnCloudReady();
 </script>
 </body>
 </html>

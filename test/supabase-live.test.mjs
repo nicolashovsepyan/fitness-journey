@@ -30,6 +30,7 @@
    policies will not let it, which is the thing being tested.
    ============================================================ */
 import { BACKEND, backendConfigured } from '../js/config.js';
+import { publishIntake, pullClients, ensureSelf } from '../js/core/backend.js';
 import { Supabase, memorySessionStore, SupabaseError } from '../js/adapters/supabase-rest.js';
 import { SupabaseAdapter } from '../js/adapters/supabase.js';
 import { LocalAdapter } from '../js/adapters/local.js';
@@ -54,6 +55,12 @@ const group = n => console.log(`\n${n}`);
 const client = new Supabase({
   url: BACKEND.url, anonKey: BACKEND.anonKey, sessionStore: memorySessionStore(),
 });
+
+/** Sign a given client in, and hand back its id. */
+async function cloudSignInWith(c) {
+  if (!c.userId) await c.signInAnonymously();
+  return c.userId;
+}
 
 group('the key that ships in the app');
 {
@@ -131,6 +138,66 @@ group('and nothing that is not theirs');
   t('listUsers returns only themselves', people.length === 1 && people[0].id === uid);
   const intakes = await adapter.listIntakes();
   t('listIntakes returns only their own', intakes.length === 1 && intakes[0].userId === uid);
+}
+
+/* ============================================================
+   THE WHOLE POINT, END TO END.
+
+   A phone fills in the survey. A laptop opens the console. They are
+   different browsers with different storage and they have never met.
+   Before this, everything the survey wrote stayed on the phone and the
+   console had no way to learn it existed - which is the bug that
+   started all of this.
+
+   Two clients here, each with its own session store, because that IS
+   two devices. One signs in and publishes an intake pointed at the
+   other. The other asks the database who its clients are.
+   ============================================================ */
+group('a survey on one device reaches a console on another');
+{
+  const phone  = new Supabase({ url: BACKEND.url, anonKey: BACKEND.anonKey,
+                                sessionStore: memorySessionStore() });
+  const laptop = new Supabase({ url: BACKEND.url, anonKey: BACKEND.anonKey,
+                                sessionStore: memorySessionStore() });
+
+  /* The console introduces itself before anybody is pointed at it.
+     Skipping this is what produced "violates foreign key constraint
+     users_trainer_fk" the first time this test ran: an auth identity
+     is not a row, and a trainer_id has to reference a row. */
+  const intro = await ensureSelf({ role: 'trainer', displayName: 'Coach', client: laptop });
+  const coach = intro.uid;
+  t('the console has an identity, and a row to go with it', intro.ok && !!coach);
+
+  const pushed = await publishIntake(
+    { answers: { name: 'Phone Person', email: null, tier: 3, pain: ['right shoulder'] }, version: 6 },
+    { client: phone, trainerId: coach });
+  t('the survey publishes' + (pushed.ok ? '' : ` — ${pushed.reason}`), pushed.ok);
+
+  const pulled = await pullClients({ client: laptop });
+  t('the console can ask' + (pulled.ok ? '' : ` — ${pulled.reason}`), pulled.ok);
+
+  const found = (pulled.clients || []).find(c => c.user.id === pushed.uid);
+  t('and the person from the phone is there', !!found);
+  t('  under the same id the phone used', found?.user.id === pushed.uid);
+  t('  with their name', found?.user.displayName === 'Phone Person');
+  t('  and their answers, not a stub', found?.intake?.answers?.pain?.[0] === 'right shoulder');
+
+  /* The other half of the promise: a console only ever sees ITS OWN
+     clients. A second coach, pointed at by nobody, must come back
+     empty however hard it asks. */
+  const stranger = new Supabase({ url: BACKEND.url, anonKey: BACKEND.anonKey,
+                                  sessionStore: memorySessionStore() });
+  const other = await pullClients({ client: stranger });
+  t('another coach sees none of them', other.ok && other.clients.length === 0);
+
+  // put both devices back
+  if (pushed.uid) {
+    await new SupabaseAdapter({ client: phone, device: new LocalAdapter() }).removeUser(pushed.uid);
+  }
+  await new SupabaseAdapter({ client: laptop, device: new LocalAdapter() }).removeUser(coach);
+  const gone = await pullClients({ client: stranger });
+  t('both test identities are cleared up', gone.ok && gone.clients.length === 0);
+  await phone.signOut(); await laptop.signOut(); await stranger.signOut();
 }
 
 group('clearing up after itself');

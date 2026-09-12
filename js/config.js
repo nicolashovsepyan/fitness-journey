@@ -51,6 +51,22 @@ export const BACKEND = {
    *  being served from, which is right in every case except a local
    *  file. */
   redirectTo: null,
+
+  /** WHICH COACH A FINISHED SURVEY BELONGS TO.
+   *
+   *  A client cannot see a coach they have not been handed to — the
+   *  policies work from trainer_id and nothing else — so somebody has
+   *  to say which coach, and the survey is published by that coach.
+   *  This is that answer.
+   *
+   *  It is a uuid, not a secret. The worst it allows is somebody
+   *  pointing their own intake at this console, which shares THEIR
+   *  answers with this coach and reveals nothing in the other
+   *  direction.
+   *
+   *  Null means a finished survey still saves to the phone and still
+   *  travels by link, it simply does not land in a console by itself. */
+  coachId: null,
 };
 
 /** True when there is something to sync to. Every caller asks this
