@@ -6860,10 +6860,27 @@ loadTheme().then(()=>go(S.tab||'today'));   /* then again from the spine, if rea
      is no single moment after which the row is guaranteed to exist.
      Rather than thread a callback through the render pipeline for one
      row, this watches for it. Cheap, and it cannot go stale. */
+  /* IT REDRAWS ITSELF, AND THAT NEARLY HUNG THE APP.
+
+     The observer below fires on any DOM change, and this function
+     changes the DOM, so the first version called itself forever the
+     moment the row existed: the Me tab loaded and the page stopped
+     responding entirely. A watcher that reacts to its own writes is a
+     loop, always.
+
+     Two guards, and both are needed. `busy` holds it off while a
+     permission prompt is in flight, so an answer in progress is not
+     wiped by a redraw. And the row records what it is showing, so a
+     draw that would change nothing returns without touching anything
+     — which is what actually breaks the cycle, because the loop ends
+     at the first write that is not a change. */
+  let busy = false;
   function draw() {
     const cell = document.getElementById('pushState');
-    if (!cell) return;
+    if (!cell || busy) return;
     const state = pushState();
+    if (cell.dataset.shown === state) return;      // already right, and this is the brake
+    cell.dataset.shown = state;
     if (state === 'unavailable' || state === 'denied') {
       cell.innerHTML = `<em>${pushExplain()}</em>`;
       return;
@@ -6876,12 +6893,16 @@ loadTheme().then(()=>go(S.tab||'today'));   /* then again from the spine, if rea
        never something that happens on load. */
     cell.querySelector('#pushBtn').onclick = async () => {
       const btn = cell.querySelector('#pushBtn');
+      busy = true;
       btn.disabled = true; btn.textContent = on ? 'Turning off\u2026' : 'Asking\u2026';
       const r = on ? await pushDisable() : await pushEnable();
+      busy = false;
       if (!r.ok && r.reason) {
+        cell.dataset.shown = 'said:' + r.reason.slice(0, 20);
         cell.innerHTML = `<em>${r.reason}</em>`;
         return;
       }
+      cell.dataset.shown = '';                     // the state really did change
       draw();
       if (!on) refreshBadge();
     };
