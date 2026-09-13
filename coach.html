@@ -553,8 +553,22 @@ select.pin{appearance:none;cursor:pointer}
 .nbdial.thin u{ opacity:1; font-weight:700; }
 .nbtopgrid{ display:grid; gap:22px 30px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); }
 .nbtopcell{ min-width:0; }
-.nbcols.one{ display:block; }
-.nbcols.one .nbcol.mid{ width:auto; max-width:none; }
+/* THE ONE-COLUMN BUILDER IS A PAGE, NOT A WINDOW.
+
+   `.nbcols` was three side-by-side columns that each scrolled inside a box
+   the height of the viewport - which is the right shape for three columns
+   and the wrong shape for one. When the builder went full width the markup
+   became `.nbcols.one` and this rule switched the layout to block, but
+   `display` was the only thing it changed. The height stayed at
+   `calc(100vh - 168px)` and the overflow stayed `hidden`, so the builder
+   became a fixed 632px window over content 2015px tall, with the rest
+   clipped and no way to reach it: the parent refused to scroll and the
+   child had nothing to scroll. Adding blocks pushed the work you were
+   doing into the clipped part, which is exactly when you notice.
+
+   One column is just content. It grows, and the page scrolls. */
+.nbcols.one{ display:block; height:auto; min-height:0; overflow:visible; }
+.nbcols.one .nbcol.mid{ width:auto; max-width:none; overflow:visible; }
 
 /* Picking a movement, in the block that wants one. */
 .nbaddpanel{ margin-top:8px; border:1px solid var(--line); border-radius:12px;
@@ -579,11 +593,23 @@ select.pin{appearance:none;cursor:pointer}
 .nbseg button{ font:600 9px ui-monospace,monospace; letter-spacing:.05em; text-transform:uppercase;
                color:var(--ink3); background:none; border:none; border-radius:4px; padding:4px 6px; cursor:pointer; }
 .nbseg button.on{ background:var(--accent,var(--accent)); color:var(--accent-on); }
-.nbdials{ display:flex; flex-wrap:wrap; gap:8px 6px; }
-.nbdial{ width:52px; text-align:center; }
+/* THE DIALS WERE TOO SMALL TO READ AND SAID HALF OF WHAT THEY KNEW.
+
+   36px rings with a 10px number in the middle, in a column 397px tall with
+   270px of it empty underneath. The number was also only half the story: a
+   pattern ring drew "1x" against a target of 2 that was written once, in
+   the heading, as a sentence - so every ring asked you to remember what a
+   full one meant. The count is now the size of the thing you read first,
+   and the target sits under it where the comparison is free. */
+.nbdials{ display:flex; flex-wrap:wrap; gap:14px 10px; }
+.nbdial{ width:76px; text-align:center; }
 .nbdial .bg{ stroke:var(--line2) } .nbdial .fg{ stroke:var(--c) }
-.nbdial .mid{ font:600 10px ui-monospace,monospace; fill:var(--ink) }
-.nbdial u{ display:block; font-size:9px; text-decoration:none; color:var(--ink3); text-transform:capitalize; }
+.nbdial .mid{ font:700 19px ui-monospace,monospace; fill:var(--ink) }
+.nbdial .sub{ font:600 9.5px ui-monospace,monospace; fill:var(--ink3) }
+.nbdial u{ display:block; font-size:10.5px; margin-top:3px; text-decoration:none;
+           color:var(--ink3); text-transform:capitalize; }
+/* met the target: the ring closes and the label stops being quiet */
+.nbdial.done u{ color:var(--ink2); }
 .nbbody{ display:flex; align-items:center; gap:8px; padding:3px 0; }
 .nbbody .nm{ width:70px; font-size:11px; color:var(--ink2); }
 .nbbody .bar{ flex:1; height:7px; border-radius:4px; background:var(--line); overflow:hidden; }
@@ -4118,7 +4144,7 @@ function nbTop(){
   let h = `<div class="nbtopgrid">`;
   h += `<div class="nbtopcell"><p class="nblbl">Training balance</p><div id="nbmix"></div></div>`;
   h += `<div class="nbtopcell"><div class="nbcovhead"><p class="nblbl" style="margin:0;flex:1">${
-        nbView==='patterns'?'A full ring is twice this week':'Where the work lands'}</p>
+        nbView==='patterns'?'Patterns this week':'Where the work lands'}</p>
       <span class="nbseg">${['patterns','body'].map(v=>
         `<button class="${nbView===v?'on':''}" onclick="nbView='${v}';drawProgram()">${v==='body'?'body':'patterns'}</button>`).join('')}</span></div>
       <div id="nbcov"></div></div>`;
@@ -4173,15 +4199,21 @@ function nbMixHTML(){
     <span class="nbseg">${['day','week'].map(v=>
       `<button class="${nbMixView===v?'on':''}" onclick="nbMixView='${v}';drawProgram()">${v}</button>`).join('')}</span></div>`;
   if(!m.total) return head + `<p class="nbmut">Nothing in there yet.</p>`;
-  const R = 15, C = 2*Math.PI*R;
+  const R = 26, C = 2*Math.PI*R;
+  /* NO TARGET IS SHOWN HERE, because there is not one. Nothing in this
+     app declares an ideal mix, so a second number under these would be
+     invented rather than measured. What sits there instead is the minutes
+     the share is a share OF - which is real, and is the thing you actually
+     want when deciding whether 9% aerobic matters. */
   return head + `<div class="nbdials">` + NB_Q.map(q=>{
-    const pct = m.t[q]/m.total, n = Math.round(pct*100);
+    const pct = m.t[q]/m.total, n = Math.round(pct*100), mins = Math.round(m.t[q]);
     return `<div class="nbdial" style="--c:${NB_QC[q]}" title="${q}: ${n}% of ${Math.round(m.total)} min">
-      <svg width="36" height="36" viewBox="0 0 38 38">
-        <circle class="bg" cx="19" cy="19" r="${R}" fill="none" stroke-width="3.5"/>
-        <circle class="fg" cx="19" cy="19" r="${R}" fill="none" stroke-width="3.5" stroke-linecap="round"
-          transform="rotate(-90 19 19)" stroke-dasharray="${(C*pct).toFixed(1)} ${C.toFixed(1)}"/>
-        <text class="mid" x="19" y="23" text-anchor="middle">${n}</text></svg><u>${q}</u></div>`;
+      <svg width="62" height="62" viewBox="0 0 62 62">
+        <circle class="bg" cx="31" cy="31" r="${R}" fill="none" stroke-width="5"/>
+        <circle class="fg" cx="31" cy="31" r="${R}" fill="none" stroke-width="5" stroke-linecap="round"
+          transform="rotate(-90 31 31)" stroke-dasharray="${(C*pct).toFixed(1)} ${C.toFixed(1)}"/>
+        <text class="mid" x="31" y="30" text-anchor="middle">${n}%</text>
+        <text class="sub" x="31" y="43" text-anchor="middle">${mins} min</text></svg><u>${q}</u></div>`;
   }).join('') + `</div>`;
 }
 function nbCovHTML(){
@@ -4195,7 +4227,7 @@ function nbCovHTML(){
       <span class="bar"><i style="width:${Math.round(n/max*100)}%"></i></span><span class="n">${n}</span></div>`).join('')
       + (thin.length?`<p class="nbmut">Once this week: ${thin.join(', ')}.</p>`:'');
   }
-  const c = nbCounts(), R = 15, C = 2*Math.PI*R;
+  const c = nbCounts(), R = 26, C = 2*Math.PI*R;
   /* WHICH ONES ARE SHORT, SAID IN WORDS.
 
      7 part-filled rings tell you the answer is in there somewhere. The
@@ -4209,14 +4241,19 @@ function nbCovHTML(){
     ? `<p class="nbweak">${none.length ? `<b>Missing:</b> ${none.join(', ')}. ` : ''}${
         thin.length ? `<b>Once only:</b> ${thin.join(', ')}.` : ''}</p>`
     : `<p class="nbweak ok">Every pattern is trained at least twice.</p>`;
+  /* Mobility is the one pattern the week does not owe 2 of, so it is the
+     one ring with no target under it rather than a target it can fail. */
   return `<div class="nbdials">` + NB_GROUPS.map(g=>{
-    const n=c[g], frac=Math.min(1,n/2);
-    return `<div class="nbdial ${g!=='mobility'&&n<2?'thin':''}" style="--c:${NBC(g)}" title="${g}: ${n} this week, aiming for 2">
-      <svg width="36" height="36" viewBox="0 0 38 38">
-        <circle class="bg" cx="19" cy="19" r="${R}" fill="none" stroke-width="3.5"/>
-        <circle class="fg" cx="19" cy="19" r="${R}" fill="none" stroke-width="3.5" stroke-linecap="round"
-          transform="rotate(-90 19 19)" stroke-dasharray="${(C*frac).toFixed(1)} ${C.toFixed(1)}"/>
-        <text class="mid" x="19" y="23" text-anchor="middle">${n}×</text></svg><u>${g}</u></div>`;
+    const n=c[g], owed = g!=='mobility', frac=Math.min(1,n/2);
+    return `<div class="nbdial ${owed&&n<2?'thin':''} ${owed&&n>=2?'done':''}" style="--c:${NBC(g)}"
+      title="${g}: ${n} this week${owed?', aiming for 2':''}">
+      <svg width="62" height="62" viewBox="0 0 62 62">
+        <circle class="bg" cx="31" cy="31" r="${R}" fill="none" stroke-width="5"/>
+        <circle class="fg" cx="31" cy="31" r="${R}" fill="none" stroke-width="5" stroke-linecap="round"
+          transform="rotate(-90 31 31)" stroke-dasharray="${(C*frac).toFixed(1)} ${C.toFixed(1)}"/>
+        <text class="mid" x="31" y="${owed?30:36}" text-anchor="middle">${n}×</text>
+        ${owed?`<text class="sub" x="31" y="43" text-anchor="middle">of 2</text>`:''}
+      </svg><u>${g}</u></div>`;
   }).join('') + `</div>` + weak;
 }
 

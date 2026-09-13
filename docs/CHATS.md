@@ -47,7 +47,7 @@ when the area goes quiet — a stale row is worse than no row.
 | **Lab** | `lab/`, `dashboard-lab.html`, `tools/build-lab.mjs` | Active 13 Sep. Experiments kept away from clients. |
 | **Logo / icons** | `logo/`, `icon*`, `images/logo-mark.svg`, `styles.css` | **IN FLIGHT, UNCOMMITTED.** Leave alone. Untracked: `logo/fj/`, `images/fj-signature.png`. |
 | **Survey** | `onboarding.html` | Idle since 12 Sep. |
-| **Backend** | `supabase/`, `js/core/backend.js` | Idle since 12 Sep. Schema and edge function live; `coach.html` does not call it yet. |
+| **Backend** | `supabase/`, `js/core/backend.js` | Live since 11 Sep. The console DOES pull clients on open. Broken in one way - see below. |
 
 ---
 
@@ -65,13 +65,31 @@ Neither is urgent; both are here so they stop being rediscovered.
 
 ---
 
-## One thing that is not in git at all
+## The console's client list, and why no chat can see it
 
-The console's client list — who is in the picker — lives in `localStorage`, so
-it belongs to **one browser at one address**. `localhost:8801` and
-`nicolashovsepyan.github.io` are different origins and therefore different
-lists, and no chat can read the list in Nicolas's own browser.
+Two separate reasons, and the second is a bug.
 
-So when a chat needs to know what is on his screen, it has to ask. Nothing in
-the repository can answer it. That changes when the console moves onto the
-backend, which is the largest thing still open.
+**localStorage is per origin.** `localhost:8801` and
+`nicolashovsepyan.github.io` are different browsers as far as storage is
+concerned, and neither is the browser Nicolas actually works in. When a chat
+needs to know what is on his screen, it has to ask. Nothing in the repository
+can answer it.
+
+**The cloud pull signs in as the wrong person.** The console does call the
+backend — `pullClients` in `js/core/backend.js`, on open and on focus. It
+works: it returns `ok`. It returns **zero clients**, and here is why.
+
+A finished survey stamps the client with `trainer_id = BACKEND.coachId`,
+which is a fixed uuid in `js/config.js`. The console, asking who it is, calls
+`ensureSelf` → `cloudSignIn` → **`signInAnonymously`**, which mints a *new*
+anonymous identity per browser. Row-level security then returns the clients
+whose `trainer_id` equals the signed-in uid. Those two are the same value in
+exactly one browser: the one that first opened the console on 11 September,
+whose id was copied into `config.js` by hand.
+
+Every other browser — a second laptop, a cleared site, this session — signs in
+as somebody new, matches nothing, and shows an empty console. `cloudAttachEmail`
+is exported and would fix it by making the identity portable, but nothing in
+`coach.html` calls it and there is no UI for it.
+
+So the sync is real, and it currently has an audience of one browser.
