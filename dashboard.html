@@ -1011,7 +1011,24 @@ button.wd:active .b{transform:scale(.94)}
 .rec-tx small{display:block;font-size:11.5px;color:var(--ink3);margin-top:3px;line-height:1.4}
 .rec-c{width:14px;height:14px;flex:none;stroke:var(--ink3);fill:none;stroke-width:2.2;
   stroke-linecap:round;stroke-linejoin:round}
-.restalt{display:flex;gap:8px;margin-top:12px}
+.restalt{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+/* Stepping back through the weeks. Small, at the end of the stats row,
+   because it is navigation and not a headline. */
+.wknav{display:flex;gap:4px;margin-left:auto}
+.wkarrow{width:28px;height:28px;display:grid;place-items:center;padding:0;
+  background:transparent;border:1px solid var(--line);border-radius:8px;
+  color:var(--ink3);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.wkarrow svg{width:14px;height:14px;transform:rotate(180deg)}
+.wkarrow.fwd svg{transform:none}
+.wkarrow:disabled{opacity:.28;cursor:default}
+.wkarrow:not(:disabled):active{background:var(--tint);color:var(--ink)}
+/* UNDO IS QUIET, AND IT IS THERE. A mis-tap needs a way back, but the
+   way back must not compete with the thing you actually came to press. */
+.undo{background:transparent;border:1px solid var(--line);border-radius:10px;
+  padding:9px 12px;font:inherit;font-size:12px;color:var(--ink3);cursor:pointer;
+  width:100%;-webkit-tap-highlight-color:transparent}
+.undo:active{background:var(--tint)}
+.restalt .undo{width:auto;flex:1}
 .restalt .go{flex:1;margin-top:0;font-size:13px;padding:12px 8px}
 
 /* the drill itself, in the sheet */
@@ -3759,14 +3776,70 @@ const recoveryDone = () => todayItems(S.freestyle).some(f => (f.h||'').indexOf('
    because only one of those tells him the plan is working. */
 /* Monday, to match the strip. A week that displays Mon–Sun but totals
    Sun–Sat disagrees with itself every Sunday. */
-const weekStart = () => {
+const weekStartAt = (off) => {
   const d = new Date(NOW); d.setHours(0,0,0,0);
-  d.setDate(d.getDate() - ((DOW + 6) % 7));
+  d.setDate(d.getDate() - ((DOW + 6) % 7) + ((off || 0) * 7));
   return d.getTime();
 };
-function freeOn(i){
-  const a = weekStart() + i*86400000;
+const weekStart = () => weekStartAt(0);
+
+/* WHICH WEEK IS ON SCREEN. 0 is this one, -1 last week, and so on. The
+   strip only ever showed the current week, so a finished week became
+   unreachable the moment Monday arrived. */
+let WKOFF = 0;
+
+/* THE DATE OF A DAY SQUARE, AND IT WAS WRONG FOR EVERY SQUARE.
+
+   `i` is a day-of-week index where Sunday is 0, but the week starts on
+   Monday, so the offset from Monday is (i + 6) % 7 — which is what the
+   strip itself uses to decide what is past. This function used a bare
+   `i`, so it read the wrong day for all 7: a Monday session lit
+   Tuesday, and a SUNDAY one lit Saturday.
+
+   That is the bug you would actually notice, because Sunday sport is
+   the commonest thing logged this way. */
+const dayStartAt = (i, off) => weekStartAt(off) + (((i + 6) % 7) * 86400000);
+
+function freeOn(i, off){
+  const a = dayStartAt(i, off);
   return (S.freestyle||[]).some(f => f.at >= a && f.at < a + 86400000);
+}
+
+/* A finished session, by DATE, for any week. S.done is a name-keyed
+   cache of the current week only and cannot answer for last month;
+   the real log can, and does. */
+function trainedOn(i, off){
+  const a = dayStartAt(i, off);
+  return appSessions().some(r => {
+    const t = new Date(r && r.date).getTime();
+    return !isNaN(t) && t >= a && t < a + 86400000;
+  });
+}
+
+/* Everything done in the week `off`, for the counters above the strip. */
+function weekTally(off){
+  let days = 0, mins = 0;
+  for(const i of [1,2,3,4,5,6,0]){
+    const a = dayStartAt(i, off), b = a + 86400000;
+    const sess = appSessions().filter(r => {
+      const t = new Date(r && r.date).getTime(); return !isNaN(t) && t >= a && t < b; });
+    const free = (S.freestyle||[]).filter(f => f.at >= a && f.at < b);
+    if(sess.length || free.length) days++;
+    mins += sess.reduce((t,r) => t + Math.max(1, Math.round((+r.seconds||0)/60) || (parseInt(A.length,10)||20)), 0);
+    mins += free.reduce((t,f) => t + (parseInt(f.mins,10) || 20), 0);
+  }
+  return { days, mins };
+}
+
+/* How far back there is anything to look at, so the arrow can stop
+   rather than walking into empty weeks forever. */
+function oldestWeekOff(){
+  const stamps = appSessions().map(r => new Date(r && r.date).getTime())
+    .concat((S.freestyle||[]).map(f => f.at)).filter(t => !isNaN(t));
+  if(!stamps.length) return 0;
+  const first = Math.min(...stamps);
+  const wk = weekStartAt(0);
+  return Math.min(0, -Math.ceil((wk - first) / (7 * 86400000)));
 }
 const freeThisWeek = () => (S.freestyle||[]).filter(f => f.at >= weekStart()).length;
 const freeMins = () => (S.freestyle||[]).filter(f => f.at >= weekStart())
@@ -4371,13 +4444,37 @@ function paneToday(){
   const trainedMins = Object.keys(S.done).reduce((t,d) =>
       t + ((S.doneMin && S.doneMin[d]) || (parseInt(A.length,10)||20)), 0) + freeMins();
 
-  h += `<div class="sect"><b>Your week</b><a data-act="tab:log">Your log</a></div>
+  /* WHICH WEEK, AND HOW TO GET BACK TO IT.
+
+     This week reads from the name-keyed cache exactly as it always
+     has, so nothing about today changes. An older week is read from
+     the real dated log, which is the only thing that can answer for a
+     Monday three weeks ago. */
+  const back = WKOFF < 0;
+  const tally = back ? weekTally(WKOFF) : null;
+  const shownDone = back ? tally.days : doneCount;
+  const shownMins = back ? tally.mins : trainedMins;
+  const wkA = new Date(weekStartAt(WKOFF)), wkB = new Date(weekStartAt(WKOFF) + 6*86400000);
+  const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const wkLabel = WKOFF === 0 ? 'Your week'
+    : WKOFF === -1 ? 'Last week'
+    : `${wkA.getDate()} ${MON[wkA.getMonth()]} \u2013 ${wkB.getDate()} ${MON[wkB.getMonth()]}`;
+  const canBack = WKOFF > oldestWeekOff();
+
+  h += `<div class="sect"><b>${wkLabel}</b><a data-act="tab:log">Your log</a></div>
   <div class="card slim">
     <div class="wkrow">
-      <div class="wk-n"><b class="tnum">${doneCount}</b><i class="tnum">/${planned}</i></div>
+      <div class="wk-n"><b class="tnum">${shownDone}</b><i class="tnum">/${planned}</i></div>
       <div class="wk-st">
-        <span><i class="tnum">${streakDays()}</i>day streak</span>
-        <span><i class="tnum">${trainedMins}</i>min trained</span>
+        ${back ? `<span><i class="tnum">${shownMins}</i>min trained</span>`
+               : `<span><i class="tnum">${streakDays()}</i>day streak</span>
+                  <span><i class="tnum">${trainedMins}</i>min trained</span>`}
+      </div>
+      <div class="wknav">
+        <button class="wkarrow" data-act="wk:-1" ${canBack?'':'disabled'}
+          aria-label="The week before">${svg(I.arrow)}</button>
+        <button class="wkarrow fwd" data-act="wk:1" ${WKOFF<0?'':'disabled'}
+          aria-label="The week after">${svg(I.arrow)}</button>
       </div>
     </div>
     <div class="week">
@@ -4385,23 +4482,25 @@ function paneToday(){
         const d = DAYNM[i];
         /* the mark itself marks a training day — the app's own symbol doing
            a job rather than decorating one */
-        const plan = WEEKPLAN[i], free = freeOn(i);
+        const plan = WEEKPLAN[i], free = freeOn(i, WKOFF);
         /* The fifth session. Only drawn when BOTH halves of the answer are
            present - which day, and which sport - because a day marked busy
            with nothing to call it explains nothing. */
         const sport = !plan && sportDays().includes(i) && mySports().length > 0;
-        const dn = !!S.done[d] || free, now = i===DOW;
+        /* This week trusts the cache; an older one asks the log. */
+        const dn = back ? (trainedOn(i, WKOFF) || free) : (!!S.done[d] || free);
+        const now = !back && i===DOW;
         /* how far through a Monday-first week each day sits, so "past" is
            still past once Sunday is the last column rather than the first */
         const pos = (i + 6) % 7, posNow = (DOW + 6) % 7;
-        const past = pos < posNow;
+        const past = back || pos < posNow;
         /* You cannot miss a session that was never handed to you. A day only
            counts as missed if it was released and the day has passed —
            otherwise it stays a plain planned day, which is what it is. */
         const missed = plan && past && released(plan);
         const cls = (dn?'done':(missed?'miss':(plan?'plan':(sport?'sport':''))))
                   + (Object.values(weekMoves()).some(t=>+t===i) ? ' moved' : '')
-                  + (free && !S.done[d] ? ' free' : '')
+                  + (free && (back || !S.done[d]) ? ' free' : '')
                   + (now && (S.markStyle||'square')!=='stamp' ? ' box' : '');
         /* A ball, drawn once and used by both branches below - a sport day
            that happens to be today still has to show something. */
@@ -4409,7 +4508,9 @@ function paneToday(){
                    + '<circle cx="12" cy="12" r="7"/><path d="M12 5v14"/></svg>';
         /* A day you can act on is a button. Anything with a session on it,
            and today itself — because today is where a session gets moved TO. */
-        const tappable = !!plan || now;
+        /* Only this week can be acted on. A session cannot be moved
+           into a Tuesday that has already been and gone. */
+        const tappable = !back && (!!plan || now);
         return `<${tappable?'button':'div'} class="wd ${cls} ${now?'now':''}"${
           tappable ? ` data-wday="${i}"` : ''}${
           sport ? ` title="${esc(sportName())}"` : ''}>
@@ -4488,7 +4589,9 @@ function paneToday(){
           <p class="just">You told me this is already in your week, so it is not a rest day and
             the app is not going to pretend it is. Log it and it counts like a session.</p>
         </div>
-        ${sDone ? '' : `<button class="go" data-act="dosport">Did it \u2014 log it</button>`}
+        ${sDone
+          ? `<button class="undo" data-act="undosport">Logged by mistake? Undo it</button>`
+          : `<button class="go" data-act="dosport">Did it \u2014 log it</button>`}
       </div>`;
     }
     /* This card was a headline, a paragraph, three big drill buttons, a list
@@ -4510,6 +4613,7 @@ function paneToday(){
 
       <div class="restalt">
         <button class="go ghost sm" data-act="tab:workouts">All workouts</button>
+        ${rDone ? `<button class="undo" data-act="undorecov">Logged by mistake? Undo it</button>` : ''}
       </div>
     </div>`;
   }
@@ -6538,6 +6642,34 @@ function act(a,el){
       b:'From your own week, not the program.'});
     save(); go('today');
     return toast('Counted \u2014 that is your week');
+  }
+  /* ============================================================
+     UNDOING SOMETHING YOU DID NOT DO.
+
+     The log is append-only on purpose: a finished workout is a fact
+     about the past and the schema says so. A mis-tap is not a fact
+     about the past. It is a wrong record, and refusing to remove it
+     makes the log LESS true, not more.
+
+     So the line is drawn at TODAY. You can take back something you
+     logged today, because that is a correction. Yesterday is history
+     and stays put.
+     ============================================================ */
+  /* Stepping through weeks. Clamped at both ends: never past this week,
+     never earlier than the first thing ever logged. */
+  if(cmd==='wk'){
+    const step = +arg || 0;
+    WKOFF = Math.max(oldestWeekOff(), Math.min(0, WKOFF + step));
+    return go('today', true);
+  }
+  if(cmd==='undosport' || cmd==='undorecov'){
+    const tag = cmd === 'undosport' ? 'Sport' : 'Recovery';
+    const mine = todayItems(S.freestyle).filter(f => (f.h||'').indexOf(tag) === 0);
+    if(!mine.length) return;
+    const drop = new Set(mine.map(f => f.at));
+    S.freestyle = (S.freestyle||[]).filter(f => !drop.has(f.at));
+    save(); go('today');
+    return toast('Taken back off today');
   }
   if(cmd==='dorecov'){
     const r = RECOVERY.find(x=>x.id===arg); if(!r) return;
