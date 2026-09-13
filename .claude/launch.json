@@ -2,23 +2,13 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "fitness-journey",
-      "runtimeExecutable": "python3",
-      "runtimeArgs": [
-        "-m",
-        "http.server",
-        "8777"
-      ],
-      "port": 8777
-    },
-    {
-      "name": "icon-drafts",
-      "runtimeExecutable": "sh",
+      "name": "fj",
+      "runtimeExecutable": "/bin/sh",
       "runtimeArgs": [
         "-c",
-        "cd '/private/tmp/claude-501/-Users-nicolashovsepyan-Library-CloudStorage-Dropbox-PERSONAL-COWORK-Fitness-Journey---2-0/d26e6b39-8594-4f99-acad-0ac78097a46a/scratchpad' && exec python3 -m http.server 8781"
+        "cd '/Users/nicolashovsepyan/Library/CloudStorage/Dropbox/PERSONAL/COWORK/Fitness Journey - 2.0' && exec python3 -m http.server 8801 --directory ."
       ],
-      "port": 8781
+      "port": 8801
     }
   ]
 }

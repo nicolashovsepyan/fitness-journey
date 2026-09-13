@@ -126,12 +126,25 @@ body{
 .eyebrow{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:600}
 .eyebrow.dim{color:var(--ink3)}
 h2.h{font-size:23px;line-height:1.2;letter-spacing:-.022em;font-weight:550}
-.sect{display:flex;align-items:baseline;justify-content:space-between;margin:26px 2px 11px}
-.sect b{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);font-weight:600;
-  display:inline-flex;align-items:center;gap:9px}
-.sect b:before{content:"";width:13px;height:2px;border-radius:2px;background:var(--neon);
-  box-shadow:0 0 7px rgba(255,95,162,.75);flex:none}
-.sect a{font-size:12.5px;color:var(--accent);text-decoration:none;font-weight:500;cursor:pointer}
+/* The divider sits ABOVE the heading and runs the full width, so the eye
+   reads "new thing starts here" before it reads what the thing is. It
+   fades out to the right rather than stopping, which is what keeps seven
+   of them from looking like a spreadsheet. */
+.sect{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  margin:34px 2px 13px;padding-top:19px;position:relative}
+.sect:before{content:"";position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,var(--line2),var(--line2) 42%,transparent)}
+.sect:first-of-type{margin-top:22px}
+.sect h2,.sect b{font-size:19px;line-height:1.15;letter-spacing:-.025em;color:var(--ink);
+  font-weight:650;margin:0;text-transform:none;
+  display:inline-flex;align-items:center;gap:10px}
+/* the mark's own pink, kept as a short stroke so the brand is still in the
+   furniture without the heading having to shout in colour */
+.sect h2:before,.sect b:before{content:"";width:3px;height:17px;border-radius:3px;background:var(--neon);
+  box-shadow:0 0 9px rgba(255,95,162,.6);flex:none}
+.sect a{font-size:12.5px;color:var(--accent);text-decoration:none;font-weight:500;cursor:pointer;
+  flex:none}
+.sect .micro{flex:none}
 .sub{font-size:14px;line-height:1.5;color:var(--ink2)}
 .micro{font-size:12px;color:var(--ink3);line-height:1.5}
 /* Justified — lines start and finish on the same edge. On a column this
@@ -403,7 +416,15 @@ h2.h{font-size:23px;line-height:1.2;letter-spacing:-.022em;font-weight:550}
 
 /* ---------- streak / week strip ---------- */
 .week{display:flex;gap:5px;margin-top:14px}
-.wd{flex:1;display:flex;flex-direction:column;align-items:center;gap:7px}
+/* Half the strip is a button now, so it has to stop looking like a div's
+   idea of one: no UA background, no border, inherited type. */
+.wd{flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;
+  background:none;border:none;padding:0;font-family:inherit;color:inherit}
+button.wd{cursor:pointer}
+button.wd:active .b{transform:scale(.94)}
+/* a session that was carried here from another day says so */
+.wd.moved .b:after{content:"";position:absolute;top:-2px;right:-2px;width:6px;height:6px;
+  border-radius:50%;background:var(--accent-2);box-shadow:0 0 6px var(--accent-2)}
 .wd .l{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);font-weight:600}
 .wd .b{width:100%;height:38px;border-radius:9px;background:rgba(255,255,255,.045);
   border:1px solid var(--line);display:flex;align-items:center;justify-content:center;
@@ -1195,6 +1216,12 @@ h2.h{font-size:23px;line-height:1.2;letter-spacing:-.022em;font-weight:550}
    a stat rather than as a sentence. */
 .dayx-n{display:flex;align-items:center;flex:none}
 .dayx-tx{flex:1;min-width:0}
+/* The number was the whole card and nothing said what the number was for.
+   A person who has never seen the app reads "8%" and has no idea whether
+   that is a battery, a discount or a score. Name it once, quietly, and the
+   rest of the card stops needing to explain itself. */
+.dayx-k{display:block;font-style:normal;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink3);font-weight:650;margin-bottom:4px}
 .dayx-tx b{display:block;font-size:15.5px;font-weight:600;letter-spacing:-.022em;line-height:1.15}
 .dayx-tx small{display:block;font-size:10px;color:var(--neon);margin-top:5px;font-weight:700;
   letter-spacing:.07em;text-transform:uppercase}
@@ -1982,11 +2009,68 @@ h2.h{font-size:23px;line-height:1.2;letter-spacing:-.022em;font-weight:550}
 .tb{flex:1;background:none;border:none;font-family:inherit;cursor:pointer;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding-top:4px}
 .tb svg{width:22px;height:22px;stroke:var(--ink3);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;transition:stroke .2s}
-.tb span{font-size:10px;color:var(--ink3);font-weight:500;letter-spacing:.02em;transition:color .2s}
+/* five across, so the label loses a little size and all of its tracking
+   rather than wrapping — "Workouts" is the one that decides the width */
+.tb span{font-size:9.5px;color:var(--ink3);font-weight:500;letter-spacing:0;transition:color .2s;
+  white-space:nowrap}
 .tb.on svg{stroke:var(--accent)}
 .tb.on span{color:var(--accent)}
 .tb .nub{position:absolute;top:6px;width:14px;height:2px;border-radius:2px;background:transparent;transition:background .2s}
 .tb.on .nub{background:var(--accent);box-shadow:0 0 12px 1px rgba(255,95,162,.6)}
+
+
+
+/* The rest card, at the size a rest day deserves */
+.restwrap.tight{padding:13px}
+.restwrap.tight .rest-hd h3{font-size:17px;margin:7px 0 3px}
+.restwrap.tight .rest-hd p{font-size:11.5px;margin-bottom:11px;color:var(--ink3);
+  text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.restwrap.tight .rec{padding:9px 12px;margin-bottom:6px;gap:11px}
+.restwrap.tight .rec-tx b{font-size:13.5px}
+.restwrap.tight .rec-tx small{display:block;font-size:11px;color:var(--ink3);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.go.sm{font-size:12.5px;padding:10px 8px}
+
+/* ---------- TAB · WORKOUTS ----------
+   One lead card you can hit without reading, then plain rows. Rows, not
+   cards: a list of things you might start should look like a list. */
+.wo-lead{display:flex;align-items:center;gap:14px;width:100%;text-align:left;cursor:pointer;
+  font-family:inherit;color:var(--ink);padding:15px;border-radius:var(--r);
+  border:1px solid var(--accent-line);
+  background:linear-gradient(135deg,rgba(62,203,168,.10),rgba(255,255,255,.02));
+  transition:transform .18s}
+.wo-lead:active{transform:scale(.988)}
+.wo-lead.done{border-color:var(--line2);background:rgba(255,255,255,.025)}
+.wo-lead.pending{border-style:dashed;border-color:var(--line2);background:none;cursor:default}
+.wo-art{width:74px;height:60px;flex:none;border-radius:12px;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.04)}
+.wo-art img,.wo-art svg{width:100%;height:100%;object-fit:contain}
+.wo-tx{flex:1;min-width:0;display:block}
+.wo-tx i{display:block;font-style:normal;font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--accent);font-weight:650;margin-bottom:4px}
+.wo-lead.done .wo-tx i,.wo-lead.pending .wo-tx i{color:var(--ink3)}
+.wo-tx b{display:block;font-size:18px;font-weight:650;letter-spacing:-.02em;line-height:1.2}
+.wo-tx small{display:block;font-size:12px;color:var(--ink3);margin-top:3px}
+.wo-c{width:17px;height:17px;flex:none;stroke:var(--ink3);fill:none;stroke-width:1.9}
+
+.wo-list{border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.wo-row{display:flex;align-items:center;gap:13px;width:100%;text-align:left;cursor:pointer;
+  font-family:inherit;color:var(--ink);padding:12px 14px;background:rgba(255,255,255,.022);
+  border:none;border-bottom:1px solid var(--line)}
+.wo-row:last-child{border-bottom:none}
+.wo-row:active{background:rgba(255,255,255,.05)}
+.wo-row.locked{cursor:default;opacity:.55}
+.wo-row.done .wo-tx b{color:var(--ink2)}
+.wo-th{width:48px;height:40px;flex:none;border-radius:9px;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.045)}
+.wo-th img,.wo-th svg{width:100%;height:100%;object-fit:contain}
+.wo-th.mins{flex-direction:column;gap:0;line-height:1}
+.wo-th.mins b{font-size:16px;font-weight:700}
+.wo-th.mins i{font-style:normal;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink3)}
+.wo-row .wo-tx b{font-size:14.5px}
+.wo-rx{flex:none;font-size:12.5px;color:var(--ink3);font-weight:600;font-variant-numeric:tabular-nums}
+.wo-ck{width:16px;height:16px;stroke:var(--accent);fill:none;stroke-width:2.4}
 
 /* ---------- sheet ---------- */
 #scrim{position:absolute;inset:0;background:rgba(6,8,10,.62);backdrop-filter:blur(3px);
@@ -2119,6 +2203,9 @@ h2.h{font-size:23px;line-height:1.2;letter-spacing:-.022em;font-weight:550}
     <button class="tb on" data-tab="today"><span class="nub"></span>
       <svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/><path d="M9.5 20v-6h5v6"/></svg>
       <span>Today</span></button>
+    <button class="tb" data-tab="workouts"><span class="nub"></span>
+      <svg viewBox="0 0 24 24"><path d="M3 9.5v5"/><path d="M6 7v10"/><rect x="9" y="8.5" width="6" height="7" rx="1.5"/><path d="M18 7v10"/><path d="M21 9.5v5"/></svg>
+      <span>Workouts</span></button>
     <button class="tb" data-tab="log"><span class="nub"></span>
       <svg viewBox="0 0 24 24"><path d="M5 3.5h11a3 3 0 0 1 3 3v14H8a3 3 0 0 1-3-3z"/><path d="M5 17.5h11"/><path d="M9 8h6"/><path d="M9 11.5h4"/></svg>
       <span>Log</span></button>
@@ -2159,7 +2246,7 @@ h2.h{font-size:23px;line-height:1.2;letter-spacing:-.022em;font-weight:550}
    a stranger's dashboard.
    ============================================================ */
 const PROFILE_V = 6;
-const BUILD_STAMP = '23 Aug 2026, 17:24';
+const BUILD_STAMP = '13 Sep 2026, 10:12';
 
 /* A stable id per person. Email is the only thing the survey collects
    that is unique to a human, so it seeds the id; anyone who skipped it
@@ -3096,10 +3183,57 @@ function layWeek(){
     .slice().sort((x,y)=>x-y).filter(d => d>=0 && d<7);
   const off = programOffset(ids, days);
   days.forEach((d,i)=>{ week[d] = ids[(off + i) % ids.length]; });
+
+  /* ---- A WEEK SURVIVES CONTACT WITH A LIFE --------------------------
+     A plan that cannot be moved is a plan you fall off. Missing Wednesday
+     and training Thursday is not failure, it is Thursday — so the week
+     lets you carry a session to another day instead of writing it off.
+
+     The move is stored as from -> to for THIS week only, and cleared when
+     the week turns. The generated plan underneath is never edited: next
+     Monday the program is back where the coach put it, which is the
+     difference between moving a session and rewriting someone's program. */
+  const mv = weekMoves();
+  for(const [from, to] of Object.entries(mv)){
+    const f = +from, t = +to;
+    if(!week[f] || week[t]) continue;      /* stale move — the plan changed under it */
+    week[t] = week[f]; week[f] = null;
+  }
   return week;
 }
 
-const WEEKPLAN = layWeek();
+/* Which Monday-week is it? Note there is a second, unrelated weekKey()
+   further down that anchors on the WEIGH-IN day — different week, different
+   question. Self-contained on purpose: this is called while the app
+   is still being assembled, above NOW, DOW and weekStart(). Reaching forward
+   to them throws into a catch and takes the whole week with it. */
+function moveWeek(){
+  const d = new Date(); d.setHours(0,0,0,0);
+  d.setDate(d.getDate() - ((d.getDay() + 6) % 7));   /* back to Monday */
+  return d.getTime();
+}
+
+/* moves live under the week they belong to, so they expire by themselves */
+function weekMoves(){
+  const k = moveWeek();
+  if(!S.moves || S.moves.wk !== k) S.moves = {wk:k, map:{}};
+  return S.moves.map;
+}
+function moveSession(from, to){
+  const mv = weekMoves();
+  /* moving the same session twice should not leave a trail of empty days:
+     rewrite the original hop rather than chaining onto it */
+  for(const [f,t] of Object.entries(mv)) if(+t === +from){ mv[f] = to; save(); return; }
+  mv[from] = to; save();
+}
+function undoMove(to){
+  const mv = weekMoves();
+  for(const [f,t] of Object.entries(mv)) if(+t === +to){ delete mv[f]; save(); return +f; }
+  return null;
+}
+
+/* WEEKPLAN is built further down, immediately after S — the week now
+   depends on this week's moves, and those live in S. */
 
 /* Every message from a human, in one list. They all wear the coach colour
    because that is what the colour MEANS — not "important", but "a person
@@ -3205,14 +3339,14 @@ const HABITS_FOR = () => HABIT_POOL.slice(0, habitSlots());
 const SCORE_TRAIN = [
   {id:'session', label:'Trained',         pts:55},
   {id:'habits',  label:'Habits',          pts:18},
-  {id:'todo',    label:'One thing',       pts:10},
+  {id:'todo',    label:'The challenge',   pts:10},
   {id:'ready',   label:'Checked in',      pts:7},
   {id:'note',    label:'Wrote a note',    pts:5},
   {id:'open',    label:'Opened the app',  pts:5}
 ];
 const SCORE_REST = [
   {id:'habits',  label:'Habits',          pts:50},
-  {id:'todo',    label:'One thing',       pts:20},
+  {id:'todo',    label:'The challenge',   pts:20},
   {id:'ready',   label:'Checked in',      pts:12},
   {id:'note',    label:'Wrote a note',    pts:10},
   {id:'open',    label:'Opened the app',  pts:8}
@@ -3364,6 +3498,10 @@ const seed = {
   dismissed:{}
 };
 let S = load();
+
+/* The week, once S can be read. Everything that consumes WEEKPLAN sits
+   below this line; nothing above it may. */
+const WEEKPLAN = layWeek();
 /* The seed cannot know the clock — T0 is defined after it — so `at:0` is a
    placeholder meaning "when he onboarded", filled in here. Left as a literal
    zero it rendered as 31 Dec 1969. */
@@ -3528,6 +3666,7 @@ async function loadTheme(){
 const NOW = new Date();
 const DOW = NOW.getDay();
 const DAYNM = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const DAYFULL = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 /* THE WEEK STARTS ON MONDAY.
    Date.getDay() returns Sunday as 0 and that stays the internal index —
    every date calculation in the file depends on it. What changes is the
@@ -3703,7 +3842,8 @@ function go(tab, keep){
   const y = (keep || sameTab) ? view.scrollTop : 0;
   S.tab=tab; save();
   document.querySelectorAll('.tb').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
-  view.innerHTML = ({today:paneToday,log:paneLog,learn:paneLearn,me:paneMe})[tab]();
+  view.innerHTML = ({today:paneToday,workouts:paneWorkouts,log:paneLog,
+                    learn:paneLearn,me:paneMe})[tab]();
   view.scrollTop=y;
   wire();
   layoutRings(view);
@@ -4011,7 +4151,7 @@ function dayHero(sc){
     </svg>` : ''}
     <button class="dayx-hd" data-act="fold:score">
       ${NUM_IN_ART(st) ? '' : `<span class="dayx-n">${segNum(sc.pct)}</span>`}
-      <span class="dayx-tx"><b>${title}</b><small>${sub}</small></span>
+      <span class="dayx-tx"><i class="dayx-k">Today's goal</i><b>${title}</b><small>${sub}</small></span>
       <span class="dayx-art">${dayArt(st, sc.fill)}</span>
       <span class="dayx-chev">${svg(I.arrow)}</span>
     </button>
@@ -4024,6 +4164,161 @@ function dayHero(sc){
         : 'Rest day, so the session’s share moves onto your habits. Today can still be a hundred.'}</div>
     </div>`:''}
   </div>`;
+}
+
+/* ---- BENCHMARKS, REACHABLE FROM WHERE YOU TRAIN ---------------------
+   They lived in the Log, which is where you read about the past. A test is
+   a thing you go and DO, so it belongs with the other things you can start.
+   One function, so there is still only one of them. */
+/* ---- A SECTION HEADING YOU CAN ACTUALLY FIND -------------------------
+   These were 11px uppercase in the dimmest ink the palette has — an
+   eyebrow, which is what you use when the label is less important than
+   what sits under it. On a screen with seven stacked sections that is
+   exactly backwards: the labels are the map.
+
+   So they read like headings now — near-white, sentence case, set at a
+   size you catch while scrolling — and each one opens with a rule that
+   runs to the edge. The rule is what does the dividing; the weight is
+   what does the finding. Smooth, because the rule is a fade, not a line.
+
+   One function so every section on every tab is the same object. */
+function sect(title, right){
+  return `<div class="sect"><h2>${title}</h2>${right||''}</div>`;
+}
+
+function benchRail(){
+  return `<div class="sect"><b>Benchmarks</b><span class="micro">${Object.keys(S.tests||{}).length}/${TESTS.length} tested</span></div>
+  <div class="rail-h bcar" id="bcar">
+    ${TESTS.map((t,i)=>{
+      const got=(S.tests||{})[t.id];
+      const flipped = !!(S.flip||{})[t.id];
+      /* Once a benchmark is set it stops being a challenge and becomes a
+         number to beat. The card says the next target rather than sitting
+         there inviting a test that has already happened. */
+      const target = got ? Math.max(got+1, Math.ceil(got*1.15)) : null;
+      return `<div class="bflip ${flipped?'over':''} ${got?'got':''} ${!got&&i===0?'lead':''}">
+        <div class="bf-in">
+          <button class="bf-face bf-front" data-flip="${t.id}">
+            <span class="bc-art">${art(t.id)}</span>
+            <b>${t.name}</b>
+            <small>${got ? `Beat ${got} ${t.unit}` : t.how}</small>
+            <span class="bc-go">${got ? `Next: ${target}` : 'Test'}</span>
+          </button>
+          <button class="bf-face bf-back" data-flip="${t.id}">
+            <span class="bf-eye">${got ? 'Your best' : (t.unit === 'sec' ? 'Hold' : 'Reps')}</span>
+            <b>${t.name}</b>
+            <p>${got ? `You did ${got}. ${target} beats it - that is the whole challenge.` : t.note}</p>
+            ${got?`<span class="bf-score"><i class="tnum">${got}</i>${t.unit}</span>`:''}
+            <span class="bc-go alt" data-go="${t.id}">${got?`Go for ${target}`:'Do it now'}</span>
+          </button>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>
+  <div class="bcdots" id="bcdots">${TESTS.map((_,k)=>
+    `<i class="${k===0?'on':''}"></i>`).join('')}</div>
+  <div class="micro" style="text-align:center;margin:2px 2px 0">Scroll through them. Tap one to turn it over.</div>`;
+
+
+}
+
+/* ============================================================
+   TAB · WORKOUTS — everything you can start, in one place
+
+   The program used to sit at the bottom of Today, which said it was an
+   afterthought. It is the product. A person who wants to train should
+   never have to scroll past their habits to find the thing they came for.
+
+   Four kinds of session live here and they are ranked by how likely you
+   are to want them, not by how much work they were to build:
+     · the one on the plan for today, or the next one if today is rest
+     · the rest of the week
+     · a benchmark, which is a session with a number at the end
+     · something short, or something you wrote yourself
+   ============================================================ */
+function paneWorkouts(){
+  const today = todayId ? SESSIONS[todayId] : null;
+  const nx = nextDay();
+  let h = `<div class="pane">${header()}`;
+
+  /* ---- the one to start now ---- */
+  h += sect('Start now');
+  if(today && released(todayId)){
+    const sc = scaleSession(today);
+    const mins = sc.blocks.reduce((t,b)=>t+b.mins,0);
+    h += `<button class="wo-lead ${todayDone()?'done':''}" data-act="openday" data-day="${todayId}">
+      <span class="wo-art">${art(heroKey(today))}</span>
+      <span class="wo-tx">
+        <i>${todayDone() ? 'Done today' : 'On the plan for today'}</i>
+        <b>${esc(today.name)}</b>
+        <small>${today.tag} &middot; ${mins} min &middot; ${sc.blocks.length} blocks</small>
+      </span>
+      ${svg(I.arrow,'wo-c')}
+    </button>`;
+  }else if(today){
+    h += `<div class="wo-lead pending">
+      <span class="wo-art">${art(heroKey(today))}</span>
+      <span class="wo-tx"><i>Being checked</i><b>${esc(today.name)}</b>
+        <small>Coach Nico is still on this one</small></span>
+    </div>`;
+  }else if(nx){
+    h += `<button class="wo-lead" data-act="openday" data-day="${nx.id}">
+      <span class="wo-art">${art(heroKey(SESSIONS[nx.id]))}</span>
+      <span class="wo-tx"><i>Next up &middot; ${nx.when}</i>
+        <b>${esc(SESSIONS[nx.id].name)}</b>
+        <small>Open it early if you want to move it here</small></span>
+      ${svg(I.arrow,'wo-c')}
+    </button>`;
+  }
+
+  /* ---- the program, all of it ---- */
+  const ids = Object.keys(SESSIONS);
+  /* the program's own name, unless it has none of its own — a heading that
+     says "Your program / Your program" is the app talking to itself */
+  const pname = programMeta().name;
+  h += sect('Your program', /your program/i.test(pname) ? '' : `<span class="micro">${esc(pname)}</span>`);
+  h += `<div class="wo-list">${ids.map(id=>{
+    const ss = SESSIONS[id];
+    const on = WEEK_ORDER.filter(i=>WEEKPLAN[i]===id).map(i=>DAYNM[i]).join(', ');
+    const rel = released(id);
+    const done = !!S.done[DAYNM[WEEK_ORDER.find(i=>WEEKPLAN[i]===id)]];
+    return `<button class="wo-row ${done?'done':''} ${rel?'':'locked'}"
+        ${rel?`data-act="openday" data-day="${id}"`:''}>
+      <span class="wo-th">${art(heroKey(ss))}</span>
+      <span class="wo-tx"><b>${esc(ss.name)}</b>
+        <small>${on || 'unscheduled'} &middot; ${ss.tag}</small></span>
+      <span class="wo-rx">${rel
+        ? (done ? svg(I.check,'wo-ck') : ss.blocks.reduce((t,b)=>t+b.mins,0)+'m')
+        : 'soon'}</span>
+    </button>`;
+  }).join('')}</div>`;
+
+  /* ---- a number to beat ---- */
+  h += benchRail();
+
+  /* ---- short, and your own ---- */
+  h += sect('Short sessions', '<span class="micro">5 to 15 minutes</span>');
+  h += `<div class="wo-list">${RECOVERY.map(r=>`<button class="wo-row" data-recov="${r.id}">
+    <span class="wo-th mins"><b class="tnum">${r.mins}</b><i>min</i></span>
+    <span class="wo-tx"><b>${esc(r.name)}</b><small>${esc(r.why)}</small></span>
+    ${svg(I.arrow,'wo-c')}
+  </button>`).join('')}</div>`;
+
+  const mine = myWorkouts();
+  h += sect('Your own', '<a data-act="buildadd2">Build one</a>');
+  h += mine.length
+    ? `<div class="wo-list">${mine.map(w=>`<button class="wo-row" data-mine="${w.id}">
+        <span class="wo-th mins"><b class="tnum">${w.items.length}</b><i>mv</i></span>
+        <span class="wo-tx"><b>${esc(w.name)}</b><small>${
+          w.items.map(it=>(EX[it.ex]||{n:it.ex}).n).slice(0,3).join(', ')}${
+          w.items.length>3?'\u2026':''}</small></span>
+        ${svg(I.arrow,'wo-c')}
+      </button>`).join('')}</div>`
+    : `<div class="empty">${svg(I.book)}<b>Nothing built yet</b>
+        <p>Pick movements, name it, and it is yours to run any day.</p>
+        <button class="go ghost" data-act="buildadd2">Build a workout</button></div>`;
+
+  return h + '</div>';
 }
 
 function paneToday(){
@@ -4105,13 +4400,18 @@ function paneToday(){
            otherwise it stays a plain planned day, which is what it is. */
         const missed = plan && past && released(plan);
         const cls = (dn?'done':(missed?'miss':(plan?'plan':(sport?'sport':''))))
+                  + (Object.values(weekMoves()).some(t=>+t===i) ? ' moved' : '')
                   + (free && !S.done[d] ? ' free' : '')
                   + (now && (S.markStyle||'square')!=='stamp' ? ' box' : '');
         /* A ball, drawn once and used by both branches below - a sport day
            that happens to be today still has to show something. */
         const BALL = '<svg viewBox="0 0 24 24" aria-hidden="true">'
                    + '<circle cx="12" cy="12" r="7"/><path d="M12 5v14"/></svg>';
-        return `<div class="wd ${cls} ${now?'now':''}"${
+        /* A day you can act on is a button. Anything with a session on it,
+           and today itself — because today is where a session gets moved TO. */
+        const tappable = !!plan || now;
+        return `<${tappable?'button':'div'} class="wd ${cls} ${now?'now':''}"${
+          tappable ? ` data-wday="${i}"` : ''}${
           sport ? ` title="${esc(sportName())}"` : ''}>
           <span class="l">${d[0]}</span>
           <span class="b">${
@@ -4131,7 +4431,7 @@ function paneToday(){
                      <g class="mk-db">${DB_PATHS}</g></svg>`
           : sport ? BALL
           : ''}</span>
-        </div>`;
+        </${tappable?'button':'div'}>`;
       }).join('')}
     </div>
   </div>`;
@@ -4191,31 +4491,25 @@ function paneToday(){
         ${sDone ? '' : `<button class="go" data-act="dosport">Did it \u2014 log it</button>`}
       </div>`;
     }
-    h += `<div class="restwrap ${rDone?'done':''}">
+    /* This card was a headline, a paragraph, three big drill buttons, a list
+       of your own workouts and two more buttons — the tallest thing on a
+       rest day, about a day with nothing to do. One line, three rows. The
+       paragraph became the line under the title, because that is all it
+       ever said. */
+    h += `<div class="restwrap tight ${rDone?'done':''}">
       <div class="rest-hd">
         <div class="tag"><i></i>Rest day</div>
         <h3>${rDone ? 'Recovery done' : 'Give it five minutes'}</h3>
-        <p class="just">Next session is ${SESSIONS[nx.id].name}, ${nx.when}. Today is for the
-          joints \u2014 pick a length and it counts on your week.</p>
+        <p>${SESSIONS[nx.id].name} ${nx.when} &middot; today is for the joints</p>
       </div>
       ${RECOVERY.map(r=>`<button class="rec" data-recov="${r.id}">
         <span class="rec-m"><b class="tnum">${r.mins}</b><i>min</i></span>
         <span class="rec-tx"><b>${r.name}</b><small>${r.why}</small></span>
         ${svg(I.arrow,'rec-c')}
       </button>`).join('')}
-      ${myWorkouts().length ? `<div class="mineblk">
-        <div class="minehd">Your own</div>
-        ${myWorkouts().slice(0,3).map(w=>`<button class="rec mine" data-mine="${w.id}">
-          <span class="rec-m"><b class="tnum">${w.items.length}</b><i>mv</i></span>
-          <span class="rec-tx"><b>${esc(w.name)}</b><small>${
-            w.items.map(it=>(EX[it.ex]||{n:it.ex}).n).slice(0,3).join(', ')}${
-            w.items.length>3?'\u2026':''}</small></span>
-          ${svg(I.arrow,'rec-c')}
-        </button>`).join('')}
-      </div>` : ''}
+
       <div class="restalt">
-        <button class="go ghost" data-act="openday" data-day="${nx.id}">${nx.when}'s session</button>
-        <button class="go ghost" data-act="buildadd2">Build a workout</button>
+        <button class="go ghost sm" data-act="tab:workouts">All workouts</button>
       </div>
     </div>`;
   }
@@ -4250,7 +4544,7 @@ function paneToday(){
      press it and marks itself the moment you save; one that needs nothing
      just ticks. A separate button underneath was asking the person to press
      the same thing twice. */
-  h += `<div class="sect" id="sec-todo"><b>One thing today</b><span class="micro">${
+  h += `<div class="sect" id="sec-todo"><b>Challenge of the day</b><span class="micro">${
     tdDone?'done':'changes daily'}</span></div>
   <button class="onething ${tdDone?'on':''}" data-todo1="${td.id}"
       ${(!tdDone && td.act)?`data-otact="${td.act}"`:''}>
@@ -4299,7 +4593,6 @@ function paneToday(){
     <button class="ql" data-act="log:weight">${svg(I.scale)}<span>Weight</span></button>
     <button class="ql" data-act="log:note">${svg(I.pen)}<span>Note</span></button>
     <button class="ql" data-act="log:photo">${svg(I.cam)}<span>Photo</span></button>
-    <button class="ql" data-act="buildadd2">${svg(I.plus)}<span>Build one</span></button>
   </div>`;
 
 
@@ -4329,7 +4622,10 @@ function paneToday(){
      badge: unread || null, openByDefault: unread > 0});
 
   /* --- the program --- */
-  h += `<div class="sect"><b>Your program</b><a data-act="openweek">See the week</a></div>
+  /* The program block keeps its place on Today because the phase bars are
+     the only view of where the block is going. Its job is now progress, not
+     navigation — starting a session happens on the Workouts tab. */
+  h += `<div class="sect"><b>Your program</b><a data-act="tab:workouts">Open workouts</a></div>
   <div class="card tap" data-act="openweek">
     <div class="prog">
       <div class="ring">${ring(8,'1')}</div>
@@ -4820,37 +5116,7 @@ function paneLog(){
 
      Laid out as a rail you swipe rather than a list you read: picking a
      test should feel like picking a game, not filling in a form. */
-  h += `<div class="sect"><b>Benchmarks</b><span class="micro">${Object.keys(S.tests||{}).length}/${TESTS.length} tested</span></div>
-  <div class="rail-h bcar" id="bcar">
-    ${TESTS.map((t,i)=>{
-      const got=(S.tests||{})[t.id];
-      const flipped = !!(S.flip||{})[t.id];
-      /* Once a benchmark is set it stops being a challenge and becomes a
-         number to beat. The card says the next target rather than sitting
-         there inviting a test that has already happened. */
-      const target = got ? Math.max(got+1, Math.ceil(got*1.15)) : null;
-      return `<div class="bflip ${flipped?'over':''} ${got?'got':''} ${!got&&i===0?'lead':''}">
-        <div class="bf-in">
-          <button class="bf-face bf-front" data-flip="${t.id}">
-            <span class="bc-art">${art(t.id)}</span>
-            <b>${t.name}</b>
-            <small>${got ? `Beat ${got} ${t.unit}` : t.how}</small>
-            <span class="bc-go">${got ? `Next: ${target}` : 'Test'}</span>
-          </button>
-          <button class="bf-face bf-back" data-flip="${t.id}">
-            <span class="bf-eye">${got ? 'Your best' : (t.unit === 'sec' ? 'Hold' : 'Reps')}</span>
-            <b>${t.name}</b>
-            <p>${got ? `You did ${got}. ${target} beats it - that is the whole challenge.` : t.note}</p>
-            ${got?`<span class="bf-score"><i class="tnum">${got}</i>${t.unit}</span>`:''}
-            <span class="bc-go alt" data-go="${t.id}">${got?`Go for ${target}`:'Do it now'}</span>
-          </button>
-        </div>
-      </div>`;
-    }).join('')}
-  </div>
-  <div class="bcdots" id="bcdots">${TESTS.map((_,k)=>
-    `<i class="${k===0?'on':''}"></i>`).join('')}</div>
-  <div class="micro" style="text-align:center;margin:2px 2px 0">Scroll through them. Tap one to turn it over.</div>`;
+  h += benchRail();
 
   const pics = S.photos || [];
   h += `<div class="sect"><b>Photos</b><a data-act="logsheet:photo">Add</a></div>
@@ -5210,7 +5476,6 @@ function paneMe(){
   const cards = [];
 
   /* Every line of this comes out of the survey. Nothing here is typed. */
-  const DAYFULL = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const WHEN = {morning:'Mornings', lunch:'Around lunch', evening:'Evenings',
                 flex:'Whenever the day allows'};
   const INT  = {easy:'Ease me in', steady:'Steady', push:'Push me'};
@@ -5594,6 +5859,48 @@ function sheetKit(){
   `);
 }
 
+/* ---- MOVING A SESSION ------------------------------------------------
+   Tapping a day on the strip asks the only two questions worth asking about
+   it: do you want to do this one now, and if it is not today, do you want it
+   to be? Everything else about the day is already on the screen. */
+function sheetDayMove(i){
+  const d = DAYNM[i], id = WEEKPLAN[i], now = i === DOW;
+  const ses = id ? SESSIONS[id] : null;
+  const moved = Object.entries(weekMoves()).find(([f,t]) => +t === i);
+  const pos = (i + 6) % 7, posNow = (DOW + 6) % 7;
+
+  /* which days this could go to: today, unless today already has one */
+  const canMoveHere = ses && !now && !WEEKPLAN[DOW];
+  const rows = [];
+
+  if(ses){
+    rows.push(`<button class="go" data-act="openday" data-day="${id}">
+      ${released(id) ? 'Open ' + esc(ses.name) : 'Not released yet'}</button>`);
+    if(canMoveHere) rows.push(`<button class="go ghost" data-act="moveto:${i}">
+      Move it to today</button>`);
+  }
+  if(moved) rows.push(`<button class="go ghost" data-act="unmove:${i}">
+    Put it back on ${DAYNM[+moved[0]]}</button>`);
+  if(now && !ses) rows.push(`<div class="micro just" style="margin:2px 0 10px">
+    Nothing is scheduled today. Tap a training day on the strip to bring its
+    session here.</div>`);
+
+  openSheet(`
+    <div class="eyebrow">${now ? 'Today' : DAYFULL[i] || d}${
+      moved ? ' &middot; moved from ' + DAYNM[+moved[0]] : ''}</div>
+    <h4 style="margin-top:8px">${ses ? esc(ses.name) : 'Rest day'}</h4>
+    <div class="shsub">${ses
+      ? esc(ses.tag) + ' \u00b7 ' + ses.blocks.reduce((t,b)=>t+b.mins,0) + ' min'
+      : (pos < posNow ? 'A day off, already past.' : 'A day off.')}</div>
+    ${ses && released(id) ? `<div class="blk">${ses.blocks.map(b=>`<div class="mv" style="cursor:default">
+      <div class="tx"><b>${esc(b.name || b.role)}</b><small>${
+        b.items.map(it=>(EX[it[0]]||{n:it[0]}).n).slice(0,3).join(', ')}</small></div>
+      <div class="rx">${b.mins}m</div></div>`).join('')}</div>` : ''}
+    <div class="sheetcta">${rows.join('')}</div>
+    <button class="go ghost" style="margin-top:9px" data-act="close">Close</button>
+  `);
+}
+
 function sheetWeek(){
   openSheet(`
     <div class="eyebrow">${esc(programMeta().eyebrow)}</div>
@@ -5917,6 +6224,7 @@ function wire(){
     const k=b.dataset.habit; S.habits[k]=!S.habits[k]; save(); go('today');
     if(S.habits[k]&&HABITS.every(x=>S.habits[x.id])) toast('All three. That is the day won.');
   });
+  view.querySelectorAll('[data-wday]').forEach(b=>b.onclick=()=>sheetDayMove(+b.dataset.wday));
   view.querySelectorAll('[data-ex]').forEach(b=>b.onclick=()=>sheetExercise(b.dataset.ex));
   view.querySelectorAll('[data-todo]').forEach(b=>b.onclick=()=>sheetTodo(b.dataset.todo));
   view.querySelectorAll('[data-test]').forEach(b=>b.onclick=()=>sheetTest(b.dataset.test));
@@ -6044,6 +6352,18 @@ function act(a,el){
   }
   if(cmd==='pending') return toast("You'll get a nudge the moment it unlocks");
   if(cmd==='openweek') return sheetWeek();
+  if(cmd==='moveto'){
+    const from = +arg;
+    if(WEEKPLAN[DOW]) return toast('Today already has a session');
+    moveSession(from, DOW);
+    rebuildWeek(); closeSheet(); go('today',true);
+    return toast(`Moved to today. ${DAYNM[from]} is a rest day now.`);
+  }
+  if(cmd==='unmove'){
+    const back = undoMove(+arg);
+    rebuildWeek(); closeSheet(); go('today',true);
+    return toast(back===null ? 'Nothing to put back' : `Back on ${DAYNM[back]}`);
+  }
   if(cmd==='swap') return toast('Swap coming - three alternatives for today');
   if(cmd==='editprofile') return sheetAnswers(arg||'info');
   if(cmd==='setans'){
