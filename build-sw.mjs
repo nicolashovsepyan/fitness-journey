@@ -21,7 +21,12 @@ import { fileURLToPath } from 'node:url';
 
 // fileURLToPath, not .pathname — the folder name has spaces and parentheses
 const ROOT = fileURLToPath(new URL('.', import.meta.url));
-const SKIP_FILE = new Set(['sw.js', 'build-sw.mjs', 'VIDEO-TODO.md', 'MEMORY.md', 'Yates_HIT_Hybrid_Protocol.md']);
+/* dashboard-lab.html is the coach's sandbox: the real dashboard plus
+   whatever is being tried this week. It is 400 KB, no client will ever
+   open it, and precaching it would download an experiment onto every
+   phone. lab/ goes with it for the same reason. */
+const SKIP_FILE = new Set(['sw.js', 'build-sw.mjs', 'VIDEO-TODO.md', 'MEMORY.md',
+  'Yates_HIT_Hybrid_Protocol.md', 'dashboard-lab.html']);
 const KEEP_EXT = /\.(html|css|js|mjs|png|svg|webmanifest|json|woff2?)$/i;
 
 /* Committed, published, but NOT part of the app. Tests are .mjs and would
@@ -35,7 +40,7 @@ const KEEP_EXT = /\.(html|css|js|mjs|png|svg|webmanifest|json|woff2?)$/i;
    would open — every one of them a stale duplicate of a file at the root.
    That folder was archived on 25 Aug 2026 and both addresses now serve the
    top level, so 'site/' is gone from this list: ARCHIVE/ covers it. */
-const SKIP_PREFIX = ['test/', 'docs/', 'ARCHIVE/',
+const SKIP_PREFIX = ['test/', 'docs/', 'ARCHIVE/', 'lab/',
   /* The exercise database is an AUTHORING surface, not part of the app: the
      workbook, the derived JSON and the build tools. dist/ is what gets
      uploaded, so shipping half a megabyte of internal data to a public URL

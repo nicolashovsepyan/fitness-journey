@@ -29,6 +29,7 @@ const CHECKS = [
   ['tools/check-sql.mjs', 'the SQL editor can actually swallow these files'],
   ['tools/check-surveys.mjs', 'the survey asks what the console reads'],
   ['tools/check-demands.mjs', 'no movement is missing an injury tag its family carries'],
+  ['tools/check-lab.mjs', 'the lab is the current dashboard, not last week'],
 ];
 
 const tests = readdirSync(join(root, 'test'))

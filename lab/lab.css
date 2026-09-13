@@ -1,0 +1,27 @@
+/* ============================================================
+   THE LAB STYLESHEET.
+
+   Everything in here applies ONLY to dashboard-lab.html. The real
+   dashboard cannot see this file.
+
+   Anything that earns its place moves into styles.css or
+   dashboard.html properly, and comes out of here. Nothing is meant to
+   live in this file for long.
+   ============================================================ */
+
+/* The banner. Fixed, small, and impossible to mistake for the app. */
+#labflag {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 9999;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 7px 14px; font: 500 11.5px/1.35 system-ui, sans-serif;
+  background: #B6FF3D; color: #10130F;
+  box-shadow: 0 -2px 14px rgba(0,0,0,.28);
+}
+#labflag b { font: 800 10px ui-monospace, monospace; letter-spacing: .14em;
+  padding: 2px 6px; border-radius: 4px; background: #10130F; color: #B6FF3D; }
+#labflag span { flex: 1; min-width: 140px; opacity: .82; }
+#labflag a { color: #10130F; font-weight: 700; text-decoration: underline; white-space: nowrap; }
+/* the banner sits over the tab bar, so the page gets its height back */
+body { padding-bottom: 46px; }
+
+/* ---- experiments below this line ---- */
