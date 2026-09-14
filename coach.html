@@ -1038,6 +1038,17 @@ select.pin{appearance:none;cursor:pointer}
       <h2 id="releaseTitle">What the client can see right now</h2>
       <div class="pad" id="release"></div>
     </div>
+
+    <!-- WHICH COACH THIS BROWSER IS.
+         A survey points itself at one coach id. The console signs in
+         anonymously, which mints a NEW id per browser - so a second laptop
+         or a phone opens a console that is correctly signed in as nobody's
+         coach, and shows an empty client list with no explanation. This
+         panel is the explanation, and the way out of it. -->
+    <div class="panel" id="whoamiPanel">
+      <h2>This console</h2>
+      <div class="pad" id="whoami"></div>
+    </div>
   </aside>
 
   <!-- ================= THE BUILD ================= -->
@@ -5395,7 +5406,104 @@ function pullFromCloud(announce){
    fine and simply never asked the database anything.
 
    So the module calls us, once it is ready. */
-window.fjOnCloudReady = function(){ pullFromCloud(false); };
+/* ============================================================
+   WHICH COACH THIS BROWSER IS SIGNED IN AS
+
+   The survey stamps every finished intake with one fixed coach id, from
+   js/config.js. The console asks who it is by signing in ANONYMOUSLY,
+   which mints a brand new identity the first time each browser opens it.
+   Those two agree in exactly one place: the browser that happened to open
+   the console first, whose id was copied into config.js by hand.
+
+   Everywhere else - a second laptop, a phone, a cleared site - the console
+   signs in as a coach nobody has been handed to, asks the database for its
+   clients, and is correctly told there are none. It then showed an empty
+   picker with no explanation, which reads as "the sync is broken" when what
+   actually happened is "you are signed in as somebody else".
+
+   Two calls already existed for this and nothing called them. Attaching an
+   email keeps the id and makes it reachable; asking for a link on a new
+   device signs that device in as the same person. So: do the first once, on
+   the browser that already works, then the second on every other device.
+   ============================================================ */
+const COACH_ID_EXPECTED = '51bd9f81-a199-4dba-be3f-3351e48830aa';
+
+function drawWhoami(){
+  const host = document.getElementById('whoami');
+  const panel = document.getElementById('whoamiPanel');
+  if(!host || !panel) return;
+
+  if(typeof window.fjCloudUserId !== 'function'){
+    panel.style.display = 'none';                 /* no backend on this build */
+    return;
+  }
+  panel.style.display = '';
+  const uid = window.fjCloudUserId();
+
+  if(!uid){
+    host.innerHTML = `<p class="micro" style="margin:0">Not signed in to the database.
+      Clients on this browser are the ones stored here, and nothing is syncing.</p>`;
+    return;
+  }
+
+  const isCoach = uid === COACH_ID_EXPECTED;
+  const short = esc(uid.slice(0, 8));
+
+  host.innerHTML = isCoach
+    ? `<div class="hist"><b style="color:var(--accent)">This is your console</b>
+         <small>Signed in as <code>${short}</code> - the coach every survey points at.
+           Finished surveys land here on their own.</small></div>
+       <div class="hist">
+         <p class="micro" style="margin:0 0 7px">To open this same console on another
+           device, give this identity an email address first. <b>The id does not
+           change</b> - everything already here keeps pointing at you.</p>
+         <input id="whoMail" type="email" placeholder="your email"
+           style="width:100%;font:inherit;font-size:12px;background:#181D23;color:inherit;
+           border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:7px">
+         <button class="btn" id="whoAttach" style="margin-top:6px;width:100%">Remember this console</button>
+       </div>`
+    : `<div class="hist"><b style="color:var(--gold)">A different console</b>
+         <small>This browser is signed in as <code>${short}</code>. Your surveys are
+           addressed to <code>${esc(COACH_ID_EXPECTED.slice(0,8))}</code>, so the database
+           correctly hands this one no clients. Nothing is lost and nothing is broken -
+           the answers are on the other browser's identity.</small></div>
+       <div class="hist">
+         <p class="micro" style="margin:0 0 7px">If you have already given that console an
+           email, ask for a link here and this device becomes it.</p>
+         <input id="whoMail" type="email" placeholder="the email you attached"
+           style="width:100%;font:inherit;font-size:12px;background:#181D23;color:inherit;
+           border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:7px">
+         <button class="btn" id="whoLink" style="margin-top:6px;width:100%">Email me a link</button>
+       </div>`;
+
+  const mail = () => (document.getElementById('whoMail').value || '').trim();
+  const attach = document.getElementById('whoAttach');
+  if(attach) attach.onclick = () => {
+    const e = mail();
+    if(!/.+@.+\..+/.test(e)) return toast('That does not look like an email');
+    attach.disabled = true;
+    window.fjCloudAttachEmail(e).then(r => {
+      attach.disabled = false;
+      toast(r && r.ok ? 'Check that inbox and click the link to confirm it'
+                      : (r && r.reason) || 'That did not work');
+    });
+  };
+  const link = document.getElementById('whoLink');
+  if(link) link.onclick = () => {
+    const e = mail();
+    if(!/.+@.+\..+/.test(e)) return toast('That does not look like an email');
+    link.disabled = true;
+    window.fjCloudSendLink(e).then(r => {
+      link.disabled = false;
+      /* shouldCreateUser is false, so an unknown address is a real answer:
+         that email has never been attached to anything. */
+      toast(r && r.ok ? 'Link sent. Open it on this device.'
+                      : (r && r.reason) || 'No console is attached to that email yet');
+    });
+  };
+}
+
+window.fjOnCloudReady = function(){ pullFromCloud(false); drawWhoami(); };
 
 /* And again whenever the coach comes back to the tab, because the
    common case is exactly this: the console is open on a laptop while
@@ -5431,12 +5539,15 @@ addEventListener('visibilitychange', function(){
      open whether or not there is a database behind it.
      ============================================================ -->
 <script type="module">
-  import { pullClients, cloudUserId, cloudSignIn, cloudAttachEmail, notify }
+  import { pullClients, cloudUserId, cloudSignIn, cloudAttachEmail, cloudSendLink, notify }
     from './js/core/backend.js';
   window.fjPullClients = pullClients;
   window.fjCloudUserId = cloudUserId;
   window.fjCloudSignIn = cloudSignIn;
   window.fjCloudAttachEmail = cloudAttachEmail;
+  /* the other half of attaching an email: coming back as that person on a
+     device that has never been this coach */
+  window.fjCloudSendLink = cloudSendLink;
   window.fjNotify = notify;
 
   /* The console is already drawn by now — see the note beside
