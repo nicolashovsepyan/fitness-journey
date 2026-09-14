@@ -222,7 +222,33 @@ header:after{
 /* SHUT, THE BUILDER TAKES THE WHOLE PAGE. Not a narrower rail - no rail. */
 .wrap.norail{grid-template-columns:1fr}
 .wrap.norail > .rail{display:none}
-@media (max-width:940px){ .wrap{grid-template-columns:1fr;padding:14px} .rail{position:static!important} }
+@media (max-width:940px){
+  .wrap{grid-template-columns:1fr;padding:14px}
+  .rail{position:static!important}
+  /* THE BUILDER COMES FIRST ON A PHONE.
+     The rail is a left-hand column on a desktop and reads as context beside
+     the work. Stacked, source order puts it ON TOP of the work: 2,069px of
+     goals, kit and constraints to scroll past before the program appears at
+     2,278px. The same facts, in the same order, went from useful to a wall.
+     They are still one flick away, underneath, where context belongs. */
+  .wrap > main{ order:1 }
+  .wrap > .rail{ order:2 }
+  /* THE LAYER COUNTER IS NOT WORTH A FIFTH OF A PHONE.
+     `.mast` wraps, and `.grow` claims a 260px minimum, so on a 375px screen
+     the counter is pushed onto its own line and then renders left-aligned at
+     34px: "0/10 LAYERS AGREED" as a headline, above the thing you opened the
+     page to use. It belongs on the same line as the title, at the size of a
+     number you glance at. */
+  .mast{ gap:10px }
+  .mast .grow{ min-width:0 }
+  .mast .meter{ text-align:left }
+  .mast .meter .big{ font-size:19px }
+  .mast .meter .big i{ font-size:12px }
+  .mast .meter .lbl{ font-size:8.5px; letter-spacing:.1em; margin-top:2px }
+  /* The dock is 168px tall once its buttons wrap, against 120px of padding
+     reserved for it - so it sat on top of the last thing on the page. */
+  body{ padding-bottom:190px }
+}
 /* the drawer's own handle, in the jump bar */
 #railBtn{margin-left:auto}
 .tmode{margin-left:10px}
