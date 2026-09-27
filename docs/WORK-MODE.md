@@ -108,7 +108,7 @@ Two jobs, one engine:
 
 Newest first. One line per shipped change: date, what changed, commit.
 
-- 27 Sep 2026 · **Timer engine fixes.** Reopening the app now lands mid-countdown instead of restarting it (every screen: holds, rests, get ready, block transition, AMRAP, EMOM, Tabata). Back-to-back steps run on a fixed wall-clock schedule, so an EMOM no longer drifts and a locked phone catches up silently to the right minute, then beeps once. "End workout" now offers Save what I did / Discard / Keep going; saved runs go to history marked "ended early", PRs count, and they never set a pace to beat. Reps typed mid-round survive a reopen. Also fixed on the way: a second single-move AMRAP started from the first one's rep count; the silent audio loop kept running after a finished workout. Test: `test/runstate.test.mjs`.
+- 27 Sep 2026 · **Timer engine fixes.** Reopening the app now lands mid-countdown instead of restarting it (every screen: holds, rests, get ready, block transition, AMRAP, EMOM, Tabata). Back-to-back steps run on a fixed wall-clock schedule, so an EMOM no longer drifts and a locked phone catches up silently to the right minute, then beeps once. "End workout" now offers Save what I did / Discard / Keep going; saved runs go to history marked "ended early", PRs count, and they never set a pace to beat. Reps typed mid-round survive a reopen. Also fixed on the way: a second single-move AMRAP started from the first one's rep count; the silent audio loop kept running after a finished workout. Test: `test/runstate.test.mjs`. Commit 3d2df34.
 - 27 Sep 2026 · Audit written, this file created. No app change yet.
 
 ---
