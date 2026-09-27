@@ -5096,8 +5096,10 @@ function addClientByName(name, email){
      same human two ids: the real one in the database, a made-up one in
      this browser, and a console listing them twice with no way to tell
      which is which. The derivation below is for intakes that arrive by
-     link or paste, which have no database id to carry. */
-  const uid = forcedUid || coachUidFor(a);
+     link or paste, which have no database id to carry.
+     (Adding by name has no database id either: this read `forcedUid`,
+     which only exists in importIntake, and threw on every add.) */
+  const uid = coachUidFor(a);
   const users = lsGet(USERS_LS).filter(u => u.id !== uid);
   users.push({ id:uid, role:'client', status:'no-survey', displayName:name, email:email||null,
     ui:'pro', programId:null, trainerId:null, accent:'#3ECBA8',

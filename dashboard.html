@@ -2375,12 +2375,19 @@ function fromRecords(){
 }
 
 function loadProfile(){
+  /* A LINK IN THE ADDRESS BAR IS NEWER THAN WHAT IS STORED. Records used to
+     win outright, so a person who finished the survey (which writes records)
+     and then opened the program Nico sent kept the survey's empty state and
+     the link sat unread in the URL. The link is read first; the device's own
+     identity still decides whose program it becomes, the same rule
+     js/release.js follows - one person per phone. */
   const viaRecords = fromRecords();
-  if(viaRecords) return viaRecords;
+  const linked = (location.hash || '').replace(/^#/, '').length > 40;
+  if(viaRecords && !linked) return viaRecords;
   try{
     const viaLink = fromHash();
     if(viaLink){
-      const uid = viaLink.uid || uidFor(viaLink.a);
+      const uid = (viaRecords && viaRecords.uid) || viaLink.uid || uidFor(viaLink.a);
       localStorage.setItem('fj.v1.profile.' + uid,
         JSON.stringify({v:PROFILE_V, at:viaLink.at, uid, a:viaLink.a}));
       localStorage.setItem('fj.v1.current', uid);
@@ -2399,6 +2406,12 @@ function loadProfile(){
           cur.program = viaLink.program;
           if(viaLink.released) cur.released = viaLink.released;
           localStorage.setItem(key, JSON.stringify(cur));
+          /* and retire the Program row an earlier link left. releasedProgram()
+             reads that row before this one, so without this a second program
+             sent to the same phone showed the first one forever.
+             syncRunnerRecords() rebuilds the row from what was just written. */
+          const rows = JSON.parse(localStorage.getItem('fj.programs') || '[]');
+          localStorage.setItem('fj.programs', JSON.stringify(rows.filter(p => p.assignedTo !== uid)));
         }catch(e){}
       }
 
@@ -2408,6 +2421,8 @@ function loadProfile(){
       return {uid, a:viaLink.a, at:viaLink.at};
     }
   }catch(e){}
+  /* a link that could not be read leaves the stored person exactly as they were */
+  if(viaRecords) return viaRecords;
   try{
     /* the current build */
     const cur = localStorage.getItem('fj.v1.current');
@@ -6835,8 +6850,11 @@ function showIntro(){
     : IS_DEMO
     ? 'Nobody has filled in the survey on this device yet, so this is a sample. '
       + 'Fill it in and this becomes yours.'
+    : programRaw()
+    ? `Your program is here. Open your week and start with today. `
+      + `Everything you do from here lands in one place.`
     : `Your answers are in and Coach Nico is building your program. `
-      + `Everything you do from here lands in one place.`;
+      + `He will text you a link when it is ready.`;
   el.hidden = false;
   el.querySelector('.in-go').onclick = ()=>{
     el.classList.add('out');

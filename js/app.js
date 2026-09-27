@@ -25,7 +25,8 @@ import { consumeReleaseHandoff } from './release.js';
 import { adaptDay } from './program-adapter.js';
 import { storage } from './core/storage.js';
 import { applyUserManifest } from './manifest-user.js';
-import { loadCurrentProgram } from './core/current.js';
+import { loadCurrentProgram, sessions } from './core/current.js';
+import { resolveSession } from './core/resolve.js';
 
 const app = document.getElementById('app');
 let view = { name: 'home', sessionId: null };
@@ -86,7 +87,25 @@ async function startFromProgram(dayId) {
       if (r.ok) catalog = (await r.json()).movements || {};
     } catch (e) { /* offline: names fall back to ids, nothing breaks */ }
 
-    const { plan, warnings } = adaptDay(dayId, day, catalog);
+    /* THE DAY SCREEN AND THE START BUTTON MUST RUN THE SAME SESSION.
+
+       This used adaptDay, which predates block types: every block reached
+       the runner as one pass of straight sets with the default 60s rest.
+       A 3-round superset on 75s ran once with a rest between A1 and A2,
+       and warm-up circuits written with no rest stopped for a minute after
+       every movement. resolveSession reads the program loaded at boot
+       (js/core/current.js), which translates type and cfg per block, so
+       this is the same plan the in-app day screen has run all along.
+       adaptDay stays only as the fallback for a day that path cannot read. */
+    let plan = null, warnings = [];
+    try {
+      if (sessions()[dayId]) {
+        plan = resolveSession(dayId, { duration: +raw.duration || 30 });
+        const nameOf = id => (catalog[id] && catalog[id].name) || id;
+        plan.blocks.forEach(b => b.items.forEach(it => { if (!it.name || it.name === it.exId) it.name = nameOf(it.exId); }));
+      }
+    } catch (e) { console.warn('[program] resolveSession failed, using adaptDay', e); plan = null; }
+    if (!plan) ({ plan, warnings } = adaptDay(dayId, day, catalog));
     if (!plan.blocks.length) return false;
     /* Started from the dashboard, so it hands back to the dashboard. */
     plan.returnTo = 'dashboard.html';

@@ -30,7 +30,7 @@
    as soon as it has been read, so it does not sit in history.
    ============================================================ */
 import { storage } from './core/storage.js';
-import { makeUser, makeIntake } from './core/schema.js';
+import { makeUser, makeIntake, makeProgram } from './core/schema.js';
 import { addUser, claimDevice } from './users.js';
 import { decode, readFragment, clearFragment } from './carrier.js';
 
@@ -146,6 +146,25 @@ export async function applySurveyPayload(input) {
     },
     submittedAt: payload.at || new Date().toISOString(),
   }));
+
+  /* A LINK FROM THE COACH CARRIES THE PROGRAM TOO. The paste box on an
+     installed app is the only door it has, and it used to keep the person
+     and drop the program: the client pasted what Nico sent and got an app
+     that said "being built" about a program sitting in the link. Written
+     the same way js/release.js writes one, so the runner and the dashboard
+     read it without knowing which door it came through. */
+  const prg = payload.program;
+  if (prg && prg.days && Object.keys(prg.days).length) {
+    const program = makeProgram({
+      id: 'prg_' + SELF, ownerId: 'coach', assignedTo: SELF,
+      name: prg.name || 'Your program', status: 'assigned',
+      days: Object.entries(prg.days)
+        .map(([id, d], k) => ({ id, weekday: k, sessionId: id, label: d.name || null })),
+      profile: { source: 'console', raw: prg, released: payload.released || null },
+    });
+    await s.savePrograms([program]);
+    await s.saveUser({ ...user, status: 'active', programId: program.id });
+  }
 
   await claimDevice(SELF, user.displayName);
   return SELF;

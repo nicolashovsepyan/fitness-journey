@@ -24,13 +24,18 @@ function beginStep(sec, kind = 'rest') { curStepKind = kind; saidHalf = false; h
 
 /* re-wake audio whenever the app returns to foreground — music/Bluetooth can suspend it */
 if (typeof document !== 'undefined') {
-  document.addEventListener('visibilitychange', () => { if (!document.hidden && S && !S.done) initAudio(); });
+  /* and the screen lock: the browser drops a wake lock whenever the page is
+     hidden, so without asking again the screen dims during every rest after
+     the first trip to the music app */
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && S && !S.done) { initAudio(); keepAwake(); } });
   /* And the first touch anywhere, whatever it lands on. "I'm ready" is the
      expected first tap but it is not the only way into a session - a resumed
      workout goes straight to the active screen and never shows that button.
      Once, then it removes itself. */
-  const unlockOnce = () => { initAudio(); document.removeEventListener('pointerdown', unlockOnce); };
-  document.addEventListener('pointerdown', unlockOnce);
+  /* touchend as well: iOS only lets audio start inside certain gestures,
+     and pointerdown has not reliably been one of them */
+  const unlockOnce = () => { initAudio(); ['pointerdown', 'touchend'].forEach(t => document.removeEventListener(t, unlockOnce)); };
+  ['pointerdown', 'touchend'].forEach(t => document.addEventListener(t, unlockOnce));
   // tap the timer circle to pause/resume that countdown (not the session clock)
   document.addEventListener('click', e => {
     if (!S || S.done) return;

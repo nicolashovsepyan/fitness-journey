@@ -3406,10 +3406,10 @@ const FLOW = [
 { ch:8, type:'nextsteps', cta:'Add it to my home screen',
   msgs:[
     "That is everything I need.",
-    "Last part, and it is the important one. <b>Add this page to your home screen.</b>",
-    "It stops being a link and becomes <b>your app</b> - it opens full screen, it works with no signal, and everything you just told me is already in it.",
-    "Open it and you land on <b>your dashboard</b>. Have a look around: your log, your movements, your week - all of it is yours from the first day.",
-    "I build the program from here and it appears <b>inside the app</b>. <b>You will get a message the moment it is ready.</b><small>Nothing to check. Nothing to wait for in an inbox.</small>"
+    "Next, I build your program. <b>When it is ready I text you a link.</b> Open it and your program is there.",
+    "Want it as an app? <b>Add this page to your home screen.</b> It opens full screen and works with no signal.",
+    "The first time you open the app, <b>paste the link I send you</b> and your program loads inside it.",
+    "One more screen after this, and it matters: <b>send me your answers.</b> That is how they reach me."
   ]},
 /* Still asked, but not as a delivery address any more — the programme
    arrives in the app. This is only so the account can be found again from
@@ -7004,7 +7004,7 @@ function nextsteps(s){
     addbox.classList.add('on');
     iconPicker();
     if(foot.querySelector('.cta')) return;
-    const label = already ? 'Carry on' : canInstall ? s.cta : 'I have added it';
+    const label = already ? 'Carry on' : canInstall ? s.cta : 'Carry on';
     setFoot(`<button class="cta accent">${label}</button>`);
     foot.querySelector('.cta').onclick=async()=>{
       haptic(400);
@@ -7061,20 +7061,19 @@ function entry(){
     <div class="logcard">
       <div class="lgrow"><span>Opened</span><b>${ds}</b></div>
       <div class="lgrow"><span>Horizon</span><b>Age ${horizonAge(A.age||38)}</b></div>
-      <div class="lgrow"><span>Profile</span><b>78% complete</b></div>
       <div class="lgrow"><span>Movements logged</span><b>${nPat} of ${totPat} patterns</b></div>
     </div>
     <div class="sendbox">
       <div class="coachtag"><i>N</i>Coach ${COACH.name}</div>
-      <h4>One last tap</h4>
-      <p>This sends me everything you just answered, in one link. I read it, build the program,
-         and <b>it appears in your app</b> - you will get a message there when it is ready.</p>
+      <h4>One last tap, and it matters</h4>
+      <p>This sends me everything you just answered. I read it, build your program,
+         and <b>text you a link</b> when it is ready. Open that link and your program is there.</p>
       <div class="sendrow">
         <button class="pri" id="sendBtn">Send to ${COACH.name}</button>
         <button id="copyBtn">Copy link</button>
       </div>
       <p class="micro sendto">Opens your mail app, already addressed to<br><b>${COACH.email}</b><br>
-        <span class="sendwhy">Until the app can carry it itself, this is how your answers reach me.</span></p>
+        <span class="sendwhy">Your answers reach me when you tap Send. Please do not skip it.</span></p>
       <div id="sentMark"></div>
     </div>
     <p class="micro">Nothing gets overwritten. When something changes it becomes a new entry with a new date.${saved?'':' <b>Note:</b> this browser blocked local saving - use the link.'}</p></div>`);
@@ -7103,15 +7102,12 @@ function entry(){
     window.fjPublishIntake({ answers:A, version:6, at:new Date().toISOString() })
       .then(function(r){
         if(!r || !r.ok) return;                 // the link path is untouched
-        done('Sent to ' + COACH.name + '. Nothing else to do.');
-        if(head) head.textContent = 'Already sent';
-        if(lede) lede.innerHTML = 'Your answers reached me the moment you finished. '
-          + 'I read them, build the program, and <b>it appears in your app</b>. '
-          + 'You will get a message there when it is ready.';
-        const row = box && box.querySelector('.sendrow .pri');
-        if(row) row.textContent = 'Send it again by mail';
+        /* Saved to the backend, but the console only sees cloud clients in
+           one browser (docs/CHATS.md), so the mail stays the step that
+           counts. Saying "nothing else to do" here lost answers. */
+        done('Saved. Now tap Send so I get it by mail too.');
         const why = box && box.querySelector('.sendwhy');
-        if(why) why.textContent = 'You do not need to. This is here in case you want a copy.';
+        if(why) why.textContent = 'Tap it anyway so I have a copy.';
       })
       .catch(function(){ /* the link path is untouched */ });
   }

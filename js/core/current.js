@@ -120,11 +120,13 @@ function runnerCfg(type, cfg, nItems) {
    every item in the block before it rests, so a block holding two pairs
    is still run as one long set. The label is right; the execution is the
    next piece of work, and it is a real one rather than a rename. */
-function pairLabels(items) {
+/* `base` carries the lettering across blocks, so a day of four superset
+   blocks reads A, B, C, D the way the coach named them, not A four times. */
+function pairLabels(items, base = 0) {
   const order = [], seen = new Map();
   for (const it of items) {
     if (it.sg == null) { order.push(null); continue; }
-    if (!seen.has(it.sg)) seen.set(it.sg, { letter: String.fromCharCode(65 + seen.size), n: 0 });
+    if (!seen.has(it.sg)) seen.set(it.sg, { letter: String.fromCharCode(65 + base + seen.size), n: 0 });
     const g = seen.get(it.sg);
     order.push(g.letter + (++g.n));
   }
@@ -135,6 +137,12 @@ function pairLabels(items) {
 }
 
 function toSession(dayId, day, fixed) {
+  let letters = 0;
+  const labelsFor = (day.blocks || []).map(b => {
+    const l = pairLabels(b.items || [], letters);
+    letters += new Set(l.filter(Boolean).map(x => x[0])).size;
+    return l;
+  });
   const blocks = (day.blocks || []).map((b, i) => ({
     id: `${dayId}b${i}`,
     role: ROLE[b.role] || 'Work',
@@ -166,10 +174,13 @@ function toSession(dayId, day, fixed) {
     items: (b.items || []).map((it, j) => {
       const p = parsePrescription(it.pres);
       const o = { ex: it.ex, note: it.note || '', pres: p.raw };
-      const lbl = pairLabels(b.items || [])[j];
+      const lbl = labelsFor[i][j];
       if (lbl) o.pair = lbl;
       if (p.sets != null) o.sets = p.sets;
       if (p.reps != null) o.reps = p.reps;
+      /* "10-15" is the target; the runner prints repsText as "aim 10-15"
+         and fell back to the bottom of the range without it */
+      if (p.repsMax != null) o.repsText = `${p.reps}-${p.repsMax}`;
       if (p.hold != null) o.hold = p.hold;
       /* A PRESCRIPTION IN SECONDS MAKES IT A TIMED MOVEMENT, whatever the
          library calls it.

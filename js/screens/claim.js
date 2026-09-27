@@ -28,8 +28,8 @@ export function renderClaim(host, { onDone }) {
   const box = `
     <div class="claim-paste">
       <p class="muted">${people.length
-        ? 'Someone else? Paste the link from your survey.'
-        : 'This phone does not know you yet. Paste the link from the end of your survey and it will.'}</p>
+        ? 'Someone else? Paste the link Nico sent you.'
+        : 'This phone does not know you yet. Paste the link Nico sent you and your program opens here.'}</p>
       <textarea id="claimLink" rows="3" placeholder="Paste your link here"></textarea>
       <button class="btn" id="claimGo">Use this link</button>
       <p class="claim-err" id="claimErr"></p>
