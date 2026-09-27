@@ -48,8 +48,15 @@ const base = (baseArg || 'https://nicolashovsepyan.github.io/fitness-journey/').
    would have turned his own dashboard into Sevan's. Both forms paste into
    the console's box — readPastedIntake reads the fragment and ignores the
    page — but a link should do the right thing when it is clicked, too. */
-const where = (whereArg || 'coach') === 'client' ? 'dashboard.html' : 'coach.html';
-const key   = where === 'coach.html' ? '#fj=' : '#';
+/* survey    onboarding.html  ONE LINK FOR A CLIENT WHO ALREADY HAS A
+                               PROGRAM. They fill in the survey, and the
+                               app it opens (or the home-screen icon it
+                               installs) already holds this program. Carries
+                               the program only; the survey supplies the
+                               person. */
+const door  = (whereArg || 'coach').toLowerCase();
+const where = door === 'client' ? 'dashboard.html' : door === 'survey' ? 'onboarding.html' : 'coach.html';
+const key   = where === 'coach.html' ? '#fj=' : where === 'onboarding.html' ? '#prg=' : '#';
 
 /* PROGRAM ONLY — FOR A PHONE THAT ALREADY KNOWS WHO IT IS.
 
@@ -66,8 +73,9 @@ const key   = where === 'coach.html' ? '#fj=' : '#';
    Pass `programonly` as the fifth argument. It only makes sense with the
    client form, because it is the client's own device that supplies the
    half this link leaves out. */
-const PROGRAM_ONLY = String(process.argv[6] || '').toLowerCase() === 'programonly';
-if (PROGRAM_ONLY && where !== 'dashboard.html') {
+const PROGRAM_ONLY = where === 'onboarding.html'
+  || String(process.argv[6] || '').toLowerCase() === 'programonly';
+if (PROGRAM_ONLY && where === 'coach.html') {
   console.error('\n  programonly needs the client form: … <baseUrl> client programonly\n');
   process.exit(1);
 }
@@ -130,7 +138,9 @@ const b64url = o => Buffer.from(JSON.stringify(o), 'utf8')
 const frag = key + b64url(payload);
 const link = base + where + frag;
 
-const out = p('spine/programs', `link.${uid}.txt`);
+/* a survey link is a second file: link.<uid>.txt is the console's copy */
+const fname = where === 'onboarding.html' ? `link.${uid}.survey.txt` : `link.${uid}.txt`;
+const out = p('spine/programs', fname);
 writeFileSync(out, link + '\n');
 
 console.log(`\n  ${personName} -> ${prog.name}`);
@@ -138,7 +148,8 @@ console.log(`  uid          ${uid}`);
 console.log(`  days         ${Object.keys(prog.days).length}${days ? '  on ' + days.join(',') + ' (0=Sun)' : ''}`);
 console.log(`  units        ${a.unit}`);
 console.log(`  opens        ${where}${
-  PROGRAM_ONLY ? '  (adds the program, keeps the profile already on the phone)'
+  where === 'onboarding.html' ? '  (the survey, with this program waiting in the app at the end)'
+  : PROGRAM_ONLY ? '  (adds the program, keeps the profile already on the phone)'
   : where === 'coach.html' ? '  (imports into your console)' : '  (provisions their phone)'}`);
 console.log(`  link length  ${link.length} characters`);
-console.log(`  written to   spine/programs/link.${uid}.txt\n`);
+console.log(`  written to   spine/programs/${fname}\n`);

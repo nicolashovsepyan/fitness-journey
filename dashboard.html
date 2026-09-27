@@ -3301,16 +3301,18 @@ const weekKey = () => {
 
 const MESSAGES = [
   {id:'mon1', from:'Coach Nico', at:'MON 08:00', subject:'Monday check-in',
-   lines:['Week one. Four sessions, twenty minutes, nothing heavy.',
+   /* Every client reads these. They used to describe one person's plan
+      (4 sessions of 20 minutes, a sore knee on Wednesday) to everybody. */
+   lines:['New week. Every session on your plan, nothing heavy yet.',
           'Turning up <em>is</em> the job. Numbers come later.'],
-   ask:"How's the knee after Wednesday?", cta:'Reply'},
+   ask:'How did your body feel after your last session?', cta:'Reply'},
   {id:'weigh', from:'Coach Nico', at:'MON 07:30', subject:'Weigh-in day',
    lines:['Same day, same time, before anything else. It only means something if it is the same conditions every week.',
-          'One number. It will bounce around and that is normal \u2014 the line is what I read, not the day.'],
+          'One number. It will bounce around and that is normal. The line is what I read, not the day.'],
    ask:'What did the scale say?', cta:'Log it'},
-  {id:'welcome', from:'Coach Nico', at:'SUN 19:40', subject:'Your program is being built',
-   lines:['Read your answers twice. The knee and the ankle change more than you would think.',
-          'Nothing you see is a template \u2014 I write it, then I check it.'],
+  {id:'welcome', from:'Coach Nico', at:'SUN 19:40', subject:'I read your answers',
+   lines:['I read every answer twice. Injuries and sleep change more than you would think.',
+          'Nothing you see is a template. I write it, then I check it.'],
    ask:null, cta:null}
 ];
 
@@ -3524,7 +3526,7 @@ const seed = {
   targetKg:null,                                /* his to set, not ours to assume */
   notes:[
     {at:0,k:'milestone',h:'Onboarding finished',
-     b:'45 answers, a starting weight, and a program being built around one kettlebell.'}
+     b:'Your answers are in, with a starting weight. Everything from here lands in this log.'}
   ],
   profile:{photo:false,goalweight:false,measure:false,test:false,injury:false},
   dismissed:{}

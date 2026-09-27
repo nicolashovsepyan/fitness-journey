@@ -113,6 +113,22 @@ export async function applySurveyPayload(input) {
   const s = storage();
 
   const existing = await s.getUser(SELF);
+
+  /* THE SAME LINK, OPENED AGAIN. An iPhone home-screen icon installed from
+     the survey IS this link (onboarding.html, pinAppAddress), so every
+     launch arrives here carrying it. Applying it again would put the person
+     back to the moment they finished the survey - and write the program
+     that came with it over any newer one. Same timestamp, already applied:
+     nothing to do but say whose phone this is. */
+  const prior = existing && await s.getIntake(SELF);
+  if (prior && payload.at && prior.submittedAt === payload.at) {
+    await claimDevice(SELF, existing.displayName);
+    return SELF;
+  }
+
+  /* A re-run survey is new answers, not a new person: a program the coach
+     already gave them stays theirs. */
+  const keeps = !!(existing && existing.programId);
   const user = makeUser({
     ...(existing || {}),
     id: SELF,
@@ -121,11 +137,11 @@ export async function applySurveyPayload(input) {
        the app opens on their answers reflected back and an honest "your
        program is being written" — never an invented workout. Turning this
        to 'active' is the coach's act, not the survey's. */
-    status: 'pending',
+    status: keeps ? 'active' : 'pending',
     displayName: a.name || (existing && existing.displayName) || '',
     email: a.email || null,
     ui: uiFor(a),
-    programId: null,
+    programId: keeps ? existing.programId : null,
     accent: '#3ECBA8',
   });
   await addUser(user);
