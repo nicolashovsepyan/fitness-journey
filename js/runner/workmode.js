@@ -10,6 +10,7 @@ import * as R from './runstate.js';
 import { store } from '../store.js';
 import { EXERCISES } from '../data/exercises.js';
 import { alternatives } from '../core/resolve.js';
+import { applyWorkTheme, clearWorkTheme } from './theme.js';
 import { say, beep, buzz, fmt, initAudio, stopAudio, keepAwake, releaseAwake, setMuted } from '../timer.js';
 
 const UNIT = { reps: 'reps', hold: 'sec', cals: 'cals', rounds: 'rounds' };
@@ -218,17 +219,17 @@ function swapCurrentExercise(newId, from) {
 /* ---------------- lifecycle ---------------- */
 export function startWorkout(plan, callbacks = {}) {
   S = R.start(plan); cb = callbacks; host = document.getElementById('app');
-  initAudio(); keepAwake(); startTicker();
+  applyWorkTheme(); initAudio(); keepAwake(); startTicker();
   enterBlock(0);
 }
 export function resumeWorkout(callbacks = {}) {
   S = R.load(); if (!S || S.done) return false;
   cb = callbacks; host = document.getElementById('app');
-  initAudio(); keepAwake(); startTicker();
+  applyWorkTheme(); initAudio(); keepAwake(); startTicker();
   enterBlock(S.bi, true);
   return true;
 }
-function quit() { stopTicker(); releaseAwake(); stopAudio(); R.clear(); cb.onExit?.(); }
+function quit() { stopTicker(); releaseAwake(); stopAudio(); R.clear(); clearWorkTheme(); cb.onExit?.(); }
 
 const block = () => S.plan.blocks[S.bi];
 const isLastBlock = () => S.bi >= S.plan.blocks.length - 1;
@@ -317,7 +318,7 @@ function renderGetReady() {
   onScreen('ready');
   shell(`<div class="now-ex getready"><div class="label">Get ready</div><div class="name">${b.name}</div>
       <div class="side">${b.role}</div></div>
-    <div class="timer-wrap">${timerSvg('buffer')}</div>
+    <div class="timer-wrap">${timerSvg('ready')}</div>
     <div class="actionbar"><button class="btn lg" id="go">I'm ready ▸</button></div>`);
   const begin = () => { R.clearStep(S); onStepDone = null; renderActive(); };
   if (beginStep(readySec(), 'rest', 'ready')) { beep('go'); say(`Get ready. ${b.name}.`); }
@@ -1302,5 +1303,5 @@ function finishSession(opts = {}) {
     <p class="muted">${S.plan.name} · ${fmt(elapsed)}${partial ? ' · ended early' : S.plan.quick ? '' : ` · ${S.plan.duration} min plan`}</p>
     <div style="height:16px;"></div>${resultHtml}${prHtml}${effHtml}
     <div class="actionbar"><button class="btn lg" id="home">${S.plan.finishLabel || 'Back to week'}</button></div></div>`;
-  document.getElementById('home').addEventListener('click', () => cb.onFinish?.());
+  document.getElementById('home').addEventListener('click', () => { clearWorkTheme(); cb.onFinish?.(); });
 }
