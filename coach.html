@@ -761,6 +761,9 @@ select.pin{appearance:none;cursor:pointer}
 .nbnw{ display:flex; flex-direction:column; min-width:0; }
 .nbbn{ font:650 13px inherit; background:none; border:none; color:var(--ink); padding:1px 3px; border-radius:4px; width:100%; }
 .nbnw small{ font-size:10px; color:var(--ink3); padding-left:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+/* the shape of the work, on a folded block: circuit, EMOM, how many rounds */
+.nbfold .nbshape{ display:block; font:600 10px ui-monospace,monospace; letter-spacing:.04em;
+  color:var(--ink3); padding-left:0; margin-top:2px; }
 .nbctl{ display:flex; align-items:center; gap:6px; }
 .nbtype{ appearance:none; cursor:pointer; border:1px solid var(--line2); border-radius:6px;
          font:600 10px ui-monospace,monospace; letter-spacing:.05em; text-transform:uppercase;
@@ -779,9 +782,33 @@ select.pin{appearance:none;cursor:pointer}
 .nbit .hand{ color:var(--ink4); cursor:grab; font-size:12px }
 .nbit .ss{ font:600 9.5px ui-monospace,monospace; color:var(--ink3); text-align:center }
 .nbit .nm{ cursor:pointer; min-width:0 }
+/* the swap caret, in the name cell: quiet until the row is under the cursor */
+.nbswapq{ font-size:11px; line-height:1; color:var(--ink4); background:none; border:0;
+  cursor:pointer; padding:2px 5px 2px 0; opacity:.45; transition:opacity .12s,color .12s }
+.nbit:hover .nbswapq{ opacity:1 }
+.nbswapq:hover{ color:var(--accent) }
+.nbswapq.on{ opacity:1; color:var(--accent) }
 .nbit .nm b{ font-weight:550; font-size:12.6px } .nbit .nm i{ font-style:normal; font-size:8px; color:var(--ink4) }
 .nbit .nm small{ display:block; font-size:10px; color:var(--ink3) }
-.nbnums{ display:flex; align-items:center; gap:5px; flex-wrap:wrap; justify-content:flex-end }
+/* A COLUMN IS ONLY A COLUMN IF IT IS IN THE SAME PLACE ON EVERY ROW.
+
+   These cells sized themselves to their contents, so the width of a row's
+   numbers depended on what was written in them: a unilateral movement says
+   "reps/side" where the one above says "reps", and the whole group slid
+   27px left. Measured on one block, the numbers started at 928px on four
+   rows and 901px on the fifth. Nothing was misaligned enough to look
+   broken, which is exactly why it read as untidy rather than as a bug, and
+   it is the reason the editor never felt like a sheet: your eye cannot run
+   down a column that is not straight.
+
+   Fixed widths per cell instead. The unit label is what varies, so it gets
+   a fixed box and truncates rather than pushing the number. */
+.nbnums{ display:flex; align-items:center; gap:5px; flex-wrap:nowrap; justify-content:flex-end }
+.nbnums > *{ flex:none }
+.nbnum{ width:84px; justify-content:center }
+.nbnum.wt, .nbnum.rest{ width:76px }
+.nbnum.tempo{ width:92px }
+.nbnum em, .nbnum .nbunit{ max-width:46px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
 /* ONE NUMBER, WITH A MINUS AND A PLUS. The steppers only show on hover or
    focus, so a row at rest is still a row of numbers rather than a row of
    buttons — and they are keyboard-skipped, because Tab should walk the
@@ -3781,6 +3808,33 @@ const NB_SPEC = {
 };
 const NB_FIELD = { rounds:['rounds',''], rest:['rest','s'], mins:['length','min'],
                    interval:['every','s'], cap:['cap','min'], work:['work','s'], off:['off','s'] };
+
+/* HOW THIS BLOCK IS RUN, IN THREE WORDS.
+
+   A locked block showed its name, its minutes and how hard it is - and not
+   the two things that decide what you actually do in it: whether it is a
+   circuit or an EMOM, and how many times round. Those live in b.type and
+   b.cfg and were only ever drawn in the unlocked editor, so locking a block
+   hid the shape of the work and left the title to carry it. Titles do not:
+   "Core" is not a number of rounds.
+
+   Straight sets say nothing, on purpose. The rounds there belong to each
+   movement's own row rather than to the block, and a chip reading "straight"
+   on two thirds of the blocks in a day is noise that teaches you to skip the
+   chip on the third. */
+function nbShape(b){
+  const c = b.cfg || {}, g = k => c[k] != null ? c[k] : NB_DEF[k];
+  switch(b.type){
+    case 'Superset': return `superset &middot; ${g('rounds')} rounds`;
+    case 'Circuit':  return `circuit &middot; ${g('rounds')} rounds`;
+    case 'EMOM':     return g('interval') === 60
+                       ? `EMOM &middot; ${g('mins')} min`
+                       : `every ${g('interval')}s &middot; ${g('mins')} min`;
+    case 'AMRAP':    return `AMRAP &middot; ${g('cap')} min cap`;
+    case 'Tabata':   return `tabata &middot; ${g('rounds')} rounds, ${g('work')}/${g('off')}s`;
+    default:         return null;
+  }
+}
 function nbSetType(bi,t){ nbAt(bi); const b=PROG.days[PDAY].blocks[bi]; b.type=t;
   /* KEEP ONLY WHAT THIS TYPE OWNS. This filled in the new type's missing
      settings and never removed the old type's, so a block moved Superset
@@ -4362,7 +4416,8 @@ function nbMiddle(){
       h += `<div class="nbblock locked fold ${peek?'peek':''}" data-bi="${bi}" style="--rc:${RC}">
         <button class="nbfold" onclick="nbTogglePeek(${bi})">
           ${stamp}
-          <span class="nbnw"><b class="nbfn">${esc(b.name||'Block')}</b></span>
+          <span class="nbnw"><b class="nbfn">${esc(b.name||'Block')}</b>${
+            nbShape(b) ? `<small class="nbshape">${nbShape(b)}</small>` : ''}</span>
           ${meter}
           <span class="nbmin"><b>${nbMins(b)}</b><em>min</em></span>
           <i class="nbchev">${peek?'\u25B2':'\u25BC'}</i>
@@ -4413,7 +4468,18 @@ function nbMiddle(){
             ondrop="nbDrop(event,${bi},${ii})">
           <span class="hand">⠿</span><span class="ss">${ss}</span>
           <span class="nm" onclick="event.stopPropagation();nbToggleCard(${bi},${ii})">
-            <b>${esc(m.n)}${m.f?' ★':''}</b> <i>${isOpen?'▲':'▼'}</i>${
+            <!-- SWAPPING WAS THREE CLICKS AND IS THE COMMONEST EDIT THERE IS.
+                 Name -> card opens -> "Swap this movement" -> the list. Every
+                 one of those was a decision about navigation rather than
+                 about training. This is the swap now: one click, the list
+                 opens under the row, and the row stays where it is. It sits
+                 inside the name cell rather than beside it because the row is
+                 a five-column grid and a sixth child would land on a second
+                 line. The name still opens the card, because reading what a
+                 movement trains is a different question from replacing it. -->
+            <button class="nbswapq ${nbSwap===key?'on':''}" title="Replace this movement"
+              onclick="event.stopPropagation();nbSwapQ='';nbSwap=${nbSwap===key?'null':"'"+key+"'"};drawProgram()"
+              >⇄</button><b>${esc(m.n)}${m.f?' ★':''}</b> <i>${isOpen?'▲':'▼'}</i>${
               it.plan && !nbPlanOpen.has(key) ? `<u class="nbplantag" title="${
                 it.plan.map((st,n)=>`set ${n+1}: ${st.v??'—'}${st.w!=null?' @ '+st.w:''}`).join(', ')
               }">${it.plan.length} sets written</u>` : ''}
@@ -4474,16 +4540,17 @@ function nbMiddle(){
                      on:`nbSetPlan(${bi},${ii},${si},'w',this.value)`})}
           </div>`).join('')}
           <button class="lnk nbplandrop" onclick="nbDropPlan(${bi},${ii})">same for every set</button></div>`;
-        if(isOpen){
-          const so = nbSwap===key;
-          const btn = `<button class="nbswapbtn" onclick="event.stopPropagation();nbSwapQ='';nbSwap=${so?'null':"'"+key+"'"};drawProgram()">${so?'Cancel':'⇄ Swap this movement'}</button>`;
-          const panel = so ? `<div class="nbalts">
-              <input class="nbsearch sm" value="${esc(nbSwapQ)}" onclick="event.stopPropagation()"
-                     placeholder="Search all ${MOVES.length} — leg explosive, kettlebell hinge…"
-                     oninput="nbSwapSearch(${bi},${ii},this.value)">
-              ${nbLadder(bi,ii)}<div id="nbaltlist">${nbAltsHTML(bi,ii)}</div></div>` : '';
-          h += nbCard(m, btn + panel);
-        }
+        /* THE LIST BELONGS TO THE ROW, NOT TO THE CARD.
+           It used to render inside nbCard, so the alternatives could only
+           exist while the card was open - which is why replacing a movement
+           needed the card at all. It hangs off the row now, and the card is
+           back to being what it says it is: what this movement trains. */
+        if(nbSwap===key) h += `<div class="nbalts" onclick="event.stopPropagation()">
+            <input class="nbsearch sm" value="${esc(nbSwapQ)}"
+                   placeholder="Search all ${MOVES.length} — leg explosive, kettlebell hinge…"
+                   oninput="nbSwapSearch(${bi},${ii},this.value)">
+            ${nbLadder(bi,ii)}<div id="nbaltlist">${nbAltsHTML(bi,ii)}</div></div>`;
+        if(isOpen) h += nbCard(m, '');
       });
       if(pair) h += `</div></div>`;
       const nx = GS[gi+1] && GS[gi+1].idx[0];
