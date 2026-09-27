@@ -35,6 +35,21 @@ every other chat, and to you tomorrow.
 
 ---
 
+## Work Mode has its own chat
+
+The live timer (program workouts AND the standalone Quick Timer) is built from
+one dedicated chat. Its home is **`docs/WORK-MODE.md`**: what is done, what is
+weak, what is pending, and a changelog.
+
+- **Every chat, at start:** read the Changelog in `docs/WORK-MODE.md` so you
+  know what changed in the timer since last time.
+- **The Work Mode chat:** after every change, commit, push (so it is live for
+  users on their next open) and add a Changelog line. Not done until all three.
+- **Any other chat** that needs a timer change: add it under "Requests from
+  other chats" in that file. Do not edit the Work Mode files yourself.
+
+---
+
 ## Who is working where
 
 Update the state line when you pick something up or put it down. Delete a row
@@ -43,7 +58,8 @@ when the area goes quiet — a stale row is worse than no row.
 | Area | Files | State |
 |---|---|---|
 | **Coach console** | `coach.html` | Idle since 12 Sep. Last: the builder went full width, dials on top, movement picker opens in the block that wants one. |
-| **Dashboard / Work Mode** | `dashboard.html`, `js/` | Active 13 Sep. Last: week navigation backwards, undo a mis-tap. |
+| **Dashboard** | `dashboard.html`, `js/` (except the Work Mode files) | Active 13 Sep. Last: week navigation backwards, undo a mis-tap. |
+| **Work Mode** | `js/runner/`, `js/timer.js`, `js/data/formats.js` | **Own chat since 27 Sep.** Audit, plan and changelog: `docs/WORK-MODE.md`. Other chats read it, never edit these files. |
 | **Lab** | `lab/`, `dashboard-lab.html`, `tools/build-lab.mjs` | Active 13 Sep. Experiments kept away from clients. |
 | **Logo / icons** | `logo/`, `icon*`, `images/logo-mark.svg`, `styles.css` | **IN FLIGHT, UNCOMMITTED.** Leave alone. Untracked: `logo/fj/`, `images/fj-signature.png`. |
 | **Survey** | `onboarding.html` | Idle since 12 Sep. |

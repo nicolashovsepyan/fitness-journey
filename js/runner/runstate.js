@@ -54,7 +54,8 @@ export function start(plan) {
     plan, startedAt: Date.now(),
     bi: 0, ii: 0, si: 0, ci: 0, round: 1, sub: 'work',   // block / item / set / circuit / round / phase cursor
     amrapRounds: 0, iv: null, ivPhase: 'work',
-    stepStartedAt: null, stepDur: null, stepPausedAt: null,   // active timed step (countdown), tap-circle pause
+    stepStartedAt: null, stepDur: null, stepPausedAt: null, stepKey: null,   // active timed step (countdown), tap-circle pause
+    screen: null, roundBuf: {},                  // which screen is up + reps typed mid-round, so a reopen lands on both
     pausedAccum: 0,                              // total paused ms (excluded from clocks)
     pausedAt: null,
     blockStart: null, blockTimes: {},            // per-block wall-clock seconds (for history)
@@ -91,11 +92,27 @@ export function stepRemaining(s) {
   return Math.max(0, s.stepDur - elapsed);
 }
 
-/* start a timed step of `durSec` (rest, hold, buffer, interval) */
-export function beginStep(s, durSec) {
-  s.stepStartedAt = Date.now(); s.stepDur = durSec; s.stepPausedAt = null; save(s); return s;
+/* start a timed step of `durSec` (rest, hold, buffer, interval).
+
+   `key` names WHICH step this is (screen + cursor). Asking again for the
+   step that is already running keeps its clock instead of restarting it -
+   that is what makes a reopened app land mid-countdown rather than back at
+   full. Returns true only when a new step actually started.
+
+   `startAt` lets a step begin where the previous one ENDED rather than
+   now, so back-to-back intervals keep a fixed wall-clock schedule and a
+   locked phone catches up instead of drifting. */
+export function beginStep(s, durSec, key = null, startAt = null) {
+  if (key != null && s.stepKey === key && s.stepStartedAt != null) return false;
+  s.stepStartedAt = startAt != null ? startAt : Date.now();
+  s.stepDur = durSec; s.stepPausedAt = null; s.stepKey = key; save(s); return true;
 }
-export function clearStep(s) { s.stepStartedAt = null; s.stepDur = null; s.stepPausedAt = null; save(s); return s; }
+/* the wall-clock moment the active step runs out (pause already folded in) */
+export function stepEndsAt(s) {
+  if (s.stepDur == null || s.stepStartedAt == null) return null;
+  return s.stepStartedAt + s.stepDur * 1000;
+}
+export function clearStep(s) { s.stepStartedAt = null; s.stepDur = null; s.stepPausedAt = null; s.stepKey = null; save(s); return s; }
 
 /* tap-the-circle pause — holds the active countdown only (session clock keeps running) */
 export function isStepPaused(s) { return !!s.stepPausedAt; }

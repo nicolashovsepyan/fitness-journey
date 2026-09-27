@@ -1,0 +1,118 @@
+# WORK MODE — the live timer
+
+**Owner:** the dedicated "Work Mode" chat. Every change to the live workout
+timer is designed, built and logged from that chat.
+
+**Files it owns:** `js/runner/workmode.js`, `js/runner/runstate.js`,
+`js/timer.js`, `js/data/formats.js`, and (when built) `js/runner/quick.js`.
+Other chats: do not edit these. If your work needs a Work Mode change, write
+it under "Requests from other chats" at the bottom and leave it.
+
+**Ship rule:** a Work Mode change is not done until it is committed, pushed
+and live at https://nicolashovsepyan.github.io/fitness-journey/ , and a line
+is added to the Changelog below. Users get it on their next app open.
+
+Two jobs, one engine:
+
+1. **Program mode.** Runs a day from the user's released program
+   (`dashboard.html` → `index.html?run=<dayId>` → `startWorkout(plan)`).
+2. **Quick Timer (free mode).** A standalone interval timer, like GymBoss or
+   SmartWOD: pick a format, set minutes / rounds / exercises, go. **Not built.**
+   Plan: a small setup screen builds a RunPlan and hands it to the SAME
+   runner, so every timer fix lands in both modes at once.
+
+---
+
+## Audit, 27 Sep 2026
+
+### Done and solid
+
+| Area | Notes |
+|---|---|
+| Timestamp clocks | Session clock and step countdown are computed from wall-clock time, so they are correct after the screen locks. `runstate.js` |
+| Persisted run | Every change is saved; app reopen drops you straight back into the workout, never the home screen. `app.js` `bootIntoActiveRun` |
+| Session clock | Total elapsed, top right, on every screen. |
+| Formats that run | Straight, tempo (shows tempo text), Yates (warm-up ramp + all-out set), isometric holds, skill (practice timer / holds / reps), superset (A1→A2, rest after pair, weight per round), circuit (rounds, set-up buffer before holds, log during round rest), AMRAP (multi-move rounds counter or single-move max reps), Tabata and EMOM (work/rest cycling through moves), benchmark / max test. |
+| Audio | Beeps built to cut through music (compressor, 1 to 3 kHz tones), 3-2-1 ticks, end triple-beep, "halfway" on work of 1 min+, spoken block names. Works with the ring switch on silent (silent loop trick). Audio re-unlocks on return to app. |
+| Screen | Wake lock, re-requested every time you come back to the app. |
+| Rest controls | −20s / +20s / skip. Tap the ring to pause just that countdown. |
+| Between blocks | 60s transition rest with "up next" card, % done, blocks-left list. |
+| Get ready | 10s countdown before each block, skippable. |
+| Logging | Reps + weight, left/right per side, tap-to-type numbers, last time's sets, "beat your best" target, editable log card at the end of each block, PRs on finish. |
+| Mid-workout tools | Watch the move, cue always on screen, swap exercise (saved for next week), notes + knee flag (coach-mode plans), "how did it feel" rating at the end. |
+| Finish screen | PRs, pace vs your previous runs of the same session, block times saved to history. |
+| Config wiring | Console settings (Tabata off, AMRAP cap, EMOM interval + length, circuit rest) reach the runner. Tested: `test/block-formats.test.mjs`. |
+
+### Weak or broken (fix first)
+
+| # | Problem | Where | Impact |
+|---|---|---|---|
+| W1 | **FIXED 27 Sep.** ~~Resume restarts the timer.~~ `enterBlock` always calls `clearStep`, then each screen calls `beginStep` fresh. Reopen mid-hold, mid-rest, mid-Tabata or mid-AMRAP and that countdown starts over from full. The session clock is fine; the step clock is not. | `workmode.js` `enterBlock`, every `render*` | The core promise ("resumes exactly where it was") is only half true. |
+| W2 | **FIXED 27 Sep.** ~~Interval formats drift and don't catch up.~~ Each EMOM minute / Tabata interval starts when the screen renders, not on a fixed schedule. Lock the phone for 2 min during a Tabata and on return it advances ONE interval and starts a fresh 20s. | `renderInterval`, `nextInterval` | EMOM / Tabata / AMRAP are not real wall-clock timers. Biggest gap vs a GymBoss. |
+| W3 | **No sound while the phone is locked.** JS timers freeze in the background on iOS, so beeps fire late (when you reopen) or not at all. | `timer.js`, `tick()` | You can't lock the phone and train by ear. |
+| W4 | **FIXED 27 Sep.** ~~"End workout" throws the workout away.~~ The confirm says "Progress is saved as far as you got", but `quit()` clears the run and saves nothing to history. | `workmode.js` `quit`, `confirmExit` | Lost sets, and the message is false. |
+| W5 | **Joint Prep is skipped.** Blocks with format `jointprep` have no items, fall into `renderSets`, and complete instantly. The v1 free-flow interval timer (switch every 10/20/30/60s) never made it into the new runner. | `renderActive`, `composer.js` | A programmed block silently disappears. |
+| W6 | **EMOM has no rep target or logging.** The screen shows the move name only, not "8 reps". History stores the round count as each move's "value". There is no "done, rest the remainder" tap; Skip jumps to the next minute and breaks the clock. | `renderInterval`, `captureRounds` | EMOM feels like a bare clock, and its log is misleading. |
+| W7 | **FIXED 27 Sep.** ~~Circuit / superset mid-round values are lost on resume.~~ `roundBuf` lives in memory only. | `workmode.js` top | Reps typed this round vanish on reopen. |
+| W8 | **Rest-pause runs as plain straight sets.** No cluster mini-rests. | `renderActive` | Format name promises something the timer doesn't do. |
+| W9 | **No whole-session pause.** `R.pause/resume` exist but no button uses them. Tap-the-ring pauses only the current countdown. | `runstate.js` | Phone call or interruption keeps the session clock running. |
+| W10 | **Fixed numbers.** Get-ready is always 10s, between-block rest always 60s, weight always lb. | `renderGetReady`, `sectionNext`, `WUNIT` | Should be user or coach settings. |
+| W11 | **Voice on/off resets every launch** and lives on the week screen, not inside the workout. No "10 seconds left" cue in the new engine. | `timer.js`, `screens/week.js` | Small, but felt every session. |
+| W12 | **Dead code.** `js/runner.js` (old v1 runner) is imported by nothing but still downloaded by the service worker. | `sw.js` | Confusing, extra download. |
+| W13 | **Navigation is block-only.** Back goes to the previous block and wipes its log; no previous exercise / set, no skip exercise in straight sets, no skip block. | `backBlock` | Mis-tap recovery is heavy. |
+
+### Pending (not built yet)
+
+**Quick Timer, the standalone mode**
+- Entry point from the dashboard ("Quick timer") that works with no program.
+- Setup screen: pick a format, set the numbers, optionally add moves (with reps), save as a favorite, go.
+- Formats it should offer:
+  - **EMOM** (every N sec, total minutes; alternating moves; E2MOM/E3MOM)
+  - **AMRAP** (time cap, rounds + extra reps)
+  - **For Time** (count up, optional cap, tap when done)
+  - **Tabata** (20/10 × 8, editable)
+  - **Intervals** (custom work / rest × rounds, optional sets with a longer rest between sets: the GymBoss core)
+  - **Stopwatch** and **Countdown** (plain)
+  - later: **Death By** (ladder EMOM), **Ladder / pyramid** reps, **Chipper**
+- Countdown before start (3, 5 or 10s).
+- Result saved to history ("12 min EMOM, 5 moves"), same as a program session.
+
+**Timer engine**
+- Absolute schedule for timed blocks: compute every interval boundary from the block start, so resume and background are exact (fixes W1, W2).
+- Pre-schedule beeps on the audio timeline so the next cues play even if JS is paused (partial fix for W3; needs real-phone testing).
+- Whole-session pause button (W9).
+- Big "glance" layout for timed formats: huge numbers readable from 2 m, color by phase (work green, rest blue, get ready amber), full-screen mode.
+
+**Program mode polish**
+- EMOM: show reps per minute, "Done" tap that shows rest remaining, reps logged per round (W6).
+- Rest-pause clusters (W8), Joint Prep free-flow (W5).
+- Save on exit (W4), persist the round buffer (W7).
+- Settings: get-ready length, block-transition rest, kg/lb, voice on/off inside the workout, cue style (beeps only / beeps + voice).
+- Previous / skip exercise and skip block (W13).
+- Tempo metronome (beep per phase of a 3-1-1 rep): nice to have.
+
+---
+
+## Suggested build order
+
+1. **Engine fixes:** W1 + W2 (absolute schedule), W4 (save on exit), W7. Everything after this is built on a timer we trust.
+2. **Quick Timer v1:** setup screen + EMOM, AMRAP, For Time, Tabata, Intervals, Stopwatch. Reuses the runner.
+3. **Glance layout + session pause + settings** (W9, W10, W11).
+4. **Program format gaps:** EMOM logging (W6), Joint Prep (W5), rest-pause (W8).
+5. **Background audio** (W3), tested on a real iPhone.
+6. Cleanup: W12, W13.
+
+---
+
+## Changelog
+
+Newest first. One line per shipped change: date, what changed, commit.
+
+- 27 Sep 2026 · **Timer engine fixes.** Reopening the app now lands mid-countdown instead of restarting it (every screen: holds, rests, get ready, block transition, AMRAP, EMOM, Tabata). Back-to-back steps run on a fixed wall-clock schedule, so an EMOM no longer drifts and a locked phone catches up silently to the right minute, then beeps once. "End workout" now offers Save what I did / Discard / Keep going; saved runs go to history marked "ended early", PRs count, and they never set a pace to beat. Reps typed mid-round survive a reopen. Also fixed on the way: a second single-move AMRAP started from the first one's rep count; the silent audio loop kept running after a finished workout. Test: `test/runstate.test.mjs`.
+- 27 Sep 2026 · Audit written, this file created. No app change yet.
+
+---
+
+## Requests from other chats
+
+(Empty. Add a line: date, which chat, what you need from Work Mode.)

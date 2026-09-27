@@ -12,6 +12,10 @@ import { storage } from './core/storage.js';
 /* ---- coach voice ---- */
 let voiceOn = true;
 export function setVoice(on) { voiceOn = on; }
+/* Muted while the runner fast-forwards through steps that ran out while the
+   phone was locked: 12 missed intervals must not fire 12 beeps at once. */
+let muted = false;
+export function setMuted(on) { muted = !!on; }
 export function isVoiceOn() { return voiceOn; }
 
 /* coach voice selection — auto-pick the most natural English voice,
@@ -50,7 +54,7 @@ export function setVoiceName(name) {
 }
 
 export function say(text) {
-  if (!voiceOn) return;
+  if (!voiceOn || muted) return;
   try {
     if (!preferredVoice) preferredVoice = pickVoice();
     const u = new SpeechSynthesisUtterance(text);
@@ -197,6 +201,7 @@ function tone(freq, ms, when = 0, vol = 0.5, type = 'square') {
 const VOL = 1.0;
 const VOL_END = 1.0;
 export function beep(kind = 'tick') {
+  if (muted) return;
   initAudio();
   if (kind === 'go') {                       // start — rising two-tone
     tone(1046, 110, 0,    0.85, 'square');

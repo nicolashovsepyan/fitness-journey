@@ -10,7 +10,7 @@ import * as R from './runstate.js';
 import { store } from '../store.js';
 import { EXERCISES } from '../data/exercises.js';
 import { alternatives } from '../core/resolve.js';
-import { say, beep, buzz, fmt, initAudio, stopAudio, keepAwake, releaseAwake } from '../timer.js';
+import { say, beep, buzz, fmt, initAudio, stopAudio, keepAwake, releaseAwake, setMuted } from '../timer.js';
 
 const UNIT = { reps: 'reps', hold: 'sec', cals: 'cals' };
 const WUNIT = 'lb';                       // weight unit (Nicolas trains in pounds)
@@ -19,15 +19,30 @@ let lastSec = null;                       // last whole-second of the active ste
 let curStepKind = 'rest', saidHalf = false, halfStepKey = null;   // halfway-cue tracking
 let countUpStart = null;                  // flexible rest before a reps set: count UP, no forced countdown
 const numAt = id => { const e = document.getElementById(id); return e && e.value !== '' ? Number(e.value) : null; };
-/* start a timed step, tagged 'work' or 'rest' (work efforts get a halfway cue) */
-function beginStep(sec, kind = 'rest') { curStepKind = kind; saidHalf = false; halfStepKey = null; R.beginStep(S, sec); }
+/* When the step that just ran out ENDED. The next step that starts on its own
+   starts there, not "now", so intervals keep a fixed schedule. Only set while
+   an ended step's callback runs; a tap always starts from now. */
+let chainAt = null;
+/* start a timed step, tagged 'work' or 'rest' (work efforts get a halfway cue).
+   `tag` names the screen; with the cursor it makes the step's identity, so a
+   re-render of the SAME step (a reopened app) keeps its clock. Returns true
+   when the step is new, which is when its voice line should play. */
+function beginStep(sec, kind = 'rest', tag = 'step') {
+  curStepKind = kind;
+  const key = `${tag}|${S.bi}|${S.ii}|${S.si}|${S.ci}|${S.round}|${S.iv}|${S.ivPhase}|${S.sub}`;
+  const fresh = R.beginStep(S, sec, key, chainAt);
+  chainAt = null;
+  return fresh;
+}
+/* which screen is up, persisted so a reopen lands back on it */
+function onScreen(name) { if (S.screen !== name) { S.screen = name; R.save(S); } }
 
 /* re-wake audio whenever the app returns to foreground — music/Bluetooth can suspend it */
 if (typeof document !== 'undefined') {
   /* and the screen lock: the browser drops a wake lock whenever the page is
      hidden, so without asking again the screen dims during every rest after
      the first trip to the music app */
-  document.addEventListener('visibilitychange', () => { if (!document.hidden && S && !S.done) { initAudio(); keepAwake(); } });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && S && !S.done) { initAudio(); keepAwake(); if (ticker) tick(); } });
   /* And the first touch anywhere, whatever it lands on. "I'm ready" is the
      expected first tap but it is not the only way into a session - a resumed
      workout goes straight to the active screen and never shows that button.
@@ -223,8 +238,11 @@ function tick() {
   if (countUpStart != null) { const el = document.getElementById('countUp'); if (el) el.textContent = fmt(Math.floor((Date.now() - countUpStart) / 1000)); }
   const rem = R.stepRemaining(S);
   if (rem == null) { lastSec = null; return; }
+  if (rem <= 0 && onStepDone) return runOut();
   updateTimer(rem, S.stepDur);
-  if (S.stepStartedAt !== halfStepKey) { halfStepKey = S.stepStartedAt; saidHalf = false; }
+  /* a step seen for the first time; if it is already past halfway (a reopen),
+     that cue has been and gone */
+  if (S.stepStartedAt !== halfStepKey) { halfStepKey = S.stepStartedAt; saidHalf = rem <= Math.round(S.stepDur / 2); }
   if (rem !== lastSec) {                       // a whole second ticked over
     lastSec = rem;
     // halfway cue — only for a WORK effort of 1 minute or more
@@ -233,10 +251,28 @@ function tick() {
     }
     if (rem <= 3 && rem > 0) { beep('count'); buzz(20); }   // 3 · 2 · 1 audible countdown
   }
-  if (rem <= 0 && onStepDone) {
-    const f = onStepDone; onStepDone = null; lastSec = null;
-    R.clearStep(S); beep('end'); buzz(60);     // distinct end beep + haptic
-    f();
+}
+/* THE ACTIVE STEP RAN OUT. Usually a moment ago, and it gets its end beep.
+   But a locked phone stops this ticker, so on the way back it can be minutes
+   late with several steps' worth of workout gone by: 6 Tabata intervals, a
+   hold and the rest after it. Each ended step hands its END time to the next
+   (chainAt), and this keeps advancing, silently, until it reaches the step
+   that is running right now. One beep then says "you are here". */
+function runOut() {
+  const late = Date.now() - (R.stepEndsAt(S) ?? Date.now()) > 2000;
+  if (late) setMuted(true); else { beep('end'); buzz(60); }
+  let guard = 0;
+  try {
+    do {
+      const f = onStepDone; onStepDone = null; lastSec = null;
+      chainAt = R.isStepPaused(S) ? null : R.stepEndsAt(S);
+      R.clearStep(S);
+      f();
+      chainAt = null;
+    } while (++guard < 2000 && onStepDone && R.stepRemaining(S) === 0);
+  } finally {
+    chainAt = null;
+    if (late) { setMuted(false); beep('end'); buzz(60); }
   }
 }
 
@@ -245,24 +281,41 @@ function enterBlock(i, opts = {}) {
   const resuming = opts === true || opts.resuming;          // back-compat with enterBlock(i, true)
   const skipReady = opts.skipReady;
   S.bi = i;
-  if (!resuming) { S.ii = 0; S.si = 0; S.ci = 0; S.round = 1; S.sub = 'work'; S.amrapRounds = 0; S.iv = null; S.ivPhase = 'work'; S.blockStart = Date.now(); }
-  R.clearStep(S); R.save(S);
-  roundBuf = {}; onStepDone = null;
+  /* A reopen keeps the running step (its clock is the point) and the reps
+     already typed this round. Only a fresh block wipes them. */
+  if (!resuming) {
+    S.ii = 0; S.si = 0; S.ci = 0; S.round = 1; S.sub = 'work'; S.amrapRounds = 0; S.amrapReps = null;
+    S.iv = null; S.ivPhase = 'work'; S.blockStart = Date.now(); S.roundBuf = {};
+    R.clearStep(S);
+  }
+  roundBuf = S.roundBuf || (S.roundBuf = {});
+  onStepDone = null; R.save(S);
   const b = block();
   if (!S.captured[b.id]) buildEntries(b);
-  if (resuming || skipReady) { beep('go'); say(b.name); return renderActive(); }
+  if (resuming) return resumeScreen();
+  if (skipReady) { beep('go'); say(b.name); return renderActive(); }
   renderGetReady();
+}
+/* back onto whichever screen was up when the app went away */
+function resumeScreen() {
+  if (S.screen === 'ready') return renderGetReady();
+  if (S.screen === 'log') return renderLog();
+  if (S.screen === 'summary') return renderSummary();
+  if (S.screen === 'trans') return sectionNext();
+  if (S.screen === 'feedback') return renderFeedback(finishSession);
+  return renderActive();
 }
 /* 10-second "get set up" countdown before each block (skippable) */
 function renderGetReady() {
   const b = block();
-  beep('go'); say(`Get ready. ${b.name}.`);
+  onScreen('ready');
   shell(`<div class="now-ex getready"><div class="label">Get ready</div><div class="name">${b.name}</div>
       <div class="side">${b.role}</div></div>
     <div class="timer-wrap">${timerSvg('buffer')}</div>
     <div class="actionbar"><button class="btn lg" id="go">I'm ready ▸</button></div>`);
   const begin = () => { R.clearStep(S); onStepDone = null; renderActive(); };
-  beginStep(10, 'rest'); onStepDone = begin;
+  if (beginStep(10, 'rest', 'ready')) { beep('go'); say(`Get ready. ${b.name}.`); }
+  onStepDone = begin;
   document.getElementById('go').addEventListener('click', () => {
     /* THE FIRST TAP IS THE ONLY MOMENT AUDIO CAN BE UNLOCKED.
        A session used to begin because somebody pressed something inside the
@@ -286,6 +339,7 @@ function buildEntries(b) {
 }
 function renderActive() {
   countUpStart = null;
+  onScreen('active');
   const f = block().format;
   if (f === 'superset') return renderSuperset();
   if (f === 'circuit') return renderCircuit();
@@ -320,8 +374,9 @@ function nextRx(b) {
   return '';
 }
 function sectionNext() {
-  R.clearStep(S); onStepDone = null;
+  onStepDone = null;          // no clearStep: a reopen lands here mid-rest and keeps it
   if (isLastBlock()) return finishSession();
+  onScreen('trans');
   const done = block();
   const next = S.plan.blocks[S.bi + 1];
   const firstItem = (next.items && next.items[0]) || { name: next.name };
@@ -370,7 +425,7 @@ function sectionNext() {
   document.getElementById('exitBtn').addEventListener('click', confirmExit);
   document.getElementById('backBtn').addEventListener('click', backBlock);
   const begin = () => { R.clearStep(S); onStepDone = null; enterBlock(S.bi + 1, { skipReady: true }); };
-  beginStep(rest, 'rest'); say(`Rest. Next, ${next.name}.`); onStepDone = begin;
+  if (beginStep(rest, 'rest', 'trans')) say(`Rest. Next, ${next.name}.`); onStepDone = begin;
   document.getElementById('add20').addEventListener('click', () => { S.stepDur += 20; R.save(S); });
   document.getElementById('sub20').addEventListener('click', () => { if (R.stepRemaining(S) > 25) { S.stepDur -= 20; R.save(S); } });
   document.getElementById('goNext').addEventListener('click', begin);
@@ -454,7 +509,7 @@ function backBlock() {
   if (S.bi <= 0) return;
   const prev = S.plan.blocks[S.bi - 1];
   (S.captured[prev.id] || []).forEach(e => e.sets = []);
-  R.clearStep(S); onStepDone = null; roundBuf = {};
+  R.clearStep(S); onStepDone = null; roundBuf = S.roundBuf = {};
   enterBlock(S.bi - 1);
 }
 function shellPlain(inner) {
@@ -462,7 +517,32 @@ function shellPlain(inner) {
     <div class="run-head" style="justify-content:flex-end;"><span class="sessclock" id="sessClock">${fmt(R.sessionElapsed(S))}</span></div>
     ${inner}</div>`;
 }
-function confirmExit() { if (confirm('End this workout? Progress is saved as far as you got.')) quit(); }
+/* Ending early used to throw the workout away while telling you it was
+   saved. Now it is your call: keep what you did (it goes to history, PRs
+   count), bin it, or change your mind. */
+function confirmExit() {
+  const logged = loggedSetCount();
+  const ov = document.createElement('div'); ov.className = 'overlay';
+  ov.innerHTML = `
+    <div class="overlay-card">
+      <div class="eyebrow">End workout</div>
+      <h2 style="margin:6px 0 4px;">Stop here?</h2>
+      <p class="muted" style="margin:0 0 14px;">${logged
+        ? `You've logged ${logged} set${logged > 1 ? 's' : ''} so far.`
+        : 'Nothing logged yet.'}</p>
+      ${logged ? '<button class="btn" id="exSave">Save what I did</button>' : ''}
+      <button class="btn ${logged ? 'ghost' : ''}" id="exDiscard" style="margin-top:8px;">${logged ? 'Discard it' : 'End workout'}</button>
+      <button class="btn ghost" id="exKeep" style="margin-top:8px;">Keep going</button>
+    </div>`;
+  host.appendChild(ov);
+  ov.querySelector('#exSave')?.addEventListener('click', () => { ov.remove(); finishSession({ partial: true }); });
+  ov.querySelector('#exDiscard').addEventListener('click', () => { ov.remove(); quit(); });
+  ov.querySelector('#exKeep').addEventListener('click', () => ov.remove());
+}
+function loggedSetCount() {
+  return Object.values(S.captured || {}).flat()
+    .reduce((n, e) => n + (e.sets || []).filter(s => s.value != null && s.value !== '').length, 0);
+}
 
 /* ---------------- timer + input fragments ---------------- */
 function timerSvg(cls) {
@@ -558,7 +638,7 @@ function renderSets() {
       <div class="timer-wrap">${timerSvg('buffer')}</div>
       <div class="actionbar"><button class="btn ghost" id="skip">Skip ▸</button></div>`);
     document.getElementById('skip').addEventListener('click', () => { R.clearStep(S); onStepDone = null; capture(target); afterSet(); });
-    beginStep(target, 'work'); say(`${item.name}. Hold it.`); onStepDone = () => { capture(target); afterSet(); };
+    if (beginStep(target, 'work', 'hold')) say(`${item.name}. Hold it.`); onStepDone = () => { capture(target); afterSet(); };
   } else {                                              // reps set → tap-to-type, weight + R/L
     const weighted = item.load === 'weighted';
     const uni = item.laterality === 'unilateral' || item.perSide;
@@ -660,7 +740,7 @@ function renderRest(prevItem) {
     <div class="actionbar"><div class="btn-row">
       <button class="btn secondary" id="sub20">−20s</button><button class="btn secondary" id="add20">+20s</button>
       <button class="btn" id="skip">Skip ▸</button></div></div>`);
-  beginStep(suggested, 'rest'); say(`Rest. ${suggested} seconds.`);
+  if (beginStep(suggested, 'rest', 'rest')) say(`Rest. ${suggested} seconds.`);
   onStepDone = () => { S.sub = 'work'; R.save(S); resume(); };
   document.getElementById('add20').addEventListener('click', () => { S.stepDur += 20; R.save(S); });
   document.getElementById('sub20').addEventListener('click', () => { if (R.stepRemaining(S) > 25) { S.stepDur -= 20; R.save(S); } });
@@ -679,14 +759,14 @@ function renderSkill() {
   if (item.minutes) {                         // freeform practice block for this drill
     shell(`${head}<div class="timer-wrap">${timerSvg('buffer')}</div><div class="circuit-list">${drillList}</div>
       <div class="actionbar"><button class="btn" id="doneSkill">Done ▸</button></div>`);
-    beginStep(item.minutes * 60, 'work'); say(`${item.name}.`);
+    if (beginStep(item.minutes * 60, 'work', 'skillmin')) say(`${item.name}.`);
     const adv = () => { R.clearStep(S); onStepDone = null; afterSkillItem(); };
     onStepDone = adv;
     document.getElementById('doneSkill').addEventListener('click', adv);
   } else if (item.measure === 'hold') {        // timed-hold drill (e.g. wall handstand / front lever tuck)
     shell(`${head}<div class="timer-wrap">${timerSvg('buffer')}</div><div class="circuit-list">${drillList}</div>
       <div class="actionbar"><button class="btn ghost" id="skip">Skip ▸</button></div>`);
-    beginStep(item.hold || 20, 'work'); say(`${item.name}. Hold.`);
+    if (beginStep(item.hold || 20, 'work', 'skillhold')) say(`${item.name}. Hold.`);
     const adv = () => { capture(item.hold || 20); afterSkillSet(item); };
     onStepDone = adv;
     document.getElementById('skip').addEventListener('click', () => { R.clearStep(S); onStepDone = null; adv(); });
@@ -746,7 +826,7 @@ function renderSuperset() {
       ${pairStrip(b)}${noRestHint}<div class="spacer" style="height:86px;"></div>
       <div class="actionbar"><button class="btn ghost" id="skip">Skip ▸</button></div>`);
     const adv = () => { roundBuf[S.ci] = { value: target }; afterSupersetItem(); };
-    beginStep(target, 'work'); say(`${item.name}. Hold.`);
+    if (beginStep(target, 'work', 'sshold')) say(`${item.name}. Hold.`);
     onStepDone = adv;
     document.getElementById('skip').addEventListener('click', () => { R.clearStep(S); onStepDone = null; adv(); });
     return;
@@ -812,10 +892,10 @@ function renderSupersetRest() {
       <button class="btn" id="nextRound">Round ${S.round + 1} ▸</button></div></div>`);
   const proceed = () => {
     R.clearStep(S); onStepDone = null;
-    S.round += 1; S.ci = 0; roundBuf = {}; S.sub = 'work'; R.save(S);
+    S.round += 1; S.ci = 0; roundBuf = S.roundBuf = {}; S.sub = 'work'; R.save(S);
     renderSuperset();
   };
-  beginStep(rest, 'rest'); say(`Rest. ${rest} seconds.`);
+  if (beginStep(rest, 'rest', 'ssrest')) say(`Rest. ${rest} seconds.`);
   onStepDone = proceed;
   document.getElementById('add20').addEventListener('click', () => { S.stepDur += 20; R.save(S); });
   document.getElementById('sub20').addEventListener('click', () => { if (R.stepRemaining(S) > 25) { S.stepDur -= 20; R.save(S); } });
@@ -837,7 +917,7 @@ function renderCircuit() {
     shell(`<div class="rounds">${dots}</div><div class="now-ex"><div class="label">Round ${S.round} / ${b.rounds}</div><div class="name">${item.name}${item.side ? ' ' + item.side : ''}</div></div>${exActions(item)}
       <div class="timer-wrap">${timerSvg('buffer')}</div><div class="circuit-list">${list}</div>
       <div class="actionbar"><button class="btn ghost" id="skip">Skip ▸</button></div>`);
-    beginStep(item.hold || 30, 'work'); say(`${item.name}. Go.`);
+    if (beginStep(item.hold || 30, 'work', 'chold')) say(`${item.name}. Go.`);
     const adv = () => { roundBuf[S.ci] = item.hold; afterCircuitItem(); };
     onStepDone = adv;
     document.getElementById('skip').addEventListener('click', () => { R.clearStep(S); onStepDone = null; adv(); });
@@ -859,7 +939,7 @@ function renderBuffer() {
     <div class="timer-wrap">${timerSvg('buffer')}</div>
     <div class="actionbar"><button class="btn" id="go">Go now ▸</button></div>`);
   const t = Number(b.transition) > 0 ? Number(b.transition) : 8;   // 8s default set-up before a hold
-  beginStep(t, 'rest'); say(`Next. ${next.name}.`);
+  if (beginStep(t, 'rest', 'buffer')) say(`Next. ${next.name}.`);
   onStepDone = () => { S.sub = 'work'; R.save(S); renderCircuit(); };
   document.getElementById('go').addEventListener('click', () => { R.clearStep(S); onStepDone = null; S.sub = 'work'; R.save(S); renderCircuit(); });
 }
@@ -883,7 +963,7 @@ function endRound() {
   R.save(S); buzz(60); say(`Round ${S.round} done.`);
   if (S.round < (b.rounds || 1)) {
     if ((b.roundRest ?? 30) > 0) { S.sub = 'roundrest'; R.save(S); renderRoundRest(); }
-    else { S.round += 1; S.ci = 0; roundBuf = {}; S.sub = 'work'; R.save(S); renderCircuit(); }
+    else { S.round += 1; S.ci = 0; roundBuf = S.roundBuf = {}; S.sub = 'work'; R.save(S); renderCircuit(); }
   } else completeBlock();          // last round → editable log (every round adjustable)
 }
 function renderRoundRest() {
@@ -897,9 +977,9 @@ function renderRoundRest() {
     <div class="actionbar"><button class="btn lg" id="nextRound">Start round ${S.round + 1} ▸</button></div>`, { progress: false });
   const proceed = () => {
     b.items.forEach((it, i) => { const v = readInput(`rr_${i}`); if (v != null) S.captured[b.id][i].sets[S.captured[b.id][i].sets.length - 1].value = v; });
-    R.clearStep(S); onStepDone = null; S.round += 1; S.ci = 0; roundBuf = {}; S.sub = 'work'; R.save(S); renderCircuit();
+    R.clearStep(S); onStepDone = null; S.round += 1; S.ci = 0; roundBuf = S.roundBuf = {}; S.sub = 'work'; R.save(S); renderCircuit();
   };
-  beginStep(rest, 'rest'); onStepDone = proceed;
+  beginStep(rest, 'rest', 'roundrest'); onStepDone = proceed;
   document.getElementById('nextRound').addEventListener('click', proceed);
 }
 
@@ -907,7 +987,7 @@ function renderRoundRest() {
 function renderAmrap() {
   const b = block(); const mins = b.minutes || 5;
   const single = b.items.length === 1;          // single-exercise max-out → log reps, not rounds
-  if (S.stepDur == null) { beginStep(mins * 60, 'work'); say(single ? `Max reps. ${mins} minutes. Go.` : `As many rounds as possible. ${mins} minutes. Go.`); }
+  if (beginStep(mins * 60, 'work', 'amrap')) { say(single ? `Max reps. ${mins} minutes. Go.` : `As many rounds as possible. ${mins} minutes. Go.`); }
   const finish = () => {
     R.clearStep(S); onStepDone = null;
     if (single) { S.captured[b.id][0].sets = [{ value: curVal }]; R.save(S); }
@@ -961,7 +1041,7 @@ function renderInterval() {
     <div class="actionbar"><button class="btn ghost" id="skip">Skip ▸</button></div>`);
   const dur = phaseWork ? work : rest;
   if (dur <= 0) return nextInterval();
-  beginStep(dur, phaseWork ? 'work' : 'rest'); if (phaseWork) say(item.name);
+  if (beginStep(dur, phaseWork ? 'work' : 'rest', 'iv') && phaseWork) say(item.name);
   onStepDone = nextInterval;
   document.getElementById('skip').addEventListener('click', () => { R.clearStep(S); onStepDone = null; nextInterval(); });
 }
@@ -987,6 +1067,7 @@ function renderBenchmark() {
 /* ---------------- log card + summary ---------------- */
 function renderLog() {
   const b = block(); const entries = S.captured[b.id];
+  onScreen('log');
   // grouped: exercise name once, its sets underneath (no repeated names)
   const word = (b.format === 'circuit' || b.format === 'superset' || entries.some(e => e.rounds)) ? 'Round' : 'Set';
   const groups = entries.map((e, ei) => {
@@ -1012,6 +1093,7 @@ function renderLog() {
 }
 function renderSummary() {
   const b = block();
+  onScreen('summary');
   const rows = S.captured[b.id].map(e => `<div class="row"><span class="nm">${e.name}</span><span class="tg">${e.sets.map(s => s.value ?? '–').join(' · ')} ${e.unit}</span></div>`).join('');
   shell(`<div class="center"><div class="eyebrow">${b.role}</div><h2 style="font-size:22px;margin:8px 0 4px;">${b.name} — done</h2></div>
     <div class="card logcard">${rows || '<div class="muted">Logged.</div>'}</div>
@@ -1042,7 +1124,7 @@ document.addEventListener('click', e => {
 /* meaningful, motivating pace bits — this session vs your history of the same workout */
 function efficiencyCallouts(session) {
   let all = []; try { all = store.all.sessions; } catch (e) {}
-  const prev = all.slice(0, -1).filter(s => s.name === session.name && s.seconds);   // prior runs of THIS workout
+  const prev = all.slice(0, -1).filter(s => s.name === session.name && s.seconds && !s.partial);   // prior runs of THIS workout; an ended-early run is no pace to beat
   const clean = n => (n || '').replace(/[—·].*$/, '').trim();
   const out = [];
   if (!prev.length) {
@@ -1097,36 +1179,48 @@ function renderFeedback(next) {
   });
 }
 
-function finishSession() {
-  if (S?.plan?.coachMode && !S.feedbackDone) {
+function finishSession(opts = {}) {
+  const partial = !!opts.partial;
+  if (!partial && S?.plan?.coachMode && !S.feedbackDone) {
     // freeze the clock first — answering the prompt must not inflate the session time
     S.finishElapsed = R.sessionElapsed(S);
-    S.feedbackDone = true; R.save(S);
+    S.feedbackDone = true; S.screen = 'feedback'; R.save(S);
     stopTicker(); releaseAwake();
     return renderFeedback(finishSession);
   }
-  stopTicker(); releaseAwake();
+  stopTicker(); releaseAwake(); stopAudio();
   const elapsed = S.finishElapsed != null ? S.finishElapsed : R.sessionElapsed(S);
+  /* the block you were in when you stopped has no finish time yet */
+  const cur = block();
+  if (partial && cur && S.blockStart && !S.blockTimes[cur.id]) S.blockTimes[cur.id] = Math.max(0, Math.round((Date.now() - S.blockStart) / 1000));
+  /* an ended-early session keeps only what was actually done: sets with a
+     number in them, and the blocks that have any */
+  const entriesOf = b => (S.captured[b.id] || [])
+    .map(e => partial ? { ...e, sets: (e.sets || []).filter(s => s.value != null && s.value !== '') } : e)
+    .filter(e => !partial || e.sets.length);
   const session = {
     date: new Date().toISOString(), name: S.plan.name, sessionId: S.plan.sessionId,
     duration: S.plan.duration, seconds: elapsed,
-    blocks: S.plan.blocks.map(b => ({ id: b.id, type: b.role, name: b.name, format: b.format, seconds: S.blockTimes[b.id] || 0, entries: S.captured[b.id] || [] })),
+    ...(partial ? { partial: true } : {}),
+    blocks: S.plan.blocks.map(b => ({ id: b.id, type: b.role, name: b.name, format: b.format, seconds: S.blockTimes[b.id] || 0, entries: entriesOf(b) }))
+      .filter(b => !partial || b.entries.length),
   };
   const { prs } = store.saveSession(session);
-  const effs = efficiencyCallouts(session);
+  const effs = partial ? [] : efficiencyCallouts(session);
   R.clear();
   const prText = p => p.weight != null
     ? ((p.l != null || p.r != null) ? `${p.weight}lb · L${p.l ?? '–'} · R${p.r ?? '–'}` : `${p.weight}lb × ${p.value}`)
     : `${p.value} ${p.unit}`;
   if (prs.length) say(`New record. ${prText(prs[0])}.`);
+  else if (partial) say('Saved.');
   else if (effs[0]?.icon === '🏆') say('Most efficient session yet. Great work.');
   else say('Workout complete. Strong work.');
   const prHtml = prs.length ? `<div class="card"><div class="eyebrow">New PRs</div>${prs.map(p => `<div class="row" style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);"><span>${p.name}</span><span class="pr-flash">${prText(p)}</span></div>`).join('')}</div>` : '';
   const effHtml = effs.length ? `<div class="card"><div class="eyebrow">Pace</div>${effs.map(e => `<div class="eff-row"><span class="eff-ico">${e.icon}</span><span>${e.text}</span></div>`).join('')}</div>` : '';
   host.innerHTML = `<div class="screen fade-in center ${S.plan.coachMode ? 'bgn' : ''}">
     <div class="big-emoji">${prs.length ? '🏆' : '✅'}</div>
-    <h1 style="font-size:28px;">${prs.length ? 'New records!' : 'Done.'}</h1>
-    <p class="muted">${S.plan.name} · ${fmt(elapsed)} · ${S.plan.duration} min plan</p>
+    <h1 style="font-size:28px;">${prs.length ? 'New records!' : partial ? 'Saved.' : 'Done.'}</h1>
+    <p class="muted">${S.plan.name} · ${fmt(elapsed)} · ${partial ? 'ended early' : `${S.plan.duration} min plan`}</p>
     <div style="height:16px;"></div>${prHtml}${effHtml}
     <div class="actionbar"><button class="btn lg" id="home">Back to week</button></div></div>`;
   document.getElementById('home').addEventListener('click', () => cb.onFinish?.());
