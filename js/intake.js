@@ -64,15 +64,26 @@ function uiFor(a) {
  * was nothing to consume — so boot() can carry on exactly as before.
  */
 export async function consumeSurveyHandoff() {
-  const raw = readFragment('fj');
+  const fromUrl = readFragment('fj');
+  /* ANDROID: THE APP OPENED BEFORE "OPEN MY APP" WAS TAPPED.
+     Chrome and an installed app share storage, but the survey offers the
+     install midway, so the icon can be opened before the link above ever
+     runs. The survey leaves the same payload in `fj.pendingHandoff` for
+     exactly that case (onboarding.html, parkHandoff). Used only when the
+     address carries nothing, and gone once used either way. */
+  let parked = null;
+  if (!fromUrl) { try { parked = localStorage.getItem(PENDING); } catch (e) {} }
+  const raw = fromUrl || parked;
   if (!raw) return null;
   const id = await applySurveyPayload(raw);
+  if (id) { try { localStorage.removeItem(PENDING); } catch (e) {} }
   /* Take it out of the address bar. It has been read, it is health data,
      and leaving it there puts it in the back button and in any screenshot
      of the app. */
-  if (id) clearFragment();
+  if (id && fromUrl) clearFragment();
   return id;
 }
+const PENDING = 'fj.pendingHandoff';
 
 /* THE SAME ARRIVAL, FROM A PASTE RATHER THAN THE ADDRESS BAR.
 

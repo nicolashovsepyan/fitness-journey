@@ -6497,9 +6497,19 @@ const SEED = (function(){
    iPhone, and not inside the app itself; Android installs from the
    manifest and shares storage with the browser, so it needs none of this. */
 function pinAppAddress(){
+  parkHandoff();
   if(!/iPad|iPhone|iPod/.test(navigator.userAgent)) return;
   if(window.navigator.standalone === true) return;
   try{ history.replaceState(null, '', appLink()); }catch(e){}
+}
+/* ANDROID, AND ANY BROWSER THAT SHARES STORAGE WITH ITS INSTALLED APP.
+   The install is offered before the last screen, so the icon can be opened
+   before "Open my app" is ever tapped - and then the app finds no one and
+   asks whose phone it is. The same payload "Open my app" would carry is
+   left here; js/intake.js takes it on the app's first open and deletes it.
+   Harmless on an iPhone, whose installed app cannot see this storage. */
+function parkHandoff(){
+  try{ localStorage.setItem('fj.pendingHandoff', appLink().split('#fj=')[1]); }catch(e){}
 }
 function hasSeed(){ return !!(SEED || SEED_LATE.s); }
 function appPayload(){
