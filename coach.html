@@ -349,6 +349,22 @@ header:after{
 .genshape p{font-size:12.5px;line-height:1.6;margin:0 0 10px}
 .gsdays{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
 .gsdays .q{font-size:11px}
+.gsbtns{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+
+/* the composer: a suggestion you can take apart, one row per day */
+.gencomp{margin-top:14px;border:1px solid var(--accent);border-radius:12px;
+  padding:14px;background:var(--card)}
+.gcrows{display:flex;flex-direction:column;gap:6px;margin:10px 0}
+.gcrow{display:grid;grid-template-columns:18px minmax(120px,190px) 1fr 22px;
+  align-items:center;gap:9px}
+.gcrow .n{font:600 10px ui-monospace,monospace;color:var(--ink3);text-align:center}
+.gcrow select{font:inherit;font-size:12.5px;background:var(--sunk);color:var(--ink);
+  border:1px solid var(--line);border-radius:7px;padding:5px 7px;width:100%}
+.gcrow small{font-size:10.5px;color:var(--ink3);overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.gcx{border:none;background:none;color:var(--ink3);cursor:pointer;font-size:15px;line-height:1}
+.gcx:hover{color:var(--gold)}
+.gcadd{display:flex;gap:14px;margin-bottom:8px}
 .draftchip{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
   padding:2px 6px;border-radius:99px;border:1px solid var(--neon-line);
   color:var(--neon);opacity:.85;vertical-align:2px;margin-left:6px}
@@ -2847,7 +2863,52 @@ const GEN_SLOT = {
   pull:  ['h-pull','v-pull','straight-arm-pull'],
   core:  ['anti-extension','anti-rotation','anti-lateral-flexion','compression','flexion'],
   carry: ['carry','locomotion'],
+  /* CONDITIONING IS THREE SUB-PATTERNS, NOT ONE, and deliberately so.
+     Jumps are the obvious ingredient and the first thing struck out by a
+     knee on the body map or a joint flag on the PAR-Q - genAvoid adds
+     'impact' for both. A slot that meant only 'jump' would empty itself
+     for exactly the people most likely to be asking for fat loss. Carries
+     and swings do the same job standing up. */
+  conditioning: ['jump','locomotion','hinge'],
 };
+
+/* THE KINDS OF DAY A WEEK CAN BE MADE OF.
+
+   These were written inline inside genShapes, four times over, which is
+   why there were exactly two ways to arrange a week and no way to say
+   "one push, one pull, two full body". A day is a name and a set of
+   slots; the presets below are orderings of these, and the composer in
+   the panel is the same list with the choosing left to a person. */
+const GEN_ALL6 = ['squat','hinge','push','pull','core','carry'];
+const GEN_KINDS = {
+  full:  { name:'Full body',    tag:'all 6 patterns',      focus:GEN_ALL6 },
+  upper: { name:'Upper',        tag:'push · pull · core',  focus:['push','pull','core'] },
+  lower: { name:'Lower',        tag:'squat · hinge · carry', focus:['squat','hinge','carry'] },
+  push:  { name:'Push',         tag:'push · core',         focus:['push','core'] },
+  pull:  { name:'Pull',         tag:'pull · carry',        focus:['pull','carry'] },
+  legs:  { name:'Legs',         tag:'squat · hinge · core', focus:['squat','hinge','core'] },
+  cond:  { name:'Conditioning', tag:'intervals · core',    focus:['conditioning','core'], cond:true },
+};
+/* One day of a shape, from a kind. The suffix letters days that repeat. */
+const genDay = (kind, suffix) => {
+  const k = GEN_KINDS[kind];
+  return { kind, name: k.name + (suffix ? ' ' + suffix : ''), tag: k.tag, focus: k.focus, cond: !!k.cond };
+};
+
+/* A LIST OF KINDS BECOMES A LIST OF DAYS, and the letters are decided
+   here rather than at each call site. Written by hand in one place and
+   not another, a week came out as "Upper, Lower, Upper, Conditioning" -
+   two days with the same name, which is ambiguous in the picker, in the
+   release switches and on the client's phone. A kind that appears once
+   has no letter; a kind that repeats is lettered in order. */
+function genDaysFrom(kinds){
+  const total = kinds.reduce((m,k)=>(m[k]=(m[k]||0)+1, m), {});
+  const seen = {};
+  return kinds.map(k => {
+    seen[k] = (seen[k]||0) + 1;
+    return genDay(k, total[k] > 1 ? 'ABCDEF'[seen[k]-1] : '');
+  });
+}
 
 function genKit(a){
   const kit = new Set(['bw']);
@@ -3031,48 +3092,59 @@ function genDose(a){
 }
 
 /* ---- the shapes on offer ---------------------------------------- */
+/* Does anything they answered say fat loss? Both halves of the survey can
+   say it - the 90-day focus and the reason they opened the app - and
+   either one is enough to make an engine day worth offering. */
+const genWantsLean = a => [].concat(a.focus||[], a.driver||[])
+  .some(v => ['lean','lose','wind','energy'].indexOf(v) >= 0);
+
 function genShapes(a){
   const days = Math.max(1, Math.min(6, +a.days || 3));
   const len = +a.length || 45;
   const S = [];
-  const all = ['squat','hinge','push','pull','core','carry'];
+  const L = 'ABCDEF';
+  const rep = (kind, n) => genDaysFrom(Array.from({length:n}, ()=>kind));
 
   if(days <= 2){
     S.push({ id:'fb', name:'Full body, every session', rec:true,
       why:'With '+days+' session'+(days===1?'':'s')+' a week, every pattern has to appear every time. Anything split leaves a pattern trained once a fortnight.',
-      days: Array.from({length:days}, (_,i)=>({ name:'Full Body '+String.fromCharCode(65+i), tag:'all 6 patterns', focus:all })) });
+      days: rep('full', days) });
   } else if(days === 3){
     S.push({ id:'fb3', name:'Full body, 3 times', rec:true,
       why:'Every pattern 3 times a week, which is the most reliable way to learn movements and the easiest to miss a day from without losing anything.',
-      days:[0,1,2].map(i=>({ name:'Full Body '+'ABC'[i], tag:'all 6 patterns', focus:all })) });
+      days: rep('full', 3) });
     S.push({ id:'ppl', name:'Push, pull, legs', rec:false,
       why:'More volume per pattern per session, less frequency. Better once the movements are known, worse while they are being learned.',
-      days:[{name:'Push', tag:'push · core', focus:['push','core']},
-            {name:'Pull', tag:'pull · carry', focus:['pull','carry']},
-            {name:'Legs', tag:'squat · hinge · core', focus:['squat','hinge','core']}] });
+      days: [genDay('push'), genDay('pull'), genDay('legs')] });
   } else if(days === 4){
     S.push({ id:'ul', name:'Upper, lower, twice each', rec:true,
       why:'Every pattern twice a week with room to go deeper than a full body day allows, and 48 hours between sessions for the same muscle by construction.',
-      days:[{name:'Upper A', tag:'push · pull', focus:['push','pull','core']},
-            {name:'Lower A', tag:'squat · hinge', focus:['squat','hinge','carry']},
-            {name:'Upper B', tag:'push · pull', focus:['push','pull','core']},
-            {name:'Lower B', tag:'squat · hinge', focus:['squat','hinge','carry']}] });
+      days: [genDay('upper','A'), genDay('lower','A'), genDay('upper','B'), genDay('lower','B')] });
     S.push({ id:'fb4', name:'Full body, 4 times', rec:false,
       why:'Highest frequency per pattern. Best for learning, hardest to fit inside a short session.',
-      days:[0,1,2,3].map(i=>({ name:'Full Body '+'ABCD'[i], tag:'all 6 patterns', focus:all })) });
+      days: rep('full', 4) });
   } else {
     S.push({ id:'ulf', name:'Upper, lower, and a full day', rec:true,
       why:days+' sessions is enough to split and still hit everything twice. The full day catches whatever the split under-trains.',
-      days:[{name:'Upper A', tag:'push · pull', focus:['push','pull','core']},
-            {name:'Lower A', tag:'squat · hinge', focus:['squat','hinge','carry']},
-            {name:'Full Body', tag:'all 6 patterns', focus:all},
-            {name:'Upper B', tag:'push · pull', focus:['push','pull','core']},
-            {name:'Lower B', tag:'squat · hinge', focus:['squat','hinge','carry']}]
-            .slice(0, days) });
+      days: [genDay('upper','A'), genDay('lower','A'), genDay('full'),
+             genDay('upper','B'), genDay('lower','B')].slice(0, days) });
     S.push({ id:'fbn', name:'Full body, every session', rec:false,
       why:'Simplest to run and simplest to miss a day from. Costs depth per pattern.',
-      days:Array.from({length:days}, (_,i)=>({ name:'Full Body '+String.fromCharCode(65+i), tag:'all 6 patterns', focus:all })) });
+      days: rep('full', days) });
   }
+
+  /* AND ONE WITH AN ENGINE DAY IN IT, when their own answers asked for
+     fat loss. Offered rather than imposed: it buys conditioning with a
+     day of lifting, which is the right trade for some people and the
+     wrong one for somebody who also said "get stronger". Stated on the
+     card so the trade is made on purpose. */
+  if(genWantsLean(a) && days >= 3){
+    const base = S[0].days.slice(0, days - 1).map(d => d.kind).concat(['cond']);
+    S.push({ id:'lean', name:'The same week, with an engine day', rec:false,
+      why:'They asked to lean out, and intervals do what a rep range cannot. This gives up one lifting day for one conditioning day - the strength work loses a slot, so do not pick it if getting stronger is the first goal.',
+      days: genDaysFrom(base) });
+  }
+
   const fit = genDose(a);
   S.forEach(s => { s.len = len; s.blocks = fit.blocks; });
   return S;
@@ -3098,6 +3170,48 @@ function genProgram(a, shape){
       cfg:{ rounds:2, rest:0 },
       items: prime.map(m => ({ ex:m.id, pres: m.meas === 'hold' ? '30s' : '10', note: m.cue || '' }))
     });
+
+    /* A CONDITIONING DAY IS ONE BLOCK, NOT FOUR.
+
+       Everything below writes a block per slot, each straight sets with
+       its own rest - which is the correct shape for lifting and the
+       wrong one for an engine day. Intervals are one piece of work with
+       several movements inside it and the clock doing the deciding, so
+       this builds that instead and skips the per-slot loop.
+
+       The movements come through the same filters as everything else, so
+       a knee on the body map takes the jumps out and leaves the carries
+       and the swings - which is the point of conditioning being three
+       sub-patterns rather than just 'jump'. */
+    if(D.cond){
+      const pool = [];
+      ['conditioning','core'].forEach(slot => {
+        genAny(slot, target, kit, avoid, used).forEach(m => {
+          if(pool.length < 5 && !pool.some(x=>x.id===m.id)){ pool.push(m); used.add(m.id); }
+        });
+      });
+      if(pool.length){
+        /* 40 on, 20 off is the interval most people can actually hold
+           for the whole block. Rounds come from what the session has
+           left after the prime. */
+        const work = Math.max(6, (+shape.len || 45) - 6);
+        const rounds = Math.max(2, Math.min(5, Math.floor(work / (pool.length * 1))));
+        blocks.push({
+          role:'Work', name:'Engine', type:'Circuit',
+          note:`${rounds} rounds. 40 seconds on, 20 off inside a round, 90 seconds between rounds. `
+             + 'Pace it so the last round looks like the first.',
+          cfg:{ rounds, rest:90 },
+          items: pool.map(m => ({ ex:m.id, pres:'40s', note:m.cue || '' }))
+        });
+        notes.push(`<b>${D.name}:</b> written as one circuit rather than separate lifts. `
+          + `Conditioning is the clock's job, not a rep range's.`);
+      } else {
+        notes.push(`<b>${D.name}:</b> nothing conditioning survives their kit and their joints. `
+          + `That day is empty and needs a decision.`);
+      }
+      days[key] = { name:D.name, tag:D.tag, why:'', blocks };
+      return;
+    }
 
     /* WORK. One block per slot this day covers, best fundamental
        first, up to what the session length can pay for. */
@@ -3246,13 +3360,98 @@ function genOpen(floating){
         <div class="gshead"><b>${esc(sh.name)}</b>${sh.rec?'<span class="draftchip">Suggested</span>':''}</div>
         <p class="mut">${esc(sh.why)}</p>
         <div class="gsdays">${sh.days.map(d=>`<span class="q">${esc(d.name)} &middot; <b>${esc(d.tag)}</b></span>`).join('')}</div>
-        <button class="btn ${sh.rec?'primary':''}" data-shape="${i}">Write this week</button>
+        <div class="gsbtns">
+          <button class="btn ${sh.rec?'primary':''}" data-shape="${i}">Write this week</button>
+          <button class="lnk" data-edit="${i}">Start from this and change it</button>
+        </div>
       </div>`).join('')}</div>
+    <div id="gencompose"></div>
   </div>`;
 
   host.querySelectorAll('[data-shape]').forEach(b => b.onclick = () => {
     genApply(shapes[+b.dataset.shape]);
   });
+  host.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => {
+    GEN_DRAFT = shapes[+b.dataset.edit].days.map(d => d.kind);
+    genDrawCompose(shapes[+b.dataset.edit]);
+  });
+}
+
+/* ============================================================
+   BUILDING THE WEEK UP FROM A SUGGESTION
+
+   The writer offered two arrangements and no third option. That is the
+   right place to start - a suggestion you can accept in one click is
+   worth more than a blank grid - but "one push, one pull, two full body"
+   was not sayable, and neither was "put an engine day in there". Both are
+   ordinary coaching decisions.
+
+   So the suggestions stay exactly as they were, and each one now has a
+   door out of it. The draft is a list of day kinds and nothing else; the
+   slots, names and tags come from GEN_KINDS, so a day composed here and a
+   day from a preset are the same object by the time anything is written.
+   ============================================================ */
+let GEN_DRAFT = null;
+
+function genDrawCompose(from){
+  const host = document.getElementById('gencompose');
+  if(!host || !GEN_DRAFT) return;
+  const asked = +A.days || GEN_DRAFT.length;
+  const n = GEN_DRAFT.length;
+  const counts = GEN_DRAFT.reduce((m,k)=>(m[k]=(m[k]||0)+1, m), {});
+
+  host.innerHTML = `<div class="gencomp">
+    <div class="gshead"><b>Your week</b><span class="draftchip">${n} day${n===1?'':'s'}</span></div>
+    <p class="mut">Change any day. Repeats get their own letter when it is written.${
+      n !== asked ? ` <b>They asked for ${asked}.</b>` : ''}</p>
+    <div class="gcrows">${GEN_DRAFT.map((kind,i) => `
+      <div class="gcrow">
+        <span class="n">${i+1}</span>
+        <select data-day="${i}">${Object.entries(GEN_KINDS).map(([k,v])=>
+          `<option value="${k}" ${k===kind?'selected':''}>${esc(v.name)}</option>`).join('')}</select>
+        <small>${esc(GEN_KINDS[kind].tag)}</small>
+        <button class="gcx" data-drop="${i}" title="Remove this day">&times;</button>
+      </div>`).join('')}</div>
+    <div class="gcadd">
+      <button class="lnk" data-add="full">+ day</button>
+      ${counts.cond ? '' : `<button class="lnk" data-add="cond">+ conditioning day</button>`}
+    </div>
+    <p class="nbweak ${genComposeWarn() ? '' : 'ok'}">${genComposeWarn()
+      || 'Every pattern is covered at least once.'}</p>
+    <button class="btn primary" id="gcWrite">Write this week</button>
+  </div>`;
+
+  host.querySelectorAll('[data-day]').forEach(s => s.onchange = () => {
+    GEN_DRAFT[+s.dataset.day] = s.value; genDrawCompose(from); });
+  host.querySelectorAll('[data-drop]').forEach(b => b.onclick = () => {
+    if(GEN_DRAFT.length <= 1) return toast('A week needs at least one day');
+    GEN_DRAFT.splice(+b.dataset.drop,1); genDrawCompose(from); });
+  host.querySelectorAll('[data-add]').forEach(b => b.onclick = () => {
+    if(GEN_DRAFT.length >= 6) return toast('Six days is the most this writes');
+    GEN_DRAFT.push(b.dataset.add); genDrawCompose(from); });
+  const w = document.getElementById('gcWrite');
+  if(w) w.onclick = () => genApply(genShapeFromDraft(from));
+}
+
+/* WHAT THE WEEK IS MISSING, SAID IN WORDS RATHER THAN LEFT TO BE FOUND.
+   A composed week can leave a pattern out entirely - four conditioning
+   days train no pull at all - and that is the one mistake the presets
+   could not make and a person can. */
+function genComposeWarn(){
+  const covered = new Set();
+  GEN_DRAFT.forEach(k => GEN_KINDS[k].focus.forEach(f => covered.add(f)));
+  const missing = GEN_ALL6.filter(p => !covered.has(p));
+  if(missing.length) return `Nothing in this week trains ${missing.join(', ')}.`;
+  const lifting = GEN_DRAFT.filter(k => !GEN_KINDS[k].cond).length;
+  if(!lifting) return 'Every day is conditioning. Nothing here gets stronger.';
+  return null;
+}
+
+/* Letters only where a kind repeats, so "Push, Pull, Full body A, Full
+   body B" rather than four days all called A. */
+function genShapeFromDraft(from){
+  return { id:'custom', name:'Your week', rec:false, why:'',
+           days: genDaysFrom(GEN_DRAFT), len:from.len, blocks:from.blocks };
 }
 
 /* Writing it is not saving it. PROG changes, the builder redraws, and
