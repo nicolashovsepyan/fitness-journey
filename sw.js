@@ -15,22 +15,19 @@
    Training data lives in localStorage, not here, so an update never
    touches a logged session.
    ============================================================ */
-const VERSION = '6c60f2c274';
+const VERSION = 'cf32553cd9';
 const CACHE = 'fj-' + VERSION;
 const ASSETS = [
   "./coach.html",
   "./dashboard.html",
   "./icon-180.png",
   "./icon-192.png",
-  "./icon-512-maskable.png",
   "./icon-maskable.svg",
   "./icon.svg",
   "./icons/rounded-180.png",
   "./icons/rounded-192.png",
-  "./icons/rounded-512.png",
   "./icons/the-original-180.png",
   "./icons/the-original-192.png",
-  "./icons/the-original-512.png",
   "./images/app-icons/Rounded.svg",
   "./images/app-icons/The Original.svg",
   "./images/equipment/kettlebell.png",
@@ -74,6 +71,7 @@ const ASSETS = [
   "./js/program-adapter.js",
   "./js/release.js",
   "./js/runner.js",
+  "./js/runner/quick.js",
   "./js/runner/runstate.js",
   "./js/runner/workmode.js",
   "./js/screens/b-day.js",

@@ -17,7 +17,8 @@ Two jobs, one engine:
 1. **Program mode.** Runs a day from the user's released program
    (`dashboard.html` → `index.html?run=<dayId>` → `startWorkout(plan)`).
 2. **Quick Timer (free mode).** A standalone interval timer, like GymBoss or
-   SmartWOD: pick a format, set minutes / rounds / exercises, go. **Not built.**
+   SmartWOD: pick a format, set minutes / rounds / exercises, go. **v1 live
+   27 Sep:** `index.html?quick`, entry in the dashboard's Workouts tab.
    Plan: a small setup screen builds a RunPlan and hands it to the SAME
    runner, so every timer fix lands in both modes at once.
 
@@ -63,19 +64,14 @@ Two jobs, one engine:
 
 ### Pending (not built yet)
 
-**Quick Timer, the standalone mode**
-- Entry point from the dashboard ("Quick timer") that works with no program.
-- Setup screen: pick a format, set the numbers, optionally add moves (with reps), save as a favorite, go.
-- Formats it should offer:
-  - **EMOM** (every N sec, total minutes; alternating moves; E2MOM/E3MOM)
-  - **AMRAP** (time cap, rounds + extra reps)
-  - **For Time** (count up, optional cap, tap when done)
-  - **Tabata** (20/10 × 8, editable)
-  - **Intervals** (custom work / rest × rounds, optional sets with a longer rest between sets: the GymBoss core)
-  - **Stopwatch** and **Countdown** (plain)
-  - later: **Death By** (ladder EMOM), **Ladder / pyramid** reps, **Chipper**
-- Countdown before start (3, 5 or 10s).
-- Result saved to history ("12 min EMOM, 5 moves"), same as a program session.
+**Quick Timer, the standalone mode** (v1 shipped 27 Sep)
+- DONE: entry in the dashboard (Workouts tab), setup screen, 7 formats: EMOM (any interval, alternating moves with reps), AMRAP (moves or just count rounds), For Time (optional cap, rounds), Tabata, Intervals (work / rest × rounds, sets with rest between), Stopwatch, Countdown. Countdown before start (none, 3, 5, 10s). Saved timers. Remembers your last setup. Result card on finish, saved to history.
+- Next for Quick Timer:
+  - **Death By** (ladder EMOM), **Ladder / pyramid** reps, **Chipper**
+  - Stopwatch laps
+  - Pick moves from the exercise library (typed-in moves have no video, no PRs)
+  - "Do it again" on the finish screen
+  - Big glance layout (see below)
 
 **Timer engine**
 - Absolute schedule for timed blocks: compute every interval boundary from the block start, so resume and background are exact (fixes W1, W2).
@@ -96,7 +92,7 @@ Two jobs, one engine:
 ## Suggested build order
 
 1. **Engine fixes:** W1 + W2 (absolute schedule), W4 (save on exit), W7. Everything after this is built on a timer we trust.
-2. **Quick Timer v1:** setup screen + EMOM, AMRAP, For Time, Tabata, Intervals, Stopwatch. Reuses the runner.
+2. ~~**Quick Timer v1:**~~ DONE 27 Sep. setup screen + EMOM, AMRAP, For Time, Tabata, Intervals, Stopwatch. Reuses the runner.
 3. **Glance layout + session pause + settings** (W9, W10, W11).
 4. **Program format gaps:** EMOM logging (W6), Joint Prep (W5), rest-pause (W8).
 5. **Background audio** (W3), tested on a real iPhone.
@@ -108,6 +104,7 @@ Two jobs, one engine:
 
 Newest first. One line per shipped change: date, what changed, commit.
 
+- 27 Sep 2026 · **Quick Timer v1.** New "Quick timer" row in the dashboard's Workouts tab opens `index.html?quick` (`js/runner/quick.js`). 7 formats, optional moves with reps, countdown before start, saved timers, last setup remembered. It builds a normal plan and runs it on Work Mode, so it gets every engine fix. Runner additions that program days get too: EMOM / Tabata show the rep target and the next move; no dead rest after the last interval; a block can set its own break after it (`restAfter`) and a plan its own get-ready length (`getReady`); new `fortime` format (count up, optional cap); EMOM / Tabata log as "rounds", not "reps". Em dashes removed from Work Mode's on-screen copy.
 - 27 Sep 2026 · **Timer engine fixes.** Reopening the app now lands mid-countdown instead of restarting it (every screen: holds, rests, get ready, block transition, AMRAP, EMOM, Tabata). Back-to-back steps run on a fixed wall-clock schedule, so an EMOM no longer drifts and a locked phone catches up silently to the right minute, then beeps once. "End workout" now offers Save what I did / Discard / Keep going; saved runs go to history marked "ended early", PRs count, and they never set a pace to beat. Reps typed mid-round survive a reopen. Also fixed on the way: a second single-move AMRAP started from the first one's rep count; the silent audio loop kept running after a finished workout. Test: `test/runstate.test.mjs`. Commit 3d2df34.
 - 27 Sep 2026 · Audit written, this file created. No app change yet.
 

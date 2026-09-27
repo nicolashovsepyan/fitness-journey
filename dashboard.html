@@ -4386,6 +4386,15 @@ function paneWorkouts(){
   /* ---- a number to beat ---- */
   h += benchRail();
 
+  /* ---- the Quick Timer: EMOM, AMRAP, Tabata, intervals, no program needed.
+     Lives in the app shell (js/runner/quick.js), owned by the Work Mode chat. */
+  h += sect('Quick timer', '<span class="micro">EMOM, AMRAP, Tabata and more</span>');
+  h += `<div class="wo-list"><button class="wo-row" data-act="quick">
+    <span class="wo-th mins"><b class="tnum">⏱</b><i>timer</i></span>
+    <span class="wo-tx"><b>Start a timer</b><small>Pick a format, set the minutes, go</small></span>
+    ${svg(I.arrow,'wo-c')}
+  </button></div>`;
+
   /* ---- short, and your own ---- */
   h += sect('Short sessions', '<span class="micro">5 to 15 minutes</span>');
   h += `<div class="wo-list">${RECOVERY.map(r=>`<button class="wo-row" data-recov="${r.id}">
@@ -6471,6 +6480,7 @@ function act(a,el){
     location.href = 'index.html?run=' + encodeURIComponent(arg);
     return;
   }
+  if(cmd==='quick'){ location.href = 'index.html?quick'; return; }
   if(cmd==='pending') return toast("You'll get a nudge the moment it unlocks");
   if(cmd==='openweek') return sheetWeek();
   if(cmd==='moveto'){

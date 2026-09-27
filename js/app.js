@@ -13,6 +13,7 @@ import { renderBDay } from './screens/b-day.js';
 import { renderBSummary } from './screens/b-summary.js';
 import { renderBHistory } from './screens/b-history.js';
 import { startWorkout, resumeWorkout } from './runner/workmode.js';
+import { renderQuick } from './runner/quick.js';
 import * as R from './runner/runstate.js';
 import { isBeginner, isClaimed, activeUserId, loadUsers } from './users.js';
 import { setAdapter } from './core/storage.js';
@@ -127,6 +128,10 @@ async function startFromProgram(dayId) {
 function render() {
   // Never guess whose phone this is — ask once if we were never told.
   if (!isClaimed()) return renderClaim(app, { onDone: () => { applyUserManifest(); render(); } });
+  /* the Quick Timer: a standalone timer, no program needed (js/runner/quick.js) */
+  if (new URLSearchParams(location.search).has('quick')) {
+    return renderQuick(app, { onStart: plan => { rememberReturn(plan); startWorkout(plan, runCb); } });
+  }
   if (isBeginner()) return renderBeginner();
   return renderPro();
 }
@@ -284,7 +289,7 @@ async function boot() {
      ?view=week and ?run=<id> come back here for the program and the runner,
      which is why this is a redirect and not a rewrite of the manifest. */
   const q = new URLSearchParams(location.search);
-  if (!q.has('view') && !q.has('run')) {
+  if (!q.has('view') && !q.has('run') && !q.has('quick')) {
     location.replace('dashboard.html');
     return;
   }

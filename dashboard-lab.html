@@ -2382,12 +2382,19 @@ function fromRecords(){
 }
 
 function loadProfile(){
+  /* A LINK IN THE ADDRESS BAR IS NEWER THAN WHAT IS STORED. Records used to
+     win outright, so a person who finished the survey (which writes records)
+     and then opened the program Nico sent kept the survey's empty state and
+     the link sat unread in the URL. The link is read first; the device's own
+     identity still decides whose program it becomes, the same rule
+     js/release.js follows - one person per phone. */
   const viaRecords = fromRecords();
-  if(viaRecords) return viaRecords;
+  const linked = (location.hash || '').replace(/^#/, '').length > 40;
+  if(viaRecords && !linked) return viaRecords;
   try{
     const viaLink = fromHash();
     if(viaLink){
-      const uid = viaLink.uid || uidFor(viaLink.a);
+      const uid = (viaRecords && viaRecords.uid) || viaLink.uid || uidFor(viaLink.a);
       localStorage.setItem('fj.v1.profile.' + uid,
         JSON.stringify({v:PROFILE_V, at:viaLink.at, uid, a:viaLink.a}));
       localStorage.setItem('fj.v1.current', uid);
@@ -2406,6 +2413,12 @@ function loadProfile(){
           cur.program = viaLink.program;
           if(viaLink.released) cur.released = viaLink.released;
           localStorage.setItem(key, JSON.stringify(cur));
+          /* and retire the Program row an earlier link left. releasedProgram()
+             reads that row before this one, so without this a second program
+             sent to the same phone showed the first one forever.
+             syncRunnerRecords() rebuilds the row from what was just written. */
+          const rows = JSON.parse(localStorage.getItem('fj.programs') || '[]');
+          localStorage.setItem('fj.programs', JSON.stringify(rows.filter(p => p.assignedTo !== uid)));
         }catch(e){}
       }
 
@@ -2415,6 +2428,8 @@ function loadProfile(){
       return {uid, a:viaLink.a, at:viaLink.at};
     }
   }catch(e){}
+  /* a link that could not be read leaves the stored person exactly as they were */
+  if(viaRecords) return viaRecords;
   try{
     /* the current build */
     const cur = localStorage.getItem('fj.v1.current');
@@ -3293,16 +3308,18 @@ const weekKey = () => {
 
 const MESSAGES = [
   {id:'mon1', from:'Coach Nico', at:'MON 08:00', subject:'Monday check-in',
-   lines:['Week one. Four sessions, twenty minutes, nothing heavy.',
+   /* Every client reads these. They used to describe one person's plan
+      (4 sessions of 20 minutes, a sore knee on Wednesday) to everybody. */
+   lines:['New week. Every session on your plan, nothing heavy yet.',
           'Turning up <em>is</em> the job. Numbers come later.'],
-   ask:"How's the knee after Wednesday?", cta:'Reply'},
+   ask:'How did your body feel after your last session?', cta:'Reply'},
   {id:'weigh', from:'Coach Nico', at:'MON 07:30', subject:'Weigh-in day',
    lines:['Same day, same time, before anything else. It only means something if it is the same conditions every week.',
-          'One number. It will bounce around and that is normal \u2014 the line is what I read, not the day.'],
+          'One number. It will bounce around and that is normal. The line is what I read, not the day.'],
    ask:'What did the scale say?', cta:'Log it'},
-  {id:'welcome', from:'Coach Nico', at:'SUN 19:40', subject:'Your program is being built',
-   lines:['Read your answers twice. The knee and the ankle change more than you would think.',
-          'Nothing you see is a template \u2014 I write it, then I check it.'],
+  {id:'welcome', from:'Coach Nico', at:'SUN 19:40', subject:'I read your answers',
+   lines:['I read every answer twice. Injuries and sleep change more than you would think.',
+          'Nothing you see is a template. I write it, then I check it.'],
    ask:null, cta:null}
 ];
 
@@ -3516,7 +3533,7 @@ const seed = {
   targetKg:null,                                /* his to set, not ours to assume */
   notes:[
     {at:0,k:'milestone',h:'Onboarding finished',
-     b:'45 answers, a starting weight, and a program being built around one kettlebell.'}
+     b:'Your answers are in, with a starting weight. Everything from here lands in this log.'}
   ],
   profile:{photo:false,goalweight:false,measure:false,test:false,injury:false},
   dismissed:{}
@@ -4375,6 +4392,15 @@ function paneWorkouts(){
 
   /* ---- a number to beat ---- */
   h += benchRail();
+
+  /* ---- the Quick Timer: EMOM, AMRAP, Tabata, intervals, no program needed.
+     Lives in the app shell (js/runner/quick.js), owned by the Work Mode chat. */
+  h += sect('Quick timer', '<span class="micro">EMOM, AMRAP, Tabata and more</span>');
+  h += `<div class="wo-list"><button class="wo-row" data-act="quick">
+    <span class="wo-th mins"><b class="tnum">⏱</b><i>timer</i></span>
+    <span class="wo-tx"><b>Start a timer</b><small>Pick a format, set the minutes, go</small></span>
+    ${svg(I.arrow,'wo-c')}
+  </button></div>`;
 
   /* ---- short, and your own ---- */
   h += sect('Short sessions', '<span class="micro">5 to 15 minutes</span>');
@@ -6461,6 +6487,7 @@ function act(a,el){
     location.href = 'index.html?run=' + encodeURIComponent(arg);
     return;
   }
+  if(cmd==='quick'){ location.href = 'index.html?quick'; return; }
   if(cmd==='pending') return toast("You'll get a nudge the moment it unlocks");
   if(cmd==='openweek') return sheetWeek();
   if(cmd==='moveto'){
@@ -6842,8 +6869,11 @@ function showIntro(){
     : IS_DEMO
     ? 'Nobody has filled in the survey on this device yet, so this is a sample. '
       + 'Fill it in and this becomes yours.'
+    : programRaw()
+    ? `Your program is here. Open your week and start with today. `
+      + `Everything you do from here lands in one place.`
     : `Your answers are in and Coach Nico is building your program. `
-      + `Everything you do from here lands in one place.`;
+      + `He will text you a link when it is ready.`;
   el.hidden = false;
   el.querySelector('.in-go').onclick = ()=>{
     el.classList.add('out');

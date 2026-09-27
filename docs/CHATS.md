@@ -59,7 +59,7 @@ when the area goes quiet — a stale row is worse than no row.
 |---|---|---|
 | **Coach console** | `coach.html` | Idle since 12 Sep. Last: the builder went full width, dials on top, movement picker opens in the block that wants one. |
 | **Dashboard** | `dashboard.html`, `js/` (except the Work Mode files) | Active 13 Sep. Last: week navigation backwards, undo a mis-tap. |
-| **Work Mode** | `js/runner/`, `js/timer.js`, `js/data/formats.js` | **Own chat since 27 Sep.** Audit, plan and changelog: `docs/WORK-MODE.md`. Other chats read it, never edit these files. |
+| **Work Mode** | `js/runner/` (incl. `quick.js`, the Quick Timer), `js/timer.js`, `js/data/formats.js`, and the "Quick timer" row in `dashboard.html` | **Own chat since 27 Sep.** Audit, plan and changelog: `docs/WORK-MODE.md`. Other chats read it, never edit these files. |
 | **Lab** | `lab/`, `dashboard-lab.html`, `tools/build-lab.mjs` | Active 13 Sep. Experiments kept away from clients. |
 | **Logo / icons** | `logo/`, `icon*`, `images/logo-mark.svg`, `styles.css` | **IN FLIGHT, UNCOMMITTED.** Leave alone. Untracked: `logo/fj/`, `images/fj-signature.png`. |
 | **Survey** | `onboarding.html` | Idle since 12 Sep. |
