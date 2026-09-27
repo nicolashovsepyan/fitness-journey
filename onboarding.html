@@ -7203,7 +7203,12 @@ function entry(){
      so the policies allow them. The buttons stay, because a person who
      has just answered a PAR-Q should be told what happened to it and
      given a way to send it again, not left trusting a spinner. */
-  if(typeof window.fjPublishIntake === 'function'){
+  /* NOT FROM A LAPTOP'S TEST SERVER. A survey run on localhost is a
+     developer walking the flow, and publishing it put fake clients into
+     the live database, where the console pulled them in beside the real
+     ones: three people called Sevan, two of them tests. */
+  const isLocal = /^(localhost|127\.0\.0\.1|\[::1\])$|\.localhost$/.test(location.hostname);
+  if(!isLocal && typeof window.fjPublishIntake === 'function'){
     const box = document.querySelector('.sendbox');
     const head = box && box.querySelector('h4');
     const lede = box && box.querySelector('h4 + p');

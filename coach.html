@@ -4986,6 +4986,8 @@ function importIntake(p, forcedUid, opts){
      which is which. The derivation below is for intakes that arrive by
      link or paste, which have no database id to carry. */
   const uid = forcedUid || coachUidFor(a);
+  /* brought back by hand (a link opened, a paste) undoes a remove */
+  if(!opts.quiet){ const hid = hiddenClients(); if(hid.delete(uid)) localStorage.setItem('fj.coach.hidden', JSON.stringify([...hid])); }
   const users = lsGet(USERS_LS).filter(u => u.id !== uid);
   users.push({ id:uid, role:'client', status:'pending', displayName:a.name||'', email:a.email||null,
     ui:'pro', programId:null, trainerId:null, accent:'#3ECBA8',
@@ -5064,11 +5066,39 @@ function clientOptions(){
   coachIntakes().forEach(i => {
     if(seen.has(i.userId)) return; seen.add(i.userId);
     const u = users.find(x => x.id === i.userId);
-    out.push({ id:i.userId,
-      name:(u && u.displayName) || (i.answers && i.answers.name) || i.userId });
+    const nm = (u && u.displayName) || (i.answers && i.answers.name) || i.userId;
+    out.push({ id:i.userId, name:nm, at:i.submittedAt || '', thin:isThinIntake(i) });
   });
+  /* THREE PEOPLE CALLED SEVAN. A name alone cannot tell a real survey from
+     a record minted by make-link or a test run, and the picker was only
+     names. When a name repeats, each entry says when it arrived and whether
+     it is a real survey, newest first, so the newest real one is on top. */
+  const count = {};
+  out.forEach(c => { count[c.name] = (count[c.name] || 0) + 1; });
+  out.forEach(c => {
+    if(count[c.name] < 2) return;
+    const d = c.at ? new Date(c.at) : null;
+    const when = d && !isNaN(d) ? d.toLocaleString(undefined,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : 'no date';
+    c.name = c.name + ' \u00B7 ' + when + (c.thin ? ' \u00B7 not a survey' : ' \u00B7 survey');
+  });
+  out.sort((a,b) => (a.name.split(' \u00B7 ')[0]).localeCompare(b.name.split(' \u00B7 ')[0])
+                    || String(b.at).localeCompare(String(a.at)));
   return out;
 }
+
+/* The same test the who-panel uses: a real survey answers questions only a
+   survey asks. Fewer than 3 of them is a record that came some other way. */
+function isThinIntake(i){
+  const REAL = ['age','sex','driver','parq','sleep','shape','blockers','trained','deck'];
+  const a = (i && i.answers) || {};
+  return i && i.version !== 0 && REAL.filter(k => a[k] != null && a[k] !== '').length < 3;
+}
+
+/* REMOVED STAYS REMOVED. The cloud pull re-imports every client the
+   database holds, on every open and every focus, so removing one from a
+   console that syncs lasted until the next click. The ids a coach removed
+   are kept here and the pull skips them. */
+function hiddenClients(){ try{ return new Set(JSON.parse(localStorage.getItem('fj.coach.hidden') || '[]')); }catch(e){ return new Set(); } }
 
 /* ------------------------------------------------------------------
    TAKING A SURVEY IN BY HAND
@@ -5218,6 +5248,8 @@ function removeClient(id){
       .forEach(k => localStorage.removeItem(k));
     if(localStorage.getItem('fj.v1.current') === id) localStorage.removeItem('fj.v1.current');
     localStorage.removeItem('fj.coach.client');
+    const hid = hiddenClients(); hid.add(id);
+    localStorage.setItem('fj.coach.hidden', JSON.stringify([...hid]));
   }catch(e){ return toast('Could not remove them'); }
   location.search = '';
 }
@@ -5455,9 +5487,11 @@ function pullFromCloud(announce){
       return;
     }
     const known = new Set(lsGet(INTAKES_LS).map(i => i.userId));
+    const hidden = hiddenClients();
     let fresh = 0;
     r.clients.forEach(function(c){
       if(!c.intake) return;                    // a person with no answers yet
+      if(hidden.has(c.user.id)) return;        // the coach removed them
       if(!known.has(c.user.id)) fresh++;
       importIntake({ v:c.intake.version, at:c.intake.submittedAt, a:c.intake.answers },
                    c.user.id, { quiet:true });
