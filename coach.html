@@ -775,8 +775,21 @@ select.pin{appearance:none;cursor:pointer}
 .nblock{ background:none; border:none; cursor:pointer; font-size:12px; padding:2px 3px; filter:grayscale(1) opacity(.55); }
 .nblock:hover,.nblock.on{ filter:none }
 
-.nbit{ display:grid; grid-template-columns:14px 20px minmax(90px,1fr) auto 22px; align-items:center;
-       gap:8px; padding:7px 9px; border-left:3px solid var(--c); }
+/* SIX CHILDREN, FIVE COLUMNS - SO THE LAST ONE WAS ON A SECOND LINE.
+
+   The row is a grid of `14px 20px 1fr auto 22px` and has always held six
+   things: handle, superset letter, name, numbers, the sets button and the
+   delete ×. Grid puts the sixth item on a new row, in the first column, so
+   every movement in every block carried a stray × beneath it and stood 77px
+   tall. It reads as generous padding rather than as a wrapped cell, which is
+   why it survived: nothing looks broken, the rows are just fat.
+
+   That is most of what "make it feel like a spreadsheet" was asking for. A
+   sheet row is one line high. Six columns now, and the name's own second
+   line - the muscles and pattern - sits inline after the name instead of
+   under it, because a sheet puts that in a column, not in a paragraph. */
+.nbit{ display:grid; grid-template-columns:14px 18px minmax(150px,1fr) auto 20px 16px;
+       align-items:center; gap:8px; padding:3px 9px; border-left:3px solid var(--c); }
 .nbit + .nbit{ border-top:1px solid var(--tint2) }
 .nbit:hover{ background:color-mix(in srgb, var(--c) 9%, transparent) }
 .nbit .hand{ color:var(--ink4); cursor:grab; font-size:12px }
@@ -789,7 +802,12 @@ select.pin{appearance:none;cursor:pointer}
 .nbswapq:hover{ color:var(--accent) }
 .nbswapq.on{ opacity:1; color:var(--accent) }
 .nbit .nm b{ font-weight:550; font-size:12.6px } .nbit .nm i{ font-style:normal; font-size:8px; color:var(--ink4) }
-.nbit .nm small{ display:block; font-size:10px; color:var(--ink3) }
+/* Inline, not a second line: one row, one line. It truncates rather than
+   wrapping, because the name is what must survive a narrow window. */
+.nbit .nm{ display:flex; align-items:baseline; gap:6px; white-space:nowrap; overflow:hidden }
+.nbit .nm b{ flex:none }
+.nbit .nm small{ font-size:10px; color:var(--ink3); min-width:0;
+                 overflow:hidden; text-overflow:ellipsis }
 /* A COLUMN IS ONLY A COLUMN IF IT IS IN THE SAME PLACE ON EVERY ROW.
 
    These cells sized themselves to their contents, so the width of a row's
@@ -863,7 +881,24 @@ select.pin{appearance:none;cursor:pointer}
             border-right:1.5px solid var(--sc); }
 .nbss .bar b{ font:700 10px ui-monospace,monospace; color:var(--sc); writing-mode:vertical-rl; transform:rotate(180deg) }
 .nbss .nbit{ border-left:none }
-.nblink{ display:flex; justify-content:center; margin:2px 0 }
+/* JOIN SAT BETWEEN EVERY PAIR OF ROWS, ALWAYS LIT.
+
+   Five movements meant four dashed pills down the middle of the block,
+   each one taking a line of its own - so the rows never ran together as a
+   list, and a third of the block's height was an offer nobody had asked
+   for. It is an action you go looking for once in a while, not a thing to
+   read past constantly.
+
+   The gap stays (rows still need somewhere to separate), it just holds
+   nothing until the cursor is near it. Keyboard focus shows it too, so it
+   is not lost to anyone tabbing through. */
+.nblink{ display:flex; justify-content:center; height:9px; margin:0;
+         opacity:0; transition:opacity .12s, height .12s }
+.nblink:hover, .nblink:focus-within{ opacity:1; height:auto; margin:2px 0 }
+.nbblock:hover .nblink{ opacity:.35 }
+.nbblock:hover .nblink:hover{ opacity:1 }
+/* a joined pair is a statement about the program, so it stays visible */
+.nblink:has(button.on){ opacity:1; height:auto; margin:2px 0 }
 .nblink button{ font:600 9px ui-monospace,monospace; letter-spacing:.08em; text-transform:uppercase;
                 color:var(--ink3); background:var(--sunk); border:1px dashed var(--line2);
                 border-radius:20px; padding:3px 10px; cursor:pointer }
