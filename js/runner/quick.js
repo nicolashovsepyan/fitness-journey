@@ -12,6 +12,12 @@
    ============================================================ */
 import { storage } from '../core/storage.js';
 import { fmt } from '../timer.js';
+import { DEMOS } from './demo.js';
+import { activeUserId } from '../users.js';
+
+/* ?demo adds the Work Mode preview: a sample of every program format */
+const showDemo = () => new URLSearchParams(location.search).has('demo');
+const standalone = () => window.matchMedia?.('(display-mode: standalone)')?.matches || window.navigator.standalone === true;
 
 /* every format the setup screen offers, and the numbers each one asks for */
 const FORMATS = [
@@ -56,6 +62,13 @@ let cfg = null, favs = [], host = null, onStart = null;
 export async function renderQuick(el, opts = {}) {
   host = el; onStart = opts.onStart;
   injectStyle();
+  /* The address itself names the person, so "Add to Home Screen" from here
+     gives a timer icon that opens as THEM (an installed iPhone app cannot
+     see Safari's storage). */
+  try {
+    const p = new URLSearchParams(location.search);
+    if (!p.has('user') && activeUserId()) { p.set('user', activeUserId()); history.replaceState(null, '', `${location.pathname}?${p.toString().replace(/=(&|$)/g, '$1')}`); }
+  } catch (e) {}
   let saved = null;
   try { saved = await storage().getDevicePref(PREF, null); } catch (e) {}
   cfg = { ...DEFAULTS, ...(saved?.last || {}) };
@@ -178,7 +191,7 @@ function fieldRow(k) {
       <button data-q="${k}" data-d="-1" aria-label="Less">−</button>
       <input data-qf="${k}" type="number" inputmode="numeric" value="${cfg[k]}" onfocus="this.select()"/>
       <button data-q="${k}" data-d="1" aria-label="More">+</button>
-      ${unit ? `<span class="qt-u">${unit}</span>` : ''}
+      <span class="qt-u">${unit}</span>
     </div></div>`;
 }
 
@@ -221,6 +234,12 @@ function draw() {
 
     <div class="qt-sum" id="qtSum">${summary()}</div>
     <button class="qt-link center" id="qtFav">☆ Save this timer</button>
+
+    ${showDemo() ? `<div class="qt-sec">Work Mode preview</div>
+    <p class="qt-hint">How a program day runs, 1 format at a time. Short numbers, nothing saved.</p>
+    <div class="qt-demos">${DEMOS.map(d => `<button class="qt-demo" data-demo="${d.id}"><b>${d.name}</b><small>${d.sub}</small><span>▸</span></button>`).join('')}</div>` : ''}
+
+    ${standalone() ? '' : `<p class="qt-hint qt-own">Want the timer as its own app? In Safari tap Share, then Add to Home Screen, while this page is open.</p>`}
     <div style="height:110px"></div>
     <div class="actionbar"><button class="btn lg" id="qtGo" ${cfg.fmt === 'countdown' && totalSec() < 5 ? 'disabled' : ''}>Start ${esc(def.name)} ▸</button></div>
   </div>`;
@@ -274,6 +293,9 @@ function wire() {
     persist(); draw();
   });
   $('#qtGo').addEventListener('click', () => { persist(); onStart?.(buildPlan()); });
+  host.querySelectorAll('[data-demo]').forEach(b => b.addEventListener('click', () => {
+    const d = DEMOS.find(x => x.id === b.dataset.demo); if (d) onStart?.(d.plan());
+  }));
 }
 
 /* ---------------- look ---------------- */
@@ -302,7 +324,7 @@ function injectStyle() {
   .qt-step button:active { background: var(--line); }
   .qt-step input { width: 52px; text-align:center; background:none; border:none; color: var(--text, #fff); font-size: 19px; font-weight: 700; font-family: var(--tnum, inherit); -moz-appearance: textfield; }
   .qt-step input::-webkit-outer-spin-button, .qt-step input::-webkit-inner-spin-button { -webkit-appearance: none; }
-  .qt-u { color: var(--muted); font-size: 12px; padding-right: 10px; min-width: 22px; }
+  .qt-u { color: var(--muted); font-size: 12px; padding-right: 10px; min-width: 34px; }
   .qt-hint { color: var(--muted); font-size: 13px; margin: 8px 0 6px; }
   .qt-move { display:flex; gap: 6px; margin: 6px 0; }
   .qt-move input { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; color: var(--text, #fff); font-size: 16px; padding: 10px; min-width: 0; }
@@ -318,6 +340,11 @@ function injectStyle() {
   .qt-fav { display:inline-flex; align-items:center; background: var(--box-2, #16161c); border: 1px solid var(--line); border-radius: 999px; }
   .qt-fav button { background:none; border:none; color: var(--text, #fff); font-size: 13.5px; padding: 8px 4px 8px 12px; cursor:pointer; }
   .qt-fav .qt-favx { color: var(--muted); padding: 8px 10px 8px 6px; font-size: 12px; }
+  .qt-demos { display:flex; flex-direction:column; gap: 6px; }
+  .qt-demo { display:grid; grid-template-columns: 1fr auto; text-align:left; background: var(--box-2, #16161c); border: 1px solid var(--line); border-radius: 12px; padding: 11px 12px; color: var(--text, #fff); cursor:pointer; }
+  .qt-demo b { font-size: 15px; } .qt-demo small { grid-column: 1; color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+  .qt-demo span { grid-column: 2; grid-row: 1 / span 2; align-self:center; color: var(--muted); font-size: 18px; }
+  .qt-own { text-align:center; margin-top: 18px; }
   .qt-sum { text-align:center; color: var(--muted); font-size: 15px; margin: 22px 0 0; }
   `;
   document.head.appendChild(st);

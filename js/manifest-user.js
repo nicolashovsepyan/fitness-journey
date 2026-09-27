@@ -33,13 +33,25 @@ export async function applyUserManifest() {
     const full = (displayName(uid) || '').trim();
     const who = full.split(' ')[0];
     const qs = `user=${encodeURIComponent(uid)}${full ? `&name=${encodeURIComponent(full)}` : ''}`;
-    const m = {
+    /* On the Quick Timer the icon being added is THE TIMER: its own id, so
+       it sits beside the main app instead of replacing it, and it opens
+       straight onto the timer. */
+    const quick = new URLSearchParams(location.search).has('quick');
+    const m = quick ? {
+      ...base,
+      id: `fitness-journey-timer-${uid}`,
+      start_url: `./index.html?quick&${qs}`,
+      name: 'Fitness Journey Timer',
+      short_name: 'FJ Timer',
+    } : {
       ...base,
       id: `fitness-journey-${uid}`,
       start_url: `./index.html?${qs}`,
       name: who ? `Fitness Journey — ${who}` : base.name,
       short_name: who || base.short_name,
     };
+    /* iOS names the icon from this tag, not the manifest */
+    if (quick) document.querySelector('meta[name="apple-mobile-web-app-title"]')?.setAttribute('content', 'FJ Timer');
 
     if (blobUrl) URL.revokeObjectURL(blobUrl);
     blobUrl = URL.createObjectURL(new Blob([JSON.stringify(m)], { type: 'application/manifest+json' }));

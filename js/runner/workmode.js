@@ -1282,7 +1282,8 @@ function finishSession(opts = {}) {
     blocks: S.plan.blocks.map(b => ({ id: b.id, type: b.role, name: b.name, format: b.format, seconds: S.blockTimes[b.id] || 0, entries: entriesOf(b) }))
       .filter(b => !partial || b.entries.length),
   };
-  const { prs } = store.saveSession(session);
+  /* a Work Mode preview run (js/runner/demo.js) is a look, not training */
+  const { prs } = S.plan.demo ? { prs: [] } : store.saveSession(session);
   const effs = (partial || S.plan.quick) ? [] : efficiencyCallouts(session);
   const resultHtml = S.plan.quick ? quickResult(session) : '';
   R.clear();
