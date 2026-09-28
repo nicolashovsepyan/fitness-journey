@@ -812,11 +812,25 @@ select.pin{appearance:none;cursor:pointer}
 .nbit .ss{ font:600 9.5px ui-monospace,monospace; color:var(--ink3); text-align:center }
 .nbit .nm{ cursor:pointer; min-width:0 }
 /* the swap caret, in the name cell: quiet until the row is under the cursor */
-.nbswapq{ font-size:11px; line-height:1; color:var(--ink4); background:none; border:0;
-  cursor:pointer; padding:2px 5px 2px 0; opacity:.45; transition:opacity .12s,color .12s }
-.nbit:hover .nbswapq{ opacity:1 }
-.nbswapq:hover{ color:var(--accent) }
-.nbswapq.on{ opacity:1; color:var(--accent) }
+/* The movement name, dressed as what it is: the cell you click to change
+   the value in it. Quiet at rest so a block still reads as a list rather
+   than a wall of controls; it takes its border on hover, like a sheet. */
+.nbsel{ display:inline-flex; align-items:baseline; gap:5px; max-width:100%;
+  font:inherit; color:inherit; background:none; cursor:pointer; text-align:left;
+  border:1px solid transparent; border-radius:6px; padding:2px 6px; margin-left:-6px;
+  transition:background .12s, border-color .12s }
+.nbsel b{ font-weight:550; font-size:12.6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.nbsel i{ font-style:normal; font-size:9px; color:var(--ink4); flex:none }
+.nbit:hover .nbsel{ border-color:var(--line2); background:var(--sunk) }
+.nbsel:hover{ border-color:var(--accent) }
+.nbsel:hover i{ color:var(--accent) }
+.nbsel.on{ border-color:var(--accent); background:var(--accent-soft) }
+.nbsel.on i{ color:var(--accent); transform:rotate(180deg) }
+/* what it trains: the rarer question, so the quieter control */
+.nbinfo{ border:0; background:none; cursor:pointer; color:var(--ink4); font-size:11px;
+  line-height:1; padding:0 4px; opacity:0; transition:opacity .12s, color .12s }
+.nbit:hover .nbinfo{ opacity:.7 }
+.nbinfo:hover, .nbinfo.on{ opacity:1; color:var(--accent) }
 .nbit .nm b{ font-weight:550; font-size:12.6px } .nbit .nm i{ font-style:normal; font-size:8px; color:var(--ink4) }
 /* Inline, not a second line: one row, one line. It truncates rather than
    wrapping, because the name is what must survive a narrow window. */
@@ -4389,13 +4403,48 @@ function nbCard(m, extra){
       ${m.cue?`<p>${esc(m.cue)}</p>`:''}${m.why?`<p class="why">${esc(m.why)}</p>`:''}
       ${extra||''}</div></div>`;
 }
+/* THE ORDER OF THIS LIST IS THE WHOLE FEATURE.
+
+   It was: fundamentals first, then alphabetical. So a shoulder press
+   offered Arm Circles before Handstand Push-Up, because A comes before H -
+   and the list was same-group only, which for a push movement is a hundred
+   things ranging from a wall push-up to a full planche. The right answer
+   was usually in there and never near the top, which is what made picking
+   feel like searching.
+
+   Four questions, in the order a coach asks them:
+
+     1. Does it break one of THEIR rules? A movement their knee or their
+        PAR-Q forbids goes last, always, however good a match it is. It is
+        still listed - a coach overriding a flag on purpose is the job -
+        but it is never offered first.
+     2. Does it train the same thing? Same sub-pattern (h-push for a bench
+        press) beats same group (any push at all).
+     3. Is it a fundamental? The movements the whole method is built on.
+     4. Is it the same difficulty? Closest to what is already in the slot,
+        so a swap is a swap rather than a jump up or down a level.
+
+   A typed query drops rule 2, because the words are the intent by then. */
 function nbAlts(bi,ii){
   const b = PROG.days[PDAY].blocks[bi], m = MV(b.items[ii].ex);
   const here = new Set(b.items.map(x=>x.ex));
   const w = nbWords(nbSwapQ);
-  const pool = w.length ? MOVES.filter(x=>!here.has(x.id) && nbMatch(x,w))
-                        : MOVES.filter(x=>x.g===m.g && !here.has(x.id));
-  return pool.sort((a,c)=>(c.f?1:0)-(a.f?1:0) || a.n.localeCompare(c.n)).slice(0,30);
+  const searching = w.length > 0;
+  const pool = searching ? MOVES.filter(x=>!here.has(x.id) && nbMatch(x,w))
+                         : MOVES.filter(x=>x.g===m.g && !here.has(x.id));
+  const pats = new Set(m.p || []);
+  const df = m.df;
+  const rank = x => [
+    nbForbidden(x) ? 1 : 0,
+    searching ? 0 : ((x.p || []).some(p => pats.has(p)) ? 0 : 1),
+    x.f ? 0 : 1,
+    (df != null && x.df != null) ? Math.abs(x.df - df) : 9,
+  ];
+  return pool.sort((a,c) => {
+    const ra = rank(a), rc = rank(c);
+    for(let i=0;i<ra.length;i++) if(ra[i] !== rc[i]) return ra[i] - rc[i];
+    return a.n.localeCompare(c.n);
+  }).slice(0,40);
 }
 /* The three movement lists all ask the same two questions of a flag: what
    class does the row wear, and what does the small print say. */
@@ -4722,22 +4771,27 @@ function nbMiddle(){
             ondragstart="nbDragStart(event,${bi},${ii})" ondragover="nbDragOver(event,${bi})"
             ondrop="nbDrop(event,${bi},${ii})">
           <span class="hand">⠿</span><span class="ss">${ss}</span>
-          <span class="nm" onclick="event.stopPropagation();nbToggleCard(${bi},${ii})">
-            <!-- SWAPPING WAS THREE CLICKS AND IS THE COMMONEST EDIT THERE IS.
-                 Name -> card opens -> "Swap this movement" -> the list. Every
-                 one of those was a decision about navigation rather than
-                 about training. This is the swap now: one click, the list
-                 opens under the row, and the row stays where it is. It sits
-                 inside the name cell rather than beside it because the row is
-                 a five-column grid and a sixth child would land on a second
-                 line. The name still opens the card, because reading what a
-                 movement trains is a different question from replacing it. -->
-            <button class="nbswapq ${nbSwap===key?'on':''}" title="Replace this movement"
+          <!-- THE NAME IS THE CONTROL.
+
+               First the swap was three clicks behind the card. Then it was a
+               small caret beside the name, which was one click but still a
+               target you had to find and hit. The thing a coach reaches for
+               is the exercise itself, and on a row that acts like a
+               spreadsheet the cell that holds a value is the cell you click
+               to change it. So the title opens the list. It is styled as a
+               select, because that is what it now behaves like.
+
+               Reading what a movement trains moved to the ⓘ, which is the
+               rarer question and no longer in the way of the common one. -->
+          <span class="nm">
+            <button class="nbsel ${nbSwap===key?'on':''}" title="Change this movement"
               onclick="event.stopPropagation();nbSwapQ='';nbSwap=${nbSwap===key?'null':"'"+key+"'"};drawProgram()"
-              >⇄</button><b>${esc(m.n)}${m.f?' ★':''}</b> <i>${isOpen?'▲':'▼'}</i>${
+              ><b>${esc(m.n)}${m.f?' ★':''}</b><i>&#9662;</i></button>${
               it.plan && !nbPlanOpen.has(key) ? `<u class="nbplantag" title="${
                 it.plan.map((st,n)=>`set ${n+1}: ${st.v??'—'}${st.w!=null?' @ '+st.w:''}`).join(', ')
               }">${it.plan.length} sets written</u>` : ''}
+            <button class="nbinfo ${isOpen?'on':''}" title="What this movement trains"
+              onclick="event.stopPropagation();nbToggleCard(${bi},${ii})">&#9432;</button>
             <small>${esc([m.g,(m.p||[])[0],(m.mus||[]).slice(0,2).join('/')].filter(Boolean).join(' · '))}${m.lat==='unilateral'?' · per side':''}</small></span>
           <span class="nbnums" onclick="event.stopPropagation()">
             ${spec.item.indexOf('sets')>=0
