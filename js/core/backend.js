@@ -265,6 +265,61 @@ export async function notify({ to, title, body, url = null, kind = 'message' }) 
  *
  *  @returns {Promise<{ok:boolean, clients?:Array, reason?:string}>}
  */
+/* ============================================================
+   A PROGRAM, FROM THE CONSOLE STRAIGHT TO THEIR APP.
+
+   Releasing in the console used to change the console's own storage and
+   nothing else; the phone learned about it only if the coach copied a
+   thirteen-thousand-character link into a message. The table for this has
+   existed since the backend did - programs, assigned_to the client, readable
+   by that client alone (programs_read_assigned) - and nothing wrote to it.
+
+   publishProgram is the coach's half: one row per client, updated in place.
+   fetchMyProgram is the phone's half: the newest program assigned to
+   whoever this device is signed in as. It never signs in; a phone with no
+   identity has nothing waiting for it, and minting one here would make a
+   stranger.
+   ============================================================ */
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export async function publishProgram({ clientId, program, released = null } = {}) {
+  if (!clientId || !UUID.test(clientId)) {
+    return { ok: false, reason: 'not linked to the app', unlinked: true };
+  }
+  if (!program || !program.days || !Object.keys(program.days).length) {
+    return { ok: false, reason: 'no program to send' };
+  }
+  const signed = await ensureSelf({ role: 'trainer', displayName: 'Coach' });
+  if (!signed.ok) return signed;
+  const a = cloudAdapter();
+  try {
+    const existing = await a.getProgram(clientId);
+    const id = (existing && existing.ownerId === signed.uid && existing.id)
+      || globalThis.crypto.randomUUID();
+    await a.savePrograms([{
+      id, ownerId: signed.uid, assignedTo: clientId,
+      name: program.name || 'Your program', status: 'assigned',
+      days: Object.entries(program.days)
+        .map(([k, d], i) => ({ id: k, weekday: i, sessionId: k, label: (d && d.name) || null })),
+      profile: { source: 'console', raw: program, released },
+    }]);
+    return { ok: true, id };
+  } catch (e) {
+    return { ok: false, reason: readable(e) };
+  }
+}
+
+export async function fetchMyProgram() {
+  const c = cloud();
+  if (!c || !c.userId) return { ok: false, reason: 'not signed in' };
+  try {
+    const p = await cloudAdapter().getProgram(c.userId);
+    return { ok: true, uid: c.userId, program: p };
+  } catch (e) {
+    return { ok: false, reason: readable(e) };
+  }
+}
+
 export async function pullClients({ client = null } = {}) {
   // A coach who has never written their own row cannot be pointed at.
   const signed = await ensureSelf({ role: 'trainer', displayName: 'Coach', client });

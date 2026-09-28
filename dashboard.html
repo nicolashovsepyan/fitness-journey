@@ -7062,6 +7062,51 @@ loadTheme().then(()=>go(S.tab||'today'));   /* then again from the spine, if rea
      the functions on window, then tell the page they are there.
      ============================================================ -->
 <script type="module">
+  /* WHAT THE COACH RELEASED, FETCHED RATHER THAN MAILED.
+
+     The console writes the program to the database the moment it is
+     released (coach.html sendToApp). This asks for it every time the app
+     opens or comes back to the front, as whoever the survey signed this
+     phone in as. Newer than what is here - by the row's own timestamp,
+     kept in fj.cloud.programAt.<user> - and it replaces the program the
+     same way a link would: the Program row the runner reads and the coach
+     record the page rebuilds it from, then one reload so every screen
+     reads it. Nothing newer, nothing happens; no identity, nothing happens. */
+  import { fetchMyProgram } from './js/core/backend.js';
+  async function takeCloudProgram() {
+    try {
+      const user = localStorage.getItem('fj.user');
+      if (!user) return;
+      const r = await fetchMyProgram();
+      if (!r.ok || !r.program) return;
+      const p = r.program, raw = p.profile && p.profile.raw;
+      if (!raw || !raw.days || !Object.keys(raw.days).length) return;
+      const stamp = 'fj.cloud.programAt.' + user;
+      if (localStorage.getItem(stamp) === String(p.updatedAt)) return;
+      const released = (p.profile && p.profile.released) || null;
+      const now = new Date().toISOString();
+      const rows = JSON.parse(localStorage.getItem('fj.programs') || '[]').filter(x => x.assignedTo !== user);
+      rows.push({ id: 'prg_' + user, ownerId: 'coach', assignedTo: user,
+        name: raw.name || p.name || 'Your program', status: 'assigned',
+        days: Object.entries(raw.days).map(([id, d], k) => ({ id, weekday: k, sessionId: id, label: (d && d.name) || null })),
+        profile: { source: 'console', raw, released }, createdAt: now, updatedAt: now });
+      localStorage.setItem('fj.programs', JSON.stringify(rows));
+      const ck = 'fj.v1.' + user + '.coach';
+      const cur = JSON.parse(localStorage.getItem(ck) || '{}');
+      cur.program = raw; cur.released = released;
+      localStorage.setItem(ck, JSON.stringify(cur));
+      const users = JSON.parse(localStorage.getItem('fj.users') || '[]')
+        .map(u => u.id === user ? { ...u, status: 'active', programId: 'prg_' + user } : u);
+      localStorage.setItem('fj.users', JSON.stringify(users));
+      localStorage.setItem(stamp, String(p.updatedAt));
+      location.reload();
+    } catch (e) { console.warn('[cloud] could not read the released program', e); }
+  }
+  takeCloudProgram();
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') takeCloudProgram();
+  });
+
   import { pushPossible, pushState, pushExplain, pushEnable, pushDisable, refreshBadge }
     from './js/core/push.js';
 

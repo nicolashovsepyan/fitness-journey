@@ -2333,7 +2333,7 @@ function drawRelease(){
     </div>`).join('');
   document.querySelectorAll('[data-rel]').forEach(b=>b.onclick=()=>{
     const id=b.dataset.rel;
-    S.released[id]=!S.released[id]; save(1); drawRelease(); drawDock();
+    S.released[id]=!S.released[id]; save(1); drawRelease(); drawDock(); sendToApp(true);
     toast(S.released[id]?'Released - it is live in his app now':'Hidden from his app again');
     if(S.released[id]) tellThem(id);
   });
@@ -2349,6 +2349,27 @@ function drawRelease(){
    shown an error about push plumbing. Only a real refusal, which means
    the client is not theirs, is worth a word. */
 let TELL_TIMER = null, TELL_QUEUE = [];
+/* RELEASING REACHES THEIR APP NOW, NOT JUST THIS SCREEN.
+   The program and its switches go to the database, where their app reads
+   them the next time it opens (js/core/backend.js, publishProgram). The
+   toast says which happened, because "released" that stayed on this
+   computer is the exact thing that left Sevan staring at "Still in review".
+   Debounced like tellThem: 5 switches in 10 seconds is 1 write. */
+let APP_TIMER = null;
+function sendToApp(quiet){
+  clearTimeout(APP_TIMER);
+  APP_TIMER = setTimeout(async () => {
+    const who = (A.name || CLIENT_ID);
+    if(typeof window.fjPublishProgram !== 'function'){
+      return toast('Saved here. No connection to the app right now, so use Send it');
+    }
+    const r = await window.fjPublishProgram({ clientId: CLIENT_ID, program: PROG, released: S.released || null });
+    if(r && r.ok) return toast(quiet ? 'Live in ' + who + "'s app" : (PROG.name || 'The program') + ' is live in ' + who + "'s app");
+    if(r && r.unlinked) return toast(who + ' is not linked to the app (no survey from their phone). Use Send it');
+    toast('Saved here, but it did not reach the app: ' + ((r && r.reason) || 'unknown error'));
+  }, quiet ? 1500 : 0);
+}
+
 function tellThem(what){
   if(typeof window.fjNotify !== 'function') return;
   if(!CLIENT_ID || CLIENT_ID === 'ozzy') return;      // the built-in example has no phone
@@ -2778,7 +2799,7 @@ function libWire(){
        otherwise the phone shows a plan it is not allowed to open */
     S.released = Object.assign({shape:true}, ...Object.keys(PROG.days).map(k=>({[k]:true})));
     save(1); drawProgram(); if(typeof drawRelease2==='function') drawRelease2();
-    toast(`${PROG.name} is now ${A.name||CLIENT_ID}'s`);
+    sendToApp(false);
   };
 }
 
@@ -5903,9 +5924,10 @@ addEventListener('visibilitychange', function(){
      open whether or not there is a database behind it.
      ============================================================ -->
 <script type="module">
-  import { pullClients, cloudUserId, cloudSignIn, cloudAttachEmail, cloudSendLink, notify }
+  import { pullClients, cloudUserId, cloudSignIn, cloudAttachEmail, cloudSendLink, notify, publishProgram }
     from './js/core/backend.js';
   window.fjPullClients = pullClients;
+  window.fjPublishProgram = publishProgram;
   window.fjCloudUserId = cloudUserId;
   window.fjCloudSignIn = cloudSignIn;
   window.fjCloudAttachEmail = cloudAttachEmail;
