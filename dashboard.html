@@ -2565,6 +2565,17 @@ function fromTemplate(){
       const p = { v:6, at:new Date().toISOString(),
         program:{ from:t.id, version:t.version, name:t.name, duration:t.duration, fixed:!!t.fixed, days:t.days },
         released, ...(rename ? { rename } : {}) };
+      /* A PHONE THAT NEVER DID THE SURVEY has no profile for a program-only
+         link to join, and fromHash() dropped it: the sample week and
+         "Still in review". The name is enough to be somebody; the answers
+         arrive whenever the survey is filled in. */
+      let hasProfile = false;
+      try{
+        const cur = localStorage.getItem('fj.v1.current');
+        hasProfile = !!(localStorage.getItem('fj.user') ||
+          (cur && JSON.parse(localStorage.getItem('fj.v1.profile.' + cur) || 'null')));
+      }catch(e){}
+      if(!hasProfile) p.a = { name: rename || '' };
       const b = btoa(unescape(encodeURIComponent(JSON.stringify(p))))
         .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
       location.replace(location.pathname + location.search + '#' + b);   // hashchange reloads onto it
