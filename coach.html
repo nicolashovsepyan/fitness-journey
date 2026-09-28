@@ -5202,7 +5202,7 @@ function coachUidFor(a){
 /* One writer for an arriving intake, whether it came from the address bar
    or from the paste box. They used to be the same code twice. */
 function importIntake(p, forcedUid, opts){
-  const a = p.a || {};
+  const a = Object.assign({}, p.a || {});
   opts = opts || {};
   /* A DISTINCT ID PER PERSON, and this matters more here than on a phone.
      js/intake.js uses the fixed id 'me' because a phone belongs to one
@@ -5220,6 +5220,10 @@ function importIntake(p, forcedUid, opts){
      which is which. The derivation below is for intakes that arrive by
      link or paste, which have no database id to carry. */
   const uid = forcedUid || coachUidFor(a);
+  /* A NAME THE COACH CORRECTED STAYS CORRECTED. The pull re-imports the
+     answers exactly as typed on every open, typo included. */
+  const fixed = renamedClients()[uid];
+  if(fixed) a.name = fixed;
   /* brought back by hand (a link opened, a paste) undoes a remove */
   if(!opts.quiet){ const hid = hiddenClients(); if(hid.delete(uid)) localStorage.setItem('fj.coach.hidden', JSON.stringify([...hid])); }
   const users = lsGet(USERS_LS).filter(u => u.id !== uid);
@@ -5332,6 +5336,25 @@ function isThinIntake(i){
    database holds, on every open and every focus, so removing one from a
    console that syncs lasted until the next click. The ids a coach removed
    are kept here and the pull skips them. */
+/* Names the coach has corrected, by client id. Kept apart from the answers
+   because the answers are what the person said, and a pull rewrites them. */
+function renamedClients(){ try{ return JSON.parse(localStorage.getItem('fj.coach.names') || '{}'); }catch(e){ return {}; } }
+function renameClient(id){
+  const now = A.name || id;
+  const nm = (prompt('Their name, spelled right:', now) || '').trim();
+  if(!nm || nm === now) return;
+  try{
+    const names = renamedClients(); names[id] = nm.slice(0, 60);
+    localStorage.setItem('fj.coach.names', JSON.stringify(names));
+    localStorage.setItem('fj.intakes', JSON.stringify(lsGet(INTAKES_LS).map(i =>
+      i.userId === id ? Object.assign({}, i, { answers: Object.assign({}, i.answers, { name: nm }) }) : i)));
+    localStorage.setItem(USERS_LS, JSON.stringify(lsGet(USERS_LS).map(u =>
+      u.id === id ? Object.assign({}, u, { displayName: nm }) : u)));
+    const pk = 'fj.v1.profile.' + id, pr = JSON.parse(localStorage.getItem(pk) || 'null');
+    if(pr && pr.a){ pr.a.name = nm; localStorage.setItem(pk, JSON.stringify(pr)); }
+  }catch(e){ return toast('Could not rename them'); }
+  location.reload();
+}
 function hiddenClients(){ try{ return new Set(JSON.parse(localStorage.getItem('fj.coach.hidden') || '[]')); }catch(e){ return new Set(); } }
 
 /* ------------------------------------------------------------------
@@ -5504,6 +5527,8 @@ function drawAddClient(){
         <button class="btn" id="nsGo" style="margin-top:6px;width:100%">Add them without a survey</button>
       </div>
     </details>
+    ${HAS_CLIENT ? `<button class="btn sm" id="rnClient"
+      style="margin-top:7px;width:100%;color:var(--ink3)">Fix the name</button>` : ''}
     ${HAS_CLIENT ? `<button class="btn sm" id="rmClient"
       style="margin-top:7px;width:100%;color:var(--ink3)">Remove ${esc(A.name||CLIENT_ID)}</button>` : ''}`;
   wireAddClient('addLink');
@@ -5512,6 +5537,8 @@ function drawAddClient(){
     document.getElementById('nsName').value, document.getElementById('nsMail').value);
   const rm = document.getElementById('rmClient');
   if(rm) rm.onclick = () => removeClient(CLIENT_ID);
+  const rn = document.getElementById('rnClient');
+  if(rn) rn.onclick = () => renameClient(CLIENT_ID);
 }
 
 function drawClients(){

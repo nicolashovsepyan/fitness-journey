@@ -2388,6 +2388,25 @@ function loadProfile(){
     const viaLink = fromHash();
     if(viaLink){
       const uid = (viaRecords && viaRecords.uid) || viaLink.uid || uidFor(viaLink.a);
+      /* A NAME THE COACH CORRECTED (#tpl=...&name=). Written into every
+         record that carries it, so the next open does not read the typo
+         back out of the survey's answers. */
+      if(viaLink.rename){
+        const nm = viaLink.rename;
+        viaLink.a = Object.assign({}, viaLink.a, { name: nm });
+        try{
+          const ids = [uid, localStorage.getItem('fj.v1.current')].filter(Boolean);
+          localStorage.setItem('fj.intakes', JSON.stringify(JSON.parse(localStorage.getItem('fj.intakes')||'[]').map(i =>
+            ids.includes(i.userId) ? Object.assign({}, i, { answers: Object.assign({}, i.answers, { name: nm }) }) : i)));
+          localStorage.setItem('fj.users', JSON.stringify(JSON.parse(localStorage.getItem('fj.users')||'[]').map(u =>
+            ids.includes(u.id) ? Object.assign({}, u, { displayName: nm }) : u)));
+          ids.forEach(id => {
+            localStorage.setItem('fj.name.' + id, nm);
+            const pk = 'fj.v1.profile.' + id, pr = JSON.parse(localStorage.getItem(pk) || 'null');
+            if(pr && pr.a){ pr.a.name = nm; localStorage.setItem(pk, JSON.stringify(pr)); }
+          });
+        }catch(e){}
+      }
       localStorage.setItem('fj.v1.profile.' + uid,
         JSON.stringify({v:PROFILE_V, at:viaLink.at, uid, a:viaLink.a}));
       localStorage.setItem('fj.v1.current', uid);
@@ -2522,7 +2541,37 @@ function normaliseDays(a){
 addEventListener('hashchange', function(){
   const h = (location.hash || '').replace(/^#/, '');
   if(h.length > 40) location.reload();
+  else fromTemplate();
 });
+
+/* THE SHORT FORM OF A PROGRAM LINK: dashboard.html#tpl=<program id>.
+   A template on the shelf (spine/programs/) is already public, so a coach
+   can text forty characters instead of eleven thousand. It is turned into
+   the ordinary program-only link - every day handed over, the person on
+   this phone kept - and that goes through the normal path above. Same
+   short form the survey takes (onboarding.html). */
+function fromTemplate(){
+  const m = (location.hash || '').match(/^#tpl=([a-z0-9_]+)(?:&name=([^&]+))?$/i);
+  if(!m) return;
+  /* &name= corrects a name typed wrong in the survey ("Sevab") */
+  let rename = null;
+  try{ rename = m[2] ? decodeURIComponent(m[2]).trim().slice(0, 60) : null; }catch(e){}
+  fetch('spine/programs/' + m[1] + '.json', {cache:'no-cache'})
+    .then(r => r.ok ? r.json() : null)
+    .then(t => {
+      if(!t || !t.days) return;
+      const released = {shape:true};
+      Object.keys(t.days).forEach(k => { released[k] = true; });
+      const p = { v:6, at:new Date().toISOString(),
+        program:{ from:t.id, version:t.version, name:t.name, duration:t.duration, fixed:!!t.fixed, days:t.days },
+        released, ...(rename ? { rename } : {}) };
+      const b = btoa(unescape(encodeURIComponent(JSON.stringify(p))))
+        .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+      location.replace(location.pathname + location.search + '#' + b);   // hashchange reloads onto it
+    })
+    .catch(function(){ /* offline: the page is simply what it was */ });
+}
+fromTemplate();
 
 const LOADED = loadProfile();
 if(LOADED) normaliseDays(LOADED.a);
