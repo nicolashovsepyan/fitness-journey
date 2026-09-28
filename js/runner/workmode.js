@@ -46,7 +46,10 @@ if (typeof document !== 'undefined') {
   /* and the screen lock: the browser drops a wake lock whenever the page is
      hidden, so without asking again the screen dims during every rest after
      the first trip to the music app */
-  document.addEventListener('visibilitychange', () => { if (!document.hidden && S && !S.done) { initAudio(); keepAwake(); if (ticker) tick(); } });
+  /* only while the clock is running: S stays set after the finish screen,
+     so this used to restart the audio loop and the wake lock every time the
+     person came back to the app after training */
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && S && !S.done && ticker) { initAudio(); keepAwake(); tick(); } });
   /* And the first touch anywhere, whatever it lands on. "I'm ready" is the
      expected first tap but it is not the only way into a session - a resumed
      workout goes straight to the active screen and never shows that button.

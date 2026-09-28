@@ -113,8 +113,16 @@ export function initAudio() {
     }
   } catch (e) {}
 
-  /* 3 — take the session off the ringer channel */
+  /* 3 — take the session off the ringer channel. iPHONE ONLY.
+     Android has no ringer switch that silences Web Audio, and on Android
+     Chrome a playing <audio> element asks for audio focus: volume 0 is not
+     muted, so a looping clip held "may duck" focus for the whole session
+     and turned the client's Spotify down from the first tap to the last.
+     The beeps are Web Audio and mix over music on their own. */
   try {
+    const ios = /iP(hone|ad|od)/.test(navigator.userAgent)
+      || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (!ios) throw 0;
     if (!keepalive) {
       keepalive = new Audio(SILENCE);
       keepalive.loop = true;
