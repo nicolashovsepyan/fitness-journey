@@ -2363,7 +2363,7 @@ function sendToApp(quiet){
     if(typeof window.fjPublishProgram !== 'function'){
       return toast('Saved here. No connection to the app right now, so use Send it');
     }
-    const r = await window.fjPublishProgram({ clientId: CLIENT_ID, program: PROG, released: S.released || null });
+    const r = await window.fjPublishProgram({ clientId: CLIENT_ID, program: PROG, released: S.released || null, clientName: A.name || null });
     if(r && r.ok) return toast(quiet ? 'Live in ' + who + "'s app" : (PROG.name || 'The program') + ' is live in ' + who + "'s app");
     if(r && r.unlinked) return toast(who + ' is not linked to the app (no survey from their phone). Use Send it');
     toast('Saved here, but it did not reach the app: ' + ((r && r.reason) || 'unknown error'));
@@ -5374,6 +5374,14 @@ function renameClient(id){
     const pk = 'fj.v1.profile.' + id, pr = JSON.parse(localStorage.getItem(pk) || 'null');
     if(pr && pr.a){ pr.a.name = nm; localStorage.setItem(pk, JSON.stringify(pr)); }
   }catch(e){ return toast('Could not rename them'); }
+  /* and on their phone, when they already have a program there: it goes
+     with the next program the app picks up, so send it again now */
+  const live = Object.keys(S.released || {}).some(k => k !== 'shape' && S.released[k]);
+  if(live && PROG && PROG.days && typeof window.fjPublishProgram === 'function'){
+    window.fjPublishProgram({ clientId: id, program: PROG, released: S.released, clientName: nm })
+      .finally(() => location.reload());
+    return;
+  }
   location.reload();
 }
 function hiddenClients(){ try{ return new Set(JSON.parse(localStorage.getItem('fj.coach.hidden') || '[]')); }catch(e){ return new Set(); } }

@@ -7098,6 +7098,23 @@ loadTheme().then(()=>go(S.tab||'today'));   /* then again from the spine, if rea
       const users = JSON.parse(localStorage.getItem('fj.users') || '[]')
         .map(u => u.id === user ? { ...u, status: 'active', programId: 'prg_' + user } : u);
       localStorage.setItem('fj.users', JSON.stringify(users));
+      /* THE NAME AS THE COACH SPELLS IT. A typo in the survey ("Sevab") is
+         corrected in the console, and rides here with the program. Written
+         everywhere the page reads a name from, or the next open reads the
+         typo back out of the survey's answers. */
+      const nm = p.profile && p.profile.clientName;
+      if (nm) {
+        const ids = [user, localStorage.getItem('fj.v1.current')].filter(Boolean);
+        localStorage.setItem('fj.users', JSON.stringify(JSON.parse(localStorage.getItem('fj.users') || '[]')
+          .map(u => ids.includes(u.id) ? { ...u, displayName: nm } : u)));
+        localStorage.setItem('fj.intakes', JSON.stringify(JSON.parse(localStorage.getItem('fj.intakes') || '[]')
+          .map(i => ids.includes(i.userId) ? { ...i, answers: { ...i.answers, name: nm } } : i)));
+        ids.forEach(id => {
+          localStorage.setItem('fj.name.' + id, nm);
+          const pk = 'fj.v1.profile.' + id, pr = JSON.parse(localStorage.getItem(pk) || 'null');
+          if (pr && pr.a) { pr.a.name = nm; localStorage.setItem(pk, JSON.stringify(pr)); }
+        });
+      }
       localStorage.setItem(stamp, String(p.updatedAt));
       location.reload();
     } catch (e) { console.warn('[cloud] could not read the released program', e); }

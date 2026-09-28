@@ -282,7 +282,7 @@ export async function notify({ to, title, body, url = null, kind = 'message' }) 
    ============================================================ */
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export async function publishProgram({ clientId, program, released = null } = {}) {
+export async function publishProgram({ clientId, program, released = null, clientName = null } = {}) {
   if (!clientId || !UUID.test(clientId)) {
     return { ok: false, reason: 'not linked to the app', unlinked: true };
   }
@@ -301,7 +301,9 @@ export async function publishProgram({ clientId, program, released = null } = {}
       name: program.name || 'Your program', status: 'assigned',
       days: Object.entries(program.days)
         .map(([k, d], i) => ({ id: k, weekday: i, sessionId: k, label: (d && d.name) || null })),
-      profile: { source: 'console', raw: program, released },
+      /* clientName: the name as the coach spells it, so a typo made in the
+         survey ("Sevab") is corrected on the phone too */
+      profile: { source: 'console', raw: program, released, ...(clientName ? { clientName } : {}) },
     }]);
     return { ok: true, id };
   } catch (e) {
