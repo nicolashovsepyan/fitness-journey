@@ -41,10 +41,10 @@ const FORMATS = [
       'Customize adds sets, with a longer rest between them.'] },
   { id: 'stopwatch', name: 'Stopwatch', sub: 'Counts up, tap to pause', moves: false,
     how: ['Counts up from 0.', 'Tap the ring to pause. Tap Done to stop.'] },
-  { id: 'pushup', name: 'Push-up test', sub: 'Keep the beat as long as you can', moves: false,
-    how: ['The push-up beep test.', 'A low beep means go down, a high beep means come up. Keep the pace as long as you can.',
-      'Tap Stop the moment you miss a beep or break form. Your score is the reps you did on the beat.',
-      '25 a minute is the NHL test and gets a rating. 20 a minute is the classic cadence test.'] },
+  { id: 'pushup', name: 'Push-up test', sub: '1 push-up every 3 seconds, as long as you can', moves: false,
+    how: ['The push-up beep test.', '1 push-up every 3 seconds: a low beep, 1.5 seconds down. A high beep, 1.5 seconds up. That is 20 a minute.',
+      'Keep the beat as long as you can. The test is over when you can no longer stay in rhythm or your form breaks: tap Stop. Your score is the reps you did on the beat.',
+      'Want it harder? 25 a minute is the NHL version.'] },
 ];
 /* field: [label, unit, step, min, max]. Time fields are seconds, shown m:ss. */
 const FIELDS = {
@@ -74,7 +74,7 @@ const MORE = {
 const DEFAULTS = {
   fmt: 'emom', every: 60, mins: 12, cap: 10, ftCap: 0, ftRounds: 1,
   work: 20, rest: 10, rounds: 8, sets: 1, setRest: 60,
-  tWork: 120, tRest: 0, tRounds: 1, pace: 25, ptCap: 0,
+  tWork: 120, tRest: 0, tRounds: 1, pace: 20, paceV: 2, ptCap: 0,
   emomStyle: 'turns', ready: 10, moves: [{ name: '', reps: '' }],
 };
 const TABATA = { work: 20, rest: 10, rounds: 8 };
@@ -103,6 +103,8 @@ export async function renderQuick(el, opts = {}) {
   let saved = null;
   try { saved = await storage().getDevicePref(PREF, null); } catch (e) {}
   cfg = migrate({ ...DEFAULTS, ...(saved?.last || {}) });
+  /* the push-up test first shipped at 25 a minute; the standard is 20 */
+  if (saved?.last && saved.last.paceV !== 2) { cfg.pace = 20; cfg.paceV = 2; }
   favs = Array.isArray(saved?.favs) ? saved.favs : [];
   draw();
 }
@@ -183,7 +185,7 @@ function summary() {
       return cfg.sets > 1 ? `${cfg.sets} sets of ${core}, ${secs(cfg.setRest)} between sets` : core;
     }
     case 'stopwatch': return 'Tap the ring to pause';
-    case 'pushup': return `${cfg.pace} push-ups a minute${cfg.pace === 25 ? ' (NHL test)' : cfg.pace === 20 ? ' (cadence test)' : ''}`;
+    case 'pushup': { const h = Math.round(3000 * 20 / cfg.pace / 2) / 1000; return `${cfg.pace} a minute: ${h}s down, ${h}s up${cfg.pace === 25 ? ' (NHL)' : ''}`; }
     default: return '';
   }
 }
@@ -273,7 +275,7 @@ function bigTile(k) {
     ${face}
     <div class="qt-tu">${isTime(k) ? (noRest ? '&nbsp;' : 'min:sec') : (none ? '&nbsp;' : unit || '&nbsp;')}</div>
     <div class="qt-tb"><button data-q="${k}" data-d="-1" aria-label="Less">−</button><button data-q="${k}" data-d="1" aria-label="More">+</button></div>
-    ${k === 'pace' ? `<div class="qt-presets"><button class="${v === 20 ? 'on' : ''}" data-pace="20">20 classic</button><button class="${v === 25 ? 'on' : ''}" data-pace="25">25 NHL</button></div>` : ''}
+    ${k === 'pace' ? `<div class="qt-presets"><button class="${v === 20 ? 'on' : ''}" data-pace="20">20 standard</button><button class="${v === 25 ? 'on' : ''}" data-pace="25">25 NHL</button></div>` : ''}
   </div>`;
 }
 /* a compact row: the details */

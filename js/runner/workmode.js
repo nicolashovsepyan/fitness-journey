@@ -1136,7 +1136,7 @@ function renderCadence() {
       <div class="cad-cue" id="cadCue">Down</div>
       <div class="cad-reps"><b id="cadReps">0</b><small>reps on the beat</small></div>
       <div class="cad-time" id="cadTime">0:00${cap ? ` / ${fmt(cap)}` : ''}</div>
-      <p class="muted cad-how">Low beep: go down. High beep: come up. Tap Stop the moment you miss a beep.</p>
+      <p class="muted cad-how">Low beep: ${+beat.toFixed(2)}s down. High beep: ${+beat.toFixed(2)}s up. Tap Stop when you can't keep the rhythm.</p>
     </div>
     <div class="actionbar"><button class="btn lg" id="cadStop">Stop</button></div>`);
   if (beginStep(cap || NO_CAP, 'rest', 'cadence')) say('Down on the low beep. Up on the high one.', 2500);
@@ -1324,12 +1324,19 @@ function renderFeedback(next) {
   });
 }
 
-/* Push-up beep test norms at 25 a minute (topendsports.com, NHL protocol).
-   Sex from the survey when we have it, both lines when we don't. */
+/* Push-up test norms (topendsports.com). At 20 a minute, the cadence test:
+   the healthy fitness zone is 20 to 40 for men, 10 to 25 for women. At 25
+   a minute, the NHL beep test bands. Sex from the survey when we have it,
+   both lines when we don't. */
 function cadenceRating(reps, rpm) {
-  if (rpm !== 25) return '';
-  const band = (r, [e, x, g, a]) => r >= e ? 'Elite' : r >= x ? 'Excellent' : r >= g ? 'Good' : r >= a ? 'Average' : 'Below average';
-  const M = [50, 40, 30, 20], F = [40, 30, 20, 12];
+  let band, M, F;
+  if (rpm === 20) {
+    band = (r, [lo, hi]) => r > hi ? 'Above the healthy zone' : r >= lo ? 'Healthy zone' : 'Below the healthy zone';
+    M = [20, 40]; F = [10, 25];
+  } else if (rpm === 25) {
+    band = (r, [e, x, g, a]) => r >= e ? 'Elite' : r >= x ? 'Excellent' : r >= g ? 'Good' : r >= a ? 'Average' : 'Below average';
+    M = [50, 40, 30, 20]; F = [40, 30, 20, 12];
+  } else return '';
   let sex = null;
   try { sex = JSON.parse(localStorage.getItem('fj.v1.profile.' + (S.plan.uid || localStorage.getItem('fj.v1.current'))) || 'null')?.a?.sex; } catch (e) {}
   const line = sex === 'f' ? band(reps, F) : sex === 'm' ? band(reps, M) : `Men: ${band(reps, M)} · Women: ${band(reps, F)}`;

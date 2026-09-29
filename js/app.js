@@ -358,6 +358,10 @@ if (!NO_SW && 'serviceWorker' in navigator) {
 }
 function showUpdateBar() {
   if (document.getElementById('updBar') || R.isActive()) return;   // never interrupt a live workout
+  /* Not mid-workout: just take the new version, the way the dashboard does.
+     A 12-second "tap to update" bar was easy to miss, and a phone kept
+     showing last week's Quick Timer. Setups are saved, nothing is lost. */
+  location.reload(); return;
   const bar = document.createElement('div');
   bar.id = 'updBar'; bar.className = 'toast go';
   bar.style.cursor = 'pointer';
