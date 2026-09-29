@@ -32,15 +32,15 @@ export async function applyUserManifest() {
        generic profile name forever. */
     const full = (displayName(uid) || '').trim();
     const who = full.split(' ')[0];
-    const qs = `user=${encodeURIComponent(uid)}${full ? `&name=${encodeURIComponent(full)}` : ''}`;
+    const qs = uid ? `user=${encodeURIComponent(uid)}${full ? `&name=${encodeURIComponent(full)}` : ''}` : '';
     /* On the Quick Timer the icon being added is THE TIMER: its own id, so
        it sits beside the main app instead of replacing it, and it opens
        straight onto the timer. */
     const quick = new URLSearchParams(location.search).has('quick');
     const m = quick ? {
       ...base,
-      id: `fitness-journey-timer-${uid}`,
-      start_url: `./index.html?quick&${qs}`,
+      id: `fitness-journey-timer${uid ? '-' + uid : ''}`,
+      start_url: `./index.html?quick${qs ? '&' + qs : ''}`,
       name: 'Fitness Journey Timer',
       short_name: 'FJ Timer',
     } : {

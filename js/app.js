@@ -50,6 +50,8 @@ function go(name, sessionId) { view = { name, sessionId }; render(); }
    when the run is mounted, because quit() clears the run state before it
    calls back. */
 let returnTo = null;
+/* the Quick Timer's owner when nobody has claimed this device (see boot) */
+const QUICK_GUEST = 'timer-guest';
 const rememberReturn = (plan) => { returnTo = (plan && plan.returnTo) || null; };
 function leaveWorkout() {
   const back = returnTo;
@@ -126,12 +128,13 @@ async function startFromProgram(dayId) {
 }
 
 function render() {
+  /* the Quick Timer: a standalone timer, no program and no identity needed
+     (js/runner/quick.js) — so it comes before the claim screen */
+  if (new URLSearchParams(location.search).has('quick')) {
+    return renderQuick(app, { guest: !isClaimed(), onStart: plan => { rememberReturn(plan); startWorkout(plan, runCb); } });
+  }
   // Never guess whose phone this is — ask once if we were never told.
   if (!isClaimed()) return renderClaim(app, { onDone: () => { applyUserManifest(); render(); } });
-  /* the Quick Timer: a standalone timer, no program needed (js/runner/quick.js) */
-  if (new URLSearchParams(location.search).has('quick')) {
-    return renderQuick(app, { onStart: plan => { rememberReturn(plan); startWorkout(plan, runCb); } });
-  }
   if (isBeginner()) return renderBeginner();
   return renderPro();
 }
@@ -253,6 +256,12 @@ async function boot() {
   const fromRelease = await consumeReleaseHandoff();
   if (fromRelease && !uid) uid = fromRelease;
 
+  /* THE QUICK TIMER NEEDS NOBODY. It is a stopwatch, not a program, and an
+     iPhone's home-screen timer has its own empty storage: it can never know
+     who installed it, so it was stopping on "Let us find you" before a
+     single second was timed. With no one claimed it runs as a device-local
+     guest; nothing is guessed, and nobody's program or log is touched. */
+  if (!uid && new URLSearchParams(location.search).has('quick')) uid = QUICK_GUEST;
   if (!uid) {                             // never guess whose phone this is
     return renderClaim(app, { onDone: async () => { await boot(); } });
   }

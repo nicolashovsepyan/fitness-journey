@@ -99,7 +99,7 @@ const DEFAULTS = {
 const TABATA = { work: 20, rest: 10, rounds: 8 };
 const PREF = 'quickTimer';
 
-let cfg = null, favs = [], host = null, onStart = null, moreOpen = false;
+let cfg = null, favs = [], host = null, onStart = null, moreOpen = false, guest = false;
 let favIdx = null;              // the saved timer currently loaded, if any
 
 /* Tabata and Timer both have work / rest / rounds, with very different
@@ -111,7 +111,7 @@ const val = k => cfg[key(k)];
 const setVal = (k, v) => { cfg[key(k)] = v; };
 
 export async function renderQuick(el, opts = {}) {
-  host = el; onStart = opts.onStart;
+  host = el; onStart = opts.onStart; guest = !!opts.guest;
   injectStyle(); applyWorkTheme(); loadPrefs();
   /* The address itself names the person, so "Add to Home Screen" from here
      gives a timer icon that opens as THEM (an installed iPhone app cannot
@@ -428,7 +428,7 @@ function draw() {
   host.innerHTML = `
   <div class="screen qt fade-in">
     <div class="qt-top">
-      <button class="qt-back" id="qtBack" aria-label="Back">‹</button>
+      ${guest ? '' : '<button class="qt-back" id="qtBack" aria-label="Back">‹</button>'}
       <h1>Timer</h1>
       <button class="qt-star" id="qtPrefs" aria-label="Timer settings" title="Timer settings">⚙︎</button>
       <button class="qt-star" id="qtShare" aria-label="Share this timer" title="Share this timer"><svg width="20" height="22" viewBox="0 0 20 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14V2M5 7l5-5 5 5"/><path d="M4 11H2.5v9h15v-9H16"/></svg></button>
@@ -715,7 +715,7 @@ async function openMovePicker(i) {
 
 function wire() {
   const $ = s => host.querySelector(s);
-  $('#qtBack').addEventListener('click', () => { location.href = 'dashboard.html'; });
+  $('#qtBack')?.addEventListener('click', () => { location.href = 'dashboard.html'; });
   $('#qtType').addEventListener('click', openTypes);
   $('#qtPrefs').addEventListener('click', () => openPrefs(host));
   $('#qtMore').addEventListener('click', () => { moreOpen = !moreOpen; draw(); });
