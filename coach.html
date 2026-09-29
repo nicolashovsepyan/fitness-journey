@@ -865,6 +865,9 @@ select.pin{appearance:none;cursor:pointer}
         background:var(--sunk); border:1px solid var(--line); border-radius:6px; padding:2px 4px }
 .nbnum.rest{ border-style:dashed }
 .nbnum.off{ opacity:.4 }
+/* the one off-cell you can act on: it goes to the field that owns it */
+button.nbnum.jump{ font:inherit; cursor:pointer; opacity:.5 }
+button.nbnum.jump:hover{ opacity:1; border-color:var(--accent); color:var(--accent) }
 .nbnum input{ width:34px; background:none; border:none; color:var(--ink); text-align:center;
               font:600 11.5px ui-monospace,monospace; padding:2px 0 }
 .nbnum.tempo input{ width:44px }
@@ -3527,13 +3530,50 @@ const NBC = g => ({ lower:'#B3651A', push:'#1D6FC7', pull:'#7B4FCB', core:'#8A6A
    see nbBlockSec. Without it a program whose set counts live in prose
    ("3 rounds, continuous") derives as one set of everything, and a
    forty-five minute session reads as eight minutes. */
+/* WHAT THE PARSER DID NOT UNDERSTAND, IT DELETED.
+
+   It read three shapes - "3 × 8", "8s", "8 each side" - and nbFmt rebuilt
+   the string from those parts alone. Everything else in the prescription
+   was simply not in the parts, so nudging a rep count threw it away, with
+   no warning and no undo. Across the seven programs on the shelf that was
+   31 rows:
+
+     "10-15"                       became "10"    - the range, gone
+     "3-5"                         became "3"
+     "30s left" / "30s right"      became "30s"   - which side, gone
+     "10 each way"                 became "10"
+     "10 reps to failure each side" became "10"   - to failure, gone
+     "3 × 6 · tempo 3-1-1"         became "3 × 6" - the tempo, gone
+     "2 min"                       became "2"     - read as 2 REPS
+
+   A coach writes "10 reps to failure each side" because every word is
+   load-bearing. The number is ours to edit; the rest of the sentence is
+   theirs to keep.
+
+   So this parses the numeric head and hands back the tail untouched, and
+   nbFmt puts the tail back exactly as it came in. A range stays a range:
+   the box edits its low end and the span is kept, because "make it a bit
+   harder" means 10-15 becomes 11-16, not 11. */
 function nbParse(p){
   const s = String(p||'').trim();
-  let m = s.match(/^(\d+)\s*[×x]\s*(\d+)\s*(s)?\s*(each side)?/i);
-  if(m) return { sets:+m[1], val:+m[2], hold:!!m[3], side:!!m[4], told:true };
-  m = s.match(/^(\d+)\s*(s)?\s*(each side)?/i);
-  if(m) return { sets:1, val:+m[1], hold:!!m[2], side:!!m[3], told:false };
-  return { sets:1, val:0, hold:false, side:false, told:false };
+  const m = s.match(/^(?:(\d+)\s*[×x]\s*)?(\d+)(?:\s*[-–]\s*(\d+))?(\s*)(s|sec|secs|seconds|min|mins)?\b\s*([\s\S]*)$/i);
+  if(!m) return { sets:1, val:null, hi:null, hold:false, unit:'', gap:'', side:false, told:false, tail:'', raw:s };
+  const unit = (m[5] || '');
+  const u = unit.toLowerCase();
+  return {
+    sets: m[1] ? +m[1] : 1,
+    val:  +m[2],
+    hi:   m[3] != null ? +m[3] : null,
+    hold: /^s/.test(u),                       // s, sec, seconds
+    mins: /^min/.test(u),
+    unit, gap: m[4] || '',
+    /* the side words live in the tail and are preserved there; this flag
+       is only for the "/side" hint the row prints beside the unit */
+    side: /each side|per side|each way|\bleft\b|\bright\b/i.test(s),
+    told: !!m[1],
+    tail: (m[6] || '').trim(),
+    raw: s,
+  };
 }
 /* A ROW THAT NEVER STATED A SET COUNT MUST NOT ACQUIRE ONE.
 
@@ -3543,9 +3583,18 @@ function nbParse(p){
    block that runs three rounds, and every clock and meter downstream then
    believed it. `told` already records whether anybody stated a count;
    this now respects it. */
-const nbFmt = p => (p.told === false && (p.sets == null || p.sets === 1))
-  ? `${p.val}${p.hold?'s':''}${p.side?' each side':''}`
-  : `${p.sets} \u00D7 ${p.val}${p.hold?'s':''}${p.side?' each side':''}`;
+const nbFmt = p => {
+  /* Nothing numeric was ever in there - a Tabata row written "\u2014". Writing
+     a number into it should produce a number, not "\u20147". */
+  if(p.val == null) return p.raw || '';
+  const num  = p.hi != null ? `${p.val}-${p.hi}` : `${p.val}`;
+  const head = (p.told === false && (p.sets == null || p.sets === 1))
+    ? num : `${p.sets} \u00D7 ${num}`;
+  /* the captured gap is the space BEFORE the unit; with no unit it is the
+     space before the tail, which the join below adds anyway */
+  const unit = p.unit ? (p.gap || '') + p.unit : '';
+  return (head + unit + (p.tail ? ' ' + p.tail : '')).trim();
+};
 
 /* ---- time, derived from what is prescribed ---- */
 const NB_SPR = 3, NB_TRANS = 8;
@@ -3912,6 +3961,14 @@ function nbBump(a, dir, step){
   el.value = v;
   el.dispatchEvent(new Event('change'));
 }
+/* Take me to the field that owns this number. Used by the row cells that
+   only display a value the block decides. */
+function nbGoto(a){
+  const el = document.querySelector(`[data-a="${a}"]`);
+  if(!el) return;
+  el.scrollIntoView({ block:'center' });
+  el.focus(); if(el.select) el.select();
+}
 const nbNum = (o) => `<span class="nbnum ${o.cls||''}" title="${esc(o.title)}">
     <button tabindex="-1" onclick="event.stopPropagation();nbBump('${o.a}',-1${o.step?','+o.step:''})">\u2212</button>
     <input type="number" data-a="${o.a}" min="${o.min}" max="${o.max}"${o.step?` step="${o.step}"`:''}
@@ -4010,7 +4067,17 @@ function nbSetNum(bi,ii,f,raw){ nbAt(bi);
   const p = nbParse(it.pres);
   /* typing a set count IS stating one, whatever the row said before */
   if(f==='sets'){ p.sets = Math.max(1, v||1); p.told = true; }
-  if(f==='val')  p.val  = Math.max(1, v||1);
+  if(f==='val'){
+    const next = Math.max(1, v||1);
+    /* A RANGE MOVES AS A RANGE. 10-15 nudged up is 11-16, not 11: the
+       span is the coach's judgement about how much room the movement has,
+       and it survives a change of difficulty. */
+    if(p.hi != null && p.val != null) p.hi = Math.max(next, p.hi + (next - p.val));
+    p.val = next;
+    /* a row that never carried a number now does, so there is no tail
+       left to preserve - "—" is not a suffix to keep on the end of "8" */
+    if(p.raw && !/\d/.test(p.raw)){ p.tail = ''; p.unit = ''; p.gap = ''; p.raw = ''; }
+  }
   it.pres = nbFmt(p);
   if(it.plan) nbFitPlan(it);
   nbSave();
@@ -4047,6 +4114,13 @@ function nbToggleUnit(bi,ii){ nbAt(bi);
     p.val = NB_SEC_STEPS.reduce((a,b) => Math.abs(b-want) < Math.abs(a-want) ? b : a);
   }
   p.hold = !p.hold;
+  /* nbFmt writes the unit from `unit`, not from `hold`, so the flag alone
+     no longer changes the string - the captured text has to change with
+     it. A range in the old unit is meaningless in the new one. */
+  p.unit = p.hold ? 's' : '';
+  p.gap  = '';
+  p.mins = false;
+  p.hi   = null;
   it.pres = nbFmt(p);
   /* a per-set plan is in the same unit as the row it belongs to */
   if(it.plan) it.plan.forEach(st => { if(st.v != null)
@@ -4808,7 +4882,7 @@ function nbMiddle(){
                        ...(pr.hold ? {step:5} : {}),
                        unit:`<button class="nbunit" title="${pr.hold?'Counted in reps instead':'Held for time instead'}"
                               onclick="event.stopPropagation();nbToggleUnit(${bi},${ii})"
-                              >${pr.hold?'sec':'reps'}</button>${pr.side?'/side':''}`,
+                              >${pr.mins?'min':pr.hold?'sec':'reps'}</button>${pr.side?'/side':''}`,
                        title:pr.hold?'seconds':'reps',
                        on:`nbSetNum(${bi},${ii},'val',this.value)`})
               /* A TABATA'S ROW HAS NO NUMBER OF ITS OWN. The clock decides:
@@ -4818,8 +4892,16 @@ function nbMiddle(){
                  a number nothing would ever read, contradicting the block
                  above it. It shows what the block says now, and says it is
                  the block's. */
-              : `<span class="nbnum off" title="the clock is on the block">
-                   <span class="gh">${b.cfg && b.cfg.work ? b.cfg.work : NB_DEF.work}</span><em>s on</em></span>`}
+              /* A DEAD BOX THAT LOOKS LIKE A BOX IS A TRAP. The seconds on
+                 a Tabata row belong to the block - one clock, every
+                 movement - so this cell cannot be typed into, and it was
+                 rendered as a greyed number with a tooltip nobody hovers.
+                 Seven rows across the shipped programs look editable and
+                 are not. It is a button now: it takes you to the field
+                 that does own the number, and selects it. */
+              : `<button class="nbnum off jump" title="The clock is on the block. Click to edit it."
+                   onclick="event.stopPropagation();nbGoto('b${bi}.cfg.work')"
+                   ><span class="gh">${b.cfg && b.cfg.work ? b.cfg.work : NB_DEF.work}</span><em>s on</em></button>`}
             ${nbCols.has('weight') ? nbNum({a:`b${bi}i${ii}.weight`, min:0, max:900, step:5, val:it.weight,
                      ph:'\u2014', unit:'lb', title:'starting weight', cls:'wt',
                      on:`nbSetNum(${bi},${ii},'weight',this.value)`}) : ''}
@@ -4842,7 +4924,7 @@ function nbMiddle(){
             <span class="n">${si+1}</span>
             ${nbNum({a:`b${bi}i${ii}s${si}.v`, min:pr.hold?5:1, max:600, val:st.v,
                      ...(pr.hold ? {step:5} : {}),
-                     unit:pr.hold?'sec':'reps', title:`set ${si+1}`,
+                     unit:pr.mins?'min':pr.hold?'sec':'reps', title:`set ${si+1}`,
                      on:`nbSetPlan(${bi},${ii},${si},'v',this.value)`})}
             ${nbNum({a:`b${bi}i${ii}s${si}.w`, min:0, max:900, step:5, val:st.w, ph:'\u2014',
                      unit:'lb', title:`set ${si+1} weight`, cls:'wt',
