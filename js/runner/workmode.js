@@ -303,7 +303,7 @@ function enterBlock(i, opts = {}) {
      already typed this round. Only a fresh block wipes them. */
   if (!resuming) {
     S.ii = 0; S.si = 0; S.ci = 0; S.round = 1; S.sub = 'work'; S.amrapRounds = 0; S.amrapReps = null;
-    S.iv = null; S.ivPhase = 'work'; S.blockStart = Date.now(); S.roundBuf = {};
+    S.iv = null; S.ivPhase = 'work'; S.blockStart = Date.now(); S.roundBuf = {}; S.laps = [];
     R.clearStep(S);
   }
   roundBuf = S.roundBuf || (S.roundBuf = {});
@@ -321,6 +321,7 @@ function resumeScreen() {
   if (S.screen === 'summary') return renderSummary();
   if (S.screen === 'trans') return sectionNext();
   if (S.screen === 'feedback') return renderFeedback(finishSession);
+  if (S.screen === 'amraplog') return renderAmrapLog();
   return renderActive();
 }
 /* "get set up" countdown before each block (skippable). 10 seconds unless
@@ -589,6 +590,10 @@ function updateTimer(rem, total) {
   let shown = rem, frac = total > 0 ? rem / total : 0;
   if (countUpDisplay) {
     shown = total - rem;
+    const ft = document.getElementById('ftTotal');
+    if (ft) ft.textContent = `Total ${fmt(shown)}`;
+    const last = (S.laps || []).at(-1);
+    if (last != null) shown = Math.max(0, upElapsed() - last);
     /* no cap: the ring sweeps once a minute, like a second hand */
     frac = total >= NO_CAP ? (shown % 60) / 60 : shown / total;
   }
@@ -1030,8 +1035,11 @@ function renderAmrap() {
   if (beginStep(mins * 60, 'work', 'amrap')) { say(single ? `Max reps. ${mins} minutes. Go.` : `As many rounds as possible. ${mins} minutes. Go.`); }
   const finish = () => {
     R.clearStep(S); onStepDone = null;
-    if (single) { S.captured[b.id][0].sets = [{ value: curVal }]; R.save(S); }
-    else captureRounds(S.amrapRounds);
+    if (single) { S.captured[b.id][0].sets = [{ value: curVal }]; R.save(S); return completeBlock(); }
+    /* named moves: every round's reps, editable, because the last rounds
+       are rarely the reps you planned */
+    if (!b.countRounds && b.items.some(it => it.reps)) { S.blockTimes[b.id] = S.blockTimes[b.id] || Math.round((Date.now() - (S.blockStart || Date.now())) / 1000); S.blockStart = null; return renderAmrapLog(); }
+    captureRounds(S.amrapRounds);
     completeBlock();
   };
   onStepDone = finish;
@@ -1062,6 +1070,35 @@ function renderAmrap() {
   document.getElementById('endAmrap').addEventListener('click', finish);
 }
 
+/* AMRAP, done: each round's reps per move, prefilled with the plan, plus
+   the reps of the round you didn't finish. What gets saved is what you
+   actually did, round by round. */
+function renderAmrapLog() {
+  const b = block(); const n = S.amrapRounds || 0;
+  onScreen('amraplog');
+  const moveCells = (key, vals) => b.items.map((it, i) => `<div class="logset"><span class="sn">${it.name}</span>${cellInputs({ measure: it.measure }, `${key}_${i}`, vals[i], null, null)}</div>`).join('');
+  const rounds = Array.from({ length: n }, (_, r) => `<div class="loggroup"><div class="gname">Round ${r + 1}</div>${moveCells(`ar${r}`, b.items.map(it => it.reps ?? ''))}</div>`).join('');
+  shell(`<div class="center"><div class="eyebrow">AMRAP done</div><h2 style="font-size:22px;margin:8px 0 4px;">${n} round${n === 1 ? '' : 's'}</h2>
+      <p class="muted" style="margin:0 0 14px;">Fix any round where you dropped reps.</p></div>
+    <div class="card logcard">${rounds}
+      <div class="loggroup"><div class="gname">Unfinished round <small class="muted">extra reps</small></div>${moveCells('arx', b.items.map(() => 0))}</div>
+    </div>
+    <div class="actionbar"><button class="btn lg" id="confirm">${isLastBlock() ? 'Finish workout ✓' : 'Confirm ▸'}</button></div>`, { progress: false });
+  document.getElementById('confirm').addEventListener('click', () => {
+    let extra = 0;
+    b.items.forEach((it, i) => {
+      const e = S.captured[b.id][i]; if (!e) return;
+      const sets = [];
+      for (let r = 0; r < n; r++) sets.push({ value: readInput(`ar${r}_${i}`) ?? 0 });
+      const x = readInput(`arx_${i}`) || 0;
+      if (x > 0) { sets.push({ value: x, partial: true }); extra += x; }
+      e.sets = sets; e.rounds = true;
+    });
+    b.items.forEach((_, i) => { const e = S.captured[b.id][i]; if (e) e.amrap = { rounds: n, extra }; });
+    R.save(S); sectionNext();
+  });
+}
+
 /* ---------------- INTERVAL (tabata / emom): work/rest cycling items ---------------- */
 /* `b.intervals`, when set, is the exact number of intervals (the Quick Timer
    writes "12 minutes of EMOM" this way, whatever the number of moves).
@@ -1083,7 +1120,11 @@ function renderInterval() {
   const roundN = Math.floor(S.iv / per) + 1;
   const phaseWork = S.ivPhase === 'work';
   const kind = b.label || (b.format === 'emom' ? 'EMOM' : 'Tabata');
-  const counter = b.intervals ? (totalIv > 1 ? ` · ${S.iv + 1}/${totalIv}` : '') : ` · round ${roundN}/${rounds}`;
+  /* `perRound`: a round is every move once (Tabata with 2 moves, 8 rounds
+     = 16 intervals), so count rounds, not intervals */
+  const pr = b.perRound > 1 ? b.perRound : 0;
+  const counter = pr ? ` · round ${Math.floor(S.iv / pr) + 1}/${b.rounds}`
+    : b.intervals ? (totalIv > 1 ? ` · ${S.iv + 1}/${totalIv}` : '') : ` · round ${roundN}/${rounds}`;
   /* what the minute asks for, and what comes after it: an EMOM you can't
      read the reps off is only a clock */
   const target = phaseWork && !all && item.reps ? `<div class="side">${item.reps} ${UNIT[item.measure] || 'reps'}</div>` : '';
@@ -1101,8 +1142,9 @@ function renderInterval() {
   /* the call at the top of each interval: halfway through the block and
      the last round get said out loud, then the move */
   if (beginStep(dur, phaseWork ? 'work' : 'rest', 'iv') && phaseWork) {
-    const pre = totalIv >= 2 && S.iv === totalIv - 1 ? 'Last round. '
-      : totalIv >= 6 && S.iv === Math.floor(totalIv / 2) ? 'Halfway. ' : '';
+    const step = pr || 1, nR = Math.round(totalIv / step);
+    const pre = nR >= 2 && S.iv === totalIv - step ? 'Last round. '
+      : nR >= 6 && S.iv === Math.floor(nR / 2) * step ? 'Halfway. ' : '';
     say(pre + (all ? '' : item.name));
   }
   onStepDone = nextInterval;
@@ -1175,26 +1217,45 @@ function renderCadence() {
    `minutes` is the cap; none means it runs until you stop it. Tapping the
    ring pauses it, which makes it a stopwatch too. */
 const NO_CAP = 99 * 60;
+/* seconds on the running count-up, to the millisecond, pause folded in */
+const upElapsed = () => S.stepStartedAt == null ? 0 : Math.max(0, ((S.stepPausedAt || Date.now()) - S.stepStartedAt) / 1000);
+function lapRows() {
+  const laps = S.laps || []; if (!laps.length) return '';
+  const word = block().label === 'Stopwatch' ? 'Lap' : 'Round';
+  const rows = laps.map((t, i) => ({ n: i + 1, split: t - (laps[i - 1] || 0), total: t })).reverse();
+  return `<div class="laps">${rows.map(r => `<div class="lap"><span>${word} ${r.n}</span><b>${fmt(r.split)}</b><small>${fmt(r.total)}</small></div>`).join('')}</div>`;
+}
 function renderForTime() {
   const b = block();
   const cap = (Number(b.minutes) || 0) * 60;
   const dur = cap || NO_CAP;
+  /* Stopwatch: Lap. For time with rounds: Round, a split per round. The big
+     number is the current lap; the running total sits under it. */
+  const lapWord = b.label === 'Stopwatch' ? 'Lap' : (b.rounds > 1 ? 'Round ✓' : '');
   const list = b.hideList ? '' : `<div class="circuit-list">${b.items.map(it => `<div class="ci">${rowVid(it)}<span class="nm">${it.name}</span><span class="tg">${it.reps ? it.reps + ' ' + (UNIT[it.measure] || 'reps') : ''}</span></div>`).join('')}</div>`;
   const rounds = b.rounds > 1 ? `${b.rounds} rounds · ` : '';
   shell(`<div class="now-ex"><div class="label">${rounds}${cap ? `cap ${fmt(cap)}` : b.hideList ? 'tap the ring to pause' : 'no cap'}</div>
       <div class="name">${b.hideList ? (b.label || 'Go') : 'For time'}</div></div>
     <div class="timer-wrap">${timerSvg('buffer')}</div>
+    ${lapWord ? `<div class="ft-total" id="ftTotal"></div>` : ''}
+    <div id="lapList">${lapRows()}</div>
     ${list}
-    <div class="actionbar"><button class="btn lg" id="ftDone">Done ✓</button></div>`);
+    <div class="actionbar">${lapWord ? `<div class="btn-row"><button class="btn secondary" id="ftLap">${lapWord}</button><button class="btn" id="ftDone">Done ✓</button></div>` : '<button class="btn lg" id="ftDone">Done ✓</button>'}</div>`);
   const finish = secs => {
     R.clearStep(S); onStepDone = null;
-    (S.captured[b.id] || []).forEach(e => { e.sets = [{ value: secs }]; e.unit = 'sec'; e.rounds = true; });
+    const laps = (S.laps || []).map((t, i, a) => Math.round(t - (a[i - 1] || 0)));
+    (S.captured[b.id] || []).forEach(e => { e.sets = [{ value: secs }]; e.unit = 'sec'; e.rounds = true; if (laps.length) e.laps = laps; });
     R.save(S); say(`Done in ${Math.floor(secs / 60)} minutes ${secs % 60} seconds.`);
     completeBlock();
   };
   if (beginStep(dur, cap ? 'work' : 'rest', 'fortime')) say('Go.');
   onStepDone = () => finish(dur);
   document.getElementById('ftDone').addEventListener('click', () => { buzz(40); finish(dur - (R.stepRemaining(S) ?? 0)); });
+  document.getElementById('ftLap')?.addEventListener('click', () => {
+    S.laps = [...(S.laps || []), upElapsed()]; R.save(S); buzz(30); beep('tick');
+    document.getElementById('lapList').innerHTML = lapRows();
+    tick();
+  });
 }
 
 /* ---------------- BENCHMARK / MAX TEST ---------------- */
@@ -1349,9 +1410,10 @@ function quickResult(session) {
     if (v == null || b.name.startsWith('Countdown')) return '';
     if (b.format === 'cadence') return `<div class="eff-row"><span>${b.name}</span><span class="pr-flash" style="margin-left:auto;">${v} reps</span></div>${cadenceRating(v, e.cadence)}`;
     const val = b.format === 'fortime' ? fmt(v)
-      : b.format === 'amrap' ? `${v} ${e.unit || 'rounds'}`
+      : b.format === 'amrap' ? (e.amrap ? `${e.amrap.rounds} rounds${e.amrap.extra ? ` + ${e.amrap.extra} reps` : ''}` : `${v} ${e.unit || 'rounds'}`)
       : `${v} interval${v === 1 ? '' : 's'}`;
-    return `<div class="eff-row"><span>${b.name}</span><span class="pr-flash" style="margin-left:auto;">${val}</span></div>`;
+    const laps = e.laps?.length ? e.laps.map((t, i) => `<div class="eff-row"><span class="muted">${b.format === 'fortime' && b.name.startsWith('Stopwatch') ? 'Lap' : 'Round'} ${i + 1}</span><span style="margin-left:auto;">${fmt(t)}</span></div>`).join('') : '';
+    return `<div class="eff-row"><span>${b.name}</span><span class="pr-flash" style="margin-left:auto;">${val}</span></div>${laps}`;
   }).join('');
   return rows ? `<div class="card"><div class="eyebrow">Result</div>${rows}</div>` : '';
 }

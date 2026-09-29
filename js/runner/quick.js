@@ -144,6 +144,9 @@ const namedMoves = () => (FORMATS.find(f => f.id === cfg.fmt)?.moves ? (cfg.move
       : { name: String(m.name).trim(), measure: 'reps', reps: n, noPR: true };
   });
 
+/* In Tabata and Timer a round is EVERY move once: 8 rounds of 2 moves is
+   16 intervals, not 8 shared between them. */
+const perRound = () => Math.max(1, namedMoves().length);
 function emomCount() { return Math.max(1, Math.floor((cfg.mins * 60) / cfg.every)); }
 function intervalSec(work, rest, rounds, sets = 1, setRest = 0) {
   const one = rounds * work + (rounds - 1) * rest;
@@ -155,17 +158,17 @@ function totalSec() {
     case 'emom': return emomCount() * cfg.every;
     case 'amrap': return cfg.cap * 60;
     case 'fortime': return cfg.ftCap ? cfg.ftCap * 60 : null;
-    case 'tabata': return intervalSec(cfg.work, cfg.rest, cfg.rounds);
-    case 'timer': return intervalSec(cfg.tWork, cfg.tRest, cfg.tRounds, cfg.sets, cfg.setRest);
+    case 'tabata': return intervalSec(cfg.work, cfg.rest, cfg.rounds * perRound());
+    case 'timer': return intervalSec(cfg.tWork, cfg.tRest, cfg.tRounds * perRound(), cfg.sets, cfg.setRest);
     case 'pushup': return cfg.ptCap ? cfg.ptCap * 60 : null;
     default: return null;
   }
 }
 /* the big "how long" above Start */
-function totalText() {
+function totalBadge() {
   const t = totalSec();
-  if (t) return (cfg.fmt === 'fortime' || cfg.fmt === 'pushup') ? `up to ${fmt(t)}` : fmt(t);
-  return cfg.fmt === 'pushup' ? 'until you miss' : 'open';
+  if (t) return { big: fmt(t), small: (cfg.fmt === 'fortime' || cfg.fmt === 'pushup') ? 'max' : 'total' };
+  return { big: '∞', small: cfg.fmt === 'pushup' ? 'till you miss' : 'open' };
 }
 const secs = v => v >= 60 ? fmt(v) : `${v}s`;
 /* one line under it: what you're about to do, in plain words */
@@ -178,10 +181,14 @@ function summary() {
     }
     case 'amrap': return moves.length ? `${moves.length} move${moves.length > 1 ? 's' : ''} per round` : 'Tap + for every round you finish';
     case 'fortime': return `${cfg.ftRounds} round${cfg.ftRounds > 1 ? 's' : ''}, ${cfg.ftCap ? `${cfg.ftCap} min cap` : 'no cap'}`;
-    case 'tabata': return `${cfg.rounds} rounds of ${secs(cfg.work)} on, ${secs(cfg.rest)} off`;
+    case 'tabata': {
+      const n = perRound();
+      return `${cfg.rounds} rounds${n > 1 ? ` × ${n} moves = ${cfg.rounds * n} intervals` : ''} of ${secs(cfg.work)} on, ${secs(cfg.rest)} off`;
+    }
     case 'timer': {
       const r = cfg.tRounds;
-      const core = `${r > 1 ? `${r} rounds of ` : ''}${secs(cfg.tWork)} work${cfg.tRest && r > 1 ? `, ${secs(cfg.tRest)} rest` : ''}`;
+      const n = perRound();
+      const core = `${r > 1 ? `${r} rounds of ` : ''}${n > 1 ? `${n} moves, ` : ''}${secs(cfg.tWork)} work${cfg.tRest && (r > 1 || n > 1) ? `, ${secs(cfg.tRest)} rest` : ''}`;
       return cfg.sets > 1 ? `${cfg.sets} sets of ${core}, ${secs(cfg.setRest)} between sets` : core;
     }
     case 'stopwatch': return 'Tap the ring to pause';
@@ -236,13 +243,14 @@ export function buildPlan(c = cfg) {
       }
       case 'tabata':
         blocks = [{ ...base, id: id(1), name, format: 'tabata', label: 'Tabata',
-          work: cfg.work, rest: cfg.rest, intervals: cfg.rounds, items: moves.length ? moves : work }];
+          work: cfg.work, rest: cfg.rest, rounds: cfg.rounds, perRound: perRound(), intervals: cfg.rounds * perRound(),
+          items: moves.length ? moves : work }];
         break;
       case 'timer':
         for (let i = 0; i < cfg.sets; i++) {
           blocks.push({ ...base, id: id(i + 1), format: 'tabata', label: 'Timer',
             name: cfg.sets > 1 ? `Set ${i + 1} of ${cfg.sets}` : name,
-            work: cfg.tWork, rest: cfg.tRest, intervals: cfg.tRounds, restAfter: cfg.setRest,
+            work: cfg.tWork, rest: cfg.tRest, rounds: cfg.tRounds, perRound: perRound(), intervals: cfg.tRounds * perRound(), restAfter: cfg.setRest,
             items: moves.length ? moves : work });
         }
         break;
@@ -312,13 +320,10 @@ function draw() {
 
     ${favs.length ? `<div class="qt-favs">${favs.map((f, i) => `<span class="qt-fav"><button data-fav="${i}">${esc(f.label)}</button><button class="qt-favx" data-favx="${i}" aria-label="Remove">✕</button></span>`).join('')}</div>` : ''}
 
-    <div class="qt-typerow">
-      <button class="qt-type" id="qtType">
-        <span class="qt-type-t"><small>Type</small><b>${def.name}</b><em>${def.sub}</em></span>
-        <span class="qt-chev">▾</span>
-      </button>
-      <button class="qt-how" id="qtHow" aria-label="How ${def.name} works">?</button>
-    </div>
+    <button class="qt-type" id="qtType">
+      <span class="qt-type-t"><small>Type</small><b>${def.name}</b><em>${def.sub}</em></span>
+      <span class="qt-chev">▾</span>
+    </button>
 
     ${main.length ? `<div class="qt-tiles n${main.length}">${main.map(bigTile).join('')}</div>`
       : `<div class="qt-empty">Nothing to set. Hit start.</div>`}
@@ -346,11 +351,13 @@ function draw() {
     <p class="qt-hint">How a program day runs, 1 format at a time. Short numbers, nothing saved.</p>
     <div class="qt-demos">${DEMOS.map(d => `<button class="qt-demo" data-demo="${d.id}"><b>${d.name}</b><small>${d.sub}</small><span>▸</span></button>`).join('')}</div>` : ''}
 
-    <div style="height:190px"></div>
+    <div style="height:200px"></div>
     <div class="actionbar qt-bar">
-      <div class="qt-total"><small>Total</small><b>${totalText()}</b></div>
       <div class="qt-sum">${summary()}</div>
-      <button class="btn lg" id="qtGo">Start</button>
+      <div class="qt-go">
+        <div class="qt-badge ${totalBadge().big.length > 5 ? 'long' : ''}"><b>${totalBadge().big}</b><small>${totalBadge().small}</small></div>
+        <button class="btn lg" id="qtGo">Start</button>
+      </div>
     </div>
   </div>`;
   wire();
@@ -369,7 +376,8 @@ function sheet(inner, cls = '') {
 /* the type list */
 function openTypes() {
   const { ov, close } = sheet(`<div class="qt-sheet-h">Type of timer</div>
-    ${FORMATS.map(f => `<button class="qt-opt ${f.id === cfg.fmt ? 'on' : ''}" data-pick="${f.id}"><b>${f.name}</b><small>${f.sub}</small>${f.id === cfg.fmt ? '<i>✓</i>' : ''}</button>`).join('')}`);
+    ${FORMATS.map(f => `<div class="qt-optrow"><button class="qt-opt ${f.id === cfg.fmt ? 'on' : ''}" data-pick="${f.id}"><b>${f.name}${f.id === cfg.fmt ? ' <i>✓</i>' : ''}</b><small>${f.sub}</small></button><button class="qt-how" data-how="${f.id}" aria-label="How ${f.name} works">?</button></div>`).join('')}`);
+  ov.querySelectorAll('[data-how]').forEach(b => b.addEventListener('click', () => openHow(b.dataset.how)));
   ov.querySelectorAll('[data-pick]').forEach(b => b.addEventListener('click', () => {
     if (cfg.fmt !== b.dataset.pick) {
       cfg.fmt = b.dataset.pick;
@@ -380,8 +388,8 @@ function openTypes() {
   }));
 }
 /* how the chosen type works */
-function openHow() {
-  const def = fmtDef();
+function openHow(id) {
+  const def = FORMATS.find(f => f.id === id) || fmtDef();
   const { ov, close } = sheet(`<div class="qt-sheet-h">How ${def.name} works</div>
     <div class="qt-howbody"><p class="lead">${def.how[0]}</p>${def.how.slice(1).map(p => `<p>${p}</p>`).join('')}</div>
     <button class="btn" id="qtHowOk">Got it</button>`);
@@ -408,30 +416,115 @@ function openTime(k) {
   ov.querySelector('#tpOk').addEventListener('click', () => { setVal(k, v); persist(); close(); draw(); });
   show();
 }
-/* search the exercise library, or keep what was typed */
-const LIB = () => Object.entries(EXERCISES).map(([id, e]) => ({ id, name: e.name, gym: !!e.gymOnly, pattern: e.pattern || '' }))
-  .filter(e => e.name).sort((a, b) => a.name.localeCompare(b.name));
-const norm = s => String(s || '').toLowerCase().replace(/[-_]/g, ' ');
-function openMovePicker(i) {
-  const lib = LIB();
+/* ---------------- search ----------------
+   Every word a person might use for a move: its name and aliases, the
+   muscles it trains (main and secondary), the body part those belong to
+   ("abs" and "core", "quads" and "legs"), the movement (push, pull,
+   hinge), the equipment, the level. Muscles come from the shared catalog
+   (spine/catalog.json); the app's own library is the fallback offline. */
+const WORDS = {
+  /* muscles → everything a person calls them */
+  quad: 'quads quadriceps thighs legs leg lower body knees', glute: 'glutes butt bum booty hips legs lower body posterior chain',
+  hamstring: 'hamstrings hams legs lower body posterior chain', calf: 'calves calf legs lower body ankles',
+  tibialis: 'shins shin tibialis legs ankles', adductor: 'adductors groin inner thigh legs',
+  chest: 'chest pecs pec upper body push', triceps: 'triceps tricep arms arm upper body', biceps: 'biceps bicep arms arm upper body',
+  forearm: 'forearms forearm grip arms', grip: 'grip forearms hands hang', 'front-delt': 'shoulders shoulder front delts upper body',
+  'side-delt': 'shoulders shoulder side delts', 'rear-delt': 'shoulders rear delts upper back back', serratus: 'serratus shoulder blades ribs',
+  abs: 'abs abdominals core six pack stomach belly midsection', obliques: 'obliques core abs sides waist twist',
+  'hip-flexor': 'hip flexors hips core', lat: 'lats back upper body wings', 'mid-back': 'back upper back rhomboids posture',
+  'lower-back': 'lower back back spine erectors posterior chain', traps: 'traps trapezius upper back neck back',
+  /* movement patterns */
+  push: 'push upper body', press: 'press push shoulders overhead', pull: 'pull back upper body', core: 'core abs midsection',
+  hinge: 'hinge deadlift posterior chain legs', squat: 'squat legs', lunge: 'lunge single leg legs', jump: 'jump jumping plyo plyometric explosive power',
+  'h-push': 'horizontal push chest', 'v-push': 'vertical push overhead shoulders', 'h-pull': 'row rows horizontal pull back',
+  'v-pull': 'pull up pull-up chin vertical pull back', 'straight-arm-push': 'planche straight arm', 'straight-arm-pull': 'front lever straight arm',
+  'anti-extension': 'core abs plank', 'anti-rotation': 'core obliques', 'anti-lateral-flexion': 'core obliques side', flexion: 'crunch core abs',
+  rotation: 'rotation twist obliques core', extension: 'back extension lower back', compression: 'compression l-sit core hip flexors',
+  locomotion: 'crawl crawling animal flow', carry: 'carry walk grip', conditioning: 'cardio conditioning hiit sweat metcon engine burn',
+  mobility: 'mobility stretch stretching flexibility warm up warmup', skill: 'skill calisthenics gymnastics', full: 'full body total body',
+  /* equipment */
+  bw: 'bodyweight body weight no equipment home', bb: 'barbell bar', db: 'dumbbell dumbbells', kb: 'kettlebell kettlebells',
+  band: 'band bands resistance band', rings: 'rings gymnastic rings', pullupbar: 'pull up bar bar', parallettes: 'parallettes',
+  dipbars: 'dip bars dip station', bench: 'bench', vest: 'weighted vest vest', machine: 'machine gym', cable: 'cable gym',
+  slantboard: 'slant board', sliders: 'sliders', abwheel: 'ab wheel ab roller', mat: 'mat', rack: 'rack squat rack',
+  /* level + shape */
+  beg: 'beginner easy', int: 'intermediate', adv: 'advanced hard', hold: 'hold isometric static', unilateral: 'single leg single arm one side unilateral',
+};
+const CHIPS = ['Core', 'Abs', 'Legs', 'Glutes', 'Push', 'Pull', 'Arms', 'Back', 'Shoulders', 'Full body', 'Cardio', 'No equipment'];
+const norm = s => String(s || '').toLowerCase().replace(/[-_/]/g, ' ').replace(/\s+/g, ' ').trim();
+let catalog = null, lib = null;
+async function loadCatalog() {
+  if (catalog) return;
+  try { const r = await fetch('spine/catalog.json'); if (r.ok) catalog = (await r.json()).movements || {}; } catch (e) {}
+  catalog = catalog || {}; lib = null;
+}
+/* Each move gets 3 word sets: its name, what it MAINLY trains (target
+   muscles, pattern, equipment, aliases) and what it also touches (secondary
+   muscles). Whole words only, so "lats" never matches "bilateral". */
+const wordsOf = str => new Set(norm(str).split(' ').filter(Boolean));
+function LIB() {
+  if (lib) return lib;
+  const add = (set, v) => [].concat(v || []).forEach(x => { if (!x || typeof x !== 'string') return; set.push(x); if (WORDS[x]) set.push(WORDS[x]); });
+  lib = Object.entries(EXERCISES).filter(([, e]) => e.name).map(([id, e]) => {
+    const c = (catalog && catalog[id]) || {};
+    const main = [], also = [];
+    [e.pattern, c.patterns, e.family, e.families, e.region, e.equipment, c.muscles, c.modality, e.level].forEach(v => add(main, v));
+    if (e.measure === 'hold') add(main, 'hold');
+    if (e.laterality === 'unilateral') add(main, 'unilateral');
+    Object.values(c.aliases || {}).forEach(v => add(main, v));
+    add(also, c.musclesAlso);
+    const muscles = (c.muscles || []).map(m => m.replace(/-/g, ' '));
+    return { id, name: e.name, n: norm(e.name), wn: wordsOf(`${e.name} ${id}`), wm: wordsOf(main.join(' ')), wa: wordsOf(also.join(' ')),
+      tag: [muscles.join(', ') || e.pattern || '', e.gymOnly ? 'gym' : ''].filter(Boolean).join(' · ') };
+  }).sort((a, b) => a.name.localeCompare(b.name));
+  return lib;
+}
+/* a query word matches a word exactly, as its singular, or as the start of
+   a longer word once 4 letters are typed ("dumb" finds dumbbell) */
+function wordHit(set, w) {
+  if (set.has(w)) return true;
+  if (w.length > 3 && w.endsWith('s') && set.has(w.slice(0, -1))) return true;
+  if (w.length >= 4) for (const x of set) if (x.startsWith(w)) return true;
+  return false;
+}
+/* every word must match somewhere; name beats main muscle beats secondary */
+function search(q) {
+  const words = norm(q).split(' ').filter(Boolean);
+  if (!words.length) return LIB();
+  const out = [];
+  for (const e of LIB()) {
+    let score = 0, ok = true;
+    for (const w of words) {
+      const s = wordHit(e.wn, w) ? 5 : wordHit(e.wm, w) ? 3 : wordHit(e.wa, w) ? 1 : 0;
+      if (!s) { ok = false; break; }
+      score += s;
+    }
+    if (ok) out.push({ e, score: score + (e.n.startsWith(words[0]) ? 2 : 0) });
+  }
+  return out.sort((a, b) => b.score - a.score || a.e.name.localeCompare(b.e.name)).map(x => x.e);
+}
+async function openMovePicker(i) {
   const { ov, close } = sheet(`<div class="qt-sheet-h">Pick a move</div>
-    <input class="qt-search" id="mvQ" placeholder="Search ${lib.length} moves, or type your own" autocomplete="off" value="${esc(cfg.moves[i]?.name || '')}"/>
+    <input class="qt-search" id="mvQ" placeholder="Name, muscle, body part, equipment…" autocomplete="off" value="${esc(cfg.moves[i]?.name || '')}"/>
+    <div class="qt-chips">${CHIPS.map(c => `<button data-chip="${c}">${c}</button>`).join('')}</div>
     <div class="qt-results" id="mvR"></div>`, 'tall');
   const q = ov.querySelector('#mvQ'), out = ov.querySelector('#mvR');
   const pick = m => { cfg.moves[i] = { ...cfg.moves[i], ...m }; persist(); close(); draw(); };
   const list = () => {
-    const t = norm(q.value.trim());
-    let hits = t ? lib.filter(e => norm(e.name).includes(t) || norm(e.id).includes(t)) : lib;
-    if (t) hits.sort((a, b) => (norm(b.name).startsWith(t) - norm(a.name).startsWith(t)) || a.name.localeCompare(b.name));
-    hits = hits.slice(0, 60);
-    const exact = t && lib.some(e => norm(e.name) === t);
+    const t = norm(q.value);
+    const all = search(t);
+    const hits = all.slice(0, 80);
+    const exact = t && LIB().some(e => e.n === t);
+    ov.querySelectorAll('[data-chip]').forEach(c => c.classList.toggle('on', norm(c.dataset.chip) === t));
     out.innerHTML = (t && !exact ? `<button class="qt-res own" data-own="1"><b>Use "${esc(q.value.trim())}"</b><small>your own move, not from the library</small></button>` : '')
-      + hits.map(e => `<button class="qt-res" data-ex="${e.id}"><b>${esc(e.name)}</b><small>${esc(e.pattern)}${e.gym ? ' · gym' : ''}</small></button>`).join('')
-      + (!hits.length && !t ? '' : '');
+      + (t ? `<div class="qt-count">${all.length} move${all.length === 1 ? '' : 's'}</div>` : '')
+      + hits.map(e => `<button class="qt-res" data-ex="${e.id}"><b>${esc(e.name)}</b><small>${esc(e.tag)}</small></button>`).join('');
     out.querySelectorAll('[data-ex]').forEach(b => b.addEventListener('click', () => pick({ exId: b.dataset.ex, name: EXERCISES[b.dataset.ex].name })));
     out.querySelector('[data-own]')?.addEventListener('click', () => pick({ exId: null, name: q.value.trim() }));
   };
   q.addEventListener('input', list);
+  ov.querySelectorAll('[data-chip]').forEach(c => c.addEventListener('click', () => { q.value = norm(q.value) === norm(c.dataset.chip) ? '' : c.dataset.chip; list(); }));
+  loadCatalog().then(() => { lib = null; list(); });
   q.addEventListener('keydown', e => { if (e.key === 'Enter') { const first = out.querySelector('.qt-res'); first?.click(); } });
   list();
   setTimeout(() => { q.focus(); q.select(); }, 60);
@@ -441,7 +534,6 @@ function wire() {
   const $ = s => host.querySelector(s);
   $('#qtBack').addEventListener('click', () => { location.href = 'dashboard.html'; });
   $('#qtType').addEventListener('click', openTypes);
-  $('#qtHow').addEventListener('click', openHow);
   $('#qtMore').addEventListener('click', () => { moreOpen = !moreOpen; draw(); });
   host.querySelectorAll('[data-q]').forEach(b => b.addEventListener('click', () => { bump(b.dataset.q, Number(b.dataset.d)); persist(); draw(); }));
   host.querySelectorAll('[data-qt]').forEach(b => b.addEventListener('click', () => openTime(b.dataset.qt)));
@@ -610,6 +702,23 @@ function injectStyle() {
   .qt-res { width:100%; display:flex; flex-direction:column; text-align:left; background:none; border:none; border-bottom: 1px solid var(--line); color: var(--text); padding: 12px 4px; cursor:pointer; }
   .qt-res b { font-size: 16px; font-weight: 600; } .qt-res small { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
   .qt-res.own b { color: var(--wm-accent); }
+  .qt-optrow { display:flex; align-items:center; border-top: 1px solid var(--line); }
+  .qt-optrow .qt-opt { flex: 1; border-top: none; }
+  .qt-optrow .qt-how { flex: none; width: 40px; height: 40px; border-radius: 50%; margin-right: 2px; font-size: 17px; }
+  .qt-opt b i { color: var(--wm-accent); font-style: normal; font-size: 15px; margin-left: 4px; }
+  .qt-go { display:flex; align-items:center; gap: 12px; }
+  .qt-go .btn { flex: 1; }
+  .qt-badge { flex: none; width: 84px; height: 84px; border-radius: 50%; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    border: 3px solid var(--wm-neon); background: radial-gradient(circle at 50% 35%, var(--wm-neon-soft), var(--bg) 70%);
+    box-shadow: 0 0 22px var(--wm-neon-line), inset 0 0 14px var(--wm-neon-soft); }
+  .qt-badge b { font-family: var(--tnum); font-size: 22px; letter-spacing: -0.04em; color: var(--text); line-height: 1; text-shadow: 0 0 10px var(--wm-neon-line); }
+  .qt-badge.long b { font-size: 17px; }
+  .qt-badge small { color: var(--wm-neon); font-size: 10px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; margin-top: 3px; }
+  .qt-chips { display:flex; gap: 6px; overflow-x:auto; padding: 10px 0 2px; scrollbar-width: none; flex: none; }
+  .qt-chips::-webkit-scrollbar { display:none; }
+  .qt-chips button { flex: none; background: var(--box); border: 1px solid var(--line); border-radius: 999px; color: var(--text); font-size: 13.5px; padding: 7px 13px; cursor:pointer; }
+  .qt-chips button.on { border-color: var(--wm-neon); color: var(--wm-neon); background: var(--wm-neon-soft); }
+  .qt-count { color: var(--faint); font-size: 12px; padding: 8px 4px 2px; }
   .qt-sum { text-align:center; color: var(--muted); font-size: 14px; margin: 0 0 10px; line-height: 1.35; }
 
   .qt-sheet { position: fixed; inset: 0; z-index: 60; background: rgba(8,10,12,0); display:flex; align-items:flex-end; transition: background .18s; }

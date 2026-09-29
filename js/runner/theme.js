@@ -95,6 +95,14 @@ function injectStyle() {
   html.wm .bchip.now { background: var(--wm-accent); color: #0C1512; }
   html.wm .sessclock { color: var(--wm-accent); }
   html.wm .overlay-card { border: 1px solid var(--wm-neon-line); box-shadow: var(--wm-glow-neon); }
+  /* stopwatch laps / for-time round splits */
+  html.wm .ft-total { text-align:center; color: var(--muted); font-family: var(--tnum); font-size: 18px; margin: -4px 0 8px; }
+  html.wm .laps { max-width: 420px; margin: 0 auto 10px; }
+  html.wm .lap { display:grid; grid-template-columns: 1fr auto 70px; gap: 10px; align-items: baseline; padding: 8px 4px; border-bottom: 1px solid var(--line); }
+  html.wm .lap span { color: var(--muted); font-size: 14px; }
+  html.wm .lap b { font-family: var(--tnum); font-size: 18px; color: var(--text); }
+  html.wm .lap small { font-family: var(--tnum); color: var(--faint); font-size: 13px; text-align: right; }
+  html.wm .lap:first-child b { color: var(--wm-accent); }
   /* push-up test: the cue flips pink (down) / accent (up) on each beep */
   html.wm .cad { text-align:center; margin-top: 14px; }
   html.wm .cad-cue { font-size: 68px; font-weight: 800; letter-spacing: -0.03em; text-transform: uppercase; color: var(--muted); }
