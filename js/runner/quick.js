@@ -448,9 +448,15 @@ const WORDS = {
   dipbars: 'dip bars dip station', bench: 'bench', vest: 'weighted vest vest', machine: 'machine gym', cable: 'cable gym',
   slantboard: 'slant board', sliders: 'sliders', abwheel: 'ab wheel ab roller', mat: 'mat', rack: 'rack squat rack',
   /* level + shape */
-  beg: 'beginner easy', int: 'intermediate', adv: 'advanced hard', hold: 'hold isometric static', unilateral: 'single leg single arm one side unilateral',
+  beg: 'beginner beginners easy easier novice starter start basic basics simple newbie new entry level regression level 1',
+  int: 'intermediate medium moderate middle normal level 2',
+  adv: 'advanced hard harder difficult tough expert elite pro challenging progression level 3', hold: 'hold isometric static', unilateral: 'single leg single arm one side unilateral',
 };
-const CHIPS = ['Core', 'Abs', 'Legs', 'Glutes', 'Push', 'Pull', 'Arms', 'Back', 'Shoulders', 'Full body', 'Cardio', 'No equipment'];
+const CHIPS = ['Easy', 'Medium', 'Hard', 'Core', 'Abs', 'Legs', 'Glutes', 'Push', 'Pull', 'Arms', 'Back', 'Shoulders', 'Full body', 'Cardio', 'No equipment'];
+/* a move's level: the library's, else the catalog's; mobility and joint
+   prep with none count as easy */
+const LEVEL_NAME = { beg: 'beginner', int: 'intermediate', adv: 'advanced' };
+function levelOf(e, c) { return e.level || c.level || (e.pattern === 'mobility' || c.role === 'joint-prep' ? 'beg' : null); }
 const norm = s => String(s || '').toLowerCase().replace(/[-_/]/g, ' ').replace(/\s+/g, ' ').trim();
 let catalog = null, lib = null;
 async function loadCatalog() {
@@ -468,14 +474,15 @@ function LIB() {
   lib = Object.entries(EXERCISES).filter(([, e]) => e.name).map(([id, e]) => {
     const c = (catalog && catalog[id]) || {};
     const main = [], also = [];
-    [e.pattern, c.patterns, e.family, e.families, e.region, e.equipment, c.muscles, c.modality, e.level].forEach(v => add(main, v));
+    const lvl = levelOf(e, c);
+    [e.pattern, c.patterns, e.family, e.families, e.region, e.equipment, c.muscles, c.modality, lvl].forEach(v => add(main, v));
     if (e.measure === 'hold') add(main, 'hold');
     if (e.laterality === 'unilateral') add(main, 'unilateral');
     Object.values(c.aliases || {}).forEach(v => add(main, v));
     add(also, c.musclesAlso);
     const muscles = (c.muscles || []).map(m => m.replace(/-/g, ' '));
-    return { id, name: e.name, n: norm(e.name), wn: wordsOf(`${e.name} ${id}`), wm: wordsOf(main.join(' ')), wa: wordsOf(also.join(' ')),
-      tag: [muscles.join(', ') || e.pattern || '', e.gymOnly ? 'gym' : ''].filter(Boolean).join(' · ') };
+    return { id, name: e.name, n: norm(e.name), lvl, wn: wordsOf(`${e.name} ${id}`), wm: wordsOf(main.join(' ')), wa: wordsOf(also.join(' ')),
+      tag: [muscles.join(', ') || e.pattern || '', LEVEL_NAME[lvl] || '', e.gymOnly ? 'gym' : ''].filter(Boolean).join(' · ') };
   }).sort((a, b) => a.name.localeCompare(b.name));
   return lib;
 }
@@ -488,11 +495,20 @@ function wordHit(set, w) {
   return false;
 }
 /* every word must match somewhere; name beats main muscle beats secondary */
+/* "easy", "novice", "hard"… are a filter on the move's LEVEL, never a
+   name match ("advanced pull" must not open on an intermediate move that
+   has "Advanced" in its name) */
+const LEVEL_WORD = {};
+for (const lv of ['beg', 'int', 'adv']) for (const w of WORDS[lv].split(' ')) if (!/^(level|1|2|3|start|new|basic|entry|normal|middle|pro)$/.test(w)) LEVEL_WORD[w] = lv;
 function search(q) {
-  const words = norm(q).split(' ').filter(Boolean);
+  let words = norm(q).split(' ').filter(Boolean);
   if (!words.length) return LIB();
+  const levels = new Set(words.filter(w => LEVEL_WORD[w]).map(w => LEVEL_WORD[w]));
+  words = words.filter(w => !LEVEL_WORD[w]);
+  const pool = levels.size ? LIB().filter(e => levels.has(e.lvl)) : LIB();
+  if (!words.length) return pool;
   const out = [];
-  for (const e of LIB()) {
+  for (const e of pool) {
     let score = 0, ok = true;
     for (const w of words) {
       const s = wordHit(e.wn, w) ? 5 : wordHit(e.wm, w) ? 3 : wordHit(e.wa, w) ? 1 : 0;
