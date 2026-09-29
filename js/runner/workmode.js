@@ -11,6 +11,7 @@ import { store } from '../store.js';
 import { EXERCISES } from '../data/exercises.js';
 import { alternatives } from '../core/resolve.js';
 import { applyWorkTheme, clearWorkTheme } from './theme.js';
+import { loadPrefs, pref, openPrefs } from './prefs.js';
 import { say, beep, buzz, fmt, initAudio, stopAudio, keepAwake, releaseAwake, setMuted } from '../timer.js';
 
 const UNIT = { reps: 'reps', hold: 'sec', cals: 'cals', rounds: 'rounds' };
@@ -33,8 +34,13 @@ let countUpDisplay = false;
    `tag` names the screen; with the cursor it makes the step's identity, so a
    re-render of the SAME step (a reopened app) keeps its clock. Returns true
    when the step is new, which is when its voice line should play. */
+/* GLANCE MODE: the whole screen takes the colour of the phase you are in,
+   so you can read "work / rest / get ready" from across the room. Set per
+   step, painted by tick() as <html data-phase>. */
+let curPhase = '';
 function beginStep(sec, kind = 'rest', tag = 'step') {
   curStepKind = kind;
+  curPhase = (tag === 'ready' || tag === 'buffer') ? 'ready' : (tag === 'fortime' || tag === 'cadence') ? 'work' : kind;
   countUpDisplay = tag === 'fortime';
   const key = `${tag}|${S.bi}|${S.ii}|${S.si}|${S.ci}|${S.round}|${S.iv}|${S.ivPhase}|${S.sub}`;
   const fresh = R.beginStep(S, sec, key, chainAt);
@@ -225,17 +231,18 @@ function swapCurrentExercise(newId, from) {
 /* ---------------- lifecycle ---------------- */
 export function startWorkout(plan, callbacks = {}) {
   S = R.start(plan); cb = callbacks; host = document.getElementById('app');
-  applyWorkTheme(); initAudio(); keepAwake(); startTicker();
+  applyWorkTheme(); loadPrefs(); initAudio(); keepAwake(); startTicker();
   enterBlock(0);
 }
 export function resumeWorkout(callbacks = {}) {
   S = R.load(); if (!S || S.done) return false;
   cb = callbacks; host = document.getElementById('app');
-  applyWorkTheme(); initAudio(); keepAwake(); startTicker();
+  applyWorkTheme(); loadPrefs(); initAudio(); keepAwake(); startTicker();
   enterBlock(S.bi, true);
+  if (S.pausedAt) showPaused();
   return true;
 }
-function quit() { stopCadence(); stopTicker(); releaseAwake(); stopAudio(); R.clear(); clearWorkTheme(); cb.onExit?.(); }
+function quit() { delete document.documentElement.dataset.phase; stopCadence(); stopTicker(); releaseAwake(); stopAudio(); R.clear(); clearWorkTheme(); cb.onExit?.(); }
 
 const block = () => S.plan.blocks[S.bi];
 const isLastBlock = () => S.bi >= S.plan.blocks.length - 1;
@@ -243,7 +250,22 @@ const isLastBlock = () => S.bi >= S.plan.blocks.length - 1;
 /* ---------------- ticker (drives clocks + step completion) ---------------- */
 function startTicker() { stopTicker(); ticker = setInterval(tick, 250); }
 function stopTicker() { if (ticker) clearInterval(ticker); ticker = null; }
+function paintPhase() {
+  const el = document.documentElement;
+  const ph = S && !S.done && S.stepDur != null ? curPhase : '';
+  if ((el.dataset.phase || '') !== ph) { if (ph) el.dataset.phase = ph; else delete el.dataset.phase; }
+  el.classList.toggle('wm-paused', !!(S && S.pausedAt));
+}
+/* a white flash over the whole screen, for a loud gym (settings: Screen flash) */
+function flash(strong = true) {
+  if (!pref('flash')) return;
+  const el = document.documentElement;
+  el.classList.remove('wm-flash', 'wm-flash-soft'); void el.offsetWidth;
+  el.classList.add(strong ? 'wm-flash' : 'wm-flash-soft');
+  setTimeout(() => el.classList.remove('wm-flash', 'wm-flash-soft'), 500);
+}
 function tick() {
+  paintPhase();
   const sc = document.getElementById('sessClock'); if (sc) sc.textContent = fmt(R.sessionElapsed(S));
   if (countUpStart != null) { const el = document.getElementById('countUp'); if (el) el.textContent = fmt(Math.floor((Date.now() - countUpStart) / 1000)); }
   const rem = R.stepRemaining(S);
@@ -265,7 +287,7 @@ function tick() {
     if (curStepKind === 'work' && rem > 0) {
       if (!saidHalf && S.stepDur >= 90 && rem <= Math.round(S.stepDur / 2)) { saidHalf = true; if (rem > 60 || S.stepDur < 180) say('Halfway.'); }
       if (!saidLastMin && S.stepDur >= 180 && rem <= 60) { saidLastMin = true; say('1 minute left.'); }
-      if (!said10 && S.stepDur >= 30 && rem <= 10 && rem > 3) { said10 = true; beep('warn'); buzz(30); }
+      if (!said10 && S.stepDur >= 30 && rem <= 10 && rem > 3) { said10 = true; beep('warn'); buzz(30); flash(false); }
     }
     if (rem <= 3 && rem > 0) { beep('count'); buzz(20); }   // 3 · 2 · 1 audible countdown
   }
@@ -278,7 +300,7 @@ function tick() {
    that is running right now. One beep then says "you are here". */
 function runOut() {
   const late = Date.now() - (R.stepEndsAt(S) ?? Date.now()) > 2000;
-  if (late) setMuted(true); else { beep('end'); buzz(60); }
+  if (late) setMuted(true); else { beep('end'); buzz(60); flash(); }
   let guard = 0;
   try {
     do {
@@ -332,7 +354,7 @@ function renderGetReady() {
   if (readySec() <= 0) { beep('go'); return renderActive(); }
   onScreen('ready');
   shell(`<div class="now-ex getready"><div class="label">Get ready</div><div class="name">${b.name}</div>
-      <div class="side">${b.role}</div></div>
+      ${S.plan.quick ? '' : `<div class="side">${b.role}</div>`}</div>
     <div class="timer-wrap">${timerSvg('ready')}</div>
     <div class="actionbar"><button class="btn lg" id="go">I'm ready ▸</button></div>`);
   const begin = () => { R.clearStep(S); onStepDone = null; renderActive(); };
@@ -431,7 +453,7 @@ function sectionNext() {
       <div class="run-head">
         <button class="x back" id="backBtn">‹</button>
         <div class="blk">✓ ${done.name} done</div>
-        <div class="right"><span class="sessclock" id="sessClock">${fmt(R.sessionElapsed(S))}</span><button class="x" id="exitBtn">✕</button></div>
+        <div class="right"><span class="sessclock" id="sessClock">${fmt(R.sessionElapsed(S))}</span><button class="x pausebtn" id="pauseBtn" aria-label="Pause"><svg width="14" height="16" viewBox="0 0 14 16" fill="currentColor"><rect x="1" y="1" width="4" height="14" rx="1.2"/><rect x="9" y="1" width="4" height="14" rx="1.2"/></svg></button><button class="x" id="exitBtn">✕</button></div>
       </div>
 
       <div class="trans-rest">
@@ -455,6 +477,7 @@ function sectionNext() {
       <div class="actionbar"><button class="btn lg" id="goNext">Start ${next.name} ▸</button></div>
     </div>`;
   document.getElementById('exitBtn').addEventListener('click', confirmExit);
+  document.getElementById('pauseBtn').addEventListener('click', pauseSession);
   document.getElementById('backBtn').addEventListener('click', backBlock);
   const begin = () => { R.clearStep(S); onStepDone = null; enterBlock(S.bi + 1, { skipReady: true }); };
   if (beginStep(rest, 'rest', 'trans')) say(`Rest. Next, ${next.name}.`); onStepDone = begin;
@@ -491,11 +514,11 @@ function shell(inner, { progress = true } = {}) {
   const b = block();
   const pct = overallPct();
   host.innerHTML = `
-    <div class="screen run fade-in ${S.plan.coachMode ? 'bgn' : ''}">
+    <div class="screen run fade-in ${S.plan.coachMode ? 'bgn' : ''} ${S.plan.blocks.length === 1 ? 'single' : ''}">
       <div class="run-head">
         <button class="x back" id="backBtn" ${S.bi <= 0 ? 'disabled' : ''}>‹</button>
         <div class="blk">${b.role} · ${b.name}</div>
-        <div class="right"><span class="sessclock" id="sessClock">${fmt(R.sessionElapsed(S))}</span><button class="x" id="exitBtn">✕</button></div>
+        <div class="right"><span class="sessclock" id="sessClock">${fmt(R.sessionElapsed(S))}</span><button class="x pausebtn" id="pauseBtn" aria-label="Pause"><svg width="14" height="16" viewBox="0 0 14 16" fill="currentColor"><rect x="1" y="1" width="4" height="14" rx="1.2"/><rect x="9" y="1" width="4" height="14" rx="1.2"/></svg></button><button class="x" id="exitBtn">✕</button></div>
       </div>
       <div class="wprog-row">
         <div class="wprog"><div class="wprog-fill" style="width:${pct}%"></div><span class="wprog-flag${pct >= 100 ? ' won' : ''}">🏁</span></div>
@@ -505,6 +528,7 @@ function shell(inner, { progress = true } = {}) {
       ${inner}
     </div>`;
   document.getElementById('exitBtn').addEventListener('click', confirmExit);
+  document.getElementById('pauseBtn').addEventListener('click', pauseSession);
   document.getElementById('backBtn')?.addEventListener('click', backBlock);
   const now = host.querySelector('.bchip.now'); if (now) now.scrollIntoView({ inline: 'center', block: 'nearest' });
   reflectPause();
@@ -550,6 +574,38 @@ function shellPlain(inner) {
     <div class="run-head" style="justify-content:flex-end;"><span class="sessclock" id="sessClock">${fmt(R.sessionElapsed(S))}</span></div>
     ${inner}</div>`;
 }
+/* PAUSE THE WHOLE THING. The session clock, the running countdown and the
+   push-up beat all stop; resume picks up exactly there. Persisted, so a
+   phone call that ends with the app reloaded comes back still paused. */
+function pauseSession() {
+  if (!S || S.done || S.pausedAt) return;
+  R.pauseStep(S); R.pause(S); buzz(30);
+  try { speechSynthesis.cancel(); } catch (e) {}
+  showPaused();
+}
+function showPaused() {
+  paintPhase();
+  document.getElementById('wmPaused')?.remove();
+  const ov = document.createElement('div'); ov.className = 'wm-paused-ov'; ov.id = 'wmPaused';
+  ov.innerHTML = `<div class="wm-paused-card">
+    <div class="eyebrow">Paused</div>
+    <div class="wm-paused-t" id="pausedClock">${fmt(R.sessionElapsed(S))}</div>
+    <p class="muted">The clock is stopped. Take your time.</p>
+    <button class="btn lg" id="wmResume">Resume ▸</button>
+    <div class="btn-row" style="margin-top:10px;"><button class="btn secondary" id="wmSettings">Settings</button><button class="btn secondary" id="wmEnd">End workout</button></div>
+  </div>`;
+  host.appendChild(ov);
+  ov.querySelector('#wmResume').addEventListener('click', resumeSession);
+  ov.querySelector('#wmSettings').addEventListener('click', () => openPrefs(host));
+  ov.querySelector('#wmEnd').addEventListener('click', () => { ov.remove(); confirmExit(); });
+}
+function resumeSession() {
+  if (!S) return;
+  R.resumeStep(S); R.resume(S); initAudio(); beep('go'); buzz(30);
+  document.getElementById('wmPaused')?.remove();
+  paintPhase(); reflectPause(); tick();
+}
+
 /* Ending early used to throw the workout away while telling you it was
    saved. Now it is your call: keep what you did (it goes to history, PRs
    count), bin it, or change your mind. */
@@ -570,7 +626,7 @@ function confirmExit() {
   host.appendChild(ov);
   ov.querySelector('#exSave')?.addEventListener('click', () => { ov.remove(); finishSession({ partial: true }); });
   ov.querySelector('#exDiscard').addEventListener('click', () => { ov.remove(); quit(); });
-  ov.querySelector('#exKeep').addEventListener('click', () => ov.remove());
+  ov.querySelector('#exKeep').addEventListener('click', () => { ov.remove(); if (S.pausedAt) showPaused(); });
 }
 function loggedSetCount() {
   return Object.values(S.captured || {}).flat()
@@ -1196,6 +1252,7 @@ function renderCadence() {
   let next = Math.max(0, Math.ceil(((Date.now() - t0()) / 1000 - LEAD) / beat));
   stopCadence();
   cadLoop = setInterval(() => {
+    if (R.isStepPaused(S)) return;               // paused: no beeps, the beat resumes where it stopped
     const now = Date.now();
     while (beatAt(next) < now + 600) {             // schedule anything due in the next 0.6s
       const at = (beatAt(next) - now) / 1000;
@@ -1426,7 +1483,8 @@ function finishSession(opts = {}) {
     stopTicker(); releaseAwake();
     return renderFeedback(finishSession);
   }
-  stopTicker(); releaseAwake(); stopAudio();
+  stopTicker(); releaseAwake(); stopAudio(); stopCadence();
+  delete document.documentElement.dataset.phase; document.documentElement.classList.remove('wm-paused');
   const elapsed = S.finishElapsed != null ? S.finishElapsed : R.sessionElapsed(S);
   /* the block you were in when you stopped has no finish time yet */
   const cur = block();

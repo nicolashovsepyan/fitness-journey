@@ -16,6 +16,7 @@ import { EXERCISES } from '../data/exercises.js';
 import { DEMOS } from './demo.js';
 import { activeUserId } from '../users.js';
 import { applyWorkTheme } from './theme.js';
+import { loadPrefs, openPrefs } from './prefs.js';
 
 /* ?demo adds the Work Mode preview: a sample of every program format */
 const showDemo = () => new URLSearchParams(location.search).has('demo');
@@ -92,7 +93,7 @@ const setVal = (k, v) => { cfg[key(k)] = v; };
 
 export async function renderQuick(el, opts = {}) {
   host = el; onStart = opts.onStart;
-  injectStyle(); applyWorkTheme();
+  injectStyle(); applyWorkTheme(); loadPrefs();
   /* The address itself names the person, so "Add to Home Screen" from here
      gives a timer icon that opens as THEM (an installed iPhone app cannot
      see Safari's storage). */
@@ -315,6 +316,7 @@ function draw() {
     <div class="qt-top">
       <button class="qt-back" id="qtBack" aria-label="Back">‹</button>
       <h1>Timer</h1>
+      <button class="qt-star" id="qtPrefs" aria-label="Timer settings" title="Timer settings">⚙︎</button>
       <button class="qt-star" id="qtFav" aria-label="Save this timer" title="Save this timer">☆</button>
     </div>
 
@@ -550,6 +552,7 @@ function wire() {
   const $ = s => host.querySelector(s);
   $('#qtBack').addEventListener('click', () => { location.href = 'dashboard.html'; });
   $('#qtType').addEventListener('click', openTypes);
+  $('#qtPrefs').addEventListener('click', () => openPrefs(host));
   $('#qtMore').addEventListener('click', () => { moreOpen = !moreOpen; draw(); });
   host.querySelectorAll('[data-q]').forEach(b => b.addEventListener('click', () => { bump(b.dataset.q, Number(b.dataset.d)); persist(); draw(); }));
   host.querySelectorAll('[data-qt]').forEach(b => b.addEventListener('click', () => openTime(b.dataset.qt)));

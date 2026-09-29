@@ -66,6 +66,8 @@ function paint() {
   s.setProperty('--wm-neon', c.neon);
   s.setProperty('--wm-neon-soft', rgba(c.neon, 0.13));
   s.setProperty('--wm-neon-line', rgba(c.neon, 0.34));
+  s.setProperty('--wm-accent-wash', rgba(c.accent, 0.30));
+  s.setProperty('--wm-neon-wash', rgba(c.neon, 0.28));
   s.setProperty('--wm-glow-accent', `0 0 ${Math.round(22 * k)}px ${rgba(c.accent, 0.35)}`);
   s.setProperty('--wm-glow-neon', `0 0 ${Math.round(22 * k)}px ${rgba(c.neon, 0.3)}`);
 }
@@ -95,6 +97,50 @@ function injectStyle() {
   html.wm .bchip.now { background: var(--wm-accent); color: #0C1512; }
   html.wm .sessclock { color: var(--wm-accent); }
   html.wm .overlay-card { border: 1px solid var(--wm-neon-line); box-shadow: var(--wm-glow-neon); }
+  /* GLANCE MODE: the screen wears the phase. A wash of colour from the top,
+     a bigger ring, bigger digits. Work = accent, rest = neon, ready = gold. */
+  html.wm[data-phase] body { transition: background .35s ease; }
+  html.wm[data-phase="work"] body { background: radial-gradient(130% 80% at 50% 0%, var(--wm-accent-wash), var(--bg) 70%) var(--bg); }
+  html.wm[data-phase="rest"] body { background: radial-gradient(130% 80% at 50% 0%, var(--wm-neon-wash), var(--bg) 70%) var(--bg); }
+  html.wm[data-phase="ready"] body { background: radial-gradient(130% 80% at 50% 0%, rgba(217,169,76,.26), var(--bg) 70%) var(--bg); }
+  html.wm .screen.run { background: transparent; }
+  html.wm[data-phase] .timer { width: min(76vw, 300px); height: min(76vw, 300px); }
+  html.wm[data-phase] .timer .read .t { font-size: min(19vw, 76px); }
+  html.wm[data-phase="work"] .now-ex .label { color: var(--wm-accent); }
+  html.wm[data-phase="rest"] .now-ex .label { color: var(--wm-neon); }
+  html.wm[data-phase="ready"] .now-ex .label { color: #D9A94C; }
+  /* one block (most Quick Timers): no progress bar or block strip to read */
+  html.wm .screen.run.single .wprog-row, html.wm .screen.run.single .blockstrip { display: none; }
+  /* screen flash at the end of a step, softer at 10 seconds */
+  html.wm.wm-flash body::after, html.wm.wm-flash-soft body::after { content:""; position: fixed; inset: 0; z-index: 90; pointer-events: none;
+    background: #fff; animation: wmFlash .45s ease-out forwards; }
+  html.wm.wm-flash-soft body::after { background: var(--wm-accent); animation-duration: .35s; }
+  @keyframes wmFlash { from { opacity: .55; } to { opacity: 0; } }
+  /* pause */
+  html.wm .pausebtn { display:inline-flex; align-items:center; }
+  html.wm .wm-paused-ov { position: fixed; inset: 0; z-index: 70; background: rgba(8,10,12,.78); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    display:flex; align-items:center; justify-content:center; padding: 24px; }
+  html.wm .wm-paused-card { width: 100%; max-width: 380px; text-align:center; }
+  html.wm .wm-paused-t { font-family: var(--tnum); font-size: 72px; font-weight: 800; letter-spacing: -0.04em; margin: 6px 0 2px; color: var(--text); text-shadow: var(--wm-glow-neon); }
+  html.wm .wm-paused-card .muted { margin: 0 0 22px; }
+  /* settings sheet */
+  html.wm .wm-sheet { position: fixed; inset: 0; z-index: 80; background: rgba(8,10,12,0); display:flex; align-items:flex-end; transition: background .18s; }
+  html.wm .wm-sheet.open { background: rgba(8,10,12,.62); }
+  html.wm .wm-sheet-card { width:100%; max-width: 560px; margin: 0 auto; background: var(--bg-2); border-top: 1px solid var(--wm-neon-line);
+    border-radius: 22px 22px 0 0; padding: 10px 16px calc(18px + env(safe-area-inset-bottom)); box-shadow: var(--wm-glow-neon);
+    transform: translateY(100%); transition: transform .2s cubic-bezier(.22,1,.36,1); }
+  html.wm .wm-sheet.open .wm-sheet-card { transform: none; }
+  html.wm .wm-sheet-h { text-align:center; color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: 8px 0 10px; }
+  html.wm .wm-pref { width:100%; display:flex; align-items:center; gap: 14px; text-align:left; background:none; border:none; border-top: 1px solid var(--line);
+    color: var(--text); padding: 14px 2px; cursor:pointer; }
+  html.wm .wm-pref span { flex:1; display:flex; flex-direction:column; }
+  html.wm .wm-pref b { font-size: 16px; } html.wm .wm-pref small { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  html.wm .wm-sw { flex:none; width: 48px; height: 28px; border-radius: 99px; background: var(--box-2); border: 1px solid var(--line); position: relative; transition: background .15s; }
+  html.wm .wm-sw:after { content:""; position:absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--muted); transition: transform .15s, background .15s; }
+  html.wm .wm-sw.on { background: var(--wm-accent-soft); border-color: var(--wm-accent); }
+  html.wm .wm-sw.on:after { transform: translateX(20px); background: var(--wm-accent); }
+  html.wm .wm-sheet-card .btn { margin-top: 10px; }
+
   /* stopwatch laps / for-time round splits */
   html.wm .ft-total { text-align:center; color: var(--muted); font-family: var(--tnum); font-size: 18px; margin: -4px 0 8px; }
   html.wm .laps { max-width: 420px; margin: 0 auto 10px; }

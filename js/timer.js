@@ -16,6 +16,9 @@ export function setVoice(on) { voiceOn = on; }
    phone was locked: 12 missed intervals must not fire 12 beeps at once. */
 let muted = false;
 export function setMuted(on) { muted = !!on; }
+/* the user's own switch for the beeps (Work Mode settings) */
+let beepsOn = true;
+export function setBeeps(on) { beepsOn = !!on; }
 export function isVoiceOn() { return voiceOn; }
 
 /* coach voice selection — auto-pick the most natural English voice,
@@ -217,7 +220,7 @@ const VOL_END = 1.0;
    the sample, so a cadence (the push-up test) stays on the beat even when
    the page's timers wobble. */
 export function beep(kind = 'tick', at = 0) {
-  if (muted) return;
+  if (muted || !beepsOn) return;
   initAudio();
   const w = Math.max(0, at);
   if (kind === 'go') {                       // start — rising two-tone
