@@ -53,14 +53,19 @@ export function setVoiceName(name) {
   preferredVoice = pickVoice();
 }
 
-export function say(text) {
+/* `keep`: a milestone ("Last round.") gets that many ms before the next
+   line may cut it off; anything said inside the window queues behind it
+   instead of cancelling it. */
+let keepUntil = 0;
+export function say(text, keep = 0) {
   if (!voiceOn || muted) return;
   try {
     if (!preferredVoice) preferredVoice = pickVoice();
     const u = new SpeechSynthesisUtterance(text);
     if (preferredVoice) { u.voice = preferredVoice; u.lang = preferredVoice.lang; }
     u.rate = 0.92; u.pitch = 1.0; u.volume = 1.0;   // slightly slower = less robotic
-    speechSynthesis.cancel();   // never let lines pile up
+    if (Date.now() >= keepUntil) speechSynthesis.cancel();   // never let lines pile up
+    if (keep) keepUntil = Date.now() + keep;
     speechSynthesis.speak(u);
   } catch (e) { /* silent fallback */ }
 }
@@ -208,20 +213,31 @@ function tone(freq, ms, when = 0, vol = 0.5, type = 'square') {
    playing music at gym volume. The compressor keeps it from clipping. */
 const VOL = 1.0;
 const VOL_END = 1.0;
-export function beep(kind = 'tick') {
+/* `at` = seconds from now. Scheduled on the audio clock, which is exact to
+   the sample, so a cadence (the push-up test) stays on the beat even when
+   the page's timers wobble. */
+export function beep(kind = 'tick', at = 0) {
   if (muted) return;
   initAudio();
+  const w = Math.max(0, at);
   if (kind === 'go') {                       // start — rising two-tone
-    tone(1046, 110, 0,    0.85, 'square');
-    tone(1568, 190, 0.09, VOL,  'square');
+    tone(1046, 110, w,        0.85, 'square');
+    tone(1568, 190, w + 0.09, VOL,  'square');
   } else if (kind === 'end') {               // finish — bright triple, unmistakable
-    tone(1318, 110, 0,    VOL,     'square');
-    tone(1568, 110, 0.10, VOL,     'square');
-    tone(2093, 280, 0.20, VOL_END, 'square');
+    tone(1318, 110, w,        VOL,     'square');
+    tone(1568, 110, w + 0.10, VOL,     'square');
+    tone(2093, 280, w + 0.20, VOL_END, 'square');
   } else if (kind === 'count') {             // 3-2-1 ticks — short and sharp
-    tone(1760, 95, 0, VOL, 'square');
+    tone(1760, 95, w, VOL, 'square');
+  } else if (kind === 'warn') {              // 10 seconds left — a quick double, not a countdown
+    tone(1175, 70, w,        VOL, 'square');
+    tone(1175, 70, w + 0.12, VOL, 'square');
+  } else if (kind === 'down') {              // push-up test: go down — low
+    tone(784, 120, w, VOL, 'square');
+  } else if (kind === 'up') {                // push-up test: come up — high
+    tone(1568, 120, w, VOL, 'square');
   } else {
-    tone(1318, 85, 0, 0.9, 'square');
+    tone(1318, 85, w, 0.9, 'square');
   }
 }
 

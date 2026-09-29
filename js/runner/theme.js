@@ -95,6 +95,16 @@ function injectStyle() {
   html.wm .bchip.now { background: var(--wm-accent); color: #0C1512; }
   html.wm .sessclock { color: var(--wm-accent); }
   html.wm .overlay-card { border: 1px solid var(--wm-neon-line); box-shadow: var(--wm-glow-neon); }
+  /* push-up test: the cue flips pink (down) / accent (up) on each beep */
+  html.wm .cad { text-align:center; margin-top: 14px; }
+  html.wm .cad-cue { font-size: 68px; font-weight: 800; letter-spacing: -0.03em; text-transform: uppercase; color: var(--muted); }
+  html.wm .cad-cue.down { color: var(--wm-neon); text-shadow: var(--wm-glow-neon); }
+  html.wm .cad-cue.up { color: var(--wm-accent); text-shadow: var(--wm-glow-accent); }
+  html.wm .cad-reps { margin-top: 10px; }
+  html.wm .cad-reps b { display:block; font-family: var(--tnum); font-size: 104px; line-height: 1; letter-spacing: -0.05em; }
+  html.wm .cad-reps small { color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: .12em; }
+  html.wm .cad-time { font-family: var(--tnum); color: var(--muted); font-size: 18px; margin-top: 14px; }
+  html.wm .cad-how { font-size: 13px; margin: 18px 18px 0; line-height: 1.4; }
   `;
   document.head.appendChild(st);
 }

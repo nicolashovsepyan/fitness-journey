@@ -18,6 +18,9 @@ const WUNIT = 'lb';                       // weight unit (Nicolas trains in poun
 let S = null, host = null, cb = {}, ticker = null, onStepDone = null, curVal = 0, roundBuf = {};
 let lastSec = null;                       // last whole-second of the active step (for once-per-second beeps)
 let curStepKind = 'rest', saidHalf = false, halfStepKey = null;   // halfway-cue tracking
+let saidLastMin = false, said10 = false;   // "1 minute left" and the 10-second warning, per step
+/* a voice line that must play once per moment, even across a reopen */
+function sayOnce(key, text) { if (S.said === key) return; S.said = key; R.save(S); say(text, 1400); }
 let countUpStart = null;                  // flexible rest before a reps set: count UP, no forced countdown
 const numAt = id => { const e = document.getElementById(id); return e && e.value !== '' ? Number(e.value) : null; };
 /* When the step that just ran out ENDED. The next step that starts on its own
@@ -232,7 +235,7 @@ export function resumeWorkout(callbacks = {}) {
   enterBlock(S.bi, true);
   return true;
 }
-function quit() { stopTicker(); releaseAwake(); stopAudio(); R.clear(); clearWorkTheme(); cb.onExit?.(); }
+function quit() { stopCadence(); stopTicker(); releaseAwake(); stopAudio(); R.clear(); clearWorkTheme(); cb.onExit?.(); }
 
 const block = () => S.plan.blocks[S.bi];
 const isLastBlock = () => S.bi >= S.plan.blocks.length - 1;
@@ -249,12 +252,20 @@ function tick() {
   updateTimer(rem, S.stepDur);
   /* a step seen for the first time; if it is already past halfway (a reopen),
      that cue has been and gone */
-  if (S.stepStartedAt !== halfStepKey) { halfStepKey = S.stepStartedAt; saidHalf = rem <= Math.round(S.stepDur / 2); }
+  if (S.stepStartedAt !== halfStepKey) {
+    halfStepKey = S.stepStartedAt;
+    saidHalf = rem <= Math.round(S.stepDur / 2); saidLastMin = rem <= 60; said10 = rem <= 10;
+  }
   if (rem !== lastSec) {                       // a whole second ticked over
     lastSec = rem;
     // halfway cue — only for a WORK effort of 1 minute or more
-    if (!saidHalf && curStepKind === 'work' && S.stepDur >= 60 && rem <= Math.round(S.stepDur / 2) && rem > 0) {
-      saidHalf = true; say('Halfway there.');
+    /* CUES ON A LONG EFFORT. Halfway from 90 seconds up (a 1-minute EMOM
+       saying "halfway" every minute was noise), 1 minute left from 3 minutes
+       up, and a double beep 10 seconds out on anything of 30 seconds or more. */
+    if (curStepKind === 'work' && rem > 0) {
+      if (!saidHalf && S.stepDur >= 90 && rem <= Math.round(S.stepDur / 2)) { saidHalf = true; if (rem > 60 || S.stepDur < 180) say('Halfway.'); }
+      if (!saidLastMin && S.stepDur >= 180 && rem <= 60) { saidLastMin = true; say('1 minute left.'); }
+      if (!said10 && S.stepDur >= 30 && rem <= 10 && rem > 3) { said10 = true; beep('warn'); buzz(30); }
     }
     if (rem <= 3 && rem > 0) { beep('count'); buzz(20); }   // 3 · 2 · 1 audible countdown
   }
@@ -356,6 +367,7 @@ function renderActive() {
   if (f === 'amrap') return renderAmrap();
   if (f === 'tabata' || f === 'emom') return renderInterval();
   if (f === 'fortime') return renderForTime();
+  if (f === 'cadence') return renderCadence();
   if (f === 'skill') return renderSkill();
   if (f === 'benchmark' || f === 'max_test') return renderBenchmark();
   return renderSets();              // straight · tempo · isometric · yates · rest_pause
@@ -367,8 +379,8 @@ function completeBlock() {
   if (b.type === 'Mobility' || b.format === 'jointprep') return sectionNext();
   /* a Quick Timer flows straight on: no confirm screen between sets of
      intervals, and the finish screen already shows the result */
-  if (S.plan.quick && ['tabata', 'emom', 'fortime'].includes(b.format)) return sectionNext();
-  if (['tabata', 'emom', 'fortime'].includes(b.format)) return renderSummary();
+  if (S.plan.quick && ['tabata', 'emom', 'fortime', 'cadence'].includes(b.format)) return sectionNext();
+  if (['tabata', 'emom', 'fortime', 'cadence'].includes(b.format)) return renderSummary();
   return renderLog();          // amrap + sets + circuit → fully editable grouped log
 }
 /* short prescription line for the "up next" card (so you know time / sets before you start) */
@@ -474,6 +486,7 @@ function openDemo(item) {
 
 /* ---------------- shells ---------------- */
 function shell(inner, { progress = true } = {}) {
+  stopCadence();
   const b = block();
   const pct = overallPct();
   host.innerHTML = `
@@ -510,7 +523,7 @@ function overallPct() {
 function blockFrac() {
   const b = block(); if (!b) return 0;
   if (b.format === 'circuit' || b.format === 'superset') return Math.min(1, (S.round - 1) / (b.rounds || 1));
-  if (['amrap', 'tabata', 'emom', 'skill', 'benchmark', 'max_test', 'fortime'].includes(b.format)) return 0.5;
+  if (['amrap', 'tabata', 'emom', 'skill', 'benchmark', 'max_test', 'fortime', 'cadence'].includes(b.format)) return 0.5;
   const items = b.items || []; const per = 1 / (items.length || 1);
   const item = items[S.ii] || {}; const total = b.format === 'yates' ? (item.warmups || 0) + 1 : (item.sets || 1);
   return Math.min(1, S.ii * per + (S.si / (total || 1)) * per);
@@ -835,6 +848,7 @@ function renderSuperset() {
   if (S.sub === 'rest') return renderSupersetRest();
 
   const rounds = supersetRounds(b);
+  if (rounds > 1 && S.round === rounds && S.ci === 0) sayOnce(`last|${S.bi}`, 'Last round.');
   const dots = Array.from({ length: rounds }, (_, i) =>
     `<div class="r ${i + 1 < S.round ? 'done' : i + 1 === S.round ? 'now' : ''}">${i + 1}</div>`).join('');
   const label = `${item.pair || ''} · round ${S.round} / ${rounds}`;
@@ -932,6 +946,7 @@ function renderCircuit() {
   const b = block(); const item = b.items[S.ci || (S.ci = 0)];
   if (S.sub === 'roundrest') return renderRoundRest();
   if (S.sub === 'buffer') return renderBuffer();
+  if ((b.rounds || 1) > 1 && S.round === b.rounds && S.ci === 0) sayOnce(`last|${S.bi}`, 'Last round.');
   const unit = UNIT[item.measure];
   const dots = Array.from({ length: b.rounds || 1 }, (_, i) => `<div class="r ${i + 1 < S.round ? 'done' : i + 1 === S.round ? 'now' : ''}">${i + 1}</div>`).join('');
   const ps = it => (it.laterality === 'unilateral' || it.perSide) && !it.side ? ' /side' : '';
@@ -1061,25 +1076,35 @@ function renderInterval() {
   if (S.iv == null) { S.iv = 0; S.ivPhase = 'work'; R.save(S); }   // iv = interval index across rounds×items
   const totalIv = intervalTotal(b);
   if (S.iv >= totalIv) { captureRounds(b.intervals || rounds); return completeBlock(); }
-  const item = b.items[S.iv % per];
+  /* `all`: every move inside each interval (A then B, every minute),
+     instead of the moves taking turns one interval each */
+  const all = !!b.allEach && per > 1;
+  const item = all ? { name: `Round ${S.iv + 1}` } : b.items[S.iv % per];
   const roundN = Math.floor(S.iv / per) + 1;
   const phaseWork = S.ivPhase === 'work';
   const kind = b.label || (b.format === 'emom' ? 'EMOM' : 'Tabata');
   const counter = b.intervals ? (totalIv > 1 ? ` · ${S.iv + 1}/${totalIv}` : '') : ` · round ${roundN}/${rounds}`;
   /* what the minute asks for, and what comes after it: an EMOM you can't
      read the reps off is only a clock */
-  const target = phaseWork && item.reps ? `<div class="side">${item.reps} ${UNIT[item.measure] || 'reps'}</div>` : '';
-  const nextItem = S.iv + 1 < totalIv ? b.items[(S.iv + 1) % per] : null;
+  const target = phaseWork && !all && item.reps ? `<div class="side">${item.reps} ${UNIT[item.measure] || 'reps'}</div>` : '';
+  const nextItem = !all && S.iv + 1 < totalIv ? b.items[(S.iv + 1) % per] : null;
   const upNext = per > 1 && nextItem ? `<div class="ss-hint">Next: ${nextItem.name}${nextItem.reps ? ` · ${nextItem.reps}` : ''}</div>` : '';
+  const allList = all && phaseWork ? `<div class="circuit-list">${b.items.map(it => `<div class="ci">${rowVid(it)}<span class="nm">${it.name}</span><span class="tg">${it.reps ? it.reps + ' ' + (UNIT[it.measure] || 'reps') : ''}</span></div>`).join('')}</div>` : '';
   shell(`<div class="now-ex"><div class="label">${kind}${counter}</div>
       <div class="name">${phaseWork ? item.name : 'Rest'}</div>${target}</div>
-    ${phaseWork ? exActions(item) : ''}
+    ${phaseWork && !all ? exActions(item) : ''}
     <div class="timer-wrap">${timerSvg(phaseWork ? 'buffer' : 'rest')}</div>
-    ${upNext}
+    ${allList}${upNext}
     <div class="actionbar"><button class="btn ghost" id="skip">Skip ▸</button></div>`);
   const dur = phaseWork ? work : rest;
   if (dur <= 0) return nextInterval();
-  if (beginStep(dur, phaseWork ? 'work' : 'rest', 'iv') && phaseWork) say(item.name);
+  /* the call at the top of each interval: halfway through the block and
+     the last round get said out loud, then the move */
+  if (beginStep(dur, phaseWork ? 'work' : 'rest', 'iv') && phaseWork) {
+    const pre = totalIv >= 2 && S.iv === totalIv - 1 ? 'Last round. '
+      : totalIv >= 6 && S.iv === Math.floor(totalIv / 2) ? 'Halfway. ' : '';
+    say(pre + (all ? '' : item.name));
+  }
   onStepDone = nextInterval;
   document.getElementById('skip').addEventListener('click', () => { R.clearStep(S); onStepDone = null; nextInterval(); });
 }
@@ -1090,6 +1115,60 @@ function nextInterval() {
   if (S.ivPhase === 'work' && !last && (b.rest ?? (b.format === 'emom' ? 0 : 10)) > 0) { S.ivPhase = 'rest'; R.save(S); return renderInterval(); }
   S.ivPhase = 'work'; S.iv += 1; R.save(S);
   renderInterval();
+}
+
+/* ---------------- CADENCE TEST (the push-up beep test) ----------------
+   A low beep for down, a high beep for up, at `rpm` reps a minute (20 is
+   the classic cadence test, 25 the NHL beep test). You keep the beat as
+   long as you can and tap Stop when you miss it or break form; the score
+   is the reps finished on the beat. Beeps are scheduled on the audio
+   clock a little ahead, so the pace is exact even if the page stutters.
+   `minutes` is an optional cap. */
+let cadLoop = null;
+function stopCadence() { if (cadLoop) clearInterval(cadLoop); cadLoop = null; }
+function renderCadence() {
+  const b = block(); const it = b.items[0] || { name: 'Push-ups' };
+  const rpm = Number(b.rpm) || 25;
+  const beat = 60 / rpm / 2;                       // seconds per beep: down, up, down, up
+  const cap = (Number(b.minutes) || 0) * 60;
+  shell(`<div class="now-ex"><div class="label">Push-up test · ${rpm} a minute</div><div class="name">${it.name}</div></div>
+    <div class="cad">
+      <div class="cad-cue" id="cadCue">Down</div>
+      <div class="cad-reps"><b id="cadReps">0</b><small>reps on the beat</small></div>
+      <div class="cad-time" id="cadTime">0:00${cap ? ` / ${fmt(cap)}` : ''}</div>
+      <p class="muted cad-how">Low beep: go down. High beep: come up. Tap Stop the moment you miss a beep.</p>
+    </div>
+    <div class="actionbar"><button class="btn lg" id="cadStop">Stop</button></div>`);
+  if (beginStep(cap || NO_CAP, 'rest', 'cadence')) say('Down on the low beep. Up on the high one.', 2500);
+  const t0 = () => S.stepStartedAt;
+  const repsAt = ms => Math.max(0, Math.floor((ms - t0()) / 1000 / (beat * 2)));
+  const finish = reps => {
+    stopCadence(); R.clearStep(S); onStepDone = null;
+    (S.captured[b.id] || []).forEach(e => { e.sets = [{ value: reps }]; e.unit = 'reps'; e.cadence = rpm; });
+    R.save(S); say(`${reps} reps.`);
+    completeBlock();
+  };
+  /* the first beep lands 2 seconds in, after the voice line */
+  const LEAD = 2;
+  const beatAt = k => t0() + (LEAD + k * beat) * 1000;
+  let next = Math.max(0, Math.ceil(((Date.now() - t0()) / 1000 - LEAD) / beat));
+  stopCadence();
+  cadLoop = setInterval(() => {
+    const now = Date.now();
+    while (beatAt(next) < now + 600) {             // schedule anything due in the next 0.6s
+      const at = (beatAt(next) - now) / 1000;
+      if (at > -0.05) beep(next % 2 ? 'up' : 'down', at);
+      next++;
+    }
+    const since = (now - t0()) / 1000 - LEAD;
+    const k = Math.floor(since / beat);
+    const cue = document.getElementById('cadCue');
+    if (cue) { const down = since < 0 || k % 2 === 0; cue.textContent = since < 0 ? 'Ready' : down ? 'Down' : 'Up'; cue.className = 'cad-cue ' + (since < 0 ? '' : down ? 'down' : 'up'); }
+    const r = document.getElementById('cadReps'); if (r) r.textContent = String(since < 0 ? 0 : Math.floor(since / (beat * 2)));
+    const tm = document.getElementById('cadTime'); if (tm) tm.textContent = fmt(Math.max(0, since)) + (cap ? ` / ${fmt(cap)}` : '');
+  }, 80);
+  onStepDone = () => finish(Math.max(0, Math.floor((cap - LEAD) / (beat * 2))));
+  document.getElementById('cadStop').addEventListener('click', () => { buzz(60); finish(Math.max(0, Math.floor(((Date.now() - t0()) / 1000 - LEAD) / (beat * 2)))); });
 }
 
 /* ---------------- FOR TIME / STOPWATCH (count up, tap when done) ----------------
@@ -1245,11 +1324,23 @@ function renderFeedback(next) {
   });
 }
 
+/* Push-up beep test norms at 25 a minute (topendsports.com, NHL protocol).
+   Sex from the survey when we have it, both lines when we don't. */
+function cadenceRating(reps, rpm) {
+  if (rpm !== 25) return '';
+  const band = (r, [e, x, g, a]) => r >= e ? 'Elite' : r >= x ? 'Excellent' : r >= g ? 'Good' : r >= a ? 'Average' : 'Below average';
+  const M = [50, 40, 30, 20], F = [40, 30, 20, 12];
+  let sex = null;
+  try { sex = JSON.parse(localStorage.getItem('fj.v1.profile.' + (S.plan.uid || localStorage.getItem('fj.v1.current'))) || 'null')?.a?.sex; } catch (e) {}
+  const line = sex === 'f' ? band(reps, F) : sex === 'm' ? band(reps, M) : `Men: ${band(reps, M)} · Women: ${band(reps, F)}`;
+  return `<div class="eff-row"><span class="muted">Rating</span><span style="margin-left:auto;">${line}</span></div>`;
+}
 /* the one number a Quick Timer produced, per block: rounds, reps or time */
 function quickResult(session) {
   const rows = session.blocks.map(b => {
     const e = b.entries[0]; const v = e?.sets?.[0]?.value;
     if (v == null || b.name.startsWith('Countdown')) return '';
+    if (b.format === 'cadence') return `<div class="eff-row"><span>${b.name}</span><span class="pr-flash" style="margin-left:auto;">${v} reps</span></div>${cadenceRating(v, e.cadence)}`;
     const val = b.format === 'fortime' ? fmt(v)
       : b.format === 'amrap' ? `${v} ${e.unit || 'rounds'}`
       : `${v} interval${v === 1 ? '' : 's'}`;
