@@ -980,6 +980,9 @@ button.nbnum.jump:hover{ opacity:1; border-color:var(--accent); color:var(--acce
 .nbrung,.nbalt{ display:grid; grid-template-columns:auto 1fr auto; gap:8px; align-items:center;
                 padding:6px 8px; border-radius:6px; cursor:pointer }
 .nbrung{ border:1px solid var(--line); margin-bottom:5px }
+/* the rung you are standing on: marked, and not clickable */
+.nbrung.here{ border-color:var(--accent); background:var(--accent-soft); cursor:default }
+.nbrung.here .ar{ color:var(--accent) }
 .nbrung:hover,.nbalt:hover{ background:color-mix(in srgb, var(--c) 12%, transparent) }
 .nbrung .ar{ font-size:13px; color:var(--c); width:16px; text-align:center }
 .nbalt .dot,.nbmv .dot{ width:7px; height:7px; border-radius:2px; background:var(--c) }
@@ -3803,7 +3806,86 @@ function nbHay(m){
   return m._h;
 }
 const nbWords = q => String(q||'').toLowerCase().split(/\s+/).filter(Boolean);
-const nbMatch = (m,w) => w.every(x => nbHay(m).includes(x) || (NB_SYN[x]||[]).some(y=>nbHay(m).includes(y)));
+
+/* PLURALS RETURNED NOTHING AT ALL.
+
+   The database stores "glute", "quad", "calf". A coach types "glutes",
+   "quads", "calves" - the words a person actually says - and got an empty
+   list, which reads as "we do not have any" rather than "try the singular".
+   Measured: glutes 0, quads 0, calves 0, against glute 53 and quad 45.
+
+   So every query word is tried as itself and as its singular, and a few
+   irregulars that a stemmer would not get. Cheap, and it removes the whole
+   class of "I searched and there was nothing". */
+const NB_IRREG = { calves:'calf', glutes:'glute', quads:'quad', abs:'abs', lats:'lat',
+                   delts:'delt', pecs:'chest', traps:'trap', calf:'calf' };
+/* A STEM SHORTER THAN THREE LETTERS MATCHES EVERYTHING. "abs" stripped to
+   "ab", and "ab" is inside "cable" and "abduction" - so searching abs
+   returned Hip Abduction Machine and Seated Cable Row above every ab
+   exercise in the database. Short words are not stemmed, and no stem
+   below three characters is kept. */
+function nbStems(x){
+  const out = [x];
+  if(NB_IRREG[x]) out.push(NB_IRREG[x]);
+  if(x.length >= 5){
+    if(/ies$/.test(x)) out.push(x.slice(0,-3)+'y');
+    else if(/es$/.test(x)) out.push(x.slice(0,-2));
+  }
+  if(x.length >= 4 && /s$/.test(x) && !/ss$/.test(x)) out.push(x.slice(0,-1));
+  return [...new Set(out)].filter(s => s.length >= 3);
+}
+const nbHit = (m,x) => nbStems(x).some(s =>
+  nbHay(m).includes(s) || (NB_SYN[s]||[]).some(y=>nbHay(m).includes(y)));
+const nbMatch = (m,w) => w.every(x => nbHit(m,x));
+
+/* AND THE ORDER WAS ALPHABETICAL, WHICH IS NO ORDER AT ALL.
+
+   Every field was one flat haystack, so a movement whose NAME is the word
+   ranked below one that merely lists it as a secondary muscle. Typing
+   "squat" put Assisted Reverse Nordic Curl above Back Squat. "press" put
+   Alternating Single-Leg L-Sit above Bench Press. The thing you asked for
+   was always in the list and almost never near the top.
+
+   A word is scored by WHERE it landed, and the list sorts on the total.
+   Name first, then the progression family, then what it trains, then the
+   muscles it merely involves. The last two are why "core" matches 233 of
+   322 movements - almost everything involves the core - and scoring is
+   what makes that harmless rather than useless. */
+function nbField(m, x){
+  const n = (m.n||'').toLowerCase();
+  const g = (m.g||'').toLowerCase();
+  const pats = (m.p||[]).map(p=>String(p).toLowerCase());
+  const mus  = (m.mus||[]).map(u=>String(u).toLowerCase());
+  let best = 9;
+  for(const s of nbStems(x)){
+    const syn = NB_SYN[s] || [];
+    const hit = (hay, y) => hay.some(h => h.includes(y));
+    if(n === s) return 0;
+    /* A CONCEPT WORD BEATS A NAME THAT MERELY CONTAINS IT.
+
+       "back", "legs", "arms", "core" are in NB_SYN because they name a
+       region of the body, not a spelling. Ranked on the name, "back"
+       returned Back Squat and Back-to-Wall Handstand Hold before a single
+       row, and "legs" returned Hanging Leg Raise - a core movement whose
+       name happens to hold the word. So for the words the synonym table
+       knows, meaning outranks spelling. Everything else - squat, press,
+       row, hollow - is a name and is ranked as one. */
+    const concept = syn.length > 0;
+    if(concept && syn.some(y => g.includes(y) || hit(pats,y))) best = Math.min(best,1);
+    if(new RegExp('\\b'+s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).test(n)) best = Math.min(best, concept ? 2 : 1);
+    if(concept && syn.some(y => hit(mus,y))) best = Math.min(best,5);
+    if(n.includes(s))                                          best = Math.min(best,3);
+    if((m.fml||'').toLowerCase().includes(s) ||
+       (m.fam||'').toLowerCase().includes(s))                  best = Math.min(best,4);
+    if(g.includes(s) || hit(pats,s))                           best = Math.min(best,4);
+    if(mus[0] && mus[0].includes(s))                           best = Math.min(best,6);
+    if(hit(mus,s))                                             best = Math.min(best,7);
+  }
+  return best;                                 // 9 = demands, kit, the long tail
+}
+/* Fundamentals break ties, because they are the movements the method is
+   built on and the likeliest thing meant by a one-word search. */
+const nbRel = (m,w) => w.reduce((t,x)=>t+nbField(m,x),0)*2 + (m.f?0:1);
 
 /* ---- what this client's constraints forbid, from what a movement demands ---- */
 /* A DEMAND IS FORBIDDEN WHEN SOMEBODY FORBADE IT — not when a body part
@@ -4272,8 +4354,10 @@ function nbAddPanel(bi){
   const b = PROG.days[PDAY].blocks[bi] || {};
   const here = new Set((b.items||[]).map(x=>x.ex));
   const list = searching
+    /* same ranking as the swap list: both are the same question asked from
+       two places, and they gave two different answers before this */
     ? MOVES.filter(m => !here.has(m.id) && nbMatch(m, w))
-           .sort((a,c)=>(c.f?1:0)-(a.f?1:0)||a.n.localeCompare(c.n)).slice(0,40)
+           .sort((a,c)=>nbRel(a,w)-nbRel(c,w)||a.n.localeCompare(c.n)).slice(0,40)
     : nbSuggest(bi);
 
   return `<div class="nbaddpanel" onclick="event.stopPropagation()">
@@ -4510,8 +4594,10 @@ function nbAlts(bi,ii){
   const df = m.df;
   const rank = x => [
     nbForbidden(x) ? 1 : 0,
-    searching ? 0 : ((x.p || []).some(p => pats.has(p)) ? 0 : 1),
-    x.f ? 0 : 1,
+    /* when words were typed, THEY are the intent: relevance decides the
+       order and the same-pattern rule steps aside */
+    searching ? nbRel(x, w) : ((x.p || []).some(p => pats.has(p)) ? 0 : 1),
+    searching ? 0 : (x.f ? 0 : 1),
     (df != null && x.df != null) ? Math.abs(x.df - df) : 9,
   ];
   return pool.sort((a,c) => {
@@ -4534,18 +4620,58 @@ function nbAltsHTML(bi,ii){
       <small>${esc(nbFlagWhy(a) || [a.g,(a.mus||[]).slice(0,2).join('/'),a.mod].filter(Boolean).join(' · '))}</small>
     </span><span class="go">use</span></div>`).join('');
 }
+/* THE WHOLE LADDER, NOT THE TWO RUNGS EITHER SIDE.
+
+   This showed `easier` and `harder` - one step down, one step up - which
+   for Hollow Hold meant Bent-Knee Hollow Hold and Hollow Rocks, and left
+   the other three where nobody would find them. The database already
+   groups a progression: `fml` is the family, and "hollow" holds six
+   movements from Hollow Hold (heels down) at difficulty 1 to
+   Squeeze-Loaded Hollow Hold at 6.
+
+   That whole chain is the answer to "what else could go here", and it is
+   the first thing a coach wants when a movement is too hard or too easy
+   for somebody. Ordered by difficulty, with the one in the slot marked,
+   so the ladder reads as a ladder and the direction is obvious. */
 function nbLadder(bi,ii){
   if(nbSwapQ) return '';
-  const m = MV(PROG.days[PDAY].blocks[bi].items[ii].ex), rungs = [];
-  if(m.ez) rungs.push(['Easier', MV(m.ez), '↓']);
-  if(m.hd) rungs.push(['Harder', MV(m.hd), '↑']);
-  if(!rungs.length) return '';
-  return `<div class="nbladder"><p class="nblbl">${m.f?'The ladder around this fundamental':'Same movement, different level'}</p>
-    ${rungs.map(([lab,a,ar])=>`<div class="nbrung ${nbFlagCls(a)}" style="--c:${NBC(a.g)}"
-      onclick="event.stopPropagation();nbSwapTo(${bi},${ii},'${a.id}')">
-      <span class="ar">${ar}</span><span><b>${esc(a.n)}${a.f?' ★':''}</b><br>
-      <small>${lab}${nbFlagWhy(a)?' · '+esc(nbFlagWhy(a)):''}</small></span>
-      <span class="go">use</span></div>`).join('')}</div>`;
+  const m = MV(PROG.days[PDAY].blocks[bi].items[ii].ex);
+  let fam = (m.fml ? MOVES.filter(x => x.fml === m.fml) : []).slice();
+  /* No family recorded: fall back to the two links, which is what this
+     always did and is better than nothing. */
+  if(fam.length < 2){
+    fam = [m, m.ez && MV(m.ez), m.hd && MV(m.hd)].filter(Boolean);
+    if(fam.length < 2) return '';
+  }
+  if(!fam.some(x=>x.id===m.id)) fam.push(m);
+  fam.sort((a,b)=>(a.df??9)-(b.df??9) || a.n.localeCompare(b.n));
+  const total = fam.length;
+  /* SOME FAMILIES ARE TWENTY-ONE MOVEMENTS LONG. The whole chain is the
+     right answer to "what else is there" and the wrong thing to put on
+     screen: it buries the search box under a wall of rungs. Three either
+     side is the part of a ladder anybody actually steps to, and the count
+     says what is beyond it. */
+  const WIN = 3;
+  let at = fam.findIndex(x=>x.id===m.id);
+  if(total > WIN*2+1){
+    const lo = Math.max(0, Math.min(at-WIN, total-(WIN*2+1)));
+    fam = fam.slice(lo, lo+WIN*2+1);
+    at = fam.findIndex(x=>x.id===m.id);
+  }
+
+  return `<div class="nbladder">
+    <p class="nblbl">${esc(m.fml ? m.fml.replace(/[-_]/g,' ') : 'this movement')} &middot; ${
+      total > fam.length ? `${fam.length} of ${total} levels` : `${total} levels`}</p>
+    ${fam.map((a,i)=>{
+      const here = a.id === m.id;
+      const dir = i < at ? '↓' : i > at ? '↑' : '●';
+      const lab = here ? 'in the program now' : i < at ? 'easier' : 'harder';
+      return `<div class="nbrung ${nbFlagCls(a)} ${here?'here':''}" style="--c:${NBC(a.g)}"
+        ${here ? '' : `onclick="event.stopPropagation();nbSwapTo(${bi},${ii},'${a.id}')"`}>
+        <span class="ar">${dir}</span><span><b>${esc(a.n)}${a.f?' ★':''}</b><br>
+        <small>${lab}${a.df!=null?` · level ${a.df}`:''}${nbFlagWhy(a)?' · '+esc(nbFlagWhy(a)):''}</small></span>
+        ${here ? '' : '<span class="go">use</span>'}</div>`;
+    }).join('')}</div>`;
 }
 function nbSwapSearch(bi,ii,v){
   const had = !!nbSwapQ; nbSwapQ = v;
