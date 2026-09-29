@@ -1312,16 +1312,21 @@ function renderForTime() {
   const dur = cap || NO_CAP;
   /* Stopwatch: Lap. For time with rounds: Round, a split per round. The big
      number is the current lap; the running total sits under it. */
-  /* LADDER: `rungs` is the reps per step (1,2,3… or a pyramid). Each tap
-     finishes a rung and records its time; the last rung finishes the block. */
+  /* LADDER: `rungs[k]` is the reps for rung k, one number per move (a
+     number alone means the same for every move), so moves can climb and
+     drop on their own: 1 pull-up + 40 push-ups, then 2 + 38… Each tap
+     finishes a rung and records its time; the last rung finishes it. */
   const rungs = Array.isArray(b.rungs) && b.rungs.length ? b.rungs : null;
   const k = rungs ? Math.min((S.laps || []).length, rungs.length - 1) : 0;
   const lapWord = rungs ? 'Rung done ✓' : b.label === 'Stopwatch' ? 'Lap' : (b.rounds > 1 ? 'Round ✓' : '');
-  const repsOf = it => rungs ? rungs[k] : it.reps;
+  const rungReps = (r, i) => Array.isArray(r) ? r[i] : r;
+  const repsOf = (it, i = b.items.indexOf(it)) => rungs ? rungReps(rungs[k], i) : it.reps;
+  const one = b.items.length === 1;
+  const rungLine = r => b.items.map((it, i) => one ? qty(rungReps(r, i)) : `${rungReps(r, i)} ${it.name}`).join(' · ');
   const list = b.hideList ? '' : `<div class="circuit-list">${b.items.map(it => `<div class="ci">${rowVid(it)}<span class="nm">${it.name}</span><span class="tg">${repsOf(it) ? qty(repsOf(it), UNIT[it.measure] || 'reps') : ''}</span></div>`).join('')}</div>`;
   const rounds = rungs ? `rung ${k + 1}/${rungs.length} · ` : b.rounds > 1 ? `${b.rounds} rounds · ` : '';
   shell(`<div class="now-ex"><div class="label">${rounds}${cap ? `cap ${fmt(cap)}` : b.hideList ? 'tap the ring to pause' : 'no cap'}</div>
-      <div class="name">${rungs ? qty(rungs[k]) : b.hideList ? (b.label || 'Go') : 'For time'}</div>${rungs && rungs[k + 1] != null ? `<div class="side">next: ${rungs[k + 1]}</div>` : ''}</div>
+      <div class="name">${rungs ? (one ? qty(rungReps(rungs[k], 0)) : `Rung ${k + 1}`) : b.hideList ? (b.label || 'Go') : 'For time'}</div>${rungs && rungs[k + 1] != null ? `<div class="side">next: ${rungLine(rungs[k + 1])}</div>` : ''}</div>
     <div class="timer-wrap">${timerSvg('buffer')}</div>
     ${lapWord ? `<div class="ft-total" id="ftTotal"></div>` : ''}
     <div id="lapList">${lapRows()}</div>
@@ -1341,7 +1346,7 @@ function renderForTime() {
     S.laps = [...(S.laps || []), upElapsed()]; R.save(S); buzz(30); beep('tick');
     if (rungs) {
       if (S.laps.length >= rungs.length) return finish(Math.round(upElapsed()));
-      say(`${rungs[S.laps.length]}.`);
+      say(`${rungLine(rungs[S.laps.length])}.`);
       return renderForTime();
     }
     document.getElementById('lapList').innerHTML = lapRows();

@@ -44,10 +44,10 @@ const FORMATS = [
     how: ['Death By.', 'Minute 1: 1 rep. Minute 2: 2 reps. Minute 3: 3 reps. Every minute the reps go up.',
       'Keep going until you can\'t finish the reps inside the minute, then tap "I can\'t finish this one". Your score is the last round you completed.',
       'Customize changes the start, the jump each round, and the interval.'] },
-  { id: 'ladder', name: 'Ladder', sub: 'Reps go up, down or both, race the clock', moves: true,
-    how: ['A rep ladder, for time.', 'Up: 1, 2, 3 … 10 reps. Down: 10, 9 … 1. Pyramid: up to the top, then back down.',
-      'Do each rung of every move, tap "Rung done", and the next rung comes up. Every rung gets its own time.',
-      'Example: burpees and squats, 1 to 10 = 55 reps of each.'] },
+  { id: 'ladder', name: 'Ladder', sub: 'Reps climb, drop, or both, race the clock', moves: true,
+    how: ['A rep ladder, for time.', 'Each move has its own start and its own change per rung. Pull-ups start at 1 and go up by 1, push-ups start at 40 and go down by 2: rung 1 is 1 + 40, rung 2 is 2 + 38…',
+      'Shape: one way (up or down), there and back (pyramid 1→10→1, or valley 10→1→10), or wave (1, 10, 2, 9…).',
+      'Tap "Rung done" after each rung. Every rung gets its own time. The presets set it all up in 1 tap.'] },
   { id: 'stopwatch', name: 'Stopwatch', sub: 'Counts up, tap to pause', moves: false,
     how: ['Counts up from 0.', 'Tap the ring to pause. Tap Done to stop.'] },
   { id: 'pushup', name: 'Push-up test', sub: '1 push-up every 3 seconds, as long as you can', moves: false,
@@ -72,9 +72,7 @@ const FIELDS = {
   dbStep:   ['Add each round',    'reps',  1,  1,  20],
   dbEvery:  ['Every',             'time', 15, 15, 300],
   dbMax:    ['Stop after',        'rounds', 1, 1,  60],
-  ldFrom:   ['From',              'reps',  1,  1, 100],
-  ldTo:     ['To',                'reps',  1,  1, 100],
-  ldStep:   ['Step',              'reps',  1,  1,  20],
+  ldRungs:  ['Rungs',             '',      1,  1,  50],
   ldCap:    ['Time cap',          'min',   1,  0,  90],
   ptCap:    ['Time cap',          'min',   1,  0,  10],
 };
@@ -83,19 +81,19 @@ const isTime = k => FIELDS[k][1] === 'time';
 const MAIN = {
   emom: ['mins'], amrap: ['cap'], fortime: ['ftRounds', 'ftCap'], tabata: ['rounds'],
   timer: ['work', 'rest', 'rounds'], stopwatch: [], pushup: ['pace'],
-  deathby: ['dbStart', 'dbStep'], ladder: ['ldFrom', 'ldTo'],
+  deathby: ['dbStart', 'dbStep'], ladder: ['ldRungs'],
 };
 const MORE = {
   emom: ['every'], amrap: [], fortime: [], tabata: ['work', 'rest'],
   timer: ['sets', 'setRest'], stopwatch: [], pushup: ['ptCap'],
-  deathby: ['dbEvery', 'dbMax'], ladder: ['ldStep', 'ldCap'],
+  deathby: ['dbEvery', 'dbMax'], ladder: ['ldCap'],
 };
 const DEFAULTS = {
   fmt: 'emom', every: 60, mins: 12, cap: 10, ftCap: 0, ftRounds: 1,
   work: 20, rest: 10, rounds: 8, sets: 1, setRest: 60,
   tWork: 120, tRest: 0, tRounds: 1, pace: 20, paceV: 2, ptCap: 0,
   dbStart: 1, dbStep: 1, dbEvery: 60, dbMax: 30,
-  ldFrom: 1, ldTo: 10, ldStep: 1, ldCap: 0, ldStyle: 'up',
+  ldRungs: 10, ldShape: 'one', ldCap: 0,
   emomStyle: 'turns', ready: 10, moves: [{ name: '', reps: '' }],
 };
 const TABATA = { work: 20, rest: 10, rounds: 8 };
@@ -146,6 +144,12 @@ function migrate(c) {
   if (c.fmt === 'intervals') Object.assign(c, { fmt: 'timer', tWork: c.work, tRest: c.rest, tRounds: c.rounds });
   if (c.fmt === 'countdown') Object.assign(c, { fmt: 'timer', tWork: Math.max(5, (c.cdMin || 0) * 60 + (c.cdSec || 0)), tRest: 0, tRounds: 1, sets: 1 });
   if (!FORMATS.some(f => f.id === c.fmt)) c.fmt = 'emom';
+  if (c.ldStyle) {
+    const lo = Math.min(c.ldFrom || 1, c.ldTo || 10), hi = Math.max(c.ldFrom || 1, c.ldTo || 10), st = c.ldStep || 1;
+    c.ldRungs = Math.floor((hi - lo) / st) + 1; c.ldShape = c.ldStyle === 'pyramid' ? 'mirror' : 'one';
+    (c.moves || []).forEach(m => { m.ldStart = c.ldStyle === 'down' ? hi : lo; m.ldStep = c.ldStyle === 'down' ? -st : st; });
+    delete c.ldStyle;
+  }
   if (!Array.isArray(c.moves) || !c.moves.length) c.moves = [{ name: '', reps: '' }];
   return c;
 }
@@ -180,14 +184,49 @@ const namedMoves = () => (FORMATS.find(f => f.id === cfg.fmt)?.moves ? (cfg.move
 /* In Tabata and Timer a round is EVERY move once: 8 rounds of 2 moves is
    16 intervals, not 8 shared between them. */
 const perRound = () => Math.max(1, namedMoves().length);
-/* the ladder's reps per rung */
-function rungs() {
-  const lo = Math.min(cfg.ldFrom, cfg.ldTo), hi = Math.max(cfg.ldFrom, cfg.ldTo), st = Math.max(1, cfg.ldStep);
-  const up = []; for (let r = lo; r <= hi; r += st) up.push(r);
-  if (up[up.length - 1] !== hi) up.push(hi);
-  if (cfg.ldStyle === 'down') return up.reverse();
-  if (cfg.ldStyle === 'pyramid') return [...up, ...up.slice(0, -1).reverse()];
-  return up;
+/* ---------------- ladder ----------------
+   Every move carries its own start and its own change per rung (ldStart,
+   ldStep on the move), so one can climb while another drops. The shape
+   decides the order the rungs are walked in:
+     one     rung 1 … N                  (up, down, or opposite pairs)
+     mirror  1 … N … 1                   (pyramid, or valley if it drops)
+     wave    1, N, 2, N-1 …              (the waving ladder) */
+const LD_SHAPES = [['one', 'One way'], ['mirror', 'There and back'], ['wave', 'Wave']];
+const LD_PRESETS = [
+  { id: 'up',     name: '1 → 10',        n: 10, shape: 'one',    m: [[1, 1]] },
+  { id: 'down',   name: '10 → 1',        n: 10, shape: 'one',    m: [[10, -1]] },
+  { id: 'pyr',    name: 'Pyramid 1→10→1', n: 10, shape: 'mirror', m: [[1, 1]] },
+  { id: 'valley', name: 'Valley 10→1→10', n: 10, shape: 'mirror', m: [[10, -1]] },
+  { id: 'seesaw', name: 'Seesaw: 1 up, 1 down', n: 10, shape: 'one', m: [[1, 1], [10, -1]] },
+  { id: 'wave',   name: 'Wave 1-10-2-9', n: 10, shape: 'wave',   m: [[1, 1]] },
+  { id: '21159',  name: '21-15-9',       n: 3,  shape: 'one',    m: [[21, -6]] },
+];
+const ldStart = m => Number.isFinite(+m.ldStart) && m.ldStart !== '' ? +m.ldStart : 1;
+const ldStep = m => Number.isFinite(+m.ldStep) && m.ldStep !== '' ? +m.ldStep : 1;
+/* the ladder's moves: the named ones, or the first row as plain "Reps" */
+function ladderMoves() {
+  const rows = (cfg.moves || []).filter(m => String(m.name || '').trim());
+  return rows.length ? rows : [cfg.moves[0] || { name: '' }];
+}
+function rungOrder() {
+  const n = Math.max(1, cfg.ldRungs), idx = [...Array(n).keys()];
+  if (cfg.ldShape === 'mirror') return [...idx, ...idx.slice(0, -1).reverse()];
+  if (cfg.ldShape === 'wave') { const o = []; for (let a = 0, b = n - 1; a <= b; a++, b--) { o.push(a); if (a !== b) o.push(b); } return o; }
+  return idx;
+}
+const repsAt = (m, i) => Math.max(0, ldStart(m) + i * ldStep(m));
+/* rungs[k] = one number per move */
+function rungs() { const ms = ladderMoves(); return rungOrder().map(i => ms.map(m => repsAt(m, i))); }
+function ladderPreview(m) {
+  const seq = rungOrder().map(i => repsAt(m, i)); const total = seq.reduce((a, b) => a + b, 0);
+  const shown = seq.length > 10 ? `${seq.slice(0, 5).join(', ')} … ${seq.slice(-2).join(', ')}` : seq.join(', ');
+  const zero = seq.indexOf(0);
+  return `${shown} · ${total} total${zero >= 0 ? ` · hits 0 at rung ${zero + 1}` : ''}`;
+}
+function applyPreset(p) {
+  cfg.ldRungs = p.n; cfg.ldShape = p.shape;
+  if (p.m.length > (cfg.moves || []).length) while (cfg.moves.length < p.m.length) cfg.moves.push({ name: '', reps: '' });
+  cfg.moves.forEach((m, i) => { const [a, d] = p.m[Math.min(i, p.m.length - 1)]; m.ldStart = a; m.ldStep = d; });
 }
 function emomCount() { return Math.max(1, Math.floor((cfg.mins * 60) / cfg.every)); }
 function intervalSec(work, rest, rounds, sets = 1, setRest = 0) {
@@ -237,9 +276,9 @@ function summary() {
     }
     case 'deathby': return `Round 1: ${cfg.dbStart} rep${cfg.dbStart > 1 ? 's' : ''}, then +${cfg.dbStep} every ${secs(cfg.dbEvery)} until you can't`;
     case 'ladder': {
-      const r = rungs(); const sum = r.reduce((a, b) => a + b, 0);
-      const shown = r.length > 9 ? `${r.slice(0, 4).join('-')}-…-${r.slice(-2).join('-')}` : r.join('-');
-      return `${shown} · ${sum} reps of each move${cfg.ldCap ? `, ${cfg.ldCap} min cap` : ''}`;
+      const ms = ladderMoves(), r = rungs();
+      const tot = ms.map((m, i) => `${r.reduce((a, x) => a + x[i], 0)} ${String(m.name || '').trim() || 'reps'}`).join(', ');
+      return `${r.length} rungs · ${tot}${cfg.ldCap ? ` · ${cfg.ldCap} min cap` : ''}`;
     }
     case 'stopwatch': return 'Tap the ring to pause';
     case 'pushup': { const h = Math.round(3000 * 20 / cfg.pace / 2) / 1000; return `${cfg.pace} a minute: ${h}s down, ${h}s up${cfg.pace === 25 ? ' (NHL)' : ''}`; }
@@ -255,7 +294,7 @@ function planName() {
   if (f === 'timer') return `Timer · ${cfg.tRounds > 1 ? `${cfg.tRounds} × ` : ''}${fmt(cfg.tWork)}${cfg.tRest && cfg.tRounds > 1 ? ` / ${fmt(cfg.tRest)}` : ''}${cfg.sets > 1 ? ` · ${cfg.sets} sets` : ''}`;
   if (f === 'pushup') return `Push-up test · ${cfg.pace} a min`;
   if (f === 'deathby') return `Death By${cfg.dbStart !== 1 || cfg.dbStep !== 1 ? ` · ${cfg.dbStart} +${cfg.dbStep}` : ''}${cfg.dbEvery !== 60 ? ` every ${fmt(cfg.dbEvery)}` : ''}`;
-  if (f === 'ladder') { const r = rungs(); return `Ladder · ${cfg.ldStyle === 'pyramid' ? 'pyramid ' : ''}${r[0]} to ${cfg.ldStyle === 'pyramid' ? Math.max(...r) : r[r.length - 1]}`; }
+  if (f === 'ladder') { const ms = ladderMoves(); return `Ladder · ${ms.map(m => `${String(m.name || '').trim() || 'reps'} ${ldStart(m)} ${ldStep(m) >= 0 ? '+' : '−'}${Math.abs(ldStep(m))}`).join(', ')}${cfg.ldShape === 'mirror' ? ' and back' : cfg.ldShape === 'wave' ? ' wave' : ''}`; }
   return 'Stopwatch';
 }
 
@@ -358,6 +397,21 @@ function smallRow(k) {
     <div class="qt-step"><button data-q="${k}" data-d="-1" aria-label="Less">−</button>${face}
       <button data-q="${k}" data-d="1" aria-label="More">+</button>${isTime(k) ? '' : `<span class="qt-u">${unit}</span>`}</div></div>`;
 }
+/* the ladder's main panel: shape, one-tap presets, and each move with
+   its own start and change per rung, with a live preview of its reps */
+function ladderPanel() {
+  const step = (i, f, v) => `<div class="qt-step"><button data-lm="${i}" data-lf="${f}" data-d="-1" aria-label="Less">−</button><b class="qt-lv">${f === 'ldStep' && v > 0 ? '+' : ''}${v}</b><button data-lm="${i}" data-lf="${f}" data-d="1" aria-label="More">+</button></div>`;
+  return `<div class="qt-seg qt-ldstyle">${LD_SHAPES.map(([v, l]) => `<button class="${cfg.ldShape === v ? 'on' : ''}" data-ldshape="${v}">${l}</button>`).join('')}</div>
+    <div class="qt-chips qt-presets2">${LD_PRESETS.map(p => `<button data-ldp="${p.id}">${p.name}</button>`).join('')}</div>
+    <div class="qt-sec">Moves <small>each with its own reps</small></div>
+    <div class="qt-card">${cfg.moves.map((m, i) => `<div class="qt-lmove">
+      <div class="qt-move"><button class="qt-mpick ${m.name ? '' : 'empty'}" data-pick-move="${i}">${m.name ? esc(m.name) : `Move ${i + 1}`}<span>⌕</span></button>
+        <button class="qt-mx" data-mvx="${i}" aria-label="Remove">✕</button></div>
+      <div class="qt-lrow"><span>Start</span>${step(i, 'ldStart', ldStart(m))}<span>Change</span>${step(i, 'ldStep', ldStep(m))}</div>
+      <div class="qt-lprev">${ladderPreview(m)}</div>
+    </div>`).join('')}
+    <button class="qt-link" id="qtAdd">+ Add a move</button></div>`;
+}
 function moveRow(m, i) {
   const ex = m.exId && EXERCISES[m.exId];
   const hold = ex && ex.measure === 'hold';
@@ -388,13 +442,13 @@ function draw() {
       <span class="qt-chev">▾</span>
     </button>
 
-    ${main.length ? `<div class="qt-tiles n${main.length}">${main.map(bigTile).join('')}</div>${cfg.fmt === 'ladder' ? `<div class="qt-seg qt-ldstyle">${[['up', 'Up ↗'], ['down', 'Down ↘'], ['pyramid', 'Pyramid ⛰']].map(([v, l]) => `<button class="${cfg.ldStyle === v ? 'on' : ''}" data-ld="${v}">${l}</button>`).join('')}</div>` : ''}`
+    ${main.length ? `<div class="qt-tiles n${main.length}">${main.map(bigTile).join('')}</div>${cfg.fmt === 'ladder' ? ladderPanel() : ''}`
       : `<div class="qt-empty">Nothing to set. Hit start.</div>`}
 
     <button class="qt-more" id="qtMore">${moreOpen ? 'Close ▴' : 'Customize ▾'}${!moreOpen && named ? ` <span>${named} move${named > 1 ? 's' : ''}</span>` : ''}</button>
     ${moreOpen ? `<div class="qt-details">
       ${more.length ? `<div class="qt-card">${more.map(smallRow).join('')}</div>` : ''}
-      ${def.moves ? `<div class="qt-sec">Moves <small>optional · search the library or type your own</small></div><div class="qt-card">
+      ${def.moves && cfg.fmt !== 'ladder' ? `<div class="qt-sec">Moves <small>optional · search the library or type your own</small></div><div class="qt-card">
         ${cfg.moves.map(moveRow).join('')}
         <button class="qt-link" id="qtAdd">+ Add a move</button>
       </div>` : ''}
@@ -434,10 +488,10 @@ const unb64u = str => decodeURIComponent(escape(atob(str.replace(/-/g, '+').repl
 function pack() {
   const keep = ['fmt', 'ready', ...(MAIN[cfg.fmt] || []), ...(MORE[cfg.fmt] || [])].map(k => (cfg.fmt === 'timer' && TIMER_KEYS[k]) || k);
   if (cfg.fmt === 'emom') keep.push('emomStyle');
-  if (cfg.fmt === 'ladder') keep.push('ldStyle');
+  if (cfg.fmt === 'ladder') keep.push('ldShape');
   if (cfg.fmt === 'timer') keep.push('sets', 'setRest');
   const o = {}; keep.forEach(k => { if (cfg[k] != null) o[k] = cfg[k]; });
-  const mv = (cfg.moves || []).filter(m => String(m.name || '').trim()).map(m => ({ name: m.name, reps: m.reps || '', ...(m.exId ? { exId: m.exId } : {}) }));
+  const mv = (cfg.moves || []).filter(m => String(m.name || '').trim()).map(m => ({ name: m.name, reps: m.reps || '', ...(m.exId ? { exId: m.exId } : {}), ...(cfg.fmt === 'ladder' ? { ldStart: ldStart(m), ldStep: ldStep(m) } : {}) }));
   if (mv.length && fmtDef().moves) o.moves = mv;
   return b64u(JSON.stringify(o));
 }
@@ -672,7 +726,14 @@ function wire() {
     inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
   });
   host.querySelectorAll('[data-pace]').forEach(b => b.addEventListener('click', () => { cfg.pace = +b.dataset.pace; persist(); draw(); }));
-  host.querySelectorAll('[data-ld]').forEach(b => b.addEventListener('click', () => { cfg.ldStyle = b.dataset.ld; persist(); draw(); }));
+  host.querySelectorAll('[data-ldshape]').forEach(b => b.addEventListener('click', () => { cfg.ldShape = b.dataset.ldshape; persist(); draw(); }));
+  host.querySelectorAll('[data-ldp]').forEach(b => b.addEventListener('click', () => { applyPreset(LD_PRESETS.find(p => p.id === b.dataset.ldp)); persist(); draw(); }));
+  host.querySelectorAll('[data-lm]').forEach(b => b.addEventListener('click', () => {
+    const m = cfg.moves[+b.dataset.lm], f = b.dataset.lf, d = +b.dataset.d;
+    if (f === 'ldStart') m.ldStart = Math.min(500, Math.max(0, ldStart(m) + d));
+    else m.ldStep = Math.min(50, Math.max(-50, ldStep(m) + d));
+    persist(); draw();
+  }));
   host.querySelectorAll('[data-style]').forEach(b => b.addEventListener('click', () => { cfg.emomStyle = b.dataset.style; persist(); draw(); }));
   host.querySelectorAll('[data-pick-move]').forEach(b => b.addEventListener('click', () => openMovePicker(+b.dataset.pickMove)));
   /* typing reps must not redraw (the keyboard would drop); the total line
@@ -687,7 +748,7 @@ function wire() {
     persist(); draw();
   }));
   $('#qtAdd')?.addEventListener('click', () => {
-    cfg.moves.push({ name: '', reps: '' }); persist(); draw();
+    cfg.moves.push(cfg.fmt === 'ladder' ? { name: '', reps: '', ldStart: 1, ldStep: 1 } : { name: '', reps: '' }); persist(); draw();
     openMovePicker(cfg.moves.length - 1);
   });
   $('#qtClassic')?.addEventListener('click', () => { Object.assign(cfg, TABATA); persist(); draw(); });
@@ -834,6 +895,13 @@ function injectStyle() {
   .qt-star svg { display:block; }
   .qt-fav.on { border-color: var(--wm-neon); } .qt-fav.on button:first-child { color: var(--wm-neon); }
   .qt-ldstyle { margin-top: 10px; }
+  .qt-presets2 { padding-top: 10px; }
+  .qt-lmove { padding: 4px 0 10px; border-bottom: 1px solid var(--line); }
+  .qt-lmove:last-of-type { border-bottom: none; }
+  .qt-lrow { display:flex; align-items:center; gap: 8px; font-size: 13px; color: var(--muted); font-weight: 600; }
+  .qt-lrow .qt-step button { width: 36px; height: 36px; }
+  .qt-lv { min-width: 34px; text-align:center; font-family: var(--tnum); font-size: 17px; color: var(--text); }
+  .qt-lprev { color: var(--wm-accent); font-size: 12.5px; margin-top: 6px; font-family: var(--tnum); }
   .qt-sheet-card .btn + .btn { margin-top: 8px; }
   .qt-toast { position: fixed; left: 50%; bottom: calc(120px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 95;
     background: var(--bg-2); border: 1px solid var(--wm-neon-line); box-shadow: var(--wm-glow-neon); color: var(--text);
