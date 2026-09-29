@@ -40,6 +40,14 @@ const FORMATS = [
     how: ['A plain timer.', 'Set how long to work. Add rest and more rounds to repeat it.',
       'Examples: a 2:00 plank (1 round, no rest). Or 5:00 work, 2:00 rest, 3 rounds.',
       'Customize adds sets, with a longer rest between them.'] },
+  { id: 'deathby', name: 'Death By', sub: '1 more rep every minute, until you can\'t', moves: true,
+    how: ['Death By.', 'Minute 1: 1 rep. Minute 2: 2 reps. Minute 3: 3 reps. Every minute the reps go up.',
+      'Keep going until you can\'t finish the reps inside the minute, then tap "I can\'t finish this one". Your score is the last round you completed.',
+      'Customize changes the start, the jump each round, and the interval.'] },
+  { id: 'ladder', name: 'Ladder', sub: 'Reps go up, down or both, race the clock', moves: true,
+    how: ['A rep ladder, for time.', 'Up: 1, 2, 3 … 10 reps. Down: 10, 9 … 1. Pyramid: up to the top, then back down.',
+      'Do each rung of every move, tap "Rung done", and the next rung comes up. Every rung gets its own time.',
+      'Example: burpees and squats, 1 to 10 = 55 reps of each.'] },
   { id: 'stopwatch', name: 'Stopwatch', sub: 'Counts up, tap to pause', moves: false,
     how: ['Counts up from 0.', 'Tap the ring to pause. Tap Done to stop.'] },
   { id: 'pushup', name: 'Push-up test', sub: '1 push-up every 3 seconds, as long as you can', moves: false,
@@ -60,6 +68,14 @@ const FIELDS = {
   sets:     ['Sets',              '',      1,  1,  10],
   setRest:  ['Rest between sets', 'time', 15,  0, 1800],
   pace:     ['Pace',              'a min', 1, 10,  40],
+  dbStart:  ['Start at',          'reps',  1,  1,  50],
+  dbStep:   ['Add each round',    'reps',  1,  1,  20],
+  dbEvery:  ['Every',             'time', 15, 15, 300],
+  dbMax:    ['Stop after',        'rounds', 1, 1,  60],
+  ldFrom:   ['From',              'reps',  1,  1, 100],
+  ldTo:     ['To',                'reps',  1,  1, 100],
+  ldStep:   ['Step',              'reps',  1,  1,  20],
+  ldCap:    ['Time cap',          'min',   1,  0,  90],
   ptCap:    ['Time cap',          'min',   1,  0,  10],
 };
 const isTime = k => FIELDS[k][1] === 'time';
@@ -67,21 +83,26 @@ const isTime = k => FIELDS[k][1] === 'time';
 const MAIN = {
   emom: ['mins'], amrap: ['cap'], fortime: ['ftRounds', 'ftCap'], tabata: ['rounds'],
   timer: ['work', 'rest', 'rounds'], stopwatch: [], pushup: ['pace'],
+  deathby: ['dbStart', 'dbStep'], ladder: ['ldFrom', 'ldTo'],
 };
 const MORE = {
   emom: ['every'], amrap: [], fortime: [], tabata: ['work', 'rest'],
   timer: ['sets', 'setRest'], stopwatch: [], pushup: ['ptCap'],
+  deathby: ['dbEvery', 'dbMax'], ladder: ['ldStep', 'ldCap'],
 };
 const DEFAULTS = {
   fmt: 'emom', every: 60, mins: 12, cap: 10, ftCap: 0, ftRounds: 1,
   work: 20, rest: 10, rounds: 8, sets: 1, setRest: 60,
   tWork: 120, tRest: 0, tRounds: 1, pace: 20, paceV: 2, ptCap: 0,
+  dbStart: 1, dbStep: 1, dbEvery: 60, dbMax: 30,
+  ldFrom: 1, ldTo: 10, ldStep: 1, ldCap: 0, ldStyle: 'up',
   emomStyle: 'turns', ready: 10, moves: [{ name: '', reps: '' }],
 };
 const TABATA = { work: 20, rest: 10, rounds: 8 };
 const PREF = 'quickTimer';
 
 let cfg = null, favs = [], host = null, onStart = null, moreOpen = false;
+let favIdx = null;              // the saved timer currently loaded, if any
 
 /* Tabata and Timer both have work / rest / rounds, with very different
    numbers (20s vs 5 min). Timer keeps its own copy so switching between
@@ -107,7 +128,18 @@ export async function renderQuick(el, opts = {}) {
   /* the push-up test first shipped at 25 a minute; the standard is 20 */
   if (saved?.last && saved.last.paceV !== 2) { cfg.pace = 20; cfg.paceV = 2; }
   favs = Array.isArray(saved?.favs) ? saved.favs : [];
+  /* a shared timer: index.html?quick&t=<code> opens exactly that setup */
+  let shared = false;
+  try {
+    const p = new URLSearchParams(location.search);
+    if (p.get('t')) {
+      const got = unpack(p.get('t'));
+      if (got) { cfg = migrate({ ...DEFAULTS, ...got, paceV: 2 }); favIdx = null; persist(); shared = true; }
+      p.delete('t'); history.replaceState(null, '', `${location.pathname}?${p.toString().replace(/=(&|$)/g, '$1')}`);
+    }
+  } catch (e) {}
   draw();
+  if (shared) toast(`Timer loaded: ${planName()}`);
 }
 /* setups saved before Intervals and Countdown became Timer */
 function migrate(c) {
@@ -148,6 +180,15 @@ const namedMoves = () => (FORMATS.find(f => f.id === cfg.fmt)?.moves ? (cfg.move
 /* In Tabata and Timer a round is EVERY move once: 8 rounds of 2 moves is
    16 intervals, not 8 shared between them. */
 const perRound = () => Math.max(1, namedMoves().length);
+/* the ladder's reps per rung */
+function rungs() {
+  const lo = Math.min(cfg.ldFrom, cfg.ldTo), hi = Math.max(cfg.ldFrom, cfg.ldTo), st = Math.max(1, cfg.ldStep);
+  const up = []; for (let r = lo; r <= hi; r += st) up.push(r);
+  if (up[up.length - 1] !== hi) up.push(hi);
+  if (cfg.ldStyle === 'down') return up.reverse();
+  if (cfg.ldStyle === 'pyramid') return [...up, ...up.slice(0, -1).reverse()];
+  return up;
+}
 function emomCount() { return Math.max(1, Math.floor((cfg.mins * 60) / cfg.every)); }
 function intervalSec(work, rest, rounds, sets = 1, setRest = 0) {
   const one = rounds * work + (rounds - 1) * rest;
@@ -162,13 +203,15 @@ function totalSec() {
     case 'tabata': return intervalSec(cfg.work, cfg.rest, cfg.rounds * perRound());
     case 'timer': return intervalSec(cfg.tWork, cfg.tRest, cfg.tRounds * perRound(), cfg.sets, cfg.setRest);
     case 'pushup': return cfg.ptCap ? cfg.ptCap * 60 : null;
+    case 'deathby': return cfg.dbMax * cfg.dbEvery;
+    case 'ladder': return cfg.ldCap ? cfg.ldCap * 60 : null;
     default: return null;
   }
 }
 /* the big "how long" above Start */
 function totalBadge() {
   const t = totalSec();
-  if (t) return { big: fmt(t), small: (cfg.fmt === 'fortime' || cfg.fmt === 'pushup') ? 'max' : 'total' };
+  if (t) return { big: fmt(t), small: ['fortime', 'pushup', 'deathby', 'ladder'].includes(cfg.fmt) ? 'max' : 'total' };
   return { big: '∞', small: cfg.fmt === 'pushup' ? 'till you miss' : 'open' };
 }
 const secs = v => v >= 60 ? fmt(v) : `${v}s`;
@@ -192,6 +235,12 @@ function summary() {
       const core = `${r > 1 ? `${r} rounds of ` : ''}${n > 1 ? `${n} moves, ` : ''}${secs(cfg.tWork)} work${cfg.tRest && (r > 1 || n > 1) ? `, ${secs(cfg.tRest)} rest` : ''}`;
       return cfg.sets > 1 ? `${cfg.sets} sets of ${core}, ${secs(cfg.setRest)} between sets` : core;
     }
+    case 'deathby': return `Round 1: ${cfg.dbStart} rep${cfg.dbStart > 1 ? 's' : ''}, then +${cfg.dbStep} every ${secs(cfg.dbEvery)} until you can't`;
+    case 'ladder': {
+      const r = rungs(); const sum = r.reduce((a, b) => a + b, 0);
+      const shown = r.length > 9 ? `${r.slice(0, 4).join('-')}-…-${r.slice(-2).join('-')}` : r.join('-');
+      return `${shown} · ${sum} reps of each move${cfg.ldCap ? `, ${cfg.ldCap} min cap` : ''}`;
+    }
     case 'stopwatch': return 'Tap the ring to pause';
     case 'pushup': { const h = Math.round(3000 * 20 / cfg.pace / 2) / 1000; return `${cfg.pace} a minute: ${h}s down, ${h}s up${cfg.pace === 25 ? ' (NHL)' : ''}`; }
     default: return '';
@@ -205,6 +254,8 @@ function planName() {
   if (f === 'tabata') return `Tabata · ${cfg.rounds} × ${cfg.work}/${cfg.rest}`;
   if (f === 'timer') return `Timer · ${cfg.tRounds > 1 ? `${cfg.tRounds} × ` : ''}${fmt(cfg.tWork)}${cfg.tRest && cfg.tRounds > 1 ? ` / ${fmt(cfg.tRest)}` : ''}${cfg.sets > 1 ? ` · ${cfg.sets} sets` : ''}`;
   if (f === 'pushup') return `Push-up test · ${cfg.pace} a min`;
+  if (f === 'deathby') return `Death By${cfg.dbStart !== 1 || cfg.dbStep !== 1 ? ` · ${cfg.dbStart} +${cfg.dbStep}` : ''}${cfg.dbEvery !== 60 ? ` every ${fmt(cfg.dbEvery)}` : ''}`;
+  if (f === 'ladder') { const r = rungs(); return `Ladder · ${cfg.ldStyle === 'pyramid' ? 'pyramid ' : ''}${r[0]} to ${cfg.ldStyle === 'pyramid' ? Math.max(...r) : r[r.length - 1]}`; }
   return 'Stopwatch';
 }
 
@@ -242,6 +293,15 @@ export function buildPlan(c = cfg) {
           items: [{ exId: 'pushup', name: pu?.name || 'Push-ups', measure: 'reps', load: 'bw', cue: pu?.cues, noPR: true }] }];
         break;
       }
+      case 'deathby':
+        blocks = [{ ...base, id: id(1), name, format: 'emom', label: 'Death By', work: cfg.dbEvery, rest: 0, intervals: cfg.dbMax,
+          ladder: { start: cfg.dbStart, step: cfg.dbStep }, allEach: moves.length > 1,
+          items: moves.length ? moves : [{ name: 'Reps', measure: 'reps' }] }];
+        break;
+      case 'ladder':
+        blocks = [{ ...base, id: id(1), name, format: 'fortime', label: 'Ladder', minutes: cfg.ldCap, rungs: rungs(),
+          ...(moves.length ? {} : { hideList: true, items: [{ name: 'Reps', measure: 'reps' }] }) }];
+        break;
       case 'tabata':
         blocks = [{ ...base, id: id(1), name, format: 'tabata', label: 'Tabata',
           work: cfg.work, rest: cfg.rest, rounds: cfg.rounds, perRound: perRound(), intervals: cfg.rounds * perRound(),
@@ -317,17 +377,18 @@ function draw() {
       <button class="qt-back" id="qtBack" aria-label="Back">‹</button>
       <h1>Timer</h1>
       <button class="qt-star" id="qtPrefs" aria-label="Timer settings" title="Timer settings">⚙︎</button>
-      <button class="qt-star" id="qtFav" aria-label="Save this timer" title="Save this timer">☆</button>
+      <button class="qt-star" id="qtShare" aria-label="Share this timer" title="Share this timer"><svg width="20" height="22" viewBox="0 0 20 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14V2M5 7l5-5 5 5"/><path d="M4 11H2.5v9h15v-9H16"/></svg></button>
+      <button class="qt-star ${favIdx != null ? 'on' : ''}" id="qtFav" aria-label="Save this timer" title="Save this timer">${favIdx != null ? '★' : '☆'}</button>
     </div>
 
-    ${favs.length ? `<div class="qt-favs">${favs.map((f, i) => `<span class="qt-fav"><button data-fav="${i}">${esc(f.label)}</button><button class="qt-favx" data-favx="${i}" aria-label="Remove">✕</button></span>`).join('')}</div>` : ''}
+    ${favs.length ? `<div class="qt-favs">${favs.map((f, i) => `<span class="qt-fav ${i === favIdx ? 'on' : ''}"><button data-fav="${i}">${esc(f.label)}</button><button class="qt-favx" data-favx="${i}" aria-label="Remove">✕</button></span>`).join('')}</div>` : ''}
 
     <button class="qt-type" id="qtType">
       <span class="qt-type-t"><small>Type</small><b>${def.name}</b><em>${def.sub}</em></span>
       <span class="qt-chev">▾</span>
     </button>
 
-    ${main.length ? `<div class="qt-tiles n${main.length}">${main.map(bigTile).join('')}</div>`
+    ${main.length ? `<div class="qt-tiles n${main.length}">${main.map(bigTile).join('')}</div>${cfg.fmt === 'ladder' ? `<div class="qt-seg qt-ldstyle">${[['up', 'Up ↗'], ['down', 'Down ↘'], ['pyramid', 'Pyramid ⛰']].map(([v, l]) => `<button class="${cfg.ldStyle === v ? 'on' : ''}" data-ld="${v}">${l}</button>`).join('')}</div>` : ''}`
       : `<div class="qt-empty">Nothing to set. Hit start.</div>`}
 
     <button class="qt-more" id="qtMore">${moreOpen ? 'Close ▴' : 'Customize ▾'}${!moreOpen && named ? ` <span>${named} move${named > 1 ? 's' : ''}</span>` : ''}</button>
@@ -363,6 +424,56 @@ function draw() {
     </div>
   </div>`;
   wire();
+}
+
+/* ---------------- share + save ----------------
+   A timer travels as its settings in the link: base64 of the JSON, only
+   the fields that matter. Anyone opening it lands on the same setup. */
+const b64u = str => btoa(unescape(encodeURIComponent(str))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const unb64u = str => decodeURIComponent(escape(atob(str.replace(/-/g, '+').replace(/_/g, '/'))));
+function pack() {
+  const keep = ['fmt', 'ready', ...(MAIN[cfg.fmt] || []), ...(MORE[cfg.fmt] || [])].map(k => (cfg.fmt === 'timer' && TIMER_KEYS[k]) || k);
+  if (cfg.fmt === 'emom') keep.push('emomStyle');
+  if (cfg.fmt === 'ladder') keep.push('ldStyle');
+  if (cfg.fmt === 'timer') keep.push('sets', 'setRest');
+  const o = {}; keep.forEach(k => { if (cfg[k] != null) o[k] = cfg[k]; });
+  const mv = (cfg.moves || []).filter(m => String(m.name || '').trim()).map(m => ({ name: m.name, reps: m.reps || '', ...(m.exId ? { exId: m.exId } : {}) }));
+  if (mv.length && fmtDef().moves) o.moves = mv;
+  return b64u(JSON.stringify(o));
+}
+function unpack(code) {
+  try { const o = JSON.parse(unb64u(code)); return o && typeof o === 'object' && o.fmt ? o : null; } catch (e) { return null; }
+}
+async function shareTimer() {
+  const url = `${location.origin}${location.pathname}?quick&t=${pack()}`;
+  const title = planName();
+  try {
+    if (navigator.share) { await navigator.share({ title: `Timer: ${title}`, text: `${title}. Tap to open it ready to go.`, url }); return; }
+  } catch (e) { if (e && e.name === 'AbortError') return; }
+  try { await navigator.clipboard.writeText(url); toast('Link copied. Paste it anywhere.'); }
+  catch (e) { prompt('Copy this link', url); }
+}
+function toast(text) {
+  document.getElementById('qtToast')?.remove();
+  const t = document.createElement('div'); t.id = 'qtToast'; t.className = 'qt-toast'; t.textContent = text;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2600);
+}
+const defaultLabel = () => { const m = namedMoves().map(x => x.name); return planName() + (m.length ? ` · ${m.slice(0, 2).join(', ')}${m.length > 2 ? '…' : ''}` : ''); };
+/* name it, update it, save a copy, or delete it */
+function openSave() {
+  const cur = favIdx != null ? favs[favIdx] : null;
+  const { ov, close } = sheet(`<div class="qt-sheet-h">${cur ? 'Saved timer' : 'Save this timer'}</div>
+    <input class="qt-search" id="svName" value="${esc(cur ? cur.label : defaultLabel())}" placeholder="Give it a name" autocomplete="off"/>
+    ${cur ? `<button class="btn" id="svUpdate">Save changes</button>
+      <button class="btn secondary" id="svNew">Save as a new timer</button>
+      <button class="btn ghost" id="svDel">Delete this timer</button>`
+    : '<button class="btn" id="svNew">Save</button>'}`);
+  const name = () => (ov.querySelector('#svName').value.trim() || defaultLabel()).slice(0, 60);
+  const snap = () => JSON.parse(JSON.stringify(cfg));
+  ov.querySelector('#svUpdate')?.addEventListener('click', () => { favs[favIdx] = { label: name(), cfg: snap() }; persist(); close(); draw(); toast('Saved'); });
+  ov.querySelector('#svNew').addEventListener('click', () => { favs.unshift({ label: name(), cfg: snap() }); favs = favs.slice(0, 20); favIdx = 0; persist(); close(); draw(); toast('Saved'); });
+  ov.querySelector('#svDel')?.addEventListener('click', () => { favs.splice(favIdx, 1); favIdx = null; persist(); close(); draw(); });
+  setTimeout(() => ov.querySelector('#svName').select(), 60);
 }
 
 /* ---------------- sheets ---------------- */
@@ -561,6 +672,7 @@ function wire() {
     inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
   });
   host.querySelectorAll('[data-pace]').forEach(b => b.addEventListener('click', () => { cfg.pace = +b.dataset.pace; persist(); draw(); }));
+  host.querySelectorAll('[data-ld]').forEach(b => b.addEventListener('click', () => { cfg.ldStyle = b.dataset.ld; persist(); draw(); }));
   host.querySelectorAll('[data-style]').forEach(b => b.addEventListener('click', () => { cfg.emomStyle = b.dataset.style; persist(); draw(); }));
   host.querySelectorAll('[data-pick-move]').forEach(b => b.addEventListener('click', () => openMovePicker(+b.dataset.pickMove)));
   /* typing reps must not redraw (the keyboard would drop); the total line
@@ -582,18 +694,15 @@ function wire() {
   host.querySelectorAll('[data-ready]').forEach(b => b.addEventListener('click', () => { cfg.ready = +b.dataset.ready; persist(); draw(); }));
   host.querySelectorAll('[data-fav]').forEach(b => b.addEventListener('click', () => {
     const f = favs[+b.dataset.fav]; if (!f) return;
-    cfg = migrate({ ...DEFAULTS, ...JSON.parse(JSON.stringify(f.cfg)) }); persist(); draw();
+    cfg = migrate({ ...DEFAULTS, ...JSON.parse(JSON.stringify(f.cfg)), paceV: 2 }); favIdx = +b.dataset.fav; persist(); draw();
   }));
   host.querySelectorAll('[data-favx]').forEach(b => b.addEventListener('click', () => {
-    favs.splice(+b.dataset.favx, 1); persist(); draw();
-  }));
-  $('#qtFav').addEventListener('click', () => {
-    const moves = namedMoves().map(m => m.name);
-    const label = planName() + (moves.length ? ` · ${moves.slice(0, 2).join(', ')}${moves.length > 2 ? '…' : ''}` : '');
-    if (!favs.some(f => f.label === label)) favs.unshift({ label, cfg: JSON.parse(JSON.stringify(cfg)) });
-    favs = favs.slice(0, 12);
+    const i = +b.dataset.favx; favs.splice(i, 1);
+    if (favIdx === i) favIdx = null; else if (favIdx > i) favIdx--;
     persist(); draw();
-  });
+  }));
+  $('#qtFav').addEventListener('click', openSave);
+  $('#qtShare').addEventListener('click', shareTimer);
   $('#qtGo').addEventListener('click', () => { persist(); onStart?.(buildPlan()); });
   host.querySelectorAll('[data-demo]').forEach(b => b.addEventListener('click', () => {
     const d = DEMOS.find(x => x.id === b.dataset.demo); if (d) onStart?.(d.plan());
@@ -721,6 +830,14 @@ function injectStyle() {
   .qt-res { width:100%; display:flex; flex-direction:column; text-align:left; background:none; border:none; border-bottom: 1px solid var(--line); color: var(--text); padding: 12px 4px; cursor:pointer; }
   .qt-res b { font-size: 16px; font-weight: 600; } .qt-res small { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
   .qt-res.own b { color: var(--wm-accent); }
+  .qt-star.on { color: var(--wm-neon); text-shadow: var(--wm-glow-neon); }
+  .qt-star svg { display:block; }
+  .qt-fav.on { border-color: var(--wm-neon); } .qt-fav.on button:first-child { color: var(--wm-neon); }
+  .qt-ldstyle { margin-top: 10px; }
+  .qt-sheet-card .btn + .btn { margin-top: 8px; }
+  .qt-toast { position: fixed; left: 50%; bottom: calc(120px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 95;
+    background: var(--bg-2); border: 1px solid var(--wm-neon-line); box-shadow: var(--wm-glow-neon); color: var(--text);
+    padding: 11px 18px; border-radius: 999px; font-size: 14px; font-weight: 600; white-space: nowrap; animation: qtIn .2s ease-out; }
   .qt-optrow { display:flex; align-items:center; border-top: 1px solid var(--line); }
   .qt-optrow .qt-opt { flex: 1; border-top: none; }
   .qt-optrow .qt-how { flex: none; width: 40px; height: 40px; border-radius: 50%; margin-right: 2px; font-size: 17px; }
