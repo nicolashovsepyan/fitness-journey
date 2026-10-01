@@ -1212,15 +1212,19 @@ function renderInterval() {
     : b.intervals ? (totalIv > 1 ? ` · ${S.iv + 1}/${totalIv}` : '') : ` · round ${roundN}/${rounds}`;
   /* what the minute asks for, and what comes after it: an EMOM you can't
      read the reps off is only a clock */
-  /* DEATH BY: the reps climb every interval (1, 2, 3…) until you can't
-     finish inside it. `ladder` = { start, step }. */
+  /* DEATH BY: the reps climb every interval until you can't finish inside
+     it. Each move climbs on its own: `dbStart` + round × `dbStep` (burpees
+     1 +1 beside squats 2 +2). An older plan's block-wide `ladder` =
+     { start, step } still reads. */
   const lad = b.ladder;
-  const ladReps = lad ? lad.start + S.iv * lad.step : null;
-  if (lad) { item.reps = ladReps; }
+  const ladOf = it => !lad ? it.reps
+    : (it.dbStart != null ? +it.dbStart : lad.start) + S.iv * (it.dbStep != null ? +it.dbStep : lad.step);
+  const ladReps = lad && !all ? ladOf(item) : null;
+  if (lad && !all) { item.reps = ladReps; }
   const target = phaseWork && !all && item.reps ? `<div class="side">${qty(item.reps, UNIT[item.measure] || 'reps')}</div>` : '';
   const nextItem = !all && S.iv + 1 < totalIv ? b.items[(S.iv + 1) % per] : null;
   const upNext = per > 1 && nextItem ? `<div class="ss-hint">Next: ${nextItem.name}${nextItem.reps ? ` · ${nextItem.reps}` : ''}</div>` : '';
-  const allList = all && phaseWork ? `<div class="circuit-list">${b.items.map(it => { const r = lad ? ladReps : it.reps; return `<div class="ci">${rowVid(it)}<span class="nm">${it.name}</span><span class="tg">${r ? qty(r, UNIT[it.measure] || 'reps') : ''}</span></div>`; }).join('')}</div>` : '';
+  const allList = all && phaseWork ? `<div class="circuit-list">${b.items.map(it => { const r = lad ? ladOf(it) : it.reps; return `<div class="ci">${rowVid(it)}<span class="nm">${it.name}</span><span class="tg">${r ? qty(r, UNIT[it.measure] || 'reps') : ''}</span></div>`; }).join('')}</div>` : '';
   shell(`<div class="now-ex"><div class="label">${kind}${counter}</div>
       <div class="name">${phaseWork ? item.name : 'Rest'}</div>${target}</div>
     ${phaseWork && !all ? exActions(item) : ''}
@@ -1235,7 +1239,7 @@ function renderInterval() {
     const step = pr || 1, nR = Math.round(totalIv / step);
     const pre = nR >= 2 && S.iv === totalIv - step ? 'Last round. '
       : nR >= 6 && S.iv === Math.floor(nR / 2) * step ? 'Halfway. ' : '';
-    say(pre + (lad ? `${ladReps}.` : all ? '' : item.name));
+    say(pre + (lad ? (all ? `Round ${S.iv + 1}.` : `${ladReps}.`) : all ? '' : item.name));
   }
   document.getElementById('dbOut')?.addEventListener('click', () => { buzz(60); endDeathBy(S.iv); });
   onStepDone = nextInterval;
@@ -1244,9 +1248,10 @@ function renderInterval() {
 /* Death By is over: `done` intervals finished, the one after it was not */
 function endDeathBy(done) {
   const b = block(); R.clearStep(S); onStepDone = null;
-  const last = done > 0 ? b.ladder.start + (done - 1) * b.ladder.step : 0;
-  (S.captured[b.id] || []).forEach(e => { e.sets = [{ value: done }]; e.rounds = true; e.unit = 'rounds'; e.deathBy = { rounds: done, lastReps: last }; });
-  R.save(S); say(`${done} rounds. Last one was ${last} reps.`, 2500);
+  /* each move's reps in the last round finished */
+  const lastOf = it => done > 0 ? (it.dbStart != null ? +it.dbStart : b.ladder.start) + (done - 1) * (it.dbStep != null ? +it.dbStep : b.ladder.step) : 0;
+  (S.captured[b.id] || []).forEach((e, i) => { e.sets = [{ value: done }]; e.rounds = true; e.unit = 'rounds'; e.deathBy = { rounds: done, lastReps: lastOf(b.items[i] || {}) }; });
+  R.save(S); say(`${done} rounds. Strong work.`, 2500);
   completeBlock();
 }
 function nextInterval() {
@@ -1544,7 +1549,8 @@ function quickResult(session) {
     const word = b.name.startsWith('Stopwatch') ? 'Lap' : b.name.startsWith('Ladder') ? 'Rung' : 'Round';
     const splits = e.laps?.length ? e.laps : e.amrap?.splits?.length ? e.amrap.splits : [];
     const laps = splits.map((t, i) => `<div class="eff-row"><span class="muted">${word} ${i + 1}</span><span style="margin-left:auto;">${fmt(t)}</span></div>`).join('');
-    if (e.deathBy) return `<div class="eff-row"><span>${b.name}</span><span class="pr-flash" style="margin-left:auto;">${qty(e.deathBy.rounds, 'rounds')} · ${qty(e.deathBy.lastReps)}</span></div>`;
+    if (e.deathBy) return `<div class="eff-row"><span>${b.name}</span><span class="pr-flash" style="margin-left:auto;">${qty(e.deathBy.rounds, 'rounds')}</span></div>`
+      + b.entries.map(x => `<div class="eff-row"><span class="muted">${x.name} · last round</span><span style="margin-left:auto;">${qty(x.deathBy?.lastReps ?? 0)}</span></div>`).join('');
     return `<div class="eff-row"><span>${b.name}</span><span class="pr-flash" style="margin-left:auto;">${val}</span></div>${laps}`;
   }).join('');
   return rows ? `<div class="card"><div class="eyebrow">Result</div>${rows}</div>` : '';

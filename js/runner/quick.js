@@ -68,8 +68,6 @@ const FIELDS = {
   sets:     ['Sets',              '',      1,  1,  10],
   setRest:  ['Rest between sets', 'time', 15,  0, 1800],
   pace:     ['Pace',              'a min', 1, 10,  40],
-  dbStart:  ['Start at',          'reps',  1,  1,  50],
-  dbStep:   ['Add each round',    'reps',  1,  1,  20],
   dbEvery:  ['Every',             'time', 15, 15, 300],
   dbMax:    ['Stop after',        'rounds', 1, 1,  60],
   ldRungs:  ['Rungs',             '',      1,  1,  50],
@@ -81,7 +79,7 @@ const isTime = k => FIELDS[k][1] === 'time';
 const MAIN = {
   emom: ['mins'], amrap: ['cap'], fortime: ['ftRounds', 'ftCap'], tabata: ['rounds'],
   timer: ['work', 'rest', 'rounds'], stopwatch: [], pushup: ['pace'],
-  deathby: ['dbStart', 'dbStep'], ladder: ['ldRungs'],
+  deathby: [], ladder: ['ldRungs'],
 };
 const MORE = {
   emom: ['every'], amrap: [], fortime: [], tabata: ['work', 'rest'],
@@ -92,9 +90,9 @@ const DEFAULTS = {
   fmt: 'emom', every: 60, mins: 12, cap: 10, ftCap: 0, ftRounds: 1,
   work: 20, rest: 10, rounds: 8, sets: 1, setRest: 60,
   tWork: 120, tRest: 0, tRounds: 1, pace: 20, paceV: 2, ptCap: 0,
-  dbStart: 1, dbStep: 1, dbEvery: 60, dbMax: 30,
+  dbEvery: 60, dbMax: 30,
   ldRungs: 10, ldShape: 'one', ldCap: 0,
-  emomStyle: 'turns', ready: 10, moves: [{ name: '', reps: '' }],
+  emomStyle: 'turns', ready: 10,
 };
 const TABATA = { work: 20, rest: 10, rounds: 8 };
 const PREF = 'quickTimer';
@@ -132,6 +130,8 @@ export async function renderQuick(el, opts = {}) {
     const p = new URLSearchParams(location.search);
     if (p.get('t')) {
       const got = unpack(p.get('t'));
+      /* a shared timer's moves belong to its type, whatever that type is */
+      if (got && Array.isArray(got.moves)) { got.movesBy = { [got.fmt]: got.moves }; delete got.moves; }
       if (got) { cfg = migrate({ ...DEFAULTS, ...got, paceV: 2 }); favIdx = null; persist(); shared = true; }
       p.delete('t'); history.replaceState(null, '', `${location.pathname}?${p.toString().replace(/=(&|$)/g, '$1')}`);
     }
@@ -147,10 +147,17 @@ function migrate(c) {
   if (c.ldStyle) {
     const lo = Math.min(c.ldFrom || 1, c.ldTo || 10), hi = Math.max(c.ldFrom || 1, c.ldTo || 10), st = c.ldStep || 1;
     c.ldRungs = Math.floor((hi - lo) / st) + 1; c.ldShape = c.ldStyle === 'pyramid' ? 'mirror' : 'one';
-    (c.moves || []).forEach(m => { m.ldStart = c.ldStyle === 'down' ? hi : lo; m.ldStep = c.ldStyle === 'down' ? -st : st; });
+    (c.moves || c.movesBy?.ladder || []).forEach(m => { m.ldStart = c.ldStyle === 'down' ? hi : lo; m.ldStep = c.ldStyle === 'down' ? -st : st; });
     delete c.ldStyle;
   }
-  if (!Array.isArray(c.moves) || !c.moves.length) c.moves = [{ name: '', reps: '' }];
+  /* ONE MOVE LIST PER TYPE. A single shared list carried an EMOM's three
+     moves into a Ladder that should start with one. Older saves (and shared
+     links) bring their `moves` to the type they were saved under. */
+  c.movesBy = { ...(c.movesBy || {}) };
+  /* (a Ladder or Death By starts with one clean row: the old shared list
+     was usually another type's moves) */
+  if (Array.isArray(c.moves) && c.moves.length && !c.movesBy[c.fmt] && !['ladder', 'deathby'].includes(c.fmt)) c.movesBy[c.fmt] = c.moves;
+  delete c.moves;
   return c;
 }
 
@@ -171,7 +178,14 @@ const bump = (k, dir) => { setVal(k, clamp(isTime(k) ? stepTime(val(k), dir) : v
 
 /* the moves, as plan items. A move picked from the library carries its id,
    so the demo video, the cue and the swap all work on it. */
-const namedMoves = () => (FORMATS.find(f => f.id === cfg.fmt)?.moves ? (cfg.moves || []) : [])
+/* this type's move rows; a type starts with one empty row */
+function MV() {
+  const list = cfg.movesBy[cfg.fmt];
+  if (Array.isArray(list) && list.length) return list;
+  return (cfg.movesBy[cfg.fmt] = [newMove()]);
+}
+const newMove = () => cfg.fmt === 'deathby' || cfg.fmt === 'ladder' ? { name: '', reps: '', ldStart: 1, ldStep: 1 } : { name: '', reps: '' };
+const namedMoves = () => (FORMATS.find(f => f.id === cfg.fmt)?.moves ? MV() : [])
   .filter(m => String(m.name || '').trim())
   .map(m => {
     const ex = m.exId && EXERCISES[m.exId];
@@ -205,8 +219,8 @@ const ldStart = m => Number.isFinite(+m.ldStart) && m.ldStart !== '' ? +m.ldStar
 const ldStep = m => Number.isFinite(+m.ldStep) && m.ldStep !== '' ? +m.ldStep : 1;
 /* the ladder's moves: the named ones, or the first row as plain "Reps" */
 function ladderMoves() {
-  const rows = (cfg.moves || []).filter(m => String(m.name || '').trim());
-  return rows.length ? rows : [cfg.moves[0] || { name: '' }];
+  const rows = MV().filter(m => String(m.name || '').trim());
+  return rows.length ? rows : [MV()[0]];
 }
 function rungOrder() {
   const n = Math.max(1, cfg.ldRungs), idx = [...Array(n).keys()];
@@ -223,10 +237,16 @@ function ladderPreview(m) {
   const zero = seq.indexOf(0);
   return `${shown} · ${total} total${zero >= 0 ? ` · hits 0 at rung ${zero + 1}` : ''}`;
 }
+/* Death By: the first rounds, so the climb is obvious */
+function deathPreview(m) {
+  const r = [0, 1, 2, 3, 4].map(i => Math.max(0, ldStart(m) + i * Math.max(0, ldStep(m))));
+  return `round 1: ${r[0]}, round 2: ${r[1]}, round 3: ${r[2]} …`;
+}
 function applyPreset(p) {
   cfg.ldRungs = p.n; cfg.ldShape = p.shape;
-  if (p.m.length > (cfg.moves || []).length) while (cfg.moves.length < p.m.length) cfg.moves.push({ name: '', reps: '' });
-  cfg.moves.forEach((m, i) => { const [a, d] = p.m[Math.min(i, p.m.length - 1)]; m.ldStart = a; m.ldStep = d; });
+  const list = MV();
+  while (list.length < p.m.length) list.push(newMove());
+  list.forEach((m, i) => { const [a, d] = p.m[Math.min(i, p.m.length - 1)]; m.ldStart = a; m.ldStep = d; });
 }
 function emomCount() { return Math.max(1, Math.floor((cfg.mins * 60) / cfg.every)); }
 function intervalSec(work, rest, rounds, sets = 1, setRest = 0) {
@@ -274,7 +294,7 @@ function summary() {
       const core = `${r > 1 ? `${r} rounds of ` : ''}${n > 1 ? `${n} moves, ` : ''}${secs(cfg.tWork)} work${cfg.tRest && (r > 1 || n > 1) ? `, ${secs(cfg.tRest)} rest` : ''}`;
       return cfg.sets > 1 ? `${cfg.sets} sets of ${core}, ${secs(cfg.setRest)} between sets` : core;
     }
-    case 'deathby': return `Round 1: ${cfg.dbStart} rep${cfg.dbStart > 1 ? 's' : ''}, then +${cfg.dbStep} every ${secs(cfg.dbEvery)} until you can't`;
+    case 'deathby': { const ms = ladderMoves(); return `Round 1: ${ms.map(m => `${ldStart(m)}${String(m.name || '').trim() ? ' ' + m.name.trim() : ''}`).join(' + ')}, then more every ${secs(cfg.dbEvery)} until you can't`; }
     case 'ladder': {
       const ms = ladderMoves(), r = rungs();
       const tot = ms.map((m, i) => `${r.reduce((a, x) => a + x[i], 0)} ${String(m.name || '').trim() || 'reps'}`).join(', ');
@@ -293,7 +313,7 @@ function planName() {
   if (f === 'tabata') return `Tabata · ${cfg.rounds} × ${cfg.work}/${cfg.rest}`;
   if (f === 'timer') return `Timer · ${cfg.tRounds > 1 ? `${cfg.tRounds} × ` : ''}${fmt(cfg.tWork)}${cfg.tRest && cfg.tRounds > 1 ? ` / ${fmt(cfg.tRest)}` : ''}${cfg.sets > 1 ? ` · ${cfg.sets} sets` : ''}`;
   if (f === 'pushup') return `Push-up test · ${cfg.pace} a min`;
-  if (f === 'deathby') return `Death By${cfg.dbStart !== 1 || cfg.dbStep !== 1 ? ` · ${cfg.dbStart} +${cfg.dbStep}` : ''}${cfg.dbEvery !== 60 ? ` every ${fmt(cfg.dbEvery)}` : ''}`;
+  if (f === 'deathby') { const ms = ladderMoves().filter(m => String(m.name || '').trim()); return `Death By${ms.length ? ' · ' + ms.map(m => m.name.trim()).join(', ') : ''}${cfg.dbEvery !== 60 ? ` every ${fmt(cfg.dbEvery)}` : ''}`; }
   if (f === 'ladder') { const ms = ladderMoves(); return `Ladder · ${ms.map(m => `${String(m.name || '').trim() || 'reps'} ${ldStart(m)} ${ldStep(m) >= 0 ? '+' : '−'}${Math.abs(ldStep(m))}`).join(', ')}${cfg.ldShape === 'mirror' ? ' and back' : cfg.ldShape === 'wave' ? ' wave' : ''}`; }
   return 'Stopwatch';
 }
@@ -334,8 +354,9 @@ export function buildPlan(c = cfg) {
       }
       case 'deathby':
         blocks = [{ ...base, id: id(1), name, format: 'emom', label: 'Death By', work: cfg.dbEvery, rest: 0, intervals: cfg.dbMax,
-          ladder: { start: cfg.dbStart, step: cfg.dbStep }, allEach: moves.length > 1,
-          items: moves.length ? moves : [{ name: 'Reps', measure: 'reps' }] }];
+          ladder: { start: 1, step: 1 }, allEach: moves.length > 1,
+          /* each move climbs on its own: its start, its jump per round */
+          items: ladderMoves().map((m, i) => ({ ...(moves[i] || { name: 'Reps', measure: 'reps' }), dbStart: ldStart(m), dbStep: Math.max(0, ldStep(m)) })) }];
         break;
       case 'ladder':
         blocks = [{ ...base, id: id(1), name, format: 'fortime', label: 'Ladder', minutes: cfg.ldCap, rungs: rungs(),
@@ -370,7 +391,29 @@ const fmtDef = () => FORMATS.find(f => f.id === cfg.fmt) || FORMATS[0];
 
 /* a big number with − and +: the main settings. A time shows as m:ss and
    opens a minutes / seconds picker when tapped. */
+/* THE LADDER'S TOP (or bottom), not a rung count. "Up to 10" is how a
+   person says it, and with There and back it reads "1 up to 10 and back".
+   It follows the first move; the rest keep their own start and change.
+   + and − always move the shown number up or down. */
+function ladderEndTile() {
+  const m = ladderMoves()[0], st = ldStep(m), n = Math.max(1, cfg.ldRungs);
+  const label = st > 0 ? 'Up to' : st < 0 ? 'Down to' : 'Rungs';
+  const v = st ? repsAt(m, n - 1) : n;
+  const unit = st ? `${n} rung${n === 1 ? '' : 's'}${cfg.ldShape === 'mirror' ? ' · and back' : ''}` : '';
+  return `<div class="qt-tile">
+    <div class="qt-tl">${label}</div>
+    <input class="qt-tv" data-ldend="1" type="number" inputmode="numeric" value="${v}" onfocus="this.select()"/>
+    <div class="qt-tu">${unit || '&nbsp;'}</div>
+    <div class="qt-tb"><button data-ldend-d="-1" aria-label="Lower">−</button><button data-ldend-d="1" aria-label="Higher">+</button></div>
+  </div>`;
+}
+function setLadderEnd(target) {
+  const m = ladderMoves()[0], st = ldStep(m);
+  const n = st ? Math.round((target - ldStart(m)) / st) + 1 : target;
+  cfg.ldRungs = Math.min(50, Math.max(1, n));
+}
 function bigTile(k) {
+  if (k === 'ldRungs') return ladderEndTile();
   const [label, unit] = FIELDS[k];
   const v = val(k);
   const none = (k === 'ftCap' || k === 'ptCap') && !v;
@@ -401,14 +444,15 @@ function smallRow(k) {
    its own start and change per rung, with a live preview of its reps */
 function ladderPanel() {
   const step = (i, f, v) => `<div class="qt-step"><button data-lm="${i}" data-lf="${f}" data-d="-1" aria-label="Less">−</button><b class="qt-lv">${f === 'ldStep' && v > 0 ? '+' : ''}${v}</b><button data-lm="${i}" data-lf="${f}" data-d="1" aria-label="More">+</button></div>`;
-  return `<div class="qt-seg qt-ldstyle">${LD_SHAPES.map(([v, l]) => `<button class="${cfg.ldShape === v ? 'on' : ''}" data-ldshape="${v}">${l}</button>`).join('')}</div>
-    <div class="qt-chips qt-presets2">${LD_PRESETS.map(p => `<button data-ldp="${p.id}">${p.name}</button>`).join('')}</div>
-    <div class="qt-sec">Moves <small>each with its own reps</small></div>
-    <div class="qt-card">${cfg.moves.map((m, i) => `<div class="qt-lmove">
+  const db = cfg.fmt === 'deathby';
+  return `${db ? '' : `<div class="qt-seg qt-ldstyle">${LD_SHAPES.map(([v, l]) => `<button class="${cfg.ldShape === v ? 'on' : ''}" data-ldshape="${v}">${l}</button>`).join('')}</div>
+    <div class="qt-chips qt-presets2">${LD_PRESETS.map(p => `<button data-ldp="${p.id}">${p.name}</button>`).join('')}</div>`}
+    <div class="qt-sec">Moves <small>${db ? 'what each starts at, and how many it adds each round' : 'each with its own reps'}</small></div>
+    <div class="qt-card">${MV().map((m, i) => `<div class="qt-lmove">
       <div class="qt-move"><button class="qt-mpick ${m.name ? '' : 'empty'}" data-pick-move="${i}">${m.name ? esc(m.name) : `Move ${i + 1}`}<span>⌕</span></button>
         <button class="qt-mx" data-mvx="${i}" aria-label="Remove">✕</button></div>
-      <div class="qt-lrow"><span>Start</span>${step(i, 'ldStart', ldStart(m))}<span>Change</span>${step(i, 'ldStep', ldStep(m))}</div>
-      <div class="qt-lprev">${ladderPreview(m)}</div>
+      <div class="qt-lrow"><span>Start</span>${step(i, 'ldStart', ldStart(m))}<span>${db ? 'Add' : 'Change'}</span>${step(i, 'ldStep', ldStep(m))}</div>
+      <div class="qt-lprev">${db ? deathPreview(m) : ladderPreview(m)}</div>
     </div>`).join('')}
     <button class="qt-link" id="qtAdd">+ Add a move</button></div>`;
 }
@@ -442,14 +486,14 @@ function draw() {
       <span class="qt-chev">▾</span>
     </button>
 
-    ${main.length ? `<div class="qt-tiles n${main.length}">${main.map(bigTile).join('')}</div>${cfg.fmt === 'ladder' ? ladderPanel() : ''}`
+    ${cfg.fmt === 'deathby' ? ladderPanel() : main.length ? `<div class="qt-tiles n${main.length}">${main.map(bigTile).join('')}</div>${cfg.fmt === 'ladder' ? ladderPanel() : ''}`
       : `<div class="qt-empty">Nothing to set. Hit start.</div>`}
 
     <button class="qt-more" id="qtMore">${moreOpen ? 'Close ▴' : 'Customize ▾'}${!moreOpen && named ? ` <span>${named} move${named > 1 ? 's' : ''}</span>` : ''}</button>
     ${moreOpen ? `<div class="qt-details">
       ${more.length ? `<div class="qt-card">${more.map(smallRow).join('')}</div>` : ''}
       ${def.moves && cfg.fmt !== 'ladder' ? `<div class="qt-sec">Moves <small>optional · search the library or type your own</small></div><div class="qt-card">
-        ${cfg.moves.map(moveRow).join('')}
+        ${MV().map(moveRow).join('')}
         <button class="qt-link" id="qtAdd">+ Add a move</button>
       </div>` : ''}
       ${cfg.fmt === 'emom' && named > 1 ? `<div class="qt-sec">How the moves run</div>
@@ -492,7 +536,7 @@ function pack() {
   if (cfg.fmt === 'ladder') keep.push('ldShape');
   if (cfg.fmt === 'timer') keep.push('sets', 'setRest');
   const o = {}; keep.forEach(k => { if (cfg[k] != null) o[k] = cfg[k]; });
-  const mv = (cfg.moves || []).filter(m => String(m.name || '').trim()).map(m => ({ name: m.name, reps: m.reps || '', ...(m.exId ? { exId: m.exId } : {}), ...(cfg.fmt === 'ladder' ? { ldStart: ldStart(m), ldStep: ldStep(m) } : {}) }));
+  const mv = MV().filter(m => String(m.name || '').trim()).map(m => ({ name: m.name, reps: m.reps || '', ...(m.exId ? { exId: m.exId } : {}), ...(cfg.fmt === 'ladder' || cfg.fmt === 'deathby' ? { ldStart: ldStart(m), ldStep: ldStep(m) } : {}) }));
   if (mv.length && fmtDef().moves) o.moves = mv;
   return b64u(JSON.stringify(o));
 }
@@ -689,11 +733,11 @@ function search(q) {
 }
 async function openMovePicker(i) {
   const { ov, close } = sheet(`<div class="qt-sheet-h">Pick a move</div>
-    <input class="qt-search" id="mvQ" placeholder="Name, muscle, body part, equipment…" autocomplete="off" value="${esc(cfg.moves[i]?.name || '')}"/>
+    <input class="qt-search" id="mvQ" placeholder="Name, muscle, body part, equipment…" autocomplete="off" value="${esc(MV()[i]?.name || '')}"/>
     <div class="qt-chips">${CHIPS.map(c => `<button data-chip="${c}">${c}</button>`).join('')}</div>
     <div class="qt-results" id="mvR"></div>`, 'tall');
   const q = ov.querySelector('#mvQ'), out = ov.querySelector('#mvR');
-  const pick = m => { cfg.moves[i] = { ...cfg.moves[i], ...m }; persist(); close(); draw(); };
+  const pick = m => { MV()[i] = { ...MV()[i], ...m }; persist(); close(); draw(); };
   const list = () => {
     const t = norm(q.value);
     const all = search(t);
@@ -728,12 +772,18 @@ function wire() {
     inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
   });
   host.querySelectorAll('[data-pace]').forEach(b => b.addEventListener('click', () => { cfg.pace = +b.dataset.pace; persist(); draw(); }));
+  host.querySelectorAll('[data-ldend-d]').forEach(b => b.addEventListener('click', () => {
+    const st = ldStep(ladderMoves()[0]), d = +b.dataset.ldendD;
+    cfg.ldRungs = Math.min(50, Math.max(1, cfg.ldRungs + (st < 0 ? -d : d)));   // the shown number moves the way the button says
+    persist(); draw();
+  }));
+  host.querySelector('[data-ldend]')?.addEventListener('change', e => { setLadderEnd(+e.target.value || 0); persist(); draw(); });
   host.querySelectorAll('[data-ldshape]').forEach(b => b.addEventListener('click', () => { cfg.ldShape = b.dataset.ldshape; persist(); draw(); }));
   host.querySelectorAll('[data-ldp]').forEach(b => b.addEventListener('click', () => { applyPreset(LD_PRESETS.find(p => p.id === b.dataset.ldp)); persist(); draw(); }));
   host.querySelectorAll('[data-lm]').forEach(b => b.addEventListener('click', () => {
-    const m = cfg.moves[+b.dataset.lm], f = b.dataset.lf, d = +b.dataset.d;
+    const m = MV()[+b.dataset.lm], f = b.dataset.lf, d = +b.dataset.d;
     if (f === 'ldStart') m.ldStart = Math.min(500, Math.max(0, ldStart(m) + d));
-    else m.ldStep = Math.min(50, Math.max(-50, ldStep(m) + d));
+    else m.ldStep = Math.min(50, Math.max(cfg.fmt === 'deathby' ? 0 : -50, ldStep(m) + d));
     persist(); draw();
   }));
   host.querySelectorAll('[data-style]').forEach(b => b.addEventListener('click', () => { cfg.emomStyle = b.dataset.style; persist(); draw(); }));
@@ -741,17 +791,17 @@ function wire() {
   /* typing reps must not redraw (the keyboard would drop); the total line
      does not depend on reps, so nothing on screen goes stale */
   host.querySelectorAll('[data-mv]').forEach(inp => {
-    inp.addEventListener('input', () => { cfg.moves[+inp.dataset.mv][inp.dataset.k] = inp.value; persist(); });
+    inp.addEventListener('input', () => { MV()[+inp.dataset.mv][inp.dataset.k] = inp.value; persist(); });
     inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
   });
   host.querySelectorAll('[data-mvx]').forEach(b => b.addEventListener('click', () => {
-    cfg.moves.splice(+b.dataset.mvx, 1);
-    if (!cfg.moves.length) cfg.moves.push({ name: '', reps: '' });
+    MV().splice(+b.dataset.mvx, 1);
+    if (!MV().length) MV().push(newMove());
     persist(); draw();
   }));
   $('#qtAdd')?.addEventListener('click', () => {
-    cfg.moves.push(cfg.fmt === 'ladder' ? { name: '', reps: '', ldStart: 1, ldStep: 1 } : { name: '', reps: '' }); persist(); draw();
-    openMovePicker(cfg.moves.length - 1);
+    MV().push(newMove()); persist(); draw();
+    openMovePicker(MV().length - 1);
   });
   $('#qtClassic')?.addEventListener('click', () => { Object.assign(cfg, TABATA); persist(); draw(); });
   host.querySelectorAll('[data-ready]').forEach(b => b.addEventListener('click', () => { cfg.ready = +b.dataset.ready; persist(); draw(); }));
