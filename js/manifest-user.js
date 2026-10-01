@@ -37,21 +37,29 @@ export async function applyUserManifest() {
        it sits beside the main app instead of replacing it, and it opens
        straight onto the timer. */
     const quick = new URLSearchParams(location.search).has('quick');
-    const m = quick ? {
-      ...base,
-      id: `fitness-journey-timer${uid ? '-' + uid : ''}`,
-      start_url: `./index.html?quick${qs ? '&' + qs : ''}`,
-      name: 'Fitness Journey Timer',
-      short_name: 'FJ Timer',
-    } : {
+    /* THE TIMER'S MANIFEST IS A REAL FILE. A manifest built as a blob
+       resolves "./index.html?quick" against blob:…, which is no address at
+       all; phones fell back to the main app's start page, and a home-screen
+       timer opened on "Let us find you". manifest-timer.webmanifest starts
+       on the timer, on every phone. */
+    if (quick) {
+      link.setAttribute('href', 'manifest-timer.webmanifest');
+      document.querySelector('meta[name="apple-mobile-web-app-title"]')?.setAttribute('content', 'FJ Timer');
+      return;
+    }
+    const m = {
       ...base,
       id: `fitness-journey-${uid}`,
       start_url: `./index.html?${qs}`,
       name: who ? `Fitness Journey — ${who}` : base.name,
       short_name: who || base.short_name,
     };
-    /* iOS names the icon from this tag, not the manifest */
-    if (quick) document.querySelector('meta[name="apple-mobile-web-app-title"]')?.setAttribute('content', 'FJ Timer');
+    /* ABSOLUTE ADDRESSES. Inside a blob manifest a relative URL resolves
+       against blob:…, which is no address; Android's install would point
+       nowhere. Every URL in it is spelled out in full. */
+    const abs = u => new URL(u, location.href).href;
+    m.start_url = abs(m.start_url); m.scope = abs(m.scope || './');
+    m.icons = (m.icons || []).map(i => ({ ...i, src: abs(i.src) }));
 
     if (blobUrl) URL.revokeObjectURL(blobUrl);
     blobUrl = URL.createObjectURL(new Blob([JSON.stringify(m)], { type: 'application/manifest+json' }));

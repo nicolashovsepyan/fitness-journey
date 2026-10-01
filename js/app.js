@@ -261,6 +261,12 @@ async function boot() {
      who installed it, so it was stopping on "Let us find you" before a
      single second was timed. With no one claimed it runs as a device-local
      guest; nothing is guessed, and nobody's program or log is touched. */
+  /* …and a home-screen app that was told "just the timer" once keeps
+     opening on it (claim screen button, js/screens/claim.js) */
+  if (!uid && !new URLSearchParams(location.search).has('quick')) {
+    let timerApp = false; try { timerApp = localStorage.getItem('fj.launchTimer') === '1'; } catch (e) {}
+    if (timerApp) history.replaceState(null, '', `${location.pathname}?quick`);
+  }
   if (!uid && new URLSearchParams(location.search).has('quick')) uid = QUICK_GUEST;
   if (!uid) {                             // never guess whose phone this is
     return renderClaim(app, { onDone: async () => { await boot(); } });

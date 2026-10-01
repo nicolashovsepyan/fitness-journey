@@ -51,7 +51,7 @@ const FORMATS = [
   { id: 'stopwatch', name: 'Stopwatch', sub: 'Counts up, tap to pause', moves: false,
     how: ['Counts up from 0.', 'Tap the ring to pause. Tap Done to stop.'] },
   { id: 'pushup', name: 'Push-up test', sub: '1 push-up every 3 seconds, as long as you can', moves: false,
-    how: ['The push-up beep test.', '1 push-up every 3 seconds: a low beep, 1.5 seconds down. A high beep, 1.5 seconds up. That is 20 a minute.',
+    how: ['The push-up beep test.', '1 beep every 3 seconds. On each beep, go down and come back up before the next one. That is 20 a minute. The coach counts every rep out loud.',
       'Keep the beat as long as you can. The test is over when you can no longer stay in rhythm or your form breaks: tap Stop. Your score is the reps you did on the beat.',
       'Want it harder? 25 a minute is the NHL version.'] },
 ];
@@ -468,6 +468,7 @@ function draw() {
     <p class="qt-hint">How a program day runs, 1 format at a time. Short numbers, nothing saved.</p>
     <div class="qt-demos">${DEMOS.map(d => `<button class="qt-demo" data-demo="${d.id}"><b>${d.name}</b><small>${d.sub}</small><span>▸</span></button>`).join('')}</div>` : ''}
 
+    ${guest ? '<button class="qt-link center qt-signin" id="qtSignIn">Have a program from Nico? Sign in</button>' : ''}
     <div style="height:200px"></div>
     <div class="actionbar qt-bar">
       <div class="qt-sum">${summary()}</div>
@@ -716,6 +717,7 @@ async function openMovePicker(i) {
 function wire() {
   const $ = s => host.querySelector(s);
   $('#qtBack')?.addEventListener('click', () => { location.href = 'dashboard.html'; });
+  $('#qtSignIn')?.addEventListener('click', () => { try { localStorage.removeItem('fj.launchTimer'); } catch (e) {} location.href = 'index.html'; });
   $('#qtType').addEventListener('click', openTypes);
   $('#qtPrefs').addEventListener('click', () => openPrefs(host));
   $('#qtMore').addEventListener('click', () => { moreOpen = !moreOpen; draw(); });
@@ -895,6 +897,7 @@ function injectStyle() {
   .qt-star svg { display:block; }
   .qt-fav.on { border-color: var(--wm-neon); } .qt-fav.on button:first-child { color: var(--wm-neon); }
   .qt-ldstyle { margin-top: 10px; }
+  .qt-signin { display:block; margin: 26px auto 0; color: var(--muted); font-weight: 500; }
   .qt-presets2 { padding-top: 10px; }
   .qt-lmove { padding: 4px 0 10px; border-bottom: 1px solid var(--line); }
   .qt-lmove:last-of-type { border-bottom: none; }

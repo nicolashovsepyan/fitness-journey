@@ -250,7 +250,7 @@ const block = () => S.plan.blocks[S.bi];
 const isLastBlock = () => S.bi >= S.plan.blocks.length - 1;
 
 /* ---------------- ticker (drives clocks + step completion) ---------------- */
-function startTicker() { stopTicker(); ticker = setInterval(tick, 250); }
+function startTicker() { stopTicker(); ticker = setInterval(tick, 100); }
 function stopTicker() { if (ticker) clearInterval(ticker); ticker = null; }
 function paintPhase() {
   const el = document.documentElement;
@@ -272,6 +272,10 @@ function tick() {
   if (countUpStart != null) { const el = document.getElementById('countUp'); if (el) el.textContent = fmt(Math.floor((Date.now() - countUpStart) / 1000)); }
   const rem = R.stepRemaining(S);
   if (rem == null) { lastSec = null; return; }
+  if (curPhase === 'ready' && !cadStartBooked && block()?.format === 'cadence' && !R.isStepPaused(S)) {
+    const ms = R.stepEndsAt(S) - Date.now();
+    if (ms > 0 && ms < 700) { beep('rep', ms / 1000); cadStartBooked = true; }
+  }
   if (rem <= 0 && onStepDone) return runOut();
   updateTimer(rem, S.stepDur);
   /* a step seen for the first time; if it is already past halfway (a reopen),
@@ -291,7 +295,10 @@ function tick() {
       if (!saidLastMin && S.stepDur >= 180 && rem <= 60) { saidLastMin = true; say('1 minute left.'); }
       if (!said10 && S.stepDur >= 30 && rem <= 10 && rem > 3) { said10 = true; beep('warn'); buzz(30); flash(false); }
     }
-    if (rem <= 3 && rem > 0) { beep('count'); buzz(20); }   // 3 · 2 · 1 audible countdown
+    if (rem <= 3 && rem > 0) {                  // 3 · 2 · 1 audible countdown
+      beep('count'); buzz(20);
+      if (curPhase === 'ready' && block()?.format === 'cadence') say(String(rem));
+    }
   }
 }
 /* THE ACTIVE STEP RAN OUT. Usually a moment ago, and it gets its end beep.
@@ -302,7 +309,10 @@ function tick() {
    that is running right now. One beep then says "you are here". */
 function runOut() {
   const late = Date.now() - (R.stepEndsAt(S) ?? Date.now()) > 2000;
-  if (late) setMuted(true); else { beep('end'); buzz(60); flash(); }
+  /* the push-up test's first rep beep IS the start; an end chime on top of
+     it would blur the one sound that has to be clean */
+  const intoCadence = curPhase === 'ready' && block()?.format === 'cadence';
+  if (late) setMuted(true); else if (!intoCadence) { beep('end'); buzz(60); flash(); }
   let guard = 0;
   try {
     do {
@@ -350,7 +360,10 @@ function resumeScreen() {
 }
 /* "get set up" countdown before each block (skippable). 10 seconds unless
    the plan says otherwise; 0 skips it. */
-const readySec = () => (S.plan.getReady != null ? Number(S.plan.getReady) : 10);
+const readySec = () => {
+  const n = S.plan.getReady != null ? Number(S.plan.getReady) : 10;
+  return block()?.format === 'cadence' ? Math.max(10, n) : n;    // the push-up test always gets its 10s briefing
+};
 function renderGetReady() {
   const b = block();
   if (readySec() <= 0) { beep('go'); return renderActive(); }
@@ -360,7 +373,13 @@ function renderGetReady() {
     <div class="timer-wrap">${timerSvg('ready')}</div>
     <div class="actionbar"><button class="btn lg" id="go">I'm ready ▸</button></div>`);
   const begin = () => { R.clearStep(S); onStepDone = null; renderActive(); };
-  if (beginStep(readySec(), 'rest', 'ready')) { beep('go'); say(`Get ready. ${b.name}.`); }
+  if (beginStep(readySec(), 'rest', 'ready')) {
+    beep('go');
+    if (b.format === 'cadence') {
+      /* short enough to finish before the spoken 3-2-1 */
+      say(`Push-up test. On every beep, one push-up, down and up. I'll count. Keep the pace.`, 5500);
+    } else say(`Get ready. ${b.name}.`);
+  }
   onStepDone = begin;
   document.getElementById('go').addEventListener('click', () => {
     /* THE FIRST TAP IS THE ONLY MOMENT AUDIO CAN BE UNLOCKED.
@@ -1247,51 +1266,65 @@ function nextInterval() {
    clock a little ahead, so the pace is exact even if the page stutters.
    `minutes` is an optional cap. */
 let cadLoop = null;
+/* the push-up test's first beep, booked on the audio clock for the exact
+   instant the get-ready countdown ends (the ticker would land it late) */
+let cadStartBooked = false;
 function stopCadence() { if (cadLoop) clearInterval(cadLoop); cadLoop = null; }
 function renderCadence() {
   const b = block(); const it = b.items[0] || { name: 'Push-ups' };
-  const rpm = Number(b.rpm) || 25;
-  const beat = 60 / rpm / 2;                       // seconds per beep: down, up, down, up
+  const rpm = Number(b.rpm) || 20;
+  const period = 60 / rpm;                          // seconds per rep: 3 at 20 a minute
   const cap = (Number(b.minutes) || 0) * 60;
   shell(`<div class="now-ex"><div class="label">Push-up test · ${rpm} a minute</div><div class="name">${it.name}</div></div>
     <div class="cad">
       <div class="cad-cue" id="cadCue">Down</div>
       <div class="cad-reps"><b id="cadReps">0</b><small>reps on the beat</small></div>
       <div class="cad-time" id="cadTime">0:00${cap ? ` / ${fmt(cap)}` : ''}</div>
-      <p class="muted cad-how">Low beep: ${+beat.toFixed(2)}s down. High beep: ${+beat.toFixed(2)}s up. Tap Stop when you can't keep the rhythm.</p>
+      <p class="muted cad-how">1 beep every ${+period.toFixed(2)} seconds: down, then up before the next one. Tap Stop when you can't keep the rhythm.</p>
     </div>
     <div class="actionbar"><button class="btn lg" id="cadStop">Stop</button></div>`);
-  if (beginStep(cap || NO_CAP, 'rest', 'cadence')) say('Down on the low beep. Up on the high one.', 2500);
+  /* ONE BEEP PER REP, AND THE COACH COUNTS. The first beep is the start
+     (it lands the instant the get-ready countdown hits 0, chained to it);
+     every beep after it says the reps finished so far, so the last number
+     you hear is your score. */
+  beginStep(cap || NO_CAP, 'rest', 'cadence');
   const t0 = () => S.stepStartedAt;
-  const repsAt = ms => Math.max(0, Math.floor((ms - t0()) / 1000 / (beat * 2)));
+  const doneAt = ms => Math.max(0, Math.floor((ms - t0()) / 1000 / period));
   const finish = reps => {
     stopCadence(); R.clearStep(S); onStepDone = null;
     (S.captured[b.id] || []).forEach(e => { e.sets = [{ value: reps }]; e.unit = 'reps'; e.cadence = rpm; });
-    R.save(S); say(`${reps} reps.`);
+    R.save(S); say(`${reps} push-ups. Well done.`, 2500);
     completeBlock();
   };
-  /* the first beep lands 2 seconds in, after the voice line */
-  const LEAD = 2;
-  const beatAt = k => t0() + (LEAD + k * beat) * 1000;
-  let next = Math.max(0, Math.ceil(((Date.now() - t0()) / 1000 - LEAD) / beat));
+  const beatAt = k => t0() + k * period * 1000;
+  /* the first beat still due: anything under a second old still plays */
+  let next = Math.max(0, Math.ceil(((Date.now() - t0()) / 1000 - 0.9) / period));
+  if (cadStartBooked) { next = Math.max(next, 1); cadStartBooked = false; }   // beat 0 already played, on time
+  let spoken = doneAt(Date.now());                  // a reopen must not read out every missed number
   stopCadence();
-  cadLoop = setInterval(() => {
+  const loop = () => {
     if (R.isStepPaused(S)) return;               // paused: no beeps, the beat resumes where it stopped
     const now = Date.now();
-    while (beatAt(next) < now + 600) {             // schedule anything due in the next 0.6s
+    while (beatAt(next) < now + 600) {             // schedule anything due in the next 0.6s, on the audio clock
       const at = (beatAt(next) - now) / 1000;
-      if (at > -0.05) beep(next % 2 ? 'up' : 'down', at);
+      /* a beat a moment late still plays (the very first one always is, by
+         the time this runs); only a long-gone one, after a reopen, is skipped */
+      if (at > -1) beep('rep', Math.max(0, at));
       next++;
     }
-    const since = (now - t0()) / 1000 - LEAD;
-    const k = Math.floor(since / beat);
+    const done = doneAt(now);
+    if (done > spoken) { spoken = done; say(String(done)); buzz(25); }
+    const since = Math.max(0, (now - t0()) / 1000);
+    const down = (since % period) < period / 2;
     const cue = document.getElementById('cadCue');
-    if (cue) { const down = since < 0 || k % 2 === 0; cue.textContent = since < 0 ? 'Ready' : down ? 'Down' : 'Up'; cue.className = 'cad-cue ' + (since < 0 ? '' : down ? 'down' : 'up'); }
-    const r = document.getElementById('cadReps'); if (r) r.textContent = String(since < 0 ? 0 : Math.floor(since / (beat * 2)));
-    const tm = document.getElementById('cadTime'); if (tm) tm.textContent = fmt(Math.max(0, since)) + (cap ? ` / ${fmt(cap)}` : '');
-  }, 80);
-  onStepDone = () => finish(Math.max(0, Math.floor((cap - LEAD) / (beat * 2))));
-  document.getElementById('cadStop').addEventListener('click', () => { buzz(60); finish(Math.max(0, Math.floor(((Date.now() - t0()) / 1000 - LEAD) / (beat * 2)))); });
+    if (cue) { cue.textContent = down ? 'Down' : 'Up'; cue.className = 'cad-cue ' + (down ? 'down' : 'up'); }
+    const r = document.getElementById('cadReps'); if (r) r.textContent = String(done);
+    const tm = document.getElementById('cadTime'); if (tm) tm.textContent = fmt(since) + (cap ? ` / ${fmt(cap)}` : '');
+  };
+  loop();                                          // the start beep, now, not 60ms from now
+  cadLoop = setInterval(loop, 60);
+  onStepDone = () => finish(Math.floor(cap / period));
+  document.getElementById('cadStop').addEventListener('click', () => { buzz(60); finish(doneAt(Date.now())); });
 }
 
 /* ---------------- FOR TIME / STOPWATCH (count up, tap when done) ----------------

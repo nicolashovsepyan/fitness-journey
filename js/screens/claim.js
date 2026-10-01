@@ -53,8 +53,18 @@ export function renderClaim(host, { onDone }) {
         </div>
         ${box}
         <p class="claim-foot">You can change this later in Settings.</p>
+        <button class="claim-timer" id="claimTimer">⏱ Just need the timer? Open it</button>
       </div>
     </div>`;
+
+  /* THE TIMER NEEDS NOBODY. A home-screen app can land here with no way to
+     know who installed it; the timer works without that. Remembered on the
+     device, so this app opens straight onto the timer from now on (the
+     timer has a "Sign in to your program" link to undo it). */
+  host.querySelector('#claimTimer')?.addEventListener('click', () => {
+    try { localStorage.setItem('fj.launchTimer', '1'); } catch (e) {}
+    location.href = 'index.html?quick';
+  });
 
   const go = host.querySelector('#claimGo');
   if (go) go.addEventListener('click', async () => {
