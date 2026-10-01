@@ -45,6 +45,10 @@ export async function applyUserManifest() {
     if (quick) {
       link.setAttribute('href', 'manifest-timer.webmanifest');
       document.querySelector('meta[name="apple-mobile-web-app-title"]')?.setAttribute('content', 'FJ Timer');
+      /* the timer's own face (J5 Sunray). iOS takes the icon from this tag
+         at the moment of "Add to Home Screen", not from the manifest */
+      document.querySelector('link[rel="apple-touch-icon"]')?.setAttribute('href', 'images/timer-icon/timer-180.png');
+      document.querySelector('link[rel="icon"][type="image/png"]')?.setAttribute('href', 'images/timer-icon/timer-192.png');
       return;
     }
     const m = {

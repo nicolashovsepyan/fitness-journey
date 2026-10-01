@@ -39,6 +39,11 @@ export function renderClaim(host, { onDone }) {
     <div class="screen fade-in claim">
       <img class="logo-img" src="images/logo-mark.svg" alt="Fitness Journey" />
       <div class="claim-inner">
+        <button class="claim-timer" id="claimTimer">
+          <img src="images/timer-icon/timer-180.png" alt="" />
+          <span><b>Just need the timer?</b><small>Open it. No sign-in needed.</small></span>
+          <i>›</i>
+        </button>
         <h1>${people.length ? 'Whose phone is this?' : 'Let us find you'}</h1>
         <p class="muted">${people.length
           ? 'Pick once and this phone remembers. Your training is kept separate from anyone else\'s.'
@@ -53,7 +58,6 @@ export function renderClaim(host, { onDone }) {
         </div>
         ${box}
         <p class="claim-foot">You can change this later in Settings.</p>
-        <button class="claim-timer" id="claimTimer">⏱ Just need the timer? Open it</button>
       </div>
     </div>`;
 
@@ -61,6 +65,19 @@ export function renderClaim(host, { onDone }) {
      know who installed it; the timer works without that. Remembered on the
      device, so this app opens straight onto the timer from now on (the
      timer has a "Sign in to your program" link to undo it). */
+  if (!document.getElementById('claim-timer-style')) {
+    const st = document.createElement('style'); st.id = 'claim-timer-style';
+    st.textContent = `.claim-timer { width: 100%; display: flex; align-items: center; gap: 14px; text-align: left; cursor: pointer;
+        margin: 4px 0 26px; padding: 14px 16px; border-radius: 20px; color: #ECEFF3;
+        background: linear-gradient(135deg, rgba(255,95,162,.16), rgba(62,203,168,.12)); border: 1.5px solid rgba(255,95,162,.55);
+        box-shadow: 0 0 24px rgba(255,95,162,.22); }
+      .claim-timer img { width: 58px; height: 58px; border-radius: 14px; flex: none; }
+      .claim-timer span { flex: 1; display: flex; flex-direction: column; }
+      .claim-timer b { font-size: 20px; letter-spacing: -0.01em; }
+      .claim-timer small { color: #A9B2BC; font-size: 14px; margin-top: 3px; }
+      .claim-timer i { font-style: normal; font-size: 30px; color: #FF5FA2; }`;
+    document.head.appendChild(st);
+  }
   host.querySelector('#claimTimer')?.addEventListener('click', () => {
     try { localStorage.setItem('fj.launchTimer', '1'); } catch (e) {}
     location.href = 'index.html?quick';
