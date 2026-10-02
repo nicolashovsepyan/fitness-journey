@@ -34,12 +34,40 @@ function weeklyPick(palettes) {
   return { accent: out[0], neon: out[1], coach: out[2] };
 }
 
+/* THE VIBE: { slots, glow, themeRandom }. ONE choice for the whole app: a
+   signed-in person's lives in the dashboard's own record (its "Customize your
+   vibe"), so picking a colour in the timer changes the dashboard too and the
+   other way round. A guest timer keeps its own on the device. */
+const vibeKey = () => activeUserId() ? `fj.v1.${activeUserId()}.dash` : 'fj.timerVibe';
+export function getVibe() {
+  try { return JSON.parse(localStorage.getItem(vibeKey()) || '{}') || {}; } catch (e) { return {}; }
+}
+export function setVibe(patch) {
+  try {
+    const rec = getVibe();                         // the whole dashboard record: change only these fields
+    if (patch.slots) rec.slots = { ...(rec.slots || {}), ...patch.slots };
+    if ('glow' in patch) rec.glow = patch.glow;
+    if ('themeRandom' in patch) rec.themeRandom = patch.themeRandom;
+    localStorage.setItem(vibeKey(), JSON.stringify(rec));
+  } catch (e) {}
+  paint();
+}
+/* what the settings sheet shows: the palettes, the two slots the timer uses,
+   and what is picked right now */
+export function vibeOptions() {
+  const t = theme || { palettes: [], slots: [] };
+  return { palettes: t.palettes, slots: t.slots.filter(sl => sl.id !== 'coach'), pick: currentPick(), vibe: getVibe() };
+}
+function currentPick() {
+  if (!theme) return {};
+  const dash = getVibe();
+  return dash.themeRandom ? weeklyPick(theme.palettes)
+    : Object.assign(Object.fromEntries(theme.slots.map(s => [s.id, s.default])), dash.slots || {});
+}
 function colours() {
   if (!theme) return DEFAULT;
-  let dash = {};
-  try { dash = JSON.parse(localStorage.getItem(`fj.v1.${activeUserId()}.dash`) || '{}') || {}; } catch (e) {}
-  const pick = dash.themeRandom ? weeklyPick(theme.palettes)
-    : Object.assign(Object.fromEntries(theme.slots.map(s => [s.id, s.default])), dash.slots || {});
+  const dash = getVibe();
+  const pick = currentPick();
   const hex = id => (theme.palettes.find(p => p.id === id) || theme.palettes[0]).hex;
   return { accent: hex(pick.accent), neon: hex(pick.neon), glow: dash.glow };
 }
@@ -140,6 +168,18 @@ function injectStyle() {
   html.wm .wm-sw.on { background: var(--wm-accent-soft); border-color: var(--wm-accent); }
   html.wm .wm-sw.on:after { transform: translateX(20px); background: var(--wm-accent); }
   html.wm .wm-sheet-card .btn { margin-top: 10px; }
+  html.wm .wm-sheet-card { max-height: 88vh; overflow-y: auto; }
+  html.wm .wm-sheet-sub { color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; margin: 18px 2px 4px; }
+  html.wm .wm-vrow { padding: 12px 2px; border-top: 1px solid var(--line); }
+  html.wm .wm-vl { display:flex; flex-direction:column; margin-bottom: 10px; }
+  html.wm .wm-vl b { font-size: 16px; } html.wm .wm-vl small { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  html.wm .wm-sw6 { display:flex; gap: 10px; flex-wrap: wrap; }
+  html.wm .wm-dot { width: 38px; height: 38px; border-radius: 50%; border: 2px solid transparent; background: var(--c); cursor:pointer;
+    box-shadow: 0 0 12px color-mix(in srgb, var(--c) 45%, transparent); }
+  html.wm .wm-dot.on { border-color: var(--text); outline: 2px solid var(--c); outline-offset: 2px; }
+  html.wm .wm-seg3 { display:flex; gap: 6px; }
+  html.wm .wm-seg3 button { flex:1; background: var(--box); border: 1px solid var(--line); border-radius: 10px; color: var(--text); padding: 10px 0; font-weight: 600; cursor:pointer; }
+  html.wm .wm-seg3 button.on { border-color: var(--wm-accent); color: var(--wm-accent); background: var(--wm-accent-soft); }
 
   /* stopwatch laps / for-time round splits */
   html.wm .ft-total { text-align:center; color: var(--muted); font-family: var(--tnum); font-size: 18px; margin: -4px 0 8px; }
@@ -149,10 +189,28 @@ function injectStyle() {
   html.wm .lap b { font-family: var(--tnum); font-size: 18px; color: var(--text); }
   html.wm .lap small { font-family: var(--tnum); color: var(--faint); font-size: 13px; text-align: right; }
   html.wm .lap:first-child b { color: var(--wm-accent); }
+  /* THE DIAL (workmode.js timerSvg): the svg is not rotated as a whole any
+     more, the arc carries its own rotate(-90) so the crown sits at 12 */
+  html.wm .timer.dial svg { transform: none; overflow: visible; }
+  html.wm .timer.dial .rays { stroke: #fff; stroke-opacity: .035; stroke-width: 1; }
+  html.wm .timer.dial .ticks { stroke: var(--muted); stroke-opacity: .45; stroke-width: 1.6; stroke-linecap: round; }
+  html.wm .timer.dial .quarters { stroke: var(--text); stroke-opacity: .8; stroke-width: 3; stroke-linecap: round; }
+  html.wm .timer.dial .crown { fill: var(--wm-accent); filter: drop-shadow(0 0 6px var(--wm-accent-soft)); }
+  html.wm .timer.dial .track { stroke: #fff; stroke-opacity: .06; stroke-width: 6; }
+  html.wm .timer.dial .fill { stroke-width: 7; }
+  html.wm .timer.dial .read .t { color: var(--wm-accent); text-shadow: 0 0 18px var(--wm-accent-soft); font-weight: 700; }
+  html.wm .timer.dial.rest .read .t, html.wm[data-phase="rest"] .timer.dial .read .t { color: var(--wm-neon); text-shadow: 0 0 18px var(--wm-neon-soft); }
+  html.wm .timer.dial.ready .read .t { color: #D9A94C; text-shadow: 0 0 18px rgba(217,169,76,.25); }
+  html.wm .timer.dial.ready .crown { fill: #D9A94C; }
+  html.wm[data-phase="rest"] .timer.dial .crown { fill: var(--wm-neon); }
+  html.wm .timer.dial .read .cap { letter-spacing: .14em; font-size: 11px; opacity: .8; }
   /* push-up test: the cue flips pink (down) / accent (up) on each beep */
   html.wm .cad { text-align:center; margin-top: 14px; }
   html.wm .cad-cue { font-size: 68px; font-weight: 800; letter-spacing: -0.03em; text-transform: uppercase; color: var(--muted); }
   html.wm .cad-cue.down { color: var(--wm-neon); text-shadow: var(--wm-glow-neon); }
+  html.wm .cad-cue.go { color: #D9A94C; text-shadow: 0 0 22px rgba(217,169,76,.4); }
+  html.wm .cad-start { margin-top: 8px; font-size: 18px; color: var(--muted); }
+  html.wm .cad-start b { color: #D9A94C; }
   html.wm .cad-cue.up { color: var(--wm-accent); text-shadow: var(--wm-glow-accent); }
   html.wm .cad-reps { margin-top: 10px; }
   html.wm .cad-reps b { display:block; font-family: var(--tnum); font-size: 104px; line-height: 1; letter-spacing: -0.05em; }

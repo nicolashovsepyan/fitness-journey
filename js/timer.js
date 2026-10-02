@@ -235,6 +235,9 @@ export function beep(kind = 'tick', at = 0) {
   } else if (kind === 'warn') {              // 10 seconds left — a quick double, not a countdown
     tone(1175, 70, w,        VOL, 'square');
     tone(1175, 70, w + 0.12, VOL, 'square');
+  } else if (kind === 'start') {             // push-up test, first rep: a double beep = "go now"
+    tone(1568, 110, w,        VOL, 'square');
+    tone(1568, 160, w + 0.16, VOL, 'square');
   } else if (kind === 'rep') {               // push-up test: one clear beep per rep
     tone(1318, 150, w, VOL, 'square');
   } else if (kind === 'down') {              // push-up test: go down — low

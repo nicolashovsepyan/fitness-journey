@@ -51,7 +51,7 @@ const FORMATS = [
   { id: 'stopwatch', name: 'Stopwatch', sub: 'Count up, with laps', moves: false,
     how: ['Counts up from 0.', 'Tap the ring to pause. Tap Done to stop.'] },
   { id: 'pushup', name: 'Push-up test', sub: '1 rep every 3 seconds', moves: false,
-    how: ['The push-up beep test.', '1 beep every 3 seconds. On each beep, go down and come back up before the next one. That is 20 a minute. The coach counts every rep out loud.',
+    how: ['The push-up beep test.', 'A 10-second countdown, then a DOUBLE beep: that is your start. After it, 1 beep every 3 seconds: on each one, go down and come back up before the next. That is 20 a minute. The coach counts every rep out loud.',
       'Keep the beat as long as you can. The test is over when you can no longer stay in rhythm or your form breaks: tap Stop. Your score is the reps you did on the beat.',
       'Want it harder? 25 a minute is the NHL version.'] },
 ];
@@ -395,50 +395,47 @@ const fmtDef = () => FORMATS.find(f => f.id === cfg.fmt) || FORMATS[0];
    person says it, and with There and back it reads "1 up to 10 and back".
    It follows the first move; the rest keep their own start and change.
    + and − always move the shown number up or down. */
-function ladderEndTile() {
+/* ONE ROW, EVERY SETTING. A coloured label on top, then − value + across
+   the full width: the same shape for the main numbers and for Customize.
+   The label's colour says what kind of number it is. */
+const ROW_TONE = {
+  mins: 'accent', cap: 'accent', work: 'accent', every: 'accent', dbEvery: 'accent', pace: 'accent',
+  rest: 'neon', setRest: 'neon',
+  rounds: 'violet', ftRounds: 'violet', sets: 'violet', dbMax: 'violet', ldRungs: 'violet',
+  ftCap: 'gold', ptCap: 'gold', ldCap: 'gold',
+};
+function rowShell(k, label, face, foot, minus, plus, extra = '') {
+  return `<div class="qt-srow tone-${ROW_TONE[k] || 'accent'}">
+    <div class="qt-sl">${label}</div>
+    <div class="qt-sline">${minus}<div class="qt-sval">${face}</div>${plus}</div>
+    ${foot ? `<div class="qt-su">${foot}</div>` : ''}${extra}
+  </div>`;
+}
+/* THE LADDER'S TOP (or bottom), not a rung count. "Up to 10" is how a
+   person says it, and with There and back it reads "1 up to 10 and back".
+   It follows the first move; the rest keep their own start and change.
+   + and − always move the shown number up or down. */
+function ladderEndRow() {
   const m = ladderMoves()[0], st = ldStep(m), n = Math.max(1, cfg.ldRungs);
   const label = st > 0 ? 'Up to' : st < 0 ? 'Down to' : 'Rungs';
   const v = st ? repsAt(m, n - 1) : n;
-  const unit = st ? `${n} rung${n === 1 ? '' : 's'}${cfg.ldShape === 'mirror' ? ' · and back' : ''}` : '';
-  return `<div class="qt-tile">
-    <div class="qt-tl">${label}</div>
-    <input class="qt-tv" data-ldend="1" type="number" inputmode="numeric" value="${v}" onfocus="this.select()"/>
-    <div class="qt-tu">${unit || '&nbsp;'}</div>
-    <div class="qt-tb"><button data-ldend-d="-1" aria-label="Lower">−</button><button data-ldend-d="1" aria-label="Higher">+</button></div>
-  </div>`;
+  const foot = st ? `${n} rung${n === 1 ? '' : 's'}${cfg.ldShape === 'mirror' ? ' · and back' : ''}` : '';
+  return rowShell('ldRungs', label,
+    `<input class="qt-tv" data-ldend="1" type="number" inputmode="numeric" value="${v}" onfocus="this.select()"/>`, foot,
+    '<button class="qt-pm" data-ldend-d="-1" aria-label="Lower">−</button>', '<button class="qt-pm" data-ldend-d="1" aria-label="Higher">+</button>');
 }
-function setLadderEnd(target) {
-  const m = ladderMoves()[0], st = ldStep(m);
-  const n = st ? Math.round((target - ldStart(m)) / st) + 1 : target;
-  cfg.ldRungs = Math.min(50, Math.max(1, n));
-}
-function bigTile(k) {
-  if (k === 'ldRungs') return ladderEndTile();
+function stepRow(k) {
+  if (k === 'ldRungs') return ladderEndRow();
   const [label, unit] = FIELDS[k];
   const v = val(k);
-  const none = (k === 'ftCap' || k === 'ptCap') && !v;
-  const noRest = k === 'rest' && !v;
+  const none = ((k === 'ftCap' || k === 'ptCap' || k === 'ldCap') && !v) || ((k === 'rest' || k === 'setRest') && !v);
   const face = isTime(k)
-    ? `<button class="qt-tv time" data-qt="${k}">${noRest ? 'none' : fmt(v)}</button>`
+    ? `<button class="qt-tv time" data-qt="${k}">${none ? 'none' : fmt(v)}</button>`
     : `<input class="qt-tv ${none ? 'none' : ''}" data-qf="${k}" type="number" inputmode="numeric" value="${none ? '' : v}" placeholder="${none ? 'none' : ''}" onfocus="this.select()"/>`;
-  return `<div class="qt-tile">
-    <div class="qt-tl">${label}</div>
-    ${face}
-    <div class="qt-tu">${isTime(k) ? (noRest ? '&nbsp;' : 'min:sec') : (none ? '&nbsp;' : unit || '&nbsp;')}</div>
-    <div class="qt-tb"><button data-q="${k}" data-d="-1" aria-label="Less">−</button><button data-q="${k}" data-d="1" aria-label="More">+</button></div>
-    ${k === 'pace' ? `<div class="qt-presets"><button class="${v === 20 ? 'on' : ''}" data-pace="20">20 standard</button><button class="${v === 25 ? 'on' : ''}" data-pace="25">25 NHL</button></div>` : ''}
-  </div>`;
-}
-/* a compact row: the details */
-function smallRow(k) {
-  const [label, unit] = FIELDS[k];
-  const v = val(k);
-  const face = isTime(k)
-    ? `<button class="qt-sv" data-qt="${k}">${k.includes('est') && !v ? 'none' : fmt(v)}</button>`
-    : `<input data-qf="${k}" type="number" inputmode="numeric" value="${v}" onfocus="this.select()"/>`;
-  return `<div class="qt-row"><span>${label}</span>
-    <div class="qt-step"><button data-q="${k}" data-d="-1" aria-label="Less">−</button>${face}
-      <button data-q="${k}" data-d="1" aria-label="More">+</button>${isTime(k) ? '' : `<span class="qt-u">${unit}</span>`}</div></div>`;
+  const foot = none ? '' : isTime(k) ? 'min : sec' : unit;
+  const extra = k === 'pace' ? `<div class="qt-presets"><button class="${v === 20 ? 'on' : ''}" data-pace="20">20 standard</button><button class="${v === 25 ? 'on' : ''}" data-pace="25">25 NHL</button></div>` : '';
+  return rowShell(k, label, face, foot,
+    `<button class="qt-pm" data-q="${k}" data-d="-1" aria-label="Less">−</button>`, `<button class="qt-pm" data-q="${k}" data-d="1" aria-label="More">+</button>`, extra);
 }
 /* the ladder's main panel: shape, one-tap presets, and each move with
    its own start and change per rung, with a live preview of its reps */
@@ -486,12 +483,12 @@ function draw() {
       <span class="qt-chev">▾</span>
     </button>
 
-    ${cfg.fmt === 'deathby' ? ladderPanel() : main.length ? `<div class="qt-tiles n${main.length}">${main.map(bigTile).join('')}</div>${cfg.fmt === 'ladder' ? ladderPanel() : ''}`
+    ${cfg.fmt === 'deathby' ? ladderPanel() : main.length ? `<div class="qt-rows">${main.map(stepRow).join('')}</div>${cfg.fmt === 'ladder' ? ladderPanel() : ''}`
       : `<div class="qt-empty">Nothing to set. Hit start.</div>`}
 
     <button class="qt-more" id="qtMore">${moreOpen ? 'Close ▴' : 'Customize ▾'}${!moreOpen && named ? ` <span>${named} move${named > 1 ? 's' : ''}</span>` : ''}</button>
     ${moreOpen ? `<div class="qt-details">
-      ${more.length ? `<div class="qt-card">${more.map(smallRow).join('')}</div>` : ''}
+      ${more.length ? `<div class="qt-rows">${more.map(stepRow).join('')}</div>` : ''}
       ${def.moves && cfg.fmt !== 'ladder' ? `<div class="qt-sec">Moves <small>optional · search the library or type your own</small></div><div class="qt-card">
         ${MV().map(moveRow).join('')}
         <button class="qt-link" id="qtAdd">+ Add a move</button>
@@ -976,6 +973,19 @@ function injectStyle() {
   .qt-chips button { flex: none; background: var(--box); border: 1px solid var(--line); border-radius: 999px; color: var(--text); font-size: 13.5px; padding: 7px 13px; cursor:pointer; }
   .qt-chips button.on { border-color: var(--wm-neon); color: var(--wm-neon); background: var(--wm-neon-soft); }
   .qt-count { color: var(--faint); font-size: 12px; padding: 8px 4px 2px; }
+  .qt-rows { display:flex; flex-direction:column; gap: 3px; margin-top: 12px; border-radius: 18px; overflow: hidden; }
+  .qt-srow { background: var(--box); padding: 12px 14px 10px; text-align:center; }
+  .qt-sl { font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+  .qt-srow.tone-accent .qt-sl { color: var(--wm-accent); }
+  .qt-srow.tone-neon .qt-sl { color: var(--wm-neon); }
+  .qt-srow.tone-violet .qt-sl { color: #B57BFF; }
+  .qt-srow.tone-gold .qt-sl { color: #D9A94C; }
+  .qt-sline { display:flex; align-items:center; justify-content: space-between; gap: 8px; }
+  .qt-pm { flex: none; width: 56px; height: 52px; background: none; border: none; color: var(--text); font-size: 30px; font-weight: 300; cursor:pointer; border-radius: 14px; touch-action: manipulation; }
+  .qt-pm:active { background: var(--box-2); }
+  .qt-sval { flex: 1; min-width: 0; }
+  .qt-sval .qt-tv { font-size: 44px; width: 100%; padding: 0; line-height: 1.15; }
+  .qt-su { color: var(--faint); font-size: 11.5px; margin-top: -2px; }
   .qt-sum { text-align:center; color: var(--muted); font-size: 14px; margin: 0 0 10px; line-height: 1.35; }
 
   .qt-sheet { position: fixed; inset: 0; z-index: 60; background: rgba(8,10,12,0); display:flex; align-items:flex-end; transition: background .18s; }

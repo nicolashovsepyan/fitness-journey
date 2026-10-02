@@ -274,7 +274,7 @@ function tick() {
   if (rem == null) { lastSec = null; return; }
   if (curPhase === 'ready' && !cadStartBooked && block()?.format === 'cadence' && !R.isStepPaused(S)) {
     const ms = R.stepEndsAt(S) - Date.now();
-    if (ms > 0 && ms < 700) { beep('rep', ms / 1000); cadStartBooked = true; }
+    if (ms > 0 && ms < 700) { beep('start', ms / 1000); cadStartBooked = true; }
   }
   if (rem <= 0 && onStepDone) return runOut();
   updateTimer(rem, S.stepDur);
@@ -368,7 +368,7 @@ function renderGetReady() {
   const b = block();
   if (readySec() <= 0) { beep('go'); return renderActive(); }
   onScreen('ready');
-  shell(`<div class="now-ex getready"><div class="label">Get ready</div><div class="name">${b.name}</div>
+  shell(`<div class="now-ex getready"><div class="label">Get ready</div><div class="name">${b.name}</div>${b.format === 'cadence' ? '<div class="cad-start">Start on the <b>double beep</b></div>' : ''}
       ${S.plan.quick ? '' : `<div class="side">${b.role}</div>`}</div>
     <div class="timer-wrap">${timerSvg('ready')}</div>
     <div class="actionbar"><button class="btn lg" id="go">I'm ready ▸</button></div>`);
@@ -377,7 +377,7 @@ function renderGetReady() {
     beep('go');
     if (b.format === 'cadence') {
       /* short enough to finish before the spoken 3-2-1 */
-      say(`Push-up test. On every beep, one push-up, down and up. I'll count. Keep the pace.`, 5500);
+      say(`Push-up test. Start on the double beep. Then one push-up on every beep. I'll count.`, 5500);
     } else say(`Get ready. ${b.name}.`);
   }
   onStepDone = begin;
@@ -655,14 +655,32 @@ function loggedSetCount() {
 }
 
 /* ---------------- timer + input fragments ---------------- */
+/* THE DIAL. A stopwatch face, after the FJ Timer icon (J5 Sunray): sixty
+   minute ticks with longer quarters, faint sunray hairlines on the face, a
+   crown nub at 12, and the time left as one glowing arc in the phase colour.
+   The arc is the only thing that moves. */
+const RING_R = 100;
+const DIAL = (() => {
+  const C = 120, line = (a, r1, r2) => { const t = (a - 90) * Math.PI / 180;
+    return `M${(C + r1 * Math.cos(t)).toFixed(1)} ${(C + r1 * Math.sin(t)).toFixed(1)}L${(C + r2 * Math.cos(t)).toFixed(1)} ${(C + r2 * Math.sin(t)).toFixed(1)}`; };
+  let ticks = '', quarters = '', rays = '';
+  for (let i = 0; i < 60; i++) {
+    const a = i * 6;
+    if (i % 15 === 0) quarters += line(a, 107, 117); else ticks += line(a, 110, 115);
+    rays += line(a, 16, 86);
+  }
+  return `<path class="rays" d="${rays}"/><path class="ticks" d="${ticks}"/><path class="quarters" d="${quarters}"/>
+    <rect class="crown" x="114" y="-4" width="12" height="9" rx="3"/>`;
+})();
 function timerSvg(cls) {
-  const r = 110, c = 2 * Math.PI * r;
-  return `<div class="timer ${cls}"><svg viewBox="0 0 240 240"><circle class="track" cx="120" cy="120" r="${r}"></circle>
-    <circle class="fill" id="timerFill" cx="120" cy="120" r="${r}" stroke-dasharray="${c}" stroke-dashoffset="0"></circle></svg>
+  const c = 2 * Math.PI * RING_R;
+  return `<div class="timer dial ${cls}"><svg viewBox="-6 -10 252 256">${DIAL}
+    <circle class="track" cx="120" cy="120" r="${RING_R}"></circle>
+    <circle class="fill" id="timerFill" cx="120" cy="120" r="${RING_R}" stroke-dasharray="${c}" stroke-dashoffset="0" transform="rotate(-90 120 120)"></circle></svg>
     <div class="read"><div class="t" id="timerText">0:00</div><div class="cap" id="timerCap"></div></div></div>`;
 }
 function updateTimer(rem, total) {
-  const r = 110, c = 2 * Math.PI * r;
+  const r = RING_R, c = 2 * Math.PI * r;
   const fillEl = document.getElementById('timerFill'), txt = document.getElementById('timerText');
   let shown = rem, frac = total > 0 ? rem / total : 0;
   if (countUpDisplay) {
@@ -1285,7 +1303,7 @@ function renderCadence() {
       <div class="cad-cue" id="cadCue">Down</div>
       <div class="cad-reps"><b id="cadReps">0</b><small>reps on the beat</small></div>
       <div class="cad-time" id="cadTime">0:00${cap ? ` / ${fmt(cap)}` : ''}</div>
-      <p class="muted cad-how">1 beep every ${+period.toFixed(2)} seconds: down, then up before the next one. Tap Stop when you can't keep the rhythm.</p>
+      <p class="muted cad-how">Double beep = start. Then 1 beep every ${+period.toFixed(2)} seconds: down, then up before the next one. Tap Stop when you can't keep the rhythm.</p>
     </div>
     <div class="actionbar"><button class="btn lg" id="cadStop">Stop</button></div>`);
   /* ONE BEEP PER REP, AND THE COACH COUNTS. The first beep is the start
@@ -1314,15 +1332,16 @@ function renderCadence() {
       const at = (beatAt(next) - now) / 1000;
       /* a beat a moment late still plays (the very first one always is, by
          the time this runs); only a long-gone one, after a reopen, is skipped */
-      if (at > -1) beep('rep', Math.max(0, at));
+      if (at > -1) beep(next === 0 ? 'start' : 'rep', Math.max(0, at));
       next++;
     }
     const done = doneAt(now);
     if (done > spoken) { spoken = done; say(String(done)); buzz(25); }
     const since = Math.max(0, (now - t0()) / 1000);
     const down = (since % period) < period / 2;
+    const go = since < Math.min(1.2, period / 2);       // the first moment: GO, not "down"
     const cue = document.getElementById('cadCue');
-    if (cue) { cue.textContent = down ? 'Down' : 'Up'; cue.className = 'cad-cue ' + (down ? 'down' : 'up'); }
+    if (cue) { cue.textContent = go ? 'Go' : down ? 'Down' : 'Up'; cue.className = 'cad-cue ' + (go ? 'go' : down ? 'down' : 'up'); }
     const r = document.getElementById('cadReps'); if (r) r.textContent = String(done);
     const tm = document.getElementById('cadTime'); if (tm) tm.textContent = fmt(since) + (cap ? ` / ${fmt(cap)}` : '');
   };
