@@ -1,6 +1,7 @@
 {
-  "version": "2026-10-02.3",
+  "version": "2026-10-02.4",
   "notes": [
+    "Cleaner timer setup: every setting, move and choice in the same simple rows",
     "Updates show up every time you open the app, plus a Check for updates button in settings",
     "Interval Timer: new name, neon tube dial, update button",
     "Uniform setup rows, stopwatch dial, Customize your vibe, push-up double-beep start"

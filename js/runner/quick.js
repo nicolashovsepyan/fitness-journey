@@ -205,7 +205,7 @@ const perRound = () => Math.max(1, namedMoves().length);
      one     rung 1 … N                  (up, down, or opposite pairs)
      mirror  1 … N … 1                   (pyramid, or valley if it drops)
      wave    1, N, 2, N-1 …              (the waving ladder) */
-const LD_SHAPES = [['one', 'One way'], ['mirror', 'There and back'], ['wave', 'Wave']];
+const LD_SHAPES = [['one', 'One way'], ['mirror', 'There & back'], ['wave', 'Wave']];
 const LD_PRESETS = [
   { id: 'up',     name: '1 → 10',        n: 10, shape: 'one',    m: [[1, 1]] },
   { id: 'down',   name: '10 → 1',        n: 10, shape: 'one',    m: [[10, -1]] },
@@ -437,35 +437,67 @@ function stepRow(k) {
   return rowShell(k, label, face, foot,
     `<button class="qt-pm" data-q="${k}" data-d="-1" aria-label="Less">−</button>`, `<button class="qt-pm" data-q="${k}" data-d="1" aria-label="More">+</button>`, extra);
 }
-/* the ladder's main panel: shape, one-tap presets, and each move with
-   its own start and change per rung, with a live preview of its reps */
-function ladderPanel() {
-  const step = (i, f, v) => `<div class="qt-step"><button data-lm="${i}" data-lf="${f}" data-d="-1" aria-label="Less">−</button><b class="qt-lv">${f === 'ldStep' && v > 0 ? '+' : ''}${v}</b><button data-lm="${i}" data-lf="${f}" data-d="1" aria-label="More">+</button></div>`;
-  const db = cfg.fmt === 'deathby';
-  return `${db ? '' : `<div class="qt-seg qt-ldstyle">${LD_SHAPES.map(([v, l]) => `<button class="${cfg.ldShape === v ? 'on' : ''}" data-ldshape="${v}">${l}</button>`).join('')}</div>
-    <div class="qt-chips qt-presets2">${LD_PRESETS.map(p => `<button data-ldp="${p.id}">${p.name}</button>`).join('')}</div>`}
-    <div class="qt-sec">Moves <small>${db ? 'what each starts at, and how many it adds each round' : 'each with its own reps'}</small></div>
-    <div class="qt-card">${MV().map((m, i) => `<div class="qt-lmove">
-      <div class="qt-move"><button class="qt-mpick ${m.name ? '' : 'empty'}" data-pick-move="${i}">${m.name ? esc(m.name) : `Move ${i + 1}`}<span>⌕</span></button>
-        <button class="qt-mx" data-mvx="${i}" aria-label="Remove">✕</button></div>
-      <div class="qt-lrow"><span>Start</span>${step(i, 'ldStart', ldStart(m))}<span>${db ? 'Add' : 'Change'}</span>${step(i, 'ldStep', ldStep(m))}</div>
-      <div class="qt-lprev">${db ? deathPreview(m) : ladderPreview(m)}</div>
-    </div>`).join('')}
-    <button class="qt-link" id="qtAdd">+ Add a move</button></div>`;
+/* ---------------- the screen's building blocks ----------------
+   ONE LOOK FOR EVERYTHING. A section is a header and a card; a card is a
+   stack of rows; every row has a small coloured label on top. Numbers are
+   − value +; choices are equal buttons; a move is its name, then the same
+   small −/+ controls. Nothing on this screen is drawn any other way. */
+const sec = (title, right = '') => `<div class="qt-sec"><span>${title}</span>${right}</div>`;
+/* a row of equal choices (shape, countdown, EMOM style) */
+function segRow(label, tone, opts, cur, attr, foot = '') {
+  return `<div class="qt-srow tone-${tone}"><div class="qt-sl">${label}</div>
+    <div class="qt-seg2">${opts.map(([v, l]) => `<button class="${String(cur) === String(v) ? 'on' : ''}" ${attr}="${v}">${l}</button>`).join('')}</div>
+    ${foot ? `<div class="qt-su">${foot}</div>` : ''}</div>`;
 }
-function moveRow(m, i) {
+/* a small labelled −/+ inside a move row */
+function mini(label, face, minus, plus) {
+  return `<div class="qt-mini"><span class="qt-ml">${label}</span><div class="qt-mline">${minus}<span class="qt-mv">${face}</span>${plus}</div></div>`;
+}
+/* one move: its name (tap to search), its numbers, one quiet line under */
+function moveCard(m, i) {
+  const lad = cfg.fmt === 'ladder', db = cfg.fmt === 'deathby';
   const ex = m.exId && EXERCISES[m.exId];
-  const hold = ex && ex.measure === 'hold';
-  return `<div class="qt-move">
-    <button class="qt-mpick ${m.name ? '' : 'empty'}" data-pick-move="${i}">${m.name ? esc(m.name) : `Move ${i + 1}`}<span>⌕</span></button>
-    <input class="qt-mreps" data-mv="${i}" data-k="reps" type="number" inputmode="numeric" placeholder="${hold ? 'sec' : 'reps'}" value="${esc(m.reps)}"/>
-    <button class="qt-mx" data-mvx="${i}" aria-label="Remove">✕</button></div>`;
+  const unit = ex && ex.measure === 'hold' ? 'Seconds' : 'Reps';
+  const pm = (attr, d) => `<button class="qt-pm sm" ${attr} data-d="${d}" aria-label="${d < 0 ? 'Less' : 'More'}">${d < 0 ? '−' : '+'}</button>`;
+  let nums = '', note = '';
+  if (lad || db) {
+    const st = ldStep(m);
+    nums = mini('Start', ldStart(m), pm(`data-lm="${i}" data-lf="ldStart"`, -1), pm(`data-lm="${i}" data-lf="ldStart"`, 1))
+         + mini(db ? 'Add per round' : 'Per rung', `${st > 0 ? '+' : ''}${st}`, pm(`data-lm="${i}" data-lf="ldStep"`, -1), pm(`data-lm="${i}" data-lf="ldStep"`, 1));
+    note = db ? deathPreview(m) : ladderPreview(m);
+  } else {
+    nums = mini(unit, `<input data-mv="${i}" data-k="reps" type="number" inputmode="numeric" placeholder="–" value="${esc(m.reps)}" onfocus="this.select()"/>`,
+      pm(`data-mr="${i}"`, -1), pm(`data-mr="${i}"`, 1));
+  }
+  return `<div class="qt-srow qt-move2">
+    <div class="qt-mhead"><button class="qt-mname2 ${m.name ? '' : 'empty'}" data-pick-move="${i}">${m.name ? esc(m.name) : `Choose move ${i + 1}`}<span>⌕</span></button>
+      ${MV().length > 1 || m.name ? `<button class="qt-mx" data-mvx="${i}" aria-label="Remove">✕</button>` : ''}</div>
+    <div class="qt-mnums">${nums}</div>
+    ${note ? `<div class="qt-mnote">${note}</div>` : ''}
+  </div>`;
+}
+function movesCard() {
+  return `<div class="qt-rows">${MV().map(moveCard).join('')}
+    <button class="qt-srow qt-addrow" id="qtAdd">+ Add a move</button></div>`;
 }
 
 function draw() {
   const def = fmtDef();
   const main = MAIN[cfg.fmt], more = MORE[cfg.fmt];
   const named = namedMoves().length;
+  const lad = cfg.fmt === 'ladder', db = cfg.fmt === 'deathby';
+  /* SETTINGS: the main numbers, and the ladder's shape as one more row */
+  const settings = [
+    ...main.map(stepRow),
+    ...(lad ? [segRow('Shape', 'violet', LD_SHAPES, cfg.ldShape, 'data-ldshape')] : []),
+  ];
+  /* CUSTOMIZE: the rest, same rows */
+  const custom = [
+    ...more.map(stepRow),
+    ...(cfg.fmt === 'emom' && named > 1 ? [segRow('How the moves run', 'accent', [['turns', 'Take turns'], ['all', 'All every minute']], cfg.emomStyle === 'all' ? 'all' : 'turns', 'data-style',
+        cfg.emomStyle === 'all' ? `All ${named} moves inside each minute` : 'Minute 1 is move 1, minute 2 is move 2')] : []),
+    segRow('Get-ready countdown', 'gold', [[0, 'None'], [3, '3s'], [5, '5s'], [10, '10s']], cfg.ready, 'data-ready', 'Time to get in position before the clock starts'),
+  ];
   host.innerHTML = `
   <div class="screen qt fade-in">
     <div class="qt-top">
@@ -483,30 +515,19 @@ function draw() {
       <span class="qt-chev">▾</span>
     </button>
 
-    ${cfg.fmt === 'deathby' ? ladderPanel() : main.length ? `<div class="qt-rows">${main.map(stepRow).join('')}</div>${cfg.fmt === 'ladder' ? ladderPanel() : ''}`
-      : `<div class="qt-empty">Nothing to set. Hit start.</div>`}
+    ${settings.length ? `${sec('Settings', lad ? '<button class="qt-seclink" id="qtPresets">Presets</button>' : '')}<div class="qt-rows">${settings.join('')}</div>` : ''}
+    ${lad || db ? `${sec('Moves')}${movesCard()}` : ''}
+    ${!settings.length && !lad && !db ? `<div class="qt-empty">Nothing to set. Hit start.</div>` : ''}
 
-    <button class="qt-more" id="qtMore">${moreOpen ? 'Close ▴' : 'Customize ▾'}${!moreOpen && named ? ` <span>${named} move${named > 1 ? 's' : ''}</span>` : ''}</button>
+    <button class="qt-more ${moreOpen ? 'open' : ''}" id="qtMore"><span>Customize</span><i>›</i>${!moreOpen && named && !lad && !db ? `<em>${named} move${named > 1 ? 's' : ''}</em>` : ''}</button>
     ${moreOpen ? `<div class="qt-details">
-      ${more.length ? `<div class="qt-rows">${more.map(stepRow).join('')}</div>` : ''}
-      ${def.moves && cfg.fmt !== 'ladder' ? `<div class="qt-sec">Moves <small>optional · search the library or type your own</small></div><div class="qt-card">
-        ${MV().map(moveRow).join('')}
-        <button class="qt-link" id="qtAdd">+ Add a move</button>
-      </div>` : ''}
-      ${cfg.fmt === 'emom' && named > 1 ? `<div class="qt-sec">How the moves run</div>
-      <div class="qt-choice">
-        <button class="${cfg.emomStyle !== 'all' ? 'on' : ''}" data-style="turns"><b>Take turns</b><small>1 move each minute: minute 1 is move 1, minute 2 is move 2</small></button>
-        <button class="${cfg.emomStyle === 'all' ? 'on' : ''}" data-style="all"><b>All every minute</b><small>Do all ${named} moves inside each minute</small></button>
-      </div>` : ''}
-      <div class="qt-sec">Get-ready countdown</div>
-      <p class="qt-note">Seconds to get into position before the clock starts.</p>
-      <div class="qt-seg">${[0, 3, 5, 10].map(s => `<button class="${cfg.ready === s ? 'on' : ''}" data-ready="${s}">${s ? s + 's' : 'None'}</button>`).join('')}</div>
+      <div class="qt-rows">${custom.join('')}</div>
+      ${def.moves && !lad && !db ? `${sec('Moves', '<small>optional</small>')}${movesCard()}` : ''}
       ${cfg.fmt === 'tabata' && (cfg.work !== TABATA.work || cfg.rest !== TABATA.rest) ? '<button class="qt-link" id="qtClassic">Back to classic 20s / 10s</button>' : ''}
       ${standalone() ? '' : `<p class="qt-hint">Want the timer as its own app? In Safari tap Share, then Add to Home Screen, while this page is open.</p>`}
     </div>` : ''}
 
-    ${showDemo() ? `<div class="qt-sec">Work Mode preview</div>
-    <p class="qt-hint">How a program day runs, 1 format at a time. Short numbers, nothing saved.</p>
+    ${showDemo() ? `${sec('Work Mode preview')}
     <div class="qt-demos">${DEMOS.map(d => `<button class="qt-demo" data-demo="${d.id}"><b>${d.name}</b><small>${d.sub}</small><span>▸</span></button>`).join('')}</div>` : ''}
 
     ${guest ? '<button class="qt-link center qt-signin" id="qtSignIn">Have a program from Nico? Sign in</button>' : ''}
@@ -521,6 +542,14 @@ function draw() {
   </div>`;
   wire();
 }
+/* the ladder presets, one tap away instead of a strip of chips */
+function openPresets() {
+  const { ov, close } = sheet(`<div class="qt-sheet-h">Ladder presets</div>
+    ${LD_PRESETS.map(p => `<button class="qt-opt" data-ldp="${p.id}"><b>${p.name}</b><small>${presetHint(p)}</small></button>`).join('')}`);
+  ov.querySelectorAll('[data-ldp]').forEach(b => b.addEventListener('click', () => { applyPreset(LD_PRESETS.find(p => p.id === b.dataset.ldp)); persist(); close(); draw(); }));
+}
+const presetHint = p => ({ up: 'Reps go 1, 2, 3 … 10', down: 'Reps go 10, 9, 8 … 1', pyr: 'Up to 10, then back down',
+  valley: 'Down to 1, then back up', seesaw: 'One move climbs while the other drops', wave: '1, 10, 2, 9, 3, 8 …', '21159': 'The classic: 21, 15, 9' }[p.id] || '');
 
 /* ---------------- share + save ----------------
    A timer travels as its settings in the link: base64 of the JSON, only
@@ -776,7 +805,10 @@ function wire() {
   }));
   host.querySelector('[data-ldend]')?.addEventListener('change', e => { setLadderEnd(+e.target.value || 0); persist(); draw(); });
   host.querySelectorAll('[data-ldshape]').forEach(b => b.addEventListener('click', () => { cfg.ldShape = b.dataset.ldshape; persist(); draw(); }));
-  host.querySelectorAll('[data-ldp]').forEach(b => b.addEventListener('click', () => { applyPreset(LD_PRESETS.find(p => p.id === b.dataset.ldp)); persist(); draw(); }));
+  $('#qtPresets')?.addEventListener('click', openPresets);
+  host.querySelectorAll('[data-mr]').forEach(b => b.addEventListener('click', () => {
+    const m = MV()[+b.dataset.mr]; m.reps = Math.max(0, Math.min(999, (Number(m.reps) || 0) + Number(b.dataset.d))) || ''; persist(); draw();
+  }));
   host.querySelectorAll('[data-lm]').forEach(b => b.addEventListener('click', () => {
     const m = MV()[+b.dataset.lm], f = b.dataset.lf, d = +b.dataset.d;
     if (f === 'ldStart') m.ldStart = Math.min(500, Math.max(0, ldStart(m) + d));
@@ -899,7 +931,7 @@ function injectStyle() {
   .qt-demo b { font-size: 15px; } .qt-demo small { grid-column: 1; color: var(--muted); font-size: 12.5px; margin-top: 2px; }
   .qt-demo span { grid-column: 2; grid-row: 1 / span 2; align-self:center; color: var(--muted); font-size: 18px; }
 
-  .qt-bar { background: linear-gradient(180deg, transparent, var(--bg) 28%); padding-top: 26px; }
+  .qt-bar { background: linear-gradient(180deg, transparent 0, var(--bg) 18px); padding-top: 22px; }
 
   .qt-typerow { display:flex; gap: 8px; align-items: stretch; }
   .qt-typerow .qt-type { flex: 1; }
@@ -986,6 +1018,36 @@ function injectStyle() {
   .qt-sval { flex: 1; min-width: 0; }
   .qt-sval .qt-tv { font-size: 44px; width: 100%; padding: 0; line-height: 1.15; }
   .qt-su { color: var(--faint); font-size: 11.5px; margin-top: -2px; }
+  /* the unified rows (draw: sec, segRow, mini, moveCard) */
+  .qt-sec { display:flex; align-items:center; justify-content:space-between; }
+  .qt-sec small { text-transform:none; letter-spacing:0; font-weight:500; color: var(--faint); }
+  .qt-seclink { background:none; border:none; color: var(--wm-accent); font-size: 13px; font-weight: 700; letter-spacing: .02em; padding: 0; cursor:pointer; text-transform:none; }
+  .qt-seg2 { display:flex; gap: 6px; margin-top: 8px; }
+  .qt-seg2 button { white-space: nowrap; flex:1; min-height: 42px; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; color: var(--muted); font-size: 14px; font-weight: 600; cursor:pointer; padding: 0 6px; }
+  .qt-srow.tone-accent .qt-seg2 button.on { color: var(--wm-accent); border-color: var(--wm-accent); background: var(--wm-accent-soft); }
+  .qt-srow.tone-violet .qt-seg2 button.on { color: #B57BFF; border-color: #B57BFF; background: rgba(181,123,255,.12); }
+  .qt-srow.tone-gold .qt-seg2 button.on { color: #D9A94C; border-color: #D9A94C; background: rgba(217,169,76,.12); }
+  .qt-srow .qt-su { margin-top: 6px; }
+  .qt-move2 { text-align:left; }
+  .qt-mhead { display:flex; align-items:center; gap: 8px; }
+  .qt-mname2 { flex:1; min-width:0; display:flex; align-items:center; justify-content:space-between; gap: 8px; background:none; border:none; padding: 2px 0;
+    color: var(--text); font-size: 17px; font-weight: 700; text-align:left; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .qt-mname2.empty { color: var(--faint); font-weight: 600; }
+  .qt-mname2 span { color: var(--wm-accent); font-size: 15px; flex:none; }
+  .qt-mnums { display:flex; gap: 10px; margin-top: 8px; }
+  .qt-mini { flex:1; min-width:0; background: var(--bg); border-radius: 12px; padding: 6px 4px 4px; text-align:center; }
+  .qt-ml { display:block; font-size: 10.5px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .qt-mline { display:flex; align-items:center; justify-content:space-between; }
+  .qt-pm.sm { width: 40px; height: 38px; font-size: 22px; }
+  .qt-mv { flex:1; font-family: var(--tnum); font-size: 22px; font-weight: 700; color: var(--text); }
+  .qt-mv input { width: 100%; background:none; border:none; text-align:center; color: var(--text); font: inherit; -moz-appearance: textfield; padding: 0; }
+  .qt-mv input::-webkit-outer-spin-button, .qt-mv input::-webkit-inner-spin-button { -webkit-appearance:none; }
+  .qt-mnote { color: var(--faint); font-size: 12px; margin-top: 7px; font-family: var(--tnum); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .qt-addrow { width:100%; border: none; color: var(--wm-accent); font-size: 15px; font-weight: 700; cursor:pointer; padding: 14px; }
+  .qt-more { display:flex; align-items:center; justify-content:center; gap: 8px; width:100%; margin: 14px 0 0; }
+  .qt-more i { font-style: normal; font-size: 18px; transform: rotate(90deg); transition: transform .2s; color: var(--muted); }
+  .qt-more.open i { transform: rotate(-90deg); }
+  .qt-more em { font-style: normal; color: var(--wm-accent); font-size: 13px; }
   .qt-sum { text-align:center; color: var(--muted); font-size: 14px; margin: 0 0 10px; line-height: 1.35; }
 
   .qt-sheet { position: fixed; inset: 0; z-index: 60; background: rgba(8,10,12,0); display:flex; align-items:flex-end; transition: background .18s; }
