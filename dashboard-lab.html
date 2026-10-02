@@ -7063,7 +7063,7 @@ loadTheme().then(()=>go(S.tab||'today'));   /* then again from the spine, if rea
   }).catch(()=>{});
 
   /* after a refresh onto a new version: "Updated ✓" and what changed, once */
-  import('./js/update-banner.js').then(m => m.announceUpdate()).catch(() => {});
+  import('./js/update-banner.js').then(m => { m.announceUpdate(); m.watchForUpdates(); }).catch(() => {});
 })();
 </script>
 <!-- ============================================================

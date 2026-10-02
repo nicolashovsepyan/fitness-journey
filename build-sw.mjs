@@ -242,6 +242,8 @@ self.addEventListener('fetch', (e) => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;      // never touch third-party requests
+  // ?live = "what is on the site right now" (the update check, js/update-banner.js): never from cache
+  if (url.searchParams.has('live')) return;
 
   // a navigation (opening the app, or a refresh) must always resolve,
   // connection or not — that is what makes it feel like an installed app

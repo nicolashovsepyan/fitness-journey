@@ -14,7 +14,7 @@ import { renderBSummary } from './screens/b-summary.js';
 import { renderBHistory } from './screens/b-history.js';
 import { startWorkout, resumeWorkout } from './runner/workmode.js';
 import { renderQuick } from './runner/quick.js';
-import { updateReady, announceUpdate } from './update-banner.js';
+import { updateReady, announceUpdate, watchForUpdates } from './update-banner.js';
 import * as R from './runner/runstate.js';
 import { isBeginner, isClaimed, activeUserId, loadUsers } from './users.js';
 import { setAdapter } from './core/storage.js';
@@ -323,6 +323,8 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) flush
 window.addEventListener('pagehide', () => { flushStore(); });
 
 announceUpdate();                         // "Updated ✓" once after a refresh onto a new version
+/* and on every open / return: is the site newer than what is running? */
+watchForUpdates(() => { if (R.isActive()) { updatePending = true; return false; } return true; });
 boot().catch(err => {
   console.error('boot failed', err);
   app.innerHTML = '<div class="screen"><h1 class="q">Something went wrong starting up.</h1>'

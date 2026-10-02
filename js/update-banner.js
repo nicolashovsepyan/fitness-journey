@@ -13,9 +13,55 @@
    ============================================================ */
 const SEEN = 'fj.seenVersion';
 
-async function whatsNew() {
-  try { const r = await fetch('whatsnew.json', { cache: 'no-store' }); if (r.ok) return await r.json(); } catch (e) {}
+/* the version this page is RUNNING (through the offline cache), and the
+   one on the site RIGHT NOW (?live skips the cache, see build-sw.mjs) */
+async function whatsNew(live = false) {
+  try { const r = await fetch(live ? `whatsnew.json?live=${Date.now()}` : 'whatsnew.json', { cache: 'no-store' }); if (r.ok) return await r.json(); } catch (e) {}
   return null;
+}
+export async function runningVersion() { return (await whatsNew())?.version || ''; }
+
+/* IS THERE A NEWER VERSION ON THE SITE? Asked on every open and every
+   return to the app, not only when the background updater happens to
+   announce one (a home-screen app can miss that and sit on an old build).
+   canShow() lets a page hold the bar back, e.g. during a workout. */
+let lastCheck = 0;
+export async function checkForUpdate({ manual = false, canShow = () => true } = {}) {
+  if (!manual && Date.now() - lastCheck < 60000) return false;
+  lastCheck = Date.now();
+  const [now, live] = await Promise.all([whatsNew(), whatsNew(true)]);
+  const newer = !!(now?.version && live?.version && live.version !== now.version);
+  if (newer) { try { (await navigator.serviceWorker?.getRegistration())?.update(); } catch (e) {} }
+  if (newer && canShow()) updateReady(live);
+  else if (manual) toast(newer ? 'An update is ready. Finish your workout, then refresh.' : `You're on the latest version (${now?.version || 'this one'}).`);
+  return newer;
+}
+/* after a check, the same check every time the app comes back to the front */
+export function watchForUpdates(canShow) {
+  checkForUpdate({ canShow });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) checkForUpdate({ canShow }); });
+}
+function toast(text) {
+  style();
+  document.getElementById('fjUpdToast')?.remove();
+  const el = document.createElement('div'); el.id = 'fjUpdToast'; el.className = 'fj-upd done';
+  el.innerHTML = `<span class="tx"><b>${esc(text)}</b></span>`;
+  document.body.appendChild(el); setTimeout(() => el.remove(), 3500);
+}
+/* Refresh = take the new version for real: ask the service worker to fetch
+   it, wait (briefly) until it is in charge, then reload onto it. */
+async function refreshNow(btn) {
+  if (btn) { btn.disabled = true; btn.textContent = 'Updating…'; }
+  try {
+    const reg = await navigator.serviceWorker?.getRegistration();
+    if (reg) {
+      await reg.update();
+      if (reg.installing || reg.waiting) {
+        await new Promise(r => { const t = setTimeout(r, 6000); navigator.serviceWorker.addEventListener('controllerchange', () => { clearTimeout(t); r(); }, { once: true }); });
+      }
+    }
+  } catch (e) {}
+  location.reload();
 }
 function style() {
   if (document.getElementById('fj-upd-style')) return;
@@ -35,14 +81,14 @@ function style() {
 }
 
 /* a new version is on the phone: say so, and let them take it */
-export async function updateReady() {
+export async function updateReady(known) {
   if (document.getElementById('fjUpd')) return;
-  const w = await whatsNew();
+  const w = known || await whatsNew(true) || await whatsNew();
   style();
   const el = document.createElement('div'); el.id = 'fjUpd'; el.className = 'fj-upd';
   el.innerHTML = `<span class="tx"><b>Update ready</b>${w?.notes?.[0] ? `<small>${esc(w.notes[0])}</small>` : ''}</span>
     <button class="go">Refresh</button><button class="x" aria-label="Later">✕</button>`;
-  el.querySelector('.go').addEventListener('click', () => location.reload());
+  el.querySelector('.go').addEventListener('click', e => refreshNow(e.currentTarget));
   el.querySelector('.x').addEventListener('click', () => el.remove());
   document.body.appendChild(el);
 }

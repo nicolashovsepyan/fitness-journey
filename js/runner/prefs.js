@@ -6,6 +6,7 @@
 import { storage } from '../core/storage.js';
 import { setVoice, setBeeps, say, beep } from '../timer.js';
 import { vibeOptions, setVibe } from './theme.js';
+import { checkForUpdate, runningVersion } from '../update-banner.js';
 
 const KEY = 'workModePrefs';
 const DEFAULTS = { voice: true, beeps: true, flash: true, ring: 'tube' };
@@ -62,6 +63,9 @@ export function openPrefs(host) {
       ${ROWS.map(([k, name, sub]) => `<button class="wm-pref" data-pref="${k}">
         <span><b>${name}</b><small>${sub}</small></span><i class="wm-sw ${prefs[k] ? 'on' : ''}"></i></button>`).join('')}
       ${vibeHtml()}
+      <div class="wm-sheet-sub">App</div>
+      <div class="wm-vrow wm-ver"><div class="wm-vl"><b>Version</b><small id="wmVer">…</small></div>
+        <button class="btn secondary" id="wmCheck">Check for updates</button></div>
       <button class="btn" id="wmPrefDone">Done</button>
     </div>`;
     ov.querySelectorAll('[data-pref]').forEach(b => b.addEventListener('click', () => {
@@ -71,6 +75,12 @@ export function openPrefs(host) {
       draw();
     }));
     ov.querySelector('#wmPrefDone').addEventListener('click', close);
+    runningVersion().then(v => { const el = ov.querySelector('#wmVer'); if (el) el.textContent = v || 'unknown'; });
+    ov.querySelector('#wmCheck').addEventListener('click', async e => {
+      e.currentTarget.textContent = 'Checking…';
+      const newer = await checkForUpdate({ manual: true });
+      if (newer) close(); else { const b = ov.querySelector('#wmCheck'); if (b) b.textContent = 'Check for updates'; }
+    });
     ov.querySelectorAll('[data-vslot]').forEach(b => b.addEventListener('click', () => {
       const [slot, pal] = b.dataset.vslot.split(':'); setVibe({ slots: { [slot]: pal }, themeRandom: false }); draw();
     }));
