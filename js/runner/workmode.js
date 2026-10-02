@@ -11,7 +11,7 @@ import { store } from '../store.js';
 import { EXERCISES } from '../data/exercises.js';
 import { alternatives } from '../core/resolve.js';
 import { applyWorkTheme, clearWorkTheme } from './theme.js';
-import { ringHTML, ringBaseCss, RING_R } from './ring.js';
+import { ringHTML, ringBaseCss, RING_R, snapToSegments } from './ring.js';
 import { loadPrefs, pref, openPrefs } from './prefs.js';
 import { say, beep, buzz, fmt, initAudio, stopAudio, keepAwake, releaseAwake, setMuted } from '../timer.js';
 
@@ -680,6 +680,7 @@ function updateTimer(rem, total) {
     frac = total >= NO_CAP ? (shown % 60) / 60 : shown / total;
   }
   if (txt) txt.textContent = fmt(shown);
+  frac = snapToSegments(document.querySelector('.timer-wrap .timer'), frac);   // segmented ring: whole segments only
   if (fillEl) fillEl.style.strokeDashoffset = String(c * (1 - frac));
   document.querySelectorAll('.timer-wrap .timer .core').forEach(el => { el.style.strokeDashoffset = String(c * (1 - frac)); });   // the core and its halo
   document.getElementById('timerGlare')?.classList.toggle('off', frac < 0.11);   // no glare floating past the end of the tube

@@ -96,6 +96,7 @@ export function ringHTML(phase, d = ringDesign(), uid = '') {
   d = complete(d);
   const ph = phase === 'buffer' ? 'work' : phase;
   const a = d.arc, tr = d.track, tk = d.ticks, dg = d.digits;
+  const cap = a.style === 'segments' ? 'butt' : a.cap;   // a round end would light a sliver of the next segment
   const c = 2 * Math.PI * RING_R;
   const id = s => `${s}${uid}`;
   const rc = 'var(--rc)';
@@ -124,7 +125,7 @@ export function ringHTML(phase, d = ringDesign(), uid = '') {
   const coreCol = a.coreColor === 'tint' ? `color-mix(in srgb, ${rc} 30%, #ffffff)` : colour(a.coreColor);
   const stroke = a.style === 'gradient' ? `url(#${id('rg')})` : rc;
   const arc = (cls, extraStyle, elId) => `<circle class="${cls}" ${elId ? `id="${elId}"` : ''} cx="${C}" cy="${C}" r="${RING_R}" fill="none"
-    stroke-dasharray="${f1(c)}" stroke-dashoffset="0" transform="rotate(-90 ${C} ${C})" style="${extraStyle} transition: stroke-dashoffset .95s linear;"></circle>`;
+    stroke-dasharray="${f1(c)}" stroke-dashoffset="0" transform="rotate(-90 ${C} ${C})" style="${extraStyle} transition: ${a.style === 'segments' ? 'none' : 'stroke-dashoffset .95s linear'};"></circle>`;
   const segW = (2 * Math.PI * RING_R) / Math.max(4, a.segments);
   const mask = a.style === 'segments' ? `mask="url(#${id('rm')})"` : '';
   const glareD = (() => { const [x1, y1] = at(12, RING_R), [x2, y2] = at(34, RING_R); return `M${f1(x1)} ${f1(y1)} A${RING_R} ${RING_R} 0 0 1 ${f1(x2)} ${f1(y2)}`; })();
@@ -136,7 +137,8 @@ export function ringHTML(phase, d = ringDesign(), uid = '') {
   const digitStyle = `color:${digitCol};font-family:${FONTS[dg.font] || FONTS.mono};font-weight:${dg.weight};`
     + `font-size:calc(min(19vw, 76px) * ${dg.size});`
     + (dg.glow > 0 ? `text-shadow:0 0 ${f1(18 * dg.glow)}px color-mix(in srgb, ${rc} ${Math.round(40 * dg.glow)}%, transparent);` : 'text-shadow:none;');
-  return `<div class="timer dial rg ${ph}" style="${vars}">
+  const segAttr = a.style === 'segments' ? ` data-seg="${Math.max(4, Math.round(a.segments))}"` : '';
+  return `<div class="timer dial rg ${ph}"${segAttr} style="${vars}">
   <svg viewBox="-14 -18 268 272" style="transform:none;overflow:visible;">
     <defs>
       <linearGradient id="${id('rg')}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" style="stop-color:${rc}"/><stop offset="100%" style="stop-color:var(--ring-grad)"/></linearGradient>
@@ -155,9 +157,9 @@ export function ringHTML(phase, d = ringDesign(), uid = '') {
     <g ${mask}>
       <circle cx="${C}" cy="${C}" r="${RING_R}" fill="none" style="stroke:#fff;stroke-opacity:${tr.opacity};stroke-width:${tr.width};"/>
       ${tr.core ? `<circle cx="${C}" cy="${C}" r="${RING_R}" fill="none" style="stroke:#fff;stroke-opacity:${f1(tr.opacity + 0.03)};stroke-width:${f1(Math.max(1.5, tr.width * 0.18))};"/>` : ''}
-      ${arc('fill', `stroke:${stroke};stroke-width:${a.width};stroke-linecap:${a.cap};${glow}`, uid ? '' : 'timerFill')}
-      ${a.core > 0 && a.coreSoft > 0 ? arc('core halo', `stroke:color-mix(in srgb, ${rc} 45%, #ffffff);stroke-opacity:${f1(0.55 * (a.coreOpacity ?? 0.92))};stroke-width:${f1(Math.min(a.width, a.width * a.core * (1 + 1.4 * a.coreSoft)))};stroke-linecap:${a.cap};`, '').replace('<circle ', `<circle filter="url(#${id('ch')})" `) : ''}
-      ${a.core > 0 ? arc('core', `stroke:${coreCol};stroke-opacity:${a.coreOpacity ?? 0.92};stroke-width:${f1(a.width * a.core * (1 - 0.35 * (a.coreSoft || 0)))};stroke-linecap:${a.cap};`, uid ? '' : 'timerCore').replace('<circle ', a.coreSoft > 0 ? `<circle filter="url(#${id('cb')})" ` : '<circle ') : ''}
+      ${arc('fill', `stroke:${stroke};stroke-width:${a.width};stroke-linecap:${cap};${glow}`, uid ? '' : 'timerFill')}
+      ${a.core > 0 && a.coreSoft > 0 ? arc('core halo', `stroke:color-mix(in srgb, ${rc} 45%, #ffffff);stroke-opacity:${f1(0.55 * (a.coreOpacity ?? 0.92))};stroke-width:${f1(Math.min(a.width, a.width * a.core * (1 + 1.4 * a.coreSoft)))};stroke-linecap:${cap};`, '').replace('<circle ', `<circle filter="url(#${id('ch')})" `) : ''}
+      ${a.core > 0 ? arc('core', `stroke:${coreCol};stroke-opacity:${a.coreOpacity ?? 0.92};stroke-width:${f1(a.width * a.core * (1 - 0.35 * (a.coreSoft || 0)))};stroke-linecap:${cap};`, uid ? '' : 'timerCore').replace('<circle ', a.coreSoft > 0 ? `<circle filter="url(#${id('cb')})" ` : '<circle ') : ''}
     </g>
     ${a.glare ? `<path class="glare" ${uid ? '' : 'id="timerGlare"'} d="${glareD}" style="fill:none;stroke:#fff;stroke-width:${f1(Math.max(1.6, a.width * 0.22))};stroke-linecap:round;stroke-opacity:.8;transform:translate(-${f1(a.width * 0.2)}px,-${f1(a.width * 0.2)}px)"/>` : ''}
   </svg>
@@ -181,7 +183,14 @@ export function ringBaseCss() {
 
 /* move every arc layer of a ring to `frac` of the time left (lab use;
    the app's updateTimer moves #timerFill / #timerCore itself) */
+/* SEGMENTS GO OUT WHOLE: a segmented ring shows only full segments, so the
+   time left is rounded up to the next segment and one drops at a time */
+export function snapToSegments(root, frac) {
+  const n = +(root?.dataset?.seg || 0);
+  return n ? Math.min(1, Math.ceil(frac * n - 1e-6) / n) : frac;
+}
 export function setRingProgress(root, frac) {
+  frac = snapToSegments(root, frac);
   const c = 2 * Math.PI * RING_R;
   root.querySelectorAll('.fill, .core').forEach(el => { el.style.strokeDashoffset = String(c * (1 - frac)); });
   root.querySelectorAll('.glare').forEach(el => el.classList.toggle('off', frac < 0.11));

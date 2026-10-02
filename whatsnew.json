@@ -1,10 +1,10 @@
 {
-  "version": "2026-10-02.7",
+  "version": "2026-10-02.8",
   "notes": [
+    "Segmented rings now drop one whole segment at a time",
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour",
     "Timer rings: Chrono, LED and Laser, electro colours only, ticks inside or out, a real stopwatch crown",
     "Timer ring lab: 7 ring designs, and design your own (settings → Design your own ring)",
-    "Cleaner timer setup: every setting, move and choice in the same simple rows",
-    "Updates show up every time you open the app, plus a Check for updates button in settings"
+    "Cleaner timer setup: every setting, move and choice in the same simple rows"
   ]
 }
