@@ -1,10 +1,10 @@
 {
-  "version": "2026-10-02.5",
+  "version": "2026-10-02.6",
   "notes": [
+    "Timer rings: Chrono, LED and Laser, electro colours only, ticks inside or out, a real stopwatch crown",
     "Timer ring lab: 7 ring designs, and design your own (settings → Design your own ring)",
     "Cleaner timer setup: every setting, move and choice in the same simple rows",
     "Updates show up every time you open the app, plus a Check for updates button in settings",
-    "Interval Timer: new name, neon tube dial, update button",
-    "Uniform setup rows, stopwatch dial, Customize your vibe, push-up double-beep start"
+    "Interval Timer: new name, neon tube dial, update button"
   ]
 }

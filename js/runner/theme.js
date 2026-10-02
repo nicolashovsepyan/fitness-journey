@@ -11,7 +11,7 @@
    is on screen. It redefines the app shell's variables (styles.css) under
    that class, so the rest of the old shell is untouched.
 
-   Phase colours: work = the accent, rest = the neon, get ready = gold.
+   Phase colours: work = the accent, rest = the neon, get ready = electric royal blue.
    House rule from the dashboard kept: neon is structure and glow only,
    never a button, never body text.
    ============================================================ */
@@ -108,7 +108,7 @@ function injectStyle() {
     --bg: #171A1E; --bg-2: #1E232A; --box: #212630; --box-2: #282E38;
     --line: #2F3640; --text: #ECEFF3; --muted: #A9B2BC; --faint: #858E99;
     --accent: var(--wm-accent); --accent-dim: var(--wm-accent-soft);
-    --good: var(--wm-neon); --warn: #D9A94C;
+    --good: var(--wm-neon); --warn: var(--wm-ready); --wm-ready: #3D6BFF; --wm-ready-wash: rgba(61,107,255,.28);
   }
   html.wm body { background: var(--bg); }
   html.wm .btn:not(.ghost):not(.secondary) { color: #0C1512; }
@@ -120,16 +120,16 @@ function injectStyle() {
   html.wm .sessclock { color: var(--wm-accent); }
   html.wm .overlay-card { border: 1px solid var(--wm-neon-line); box-shadow: var(--wm-glow-neon); }
   /* GLANCE MODE: the screen wears the phase. A wash of colour from the top,
-     a bigger ring, bigger digits. Work = accent, rest = neon, ready = gold. */
+     a bigger ring, bigger digits. Work = accent, rest = neon, ready = royal blue. */
   html.wm[data-phase] body { transition: background .35s ease; }
   html.wm[data-phase="work"] body { background: radial-gradient(130% 80% at 50% 0%, var(--wm-accent-wash), var(--bg) 70%) var(--bg); }
   html.wm[data-phase="rest"] body { background: radial-gradient(130% 80% at 50% 0%, var(--wm-neon-wash), var(--bg) 70%) var(--bg); }
-  html.wm[data-phase="ready"] body { background: radial-gradient(130% 80% at 50% 0%, rgba(217,169,76,.26), var(--bg) 70%) var(--bg); }
+  html.wm[data-phase="ready"] body { background: radial-gradient(130% 80% at 50% 0%, var(--wm-ready-wash), var(--bg) 70%) var(--bg); }
   html.wm .screen.run { background: transparent; }
   html.wm[data-phase] .timer { width: min(76vw, 300px); height: min(76vw, 300px); }
   html.wm[data-phase="work"] .now-ex .label { color: var(--wm-accent); }
   html.wm[data-phase="rest"] .now-ex .label { color: var(--wm-neon); }
-  html.wm[data-phase="ready"] .now-ex .label { color: #D9A94C; }
+  html.wm[data-phase="ready"] .now-ex .label { color: var(--wm-ready); }
   /* one block (most Quick Timers): no progress bar or block strip to read */
   html.wm .screen.run.single .wprog-row, html.wm .screen.run.single .blockstrip { display: none; }
   /* screen flash at the end of a step, softer at 10 seconds */
@@ -170,7 +170,7 @@ function injectStyle() {
   html.wm .wm-dot { width: 38px; height: 38px; border-radius: 50%; border: 2px solid transparent; background: var(--c); cursor:pointer;
     box-shadow: 0 0 12px color-mix(in srgb, var(--c) 45%, transparent); }
   html.wm .wm-dot.on { border-color: var(--text); outline: 2px solid var(--c); outline-offset: 2px; }
-  html.wm .wm-rings { display:grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  html.wm .wm-rings { display:grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   html.wm .wm-ringopt { display:flex; flex-direction:column; align-items:center; gap: 4px; background: var(--box); border: 1px solid var(--line); border-radius: 14px; padding: 8px 4px 6px; color: var(--muted); font-size: 11.5px; font-weight: 600; cursor:pointer; }
   html.wm .wm-ringopt.on { border-color: var(--wm-accent); color: var(--wm-accent); background: var(--wm-accent-soft); }
   html.wm .wm-mini { display:block; width: 58px; height: 58px; }
@@ -196,9 +196,9 @@ function injectStyle() {
   html.wm .cad { text-align:center; margin-top: 14px; }
   html.wm .cad-cue { font-size: 68px; font-weight: 800; letter-spacing: -0.03em; text-transform: uppercase; color: var(--muted); }
   html.wm .cad-cue.down { color: var(--wm-neon); text-shadow: var(--wm-glow-neon); }
-  html.wm .cad-cue.go { color: #D9A94C; text-shadow: 0 0 22px rgba(217,169,76,.4); }
+  html.wm .cad-cue.go { color: var(--wm-ready); text-shadow: 0 0 22px var(--wm-ready-wash); }
   html.wm .cad-start { margin-top: 8px; font-size: 18px; color: var(--muted); }
-  html.wm .cad-start b { color: #D9A94C; }
+  html.wm .cad-start b { color: var(--wm-ready); }
   html.wm .cad-cue.up { color: var(--wm-accent); text-shadow: var(--wm-glow-accent); }
   html.wm .cad-reps { margin-top: 10px; }
   html.wm .cad-reps b { display:block; font-family: var(--tnum); font-size: 104px; line-height: 1; letter-spacing: -0.05em; }

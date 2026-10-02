@@ -61,6 +61,12 @@
     .sw.on { border-color: var(--text); outline: 2px solid var(--c); outline-offset: 1px; }
     .sw.own { position: relative; overflow: hidden; background: conic-gradient(#FF5FA2, #FFE24A, #B6FF3D, #3ECBA8, #4FD8FF, #B57BFF, #FF5FA2); }
     .sw.own input { position:absolute; inset:-6px; opacity: 0; cursor:pointer; }
+    .sw i { display:none; }
+    .swatches.editing .sw { position: relative; animation: wob .25s ease-in-out infinite alternate; }
+    .swatches.editing .sw i { display:flex; position:absolute; top:-6px; right:-6px; width:18px; height:18px; border-radius:50%; background:#0C0F12; color:#fff; font-style:normal; font-size:10px; align-items:center; justify-content:center; border:1px solid var(--line); }
+    @keyframes wob { from { transform: rotate(-4deg); } to { transform: rotate(4deg); } }
+    .lnk { background:none; border:none; color: var(--wm-accent, #3ECBA8); font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; cursor:pointer; padding: 0; margin-left: 10px; }
+    .presets { grid-template-columns: repeat(3, 1fr) !important; }
     .mine { display:flex; flex-wrap:wrap; gap: 6px; }
     .mine button { background: var(--box); border: 1px solid var(--line); color: var(--text); border-radius: 999px; padding: 7px 12px; font-size: 13px; cursor:pointer; }
     .mine button.x { padding: 7px 9px; color: var(--faint); }
@@ -111,8 +117,27 @@ const get = path => path.split('.').reduce((o, k) => o[k], d);
 const set = (path, v) => { const ks = path.split('.'); const last = ks.pop(); ks.reduce((o, k) => o[k], d)[last] = v; d.custom = true; d.id = 'custom'; draw(); };
 
 /* ---- the controls, as data: [label, path, kind, …] ---- */
-const COLORS = [['accent', 'Your main'], ['neon', 'Your glow'], ['gold', 'Gold'], ['white', 'White'], ['cyan', 'Cyan'], ['violet', 'Violet'], ['yellow', 'Yellow'], ['lime', 'Lime']];
-const HEX = { accent: 'var(--wm-accent)', neon: 'var(--wm-neon)', gold: '#D9A94C', white: '#ECEFF3', cyan: '#4FD8FF', violet: '#B57BFF', yellow: '#FFE24A', lime: '#B6FF3D' };
+/* THE COLOURS: electro only. Your two vibe colours (they follow Timer
+   settings), every palette the app has (spine/theme.json), electric green
+   and royal blue, and any colour you add. Edit removes the ones you don't
+   want; the list is kept on this device. */
+const PAL_KEY = 'fj.ringPalette';
+let appPalettes = [];
+try { const r = await fetch('spine/theme.json'); if (r.ok) appPalettes = (await r.json()).palettes || []; } catch (e) {}
+const EXTRA = [{ val: '#39FF14', name: 'Electric green' }, { val: '#3D6BFF', name: 'Royal blue' }];
+let editColours = false;
+const palPrefs = () => { try { return { hidden: [], custom: [], ...JSON.parse(localStorage.getItem(PAL_KEY) || '{}') }; } catch (e) { return { hidden: [], custom: [] }; } };
+const savePal = p => { try { localStorage.setItem(PAL_KEY, JSON.stringify(p)); } catch (e) {} };
+function palette(all = false) {
+  const p = palPrefs();
+  const list = [
+    { val: 'accent', name: 'Your main', css: 'var(--wm-accent)' }, { val: 'neon', name: 'Your glow', css: 'var(--wm-neon)' },
+    ...appPalettes.map(x => ({ val: x.hex, name: x.name })), ...EXTRA,
+    ...p.custom.map(h => ({ val: h, name: 'Mine', custom: true })),
+  ].map(c => ({ ...c, css: c.css || c.val }))
+   .filter((c, i, a) => a.findIndex(x => x.val.toLowerCase() === c.val.toLowerCase()) === i);
+  return all ? list : list.filter(c => !p.hidden.includes(c.val));
+}
 const GROUPS = [
   ['Colours', [
     ['Work', 'colors.work', 'color'], ['Rest', 'colors.rest', 'color'], ['Get ready', 'colors.ready', 'color'],
@@ -136,6 +161,7 @@ const GROUPS = [
   ]],
   ['The dial', [
     ['Ticks', 'ticks.count', 'seg', [[0, 'None'], [12, '12'], [60, '60'], [120, '120']]],
+    ['Tick position', 'ticks.position', 'seg', [['outside', 'Outside'], ['inside', 'Inside']], d => d.ticks.count > 0],
     ['Tick length', 'ticks.length', 'range', 2, 14, 0.5],
     ['Tick brightness', 'ticks.opacity', 'range', 0.05, 1, 0.01],
     ['Tick colour', 'ticks.color', 'seg', [['muted', 'Grey'], ['phase', 'Phase']]],
@@ -164,9 +190,13 @@ function ctl([label, path, kind, ...o]) {
   if (kind === 'toggle') return `<div class="ctl wide"><label>${label}</label><button class="tog ${v ? 'on' : ''}" data-tog="${path}" aria-label="${label}"></button></div>`;
   if (kind === 'seg') return `<div class="ctl wide"><label>${label}</label><div class="seg">${o[0].map(([val, l]) => `<button class="${String(v) === String(val) ? 'on' : ''}" data-seg="${path}" data-val="${val}">${l}</button>`).join('')}</div></div>`;
   if (kind === 'color') {
-    const custom = !HEX[v];
-    return `<div class="ctl wide"><label>${label}</label><div class="swatches">${COLORS.map(([c, n]) => `<button class="sw ${v === c ? 'on' : ''}" style="--c:${HEX[c]}" data-col="${path}" data-val="${c}" title="${n}" aria-label="${n}"></button>`).join('')}
-      <span class="sw own ${custom ? 'on' : ''}" title="Any colour" style="${custom ? `--c:${v};background:${v}` : ''}"><input type="color" data-pick="${path}" value="${custom ? v : '#ff5fa2'}"/></span></div></div>`;
+    const list = palette();
+    const known = list.some(c => c.val.toLowerCase() === String(v).toLowerCase());
+    /* a colour in use that has been removed from the list still shows, so the
+       design never points at nothing */
+    const shown = known ? list : [...list, { val: v, name: 'In use', css: v === 'accent' ? 'var(--wm-accent)' : v === 'neon' ? 'var(--wm-neon)' : v }];
+    return `<div class="ctl wide"><label>${label}</label><div class="swatches ${editColours ? 'editing' : ''}">${shown.map(c => `<button class="sw ${String(v).toLowerCase() === c.val.toLowerCase() ? 'on' : ''}" style="--c:${c.css}" ${editColours ? `data-hide="${c.val}"` : `data-col="${path}" data-val="${c.val}"`} title="${c.name}" aria-label="${c.name}">${editColours ? '<i>✕</i>' : ''}</button>`).join('')}
+      ${editColours ? '' : `<span class="sw own" title="Add any colour"><input type="color" data-pick="${path}" value="#ff5fa2"/></span>`}</div></div>`;
   }
   return '';
 }
@@ -185,7 +215,7 @@ function draw() {
   const mine = savedList();
   $('#mineWrap').innerHTML = mine.length ? `<div class="sec"><span>My designs</span></div><div class="mine">${mine.map((m, i) => `<span><button data-mine="${i}">${esc(m.name)}</button><button class="x" data-minex="${i}" aria-label="Delete">✕</button></span>`).join('')}</div>` : '';
   /* controls */
-  $('#controls').innerHTML = GROUPS.map(([title, rows]) => `<div class="sec"><span>${title}</span></div><div class="group">${rows.map(ctl).join('')}</div>`).join('');
+  $('#controls').innerHTML = GROUPS.map(([title, rows]) => `<div class="sec"><span>${title}</span>${title === 'Colours' ? `<span>${editColours && palPrefs().hidden.length ? '<button class="lnk" id="palRestore">Bring all back</button> ' : ''}<button class="lnk" id="palEdit">${editColours ? 'Done' : 'Edit colours'}</button></span>` : ''}</div><div class="group">${rows.map(ctl).join('')}</div>`).join('');
   wire();
 }
 function wire() {
@@ -200,7 +230,21 @@ function wire() {
   document.querySelectorAll('[data-tog]').forEach(b => b.onclick = () => set(b.dataset.tog, !get(b.dataset.tog)));
   document.querySelectorAll('[data-seg]').forEach(b => b.onclick = () => { const v = b.dataset.val; set(b.dataset.seg, /^\d+$/.test(v) ? +v : v); });
   document.querySelectorAll('[data-col]').forEach(b => b.onclick = () => set(b.dataset.col, b.dataset.val));
-  document.querySelectorAll('[data-pick]').forEach(i => i.oninput = () => set(i.dataset.pick, i.value));
+  /* a picked colour joins the list, so it can be used again (or removed) */
+  document.querySelectorAll('[data-pick]').forEach(i => i.onchange = () => {
+    const p = palPrefs(); const h = i.value.toLowerCase();
+    if (!palette(true).some(c => c.val.toLowerCase() === h)) p.custom.push(h);
+    p.hidden = p.hidden.filter(x => x.toLowerCase() !== h); savePal(p);
+    set(i.dataset.pick, h);
+  });
+  $('#palEdit') && ($('#palEdit').onclick = () => { editColours = !editColours; draw(); });
+  $('#palRestore') && ($('#palRestore').onclick = () => { const p = palPrefs(); p.hidden = []; savePal(p); draw(); });
+  document.querySelectorAll('[data-hide]').forEach(b => b.onclick = () => {
+    const p = palPrefs(), v = b.dataset.hide;
+    if (palette().length <= 1) return toast('Keep at least one colour');
+    if (p.custom.includes(v)) p.custom = p.custom.filter(x => x !== v); else p.hidden.push(v);
+    savePal(p); draw();
+  });
   document.querySelectorAll('[data-mine]').forEach(b => b.onclick = () => { d = clone(savedList()[+b.dataset.mine].design); draw(); });
   document.querySelectorAll('[data-minex]').forEach(b => b.onclick = () => { const l = savedList(); l.splice(+b.dataset.minex, 1); store(l); draw(); });
 }
@@ -237,7 +281,7 @@ $('#copy').onclick = async () => {
   const text = JSON.stringify(d);
   try { await navigator.clipboard.writeText(text); toast('Copied. Send it to Nico to make it the default'); } catch (e) { prompt('Copy this design', text); }
 };
-$('#reset').onclick = () => { d = presetById('tube'); draw(); };
+$('#reset').onclick = () => { d = presetById('chrono'); draw(); };
 draw();
 </script>
 </body>

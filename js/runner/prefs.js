@@ -43,7 +43,7 @@ function miniRing(p) {
 }
 function vibeHtml() {
   const { palettes, slots, pick, vibe } = vibeOptions();
-  const mine = ringDesign(); const cur = mine.id && PRESETS.some(p => p.id === mine.id) && !mine.custom ? mine.id : (mine.custom ? 'custom' : 'tube');
+  const mine = ringDesign(); const cur = mine.id && PRESETS.some(p => p.id === mine.id) && !mine.custom ? mine.id : (mine.custom ? 'custom' : 'chrono');
   if (!palettes.length) return '';
   const glow = vibe.glow || 'normal';
   return `<div class="wm-sheet-sub">Customize your vibe</div>

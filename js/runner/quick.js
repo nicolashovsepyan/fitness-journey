@@ -402,7 +402,7 @@ const ROW_TONE = {
   mins: 'accent', cap: 'accent', work: 'accent', every: 'accent', dbEvery: 'accent', pace: 'accent',
   rest: 'neon', setRest: 'neon',
   rounds: 'violet', ftRounds: 'violet', sets: 'violet', dbMax: 'violet', ldRungs: 'violet',
-  ftCap: 'gold', ptCap: 'gold', ldCap: 'gold',
+  ftCap: 'ready', ptCap: 'ready', ldCap: 'ready',
 };
 function rowShell(k, label, face, foot, minus, plus, extra = '') {
   return `<div class="qt-srow tone-${ROW_TONE[k] || 'accent'}">
@@ -496,7 +496,7 @@ function draw() {
     ...more.map(stepRow),
     ...(cfg.fmt === 'emom' && named > 1 ? [segRow('How the moves run', 'accent', [['turns', 'Take turns'], ['all', 'All every minute']], cfg.emomStyle === 'all' ? 'all' : 'turns', 'data-style',
         cfg.emomStyle === 'all' ? `All ${named} moves inside each minute` : 'Minute 1 is move 1, minute 2 is move 2')] : []),
-    segRow('Get-ready countdown', 'gold', [[0, 'None'], [3, '3s'], [5, '5s'], [10, '10s']], cfg.ready, 'data-ready', 'Time to get in position before the clock starts'),
+    segRow('Get-ready countdown', 'ready', [[0, 'None'], [3, '3s'], [5, '5s'], [10, '10s']], cfg.ready, 'data-ready', 'Time to get in position before the clock starts'),
   ];
   host.innerHTML = `
   <div class="screen qt fade-in">
@@ -1011,7 +1011,7 @@ function injectStyle() {
   .qt-srow.tone-accent .qt-sl { color: var(--wm-accent); }
   .qt-srow.tone-neon .qt-sl { color: var(--wm-neon); }
   .qt-srow.tone-violet .qt-sl { color: #B57BFF; }
-  .qt-srow.tone-gold .qt-sl { color: #D9A94C; }
+  .qt-srow.tone-ready .qt-sl { color: var(--wm-ready, #3D6BFF); }
   .qt-sline { display:flex; align-items:center; justify-content: space-between; gap: 8px; }
   .qt-pm { flex: none; width: 56px; height: 52px; background: none; border: none; color: var(--text); font-size: 30px; font-weight: 300; cursor:pointer; border-radius: 14px; touch-action: manipulation; }
   .qt-pm:active { background: var(--box-2); }
@@ -1026,7 +1026,7 @@ function injectStyle() {
   .qt-seg2 button { white-space: nowrap; flex:1; min-height: 42px; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; color: var(--muted); font-size: 14px; font-weight: 600; cursor:pointer; padding: 0 6px; }
   .qt-srow.tone-accent .qt-seg2 button.on { color: var(--wm-accent); border-color: var(--wm-accent); background: var(--wm-accent-soft); }
   .qt-srow.tone-violet .qt-seg2 button.on { color: #B57BFF; border-color: #B57BFF; background: rgba(181,123,255,.12); }
-  .qt-srow.tone-gold .qt-seg2 button.on { color: #D9A94C; border-color: #D9A94C; background: rgba(217,169,76,.12); }
+  .qt-srow.tone-ready .qt-seg2 button.on { color: #7D9BFF; border-color: var(--wm-ready, #3D6BFF); background: rgba(61,107,255,.14); }
   .qt-srow .qt-su { margin-top: 6px; }
   .qt-move2 { text-align:left; }
   .qt-mhead { display:flex; align-items:center; gap: 8px; }
