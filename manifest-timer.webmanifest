@@ -1,6 +1,6 @@
 {
-  "name": "Fitness Journey Timer",
-  "short_name": "FJ Timer",
+  "name": "Interval Timer",
+  "short_name": "Interval Timer",
   "description": "EMOM, AMRAP, Tabata, ladders, push-up test. Your timer.",
   "start_url": "./index.html?quick",
   "scope": "./",

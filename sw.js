@@ -15,7 +15,7 @@
    Training data lives in localStorage, not here, so an update never
    touches a logged session.
    ============================================================ */
-const VERSION = 'd32132112b';
+const VERSION = '6b98b635c9';
 const CACHE = 'fj-' + VERSION;
 const ASSETS = [
   "./coach.html",
@@ -92,6 +92,7 @@ const ASSETS = [
   "./js/screens/week.js",
   "./js/store.js",
   "./js/timer.js",
+  "./js/update-banner.js",
   "./js/users.js",
   "./library.html",
   "./logo/DUMBBELL.html",
@@ -124,7 +125,8 @@ const ASSETS = [
   "./spine/programs/levers_and_lifts.json",
   "./spine/programs/main.json",
   "./spine/theme.json",
-  "./styles.css"
+  "./styles.css",
+  "./whatsnew.json"
 ];
 
 self.addEventListener('install', (e) => {

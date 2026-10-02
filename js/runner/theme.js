@@ -204,6 +204,28 @@ function injectStyle() {
   html.wm .timer.dial.ready .crown { fill: #D9A94C; }
   html.wm[data-phase="rest"] .timer.dial .crown { fill: var(--wm-neon); }
   html.wm .timer.dial .read .cap { letter-spacing: .14em; font-size: 11px; opacity: .8; }
+  /* RING STYLES (Timer settings → Timer ring), as <html class="ring-…">.
+     Shared: the core, glare and cutter are hidden unless a style uses them. */
+  html.wm .timer.dial .core, html.wm .timer.dial .glare, html.wm .timer.dial .cut, html.wm .timer.dial .track-core { display: none; }
+  html.wm .timer.dial .fill, html.wm .timer.dial .core { transition: stroke-dashoffset .95s linear; fill: none; stroke-linecap: round; }
+  html.wm .timer.dial.ready .fill { stroke: #D9A94C; }
+  /* NEON TUBE: colour tube + white-hot core + halo + glare; the empty part is unlit glass */
+  html.wm.ring-tube .timer.dial .fill { stroke-width: 11; filter: drop-shadow(0 0 4px var(--wm-accent)) drop-shadow(0 0 14px var(--wm-accent-wash)); }
+  html.wm.ring-tube .timer.dial.rest .fill, html.wm.ring-tube[data-phase="rest"] .timer.dial .fill { filter: drop-shadow(0 0 4px var(--wm-neon)) drop-shadow(0 0 14px var(--wm-neon-wash)); }
+  html.wm.ring-tube .timer.dial.ready .fill { filter: drop-shadow(0 0 4px #D9A94C) drop-shadow(0 0 14px rgba(217,169,76,.35)); }
+  html.wm.ring-tube .timer.dial .core { display: inline; stroke: #fff; stroke-opacity: .92; stroke-width: 3.6; }
+  html.wm.ring-tube .timer.dial .track { stroke: #fff; stroke-opacity: .07; stroke-width: 11; }
+  html.wm.ring-tube .timer.dial .track-core { display: inline; fill: none; stroke: #fff; stroke-opacity: .09; stroke-width: 2; }
+  html.wm.ring-tube .timer.dial .glare { display: inline; fill: none; stroke: #fff; stroke-width: 2.4; stroke-linecap: round; stroke-opacity: .85;
+    transform: translate(-2.2px, -2.2px); filter: blur(.4px); }
+  html.wm.ring-tube .timer.dial .glare.off { display: none; }
+  /* LED: the same tube, cut into segments like an 80s display */
+  html.wm.ring-led .timer.dial .fill { stroke-width: 12; stroke-linecap: butt; filter: drop-shadow(0 0 6px var(--wm-accent-wash)); }
+  html.wm.ring-led .timer.dial.rest .fill, html.wm.ring-led[data-phase="rest"] .timer.dial .fill { filter: drop-shadow(0 0 6px var(--wm-neon-wash)); }
+  html.wm.ring-led .timer.dial .track { stroke-width: 12; stroke: #fff; stroke-opacity: .07; }
+  html.wm.ring-led .timer.dial .cut { display: inline; fill: none; stroke: var(--bg); stroke-width: 14; stroke-dasharray: 2.2 8.27; }
+  /* CLEAN: one line, the previous look */
+  html.wm.ring-clean .timer.dial .fill { stroke-width: 7; }
   /* push-up test: the cue flips pink (down) / accent (up) on each beep */
   html.wm .cad { text-align:center; margin-top: 14px; }
   html.wm .cad-cue { font-size: 68px; font-weight: 800; letter-spacing: -0.03em; text-transform: uppercase; color: var(--muted); }

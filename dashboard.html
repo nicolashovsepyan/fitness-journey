@@ -7034,11 +7034,10 @@ loadTheme().then(()=>go(S.tab||'today'));   /* then again from the spine, if rea
      would not even re-read the worker to notice a new version existed.
      This bypasses the browser cache for the worker script only.
 
-     A RELOAD, not a bar. index.html shows "new version ready, tap to
-     update" because it may be running a workout and must never
-     interrupt one. Nothing runs on this page, so waiting for a tap only
-     means looking at a stale screen for longer. It reloads itself once
-     and says so afterwards.
+     A BAR WITH A REFRESH BUTTON (since 2 Oct 2026, Nicolas: "updates should
+     be clear"). Same bar on every page, js/update-banner.js: "Update ready"
+     + what changed (whatsnew.json) + Refresh; after the refresh, "Updated"
+     once. Every release bumps whatsnew.json.
    ============================================================ */
 (function(){
   if(!('serviceWorker' in navigator)) return;
@@ -7046,10 +7045,9 @@ loadTheme().then(()=>go(S.tab||'today'));   /* then again from the spine, if rea
   navigator.serviceWorker.addEventListener('message', e => {
     if(!e.data || e.data.type !== 'sw-updated') return;
     if(!seen){ seen = true; return; }                // the very first install updates nothing
-    /* Remember across the reload so the page can say what happened rather
-       than appearing to have blinked for no reason. */
-    try{ sessionStorage.setItem('fj.justUpdated', e.data.version || '1'); }catch(err){}
-    location.reload();
+    /* AN UPDATE YOU CAN SEE: an "Update ready" bar with what changed and a
+       Refresh button, the same one the timer shows (js/update-banner.js). */
+    import('./js/update-banner.js').then(m => m.updateReady()).catch(() => location.reload());
   });
   navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(reg => {
     const poke = () => { if(!document.hidden) reg.update().catch(()=>{}); };
@@ -7057,12 +7055,8 @@ loadTheme().then(()=>go(S.tab||'today'));   /* then again from the spine, if rea
     poke();
   }).catch(()=>{});
 
-  try{
-    if(sessionStorage.getItem('fj.justUpdated')){
-      sessionStorage.removeItem('fj.justUpdated');
-      setTimeout(()=>{ try{ toast('Updated to the latest version'); }catch(err){} }, 600);
-    }
-  }catch(err){}
+  /* after a refresh onto a new version: "Updated ✓" and what changed, once */
+  import('./js/update-banner.js').then(m => m.announceUpdate()).catch(() => {});
 })();
 </script>
 <!-- ============================================================

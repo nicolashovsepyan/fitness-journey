@@ -8,7 +8,8 @@ import { setVoice, setBeeps, say, beep } from '../timer.js';
 import { vibeOptions, setVibe } from './theme.js';
 
 const KEY = 'workModePrefs';
-const DEFAULTS = { voice: true, beeps: true, flash: true };
+const DEFAULTS = { voice: true, beeps: true, flash: true, ring: 'tube' };
+const RINGS = [['tube', 'Neon tube'], ['led', 'LED'], ['clean', 'Clean']];
 let prefs = { ...DEFAULTS };
 let loaded = false;
 
@@ -19,7 +20,11 @@ export async function loadPrefs() {
   return prefs;
 }
 export const pref = k => prefs[k];
-function apply() { setVoice(!!prefs.voice); setBeeps(!!prefs.beeps); }
+function apply() {
+  setVoice(!!prefs.voice); setBeeps(!!prefs.beeps);
+  const el = document.documentElement;
+  RINGS.forEach(([id]) => el.classList.toggle('ring-' + id, prefs.ring === id));
+}
 function set(k, v) {
   prefs[k] = v; apply();
   try { storage().setDevicePref(KEY, prefs); } catch (e) {}
@@ -39,6 +44,8 @@ function vibeHtml() {
   if (!palettes.length) return '';
   const glow = vibe.glow || 'normal';
   return `<div class="wm-sheet-sub">Customize your vibe</div>
+    <div class="wm-vrow"><div class="wm-vl"><b>Timer ring</b><small>How the countdown circle is drawn</small></div>
+      <div class="wm-seg3">${RINGS.map(([v, l]) => `<button class="${prefs.ring === v ? 'on' : ''}" data-vring="${v}">${l}</button>`).join('')}</div></div>
     ${slots.map(sl => `<div class="wm-vrow"><div class="wm-vl"><b>${sl.name}</b><small>${sl.hint}</small></div>
       <div class="wm-sw6">${palettes.map(p => `<button class="wm-dot ${pick[sl.id] === p.id ? 'on' : ''}" style="--c:${p.hex}" data-vslot="${sl.id}:${p.id}" aria-label="${p.name}" title="${p.name}"></button>`).join('')}</div></div>`).join('')}
     <div class="wm-vrow"><div class="wm-vl"><b>Glow</b><small>How hard everything shines</small></div>
@@ -67,6 +74,7 @@ export function openPrefs(host) {
     ov.querySelectorAll('[data-vslot]').forEach(b => b.addEventListener('click', () => {
       const [slot, pal] = b.dataset.vslot.split(':'); setVibe({ slots: { [slot]: pal }, themeRandom: false }); draw();
     }));
+    ov.querySelectorAll('[data-vring]').forEach(b => b.addEventListener('click', () => { set('ring', b.dataset.vring); draw(); }));
     ov.querySelectorAll('[data-vglow]').forEach(b => b.addEventListener('click', () => { setVibe({ glow: b.dataset.vglow }); draw(); }));
     ov.querySelector('[data-vshuffle]')?.addEventListener('click', () => { const v = vibeOptions(); setVibe({ themeRandom: !v.vibe.themeRandom, slots: v.pick }); draw(); });
   };

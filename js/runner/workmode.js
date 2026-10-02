@@ -672,11 +672,22 @@ const DIAL = (() => {
   return `<path class="rays" d="${rays}"/><path class="ticks" d="${ticks}"/><path class="quarters" d="${quarters}"/>
     <rect class="crown" x="114" y="-4" width="12" height="9" rx="3"/>`;
 })();
+/* THE TUBE (settings: Timer ring). Drawn like the logo's neon: a coloured
+   tube with a white-hot core running inside it and a glare where the light
+   catches the glass; the empty part is unlit tube. "LED" cuts the same
+   tube into segments; "Clean" is a single line. All share one arc, so the
+   time left moves every layer together. */
+const GLARE = (() => { const C = 120, p = a => { const t = (a - 90) * Math.PI / 180; return `${(C + RING_R * Math.cos(t)).toFixed(1)} ${(C + RING_R * Math.sin(t)).toFixed(1)}`; };
+  return `M${p(12)} A${RING_R} ${RING_R} 0 0 1 ${p(34)}`; })();
 function timerSvg(cls) {
   const c = 2 * Math.PI * RING_R;
+  const arc = (k, id) => `<circle class="${k}" ${id ? `id="${id}"` : ''} cx="120" cy="120" r="${RING_R}" stroke-dasharray="${c}" stroke-dashoffset="0" transform="rotate(-90 120 120)"></circle>`;
   return `<div class="timer dial ${cls}"><svg viewBox="-6 -10 252 256">${DIAL}
     <circle class="track" cx="120" cy="120" r="${RING_R}"></circle>
-    <circle class="fill" id="timerFill" cx="120" cy="120" r="${RING_R}" stroke-dasharray="${c}" stroke-dashoffset="0" transform="rotate(-90 120 120)"></circle></svg>
+    <circle class="track-core" cx="120" cy="120" r="${RING_R}"></circle>
+    ${arc('fill', 'timerFill')}${arc('core', 'timerCore')}
+    <path class="glare" id="timerGlare" d="${GLARE}"/>
+    <circle class="cut" cx="120" cy="120" r="${RING_R}"></circle></svg>
     <div class="read"><div class="t" id="timerText">0:00</div><div class="cap" id="timerCap"></div></div></div>`;
 }
 function updateTimer(rem, total) {
@@ -694,6 +705,8 @@ function updateTimer(rem, total) {
   }
   if (txt) txt.textContent = fmt(shown);
   if (fillEl) fillEl.style.strokeDashoffset = String(c * (1 - frac));
+  const coreEl = document.getElementById('timerCore'); if (coreEl) coreEl.style.strokeDashoffset = String(c * (1 - frac));
+  document.getElementById('timerGlare')?.classList.toggle('off', frac < 0.11);   // no glare floating past the end of the tube
   const paused = R.isStepPaused(S);
   const cap = document.getElementById('timerCap'); if (cap) cap.textContent = paused ? '❚❚ paused, tap to resume' : 'tap to pause';
   document.querySelector('.timer')?.classList.toggle('paused', paused);

@@ -35,6 +35,16 @@ every other chat, and to you tomorrow.
 
 ---
 
+## Every release: bump whatsnew.json
+
+Users see an "Update ready · Refresh" bar and then "Updated ✓" with the first
+line of `whatsnew.json` (js/update-banner.js, on index.html and dashboard.html).
+**Any chat that ships something users will notice:** change `version` and put
+one short plain line first in `notes`, in the same commit. Without it the bar
+still appears, but says nothing about what changed.
+
+---
+
 ## Work Mode has its own chat
 
 The live timer (program workouts AND the standalone Quick Timer) is built from

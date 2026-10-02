@@ -14,6 +14,7 @@ import { renderBSummary } from './screens/b-summary.js';
 import { renderBHistory } from './screens/b-history.js';
 import { startWorkout, resumeWorkout } from './runner/workmode.js';
 import { renderQuick } from './runner/quick.js';
+import { updateReady, announceUpdate } from './update-banner.js';
 import * as R from './runner/runstate.js';
 import { isBeginner, isClaimed, activeUserId, loadUsers } from './users.js';
 import { setAdapter } from './core/storage.js';
@@ -321,6 +322,7 @@ async function boot() {
 document.addEventListener('visibilitychange', () => { if (document.hidden) flushStore(); });
 window.addEventListener('pagehide', () => { flushStore(); });
 
+announceUpdate();                         // "Updated ✓" once after a refresh onto a new version
 boot().catch(err => {
   console.error('boot failed', err);
   app.innerHTML = '<div class="screen"><h1 class="q">Something went wrong starting up.</h1>'
@@ -371,17 +373,12 @@ if (!NO_SW && 'serviceWorker' in navigator) {
     showUpdateBar();
   });
 }
+/* A NEW VERSION IS HERE: an "Update ready" bar with what changed and a
+   Refresh button (js/update-banner.js). Never during a live workout: it
+   waits, and shows the moment the workout is over. */
+let updatePending = false;
 function showUpdateBar() {
-  if (document.getElementById('updBar') || R.isActive()) return;   // never interrupt a live workout
-  /* Not mid-workout: just take the new version, the way the dashboard does.
-     A 12-second "tap to update" bar was easy to miss, and a phone kept
-     showing last week's Quick Timer. Setups are saved, nothing is lost. */
-  location.reload(); return;
-  const bar = document.createElement('div');
-  bar.id = 'updBar'; bar.className = 'toast go';
-  bar.style.cursor = 'pointer';
-  bar.textContent = '↻ New version ready — tap to update';
-  bar.addEventListener('click', () => location.reload());
-  document.body.appendChild(bar);
-  setTimeout(() => bar.remove(), 12000);
+  if (R.isActive()) { updatePending = true; return; }
+  updateReady();
 }
+setInterval(() => { if (updatePending && !R.isActive()) { updatePending = false; updateReady(); } }, 2000);
