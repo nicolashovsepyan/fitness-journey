@@ -21,21 +21,21 @@ const KEY = 'fj.ringDesign';
    number in them is a lab control. Colours are electro only. */
 export const PRESETS = [
   { id: 'chrono', name: 'Chrono', note: 'Like the app icon: pink dial, lit ticks',
-    arc: { width: 8, style: 'solid', core: 0.42, coreColor: 'tint', glow: 0.8, glare: false, cap: 'round', segments: 60, gap: 0.35 },
+    arc: { width: 8, style: 'solid', core: 0.42, coreColor: 'tint', coreSoft: 0.45, coreOpacity: 0.92, glow: 0.8, glare: false, cap: 'round', segments: 60, gap: 0.35 },
     track: { width: 8, opacity: 0.05, core: false },
     ticks: { count: 60, length: 7, quarters: true, opacity: 0.8, color: 'phase', position: 'outside' },
     rays: 0.05, crown: true, face: 'disc',
     digits: { font: 'mono', weight: 700, glow: 0.8, color: 'phase', size: 1 },
     colors: { work: 'neon', rest: 'accent', ready: 'royal', grad: 'accent' } },
   { id: 'led', name: 'LED', note: 'Segments, like an 80s display',
-    arc: { width: 14, style: 'segments', core: 0, coreColor: 'white', glow: 0.6, glare: false, cap: 'butt', segments: 60, gap: 0.4 },
+    arc: { width: 14, style: 'segments', core: 0, coreColor: 'white', coreSoft: 0.3, coreOpacity: 0.92, glow: 0.6, glare: false, cap: 'butt', segments: 60, gap: 0.4 },
     track: { width: 14, opacity: 0.08, core: false },
     ticks: { count: 0, length: 5, quarters: false, opacity: 0.4, color: 'muted', position: 'outside' },
     rays: 0, crown: true, face: 'none',
     digits: { font: 'mono', weight: 700, glow: 0.7, color: 'phase', size: 1 },
     colors: { work: 'accent', rest: 'neon', ready: 'royal', grad: 'neon' } },
   { id: 'laser', name: 'Laser', note: 'A thin white beam with a big glow',
-    arc: { width: 3.5, style: 'solid', core: 1, coreColor: 'white', glow: 2, glare: false, cap: 'round', segments: 60, gap: 0.35 },
+    arc: { width: 3.5, style: 'solid', core: 1, coreColor: 'white', coreSoft: 0.2, coreOpacity: 0.95, glow: 2, glare: false, cap: 'round', segments: 60, gap: 0.35 },
     track: { width: 2, opacity: 0.06, core: false },
     ticks: { count: 60, length: 4, quarters: true, opacity: 0.3, color: 'muted', position: 'outside' },
     rays: 0.03, crown: true, face: 'none',
@@ -142,6 +142,8 @@ export function ringHTML(phase, d = ringDesign(), uid = '') {
       <linearGradient id="${id('rg')}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" style="stop-color:${rc}"/><stop offset="100%" style="stop-color:var(--ring-grad)"/></linearGradient>
       <radialGradient id="${id('rf')}"><stop offset="0%" stop-color="#ffffff" stop-opacity=".05"/><stop offset="100%" stop-color="#000000" stop-opacity=".35"/></radialGradient>
       <radialGradient id="${id('rgw')}"><stop offset="0%" style="stop-color:${rc};stop-opacity:.12"/><stop offset="100%" style="stop-color:${rc};stop-opacity:0"/></radialGradient>
+      <filter id="${id('cb')}" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="${f1(Math.max(0.01, (a.coreSoft || 0) * a.width * a.core * 0.55))}"/></filter>
+      <filter id="${id('ch')}" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="${f1(Math.max(0.01, (a.coreSoft || 0) * a.width * 0.45))}"/></filter>
       <mask id="${id('rm')}"><circle cx="${C}" cy="${C}" r="${RING_R}" fill="none" stroke="#fff" stroke-width="${a.width + 6}"
         stroke-dasharray="${f1(segW * (1 - a.gap))} ${f1(segW * a.gap)}" transform="rotate(-90 ${C} ${C})"/></mask>
     </defs>
@@ -154,7 +156,8 @@ export function ringHTML(phase, d = ringDesign(), uid = '') {
       <circle cx="${C}" cy="${C}" r="${RING_R}" fill="none" style="stroke:#fff;stroke-opacity:${tr.opacity};stroke-width:${tr.width};"/>
       ${tr.core ? `<circle cx="${C}" cy="${C}" r="${RING_R}" fill="none" style="stroke:#fff;stroke-opacity:${f1(tr.opacity + 0.03)};stroke-width:${f1(Math.max(1.5, tr.width * 0.18))};"/>` : ''}
       ${arc('fill', `stroke:${stroke};stroke-width:${a.width};stroke-linecap:${a.cap};${glow}`, uid ? '' : 'timerFill')}
-      ${a.core > 0 ? arc('core', `stroke:${coreCol};stroke-opacity:.92;stroke-width:${f1(a.width * a.core)};stroke-linecap:${a.cap};`, uid ? '' : 'timerCore') : ''}
+      ${a.core > 0 && a.coreSoft > 0 ? arc('core halo', `stroke:color-mix(in srgb, ${rc} 45%, #ffffff);stroke-opacity:${f1(0.55 * (a.coreOpacity ?? 0.92))};stroke-width:${f1(Math.min(a.width, a.width * a.core * (1 + 1.4 * a.coreSoft)))};stroke-linecap:${a.cap};`, '').replace('<circle ', `<circle filter="url(#${id('ch')})" `) : ''}
+      ${a.core > 0 ? arc('core', `stroke:${coreCol};stroke-opacity:${a.coreOpacity ?? 0.92};stroke-width:${f1(a.width * a.core * (1 - 0.35 * (a.coreSoft || 0)))};stroke-linecap:${a.cap};`, uid ? '' : 'timerCore').replace('<circle ', a.coreSoft > 0 ? `<circle filter="url(#${id('cb')})" ` : '<circle ') : ''}
     </g>
     ${a.glare ? `<path class="glare" ${uid ? '' : 'id="timerGlare"'} d="${glareD}" style="fill:none;stroke:#fff;stroke-width:${f1(Math.max(1.6, a.width * 0.22))};stroke-linecap:round;stroke-opacity:.8;transform:translate(-${f1(a.width * 0.2)}px,-${f1(a.width * 0.2)}px)"/>` : ''}
   </svg>

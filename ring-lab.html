@@ -147,6 +147,8 @@ const GROUPS = [
     ['Thickness', 'arc.width', 'range', 2, 28, 0.5],
     ['White core', 'arc.core', 'range', 0, 1, 0.01],
     ['Core colour', 'arc.coreColor', 'seg', [['white', 'White'], ['tint', 'Tinted']]],
+    ['Core softness', 'arc.coreSoft', 'range', 0, 1, 0.01, d => d.arc.core > 0],
+    ['Core brightness', 'arc.coreOpacity', 'range', 0.2, 1, 0.01, d => d.arc.core > 0],
     ['Glow', 'arc.glow', 'range', 0, 2.5, 0.05],
     ['Glare', 'arc.glare', 'toggle'],
     ['Ends', 'arc.cap', 'seg', [['round', 'Round'], ['butt', 'Flat']]],

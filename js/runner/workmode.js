@@ -681,7 +681,7 @@ function updateTimer(rem, total) {
   }
   if (txt) txt.textContent = fmt(shown);
   if (fillEl) fillEl.style.strokeDashoffset = String(c * (1 - frac));
-  const coreEl = document.getElementById('timerCore'); if (coreEl) coreEl.style.strokeDashoffset = String(c * (1 - frac));
+  document.querySelectorAll('.timer-wrap .timer .core').forEach(el => { el.style.strokeDashoffset = String(c * (1 - frac)); });   // the core and its halo
   document.getElementById('timerGlare')?.classList.toggle('off', frac < 0.11);   // no glare floating past the end of the tube
   const paused = R.isStepPaused(S);
   const cap = document.getElementById('timerCap'); if (cap) cap.textContent = paused ? '❚❚ paused, tap to resume' : 'tap to pause';
