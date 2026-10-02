@@ -113,12 +113,6 @@ function injectStyle() {
   html.wm body { background: var(--bg); }
   html.wm .btn:not(.ghost):not(.secondary) { color: #0C1512; }
   html.wm .btn.lg:not(.ghost):not(.secondary) { box-shadow: var(--wm-glow-accent); }
-  /* the ring: work in the accent, rest in the neon, get ready in gold, each with its halo */
-  html.wm .timer .fill { stroke: var(--wm-accent); filter: drop-shadow(0 0 8px var(--wm-accent-soft)); }
-  html.wm .timer.buffer .fill { stroke: var(--wm-accent); }
-  html.wm .timer.rest .fill { stroke: var(--wm-neon); filter: drop-shadow(0 0 10px var(--wm-neon-line)); }
-  html.wm .timer.ready .fill { stroke: #D9A94C; filter: none; }
-  html.wm .timer .track { stroke: #242A33; }
   html.wm .timer .read .t { letter-spacing: -0.02em; }
   html.wm .run-head { border-bottom: 1px solid var(--wm-neon-soft); }
   html.wm .wprog-fill { background: linear-gradient(90deg, var(--wm-neon), var(--wm-accent)); }
@@ -133,7 +127,6 @@ function injectStyle() {
   html.wm[data-phase="ready"] body { background: radial-gradient(130% 80% at 50% 0%, rgba(217,169,76,.26), var(--bg) 70%) var(--bg); }
   html.wm .screen.run { background: transparent; }
   html.wm[data-phase] .timer { width: min(76vw, 300px); height: min(76vw, 300px); }
-  html.wm[data-phase] .timer .read .t { font-size: min(19vw, 76px); }
   html.wm[data-phase="work"] .now-ex .label { color: var(--wm-accent); }
   html.wm[data-phase="rest"] .now-ex .label { color: var(--wm-neon); }
   html.wm[data-phase="ready"] .now-ex .label { color: #D9A94C; }
@@ -177,6 +170,13 @@ function injectStyle() {
   html.wm .wm-dot { width: 38px; height: 38px; border-radius: 50%; border: 2px solid transparent; background: var(--c); cursor:pointer;
     box-shadow: 0 0 12px color-mix(in srgb, var(--c) 45%, transparent); }
   html.wm .wm-dot.on { border-color: var(--text); outline: 2px solid var(--c); outline-offset: 2px; }
+  html.wm .wm-rings { display:grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  html.wm .wm-ringopt { display:flex; flex-direction:column; align-items:center; gap: 4px; background: var(--box); border: 1px solid var(--line); border-radius: 14px; padding: 8px 4px 6px; color: var(--muted); font-size: 11.5px; font-weight: 600; cursor:pointer; }
+  html.wm .wm-ringopt.on { border-color: var(--wm-accent); color: var(--wm-accent); background: var(--wm-accent-soft); }
+  html.wm .wm-mini { display:block; width: 58px; height: 58px; }
+  html.wm .wm-mini .timer { width: 58px !important; height: 58px !important; }
+  html.wm .wm-mini .read { display: none; }
+  html.wm .wm-lab { display:block; text-align:center; text-decoration:none; margin-top: 10px; }
   html.wm .wm-seg3 { display:flex; gap: 6px; }
   html.wm .wm-seg3 button { flex:1; background: var(--box); border: 1px solid var(--line); border-radius: 10px; color: var(--text); padding: 10px 0; font-weight: 600; cursor:pointer; }
   html.wm .wm-seg3 button.on { border-color: var(--wm-accent); color: var(--wm-accent); background: var(--wm-accent-soft); }
@@ -189,43 +189,9 @@ function injectStyle() {
   html.wm .lap b { font-family: var(--tnum); font-size: 18px; color: var(--text); }
   html.wm .lap small { font-family: var(--tnum); color: var(--faint); font-size: 13px; text-align: right; }
   html.wm .lap:first-child b { color: var(--wm-accent); }
-  /* THE DIAL (workmode.js timerSvg): the svg is not rotated as a whole any
-     more, the arc carries its own rotate(-90) so the crown sits at 12 */
+  /* the ring itself is drawn by js/runner/ring.js, every property inline */
   html.wm .timer.dial svg { transform: none; overflow: visible; }
-  html.wm .timer.dial .rays { stroke: #fff; stroke-opacity: .035; stroke-width: 1; }
-  html.wm .timer.dial .ticks { stroke: var(--muted); stroke-opacity: .45; stroke-width: 1.6; stroke-linecap: round; }
-  html.wm .timer.dial .quarters { stroke: var(--text); stroke-opacity: .8; stroke-width: 3; stroke-linecap: round; }
-  html.wm .timer.dial .crown { fill: var(--wm-accent); filter: drop-shadow(0 0 6px var(--wm-accent-soft)); }
-  html.wm .timer.dial .track { stroke: #fff; stroke-opacity: .06; stroke-width: 6; }
-  html.wm .timer.dial .fill { stroke-width: 7; }
-  html.wm .timer.dial .read .t { color: var(--wm-accent); text-shadow: 0 0 18px var(--wm-accent-soft); font-weight: 700; }
-  html.wm .timer.dial.rest .read .t, html.wm[data-phase="rest"] .timer.dial .read .t { color: var(--wm-neon); text-shadow: 0 0 18px var(--wm-neon-soft); }
-  html.wm .timer.dial.ready .read .t { color: #D9A94C; text-shadow: 0 0 18px rgba(217,169,76,.25); }
-  html.wm .timer.dial.ready .crown { fill: #D9A94C; }
-  html.wm[data-phase="rest"] .timer.dial .crown { fill: var(--wm-neon); }
-  html.wm .timer.dial .read .cap { letter-spacing: .14em; font-size: 11px; opacity: .8; }
-  /* RING STYLES (Timer settings → Timer ring), as <html class="ring-…">.
-     Shared: the core, glare and cutter are hidden unless a style uses them. */
-  html.wm .timer.dial .core, html.wm .timer.dial .glare, html.wm .timer.dial .cut, html.wm .timer.dial .track-core { display: none; }
-  html.wm .timer.dial .fill, html.wm .timer.dial .core { transition: stroke-dashoffset .95s linear; fill: none; stroke-linecap: round; }
-  html.wm .timer.dial.ready .fill { stroke: #D9A94C; }
-  /* NEON TUBE: colour tube + white-hot core + halo + glare; the empty part is unlit glass */
-  html.wm.ring-tube .timer.dial .fill { stroke-width: 11; filter: drop-shadow(0 0 4px var(--wm-accent)) drop-shadow(0 0 14px var(--wm-accent-wash)); }
-  html.wm.ring-tube .timer.dial.rest .fill, html.wm.ring-tube[data-phase="rest"] .timer.dial .fill { filter: drop-shadow(0 0 4px var(--wm-neon)) drop-shadow(0 0 14px var(--wm-neon-wash)); }
-  html.wm.ring-tube .timer.dial.ready .fill { filter: drop-shadow(0 0 4px #D9A94C) drop-shadow(0 0 14px rgba(217,169,76,.35)); }
-  html.wm.ring-tube .timer.dial .core { display: inline; stroke: #fff; stroke-opacity: .92; stroke-width: 3.6; }
-  html.wm.ring-tube .timer.dial .track { stroke: #fff; stroke-opacity: .07; stroke-width: 11; }
-  html.wm.ring-tube .timer.dial .track-core { display: inline; fill: none; stroke: #fff; stroke-opacity: .09; stroke-width: 2; }
-  html.wm.ring-tube .timer.dial .glare { display: inline; fill: none; stroke: #fff; stroke-width: 2.4; stroke-linecap: round; stroke-opacity: .85;
-    transform: translate(-2.2px, -2.2px); filter: blur(.4px); }
-  html.wm.ring-tube .timer.dial .glare.off { display: none; }
-  /* LED: the same tube, cut into segments like an 80s display */
-  html.wm.ring-led .timer.dial .fill { stroke-width: 12; stroke-linecap: butt; filter: drop-shadow(0 0 6px var(--wm-accent-wash)); }
-  html.wm.ring-led .timer.dial.rest .fill, html.wm.ring-led[data-phase="rest"] .timer.dial .fill { filter: drop-shadow(0 0 6px var(--wm-neon-wash)); }
-  html.wm.ring-led .timer.dial .track { stroke-width: 12; stroke: #fff; stroke-opacity: .07; }
-  html.wm.ring-led .timer.dial .cut { display: inline; fill: none; stroke: var(--bg); stroke-width: 14; stroke-dasharray: 2.2 8.27; }
-  /* CLEAN: one line, the previous look */
-  html.wm.ring-clean .timer.dial .fill { stroke-width: 7; }
+  html.wm[data-phase] .timer.dial { width: min(80vw, 310px); height: min(80vw, 310px); }
   /* push-up test: the cue flips pink (down) / accent (up) on each beep */
   html.wm .cad { text-align:center; margin-top: 14px; }
   html.wm .cad-cue { font-size: 68px; font-weight: 800; letter-spacing: -0.03em; text-transform: uppercase; color: var(--muted); }

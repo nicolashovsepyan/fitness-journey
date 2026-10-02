@@ -11,6 +11,7 @@ import { store } from '../store.js';
 import { EXERCISES } from '../data/exercises.js';
 import { alternatives } from '../core/resolve.js';
 import { applyWorkTheme, clearWorkTheme } from './theme.js';
+import { ringHTML, ringBaseCss, RING_R } from './ring.js';
 import { loadPrefs, pref, openPrefs } from './prefs.js';
 import { say, beep, buzz, fmt, initAudio, stopAudio, keepAwake, releaseAwake, setMuted } from '../timer.js';
 
@@ -655,43 +656,18 @@ function loggedSetCount() {
 }
 
 /* ---------------- timer + input fragments ---------------- */
-/* THE DIAL. A stopwatch face, after the FJ Timer icon (J5 Sunray): sixty
-   minute ticks with longer quarters, faint sunray hairlines on the face, a
-   crown nub at 12, and the time left as one glowing arc in the phase colour.
-   The arc is the only thing that moves. */
-const RING_R = 100;
-const DIAL = (() => {
-  const C = 120, line = (a, r1, r2) => { const t = (a - 90) * Math.PI / 180;
-    return `M${(C + r1 * Math.cos(t)).toFixed(1)} ${(C + r1 * Math.sin(t)).toFixed(1)}L${(C + r2 * Math.cos(t)).toFixed(1)} ${(C + r2 * Math.sin(t)).toFixed(1)}`; };
-  let ticks = '', quarters = '', rays = '';
-  for (let i = 0; i < 60; i++) {
-    const a = i * 6;
-    if (i % 15 === 0) quarters += line(a, 107, 117); else ticks += line(a, 110, 115);
-    rays += line(a, 16, 86);
-  }
-  return `<path class="rays" d="${rays}"/><path class="ticks" d="${ticks}"/><path class="quarters" d="${quarters}"/>
-    <rect class="crown" x="114" y="-4" width="12" height="9" rx="3"/>`;
-})();
-/* THE TUBE (settings: Timer ring). Drawn like the logo's neon: a coloured
-   tube with a white-hot core running inside it and a glare where the light
-   catches the glass; the empty part is unlit tube. "LED" cuts the same
-   tube into segments; "Clean" is a single line. All share one arc, so the
-   time left moves every layer together. */
-const GLARE = (() => { const C = 120, p = a => { const t = (a - 90) * Math.PI / 180; return `${(C + RING_R * Math.cos(t)).toFixed(1)} ${(C + RING_R * Math.sin(t)).toFixed(1)}`; };
-  return `M${p(12)} A${RING_R} ${RING_R} 0 0 1 ${p(34)}`; })();
-function timerSvg(cls) {
-  const c = 2 * Math.PI * RING_R;
-  const arc = (k, id) => `<circle class="${k}" ${id ? `id="${id}"` : ''} cx="120" cy="120" r="${RING_R}" stroke-dasharray="${c}" stroke-dashoffset="0" transform="rotate(-90 120 120)"></circle>`;
-  return `<div class="timer dial ${cls}"><svg viewBox="-6 -10 252 256">${DIAL}
-    <circle class="track" cx="120" cy="120" r="${RING_R}"></circle>
-    <circle class="track-core" cx="120" cy="120" r="${RING_R}"></circle>
-    ${arc('fill', 'timerFill')}${arc('core', 'timerCore')}
-    <path class="glare" id="timerGlare" d="${GLARE}"/>
-    <circle class="cut" cx="120" cy="120" r="${RING_R}"></circle></svg>
-    <div class="read"><div class="t" id="timerText">0:00</div><div class="cap" id="timerCap"></div></div></div>`;
-}
+/* THE RING. Drawn from the user's ring design (js/runner/ring.js: a preset
+   from Timer settings, or one made in ring-lab.html). Same drawing for the
+   get-ready, work and rest timers; only the phase colour changes. */
+function timerSvg(cls) { ringBaseCss(); return ringHTML(cls); }
+/* a new design picked mid-workout (pause → settings): swap the ring in place */
+if (typeof document !== 'undefined') document.addEventListener('fj-ring-changed', () => {
+  const t = document.querySelector('.timer-wrap .timer'); if (!t) return;
+  const ph = t.classList.contains('rest') ? 'rest' : t.classList.contains('ready') ? 'ready' : 'work';
+  t.outerHTML = timerSvg(ph); lastSec = null; if (S && !S.done) tick();
+});
 function updateTimer(rem, total) {
-  const r = RING_R, c = 2 * Math.PI * r;
+  const r = RING_R, c = 2 * Math.PI * r;   // RING_R from ring.js
   const fillEl = document.getElementById('timerFill'), txt = document.getElementById('timerText');
   let shown = rem, frac = total > 0 ? rem / total : 0;
   if (countUpDisplay) {

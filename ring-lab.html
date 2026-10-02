@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en" class="wm">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#171A1E" />
+  <title>Timer ring lab</title>
+  <link rel="icon" type="image/png" href="images/timer-icon/timer-192.png" />
+  <!--
+    TIMER RING LAB. Design the countdown circle the way the logo was
+    designed: start from a preset, push every dial, watch it live in all
+    three phases, then "Use on my timer". Draws with js/runner/ring.js,
+    the same code the timer uses, so the lab cannot lie about the result.
+  -->
+  <style>
+    :root { --bg:#171A1E; --bg-2:#1E232A; --box:#212630; --box-2:#282E38; --line:#2F3640; --text:#ECEFF3; --muted:#A9B2BC; --faint:#858E99;
+      --tnum:"SF Mono","Roboto Mono",ui-monospace,monospace; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin:0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif; }
+    body { padding: calc(14px + env(safe-area-inset-top)) 16px calc(110px + env(safe-area-inset-bottom)); max-width: 1100px; margin: 0 auto; }
+    a { color: inherit; }
+    .top { display:flex; align-items:center; gap: 10px; margin-bottom: 12px; }
+    .top a { text-decoration:none; color: var(--muted); font-size: 28px; line-height: 1; }
+    .top h1 { margin:0; font-size: 24px; letter-spacing: -0.02em; flex:1; }
+    .top h1:after { content:""; display:block; width: 30px; height: 3px; border-radius: 3px; margin-top: 5px; background: var(--wm-neon, #FF5FA2); box-shadow: 0 0 14px var(--wm-neon, #FF5FA2); }
+    .wrap { display:grid; gap: 18px; }
+    @media (min-width: 860px) { .wrap { grid-template-columns: 1fr 1fr; align-items: start; } .stage { position: sticky; top: 14px; } }
+    .stage { background: radial-gradient(120% 90% at 50% 0%, rgba(255,255,255,.04), transparent 70%), var(--bg-2); border: 1px solid var(--line); border-radius: 22px; padding: 14px; }
+    .phases { display:flex; gap: 6px; }
+    .phases button, .seg button { flex:1; background: var(--bg); border:1px solid var(--line); color: var(--muted); border-radius: 11px; padding: 9px 4px; font-size: 13px; font-weight: 700; cursor:pointer; white-space: nowrap; }
+    .phases button.on, .seg button.on { color: var(--text); border-color: var(--wm-accent, #3ECBA8); background: color-mix(in srgb, var(--wm-accent, #3ECBA8) 15%, transparent); }
+    .big { display:flex; justify-content:center; padding: 18px 0 6px; }
+    .big .timer { width: min(78vw, 330px); height: min(78vw, 330px); position: relative; }
+    .trio { display:grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 14px 0 4px; }
+    .trio > div { text-align:center; color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+    .trio .timer { width: 100%; aspect-ratio: 1; height: auto; margin-bottom: 6px; position: relative; }
+    .timer .read { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; }
+    .timer svg { width: 100%; height: 100%; }
+    .trio .timer .read .t { font-size: 22px !important; }
+    .trio .timer .read .cap { display:none; }
+    .lab .fill, .lab .core { transition: none !important; }
+    .sec { color: var(--muted); font-size: 11.5px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; margin: 18px 2px 8px; display:flex; justify-content: space-between; }
+    .presets { display:grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .pre { background: var(--box); border: 1px solid var(--line); border-radius: 14px; padding: 8px 4px 7px; color: var(--muted); font-size: 11.5px; font-weight: 700; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap: 4px; }
+    .pre.on { border-color: var(--wm-accent, #3ECBA8); color: var(--text); }
+    .pre .m { width: 62px; height: 62px; } .pre .timer { width: 62px; height: 62px; position: relative; } .pre .read { display:none; }
+    .group { background: var(--box); border-radius: 18px; overflow: hidden; display:flex; flex-direction:column; gap: 2px; }
+    .ctl { background: var(--box); padding: 11px 14px; display:grid; grid-template-columns: 112px 1fr 46px; align-items:center; gap: 10px; border-top: 1px solid var(--line); }
+    .ctl:first-child { border-top: none; }
+    .ctl.wide { grid-template-columns: 112px 1fr; }
+    .ctl label { font-size: 13.5px; font-weight: 600; }
+    .ctl output { font-family: var(--tnum); font-size: 13px; color: var(--muted); text-align: right; }
+    input[type=range] { width: 100%; accent-color: var(--wm-accent, #3ECBA8); }
+    .seg { display:flex; gap: 5px; } .seg button { padding: 8px 2px; font-size: 12.5px; }
+    .tog { justify-self: start; width: 48px; height: 28px; border-radius: 99px; background: var(--box-2); border:1px solid var(--line); position: relative; cursor:pointer; }
+    .tog:after { content:""; position:absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--muted); transition: transform .15s; }
+    .tog.on { background: color-mix(in srgb, var(--wm-accent, #3ECBA8) 20%, transparent); border-color: var(--wm-accent, #3ECBA8); }
+    .tog.on:after { transform: translateX(20px); background: var(--wm-accent, #3ECBA8); }
+    .swatches { display:flex; flex-wrap:wrap; gap: 7px; align-items:center; }
+    .sw { width: 30px; height: 30px; border-radius: 50%; border: 2px solid transparent; cursor:pointer; background: var(--c); box-shadow: 0 0 10px color-mix(in srgb, var(--c) 40%, transparent); }
+    .sw.on { border-color: var(--text); outline: 2px solid var(--c); outline-offset: 1px; }
+    .sw.own { position: relative; overflow: hidden; background: conic-gradient(#FF5FA2, #FFE24A, #B6FF3D, #3ECBA8, #4FD8FF, #B57BFF, #FF5FA2); }
+    .sw.own input { position:absolute; inset:-6px; opacity: 0; cursor:pointer; }
+    .mine { display:flex; flex-wrap:wrap; gap: 6px; }
+    .mine button { background: var(--box); border: 1px solid var(--line); color: var(--text); border-radius: 999px; padding: 7px 12px; font-size: 13px; cursor:pointer; }
+    .mine button.x { padding: 7px 9px; color: var(--faint); }
+    .bar { position: fixed; left: 0; right: 0; bottom: 0; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: linear-gradient(180deg, transparent, var(--bg) 22px);
+      display:flex; gap: 8px; max-width: 1100px; margin: 0 auto; }
+    .bar button { flex:1; border:none; border-radius: 14px; padding: 15px 8px; font-size: 15px; font-weight: 700; cursor:pointer; background: var(--box-2); color: var(--text); }
+    .bar .use { flex: 1.6; background: var(--wm-accent, #3ECBA8); color: #0C1512; box-shadow: 0 0 22px color-mix(in srgb, var(--wm-accent, #3ECBA8) 35%, transparent); }
+    .toast { position: fixed; left: 50%; bottom: calc(90px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: var(--bg-2); border: 1px solid var(--wm-neon, #FF5FA2);
+      padding: 11px 18px; border-radius: 999px; font-size: 14px; font-weight: 600; z-index: 9; white-space: nowrap; }
+    .hint { color: var(--faint); font-size: 12.5px; margin: 8px 2px 0; line-height: 1.4; }
+  </style>
+</head>
+<body class="lab">
+  <div class="top"><a href="index.html?quick" aria-label="Back to the timer">‹</a><h1>Timer ring lab</h1></div>
+  <div class="wrap">
+    <div class="stage">
+      <div class="phases" id="phases"></div>
+      <div id="view"></div>
+    </div>
+    <div>
+      <div class="sec"><span>Start from</span></div>
+      <div class="presets" id="presets"></div>
+      <div id="mineWrap"></div>
+      <div id="controls"></div>
+      <p class="hint">Your main and glow colours follow your vibe (Timer settings). Pick a fixed colour to break away from them.</p>
+    </div>
+  </div>
+  <div class="bar"><button id="reset">Reset</button><button id="save">Save</button><button id="copy">Copy</button><button class="use" id="use">Use on timer</button></div>
+
+<script type="module">
+import { setAdapter } from './js/core/storage.js';
+import { LocalAdapter } from './js/adapters/local.js';
+import { loadUsers } from './js/users.js';
+import { applyWorkTheme } from './js/runner/theme.js';
+import { PRESETS, presetById, ringDesign, saveRingDesign, ringHTML, ringBaseCss, setRingProgress } from './js/runner/ring.js';
+
+setAdapter(new LocalAdapter());
+try { await loadUsers(); } catch (e) {}          // so "your colours" are the signed-in person's
+await applyWorkTheme();
+ringBaseCss();
+
+const SAVED = 'fj.ringSaved';
+let d = ringDesign();
+let phase = 'all';
+const $ = s => document.querySelector(s);
+const clone = o => JSON.parse(JSON.stringify(o));
+const get = path => path.split('.').reduce((o, k) => o[k], d);
+const set = (path, v) => { const ks = path.split('.'); const last = ks.pop(); ks.reduce((o, k) => o[k], d)[last] = v; d.custom = true; d.id = 'custom'; draw(); };
+
+/* ---- the controls, as data: [label, path, kind, …] ---- */
+const COLORS = [['accent', 'Your main'], ['neon', 'Your glow'], ['gold', 'Gold'], ['white', 'White'], ['cyan', 'Cyan'], ['violet', 'Violet'], ['yellow', 'Yellow'], ['lime', 'Lime']];
+const HEX = { accent: 'var(--wm-accent)', neon: 'var(--wm-neon)', gold: '#D9A94C', white: '#ECEFF3', cyan: '#4FD8FF', violet: '#B57BFF', yellow: '#FFE24A', lime: '#B6FF3D' };
+const GROUPS = [
+  ['Colours', [
+    ['Work', 'colors.work', 'color'], ['Rest', 'colors.rest', 'color'], ['Get ready', 'colors.ready', 'color'],
+  ]],
+  ['The ring', [
+    ['Style', 'arc.style', 'seg', [['solid', 'Solid'], ['gradient', 'Gradient'], ['segments', 'Segments']]],
+    ['Thickness', 'arc.width', 'range', 2, 28, 0.5],
+    ['White core', 'arc.core', 'range', 0, 1, 0.01],
+    ['Core colour', 'arc.coreColor', 'seg', [['white', 'White'], ['tint', 'Tinted']]],
+    ['Glow', 'arc.glow', 'range', 0, 2.5, 0.05],
+    ['Glare', 'arc.glare', 'toggle'],
+    ['Ends', 'arc.cap', 'seg', [['round', 'Round'], ['butt', 'Flat']]],
+    ['Segments', 'arc.segments', 'range', 12, 120, 1, d => d.arc.style === 'segments'],
+    ['Gap', 'arc.gap', 'range', 0.1, 0.8, 0.01, d => d.arc.style === 'segments'],
+    ['Gradient to', 'colors.grad', 'color', d => d.arc.style === 'gradient'],
+  ]],
+  ['The empty part', [
+    ['Thickness', 'track.width', 'range', 0, 28, 0.5],
+    ['Brightness', 'track.opacity', 'range', 0, 0.3, 0.005],
+    ['Glass line', 'track.core', 'toggle'],
+  ]],
+  ['The dial', [
+    ['Ticks', 'ticks.count', 'seg', [[0, 'None'], [12, '12'], [60, '60'], [120, '120']]],
+    ['Tick length', 'ticks.length', 'range', 2, 14, 0.5],
+    ['Tick brightness', 'ticks.opacity', 'range', 0.05, 1, 0.01],
+    ['Tick colour', 'ticks.color', 'seg', [['muted', 'Grey'], ['phase', 'Phase']]],
+    ['Quarter marks', 'ticks.quarters', 'toggle'],
+    ['Sunrays', 'rays', 'range', 0, 0.12, 0.002],
+    ['Face', 'face', 'seg', [['none', 'None'], ['disc', 'Disc'], ['glow', 'Glow']]],
+    ['Crown', 'crown', 'toggle'],
+  ]],
+  ['The numbers', [
+    ['Font', 'digits.font', 'seg', [['mono', 'Mono'], ['system', 'Sans'], ['rounded', 'Round']]],
+    ['Weight', 'digits.weight', 'range', 200, 900, 100],
+    ['Size', 'digits.size', 'range', 0.7, 1.35, 0.01],
+    ['Glow', 'digits.glow', 'range', 0, 1.6, 0.05],
+    ['Colour', 'digits.color', 'seg', [['phase', 'Phase'], ['white', 'White']]],
+  ]],
+];
+
+function ctl([label, path, kind, ...o]) {
+  const showIf = typeof o[o.length - 1] === 'function' ? o.pop() : null;
+  if (showIf && !showIf(d)) return '';
+  const v = get(path);
+  if (kind === 'range') {
+    const [min, max, step] = o;
+    return `<div class="ctl"><label>${label}</label><input type="range" min="${min}" max="${max}" step="${step}" value="${v}" data-path="${path}"/><output>${(+v).toFixed(step < 0.1 ? 2 : step < 1 ? 1 : 0)}</output></div>`;
+  }
+  if (kind === 'toggle') return `<div class="ctl wide"><label>${label}</label><button class="tog ${v ? 'on' : ''}" data-tog="${path}" aria-label="${label}"></button></div>`;
+  if (kind === 'seg') return `<div class="ctl wide"><label>${label}</label><div class="seg">${o[0].map(([val, l]) => `<button class="${String(v) === String(val) ? 'on' : ''}" data-seg="${path}" data-val="${val}">${l}</button>`).join('')}</div></div>`;
+  if (kind === 'color') {
+    const custom = !HEX[v];
+    return `<div class="ctl wide"><label>${label}</label><div class="swatches">${COLORS.map(([c, n]) => `<button class="sw ${v === c ? 'on' : ''}" style="--c:${HEX[c]}" data-col="${path}" data-val="${c}" title="${n}" aria-label="${n}"></button>`).join('')}
+      <span class="sw own ${custom ? 'on' : ''}" title="Any colour" style="${custom ? `--c:${v};background:${v}` : ''}"><input type="color" data-pick="${path}" value="${custom ? v : '#ff5fa2'}"/></span></div></div>`;
+  }
+  return '';
+}
+
+function draw() {
+  /* stage */
+  $('#phases').innerHTML = [['all', 'All 3'], ['ready', 'Get ready'], ['work', 'Work'], ['rest', 'Rest']]
+    .map(([p, l]) => `<button class="${phase === p ? 'on' : ''}" data-phase="${p}">${l}</button>`).join('');
+  $('#view').innerHTML = phase === 'all'
+    ? `<div class="big">${ringHTML('work', d, '-big')}</div><div class="trio">${['ready', 'work', 'rest'].map(p => `<div>${ringHTML(p, d, '-' + p)}${p === 'ready' ? 'Get ready' : p === 'work' ? 'Work' : 'Rest'}</div>`).join('')}</div>`
+    : `<div class="big">${ringHTML(phase, d, '-big')}</div>`;
+  /* presets */
+  $('#presets').innerHTML = PRESETS.map(p => `<button class="pre ${d.id === p.id && !d.custom ? 'on' : ''}" data-pre="${p.id}"><span class="m">${ringHTML('work', p, '-p' + p.id)}</span>${p.name}</button>`).join('');
+  document.querySelectorAll('.pre .timer').forEach(t => setRingProgress(t, 0.7));
+  /* my saved designs */
+  const mine = savedList();
+  $('#mineWrap').innerHTML = mine.length ? `<div class="sec"><span>My designs</span></div><div class="mine">${mine.map((m, i) => `<span><button data-mine="${i}">${esc(m.name)}</button><button class="x" data-minex="${i}" aria-label="Delete">✕</button></span>`).join('')}</div>` : '';
+  /* controls */
+  $('#controls').innerHTML = GROUPS.map(([title, rows]) => `<div class="sec"><span>${title}</span></div><div class="group">${rows.map(ctl).join('')}</div>`).join('');
+  wire();
+}
+function wire() {
+  document.querySelectorAll('[data-phase]').forEach(b => b.onclick = () => { phase = b.dataset.phase; draw(); });
+  document.querySelectorAll('[data-pre]').forEach(b => b.onclick = () => { d = presetById(b.dataset.pre); draw(); });
+  document.querySelectorAll('input[type=range][data-path]').forEach(r => r.oninput = () => {
+    const path = r.dataset.path; const ks = path.split('.'); const last = ks.pop();
+    ks.reduce((o, k) => o[k], d)[last] = +r.value; d.custom = true; d.id = 'custom';
+    r.nextElementSibling.textContent = (+r.value).toFixed(+r.step < 0.1 ? 2 : +r.step < 1 ? 1 : 0);
+    redrawStage();
+  });
+  document.querySelectorAll('[data-tog]').forEach(b => b.onclick = () => set(b.dataset.tog, !get(b.dataset.tog)));
+  document.querySelectorAll('[data-seg]').forEach(b => b.onclick = () => { const v = b.dataset.val; set(b.dataset.seg, /^\d+$/.test(v) ? +v : v); });
+  document.querySelectorAll('[data-col]').forEach(b => b.onclick = () => set(b.dataset.col, b.dataset.val));
+  document.querySelectorAll('[data-pick]').forEach(i => i.oninput = () => set(i.dataset.pick, i.value));
+  document.querySelectorAll('[data-mine]').forEach(b => b.onclick = () => { d = clone(savedList()[+b.dataset.mine].design); draw(); });
+  document.querySelectorAll('[data-minex]').forEach(b => b.onclick = () => { const l = savedList(); l.splice(+b.dataset.minex, 1); store(l); draw(); });
+}
+/* sliders only redraw the rings, so the slider under your finger survives */
+function redrawStage() {
+  const big = $('#view .big'); if (big) big.innerHTML = ringHTML(phase === 'all' ? 'work' : phase, d, '-big');
+  document.querySelectorAll('#view .trio > div').forEach((el, i) => { const p = ['ready', 'work', 'rest'][i]; el.innerHTML = ringHTML(p, d, '-' + p) + (p === 'ready' ? 'Get ready' : p === 'work' ? 'Work' : 'Rest'); });
+}
+
+/* a running clock so the ring is seen moving, the way it will in a workout */
+const fmt = s => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+function loop(t) {
+  const frac = 1 - ((t / 14000) % 1);
+  document.querySelectorAll('#view .timer').forEach(el => {
+    setRingProgress(el, frac);
+    const tx = el.querySelector('.t'); if (tx) tx.textContent = fmt(Math.ceil(frac * 60));
+    const cap = el.querySelector('.cap'); if (cap) cap.textContent = 'tap to pause';
+  });
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* ---- save, copy, use ---- */
+const savedList = () => { try { return JSON.parse(localStorage.getItem(SAVED) || '[]'); } catch (e) { return []; } };
+const store = l => { try { localStorage.setItem(SAVED, JSON.stringify(l)); } catch (e) {} };
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+function toast(t) { document.querySelector('.toast')?.remove(); const el = document.createElement('div'); el.className = 'toast'; el.textContent = t; document.body.appendChild(el); setTimeout(() => el.remove(), 2600); }
+$('#use').onclick = () => { saveRingDesign(d); toast('On your timer: get ready, work and rest'); };
+$('#save').onclick = () => {
+  const name = prompt('Name this design', `Design ${savedList().length + 1}`); if (!name) return;
+  const l = savedList(); l.unshift({ name: name.slice(0, 30), design: clone(d) }); store(l.slice(0, 20)); draw(); toast('Saved');
+};
+$('#copy').onclick = async () => {
+  const text = JSON.stringify(d);
+  try { await navigator.clipboard.writeText(text); toast('Copied. Send it to Nico to make it the default'); } catch (e) { prompt('Copy this design', text); }
+};
+$('#reset').onclick = () => { d = presetById('tube'); draw(); };
+draw();
+</script>
+</body>
+</html>
