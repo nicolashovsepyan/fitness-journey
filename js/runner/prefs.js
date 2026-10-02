@@ -7,7 +7,7 @@ import { storage } from '../core/storage.js';
 import { setVoice, setBeeps, say, beep } from '../timer.js';
 import { vibeOptions, setVibe } from './theme.js';
 import { checkForUpdate, runningVersion } from '../update-banner.js';
-import { PRESETS, presetById, saveRingDesign, ringDesign, ringHTML, ringBaseCss } from './ring.js';
+import { PRESETS, designFor, ringChoice, chooseRing, ringHTML, ringBaseCss } from './ring.js';
 
 const KEY = 'workModePrefs';
 const DEFAULTS = { voice: true, beeps: true, flash: true };
@@ -39,17 +39,16 @@ const ROWS = [
 /* a small live ring for each preset, at 70% through */
 function miniRing(p) {
   ringBaseCss();
-  return `<span class="wm-mini">${ringHTML('work', p, '-m' + p.id).replace('stroke-dashoffset="0"', 'stroke-dashoffset="188"').replace('stroke-dashoffset="0"', 'stroke-dashoffset="188"').replace('>0:00<', '><')}</span>`;
+  return `<span class="wm-mini">${ringHTML('work', designFor(p.id), '-m' + p.id).replace('stroke-dashoffset="0"', 'stroke-dashoffset="188"').replace('stroke-dashoffset="0"', 'stroke-dashoffset="188"').replace('>0:00<', '><')}</span>`;
 }
 function vibeHtml() {
   const { palettes, slots, pick, vibe } = vibeOptions();
-  const mine = ringDesign(); const cur = mine.id && PRESETS.some(p => p.id === mine.id) && !mine.custom ? mine.id : (mine.custom ? 'custom' : 'chrono');
+  const cur = ringChoice();
   if (!palettes.length) return '';
   const glow = vibe.glow || 'normal';
   return `<div class="wm-sheet-sub">Customize your vibe</div>
     <div class="wm-vrow"><div class="wm-vl"><b>Timer ring</b><small>How the countdown circle looks, for get ready, work and rest</small></div>
-      <div class="wm-rings">${PRESETS.map(p => `<button class="wm-ringopt ${cur === p.id ? 'on' : ''}" data-vring="${p.id}">${miniRing(p)}<span>${p.name}</span></button>`).join('')}</div>
-      <a class="btn secondary wm-lab" href="ring-lab.html">Design your own ring ›</a></div>
+      <div class="wm-rings">${PRESETS.map(p => `<button class="wm-ringopt ${cur === p.id ? 'on' : ''}" data-vring="${p.id}">${miniRing(p)}<span>${p.name}</span></button>`).join('')}</div></div>
     ${slots.map(sl => `<div class="wm-vrow"><div class="wm-vl"><b>${sl.name}</b><small>${sl.hint}</small></div>
       <div class="wm-sw6">${palettes.map(p => `<button class="wm-dot ${pick[sl.id] === p.id ? 'on' : ''}" style="--c:${p.hex}" data-vslot="${sl.id}:${p.id}" aria-label="${p.name}" title="${p.name}"></button>`).join('')}</div></div>`).join('')}
     <div class="wm-vrow"><div class="wm-vl"><b>Glow</b><small>How hard everything shines</small></div>
@@ -90,7 +89,13 @@ export function openPrefs(host) {
     ov.querySelectorAll('[data-vslot]').forEach(b => b.addEventListener('click', () => {
       const [slot, pal] = b.dataset.vslot.split(':'); setVibe({ slots: { [slot]: pal }, themeRandom: false }); draw();
     }));
-    ov.querySelectorAll('[data-vring]').forEach(b => b.addEventListener('click', () => { saveRingDesign(presetById(b.dataset.vring)); refreshRings(); draw(); }));
+    ov.querySelectorAll('[data-vring]').forEach(b => b.addEventListener('click', () => { chooseRing(b.dataset.vring); refreshRings(); draw(); }));
+    /* THE LAB IS THE COACH'S. No button for it: five taps on Version open it. */
+    let taps = 0, tapT = null;
+    ov.querySelector('.wm-ver .wm-vl')?.addEventListener('click', () => {
+      taps++; clearTimeout(tapT); tapT = setTimeout(() => { taps = 0; }, 1500);
+      if (taps >= 5) location.href = 'ring-lab.html';
+    });
     ov.querySelectorAll('[data-vglow]').forEach(b => b.addEventListener('click', () => { setVibe({ glow: b.dataset.vglow }); draw(); }));
     ov.querySelector('[data-vshuffle]')?.addEventListener('click', () => { const v = vibeOptions(); setVibe({ themeRandom: !v.vibe.themeRandom, slots: v.pick }); draw(); });
   };

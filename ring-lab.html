@@ -67,6 +67,11 @@
     @keyframes wob { from { transform: rotate(-4deg); } to { transform: rotate(4deg); } }
     .lnk { background:none; border:none; color: var(--wm-accent, #3ECBA8); font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; cursor:pointer; padding: 0; margin-left: 10px; }
     .presets { grid-template-columns: repeat(3, 1fr) !important; }
+    .pre .ed { color: var(--wm-neon, #FF5FA2); font-style: normal; font-size: 9px; }
+    .pre .live { display:block; color: var(--wm-accent, #3ECBA8); font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .hint2 { text-transform: none; letter-spacing: 0; font-weight: 500; color: var(--faint); margin-left: 6px; }
+    .saved { color: var(--wm-accent, #3ECBA8); opacity: 0; transition: opacity .2s; text-transform: none; letter-spacing: 0; }
+    .saved.on { opacity: 1; }
     .mine { display:flex; flex-wrap:wrap; gap: 6px; }
     .mine button { background: var(--box); border: 1px solid var(--line); color: var(--text); border-radius: 999px; padding: 7px 12px; font-size: 13px; cursor:pointer; }
     .mine button.x { padding: 7px 9px; color: var(--faint); }
@@ -87,21 +92,21 @@
       <div id="view"></div>
     </div>
     <div>
-      <div class="sec"><span>Start from</span></div>
+      <div class="sec"><span>Your 3 designs <small class="hint2">tap one to edit it</small></span><span id="saved" class="saved"></span></div>
       <div class="presets" id="presets"></div>
       <div id="mineWrap"></div>
       <div id="controls"></div>
       <p class="hint">Your main and glow colours follow your vibe (Timer settings). Pick a fixed colour to break away from them.</p>
     </div>
   </div>
-  <div class="bar"><button id="reset">Reset</button><button id="save">Save</button><button id="copy">Copy</button><button class="use" id="use">Use on timer</button></div>
+  <div class="bar"><button id="reset">Reset</button><button id="copy">Copy all 3</button><button class="use" id="use">Use on timer</button></div>
 
 <script type="module">
 import { setAdapter } from './js/core/storage.js';
 import { LocalAdapter } from './js/adapters/local.js';
 import { loadUsers } from './js/users.js';
 import { applyWorkTheme } from './js/runner/theme.js';
-import { PRESETS, presetById, ringDesign, saveRingDesign, ringHTML, ringBaseCss, setRingProgress } from './js/runner/ring.js';
+import { PRESETS, designFor, ringChoice, chooseRing, saveDesign, resetDesign, isEdited, allDesigns, ringHTML, ringBaseCss, setRingProgress } from './js/runner/ring.js';
 
 setAdapter(new LocalAdapter());
 try { await loadUsers(); } catch (e) {}          // so "your colours" are the signed-in person's
@@ -109,12 +114,22 @@ await applyWorkTheme();
 ringBaseCss();
 
 const SAVED = 'fj.ringSaved';
-let d = ringDesign();
+/* YOUR THREE DESIGNS. Pick one to edit; every change saves into it at once
+   (switching never loses work). "Use on timer" makes it the one your timer
+   shows; "Copy all 3" hands Nico's final versions over. */
+let cur = ringChoice();
+let d = designFor(cur);
+let savedT = null;
+function autosave() {
+  saveDesign(cur, d);
+  const el = document.getElementById('saved'); if (el) { el.textContent = 'Saved'; el.classList.add('on'); clearTimeout(savedT); savedT = setTimeout(() => el.classList.remove('on'), 1200); }
+  if (cur === ringChoice()) document.querySelectorAll('.pre.on .m').forEach(m => { m.innerHTML = ringHTML('work', d, '-p' + cur); setRingProgress(m.querySelector('.timer'), 0.7); });
+}
 let phase = 'all';
 const $ = s => document.querySelector(s);
 const clone = o => JSON.parse(JSON.stringify(o));
 const get = path => path.split('.').reduce((o, k) => o[k], d);
-const set = (path, v) => { const ks = path.split('.'); const last = ks.pop(); ks.reduce((o, k) => o[k], d)[last] = v; d.custom = true; d.id = 'custom'; draw(); };
+const set = (path, v) => { const ks = path.split('.'); const last = ks.pop(); ks.reduce((o, k) => o[k], d)[last] = v; autosave(); draw(); };
 
 /* ---- the controls, as data: [label, path, kind, …] ---- */
 /* THE COLOURS: electro only. Your two vibe colours (they follow Timer
@@ -211,10 +226,10 @@ function draw() {
     ? `<div class="big">${ringHTML('work', d, '-big')}</div><div class="trio">${['ready', 'work', 'rest'].map(p => `<div>${ringHTML(p, d, '-' + p)}${p === 'ready' ? 'Get ready' : p === 'work' ? 'Work' : 'Rest'}</div>`).join('')}</div>`
     : `<div class="big">${ringHTML(phase, d, '-big')}</div>`;
   /* presets */
-  $('#presets').innerHTML = PRESETS.map(p => `<button class="pre ${d.id === p.id && !d.custom ? 'on' : ''}" data-pre="${p.id}"><span class="m">${ringHTML('work', p, '-p' + p.id)}</span>${p.name}</button>`).join('');
+  $('#presets').innerHTML = PRESETS.map(p => `<button class="pre ${cur === p.id ? 'on' : ''}" data-pre="${p.id}"><span class="m">${ringHTML('work', p.id === cur ? d : designFor(p.id), '-p' + p.id)}</span>${p.name}${isEdited(p.id) ? ' <i class="ed" title="Edited">●</i>' : ''}${ringChoice() === p.id ? '<small class="live">on timer</small>' : ''}</button>`).join('');
   document.querySelectorAll('.pre .timer').forEach(t => setRingProgress(t, 0.7));
   /* my saved designs */
-  const mine = savedList();
+  const mine = [];
   $('#mineWrap').innerHTML = mine.length ? `<div class="sec"><span>My designs</span></div><div class="mine">${mine.map((m, i) => `<span><button data-mine="${i}">${esc(m.name)}</button><button class="x" data-minex="${i}" aria-label="Delete">✕</button></span>`).join('')}</div>` : '';
   /* controls */
   $('#controls').innerHTML = GROUPS.map(([title, rows]) => `<div class="sec"><span>${title}</span>${title === 'Colours' ? `<span>${editColours && palPrefs().hidden.length ? '<button class="lnk" id="palRestore">Bring all back</button> ' : ''}<button class="lnk" id="palEdit">${editColours ? 'Done' : 'Edit colours'}</button></span>` : ''}</div><div class="group">${rows.map(ctl).join('')}</div>`).join('');
@@ -222,10 +237,10 @@ function draw() {
 }
 function wire() {
   document.querySelectorAll('[data-phase]').forEach(b => b.onclick = () => { phase = b.dataset.phase; draw(); });
-  document.querySelectorAll('[data-pre]').forEach(b => b.onclick = () => { d = presetById(b.dataset.pre); draw(); });
+  document.querySelectorAll('[data-pre]').forEach(b => b.onclick = () => { cur = b.dataset.pre; d = designFor(cur); draw(); });
   document.querySelectorAll('input[type=range][data-path]').forEach(r => r.oninput = () => {
     const path = r.dataset.path; const ks = path.split('.'); const last = ks.pop();
-    ks.reduce((o, k) => o[k], d)[last] = +r.value; d.custom = true; d.id = 'custom';
+    ks.reduce((o, k) => o[k], d)[last] = +r.value; autosave();
     r.nextElementSibling.textContent = (+r.value).toFixed(+r.step < 0.1 ? 2 : +r.step < 1 ? 1 : 0);
     redrawStage();
   });
@@ -247,8 +262,6 @@ function wire() {
     if (p.custom.includes(v)) p.custom = p.custom.filter(x => x !== v); else p.hidden.push(v);
     savePal(p); draw();
   });
-  document.querySelectorAll('[data-mine]').forEach(b => b.onclick = () => { d = clone(savedList()[+b.dataset.mine].design); draw(); });
-  document.querySelectorAll('[data-minex]').forEach(b => b.onclick = () => { const l = savedList(); l.splice(+b.dataset.minex, 1); store(l); draw(); });
 }
 /* sliders only redraw the rings, so the slider under your finger survives */
 function redrawStage() {
@@ -274,16 +287,15 @@ const savedList = () => { try { return JSON.parse(localStorage.getItem(SAVED) ||
 const store = l => { try { localStorage.setItem(SAVED, JSON.stringify(l)); } catch (e) {} };
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
 function toast(t) { document.querySelector('.toast')?.remove(); const el = document.createElement('div'); el.className = 'toast'; el.textContent = t; document.body.appendChild(el); setTimeout(() => el.remove(), 2600); }
-$('#use').onclick = () => { saveRingDesign(d); toast('On your timer: get ready, work and rest'); };
-$('#save').onclick = () => {
-  const name = prompt('Name this design', `Design ${savedList().length + 1}`); if (!name) return;
-  const l = savedList(); l.unshift({ name: name.slice(0, 30), design: clone(d) }); store(l.slice(0, 20)); draw(); toast('Saved');
-};
+$('#use').onclick = () => { saveDesign(cur, d); chooseRing(cur); draw(); toast(`${PRESETS.find(p => p.id === cur).name} is on your timer`); };
 $('#copy').onclick = async () => {
-  const text = JSON.stringify(d);
-  try { await navigator.clipboard.writeText(text); toast('Copied. Send it to Nico to make it the default'); } catch (e) { prompt('Copy this design', text); }
+  const text = JSON.stringify(allDesigns());
+  try { await navigator.clipboard.writeText(text); toast('All 3 copied. Paste them to Claude to make them everyone\'s'); } catch (e) { prompt('Copy all 3 designs', text); }
 };
-$('#reset').onclick = () => { d = presetById('chrono'); draw(); };
+$('#reset').onclick = () => {
+  if (!confirm(`Put ${PRESETS.find(p => p.id === cur).name} back to how it shipped?`)) return;
+  resetDesign(cur); d = designFor(cur); draw(); toast('Back to the original');
+};
 draw();
 </script>
 </body>

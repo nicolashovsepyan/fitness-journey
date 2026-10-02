@@ -14,7 +14,13 @@
    ============================================================ */
 export const RING_R = 100;
 const C = 120;
-const KEY = 'fj.ringDesign';
+/* THREE DESIGNS, EACH EDITABLE. Users pick one of the three (Timer
+   settings). The lab edits the three themselves: an edit is saved into that
+   design straight away (`fj.ringOverrides`), so switching designs never
+   loses work. Final versions get baked into PRESETS for everyone. */
+const CHOICE = 'fj.ringChoice';
+const OVR = 'fj.ringOverrides';
+const OLD = 'fj.ringDesign';                     // the lab's first format: one free design
 
 /* the starting points; every number in them is a lab control */
 /* the starting points (Nicolas's three: Chrono, LED, Laser); every
@@ -54,10 +60,34 @@ function complete(d) {
   return base;
 }
 export function presetById(id) { return clone(PRESETS.find(p => p.id === id) || PRESETS[0]); }
-export function ringDesign() {
-  try { return complete(JSON.parse(localStorage.getItem(KEY) || 'null')); } catch (e) { return complete(null); }
+const read = (k, dflt) => { try { const v = JSON.parse(localStorage.getItem(k) || 'null'); return v ?? dflt; } catch (e) { return dflt; } };
+const write = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+/* the first lab kept one free-form design: it becomes an edit of the
+   design it started from (Chrono when unknown) and is chosen */
+(function migrate() {
+  try {
+    const old = read(OLD, null); if (!old) return;
+    const base = PRESETS.some(p => p.id === old.id) ? old.id : 'chrono';
+    const o = read(OVR, {}); if (!o[base]) { o[base] = { ...old, id: base }; write(OVR, o); }
+    if (!localStorage.getItem(CHOICE)) write(CHOICE, base);
+    localStorage.removeItem(OLD);
+  } catch (e) {}
+})();
+export const ringIds = () => PRESETS.map(p => p.id);
+/* one of the three, with this device's edits on top */
+export function designFor(id) {
+  const o = read(OVR, {})[id];
+  const d = complete(o ? { ...presetById(id), ...o } : presetById(id));
+  d.id = id; delete d.custom; return d;
 }
-export function saveRingDesign(d) { try { localStorage.setItem(KEY, JSON.stringify(complete(d))); } catch (e) {} }
+export function ringChoice() { const c = read(CHOICE, 'chrono'); return PRESETS.some(p => p.id === c) ? c : 'chrono'; }
+export function chooseRing(id) { write(CHOICE, id); }
+export function ringDesign() { return designFor(ringChoice()); }
+export function saveDesign(id, d) { const o = read(OVR, {}); o[id] = { ...complete(d), id }; write(OVR, o); }
+export function resetDesign(id) { const o = read(OVR, {}); delete o[id]; write(OVR, o); }
+export function isEdited(id) { return !!read(OVR, {})[id]; }
+/* all three as they stand on this device: what "Copy all 3" hands over */
+export function allDesigns() { return PRESETS.map(p => designFor(p.id)); }
 
 /* colour words → CSS. The theme words follow the user's own palette. */
 export function colour(v) {
