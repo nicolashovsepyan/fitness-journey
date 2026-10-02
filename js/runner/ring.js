@@ -158,7 +158,13 @@ export function ringHTML(phase, d = ringDesign(), uid = '') {
     stroke-dasharray="${f1(c)}" stroke-dashoffset="0" transform="rotate(-90 ${C} ${C})" style="${extraStyle} transition: ${a.style === 'segments' ? 'none' : 'stroke-dashoffset .95s linear'};"></circle>`;
   const segW = (2 * Math.PI * RING_R) / Math.max(4, a.segments);
   const mask = a.style === 'segments' ? `mask="url(#${id('rm')})"` : '';
-  const glareD = (() => { const [x1, y1] = at(12, RING_R), [x2, y2] = at(34, RING_R); return `M${f1(x1)} ${f1(y1)} A${RING_R} ${RING_R} 0 0 1 ${f1(x2)} ${f1(y2)}`; })();
+  /* THE GLARE: light catching the glass. A bright streak on the tube's OUTER
+     edge (not over the core, where it vanished) from 1 to 2 o'clock, plus a
+     sparkle just past it. Hidden once the time left no longer reaches it. */
+  const gs = a.glareSize ?? 1;                       // lab: Glare size
+  const gR = RING_R + a.width * 0.24;
+  const glareD = (() => { const [x1, y1] = at(16, gR), [x2, y2] = at(44, gR); return `M${f1(x1)} ${f1(y1)} A${f1(gR)} ${f1(gR)} 0 0 1 ${f1(x2)} ${f1(y2)}`; })();
+  const [spX, spY] = at(52, gR);
   const face = d.face === 'disc'
     ? `<circle cx="${C}" cy="${C}" r="${f1(RING_R - a.width / 2 - 2)}" fill="url(#${id('rf')})"/>`
     : d.face === 'glow' ? `<circle cx="${C}" cy="${C}" r="${f1(RING_R - a.width / 2 - 2)}" fill="url(#${id('rgw')})"/>` : '';
@@ -176,6 +182,7 @@ export function ringHTML(phase, d = ringDesign(), uid = '') {
       <radialGradient id="${id('rgw')}"><stop offset="0%" style="stop-color:${rc};stop-opacity:.12"/><stop offset="100%" style="stop-color:${rc};stop-opacity:0"/></radialGradient>
       <filter id="${id('cb')}" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="${f1(Math.max(0.01, (a.coreSoft || 0) * a.width * a.core * 0.55))}"/></filter>
       <filter id="${id('ch')}" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="${f1(Math.max(0.01, (a.coreSoft || 0) * a.width * 0.45))}"/></filter>
+      <filter id="${id('gb')}" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="0.6"/></filter>
       <mask id="${id('rm')}"><circle cx="${C}" cy="${C}" r="${RING_R}" fill="none" stroke="#fff" stroke-width="${a.width + 6}"
         stroke-dasharray="${f1(segW * (1 - a.gap))} ${f1(segW * a.gap)}" transform="rotate(-90 ${C} ${C})"/></mask>
     </defs>
@@ -191,7 +198,7 @@ export function ringHTML(phase, d = ringDesign(), uid = '') {
       ${a.core > 0 && a.coreSoft > 0 ? arc('core halo', `stroke:color-mix(in srgb, ${rc} 45%, #ffffff);stroke-opacity:${f1(0.55 * (a.coreOpacity ?? 0.92))};stroke-width:${f1(Math.min(a.width, a.width * a.core * (1 + 1.4 * a.coreSoft)))};stroke-linecap:${cap};`, '').replace('<circle ', `<circle filter="url(#${id('ch')})" `) : ''}
       ${a.core > 0 ? arc('core', `stroke:${coreCol};stroke-opacity:${a.coreOpacity ?? 0.92};stroke-width:${f1(a.width * a.core * (1 - 0.35 * (a.coreSoft || 0)))};stroke-linecap:${cap};`, uid ? '' : 'timerCore').replace('<circle ', a.coreSoft > 0 ? `<circle filter="url(#${id('cb')})" ` : '<circle ') : ''}
     </g>
-    ${a.glare ? `<path class="glare" ${uid ? '' : 'id="timerGlare"'} d="${glareD}" style="fill:none;stroke:#fff;stroke-width:${f1(Math.max(1.6, a.width * 0.22))};stroke-linecap:round;stroke-opacity:.8;transform:translate(-${f1(a.width * 0.2)}px,-${f1(a.width * 0.2)}px)"/>` : ''}
+        ${a.glare ? `<g class="glare" ${uid ? '' : 'id="timerGlare"'} filter="url(#${id('gb')})" style="pointer-events:none"><path d="${glareD}" style="fill:none;stroke:#fff;stroke-width:${f1(Math.max(4, a.width * 0.6) * gs)};stroke-linecap:round;stroke-opacity:.28"/><path d="${glareD}" style="fill:none;stroke:#fff;stroke-width:${f1(Math.max(2, a.width * 0.28) * gs)};stroke-linecap:round;stroke-opacity:1"/><circle cx="${f1(spX)}" cy="${f1(spY)}" r="${f1(Math.max(1.6, a.width * 0.16) * gs)}" style="fill:#fff;fill-opacity:1"/></g>` : ''}
   </svg>
   <div class="read"><div class="t" ${uid ? '' : 'id="timerText"'} style="${digitStyle}">0:00</div><div class="cap" ${uid ? '' : 'id="timerCap"'}></div></div>
 </div>`;
@@ -223,5 +230,5 @@ export function setRingProgress(root, frac) {
   frac = snapToSegments(root, frac);
   const c = 2 * Math.PI * RING_R;
   root.querySelectorAll('.fill, .core').forEach(el => { el.style.strokeDashoffset = String(c * (1 - frac)); });
-  root.querySelectorAll('.glare').forEach(el => el.classList.toggle('off', frac < 0.11));
+  root.querySelectorAll('.glare').forEach(el => el.classList.toggle('off', frac < 0.16));   // the arc no longer reaches 1 to 2 o'clock
 }

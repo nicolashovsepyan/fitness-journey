@@ -69,6 +69,7 @@
     .presets { grid-template-columns: repeat(3, 1fr) !important; }
     .pre .ed { color: var(--wm-neon, #FF5FA2); font-style: normal; font-size: 9px; }
     .pre .live { display:block; color: var(--wm-accent, #3ECBA8); font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .why { display:block; color: var(--faint); font-size: 11.5px; font-weight: 500; margin-top: 2px; }
     .hint2 { text-transform: none; letter-spacing: 0; font-weight: 500; color: var(--faint); margin-left: 6px; }
     .saved { color: var(--wm-accent, #3ECBA8); opacity: 0; transition: opacity .2s; text-transform: none; letter-spacing: 0; }
     .saved.on { opacity: 1; }
@@ -168,7 +169,8 @@ const GROUPS = [
     ['Core softness', 'arc.coreSoft', 'range', 0, 1, 0.01, d => d.arc.core > 0],
     ['Core brightness', 'arc.coreOpacity', 'range', 0.2, 1, 0.01, d => d.arc.core > 0],
     ['Glow', 'arc.glow', 'range', 0, 2.5, 0.05],
-    ['Glare', 'arc.glare', 'toggle'],
+    ['Glare', 'arc.glare', 'toggle', 'Light catching the glass, near 1 o\'clock'],
+    ['Glare size', 'arc.glareSize', 'range', 0.4, 2.5, 0.05, d => d.arc.glare],
     ['Ends', 'arc.cap', 'seg', [['round', 'Round'], ['butt', 'Flat']]],
     ['Segments', 'arc.segments', 'range', 12, 120, 1, d => d.arc.style === 'segments'],
     ['Gap', 'arc.gap', 'range', 0.1, 0.8, 0.01, d => d.arc.style === 'segments'],
@@ -207,7 +209,7 @@ function ctl([label, path, kind, ...o]) {
     const [min, max, step] = o;
     return `<div class="ctl"><label>${label}</label><input type="range" min="${min}" max="${max}" step="${step}" value="${v}" data-path="${path}"/><output>${(+v).toFixed(step < 0.1 ? 2 : step < 1 ? 1 : 0)}</output></div>`;
   }
-  if (kind === 'toggle') return `<div class="ctl wide"><label>${label}</label><button class="tog ${v ? 'on' : ''}" data-tog="${path}" aria-label="${label}"></button></div>`;
+  if (kind === 'toggle') return `<div class="ctl wide"><label>${label}${o[0] && typeof o[0] === 'string' ? `<small class="why">${o[0]}</small>` : ''}</label><button class="tog ${v ? 'on' : ''}" data-tog="${path}" aria-label="${label}"></button></div>`;
   if (kind === 'seg') return `<div class="ctl wide"><label>${label}</label><div class="seg">${o[0].map(([val, l]) => `<button class="${String(v) === String(val) ? 'on' : ''}" data-seg="${path}" data-val="${val}">${l}</button>`).join('')}</div></div>`;
   if (kind === 'color') {
     const list = palette();

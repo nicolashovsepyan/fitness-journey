@@ -1,10 +1,10 @@
 {
-  "version": "2026-10-02.10",
+  "version": "2026-10-02.11",
   "notes": [
+    "Ring glare works: a light streak and sparkle on the glass, with a size control in the lab",
     "Timer look: swipe through the ring designs at full size and pick your colours (Timer settings → Timer look)",
     "Timer ring: pick Chrono, LED or Laser in Timer settings",
     "Segmented rings now drop one whole segment at a time",
-    "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour",
-    "Timer rings: Chrono, LED and Laser, electro colours only, ticks inside or out, a real stopwatch crown"
+    "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
   ]
 }

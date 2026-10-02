@@ -683,7 +683,7 @@ function updateTimer(rem, total) {
   frac = snapToSegments(document.querySelector('.timer-wrap .timer'), frac);   // segmented ring: whole segments only
   if (fillEl) fillEl.style.strokeDashoffset = String(c * (1 - frac));
   document.querySelectorAll('.timer-wrap .timer .core').forEach(el => { el.style.strokeDashoffset = String(c * (1 - frac)); });   // the core and its halo
-  document.getElementById('timerGlare')?.classList.toggle('off', frac < 0.11);   // no glare floating past the end of the tube
+  document.getElementById('timerGlare')?.classList.toggle('off', frac < 0.16);   // no glare floating past the end of the tube
   const paused = R.isStepPaused(S);
   const cap = document.getElementById('timerCap'); if (cap) cap.textContent = paused ? '❚❚ paused, tap to resume' : 'tap to pause';
   document.querySelector('.timer')?.classList.toggle('paused', paused);
