@@ -92,14 +92,14 @@
       <div id="view"></div>
     </div>
     <div>
-      <div class="sec"><span>Your 3 designs <small class="hint2">tap one to edit it</small></span><span id="saved" class="saved"></span></div>
+      <div class="sec"><span>Your 3 designs <small class="hint2">tap one to edit it</small></span><span><span id="saved" class="saved"></span><button class="lnk" id="copy">Copy all 3</button></span></div>
       <div class="presets" id="presets"></div>
       <div id="mineWrap"></div>
       <div id="controls"></div>
       <p class="hint">Your main and glow colours follow your vibe (Timer settings). Pick a fixed colour to break away from them.</p>
     </div>
   </div>
-  <div class="bar"><button id="reset">Reset</button><button id="copy">Copy all 3</button><button class="use" id="use">Use on timer</button></div>
+  <div class="bar"><button id="reset">Reset</button><button id="savebtn">Save</button><button class="use" id="use">Use on timer</button></div>
 
 <script type="module">
 import { setAdapter } from './js/core/storage.js';
@@ -108,6 +108,9 @@ import { loadUsers } from './js/users.js';
 import { applyWorkTheme } from './js/runner/theme.js';
 import { PRESETS, designFor, ringChoice, chooseRing, saveDesign, resetDesign, isEdited, allDesigns, ringHTML, ringBaseCss, setRingProgress } from './js/runner/ring.js';
 
+/* opening the lab marks this phone as the coach's: "Edit designs" shows
+   in its Timer look from now on (js/runner/prefs.js isCoachDevice) */
+try { localStorage.setItem('fj.coachDevice', '1'); } catch (e) {}
 setAdapter(new LocalAdapter());
 try { await loadUsers(); } catch (e) {}          // so "your colours" are the signed-in person's
 await applyWorkTheme();
@@ -288,6 +291,7 @@ const store = l => { try { localStorage.setItem(SAVED, JSON.stringify(l)); } cat
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
 function toast(t) { document.querySelector('.toast')?.remove(); const el = document.createElement('div'); el.className = 'toast'; el.textContent = t; document.body.appendChild(el); setTimeout(() => el.remove(), 2600); }
 $('#use').onclick = () => { saveDesign(cur, d); chooseRing(cur); draw(); toast(`${PRESETS.find(p => p.id === cur).name} is on your timer`); };
+$('#savebtn').onclick = () => { saveDesign(cur, d); draw(); toast(`${PRESETS.find(p => p.id === cur).name} saved`); };
 $('#copy').onclick = async () => {
   const text = JSON.stringify(allDesigns());
   try { await navigator.clipboard.writeText(text); toast('All 3 copied. Paste them to Claude to make them everyone\'s'); } catch (e) { prompt('Copy all 3 designs', text); }

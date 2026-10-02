@@ -1,10 +1,10 @@
 {
-  "version": "2026-10-02.9",
+  "version": "2026-10-02.10",
   "notes": [
+    "Timer look: swipe through the ring designs at full size and pick your colours (Timer settings → Timer look)",
     "Timer ring: pick Chrono, LED or Laser in Timer settings",
     "Segmented rings now drop one whole segment at a time",
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour",
-    "Timer rings: Chrono, LED and Laser, electro colours only, ticks inside or out, a real stopwatch crown",
-    "Timer ring lab: 7 ring designs, and design your own (settings → Design your own ring)"
+    "Timer rings: Chrono, LED and Laser, electro colours only, ticks inside or out, a real stopwatch crown"
   ]
 }

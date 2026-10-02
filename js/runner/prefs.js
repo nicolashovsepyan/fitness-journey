@@ -7,7 +7,7 @@ import { storage } from '../core/storage.js';
 import { setVoice, setBeeps, say, beep } from '../timer.js';
 import { vibeOptions, setVibe } from './theme.js';
 import { checkForUpdate, runningVersion } from '../update-banner.js';
-import { PRESETS, designFor, ringChoice, chooseRing, ringHTML, ringBaseCss } from './ring.js';
+import { PRESETS, designFor, ringChoice, chooseRing, ringHTML, ringBaseCss, setRingProgress } from './ring.js';
 
 const KEY = 'workModePrefs';
 const DEFAULTS = { voice: true, beeps: true, flash: true };
@@ -47,13 +47,62 @@ function vibeHtml() {
   if (!palettes.length) return '';
   const glow = vibe.glow || 'normal';
   return `<div class="wm-sheet-sub">Customize your vibe</div>
-    <div class="wm-vrow"><div class="wm-vl"><b>Timer ring</b><small>How the countdown circle looks, for get ready, work and rest</small></div>
-      <div class="wm-rings">${PRESETS.map(p => `<button class="wm-ringopt ${cur === p.id ? 'on' : ''}" data-vring="${p.id}">${miniRing(p)}<span>${p.name}</span></button>`).join('')}</div></div>
+    <button class="wm-lookrow" data-look="1">${miniRing(PRESETS.find(p => p.id === cur) || PRESETS[0])}<span><b>Timer look</b><small>${(PRESETS.find(p => p.id === cur) || PRESETS[0]).name} · swipe through the designs and colours</small></span><i>›</i></button>
     ${slots.map(sl => `<div class="wm-vrow"><div class="wm-vl"><b>${sl.name}</b><small>${sl.hint}</small></div>
       <div class="wm-sw6">${palettes.map(p => `<button class="wm-dot ${pick[sl.id] === p.id ? 'on' : ''}" style="--c:${p.hex}" data-vslot="${sl.id}:${p.id}" aria-label="${p.name}" title="${p.name}"></button>`).join('')}</div></div>`).join('')}
     <div class="wm-vrow"><div class="wm-vl"><b>Glow</b><small>How hard everything shines</small></div>
       <div class="wm-seg3">${[['soft', 'Soft'], ['normal', 'Normal'], ['bold', 'Bold']].map(([v, l]) => `<button class="${glow === v ? 'on' : ''}" data-vglow="${v}">${l}</button>`).join('')}</div></div>
     <button class="btn ${vibe.themeRandom ? '' : 'secondary'}" data-vshuffle="1">${vibe.themeRandom ? 'Shuffling weekly. Turn off' : 'Surprise me every week'}</button>`;
+}
+
+/* is this the coach's phone? (the coach console has run here, or the lab
+   has been opened here once) — the only place "Edit designs" shows */
+export function isCoachDevice() {
+  try { return localStorage.getItem('fj.coachDevice') === '1' || !!localStorage.getItem('fj.coach.seeded') || !!localStorage.getItem('fj.coach.client'); } catch (e) { return false; }
+}
+
+/* THE TIMER LOOK. Each design at the size it is in a workout, the clock
+   running, swiped left and right; the colours underneath, swiped too, and
+   the rings change as you tap. "Use this look" keeps it. */
+export function openLook(host, onDone) {
+  ringBaseCss();
+  const ids = PRESETS.map(p => p.id);
+  let idx = Math.max(0, ids.indexOf(ringChoice())), raf = 0;
+  const ov = document.createElement('div'); ov.className = 'wm-look';
+  const slides = () => PRESETS.map(p => `<div class="wm-slide"><div class="wm-bigring">${ringHTML('work', designFor(p.id), '-l' + p.id)}</div>
+    <b>${p.name}</b><small>${p.note}</small></div>`).join('');
+  const strips = () => {
+    const { palettes, slots, pick } = vibeOptions();
+    return slots.map(sl => `<div class="wm-strip"><div class="wm-stl">${sl.name}</div><div class="wm-swipe">${palettes.map(p => `<button class="wm-dot ${pick[sl.id] === p.id ? 'on' : ''}" style="--c:${p.hex}" data-lslot="${sl.id}:${p.id}" aria-label="${p.name}"><span>${p.name}</span></button>`).join('')}</div></div>`).join('');
+  };
+  ov.innerHTML = `<div class="wm-look-top"><button class="wm-look-x" aria-label="Back">‹</button><b>Timer look</b>
+      ${isCoachDevice() ? '<a class="wm-look-edit" href="ring-lab.html">Edit designs</a>' : '<span></span>'}</div>
+    <div class="wm-car" id="lookCar">${slides()}</div>
+    <div class="wm-dots">${ids.map((_, i) => `<i class="${i === idx ? 'on' : ''}"></i>`).join('')}</div>
+    <div class="wm-strips" id="lookStrips">${strips()}</div>
+    <div class="wm-look-bar"><button class="btn lg" id="lookUse">Use this look</button></div>`;
+  host.appendChild(ov);
+  const car = ov.querySelector('#lookCar');
+  requestAnimationFrame(() => { car.scrollLeft = idx * car.clientWidth; ov.classList.add('open'); });
+  const dots = () => ov.querySelectorAll('.wm-dots i').forEach((d, i) => d.classList.toggle('on', i === idx));
+  car.addEventListener('scroll', () => { const i = Math.round(car.scrollLeft / Math.max(1, car.clientWidth)); if (i !== idx) { idx = i; dots(); } }, { passive: true });
+  ov.querySelectorAll('.wm-dots i').forEach((d, i) => d.addEventListener('click', () => car.scrollTo({ left: i * car.clientWidth, behavior: 'smooth' })));
+  const wireStrips = () => ov.querySelectorAll('[data-lslot]').forEach(b => b.addEventListener('click', () => {
+    const [slot, pal] = b.dataset.lslot.split(':'); setVibe({ slots: { [slot]: pal }, themeRandom: false });
+    ov.querySelector('#lookStrips').innerHTML = strips(); wireStrips();
+  }));
+  wireStrips();
+  /* the clock runs on every ring, the way it will in a workout */
+  const fmt = n => `${Math.floor(n / 60)}:${String(n % 60).padStart(2, '0')}`;
+  const loop = t => {
+    const frac = 1 - ((t / 12000) % 1);
+    ov.querySelectorAll('.wm-bigring .timer').forEach(el => { setRingProgress(el, frac); const tx = el.querySelector('.t'); if (tx) tx.textContent = fmt(Math.ceil(frac * 45)); });
+    raf = requestAnimationFrame(loop);
+  };
+  raf = requestAnimationFrame(loop);
+  const close = () => { cancelAnimationFrame(raf); ov.classList.remove('open'); setTimeout(() => ov.remove(), 200); onDone?.(); };
+  ov.querySelector('.wm-look-x').addEventListener('click', close);
+  ov.querySelector('#lookUse').addEventListener('click', () => { chooseRing(ids[idx]); refreshRings(); close(); });
 }
 
 /* a running timer redraws its ring when the design changes */
@@ -89,7 +138,7 @@ export function openPrefs(host) {
     ov.querySelectorAll('[data-vslot]').forEach(b => b.addEventListener('click', () => {
       const [slot, pal] = b.dataset.vslot.split(':'); setVibe({ slots: { [slot]: pal }, themeRandom: false }); draw();
     }));
-    ov.querySelectorAll('[data-vring]').forEach(b => b.addEventListener('click', () => { chooseRing(b.dataset.vring); refreshRings(); draw(); }));
+    ov.querySelector('[data-look]')?.addEventListener('click', () => openLook(document.body, draw));
     /* THE LAB IS THE COACH'S. No button for it: five taps on Version open it. */
     let taps = 0, tapT = null;
     ov.querySelector('.wm-ver .wm-vl')?.addEventListener('click', () => {

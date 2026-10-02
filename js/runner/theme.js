@@ -177,6 +177,36 @@ function injectStyle() {
   html.wm .wm-mini .timer { width: 58px !important; height: 58px !important; }
   html.wm .wm-mini .read { display: none; }
   html.wm .wm-lab { display:block; text-align:center; text-decoration:none; margin-top: 10px; }
+  /* settings row that opens the Timer look */
+  html.wm .wm-lookrow { width:100%; display:flex; align-items:center; gap: 12px; text-align:left; background: var(--box); border: 1px solid var(--line); border-radius: 16px; padding: 10px 12px; margin: 6px 0; color: var(--text); cursor:pointer; }
+  html.wm .wm-lookrow span { flex:1; display:flex; flex-direction:column; } html.wm .wm-lookrow b { font-size: 16px; } html.wm .wm-lookrow small { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+  html.wm .wm-lookrow i { font-style: normal; font-size: 22px; color: var(--muted); }
+  /* THE TIMER LOOK: full screen, real-size rings, swipe */
+  html.wm .wm-look { position: fixed; inset: 0; z-index: 120; background: var(--bg); display:flex; flex-direction:column; opacity: 0; transform: translateY(16px); transition: opacity .2s, transform .2s;
+    padding: calc(10px + env(safe-area-inset-top)) 0 calc(14px + env(safe-area-inset-bottom)); }
+  html.wm .wm-look.open { opacity: 1; transform: none; }
+  html.wm .wm-look-top { display:flex; align-items:center; justify-content:space-between; padding: 0 16px; }
+  html.wm .wm-look-top b { font-size: 18px; }
+  html.wm .wm-look-x { background:none; border:none; color: var(--muted); font-size: 30px; line-height: 1; padding: 4px 10px 4px 0; cursor:pointer; }
+  html.wm .wm-look-edit { color: var(--wm-neon); font-size: 13px; font-weight: 800; text-decoration:none; border: 1px solid var(--wm-neon-line); border-radius: 999px; padding: 6px 12px; }
+  html.wm .wm-car { flex: none; display:flex; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; margin-top: 8px; }
+  html.wm .wm-car::-webkit-scrollbar { display:none; }
+  html.wm .wm-slide { flex: 0 0 100%; scroll-snap-align: center; display:flex; flex-direction:column; align-items:center; text-align:center; padding: 6px 16px; }
+  html.wm .wm-bigring .timer { width: min(76vw, 310px); height: min(76vw, 310px); position: relative; }
+  html.wm .wm-bigring .timer .read { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  html.wm .wm-slide b { font-size: 22px; margin-top: 10px; } html.wm .wm-slide small { color: var(--muted); font-size: 13.5px; margin-top: 3px; }
+  html.wm .wm-dots { display:flex; justify-content:center; gap: 8px; margin: 10px 0 4px; }
+  html.wm .wm-dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--line); cursor:pointer; }
+  html.wm .wm-dots i.on { background: var(--wm-accent); box-shadow: 0 0 8px var(--wm-accent); width: 22px; border-radius: 99px; }
+  html.wm .wm-strips { flex: 1; overflow-y: auto; padding: 4px 0; }
+  html.wm .wm-strip { margin-top: 12px; }
+  html.wm .wm-stl { padding: 0 16px; color: var(--muted); font-size: 11.5px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 8px; }
+  html.wm .wm-swipe { display:flex; gap: 14px; overflow-x: auto; scroll-snap-type: x proximity; padding: 4px 16px 8px; scrollbar-width: none; }
+  html.wm .wm-swipe::-webkit-scrollbar { display:none; }
+  html.wm .wm-swipe .wm-dot { flex: none; width: 52px; height: 52px; scroll-snap-align: start; position: relative; }
+  html.wm .wm-swipe .wm-dot span { position:absolute; top: 58px; left: 50%; transform: translateX(-50%); color: var(--muted); font-size: 11px; white-space: nowrap; }
+  html.wm .wm-swipe { padding-bottom: 26px; }
+  html.wm .wm-look-bar { padding: 8px 16px 0; }
   html.wm .wm-seg3 { display:flex; gap: 6px; }
   html.wm .wm-seg3 button { flex:1; background: var(--box); border: 1px solid var(--line); border-radius: 10px; color: var(--text); padding: 10px 0; font-weight: 600; cursor:pointer; }
   html.wm .wm-seg3 button.on { border-color: var(--wm-accent); color: var(--wm-accent); background: var(--wm-accent-soft); }
