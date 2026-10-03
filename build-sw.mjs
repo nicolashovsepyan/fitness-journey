@@ -27,7 +27,8 @@ const ROOT = fileURLToPath(new URL('.', import.meta.url));
    phone. lab/ goes with it for the same reason. */
 const SKIP_FILE = new Set(['sw.js', 'build-sw.mjs', 'VIDEO-TODO.md', 'MEMORY.md',
   'Yates_HIT_Hybrid_Protocol.md', 'dashboard-lab.html']);
-const KEEP_EXT = /\.(html|css|js|mjs|png|svg|webmanifest|json|woff2?)$/i;
+// mp3: the coach voice (audio/voice), ~10 KB a piece, needed offline in a gym
+const KEEP_EXT = /\.(html|css|js|mjs|png|svg|webmanifest|json|woff2?|mp3)$/i;
 
 /* Committed, published, but NOT part of the app. Tests are .mjs and would
    otherwise match KEEP_EXT and be downloaded onto every user's phone as part
