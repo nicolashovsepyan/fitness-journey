@@ -1,6 +1,7 @@
 {
-  "version": "2026-10-03.20",
+  "version": "2026-10-03.21",
   "notes": [
+    "Nico's own voice coaches you now, tap a move to add weight mid-workout, and the end screen shows your totals, load and last time",
     "Hold a move and drag it to change the order, when setting up and during the workout",
     "Your music keeps playing during a workout: the timer now plays over it (turn on Sound on silent mode in Timer settings if you train without music)",
     "Hold − or + to go fast, Tabata logs your reps and every round, and colors are simpler: a main color, a second color, and a preview",

@@ -20,6 +20,7 @@ import { applyWorkTheme } from './theme.js';
 import { loadPrefs, openPrefs, pref } from './prefs.js';
 import { installHold } from './hold.js';
 import { makeSortable } from './drag.js';
+import { readHistory, sigOf, showWeight } from './tally.js';
 import { ringHTML, ringBaseCss, ringDesign } from './ring.js';
 
 /* ?demo adds the Work Mode preview: a sample of every program format */
@@ -102,6 +103,8 @@ const DEFAULTS = {
 const TABATA = { work: 20, rest: 10, rounds: 8 };
 const PREF = 'quickTimer';
 
+/* the timer workouts done on this device (tally.js), for "last time" */
+let hist = [];
 let cfg = null, favs = [], host = null, onStart = null, moreOpen = false, guest = false;
 let favIdx = null;              // the saved timer currently loaded, if any
 
@@ -120,6 +123,7 @@ const setVal = (k, v) => { if (cfg.fmt === 'tabata' && k === 'rounds') { cfg.tbT
 export async function renderQuick(el, opts = {}) {
   host = el; onStart = opts.onStart; guest = !!opts.guest;
   injectStyle(); applyWorkTheme(); loadPrefs(); installHold();
+  readHistory().then(h => { hist = h; if (host && cfg) draw(); });
   /* The address itself names the person, so "Add to Home Screen" from here
      gives a timer icon that opens as THEM (an installed iPhone app cannot
      see Safari's storage). */
@@ -404,6 +408,7 @@ export function buildPlan(c = cfg) {
       name, sessionId: 'quick', quick: true, duration: Math.round((totalSec() || 0) / 60),
       /* the get-ready countdown is one setting for every timer (Timer
          settings, 8 s unless changed); a plan built in code can still pin it */
+      fmt: FORMATS.find(f => f.id === cfg.fmt)?.name || cfg.fmt,
       getReady: cfg.readyOverride ?? pref('ready') ?? 8, returnTo: 'index.html?quick', finishLabel: 'Done', blocks,
     };
   } finally { cfg = prev; }
@@ -525,6 +530,23 @@ function fitMoveNames() {
   els.forEach(el => { el.style.fontSize = f + 'px'; });
 }
 
+/* LAST TIME, for this same timer (its type and its moves) */
+const curSig = () => sigOf(fmtDef().name, namedMoves().map(m => m.name));
+const pastRuns = () => hist.filter(x => x.sig === curSig());
+const shortDate = iso => new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+function lastLine() {
+  const runs = pastRuns(); if (!runs.length) return '';
+  const r = runs[0];
+  return `<button class="qt-last" id="qtLast"><span>Last time · ${shortDate(r.at)}</span><b>${r.total} reps${r.loadKg ? ` · ${showWeight(r.loadKg, wUnit())}` : ''}</b><i>${runs.length > 1 ? `${runs.length} times ›` : '›'}</i></button>`;
+}
+function openHistory() {
+  const runs = pastRuns();
+  const { ov, close } = sheet(`<div class="qt-sheet-h">${fmtDef().name} · history</div>
+    <div class="qt-hist">${runs.map(r => `<div class="qt-hrow"><div class="qt-hh"><b>${shortDate(r.at)}</b><span>${r.total} reps${r.loadKg ? ` · ${showWeight(r.loadKg, wUnit())}` : ''}${r.seconds ? ` · ${fmt(r.seconds)}` : ''}${r.partial ? ' · ended early' : ''}</span></div>
+      <small>${r.moves.map(m => `${esc(m.name)} ${m.reps}${m.weight ? ` @ ${m.weight} ${m.wUnit || 'lb'}` : ''}`).join(' · ')}</small></div>`).join('')}</div>
+    <button class="btn" id="qtHistOk">Close</button>`, 'tall');
+  ov.querySelector('#qtHistOk').addEventListener('click', close);
+}
 function draw() {
   const def = fmtDef();
   /* the break between repeats only shows once there is more than one */
@@ -558,6 +580,7 @@ function draw() {
       <span class="qt-type-t"><small>Type</small><b>${def.name}</b><em>${def.sub}</em></span>
       <span class="qt-chev">▾</span>
     </button>
+    ${lastLine()}
 
     ${settings.length ? `${sec('Settings', lad ? '<button class="qt-seclink" id="qtPresets">Presets</button>' : '')}<div class="qt-rows">${settings.join('')}</div>` : ''}
     ${lad || db ? `${sec('Moves')}${movesCard()}` : ''}
@@ -922,6 +945,7 @@ function wire() {
   $('#qtBack')?.addEventListener('click', () => { location.href = 'dashboard.html'; });
   $('#qtSignIn')?.addEventListener('click', () => { try { localStorage.removeItem('fj.launchTimer'); } catch (e) {} location.href = 'index.html'; });
   $('#qtType').addEventListener('click', openTypes);
+  $('#qtLast')?.addEventListener('click', openHistory);
   $('#qtPrefs').addEventListener('click', () => openPrefs(host));
   $('#qtMore')?.addEventListener('click', () => { moreOpen = !moreOpen; draw(); });
   host.querySelectorAll('[data-q]').forEach(b => b.addEventListener('click', () => { bump(b.dataset.q, Number(b.dataset.d)); persist(); draw(); }));
@@ -1225,9 +1249,15 @@ function injectStyle() {
   .qt-stl { color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; margin-right: 2px; }
   /* the unit IS the kg / lb switch: small, quiet, dotted underline */
   .qt-wu { font-size: 12px; color: var(--muted); padding-left: 2px; text-decoration: underline dotted; text-underline-offset: 3px; cursor: pointer; }
-  .qt-addwt { background:none; border:none; color: var(--faint); font-size: 12px; font-weight: 600; padding: 0 30px 6px 0; cursor:pointer; }
+  .qt-addwt { background:none; border:none; color: var(--wm-accent); opacity: .75; font-size: 12.5px; font-weight: 600; padding: 0 30px 6px 0; cursor:pointer; }
   .qt-addrow2 { width:100%; background:none; border:none; border-top: 1px solid var(--line); color: var(--wm-accent); font-size: 15px; font-weight: 700; padding: 13px 0; cursor:pointer; }
   .qt-mvlist .qt-mnote { margin: 0 0 6px; }
+  .qt-last { width:100%; display:flex; align-items:center; gap: 8px; margin-top: 8px; background: var(--box); border: 1px solid var(--line); border-radius: 14px; padding: 10px 14px; color: var(--text); cursor:pointer; font: inherit; text-align:left; }
+  .qt-last span { color: var(--muted); font-size: 13px; flex: 1; } .qt-last b { font-family: var(--tnum); font-size: 14px; } .qt-last i { font-style: normal; color: var(--wm-accent); font-size: 13px; }
+  .qt-hist { display:flex; flex-direction:column; gap: 8px; margin-bottom: 12px; text-align:left; }
+  .qt-hrow { background: var(--bg); border-radius: 12px; padding: 10px 12px; }
+  .qt-hh { display:flex; justify-content:space-between; gap: 8px; } .qt-hh span { font-family: var(--tnum); font-size: 13.5px; }
+  .qt-hrow small { display:block; color: var(--muted); font-size: 12px; margin-top: 4px; }
   .qt-mhead { display:flex; align-items:center; gap: 8px; }
   .qt-mname2 { flex:1; min-width:0; display:flex; align-items:center; justify-content:space-between; gap: 8px; background:none; border:none; padding: 2px 0;
     color: var(--text); font-size: 17px; font-weight: 700; text-align:left; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }

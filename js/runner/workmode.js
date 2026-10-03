@@ -13,6 +13,7 @@ import { alternatives } from '../core/resolve.js';
 import { applyWorkTheme, clearWorkTheme } from './theme.js';
 import { installHold } from './hold.js';
 import { makeSortable, orderAfter } from './drag.js';
+import { bodyWeight, setTimerBodyWeight, moveLoadKg, showWeight, needsBody, readHistory, addHistory, sigOf } from './tally.js';
 import { ringHTML, ringBaseCss, RING_R, snapToSegments } from './ring.js';
 import { loadPrefs, pref, openPrefs } from './prefs.js';
 import { say, beep, buzz, fmt, initAudio, stopAudio, keepAwake, releaseAwake, setMuted } from '../timer.js';
@@ -183,13 +184,13 @@ function rowVid(it) {
    so names line up), the full name on one line (shrunk to fit, never cut),
    then either − value + or just the value. Slim: a list, not a stack of
    buttons. `step`: the data attribute the − + carry, e.g. 'data-am="2"'. */
-function mvRow(it, { val = null, unit = '', step = '' } = {}) {
+function mvRow(it, { val = null, unit = '', step = '', wIdx = null } = {}) {
   const v = val == null || val === '' ? '' : `${val}${unit === 'sec' ? '<small>s</small>' : ''}`;
   const right = step
     ? `<span class="mvr-st"><button ${step} data-d="-1" aria-label="Less">−</button><b>${v || 0}</b><button ${step} data-d="1" aria-label="More">+</button></span>`
     : v ? `<b class="mvr-v">${v}</b>` : '';
   const wt = Number(it.weight) > 0 ? ` <small class="mvr-wt">${it.weight} ${it.wUnit || 'lb'}</small>` : '';
-  return `<div class="mvr">${rowVid(it) || '<span class="mvr-sp"></span>'}<span class="mvr-n">${it.name}${wt}</span>${right}</div>`;
+  return `<div class="mvr">${rowVid(it) || '<span class="mvr-sp"></span>'}<span class="mvr-n"${wIdx != null ? ` data-mvw="${wIdx}" role="button"` : ''}>${it.name}${wt}</span>${right}</div>`;
 }
 const mvUnit = it => UNIT[it.measure] === 'sec' ? 'sec' : '';
 /* − + on a timed move moves 5 seconds, landing on a multiple of 5 */
@@ -1204,7 +1205,7 @@ function renderAmrap() {
   if (!Array.isArray(S.amrapCur)) S.amrapCur = b.items.map(it => Number(it.reps) || 0);
   if (!Array.isArray(S.amrapLog)) S.amrapLog = [];
   const showReps = !b.countRounds && b.items.some(it => it.reps);
-  const moveRows = () => b.items.map((it, i) => mvRow(it, showReps ? { val: S.amrapCur[i], unit: mvUnit(it), step: `data-am="${i}"` } : {})).join('');
+  const moveRows = () => b.items.map((it, i) => mvRow(it, showReps ? { val: S.amrapCur[i], unit: mvUnit(it), step: `data-am="${i}"`, wIdx: i } : { wIdx: i })).join('');
   const logRows = () => {
     const times = amrapTimes();
     return S.amrapLog.map((r, k) => ({ r, k, t: times[k] })).reverse().map(({ r, k, t }) => `<button class="am-r" data-amr="${k}"><span>Round ${k + 1}</span><b>${t != null ? fmt(t) : ''}</b><small>${showReps ? r.reps.join(' · ') : ''}</small></button>`).join('');
@@ -1222,6 +1223,7 @@ function renderAmrap() {
   }));
   host.querySelectorAll('[data-amr]').forEach(btn => btn.addEventListener('click', () => editAmrapRound(+btn.dataset.amr, redraw)));
   makeSortable(host.querySelector('.am-moves'), '.mvr', (from, to) => { reorderMoves(b, from, to); redraw(); });
+  host.querySelectorAll('[data-mvw]').forEach(el => el.addEventListener('click', () => editMoveWeight(b, +el.dataset.mvw, redraw)));
   document.getElementById('rdPlus').addEventListener('click', e => {
     S.amrapRounds++; S.amrapSplits = [...(S.amrapSplits || []), upElapsed()];
     S.amrapLog.push({ reps: [...S.amrapCur] }); R.save(S);
@@ -1248,6 +1250,31 @@ function editAmrapRound(k, done) {
     ov.querySelector('#amEditDone').addEventListener('click', () => { ov.remove(); done(); });
   };
   draw(); host.appendChild(ov); requestAnimationFrame(fitNames);
+}
+
+/* A MOVE'S WEIGHT, MID-WORKOUT: tap its name. 5 lb / 2.5 kg steps, the
+   unit switches by tapping it, 0 takes the weight off. */
+function editMoveWeight(b, i, done) {
+  const it = b.items[i]; if (!it) return;
+  const ov = document.createElement('div'); ov.className = 'overlay';
+  let unit = it.wUnit || 'lb', v = Number(it.weight) || 0;
+  const draw = () => {
+    ov.innerHTML = `<div class="overlay-card"><div class="eyebrow">Weight</div>
+      <h2 style="margin:6px 0 14px;">${it.name}</h2>
+      <div class="mvr-list"><div class="mvr"><span class="mvr-sp"></span><span class="mvr-n">${v > 0 ? 'Added weight' : 'Bodyweight'}</span>
+        <span class="mvr-st"><button data-w="-1" aria-label="Less">−</button><b>${v || 0}<small class="wm-wu" data-wu="1" role="button">${unit}</small></b><button data-w="1" aria-label="More">+</button></span></div></div>
+      <button class="btn" id="mwDone" style="margin-top:14px;">Done</button></div>`;
+    const k = unit === 'kg' ? 2.5 : 5;
+    ov.querySelectorAll('[data-w]').forEach(btn => btn.addEventListener('click', () => {
+      const d = Number(btn.dataset.w); v = Math.max(0, Math.round((d > 0 ? Math.floor(v / k + 1e-9) * k + k : Math.ceil(v / k - 1e-9) * k - k) * 10) / 10); buzz(10); draw(); }));
+    ov.querySelector('[data-wu]').addEventListener('click', () => {
+      v = unit === 'lb' ? Math.round(v / 2.20462 / 2.5) * 2.5 : Math.round(v * 2.20462 / 5) * 5; unit = unit === 'lb' ? 'kg' : 'lb'; draw(); });
+    ov.querySelector('#mwDone').addEventListener('click', () => {
+      if (v > 0) { it.weight = v; it.wUnit = unit; } else { delete it.weight; delete it.wUnit; }
+      R.save(S); ov.remove(); done();
+    });
+  };
+  draw(); host.appendChild(ov);
 }
 
 /* REORDER A BLOCK'S MOVES MID-WORKOUT (hold and drag). Everything indexed
@@ -1383,7 +1410,7 @@ function renderInterval() {
   /* time-based: in the rest after it, the move you just did stays up so you
      can put in your reps */
   const moveLines = phaseWork || (timeBased && hasReps) ? moves.map((i, j) => { const it = b.items[i];
-    return mvRow(it, hasReps ? { val: S.ivCur[j], unit: mvUnit(it), step: `data-ivr="${j}"` } : {}); }).join('') : '';
+    return mvRow(it, hasReps ? { val: S.ivCur[j], unit: mvUnit(it), step: `data-ivr="${j}"`, wIdx: i } : { wIdx: i }); }).join('') : '';
   const nextItem = !all && S.iv + 1 < totalIv ? b.items[(S.iv + 1) % per] : null;
   /* only the numbers that say something: no "total reps" on a bare clock */
   const stats = [`<div><small>Rounds</small><b class="wm-pop">${doneCount}${lad ? '' : `<i>/${totalIv}</i>`}</b></div>`,
@@ -1433,6 +1460,7 @@ function renderInterval() {
     else if (!all && !S.ivLog?.[S.iv] && at[S.iv % per] !== S.iv % per) S.ivCurAt = null;
     R.save(S); renderInterval();
   });
+  host.querySelectorAll('[data-mvw]').forEach(el => el.addEventListener('click', () => editMoveWeight(b, +el.dataset.mvw, renderInterval)));
   host.querySelectorAll('[data-ivl]').forEach(r => r.addEventListener('click', () => { const k = +r.dataset.ivl; if (S.ivLog[k]) editIvRound(k, renderInterval); }));
   document.getElementById('ivDone')?.addEventListener('click', e => {
     if (S.ivLog[S.iv]?.t != null) return;
@@ -1624,7 +1652,8 @@ function renderLadder() {
   const finish = secs => {
     R.clearStep(S); onStepDone = null;
     const ls = (S.laps || []).map((t, i, a) => Math.round(t - (a[i - 1] || 0)));
-    (S.captured[b.id] || []).forEach(e => { e.sets = [{ value: secs }]; e.unit = 'sec'; e.rounds = true; if (ls.length) e.laps = ls; });
+    const doneRungs = rungs.slice(0, (S.laps || []).length);
+    (S.captured[b.id] || []).forEach((e, i) => { e.sets = [{ value: secs }]; e.unit = 'sec'; e.rounds = true; if (ls.length) e.laps = ls; e.ladReps = doneRungs.reduce((a, r) => a + (Number(val(r, i)) || 0), 0); });
     R.save(S); say(`Done. ${Math.floor(secs / 60)} minutes ${secs % 60} seconds.`, 2500);
     completeBlock();
   };
@@ -1858,6 +1887,74 @@ function quickResult(session) {
   }).join('');
   return rows ? `<div class="card"><div class="eyebrow">Result</div>${rows}</div>` : '';
 }
+/* THE TALLY at the end of a timer workout: reps per move, total reps, the
+   load (added weight + the share of body weight each bodyweight move
+   lifts), and the same timer's last time. Saved to the timer's history. */
+function repsOfEntry(e, b, item, partial) {
+  if (e.ivReps) return e.ivReps.total;
+  if (e.deathBy) return e.deathBy.total || 0;
+  if (e.ladReps != null) return e.ladReps;
+  if (e.amrap && e.unit !== 'rounds') return (e.sets || []).reduce((a, x) => a + (Number(x.value) || 0), 0);
+  if (b.format === 'cadence' || (b.format === 'amrap' && e.unit !== 'rounds' && !e.amrap)) return Number(e.sets?.[0]?.value) || 0;
+  if (b.format === 'fortime' && !partial && Number(item?.reps) > 0) return Number(item.reps) * (b.rounds || 1);
+  return null;
+}
+function quickTally(session, partial) {
+  const body = bodyWeight();
+  const unit = body?.unit === 'kg' ? 'kg' : (S.plan.blocks.flatMap(b => b.items).find(it => it.wUnit)?.wUnit || body?.unit || 'lb');
+  const moves = new Map();                                 // by name: reps, an item to price it with
+  session.blocks.forEach(sb => {
+    const pb = S.plan.blocks.find(x => x.id === sb.id); if (!pb) return;
+    sb.entries.forEach((e, i) => {
+      const it = pb.items[i] || {}; const r = repsOfEntry(e, pb, it, partial);
+      if (r == null || !it.name || /^(Work|Time|Reps|Rounds)$/.test(it.name)) return;
+      const m = moves.get(it.name) || { name: it.name, reps: 0, item: it };
+      m.reps += r; moves.set(it.name, m);
+    });
+  });
+  const list = [...moves.values()].filter(m => m.reps > 0);
+  if (!list.length) return null;
+  /* reps and held seconds are different things: holds get their own line */
+  const total = list.filter(m => !mvUnit(m.item)).reduce((a, m) => a + m.reps, 0);
+  const held = list.filter(m => mvUnit(m.item)).reduce((a, m) => a + m.reps, 0);
+  const loadKg = b => list.reduce((a, m) => a + moveLoadKg(m.item, m.reps, b), 0);
+  const askBody = !body && needsBody(list.map(m => m.item));
+  const fmtName = S.plan.blocks[0]?.label || S.plan.blocks[0]?.format || '';
+  /* the timer is its type and ALL its moves (a move left at 0 reps today is still part of it) */
+  const planNames = [...new Set(S.plan.blocks.flatMap(b => b.items || []).map(it => it.name).filter(n => n && !/^(Work|Time|Reps|Rounds)$/.test(n)))];
+  const sig = sigOf(S.plan.fmt || fmtName, planNames);
+  const row = (l, r, cls = '') => `<div class="eff-row ${cls}"><span>${l}</span><span style="margin-left:auto;" class="tnum">${r}</span></div>`;
+  const loadRow = () => { const kg = loadKg(bodyWeight()); return kg > 0 ? row('Total load <small class="muted">est.</small>', showWeight(kg, unit)) : ''; };
+  const html = `<div class="card tally"><div class="eyebrow">Totals</div>
+    ${list.map(m => row(`${m.name}${Number(m.item.weight) > 0 ? ` <small class="muted">@ ${m.item.weight} ${m.item.wUnit || 'lb'}</small>` : ''}`, `${m.reps} ${mvUnit(m.item) ? 'sec' : 'reps'}`)).join('')}
+    ${row('<b>Total reps</b>', `<b>${total}</b>`, 'tally-sum')}
+    ${held ? row('Total time held', fmt(held)) : ''}
+    <div id="tallyLoad">${loadRow()}</div>
+    ${askBody ? `<div class="tally-body" id="tallyBody"><span>Your body weight, to count bodyweight moves in the load</span>
+      <span class="mvr-st"><input id="tbW" type="number" inputmode="decimal" placeholder="–"/><small>${unit}</small><button class="btn secondary" id="tbSave">Save</button></span></div>` : ''}
+    <div id="tallyLast" class="tally-last"></div></div>`;
+  const rec = { at: new Date().toISOString(), sig, title: S.plan.name, seconds: session.seconds, partial: !!partial,
+    moves: list.map(m => ({ name: m.name, reps: m.reps, weight: m.item.weight || null, wUnit: m.item.wUnit || null })), total, loadKg: Math.round(loadKg(body)) };
+  const wire = () => {
+    document.getElementById('tbSave')?.addEventListener('click', () => {
+      const v = Number(document.getElementById('tbW')?.value); if (!(v > 0)) return;
+      setTimerBodyWeight(v, unit); document.getElementById('tallyBody')?.remove();
+      document.getElementById('tallyLoad').innerHTML = loadRow();
+    });
+    /* last time, for this same timer; then this one joins the history */
+    readHistory().then(h => {
+      const prev = h.find(x => x.sig === sig);
+      const el = document.getElementById('tallyLast');
+      if (prev && el) {
+        const d = new Date(prev.at), diff = total - prev.total;
+        el.innerHTML = `<div class="eff-row"><span class="muted">Last time · ${d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span><span style="margin-left:auto;">${prev.total} reps <b class="${diff > 0 ? 'up' : diff < 0 ? 'down' : ''}">${diff > 0 ? `+${diff}` : diff < 0 ? diff : '='}</b></span></div>`;
+      }
+      return addHistory(rec);
+    });
+  };
+  return { html, wire };
+}
+
 function finishSession(opts = {}) {
   const partial = !!opts.partial;
   if (!partial && S?.plan?.coachMode && !S.feedbackDone) {
@@ -1892,6 +1989,7 @@ function finishSession(opts = {}) {
   const { prs } = S.plan.demo ? { prs: [] } : store.saveSession(session);
   const effs = (partial || S.plan.quick) ? [] : efficiencyCallouts(session);
   const resultHtml = S.plan.quick ? quickResult(session) : '';
+  const tally = S.plan.quick && !S.plan.demo ? quickTally(session, partial) : null;
   R.clear();
   const prText = p => p.weight != null
     ? ((p.l != null || p.r != null) ? `${p.weight}lb · L${p.l ?? '–'} · R${p.r ?? '–'}` : `${p.weight}lb × ${p.value}`)
@@ -1906,7 +2004,8 @@ function finishSession(opts = {}) {
     <div class="big-emoji">${prs.length ? '🏆' : '✅'}</div>
     <h1 style="font-size:28px;">${prs.length ? 'New records!' : partial ? 'Saved.' : 'Done.'}</h1>
     <p class="muted">${S.plan.name} · ${fmt(elapsed)}${partial ? ' · ended early' : S.plan.quick ? '' : ` · ${S.plan.duration} min plan`}</p>
-    <div style="height:16px;"></div>${resultHtml}${prHtml}${effHtml}
+    <div style="height:16px;"></div>${resultHtml}${tally ? tally.html : ''}${prHtml}${effHtml}
     <div class="actionbar"><button class="btn lg" id="home">${S.plan.finishLabel || 'Back to week'}</button></div></div>`;
+  if (tally) tally.wire();
   document.getElementById('home').addEventListener('click', async () => { const leavesPage = !!S?.plan?.returnTo; try { await R.flushRunState(); } catch (e) {} if (!leavesPage) clearWorkTheme(); cb.onFinish?.(); });
 }

@@ -329,6 +329,14 @@ function injectStyle() {
     background: linear-gradient(105deg, transparent 52%, rgba(255,255,255,.09) 60%, transparent 68%), var(--box); }
   html.wm .ld-reps div.now::before, html.wm .ld-reps div.now::after { opacity: 1; }
   html.wm .ld-reps div.now span, html.wm .ld-reps div.now b { color: #fff; text-shadow: 0 0 10px var(--wm-neon), 0 0 2px rgba(255,255,255,.8); }
+  html.wm .mvr-n[data-mvw] { cursor: pointer; }
+  html.wm .mvr-st .wm-wu { text-decoration: underline dotted; text-underline-offset: 3px; cursor: pointer; }
+  html.wm .tally .tally-sum { border-top: 1px solid var(--line); margin-top: 4px; padding-top: 8px; }
+  html.wm .tally .tnum { font-family: var(--tnum); }
+  html.wm .tally-body { display:flex; flex-direction:column; gap: 8px; padding: 10px 0 4px; color: var(--muted); font-size: 13px; text-align:left; }
+  html.wm .tally-body input { width: 70px; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; color: var(--text); font: inherit; font-size: 18px; padding: 6px 8px; text-align:center; }
+  html.wm .tally-body .btn { width:auto; padding: 8px 14px; margin-left: 8px; }
+  html.wm .tally-last b.up { color: var(--wm-accent); } html.wm .tally-last b.down { color: #ff8a8a; }
   html.wm .mvr-n .mvr-wt { color: var(--wm-accent); font-weight: 700; font-family: var(--tnum); }
   /* the round-done burst (workmode.js celebrate) */
   .wm-burst { position: fixed; z-index: 150; width: 0; height: 0; pointer-events: none; }

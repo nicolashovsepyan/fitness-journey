@@ -43,5 +43,3 @@ CLIENTS/
 # Nico's raw Voice Memos takes (kept in Dropbox, cut by tools/build-voice.py)
 audio/voice-src/
 audio/nico-voice-sample.mp3
-# the voice pack goes live when its index ships
-audio/voice/index.json
