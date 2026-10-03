@@ -134,7 +134,7 @@ export function openPrefs(host) {
         <div class="wm-rstep"><button data-rd="-1" aria-label="Less">−</button><b>${prefs.ready}s</b><button data-rd="1" aria-label="More">+</button></div></div>
       <div class="wm-vrow"><div class="wm-vl"><b>Coach voice</b><small>Nico's voice, or the same coaching in a female voice</small></div>
         <div class="wm-seg3">${[['m', 'Male'], ['f', 'Female']].map(([v, l]) => `<button class="${prefs.voiceKind === v ? 'on' : ''}" data-vk="${v}">${l}</button>`).join('')}</div>
-        ${isCoachDevice() ? '<a class="wm-look-edit" href="voice-lab.html" style="display:inline-block;margin-top:10px;">Voice lab ›</a>' : ''}</div>
+        <a class="wm-voicelab" href="voice-lab.html">Fine-tune the voice ›</a></div>
       ${ROWS.map(([k, name, sub]) => `<button class="wm-pref" data-pref="${k}">
         <span><b>${name}</b><small>${sub}</small></span><i class="wm-sw ${prefs[k] ? 'on' : ''}"></i></button>`).join('')}
       ${vibeHtml()}

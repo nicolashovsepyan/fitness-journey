@@ -1,6 +1,7 @@
 {
-  "version": "2026-10-03.22",
+  "version": "2026-10-03.23",
   "notes": [
+    "Fine-tune the coach voice: Timer settings, under Coach voice",
     "Pick a male or female coach voice in Timer settings. No sound on iPhone? Turn off silent mode: the timer plays over your music, and the silent switch mutes it",
     "Nico's own voice coaches you now, tap a move to add weight mid-workout, and the end screen shows your totals, load and last time",
     "Hold a move and drag it to change the order, when setting up and during the workout",

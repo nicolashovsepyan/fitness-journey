@@ -49,7 +49,7 @@
   </style>
 </head>
 <body>
-  <div class="top"><a href="index.html?quick" aria-label="Back">‹</a><h1>Voice lab</h1></div>
+  <div class="top"><a href="index.html?quick" id="back" aria-label="Back">‹</a><h1>Voice lab</h1></div>
 
   <div class="card">
     <div class="h">Voice</div>
@@ -74,6 +74,8 @@
 <script type="module">
 import { loadVoicePack, plan, playLine, stopVoice, setVoiceKind, voiceKind, FX_DEFAULTS, fxFor } from './js/voice.js';
 try { localStorage.setItem('fj.coachDevice', '1'); } catch (e) {}
+/* back to wherever the lab was opened from (the Training Timer, or a workout's settings) */
+document.getElementById('back').addEventListener('click', e => { if (history.length > 1) { e.preventDefault(); history.back(); } });
 
 const LINES = ['Get ready.', '3', 'Go. Burpees.', 'Rest. Next, Push-ups.', 'Halfway.', 'Ten seconds.', 'Last round. Kettlebell swings.', '12 Push-ups.', 'Round 5.', '8 rounds. Strong work.', 'Workout complete. Strong work.'];
 const DIALS = [
