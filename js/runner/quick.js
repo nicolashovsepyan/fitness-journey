@@ -13,6 +13,7 @@
 import { storage } from '../core/storage.js';
 import { fmt } from '../timer.js';
 import { EXERCISES } from '../data/exercises.js';
+import { exerciseImage } from '../data/exercise-images.js';
 import { DEMOS } from './demo.js';
 import { activeUserId } from '../users.js';
 import { applyWorkTheme } from './theme.js';
@@ -467,6 +468,8 @@ function segRow(label, tone, opts, cur, attr, foot = '') {
     <div class="qt-seg2">${opts.map(([v, l]) => `<button class="${String(cur) === String(v) ? 'on' : ''}" ${attr}="${v}">${l}</button>`).join('')}</div>
     ${foot ? `<div class="qt-su">${foot}</div>` : ''}</div>`;
 }
+/* a timed move (plank, hang, wall sit): its numbers are seconds */
+const isHold = m => !!(m && m.exId && EXERCISES[m.exId]?.measure === 'hold');
 /* a small labelled −/+ inside a move row */
 function mini(label, face, minus, plus) {
   return `<div class="qt-mini"><span class="qt-ml">${label}</span><div class="qt-mline">${minus}<span class="qt-mv">${face}</span>${plus}</div></div>`;
@@ -647,8 +650,12 @@ function openTypes() {
       persist(); draw();
     }
     close();
+    /* nothing to set: straight in */
+    if (NO_SETUP.has(cfg.fmt)) { persist(); onStart?.(buildPlan()); }
   }));
 }
+/* types with nothing to set open straight into the clock */
+const NO_SETUP = new Set(['stopwatch']);
 /* how the chosen type works */
 function openHow(id) {
   const def = FORMATS.find(f => f.id === id) || fmtDef();
@@ -835,7 +842,8 @@ async function openMovePicker(i) {
     const exact = t && LIB().some(e => e.n === t);
     out.innerHTML = (t && !exact ? `<button class="qt-res own" data-own="1"><b>Use "${esc(q.value.trim())}"</b><small>your own move, not from the library</small></button>` : '')
       + (t || filtered ? `<div class="qt-count">${all.length} move${all.length === 1 ? '' : 's'}</div>` : '')
-      + hits.map(e => `<button class="qt-res" data-ex="${e.id}"><b>${esc(e.name)}</b><small>${esc(e.tag)}</small></button>`).join('');
+      + hits.map(e => { const img = exerciseImage(e.id);
+        return `<button class="qt-res pic" data-ex="${e.id}"><span class="qt-th">${img ? `<img src="${img}" alt="" loading="lazy" decoding="async"/>` : esc(e.name[0])}</span><span class="qt-rt"><b>${esc(e.name)}</b><small>${esc(e.tag)}</small></span></button>`; }).join('');
     out.querySelectorAll('[data-ex]').forEach(b => b.addEventListener('click', () => pick({ exId: b.dataset.ex, name: EXERCISES[b.dataset.ex].name })));
     out.querySelector('[data-own]')?.addEventListener('click', () => pick({ exId: null, name: q.value.trim() }));
   };
@@ -870,12 +878,16 @@ function wire() {
   host.querySelectorAll('[data-ldshape]').forEach(b => b.addEventListener('click', () => { cfg.ldShape = b.dataset.ldshape; persist(); draw(); }));
   $('#qtPresets')?.addEventListener('click', openPresets);
   host.querySelectorAll('[data-mr]').forEach(b => b.addEventListener('click', () => {
-    const m = MV()[+b.dataset.mr]; m.reps = Math.max(0, Math.min(999, (Number(m.reps) || 0) + Number(b.dataset.d))) || ''; persist(); draw();
+    const m = MV()[+b.dataset.mr], k = isHold(m) ? 5 : 1, v = Number(m.reps) || 0;
+    /* seconds move 5 at a time, landing on a multiple of 5 (12 → 15, not 17) */
+    const nv = Number(b.dataset.d) > 0 ? Math.floor(v / k) * k + k : Math.ceil(v / k) * k - k;
+    m.reps = Math.max(0, Math.min(999, nv)) || ''; persist(); draw();
   }));
   host.querySelectorAll('[data-lm]').forEach(b => b.addEventListener('click', () => {
     const m = MV()[+b.dataset.lm], f = b.dataset.lf, d = +b.dataset.d;
-    if (f === 'ldStart') m.ldStart = Math.min(500, Math.max(1, ldStart(m) + d));
-    else m.ldStep = Math.min(50, Math.max(cfg.fmt === 'deathby' ? 0 : -50, ldStep(m) + d));
+    const k = isHold(m) ? 5 : 1;
+    if (f === 'ldStart') m.ldStart = Math.min(500, Math.max(1, ldStart(m) + d * k));
+    else m.ldStep = Math.min(50 * k, Math.max(cfg.fmt === 'deathby' ? 0 : -50 * k, ldStep(m) + d * k));
     persist(); draw();
   }));
   host.querySelectorAll('[data-style]').forEach(b => b.addEventListener('click', () => { cfg.emomStyle = b.dataset.style; persist(); draw(); }));
@@ -1034,6 +1046,11 @@ function injectStyle() {
   .qt-res { width:100%; display:flex; flex-direction:column; text-align:left; background:none; border:none; border-bottom: 1px solid var(--line); color: var(--text); padding: 12px 4px; cursor:pointer; }
   .qt-res b { font-size: 16px; font-weight: 600; } .qt-res small { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
   .qt-res.own b { color: var(--wm-accent); }
+  .qt-res.pic { flex-direction:row; align-items:center; gap: 12px; }
+  .qt-rt { display:flex; flex-direction:column; min-width:0; }
+  .qt-th { flex: 0 0 64px; width:64px; height:64px; border-radius: 12px; overflow:hidden; background: #eef1f5; display:grid; place-items:center; font-weight:800; font-size:20px; color: var(--wm-accent); }
+  .qt-th:not(:has(img)) { background: color-mix(in srgb, var(--wm-accent) 14%, transparent); }
+  .qt-th img { width:100%; height:100%; object-fit:contain; }
   .qt-star.on { color: var(--wm-neon); text-shadow: var(--wm-glow-neon); }
   .qt-star svg { display:block; }
   .qt-fav.on { border-color: var(--wm-neon); } .qt-fav.on button:first-child { color: var(--wm-neon); }

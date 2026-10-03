@@ -1,6 +1,7 @@
 {
-  "version": "2026-10-03.2",
+  "version": "2026-10-03.3",
   "notes": [
+    "Timed moves like planks go up and down 5 seconds at a time, the move list shows pictures, and Stopwatch starts as soon as you pick it",
     "Ladders never hit 0: a dropping ladder stops at 1 rep, so 20 down by 2 ends at 2 and comes back",
     "Round done now celebrates (buzz, chime, sparks), AMRAP logs every round with its time and lets you fix the reps, the ladder shows your progress rung by rung, and moves filter by body part, level and equipment",
     "Ring glare works: a light streak and sparkle on the glass, with a size control in the lab",
