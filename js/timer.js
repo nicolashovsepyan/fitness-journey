@@ -8,6 +8,8 @@
    ============================================================ */
 
 import { storage } from './core/storage.js';
+import { loadVoicePack, warmVoice, plan, playLine, stopVoice } from './voice.js';
+loadVoicePack();
 
 /* ---- coach voice ---- */
 let voiceOn = true;
@@ -60,8 +62,34 @@ export function setVoiceName(name) {
    line may cut it off; anything said inside the window queues behind it
    instead of cancelling it. */
 let keepUntil = 0;
+/* the phone's voice, for a word Nico has not recorded: resolves when done */
+function speakNow(text) {
+  return new Promise(done => {
+    try {
+      if (!text) return done();
+      if (!preferredVoice) preferredVoice = pickVoice();
+      const u = new SpeechSynthesisUtterance(text);
+      if (preferredVoice) { u.voice = preferredVoice; u.lang = preferredVoice.lang; }
+      u.rate = 0.92;
+      const t = setTimeout(done, 600 + text.length * 90);      // onend is not reliable everywhere
+      u.onend = () => { clearTimeout(t); done(); };
+      speechSynthesis.speak(u);
+    } catch (e) { done(); }
+  });
+}
+let voiceChain = Promise.resolve();
 export function say(text, keep = 0) {
   if (!voiceOn || muted) return;
+  /* NICO'S RECORDED VOICE first (js/voice.js); the phone's voice only for
+     the words not recorded yet */
+  const steps = actx && plan(text);
+  if (steps) {
+    const now = Date.now() >= keepUntil;
+    if (keep) keepUntil = Date.now() + keep;
+    if (now) { stopVoice(); try { speechSynthesis.cancel(); } catch (e) {} voiceChain = playLine(actx, steps, speakNow).catch(() => {}); }
+    else voiceChain = voiceChain.then(() => playLine(actx, steps, speakNow)).catch(() => {});
+    return;
+  }
   try {
     if (!preferredVoice) preferredVoice = pickVoice();
     const u = new SpeechSynthesisUtterance(text);
@@ -76,6 +104,11 @@ export function say(text, keep = 0) {
 /* ---- Web Audio beeps (mix over music, don't interrupt it) ---- */
 let actx = null;
 let speechPrimed = false;
+/* "Sound on silent mode" (Work Mode settings): off by default, because on
+   an iPhone the only way past the ringer switch also stops the music */
+let silentOverride = false;
+let voiceWarm = false;
+export function setSilentOverride(on) { silentOverride = !!on; try { if (navigator.audioSession) navigator.audioSession.type = silentOverride ? 'playback' : 'ambient'; } catch (e) {} if (!silentOverride) { try { keepalive?.pause?.(); } catch (e) {} } }
 let keepalive = null;
 
 /* THREE SEPARATE THINGS SILENCE A PHONE, AND UNLOCKING ONE FIXES NOTHING
@@ -111,6 +144,9 @@ export function initAudio() {
     const src = actx.createBufferSource(); src.buffer = b; src.connect(actx.destination); src.start(0);
   } catch (e) {}
 
+  /* the recorded voice: decoded in the background, one piece at a time */
+  if (actx && !voiceWarm) { voiceWarm = true; warmVoice(actx); }
+
   /* 2 — speech has its own gate, and it is one-shot */
   try {
     if (!speechPrimed && typeof speechSynthesis !== 'undefined') {
@@ -121,7 +157,14 @@ export function initAudio() {
     }
   } catch (e) {}
 
-  /* 3 — take the session off the ringer channel. iPHONE ONLY.
+  /* 3 — MUSIC FIRST. By default the timer mixes with whatever is playing
+     (Spotify, Apple Music): the audio session is "ambient", the kind iOS
+     plays alongside music. The cost: the ringer switch silences it. Only
+     when the person asks for "Sound on silent mode" does the old trick
+     below run, and that one pauses their music, which is why it is off
+     unless chosen. */
+  try { if (navigator.audioSession) navigator.audioSession.type = silentOverride ? 'playback' : 'ambient'; } catch (e) {}
+  /* 3b — take the session off the ringer channel. iPHONE ONLY, OPT-IN.
      Android has no ringer switch that silences Web Audio, and on Android
      Chrome a playing <audio> element asks for audio focus: volume 0 is not
      muted, so a looping clip held "may duck" focus for the whole session
@@ -130,7 +173,7 @@ export function initAudio() {
   try {
     const ios = /iP(hone|ad|od)/.test(navigator.userAgent)
       || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    if (!ios) throw 0;
+    if (!ios || !silentOverride) { keepalive?.pause?.(); throw 0; }
     if (!keepalive) {
       keepalive = new Audio(SILENCE);
       keepalive.loop = true;

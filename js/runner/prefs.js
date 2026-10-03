@@ -4,13 +4,13 @@
    boot, changed from the pause screen or the Quick Timer's gear.
    ============================================================ */
 import { storage } from '../core/storage.js';
-import { setVoice, setBeeps, say, beep } from '../timer.js';
+import { setVoice, setBeeps, say, beep, setSilentOverride } from '../timer.js';
 import { vibeOptions, setVibe } from './theme.js';
 import { checkForUpdate, runningVersion } from '../update-banner.js';
 import { PRESETS, designFor, ringChoice, chooseRing, ringHTML, ringBaseCss, setRingProgress } from './ring.js';
 
 const KEY = 'workModePrefs';
-const DEFAULTS = { voice: true, beeps: true, flash: true, ready: 8 };
+const DEFAULTS = { voice: true, beeps: true, flash: true, ready: 8, silent: false };
 let prefs = { ...DEFAULTS };
 let loaded = false;
 
@@ -21,7 +21,7 @@ export async function loadPrefs() {
   return prefs;
 }
 export const pref = k => prefs[k];
-function apply() { setVoice(!!prefs.voice); setBeeps(!!prefs.beeps); }
+function apply() { setVoice(!!prefs.voice); setBeeps(!!prefs.beeps); setSilentOverride(!!prefs.silent); }
 function set(k, v) {
   prefs[k] = v; apply();
   try { storage().setDevicePref(KEY, prefs); } catch (e) {}
@@ -31,6 +31,7 @@ const ROWS = [
   ['voice', 'Coach voice', 'Move names, halfway, last round, 1 minute left'],
   ['beeps', 'Beeps', 'Countdown ticks, the end of each step, the 10-second warning'],
   ['flash', 'Screen flash', 'The screen flashes when a step ends. Handy in a loud gym'],
+  ['silent', 'Sound on silent mode', 'Off: the timer plays over your music (your silent switch mutes it). On: it plays even on silent, but iPhone pauses your music'],
 ];
 
 /* CUSTOMIZE YOUR VIBE — the same three choices as the app's own: which

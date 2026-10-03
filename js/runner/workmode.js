@@ -419,7 +419,7 @@ function renderGetReady() {
     if (b.format === 'cadence') {
       /* short enough to finish before the spoken 3-2-1 */
       say(`Push-up test. Start on the double beep. Then one push-up on every beep. I'll count.`, 5500);
-    } else say(`Get ready. ${b.name}.`);
+    } else say(String(b.name).includes('·') ? 'Get ready.' : `Get ready. ${b.name}.`);
   }
   onStepDone = begin;
   document.getElementById('go').addEventListener('click', () => {
@@ -1598,7 +1598,7 @@ function renderLadder() {
     R.clearStep(S); onStepDone = null;
     const ls = (S.laps || []).map((t, i, a) => Math.round(t - (a[i - 1] || 0)));
     (S.captured[b.id] || []).forEach(e => { e.sets = [{ value: secs }]; e.unit = 'sec'; e.rounds = true; if (ls.length) e.laps = ls; });
-    R.save(S); say(`Ladder done in ${Math.floor(secs / 60)} minutes ${secs % 60} seconds.`, 2500);
+    R.save(S); say(`Done. ${Math.floor(secs / 60)} minutes ${secs % 60} seconds.`, 2500);
     completeBlock();
   };
   if (beginStep(dur, cap ? 'work' : 'rest', 'fortime')) say(`Go. ${b.items.map((_, i) => `${val(rungs[k], i)} ${named[i]}`).join(', ')}.`);
