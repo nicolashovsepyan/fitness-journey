@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#171A1E" />
+  <title>Labs</title>
+  <link rel="icon" type="image/png" href="images/timer-icon/timer-192.png" />
+  <!--
+    LABS. Every design lab behind one link, for Nico, not for clients:
+    the logo, the timer ring, the coach voice, the dashboard. Each lab is
+    its own page (kept by the chat that owns it); this page only switches
+    between them. The tab last used opens next time; #voice etc. opens one
+    directly.
+  -->
+  <style>
+    :root { --bg:#171A1E; --box:#212630; --line:#2F3640; --text:#ECEFF3; --muted:#A9B2BC; --acc:#3ECBA8; --neon:#FF5FA2; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin:0; height:100%; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif; }
+    body { display:flex; flex-direction:column; }
+    header { display:flex; align-items:center; gap: 12px; padding: calc(10px + env(safe-area-inset-top)) 14px 10px; border-bottom: 1px solid var(--line); }
+    header h1 { margin:0; font-size: 20px; letter-spacing: -0.02em; }
+    header h1:after { content:""; display:block; width: 24px; height: 3px; border-radius: 3px; margin-top: 4px; background: var(--neon); box-shadow: 0 0 12px var(--neon); }
+    nav { display:flex; gap: 6px; overflow-x:auto; scrollbar-width: none; flex: 1; }
+    nav::-webkit-scrollbar { display:none; }
+    nav button { flex: 0 0 auto; background: var(--box); border: 1px solid var(--line); color: var(--muted); border-radius: 999px; padding: 8px 14px; font-size: 14px; font-weight: 700; cursor:pointer; white-space: nowrap; }
+    nav button.on { color: var(--text); border-color: var(--acc); background: color-mix(in srgb, var(--acc) 16%, transparent); box-shadow: 0 0 12px color-mix(in srgb, var(--acc) 30%, transparent); }
+    a.open { color: var(--muted); font-size: 13px; text-decoration: none; white-space: nowrap; }
+    iframe { flex: 1; width: 100%; border: 0; background: var(--bg); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Labs</h1>
+    <nav id="tabs"></nav>
+    <a class="open" id="open" target="_blank" rel="noopener" title="Open this lab on its own">↗</a>
+  </header>
+  <iframe id="frame" title="Lab"></iframe>
+<script>
+  const LABS = [
+    { id: 'logo', name: 'Logo', src: 'logo/LOGO%20LAB.html' },
+    { id: 'ring', name: 'Timer ring', src: 'ring-lab.html' },
+    { id: 'voice', name: 'Voice', src: 'voice-lab.html' },
+    { id: 'dashboard', name: 'Dashboard', src: 'dashboard-lab.html' },
+  ];
+  try { localStorage.setItem('fj.coachDevice', '1'); } catch (e) {}
+  const pick = id => {
+    const lab = LABS.find(l => l.id === id) || LABS[0];
+    document.getElementById('frame').src = lab.src;
+    document.getElementById('open').href = lab.src;
+    document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.id === lab.id));
+    try { localStorage.setItem('fj.labsTab', lab.id); } catch (e) {}
+    history.replaceState(null, '', '#' + lab.id);
+  };
+  document.getElementById('tabs').innerHTML = LABS.map(l => `<button data-id="${l.id}">${l.name}</button>`).join('');
+  document.querySelectorAll('#tabs button').forEach(b => b.addEventListener('click', () => pick(b.dataset.id)));
+  let start = location.hash.slice(1);
+  if (!LABS.some(l => l.id === start)) { try { start = localStorage.getItem('fj.labsTab'); } catch (e) {} }
+  pick(start);
+</script>
+</body>
+</html>

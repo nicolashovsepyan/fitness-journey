@@ -47,6 +47,8 @@
     .toast { position: fixed; left: 50%; bottom: 100px; transform: translateX(-50%); background: var(--box-2); border: 1px solid var(--acc); color: var(--text); padding: 10px 16px; border-radius: 12px; font-size: 14px; opacity: 0; transition: opacity .2s; pointer-events:none; }
     .toast.on { opacity: 1; }
   </style>
+<style>/* inside labs.html: the hub has the way out */ html.in-labs .top > a:first-child { display:none; }</style>
+<script>if (window !== window.top) document.documentElement.classList.add('in-labs');</script>
 </head>
 <body>
   <div class="top"><a href="index.html?quick" id="back" aria-label="Back">‹</a><h1>Voice lab</h1></div>

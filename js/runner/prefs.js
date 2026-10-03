@@ -32,7 +32,7 @@ const ROWS = [
   ['voice', 'Coach voice', 'Move names, halfway, last round, 1 minute left'],
   ['beeps', 'Beeps', 'Countdown ticks, the end of each step, the 10-second warning'],
   ['flash', 'Screen flash', 'The screen flashes when a step ends. Handy in a loud gym'],
-  ['silent', 'Sound on silent mode', 'iPhone only lets a web app do one: Off plays over your music, but the silent switch mutes the timer (flip it off to hear it). On plays even on silent, but pauses your music'],
+  ['silent', 'Sound on silent mode', 'Plays even with the silent switch on. iPhone pauses your music for it. Want both? Leave the switch off and turn on Do Not Disturb or a Focus: no distractions, music and timer together'],
 ];
 
 /* CUSTOMIZE YOUR VIBE — the same three choices as the app's own: which
@@ -92,7 +92,7 @@ export function openLook(host, onDone) {
     return slots.map(sl => `<div class="wm-strip"><div class="wm-stl">${slotName(sl)}</div><div class="wm-swipe">${palettes.map(p => `<button class="wm-dot ${pick[sl.id] === p.id ? 'on' : ''}" style="--c:${p.hex}" data-lslot="${sl.id}:${p.id}" aria-label="${p.name}"><span>${p.name}</span></button>`).join('')}</div></div>`).join('');
   };
   ov.innerHTML = `<div class="wm-look-top"><button class="wm-look-x" aria-label="Back">‹</button><b>Timer look</b>
-      ${isCoachDevice() ? '<a class="wm-look-edit" href="ring-lab.html">Edit designs</a>' : '<span></span>'}</div>
+      <span></span></div>
     <div class="wm-car" id="lookCar">${slides()}</div>
     <div class="wm-dots">${ids.map((_, i) => `<i class="${i === idx ? 'on' : ''}"></i>`).join('')}</div>
     <div class="wm-strips" id="lookStrips">${strips()}</div>
@@ -133,8 +133,7 @@ export function openPrefs(host) {
       <div class="wm-vrow wm-readyrow"><div class="wm-vl"><b>Get-ready countdown</b><small>Seconds to get in position before every timer starts</small></div>
         <div class="wm-rstep"><button data-rd="-1" aria-label="Less">−</button><b>${prefs.ready}s</b><button data-rd="1" aria-label="More">+</button></div></div>
       <div class="wm-vrow"><div class="wm-vl"><b>Coach voice</b><small>Nico's voice, or the same coaching in a female voice</small></div>
-        <div class="wm-seg3">${[['m', 'Male'], ['f', 'Female']].map(([v, l]) => `<button class="${prefs.voiceKind === v ? 'on' : ''}" data-vk="${v}">${l}</button>`).join('')}</div>
-        <a class="wm-voicelab" href="voice-lab.html">Fine-tune the voice ›</a></div>
+        <div class="wm-seg3">${[['m', 'Male'], ['f', 'Female']].map(([v, l]) => `<button class="${prefs.voiceKind === v ? 'on' : ''}" data-vk="${v}">${l}</button>`).join('')}</div></div>
       ${ROWS.map(([k, name, sub]) => `<button class="wm-pref" data-pref="${k}">
         <span><b>${name}</b><small>${sub}</small></span><i class="wm-sw ${prefs[k] ? 'on' : ''}"></i></button>`).join('')}
       ${vibeHtml()}
@@ -162,11 +161,12 @@ export function openPrefs(host) {
       const [slot, pal] = b.dataset.vslot.split(':'); setVibe({ slots: { [slot]: pal }, themeRandom: false }); draw();
     }));
     ov.querySelector('[data-look]')?.addEventListener('click', () => openLook(document.body, draw));
-    /* THE LAB IS THE COACH'S. No button for it: five taps on Version open it. */
+    /* THE LABS ARE THE COACH'S (labs.html: logo, ring, voice, dashboard),
+       not part of the app. No button: five taps on Version open them. */
     let taps = 0, tapT = null;
     ov.querySelector('.wm-ver .wm-vl')?.addEventListener('click', () => {
       taps++; clearTimeout(tapT); tapT = setTimeout(() => { taps = 0; }, 1500);
-      if (taps >= 5) location.href = 'ring-lab.html';
+      if (taps >= 5) location.href = 'labs.html';
     });
     ov.querySelectorAll('[data-vglow]').forEach(b => b.addEventListener('click', () => { setVibe({ glow: b.dataset.vglow }); draw(); }));
     ov.querySelector('[data-vshuffle]')?.addEventListener('click', () => { const v = vibeOptions(); setVibe({ themeRandom: !v.vibe.themeRandom, slots: v.pick }); draw(); });

@@ -82,6 +82,7 @@ export function say(text, keep = 0) {
   if (!voiceOn || muted) return;
   /* NICO'S RECORDED VOICE first (js/voice.js); the phone's voice only for
      the words not recorded yet */
+  try { if (actx && actx.state !== 'running') actx.resume().catch?.(() => {}); } catch (e) {}   // interrupted mid-workout: wake it
   const steps = actx && plan(text);
   if (steps) {
     const now = Date.now() >= keepUntil;
@@ -108,7 +109,14 @@ let speechPrimed = false;
    an iPhone the only way past the ringer switch also stops the music */
 let silentOverride = false;
 let voiceWarm = false;
-export function setSilentOverride(on) { silentOverride = !!on; try { if (navigator.audioSession) navigator.audioSession.type = silentOverride ? 'playback' : 'ambient'; } catch (e) {} if (!silentOverride) { try { keepalive?.pause?.(); } catch (e) {} } }
+let sessionType = null;
+function setSessionType() {
+  const want = silentOverride ? 'playback' : 'ambient';
+  if (want === sessionType) return;
+  try { if (navigator.audioSession) { navigator.audioSession.type = want; sessionType = want; } } catch (e) {}
+  try { if (actx && actx.state !== 'running') actx.resume().catch?.(() => {}); } catch (e) {}
+}
+export function setSilentOverride(on) { silentOverride = !!on; setSessionType(); if (!silentOverride) { try { keepalive?.pause?.(); } catch (e) {} } }
 let keepalive = null;
 
 /* THREE SEPARATE THINGS SILENCE A PHONE, AND UNLOCKING ONE FIXES NOTHING
@@ -136,9 +144,15 @@ let keepalive = null;
    Called on every gesture; everything here is idempotent and cheap after
    the first time. */
 export function initAudio() {
+  /* the audio session type is set BEFORE the context exists, and only when
+     it changes: changing it under a running context is what Safari answers
+     with an "interrupted" context, which then plays nothing */
+  setSessionType();
   try {
     actx = actx || new (window.AudioContext || window.webkitAudioContext)();
-    if (actx.state === 'suspended') actx.resume();
+    /* "suspended" (no gesture yet) AND "interrupted" (Safari, after a call,
+       Siri, another app, a session change): either way, start it again */
+    if (actx.state !== 'running') actx.resume().catch?.(() => {});
     // play a 1-sample silent buffer — the reliable iOS unlock so later beeps actually fire
     const b = actx.createBuffer(1, 1, 22050);
     const src = actx.createBufferSource(); src.buffer = b; src.connect(actx.destination); src.start(0);
@@ -163,7 +177,6 @@ export function initAudio() {
      when the person asks for "Sound on silent mode" does the old trick
      below run, and that one pauses their music, which is why it is off
      unless chosen. */
-  try { if (navigator.audioSession) navigator.audioSession.type = silentOverride ? 'playback' : 'ambient'; } catch (e) {}
   /* 3b — take the session off the ringer channel. iPHONE ONLY, OPT-IN.
      Android has no ringer switch that silences Web Audio, and on Android
      Chrome a playing <audio> element asks for audio focus: volume 0 is not

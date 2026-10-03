@@ -84,6 +84,8 @@
       padding: 11px 18px; border-radius: 999px; font-size: 14px; font-weight: 600; z-index: 9; white-space: nowrap; }
     .hint { color: var(--faint); font-size: 12.5px; margin: 8px 2px 0; line-height: 1.4; }
   </style>
+<style>/* inside labs.html: the hub has the way out */ html.in-labs .top > a:first-child { display:none; }</style>
+<script>if (window !== window.top) document.documentElement.classList.add('in-labs');</script>
 </head>
 <body class="lab">
   <div class="top"><a href="index.html?quick" aria-label="Back to the timer">‹</a><h1>Timer ring lab</h1></div>
