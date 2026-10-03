@@ -1,6 +1,7 @@
 {
-  "version": "2026-10-03.16",
+  "version": "2026-10-03.17",
   "notes": [
+    "Weights sit right under the reps, and tapping lb switches everything to kg (and back)",
     "Setting up moves uses the same slim rows as the workout, any move can carry a weight (+lb), and the move you're on glows with white text",
     "Timer types are listed simplest first: Stopwatch, Interval timer, Tabata, EMOM, AMRAP, For time, Ladder, Death By, Push-up test",
     "Ladder and Death By show every setting up front, Customize says Pick your exercises when that is all it holds, and ladder moves have a divider",
