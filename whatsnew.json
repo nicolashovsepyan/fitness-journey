@@ -1,6 +1,7 @@
 {
-  "version": "2026-10-03.7",
+  "version": "2026-10-03.8",
   "notes": [
+    "Tabata with 2 moves is 16 rounds, 8 of each, alternating, and you can lower or raise it",
     "Picking a move: your favorites (tap the star), recent picks, suggestions like them, and the fundamentals come first, with all the other moves underneath",
     "During a workout, timed moves go up and down 5 seconds at a time, and Done after a workout goes straight back to the timer without a color flash",
     "Moves look the same in every timer: one slim row each, the full name on one line, small − and + for the reps",

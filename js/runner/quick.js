@@ -37,7 +37,7 @@ const FORMATS = [
     how: ['Race the clock.', 'Do all the work as fast as you can, then tap Done. Your time is your score.',
       'Add a time cap and the clock stops you there if you are not finished.'] },
   { id: 'tabata', name: 'Tabata', sub: '20s on, 10s off', moves: true,
-    how: ['20 seconds all out, 10 seconds rest, 8 rounds. 4 minutes.', 'Change the numbers in Customize if you want a different mix.'] },
+    how: ['20 seconds all out, 10 seconds rest, 8 rounds. 4 minutes.', 'With 2 moves it becomes 16 rounds, 8 of each, alternating: move 1, move 2, move 1… Lower the rounds if you want it shorter.', 'Change the times in Customize if you want a different mix.'] },
   { id: 'timer', name: 'Timer', sub: 'Work, rest, rounds', moves: true,
     how: ['A plain timer.', 'Set how long to work. Add rest and more rounds to repeat it.',
       'Examples: a 2:00 plank (1 round, no rest). Or 5:00 work, 2:00 rest, 3 rounds.',
@@ -107,8 +107,12 @@ let favIdx = null;              // the saved timer currently loaded, if any
    them never turns a 5-minute round into 20 seconds. */
 const TIMER_KEYS = { work: 'tWork', rest: 'tRest', rounds: 'tRounds' };
 const key = k => (cfg.fmt === 'timer' && TIMER_KEYS[k]) || k;
-const val = k => cfg[key(k)];
-const setVal = (k, v) => { cfg[key(k)] = v; };
+/* TABATA ROUNDS ARE EVERY INTERVAL. 2 moves = 16 rounds (8 of each,
+   alternating), set the moment the second move is added; lower it (or
+   raise it) and that number holds until the number of moves changes. */
+const tbTotal = () => { const n = perRound(); return cfg.tbN === n && cfg.tbTotal ? cfg.tbTotal : cfg.rounds * n; };
+const val = k => cfg.fmt === 'tabata' && k === 'rounds' ? tbTotal() : cfg[key(k)];
+const setVal = (k, v) => { if (cfg.fmt === 'tabata' && k === 'rounds') { cfg.tbTotal = v; cfg.tbN = perRound(); return; } cfg[key(k)] = v; };
 
 export async function renderQuick(el, opts = {}) {
   host = el; onStart = opts.onStart; guest = !!opts.guest;
@@ -276,7 +280,7 @@ function totalSec() {
     case 'emom': return emomCount() * cfg.every;
     case 'amrap': return cfg.cap * 60;
     case 'fortime': return cfg.ftCap ? cfg.ftCap * 60 : null;
-    case 'tabata': return intervalSec(cfg.work, cfg.rest, cfg.rounds * perRound());
+    case 'tabata': return intervalSec(cfg.work, cfg.rest, tbTotal());
     case 'timer': return intervalSec(cfg.tWork, cfg.tRest, cfg.tRounds * perRound(), cfg.sets, cfg.setRest);
     case 'pushup': return cfg.ptCap ? cfg.ptCap * 60 : null;
     case 'deathby': return cfg.dbMax * cfg.dbEvery;
@@ -303,7 +307,7 @@ function summary() {
     case 'fortime': return `${cfg.ftRounds} round${cfg.ftRounds > 1 ? 's' : ''}, ${cfg.ftCap ? `${cfg.ftCap} min cap` : 'no cap'}`;
     case 'tabata': {
       const n = perRound();
-      return `${cfg.rounds} rounds${n > 1 ? ` × ${n} moves = ${cfg.rounds * n} intervals` : ''} of ${secs(cfg.work)} on, ${secs(cfg.rest)} off`;
+      return `${tbTotal()} rounds${n > 1 ? `, alternating ${n} moves` : ''}, ${secs(cfg.work)} on, ${secs(cfg.rest)} off`;
     }
     case 'timer': {
       const r = cfg.tRounds;
@@ -327,7 +331,7 @@ function planName() {
   if (f === 'emom') return cfg.every === 60 ? `EMOM · ${cfg.mins} min` : `Every ${fmt(cfg.every)} · ${cfg.mins} min`;
   if (f === 'amrap') return `AMRAP · ${cfg.cap} min`;
   if (f === 'fortime') return `For time${cfg.ftCap ? ` · ${cfg.ftCap} min cap` : ''}`;
-  if (f === 'tabata') return `Tabata · ${cfg.rounds} × ${cfg.work}/${cfg.rest}`;
+  if (f === 'tabata') return `Tabata · ${tbTotal()} × ${cfg.work}/${cfg.rest}`;
   if (f === 'timer') return `Timer · ${cfg.tRounds > 1 ? `${cfg.tRounds} × ` : ''}${fmt(cfg.tWork)}${cfg.tRest && cfg.tRounds > 1 ? ` / ${fmt(cfg.tRest)}` : ''}${cfg.sets > 1 ? ` · ${cfg.sets} sets` : ''}`;
   if (f === 'pushup') return `Push-up test · ${cfg.pace} a min`;
   if (f === 'deathby') { const ms = ladderMoves().filter(m => String(m.name || '').trim()); return `Death By${ms.length ? ' · ' + ms.map(m => m.name.trim()).join(', ') : ''}${cfg.dbEvery !== 60 ? ` every ${fmt(cfg.dbEvery)}` : ''}`; }
@@ -381,7 +385,7 @@ export function buildPlan(c = cfg) {
         break;
       case 'tabata':
         blocks = [{ ...base, id: id(1), name, format: 'tabata', label: 'Tabata',
-          work: cfg.work, rest: cfg.rest, rounds: cfg.rounds, perRound: perRound(), intervals: cfg.rounds * perRound(),
+          work: cfg.work, rest: cfg.rest, rounds: tbTotal(), perRound: 1, intervals: tbTotal(),
           items: moves.length ? moves : work }];
         break;
       case 'timer':
@@ -451,7 +455,8 @@ function stepRow(k) {
   const face = isTime(k)
     ? `<button class="qt-tv time" data-qt="${k}">${none ? 'none' : fmt(v)}</button>`
     : `<input class="qt-tv ${none ? 'none' : ''}" data-qf="${k}" type="number" inputmode="numeric" value="${none ? '' : v}" placeholder="${none ? 'none' : ''}" onfocus="this.select()"/>`;
-  const foot = none ? '' : isTime(k) ? 'min : sec' : unit;
+  const tbn = cfg.fmt === 'tabata' && k === 'rounds' ? perRound() : 1;
+  const foot = none ? '' : isTime(k) ? 'min : sec' : tbn > 1 ? (v % tbn ? `alternating ${tbn} moves` : `${v / tbn} of each, alternating`) : unit;
   const extra = k === 'pace' ? `<div class="qt-presets"><button class="${v === 20 ? 'on' : ''}" data-pace="20">20 standard</button><button class="${v === 25 ? 'on' : ''}" data-pace="25">25 NHL</button></div>` : '';
   return rowShell(k, label, face, foot,
     `<button class="qt-pm" data-q="${k}" data-d="-1" aria-label="Less">−</button>`, `<button class="qt-pm" data-q="${k}" data-d="1" aria-label="More">+</button>`, extra);
@@ -646,7 +651,7 @@ function openTypes() {
   ov.querySelectorAll('[data-pick]').forEach(b => b.addEventListener('click', () => {
     if (cfg.fmt !== b.dataset.pick) {
       cfg.fmt = b.dataset.pick;
-      if (cfg.fmt === 'tabata') Object.assign(cfg, TABATA);
+      if (cfg.fmt === 'tabata') Object.assign(cfg, TABATA, { tbN: null, tbTotal: null });
       persist(); draw();
     }
     close();
@@ -945,7 +950,7 @@ function wire() {
     MV().push(newMove()); persist(); draw();
     openMovePicker(MV().length - 1);
   });
-  $('#qtClassic')?.addEventListener('click', () => { Object.assign(cfg, TABATA); persist(); draw(); });
+  $('#qtClassic')?.addEventListener('click', () => { Object.assign(cfg, TABATA, { tbN: null, tbTotal: null }); persist(); draw(); });
   host.querySelectorAll('[data-fav]').forEach(b => b.addEventListener('click', () => {
     const f = favs[+b.dataset.fav]; if (!f) return;
     cfg = migrate({ ...DEFAULTS, ...JSON.parse(JSON.stringify(f.cfg)), paceV: 2 }); favIdx = +b.dataset.fav; persist(); draw();
