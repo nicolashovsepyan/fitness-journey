@@ -720,7 +720,11 @@ function updateTimer(rem, total) {
     frac = total >= NO_CAP ? (shown % 60) / 60 : shown / total;
   }
   if (txt) txt.textContent = fmt(shown);
-  frac = snapToSegments(document.querySelector('.timer-wrap .timer'), frac);   // segmented ring: whole segments only
+  const segRoot = document.querySelector('.timer-wrap .timer');
+  /* SEGMENTS GO ONE AT A TIME. Whole seconds dropped 3 at once on a 20s
+     step (60 segments); the exact time left drops each on its own beat. */
+  if (!countUpDisplay && +(segRoot?.dataset?.seg || 0) && total > 0) { const ex = R.stepRemainingExact?.(S); if (ex != null) frac = ex / total; }
+  frac = snapToSegments(segRoot, frac);   // segmented ring: whole segments only
   if (fillEl) fillEl.style.strokeDashoffset = String(c * (1 - frac));
   document.querySelectorAll('.timer-wrap .timer .core').forEach(el => { el.style.strokeDashoffset = String(c * (1 - frac)); });   // the core and its halo
   document.getElementById('timerGlare')?.classList.toggle('off', frac < 0.16);   // no glare floating past the end of the tube

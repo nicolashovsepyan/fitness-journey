@@ -85,6 +85,13 @@ export function sessionElapsed(s) {
 
 /* remaining seconds on the active timed step (rest/hold/interval), or null.
    Freezes while step-paused (tap-the-circle), without touching the session clock. */
+/* the same, to the millisecond (in seconds): a segmented ring drops one
+   segment at a time, however short the step */
+export function stepRemainingExact(s) {
+  if (s.stepDur == null || s.stepStartedAt == null) return null;
+  const now = s.stepPausedAt || Date.now();
+  return Math.max(0, s.stepDur - (now - s.stepStartedAt) / 1000);
+}
 export function stepRemaining(s) {
   if (s.stepDur == null || s.stepStartedAt == null) return null;
   const now = s.stepPausedAt || Date.now();
