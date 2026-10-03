@@ -319,9 +319,13 @@ function injectStyle() {
   html.wm .ld-reps div { border: 1px solid transparent; transition: border-color .25s, box-shadow .25s; }
   html.wm .ld-reps div::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background: var(--wm-neon); opacity:0; box-shadow: 0 0 10px var(--wm-neon); transition: opacity .25s; z-index: 2; }
   html.wm .ld-reps div::after { content:''; position:absolute; left:0; top:0; bottom:0; width: 70%; background: linear-gradient(90deg, var(--wm-neon-soft), transparent); opacity:0; transition: opacity .25s; pointer-events:none; }
-  html.wm .ld-reps div.now { border-color: var(--wm-neon-line); box-shadow: 0 0 16px var(--wm-neon-soft); }
+  /* lit: the OUTLINE glows with a glint of light on its top edge and a
+     streak across the glass; the words stay white and glow */
+  html.wm .ld-reps div.now { border-color: var(--wm-neon); box-shadow: 0 0 16px var(--wm-neon-soft), 0 0 4px var(--wm-neon-line), inset 0 1px 0 rgba(255,255,255,.35);
+    background: linear-gradient(105deg, transparent 52%, rgba(255,255,255,.09) 60%, transparent 68%), var(--box); }
   html.wm .ld-reps div.now::before, html.wm .ld-reps div.now::after { opacity: 1; }
-  html.wm .ld-reps div.now span { color: var(--wm-neon); }
+  html.wm .ld-reps div.now span, html.wm .ld-reps div.now b { color: #fff; text-shadow: 0 0 10px var(--wm-neon), 0 0 2px rgba(255,255,255,.8); }
+  html.wm .mvr-n .mvr-wt { color: var(--wm-accent); font-weight: 700; font-family: var(--tnum); }
   /* the round-done burst (workmode.js celebrate) */
   .wm-burst { position: fixed; z-index: 150; width: 0; height: 0; pointer-events: none; }
   .wm-burst i { position: absolute; width: 8px; height: 8px; margin: -4px; border-radius: 50%; background: var(--c); box-shadow: 0 0 10px var(--c);

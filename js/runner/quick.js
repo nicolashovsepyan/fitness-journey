@@ -198,8 +198,8 @@ const namedMoves = () => (FORMATS.find(f => f.id === cfg.fmt)?.moves ? MV() : []
     const ex = m.exId && EXERCISES[m.exId];
     const n = Number(m.reps) > 0 ? Number(m.reps) : null;
     return ex
-      ? { exId: m.exId, name: ex.name, measure: ex.measure || 'reps', load: ex.load, laterality: ex.laterality, cue: ex.cues, reps: n, ...(ex.measure === 'hold' && n ? { hold: n } : {}), noPR: true }
-      : { name: String(m.name).trim(), measure: 'reps', reps: n, noPR: true };
+      ? { exId: m.exId, name: ex.name, measure: ex.measure || 'reps', load: ex.load, laterality: ex.laterality, cue: ex.cues, reps: n, ...(ex.measure === 'hold' && n ? { hold: n } : {}), ...(Number(m.wt) > 0 ? { weight: Number(m.wt), wUnit: WT_UNIT } : {}), noPR: true }
+      : { name: String(m.name).trim(), measure: 'reps', reps: n, ...(Number(m.wt) > 0 ? { weight: Number(m.wt), wUnit: WT_UNIT } : {}), noPR: true };
   });
 
 /* In Tabata and Timer a round is EVERY move once: 8 rounds of 2 moves is
@@ -476,36 +476,44 @@ function segRow(label, tone, opts, cur, attr, foot = '') {
 }
 /* a timed move (plank, hang, wall sit): its numbers are seconds */
 const isHold = m => !!(m && m.exId && EXERCISES[m.exId]?.measure === 'hold');
-/* a small labelled −/+ inside a move row */
-function mini(label, face, minus, plus) {
-  return `<div class="qt-mini"><span class="qt-ml">${label}</span><div class="qt-mline">${minus}<span class="qt-mv">${face}</span>${plus}</div></div>`;
-}
-/* one move: its name (tap to search), its numbers, one quiet line under */
+/* ONE MOVE, the same slim row as in the workout (workmode.js mvRow): the
+   full name on one line (tap it to change the move), a small − value +,
+   and ✕. A second slim line holds what else the move needs: Ladder /
+   Death By's start and change, and the weight when there is one. */
+const WT_UNIT = 'lb';
+const isWeighted = m => !!(m && m.exId && EXERCISES[m.exId]?.load === 'weighted');
 function moveCard(m, i) {
   const lad = cfg.fmt === 'ladder', db = cfg.fmt === 'deathby';
-  const ex = m.exId && EXERCISES[m.exId];
-  const unit = ex && ex.measure === 'hold' ? 'Seconds' : 'Reps';
-  const pm = (attr, d) => `<button class="qt-pm sm" ${attr} data-d="${d}" aria-label="${d < 0 ? 'Less' : 'More'}">${d < 0 ? '−' : '+'}</button>`;
-  let nums = '', note = '';
+  const sec = isHold(m);
+  const st = (attr, face) => `<span class="qt-st"><button ${attr} data-d="-1" aria-label="Less">−</button><b>${face}</b><button ${attr} data-d="1" aria-label="More">+</button></span>`;
+  const reps = lad || db ? '' : `<span class="qt-st"><button data-mr="${i}" data-d="-1" aria-label="Less">−</button><b><input data-mv="${i}" data-k="reps" type="number" inputmode="numeric" placeholder="–" value="${esc(m.reps)}" onfocus="this.select()"/>${sec ? '<small>s</small>' : ''}</b><button data-mr="${i}" data-d="1" aria-label="More">+</button></span>`;
+  const subs = [];
   if (lad || db) {
-    const st = ldStep(m);
-    nums = mini('Start', ldStart(m), pm(`data-lm="${i}" data-lf="ldStart"`, -1), pm(`data-lm="${i}" data-lf="ldStart"`, 1))
-         + mini(db ? 'Add per round' : 'Per rung', `${st > 0 ? '+' : ''}${st}`, pm(`data-lm="${i}" data-lf="ldStep"`, -1), pm(`data-lm="${i}" data-lf="ldStep"`, 1));
-    note = db ? deathPreview(m) : ladderPreview(m);
-  } else {
-    nums = mini(unit, `<input data-mv="${i}" data-k="reps" type="number" inputmode="numeric" placeholder="–" value="${esc(m.reps)}" onfocus="this.select()"/>`,
-      pm(`data-mr="${i}"`, -1), pm(`data-mr="${i}"`, 1));
+    const step = ldStep(m);
+    subs.push(`<span class="qt-sl">Start</span>${st(`data-lm="${i}" data-lf="ldStart"`, `${ldStart(m)}${sec ? '<small>s</small>' : ''}`)}`);
+    subs.push(`<span class="qt-sl">${db ? 'Add' : 'Per rung'}</span>${st(`data-lm="${i}" data-lf="ldStep"`, `${step > 0 ? '+' : ''}${step}`)}`);
   }
-  return `<div class="qt-srow qt-move2">
-    <div class="qt-mhead"><button class="qt-mname2 ${m.name ? '' : 'empty'}" data-pick-move="${i}">${m.name ? esc(m.name) : `Choose move ${i + 1}`}<span>⌕</span></button>
+  const hasWt = m.name && (isWeighted(m) || Number(m.wt) > 0);
+  if (hasWt) subs.push(`<span class="qt-sl">Weight</span>${st(`data-mw="${i}"`, `${Number(m.wt) > 0 ? m.wt : '–'}<small>${WT_UNIT}</small>`)}`);
+  const note = lad ? ladderPreview(m) : db ? deathPreview(m) : '';
+  return `<div class="qt-mvr">
+    <div class="qt-mvr-top"><button class="qt-mvr-n ${m.name ? '' : 'empty'}" data-pick-move="${i}">${m.name ? esc(m.name) : `Choose move ${i + 1}`}</button>${reps}
+      ${m.name && !hasWt ? `<button class="qt-addwt" data-mw="${i}" data-d="1" aria-label="Add a weight" title="Add a weight">+lb</button>` : ''}
       ${MV().length > 1 || m.name ? `<button class="qt-mx" data-mvx="${i}" aria-label="Remove">✕</button>` : ''}</div>
-    <div class="qt-mnums">${nums}</div>
+    ${subs.length ? `<div class="qt-mvr-sub">${subs.map(x => `<span class="qt-sgrp">${x}</span>`).join('')}</div>` : ''}
     ${note ? `<div class="qt-mnote">${note}</div>` : ''}
   </div>`;
 }
 function movesCard() {
-  return `<div class="qt-rows">${MV().map(moveCard).join('')}
-    <button class="qt-srow qt-addrow" id="qtAdd">+ Add a move</button></div>`;
+  return `<div class="qt-mvlist">${MV().map(moveCard).join('')}
+    <button class="qt-addrow2" id="qtAdd">+ Add a move</button></div>`;
+}
+/* full names on one line: a list's names at the size its longest needs */
+function fitMoveNames() {
+  const els = [...host.querySelectorAll('.qt-mvr-n')]; let f = 99;
+  els.forEach(el => { el.style.fontSize = ''; let s = parseFloat(getComputedStyle(el).fontSize) || 16;
+    while (el.scrollWidth > el.clientWidth + 1 && s > 11) { s -= 0.5; el.style.fontSize = s + 'px'; } f = Math.min(f, s); });
+  els.forEach(el => { el.style.fontSize = f + 'px'; });
 }
 
 function draw() {
@@ -596,7 +604,7 @@ function pack() {
   if (cfg.fmt === 'ladder') keep.push('ldShape');
   if (cfg.fmt === 'timer') keep.push('sets', 'setRest');
   const o = {}; keep.forEach(k => { if (cfg[k] != null) o[k] = cfg[k]; });
-  const mv = MV().filter(m => String(m.name || '').trim()).map(m => ({ name: m.name, reps: m.reps || '', ...(m.exId ? { exId: m.exId } : {}), ...(cfg.fmt === 'ladder' || cfg.fmt === 'deathby' ? { ldStart: ldStart(m), ldStep: ldStep(m) } : {}) }));
+  const mv = MV().filter(m => String(m.name || '').trim()).map(m => ({ name: m.name, reps: m.reps || '', ...(m.exId ? { exId: m.exId } : {}), ...(cfg.fmt === 'ladder' || cfg.fmt === 'deathby' ? { ldStart: ldStart(m), ldStep: ldStep(m) } : {}), ...(Number(m.wt) > 0 ? { wt: Number(m.wt) } : {}) }));
   if (mv.length && fmtDef().moves) o.moves = mv;
   return b64u(JSON.stringify(o));
 }
@@ -943,6 +951,11 @@ function wire() {
     inp.addEventListener('input', () => { MV()[+inp.dataset.mv][inp.dataset.k] = inp.value; persist(); });
     inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
   });
+  host.querySelectorAll('[data-mw]').forEach(b => b.addEventListener('click', () => {
+    const m = MV()[+b.dataset.mw], v = Number(m.wt) || 0, d = Number(b.dataset.d);
+    m.wt = Math.max(0, Math.min(1000, d > 0 ? Math.floor(v / 5) * 5 + 5 : Math.ceil(v / 5) * 5 - 5)) || ''; persist(); draw();
+  }));
+  requestAnimationFrame(fitMoveNames);
   host.querySelectorAll('[data-mvx]').forEach(b => b.addEventListener('click', () => {
     MV().splice(+b.dataset.mvx, 1);
     if (!MV().length) MV().push(newMove());
@@ -1170,6 +1183,27 @@ function injectStyle() {
   .qt-srow.tone-ready .qt-seg2 button.on { color: #7D9BFF; border-color: var(--wm-ready, #3D6BFF); background: rgba(61,107,255,.14); }
   .qt-srow .qt-su { margin-top: 6px; }
   .qt-move2 { text-align:left; }
+  /* THE MOVE ROW, setup side: the workout's slim row (workmode mvRow) */
+  .qt-mvlist { background: var(--box); border-radius: 16px; padding: 2px 12px; }
+  .qt-mvr { border-top: 1px solid var(--line); padding: 4px 0; }
+  .qt-mvr:first-child { border-top: none; }
+  .qt-mvr-top { display:flex; align-items:center; gap: 3px; min-height: 44px; }
+  .qt-mvr-top .qt-mx { width: 24px; flex: 0 0 24px; padding: 0; }
+  .qt-mvr-n { flex:1; min-width:0; text-align:left; background:none; border:none; color: var(--text); font-size: 16px; font-weight: 600; white-space: nowrap; overflow:hidden; padding: 0; cursor:pointer; font-family: inherit; }
+  .qt-mvr-n.empty { color: var(--wm-accent); }
+  .qt-st { flex: 0 0 auto; display:flex; align-items:center; }
+  .qt-st button { width: 28px; height: 36px; background:none; border:none; color: var(--wm-accent); font-size: 20px; line-height:1; cursor:pointer; padding:0; touch-action: manipulation; }
+  .qt-st button:active { transform: scale(.85); }
+  .qt-st b { min-width: 26px; text-align:center; font-family: var(--tnum); font-size: 18px; font-weight: 700; display:flex; align-items:baseline; justify-content:center; }
+  .qt-st b small { font-size: 12px; color: var(--muted); margin-left: 1px; }
+  .qt-st input { width: 2.3ch; background:none; border:none; text-align:center; color: var(--text); font: inherit; padding:0; -moz-appearance: textfield; }
+  .qt-st input::-webkit-outer-spin-button, .qt-st input::-webkit-inner-spin-button { -webkit-appearance:none; }
+  .qt-mvr-sub { display:flex; flex-wrap: wrap; align-items:center; gap: 4px 14px; padding: 0 0 4px; }
+  .qt-sgrp { display:flex; align-items:center; gap: 2px; }
+  .qt-sl { color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+  .qt-addwt { flex: 0 0 auto; background:none; border: 1px solid var(--line); border-radius: 8px; color: var(--muted); font-size: 11.5px; font-weight: 700; padding: 2px 4px; cursor:pointer; font-family: var(--tnum); margin-left: 2px; }
+  .qt-addrow2 { width:100%; background:none; border:none; border-top: 1px solid var(--line); color: var(--wm-accent); font-size: 15px; font-weight: 700; padding: 13px 0; cursor:pointer; }
+  .qt-mvlist .qt-mnote { margin: 0 0 6px; }
   .qt-mhead { display:flex; align-items:center; gap: 8px; }
   .qt-mname2 { flex:1; min-width:0; display:flex; align-items:center; justify-content:space-between; gap: 8px; background:none; border:none; padding: 2px 0;
     color: var(--text); font-size: 17px; font-weight: 700; text-align:left; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }

@@ -186,7 +186,8 @@ function mvRow(it, { val = null, unit = '', step = '' } = {}) {
   const right = step
     ? `<span class="mvr-st"><button ${step} data-d="-1" aria-label="Less">−</button><b>${v || 0}</b><button ${step} data-d="1" aria-label="More">+</button></span>`
     : v ? `<b class="mvr-v">${v}</b>` : '';
-  return `<div class="mvr">${rowVid(it) || '<span class="mvr-sp"></span>'}<span class="mvr-n">${it.name}</span>${right}</div>`;
+  const wt = Number(it.weight) > 0 ? ` <small class="mvr-wt">${it.weight} ${it.wUnit || 'lb'}</small>` : '';
+  return `<div class="mvr">${rowVid(it) || '<span class="mvr-sp"></span>'}<span class="mvr-n">${it.name}${wt}</span>${right}</div>`;
 }
 const mvUnit = it => UNIT[it.measure] === 'sec' ? 'sec' : '';
 /* − + on a timed move moves 5 seconds, landing on a multiple of 5 */

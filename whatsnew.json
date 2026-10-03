@@ -1,6 +1,7 @@
 {
-  "version": "2026-10-03.15",
+  "version": "2026-10-03.16",
   "notes": [
+    "Setting up moves uses the same slim rows as the workout, any move can carry a weight (+lb), and the move you're on glows with white text",
     "Timer types are listed simplest first: Stopwatch, Interval timer, Tabata, EMOM, AMRAP, For time, Ladder, Death By, Push-up test",
     "Ladder and Death By show every setting up front, Customize says Pick your exercises when that is all it holds, and ladder moves have a divider",
     "The final Chrono, LED and Laser ring designs are in: LED glows with a white core, Laser is a brighter beam",
