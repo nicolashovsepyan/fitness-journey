@@ -330,6 +330,7 @@ function injectStyle() {
   html.wm .ld-reps div.now::before, html.wm .ld-reps div.now::after { opacity: 1; }
   html.wm .ld-reps div.now span, html.wm .ld-reps div.now b { color: #fff; text-shadow: 0 0 10px var(--wm-neon), 0 0 2px rgba(255,255,255,.8); }
   html.wm .mvr-n[data-mvw] { cursor: pointer; }
+  html.wm .wm-silent { color: var(--muted); font-size: 13px; text-align:center; margin: 4px 12px 0; line-height: 1.4; }
   html.wm .mvr-st .wm-wu { text-decoration: underline dotted; text-underline-offset: 3px; cursor: pointer; }
   html.wm .tally .tally-sum { border-top: 1px solid var(--line); margin-top: 4px; padding-top: 8px; }
   html.wm .tally .tnum { font-family: var(--tnum); }

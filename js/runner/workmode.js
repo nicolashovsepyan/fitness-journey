@@ -407,6 +407,13 @@ const readySec = () => {
   const n = S.plan.getReady != null ? Number(S.plan.getReady) : 10;
   return block()?.format === 'cadence' ? Math.max(10, n) : n;    // the push-up test always gets its 10s briefing
 };
+/* ON AN IPHONE the timer plays over music, so the ringer switch mutes it
+   (a web app cannot do both). Said where it matters: before every start. */
+const isIOS = () => /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+function silentHint() {
+  if (!isIOS() || pref('silent') || !(pref('voice') || pref('beeps'))) return '';
+  return `<p class="wm-silent">🔕 No sound? Your iPhone may be on silent. Flip the switch on the side to hear the timer over your music.</p>`;
+}
 function renderGetReady() {
   const b = block();
   if (readySec() <= 0) { beep('go'); return renderActive(); }
@@ -414,6 +421,7 @@ function renderGetReady() {
   shell(`<div class="now-ex getready"><div class="label">Get ready</div><div class="name">${b.name}</div>${b.format === 'cadence' ? '<div class="cad-start">Start on the <b>double beep</b></div>' : ''}
       ${S.plan.quick ? '' : `<div class="side">${b.role}</div>`}</div>
     <div class="timer-wrap">${timerSvg('ready')}</div>
+    ${silentHint()}
     <div class="actionbar"><button class="btn lg" id="go">I'm ready ▸</button></div>`);
   const begin = () => { R.clearStep(S); onStepDone = null; renderActive(); };
   if (beginStep(readySec(), 'rest', 'ready')) {

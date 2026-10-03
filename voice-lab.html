@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en" class="wm">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#171A1E" />
+  <title>Voice lab</title>
+  <link rel="icon" type="image/png" href="images/timer-icon/timer-192.png" />
+  <!--
+    VOICE LAB. Nico shapes the coach voice: male or female, then the dials
+    (pitch, EQ, punch, room, volume, the gap between words), heard on real
+    timer lines as he moves them. Plays through js/voice.js, the code the
+    timer uses, so what he hears here is what the workout says.
+    "Save on this phone" keeps the dials here; "Copy settings" is what he
+    sends to make them everybody's.
+  -->
+  <style>
+    :root { --bg:#171A1E; --bg-2:#1E232A; --box:#212630; --box-2:#282E38; --line:#2F3640; --text:#ECEFF3; --muted:#A9B2BC; --faint:#858E99;
+      --acc:#3ECBA8; --neon:#FF5FA2; --tnum:"SF Mono","Roboto Mono",ui-monospace,monospace; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin:0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif; }
+    body { padding: calc(14px + env(safe-area-inset-top)) 16px calc(120px + env(safe-area-inset-bottom)); max-width: 640px; margin: 0 auto; }
+    .top { display:flex; align-items:center; gap: 10px; margin-bottom: 14px; }
+    .top a { text-decoration:none; color: var(--muted); font-size: 28px; line-height: 1; }
+    .top h1 { margin:0; font-size: 24px; letter-spacing: -0.02em; flex:1; }
+    .top h1:after { content:""; display:block; width: 30px; height: 3px; border-radius: 3px; margin-top: 5px; background: var(--neon); box-shadow: 0 0 14px var(--neon); }
+    .card { background: var(--bg-2); border: 1px solid var(--line); border-radius: 18px; padding: 14px; margin-bottom: 14px; }
+    .h { color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; margin: 0 0 10px; }
+    .seg { display:flex; gap: 6px; }
+    .seg button { flex:1; background: var(--bg); border:1px solid var(--line); color: var(--muted); border-radius: 11px; padding: 11px 4px; font-size: 15px; font-weight: 700; cursor:pointer; }
+    .seg button.on { color: var(--text); border-color: var(--acc); background: color-mix(in srgb, var(--acc) 15%, transparent); }
+    .lines { display:flex; flex-direction:column; gap: 6px; }
+    .lines button { text-align:left; background: var(--box); border: 1px solid var(--line); border-radius: 12px; color: var(--text); padding: 11px 12px; font-size: 15px; cursor:pointer; display:flex; justify-content:space-between; }
+    .lines button.on { border-color: var(--neon); box-shadow: 0 0 12px color-mix(in srgb, var(--neon) 30%, transparent); }
+    .lines button i { font-style: normal; color: var(--acc); }
+    .dial { padding: 10px 0; border-top: 1px solid var(--line); }
+    .dial:first-of-type { border-top: none; }
+    .dial label { display:flex; justify-content:space-between; font-size: 15px; font-weight: 600; }
+    .dial label b { font-family: var(--tnum); color: var(--acc); }
+    .dial small { color: var(--faint); font-size: 12px; display:block; margin: 2px 0 6px; }
+    .dial input { width: 100%; accent-color: var(--acc); height: 28px; }
+    .bar { position: fixed; left: 0; right: 0; bottom: 0; padding: 14px 16px calc(16px + env(safe-area-inset-bottom)); background: linear-gradient(180deg, transparent, var(--bg) 30%); }
+    .bar > div { max-width: 640px; margin: 0 auto; display:flex; gap: 8px; }
+    .btn { flex:1; border:none; border-radius: 14px; padding: 15px 8px; font-size: 15px; font-weight: 800; cursor:pointer; background: var(--acc); color: #0E1512; }
+    .btn.ghost { background: var(--box); color: var(--text); border: 1px solid var(--line); }
+    .note { color: var(--faint); font-size: 12.5px; margin: 6px 2px 0; }
+    .toast { position: fixed; left: 50%; bottom: 100px; transform: translateX(-50%); background: var(--box-2); border: 1px solid var(--acc); color: var(--text); padding: 10px 16px; border-radius: 12px; font-size: 14px; opacity: 0; transition: opacity .2s; pointer-events:none; }
+    .toast.on { opacity: 1; }
+  </style>
+</head>
+<body>
+  <div class="top"><a href="index.html?quick" aria-label="Back">‹</a><h1>Voice lab</h1></div>
+
+  <div class="card">
+    <div class="h">Voice</div>
+    <div class="seg" id="kind"><button data-k="m">Male · Nico</button><button data-k="f">Female</button></div>
+    <p class="note">Each voice keeps its own dials.</p>
+  </div>
+
+  <div class="card">
+    <div class="h">Tap a line to hear it</div>
+    <div class="lines" id="lines"></div>
+  </div>
+
+  <div class="card" id="dials"></div>
+
+  <div class="bar"><div>
+    <button class="btn ghost" id="reset">Reset</button>
+    <button class="btn ghost" id="copy">Copy settings</button>
+    <button class="btn" id="save">Save on this phone</button>
+  </div></div>
+  <div class="toast" id="toast"></div>
+
+<script type="module">
+import { loadVoicePack, plan, playLine, stopVoice, setVoiceKind, voiceKind, FX_DEFAULTS, fxFor } from './js/voice.js';
+try { localStorage.setItem('fj.coachDevice', '1'); } catch (e) {}
+
+const LINES = ['Get ready.', '3', 'Go. Burpees.', 'Rest. Next, Push-ups.', 'Halfway.', 'Ten seconds.', 'Last round. Kettlebell swings.', '12 Push-ups.', 'Round 5.', '8 rounds. Strong work.', 'Workout complete. Strong work.'];
+const DIALS = [
+  ['rate', 'Pitch and pace', 'Lower and slower, or higher and quicker, together', 0.85, 1.15, 0.01, v => `${Math.round((v - 1) * 100) >= 0 ? '+' : ''}${Math.round((v - 1) * 100)}%`],
+  ['bass', 'Bass', 'Body and depth', -12, 12, 0.5, v => `${v > 0 ? '+' : ''}${v} dB`],
+  ['presence', 'Presence', 'Clarity: how much the words cut through music', -12, 12, 0.5, v => `${v > 0 ? '+' : ''}${v} dB`],
+  ['air', 'Air', 'Brightness on the top', -12, 12, 0.5, v => `${v > 0 ? '+' : ''}${v} dB`],
+  ['punch', 'Punch', 'Evens the voice out and pushes it forward', 0, 1, 0.05, v => `${Math.round(v * 100)}%`],
+  ['room', 'Room', 'A little space around the voice', 0, 1, 0.05, v => `${Math.round(v * 100)}%`],
+  ['volume', 'Volume', 'Next to the beeps', 0.5, 2, 0.05, v => `${Math.round(v * 100)}%`],
+  ['gap', 'Gap between words', 'Tighter or more spaced when a line is joined from pieces', -0.12, 0.3, 0.01, v => `${v > 0 ? '+' : ''}${Math.round(v * 1000)} ms`],
+];
+
+let actx = null, cur = 0;
+const all = () => { try { return JSON.parse(localStorage.getItem('fj.voiceFx') || '{}'); } catch (e) { return {}; } };
+/* the dials being edited (not yet saved): start from what this phone uses */
+let edit = { m: fxFor('m'), f: fxFor('f') };
+const toast = t => { const el = document.getElementById('toast'); el.textContent = t; el.classList.add('on'); setTimeout(() => el.classList.remove('on'), 1600); };
+
+async function play(i = cur) {
+  cur = i; drawLines();
+  actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+  if (actx.state === 'suspended') await actx.resume();
+  await loadVoicePack();
+  const steps = plan(LINES[i]); if (!steps) return;
+  stopVoice();
+  const speak = t => new Promise(r => { try { const u = new SpeechSynthesisUtterance(t); u.onend = r; speechSynthesis.speak(u); setTimeout(r, 600 + t.length * 90); } catch (e) { r(); } });
+  /* the lab hears the dials being edited: put them where js/voice.js reads
+     them for the length of the line, then put the saved ones back */
+  const saved = localStorage.getItem('fj.voiceFx');
+  localStorage.setItem('fj.voiceFx', JSON.stringify({ ...all(), [voiceKind()]: edit[voiceKind()] }));
+  try { await playLine(actx, steps, speak); } finally { if (saved == null) localStorage.removeItem('fj.voiceFx'); else localStorage.setItem('fj.voiceFx', saved); }
+}
+function drawLines() {
+  document.getElementById('lines').innerHTML = LINES.map((l, i) => `<button class="${i === cur ? 'on' : ''}" data-l="${i}"><span>${l}</span><i>▶</i></button>`).join('');
+  document.querySelectorAll('[data-l]').forEach(b => b.addEventListener('click', () => play(+b.dataset.l)));
+}
+function drawKind() { document.querySelectorAll('#kind [data-k]').forEach(b => b.classList.toggle('on', b.dataset.k === voiceKind())); }
+function drawDials() {
+  const f = edit[voiceKind()];
+  document.getElementById('dials').innerHTML = `<div class="h">Dials · ${voiceKind() === 'f' ? 'Female' : 'Male'}</div>` + DIALS.map(([k, name, hint, lo, hi, st, show]) =>
+    `<div class="dial"><label>${name}<b id="v-${k}">${show(f[k])}</b></label><small>${hint}</small>
+      <input type="range" min="${lo}" max="${hi}" step="${st}" value="${f[k]}" data-d="${k}"/></div>`).join('');
+  document.querySelectorAll('[data-d]').forEach(inp => {
+    const d = DIALS.find(x => x[0] === inp.dataset.d);
+    inp.addEventListener('input', () => { edit[voiceKind()][d[0]] = Number(inp.value); document.getElementById('v-' + d[0]).textContent = d[6](Number(inp.value)); });
+    inp.addEventListener('change', () => play());          // let go of a dial: hear it
+  });
+}
+document.querySelectorAll('#kind [data-k]').forEach(b => b.addEventListener('click', () => {
+  setVoiceKind(b.dataset.k);
+  drawKind(); drawDials(); play();
+}));
+document.getElementById('save').addEventListener('click', () => {
+  localStorage.setItem('fj.voiceFx', JSON.stringify({ ...all(), [voiceKind()]: edit[voiceKind()] }));
+  toast(`${voiceKind() === 'f' ? 'Female' : 'Male'} voice saved on this phone`);
+});
+document.getElementById('reset').addEventListener('click', () => {
+  edit[voiceKind()] = { ...FX_DEFAULTS[voiceKind()] };
+  const a = all(); delete a[voiceKind()]; localStorage.setItem('fj.voiceFx', JSON.stringify(a));
+  drawDials(); toast('Back to the default'); play();
+});
+document.getElementById('copy').addEventListener('click', async () => {
+  const text = JSON.stringify({ m: edit.m, f: edit.f });
+  try { await navigator.clipboard.writeText(text); toast('Copied. Paste it to Claude to make it everyone\'s'); }
+  catch (e) { prompt('Copy this and send it:', text); }
+});
+setVoiceKind('m'); drawKind(); drawLines(); drawDials();
+</script>
+</body>
+</html>

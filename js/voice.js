@@ -15,6 +15,52 @@ import { EXERCISES } from './data/exercises.js';
 
 let index = null, loading = null;
 const buffers = new Map();
+
+/* MALE OR FEMALE. Both are Nico's takes; the female set is rebuilt from
+   them by tools/build-voice-female.py (pitch and formants raised). */
+let kind = 'm';
+const dirFor = k => k === 'f' ? 'audio/voice-f' : 'audio/voice';
+export function setVoiceKind(k) { kind = k === 'f' ? 'f' : 'm'; }
+export const voiceKind = () => kind;
+
+/* THE SOUND OF IT (the Voice lab's dials). Applied live on playback, so a
+   change needs no rebuild: rate (a touch of pitch and speed together),
+   bass / presence / air (EQ), punch (compression), room (a small space),
+   volume, and the gap between the pieces of a line. Baked defaults per
+   voice; the lab's saved dials (fj.voiceFx) win on that device. */
+export const FX_DEFAULTS = {
+  m: { rate: 1, bass: 0, presence: 2, air: 1, punch: 0.3, room: 0, volume: 1, gap: 0 },
+  f: { rate: 1, bass: -2, presence: 2, air: 2, punch: 0.3, room: 0, volume: 1, gap: 0 },
+};
+export function fxFor(k = kind) {
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem('fj.voiceFx') || '{}')[k] || {}; } catch (e) {}
+  return { ...FX_DEFAULTS[k], ...saved };
+}
+let chain = null;
+function fxChain(actx) {
+  if (!chain || chain.ctx !== actx) {
+    const n = t => actx[`create${t}`]();
+    const input = n('Gain'), bass = n('BiquadFilter'), pres = n('BiquadFilter'), air = n('BiquadFilter'), comp = n('DynamicsCompressor'), out = n('Gain');
+    const verb = n('Convolver'), wet = n('Gain');
+    bass.type = 'lowshelf'; bass.frequency.value = 180;
+    pres.type = 'peaking'; pres.frequency.value = 3000; pres.Q.value = 0.9;
+    air.type = 'highshelf'; air.frequency.value = 8000;
+    /* a small room: a short burst of decaying noise */
+    const len = Math.round(actx.sampleRate * 0.6), ir = actx.createBuffer(2, len, actx.sampleRate);
+    for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3); }
+    verb.buffer = ir;
+    input.connect(bass).connect(pres).connect(air).connect(comp).connect(out).connect(actx.destination);
+    comp.connect(verb).connect(wet).connect(actx.destination);
+    chain = { ctx: actx, input, bass, pres, air, comp, out, wet };
+  }
+  const f = fxFor();
+  chain.bass.gain.value = f.bass; chain.pres.gain.value = f.presence; chain.air.gain.value = f.air;
+  chain.comp.threshold.value = -6 - f.punch * 24; chain.comp.ratio.value = 1 + f.punch * 7; chain.comp.attack.value = 0.004; chain.comp.release.value = 0.12;
+  chain.out.gain.value = f.volume * (1 + f.punch * 0.6);    // make-up for the squeeze
+  chain.wet.gain.value = f.room * 0.6;
+  return chain;
+}
 let dict = null, maxWords = 1;
 
 const norm = t => String(t).toLowerCase()
@@ -58,12 +104,14 @@ export function loadVoicePack() {
 }
 export const hasVoicePack = () => !!dict;
 
-async function bufferFor(actx, key) {
-  if (buffers.has(key)) return buffers.get(key);
-  const p = fetch(`audio/voice/${key}.mp3`).then(r => r.arrayBuffer())
+async function bufferFor(actx, key, k = kind) {
+  const id = `${k}:${key}`;
+  if (buffers.has(id)) return buffers.get(id);
+  const p = fetch(`${dirFor(k)}/${key}.mp3`).then(r => r.arrayBuffer())
     .then(ab => new Promise((ok, no) => actx.decodeAudioData(ab, ok, no)))
-    .catch(() => null);
-  buffers.set(key, p);
+    .then(b => b || (k === 'f' ? bufferFor(actx, key, 'm') : null))   // a female piece missing: the male one
+    .catch(() => (k === 'f' ? bufferFor(actx, key, 'm') : null));
+  buffers.set(id, p);
   return p;
 }
 export async function warmVoice(actx) {
@@ -135,13 +183,13 @@ export async function playLine(actx, steps, speak) {
     const buf = await bufferFor(actx, st.key);
     if (run.cancelled) return;
     if (!buf) { await speak(index[st.key] || ''); t = actx.currentTime + 0.05; continue; }
-    const src = actx.createBufferSource(); src.buffer = buf;
-    const g = actx.createGain(); g.gain.value = 1.0;
-    src.connect(g).connect(actx.destination);
+    const fx = fxFor(), ch = fxChain(actx);
+    const src = actx.createBufferSource(); src.buffer = buf; src.playbackRate.value = fx.rate;
+    src.connect(ch.input);
     t = Math.max(t, actx.currentTime + 0.01);
     src.start(t);
     run.sources.push(src);
-    t += buf.duration - (st.stop ? 0.02 : 0.13);           // pieces run into each other; a sentence end keeps its pause
+    t += buf.duration / fx.rate - (st.stop ? 0.02 : 0.13) + fx.gap;   // pieces run into each other; a sentence end keeps its pause
   }
   await new Promise(r => setTimeout(r, Math.max(0, (t - actx.currentTime) * 1000)));
   if (playing === run) playing = null;

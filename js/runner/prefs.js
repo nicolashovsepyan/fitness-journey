@@ -5,12 +5,13 @@
    ============================================================ */
 import { storage } from '../core/storage.js';
 import { setVoice, setBeeps, say, beep, setSilentOverride } from '../timer.js';
+import { setVoiceKind } from '../voice.js';
 import { vibeOptions, setVibe } from './theme.js';
 import { checkForUpdate, runningVersion } from '../update-banner.js';
 import { PRESETS, designFor, ringChoice, chooseRing, ringHTML, ringBaseCss, setRingProgress } from './ring.js';
 
 const KEY = 'workModePrefs';
-const DEFAULTS = { voice: true, beeps: true, flash: true, ready: 8, silent: false };
+const DEFAULTS = { voice: true, beeps: true, flash: true, ready: 8, silent: false, voiceKind: 'm' };
 let prefs = { ...DEFAULTS };
 let loaded = false;
 
@@ -21,7 +22,7 @@ export async function loadPrefs() {
   return prefs;
 }
 export const pref = k => prefs[k];
-function apply() { setVoice(!!prefs.voice); setBeeps(!!prefs.beeps); setSilentOverride(!!prefs.silent); }
+function apply() { setVoice(!!prefs.voice); setBeeps(!!prefs.beeps); setSilentOverride(!!prefs.silent); setVoiceKind(prefs.voiceKind); }
 function set(k, v) {
   prefs[k] = v; apply();
   try { storage().setDevicePref(KEY, prefs); } catch (e) {}
@@ -31,7 +32,7 @@ const ROWS = [
   ['voice', 'Coach voice', 'Move names, halfway, last round, 1 minute left'],
   ['beeps', 'Beeps', 'Countdown ticks, the end of each step, the 10-second warning'],
   ['flash', 'Screen flash', 'The screen flashes when a step ends. Handy in a loud gym'],
-  ['silent', 'Sound on silent mode', 'Off: the timer plays over your music (your silent switch mutes it). On: it plays even on silent, but iPhone pauses your music'],
+  ['silent', 'Sound on silent mode', 'iPhone only lets a web app do one: Off plays over your music, but the silent switch mutes the timer (flip it off to hear it). On plays even on silent, but pauses your music'],
 ];
 
 /* CUSTOMIZE YOUR VIBE — the same three choices as the app's own: which
@@ -131,6 +132,9 @@ export function openPrefs(host) {
       <div class="wm-sheet-h">Timer settings</div>
       <div class="wm-vrow wm-readyrow"><div class="wm-vl"><b>Get-ready countdown</b><small>Seconds to get in position before every timer starts</small></div>
         <div class="wm-rstep"><button data-rd="-1" aria-label="Less">−</button><b>${prefs.ready}s</b><button data-rd="1" aria-label="More">+</button></div></div>
+      <div class="wm-vrow"><div class="wm-vl"><b>Coach voice</b><small>Nico's voice, or the same coaching in a female voice</small></div>
+        <div class="wm-seg3">${[['m', 'Male'], ['f', 'Female']].map(([v, l]) => `<button class="${prefs.voiceKind === v ? 'on' : ''}" data-vk="${v}">${l}</button>`).join('')}</div>
+        ${isCoachDevice() ? '<a class="wm-look-edit" href="voice-lab.html" style="display:inline-block;margin-top:10px;">Voice lab ›</a>' : ''}</div>
       ${ROWS.map(([k, name, sub]) => `<button class="wm-pref" data-pref="${k}">
         <span><b>${name}</b><small>${sub}</small></span><i class="wm-sw ${prefs[k] ? 'on' : ''}"></i></button>`).join('')}
       ${vibeHtml()}
@@ -146,6 +150,7 @@ export function openPrefs(host) {
       draw();
     }));
     ov.querySelector('#wmPrefDone').addEventListener('click', close);
+    ov.querySelectorAll('[data-vk]').forEach(b => b.addEventListener('click', () => { set('voiceKind', b.dataset.vk); say('Get ready.'); draw(); }));
     ov.querySelectorAll('[data-rd]').forEach(b => b.addEventListener('click', () => { set('ready', Math.max(0, Math.min(30, (prefs.ready ?? 8) + Number(b.dataset.rd)))); draw(); }));
     runningVersion().then(v => { const el = ov.querySelector('#wmVer'); if (el) el.textContent = v || 'unknown'; });
     ov.querySelector('#wmCheck').addEventListener('click', async e => {
