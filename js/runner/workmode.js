@@ -177,6 +177,31 @@ function rowVid(it) {
   return `<button class="ci-vid demo-btn ${has ? 'has' : ''}" data-ex="${it.exId}" data-exname="${a(it.name)}" data-cue="${a(it.cue || EXERCISES[it.exId]?.cues)}" title="Watch it">▶</button>`;
 }
 
+/* ONE MOVE ROW, the same in every timer mode: a small ▶ (or an empty slot,
+   so names line up), the full name on one line (shrunk to fit, never cut),
+   then either − value + or just the value. Slim: a list, not a stack of
+   buttons. `step`: the data attribute the − + carry, e.g. 'data-am="2"'. */
+function mvRow(it, { val = null, unit = '', step = '' } = {}) {
+  const v = val == null || val === '' ? '' : `${val}${unit === 'sec' ? '<small>s</small>' : ''}`;
+  const right = step
+    ? `<span class="mvr-st"><button ${step} data-d="-1" aria-label="Less">−</button><b>${v || 0}</b><button ${step} data-d="1" aria-label="More">+</button></span>`
+    : v ? `<b class="mvr-v">${v}</b>` : '';
+  return `<div class="mvr">${rowVid(it) || '<span class="mvr-sp"></span>'}<span class="mvr-n">${it.name}</span>${right}</div>`;
+}
+const mvUnit = it => UNIT[it.measure] === 'sec' ? 'sec' : '';
+/* full names on one line: shrink the long ones until they fit */
+function fitNames() {
+  const groups = new Map();
+  host.querySelectorAll('.mvr-n, .circuit-list .ci .nm').forEach(el => {
+    el.style.fontSize = ''; let f = parseFloat(getComputedStyle(el).fontSize) || 16;
+    while (el.scrollWidth > el.clientWidth + 1 && f > 11) { f -= 0.5; el.style.fontSize = f + 'px'; }
+    const g = el.closest('.mvr-list, .am-moves, .circuit-list') || el;
+    groups.set(g, Math.min(groups.get(g) ?? 99, f));
+  });
+  /* one list, one size: every name in it at the size the longest needs */
+  groups.forEach((f, g) => g.querySelectorAll?.('.mvr-n, .ci .nm').forEach(el => { el.style.fontSize = f + 'px'; }));
+}
+
 /* which exercise is on screen right now, whatever the format */
 function curIdx() {
   const b = block(); if (!b) return 0;
@@ -564,6 +589,7 @@ function shell(inner, { progress = true } = {}) {
   document.getElementById('backBtn')?.addEventListener('click', backBlock);
   const now = host.querySelector('.bchip.now'); if (now) now.scrollIntoView({ inline: 'center', block: 'nearest' });
   reflectPause();
+  requestAnimationFrame(fitNames);
 }
 /* tap anywhere on the timer circle to pause/resume that countdown (session clock keeps running) */
 function reflectPause() {
@@ -1163,9 +1189,7 @@ function renderAmrap() {
   if (!Array.isArray(S.amrapCur)) S.amrapCur = b.items.map(it => Number(it.reps) || 0);
   if (!Array.isArray(S.amrapLog)) S.amrapLog = [];
   const showReps = !b.countRounds && b.items.some(it => it.reps);
-  const unitOf = it => UNIT[it.measure] === 'sec' ? 'sec' : 'reps';
-  const moveRows = () => b.items.map((it, i) => `<div class="am-move">${rowVid(it)}<span class="nm">${it.name}</span>
-      ${showReps ? `<span class="am-step"><button data-am="${i}" data-d="-1" aria-label="Less">−</button><b>${S.amrapCur[i]}</b><button data-am="${i}" data-d="1" aria-label="More">+</button></span><small>${unitOf(it)}</small>` : ''}</div>`).join('');
+  const moveRows = () => b.items.map((it, i) => mvRow(it, showReps ? { val: S.amrapCur[i], unit: mvUnit(it), step: `data-am="${i}"` } : {})).join('');
   const logRows = () => {
     const times = amrapTimes();
     return S.amrapLog.map((r, k) => ({ r, k, t: times[k] })).reverse().map(({ r, k, t }) => `<button class="am-r" data-amr="${k}"><span>Round ${k + 1}</span><b>${t != null ? fmt(t) : ''}</b><small>${showReps ? r.reps.join(' · ') : ''}</small></button>`).join('');
@@ -1173,13 +1197,13 @@ function renderAmrap() {
   shell(`<div class="now-ex"><div class="label">AMRAP · ${mins} min</div></div>
     <div class="am-top"><div class="timer-wrap am-ring">${timerSvg('buffer')}</div>
       <div class="am-count"><small>Rounds</small><b class="wm-pop" id="amrapN">${S.amrapRounds}</b><span id="amrapLast">${amrapLast()}</span></div></div>
-    ${b.hideList ? '' : `<div class="am-moves"><div class="am-h">Round ${S.amrapRounds + 1}${showReps ? '<small> · fix the reps with − +</small>' : ''}</div>${moveRows()}</div>`}
+    ${b.hideList ? '' : `<div class="am-moves"><div class="am-h">Round ${S.amrapRounds + 1}</div>${moveRows()}</div>`}
     <div class="am-log" id="amLog">${logRows()}</div>
     <div class="actionbar"><div class="btn-row am-bar"><button class="btn secondary" id="rdMinus" aria-label="Undo last round">↶</button><button class="btn lg" id="rdPlus">Round done ✓</button><button class="btn ghost" id="endAmrap">End</button></div></div>`);
   const redraw = () => renderAmrap();
   host.querySelectorAll('[data-am]').forEach(btn => btn.addEventListener('click', () => {
     const i = +btn.dataset.am; S.amrapCur[i] = Math.max(0, S.amrapCur[i] + Number(btn.dataset.d)); R.save(S);
-    btn.parentElement.querySelector('b').textContent = S.amrapCur[i]; buzz(10);
+    btn.parentElement.querySelector('b').innerHTML = `${S.amrapCur[i]}${mvUnit(b.items[i]) ? '<small>s</small>' : ''}`; buzz(10);
   }));
   host.querySelectorAll('[data-amr]').forEach(btn => btn.addEventListener('click', () => editAmrapRound(+btn.dataset.amr, redraw)));
   document.getElementById('rdPlus').addEventListener('click', e => {
@@ -1202,12 +1226,12 @@ function editAmrapRound(k, done) {
   const draw = () => {
     ov.innerHTML = `<div class="overlay-card"><div class="eyebrow">Round ${k + 1}${amrapTimes()[k] != null ? ` · ${fmt(amrapTimes()[k])}` : ''}</div>
       <h2 style="margin:6px 0 12px;">What you did</h2>
-      ${b.items.map((it, i) => `<div class="am-move"><span class="nm">${it.name}</span><span class="am-step"><button data-e="${i}" data-d="-1">−</button><b>${r.reps[i]}</b><button data-e="${i}" data-d="1">+</button></span></div>`).join('')}
+      <div class="mvr-list">${b.items.map((it, i) => mvRow({ ...it, exId: null }, { val: r.reps[i], unit: mvUnit(it), step: `data-e="${i}"` })).join('')}</div>
       <button class="btn" id="amEditDone" style="margin-top:14px;">Done</button></div>`;
     ov.querySelectorAll('[data-e]').forEach(btn => btn.addEventListener('click', () => { const i = +btn.dataset.e; r.reps[i] = Math.max(0, r.reps[i] + Number(btn.dataset.d)); R.save(S); draw(); }));
     ov.querySelector('#amEditDone').addEventListener('click', () => { ov.remove(); done(); });
   };
-  draw(); host.appendChild(ov);
+  draw(); host.appendChild(ov); requestAnimationFrame(fitNames);
 }
 
 /* A ROUND DONE SHOULD FEEL LIKE ONE. A buzz pattern, a victory chime, a
@@ -1306,7 +1330,6 @@ function renderInterval() {
      clocks how long the reps took. Tabata / Timer are time on, time off. */
   const doneable = phaseWork && (b.format === 'emom' || lad) && hasReps;
   const logged = S.ivLog[S.iv];
-  const unitOf = it => UNIT[it.measure] === 'sec' ? 'sec' : 'reps';
 
   /* the whole block as bars: done lit, this one glowing; Death By climbs */
   const nBars = totalIv;
@@ -1323,20 +1346,19 @@ function renderInterval() {
   const times = S.ivLog.filter(L => L && L.t != null).map(L => L.t);
   const doneCount = Math.min(S.iv + (logged ? 1 : 0), totalIv);
 
-  const stepper = (j, v) => `<span class="am-step"><button data-ivr="${j}" data-d="-1" aria-label="Less">−</button><b>${v}</b><button data-ivr="${j}" data-d="1" aria-label="More">+</button></span>`;
   const moveLines = phaseWork ? moves.map((i, j) => { const it = b.items[i];
-    return `<div class="iv-mv">${rowVid(it)}<span class="nm">${it.name}</span>${hasReps ? `${stepper(j, S.ivCur[j])}<small>${unitOf(it)}</small>` : ''}</div>`; }).join('') : '';
+    return mvRow(it, hasReps ? { val: S.ivCur[j], unit: mvUnit(it), step: `data-ivr="${j}"` } : {}); }).join('') : '';
   const nextItem = !all && S.iv + 1 < totalIv ? b.items[(S.iv + 1) % per] : null;
   /* only the numbers that say something: no "total reps" on a bare clock */
   const nxName = nextItem && phaseWork && !lad && b.items.some(it => it.exId || (it.name && it.name !== 'Work')) ? nextItem.name : '';
   const stats = [`<div><small>Rounds</small><b class="wm-pop">${doneCount}${lad ? '' : `<i>/${totalIv}</i>`}</b></div>`,
     times.length ? `<div><small>Last</small><b>${fmt(times.at(-1))}</b></div>` : nxName ? `<div><small>Next</small><b><span class="iv-nx">${nxName}</span></b></div>` : '',
     hasReps ? `<div><small>Total reps</small><b class="wm-pop">${doneReps.reduce((a, x) => a + x, 0)}</b></div>` : ''].filter(Boolean);
-  const restLine = !phaseWork ? `<div class="iv-mv rest"><span class="nm">Rest</span>${nextItem ? `<small>Next: ${nextItem.name}</small>` : ''}</div>` : '';
+  const restLine = !phaseWork ? `<div class="mvr rest"><span class="mvr-sp"></span><span class="mvr-n">Rest${nextItem ? ` <small>· next: ${nextItem.name}</small>` : ''}</span></div>` : '';
 
   shell(`<div class="now-ex"><div class="label">${kind}${counter}</div></div>
     <svg class="ld-bars iv-bars" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${bars}</svg>
-    <div class="iv-moves">${moveLines}${restLine}</div>
+    <div class="mvr-list">${moveLines}${restLine}</div>
     <div class="timer-wrap iv-ring">${timerSvg(phaseWork ? 'buffer' : 'rest')}</div>
     <div class="ld-stats" style="grid-template-columns: repeat(${stats.length}, 1fr)">${stats.join('')}</div>
     ${hasReps && per > 1 ? `<div class="ld-reps">${b.items.map((it, i) => `<div><span>${it.name}</span><b>${doneReps[i]}</b>${planTot[i] ? `<small>/ ${planTot[i]}</small>` : ''}<i style="width:${planTot[i] ? Math.min(100, 100 * doneReps[i] / planTot[i]).toFixed(1) : 0}%"></i></div>`).join('')}</div>` : ''}
@@ -1355,7 +1377,7 @@ function renderInterval() {
   host.querySelectorAll('[data-ivr]').forEach(btn => btn.addEventListener('click', () => {
     const j = +btn.dataset.ivr; S.ivCur[j] = Math.max(0, (S.ivCur[j] || 0) + Number(btn.dataset.d));
     if (S.ivLog[S.iv]) S.ivLog[S.iv].reps = [...S.ivCur];
-    R.save(S); btn.parentElement.querySelector('b').textContent = S.ivCur[j]; buzz(10);
+    R.save(S); btn.parentElement.querySelector('b').innerHTML = `${S.ivCur[j]}${mvUnit(b.items[moves[j]] || {}) ? '<small>s</small>' : ''}`; buzz(10);
   }));
   host.querySelectorAll('[data-ivb]').forEach(r => r.addEventListener('click', () => { const k = +r.dataset.ivb; if (S.ivLog[k] && k < S.iv) editIvRound(k, renderInterval); }));
   document.getElementById('ivDone')?.addEventListener('click', e => {
@@ -1376,12 +1398,12 @@ function editIvRound(k, done) {
   const draw = () => {
     ov.innerHTML = `<div class="overlay-card"><div class="eyebrow">Round ${k + 1}${L.t != null ? ` · ${fmt(L.t)}` : ''}</div>
       <h2 style="margin:6px 0 12px;">What you did</h2>
-      ${L.m.map((i, j) => `<div class="am-move"><span class="nm">${b.items[i]?.name || ''}</span><span class="am-step"><button data-e="${j}" data-d="-1">−</button><b>${L.reps[j]}</b><button data-e="${j}" data-d="1">+</button></span></div>`).join('')}
+      <div class="mvr-list">${L.m.map((i, j) => mvRow({ ...(b.items[i] || {}), exId: null }, { val: L.reps[j], unit: mvUnit(b.items[i] || {}), step: `data-e="${j}"` })).join('')}</div>
       <button class="btn" id="ivEditDone" style="margin-top:14px;">Done</button></div>`;
     ov.querySelectorAll('[data-e]').forEach(btn => btn.addEventListener('click', () => { const j = +btn.dataset.e; L.reps[j] = Math.max(0, (L.reps[j] || 0) + Number(btn.dataset.d)); R.save(S); draw(); }));
     ov.querySelector('#ivEditDone').addEventListener('click', () => { ov.remove(); done(); });
   };
-  draw(); host.appendChild(ov);
+  draw(); host.appendChild(ov); requestAnimationFrame(fitNames);
 }
 /* every interval's reps, per move, onto the block's entries: the total,
    each interval's reps, and the times of the ones you clocked */
@@ -1585,7 +1607,7 @@ function renderForTime() {
   const repsOf = (it, i = b.items.indexOf(it)) => rungs ? rungReps(rungs[k], i) : it.reps;
   const one = b.items.length === 1;
   const rungLine = r => b.items.map((it, i) => one ? qty(rungReps(r, i)) : `${rungReps(r, i)} ${it.name}`).join(' · ');
-  const list = b.hideList ? '' : `<div class="circuit-list">${b.items.map(it => `<div class="ci">${rowVid(it)}<span class="nm">${it.name}</span><span class="tg">${repsOf(it) ? qty(repsOf(it), UNIT[it.measure] || 'reps') : ''}</span></div>`).join('')}</div>`;
+  const list = b.hideList ? '' : `<div class="mvr-list">${b.items.map(it => mvRow(it, { val: repsOf(it) || null, unit: mvUnit(it) })).join('')}</div>`;
   const rounds = rungs ? `rung ${k + 1}/${rungs.length} · ` : b.rounds > 1 ? `${b.rounds} rounds · ` : '';
   shell(`<div class="now-ex"><div class="label">${rounds}${cap ? `cap ${fmt(cap)}` : b.hideList ? 'tap the ring to pause' : 'no cap'}</div>
       <div class="name">${rungs ? (one ? qty(rungReps(rungs[k], 0)) : `Rung ${k + 1}`) : b.hideList ? (b.label || 'Go') : 'For time'}</div>${rungs && rungs[k + 1] != null ? `<div class="side">next: ${rungLine(rungs[k + 1])}</div>` : ''}</div>

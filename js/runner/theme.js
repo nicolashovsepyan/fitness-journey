@@ -254,6 +254,32 @@ function injectStyle() {
   html.wm .am-bar .btn.lg { flex: 2.4; }
   /* LADDER screen */
   html.wm .ld-bars { width: 100%; height: 64px; display:block; margin: 6px 0 12px; }
+  /* THE MOVE ROW (mvRow), every mode: one slim list, full names, small − + */
+  html.wm .mvr-list { background: var(--box); border-radius: 16px; padding: 2px 10px; }
+  html.wm .mvr { display:flex; align-items:center; gap: 8px; min-height: 44px; padding: 3px 0; border-top: 1px solid var(--line); }
+  html.wm .mvr:first-child { border-top: none; }
+  html.wm .mvr .ci-vid, html.wm .mvr-sp { flex: 0 0 24px; width: 24px; height: 24px; margin: 0; border-radius: 50%; font-size: 9px; padding: 0; display:grid; place-items:center; }
+  html.wm .mvr .ci-vid { background: transparent; border: 1.5px solid var(--line); color: var(--muted); }
+  html.wm .mvr .ci-vid.has { border-color: var(--wm-accent); color: var(--wm-accent); background: transparent; }
+  html.wm .mvr-n { flex: 1; min-width: 0; font-size: 16px; font-weight: 600; white-space: nowrap; overflow: hidden; }
+  html.wm .mvr-n small { color: var(--muted); font-weight: 500; font-size: .85em; }
+  html.wm .mvr.rest .mvr-n { color: var(--muted); }
+  html.wm .mvr-st { flex: 0 0 auto; display:flex; align-items:center; }
+  html.wm .mvr-st button { width: 32px; height: 36px; background: none; border: none; color: var(--wm-accent); font-size: 20px; line-height: 1; cursor: pointer; touch-action: manipulation; padding: 0; }
+  html.wm .mvr-st button:active { transform: scale(.85); }
+  html.wm .mvr-st b, html.wm .mvr-v { min-width: 30px; text-align: center; font-family: var(--tnum); font-size: 18px; font-weight: 700; }
+  html.wm .mvr-v { color: var(--wm-neon); padding-right: 4px; }
+  html.wm .mvr-st b small, html.wm .mvr-v small { font-size: 12px; color: var(--muted); margin-left: 1px; }
+  html.wm .overlay-card .mvr-list { background: var(--bg); margin-bottom: 4px; }
+  /* the older lists (program circuits, supersets) take the same slim look */
+  html.wm .circuit-list { background: var(--box); border-radius: 16px; padding: 2px 10px; }
+  html.wm .circuit-list .ci { background: none; border: none; border-top: 1px solid var(--line); border-radius: 0; margin: 0; padding: 3px 0; min-height: 44px; gap: 8px; }
+  html.wm .circuit-list .ci:first-child { border-top: none; }
+  html.wm .circuit-list .ci .nm { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; }
+  html.wm .circuit-list .ci .ci-vid { flex: 0 0 24px; width: 24px; height: 24px; margin: 0; border-radius: 50%; font-size: 9px; padding: 0; background: transparent; border: 1.5px solid var(--line); color: var(--muted); }
+  html.wm .circuit-list .ci .ci-vid.has { border-color: var(--wm-accent); color: var(--wm-accent); }
+  html.wm .circuit-list .ci.active .nm { color: var(--wm-accent); }
+  html.wm .am-moves { padding: 6px 10px 2px; } html.wm .am-moves .mvr:nth-child(2) { border-top: none; }
   html.wm .iv-bars { height: 40px; margin: 4px 0 8px; } html.wm .iv-bars rect.done { cursor:pointer; }
   html.wm .iv-moves { display:flex; flex-direction:column; gap: 6px; }
   html.wm .iv-mv { display:flex; align-items:center; gap: 8px; background: var(--box); border-radius: 14px; padding: 6px 8px 6px 10px; }
