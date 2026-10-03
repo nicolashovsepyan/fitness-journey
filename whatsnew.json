@@ -1,6 +1,7 @@
 {
-  "version": "2026-10-03.5",
+  "version": "2026-10-03.6",
   "notes": [
+    "During a workout, timed moves go up and down 5 seconds at a time, and Done after a workout goes straight back to the timer without a color flash",
     "Moves look the same in every timer: one slim row each, the full name on one line, small − and + for the reps",
     "EMOM, Death By and Tabata: the clock is front and center, tap Done to clock each round, fix your reps with − +, and watch your rounds and total reps add up",
     "Timed moves like planks go up and down 5 seconds at a time, the move list shows pictures, and Stopwatch starts as soon as you pick it",

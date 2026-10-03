@@ -189,6 +189,9 @@ function mvRow(it, { val = null, unit = '', step = '' } = {}) {
   return `<div class="mvr">${rowVid(it) || '<span class="mvr-sp"></span>'}<span class="mvr-n">${it.name}</span>${right}</div>`;
 }
 const mvUnit = it => UNIT[it.measure] === 'sec' ? 'sec' : '';
+/* − + on a timed move moves 5 seconds, landing on a multiple of 5 */
+const nudge = (it, v, d) => { const k = mvUnit(it || {}) ? 5 : 1; v = Number(v) || 0;
+  return Math.max(0, d > 0 ? Math.floor(v / k) * k + k : Math.ceil(v / k) * k - k); };
 /* full names on one line: shrink the long ones until they fit */
 function fitNames() {
   const groups = new Map();
@@ -275,9 +278,10 @@ export function resumeWorkout(callbacks = {}) {
    workout came back on the next open. Wait for the write, then leave. */
 async function quit() {
   delete document.documentElement.dataset.phase; stopCadence(); stopTicker(); releaseAwake(); stopAudio();
+  const leavesPage = !!S?.plan?.returnTo;   // going to another page: keep the timer's colours until it loads
   R.clear();
   try { await R.flushRunState(); } catch (e) {}
-  clearWorkTheme(); cb.onExit?.();
+  if (!leavesPage) clearWorkTheme(); cb.onExit?.();
 }
 
 const block = () => S.plan.blocks[S.bi];
@@ -725,15 +729,18 @@ function updateTimer(rem, total) {
   document.querySelector('.timer')?.classList.toggle('paused', paused);
 }
 function bigEditable(val, unit) {
-  return `<div class="big-edit"><button class="rnd" id="decBig">−</button>
+  const step = /^(sec|s|seconds?)\b/i.test(String(unit || '').trim()) ? 5 : 1;   // a hold moves 5 seconds a tap
+  return `<div class="big-edit" data-step="${step}"><button class="rnd" id="decBig">−</button>
     <div><input class="big-input" id="bigVal" type="number" inputmode="numeric" value="${val}" onfocus="this.select()"/><div class="unit">${unit}</div></div>
     <button class="rnd" id="incBig">+</button></div>`;
 }
 function wireBig() {
   const inp = document.getElementById('bigVal');
   const set = v => { curVal = Math.max(0, v); if (inp) inp.value = curVal; };
-  document.getElementById('decBig')?.addEventListener('click', () => { set((Number(inp?.value) || 0) - 1); buzz(15); });
-  document.getElementById('incBig')?.addEventListener('click', () => { set((Number(inp?.value) || 0) + 1); buzz(15); });
+  const k = Number(document.querySelector('.big-edit')?.dataset.step) || 1;
+  const go = d => { const v = Number(inp?.value) || 0; set(d > 0 ? Math.floor(v / k) * k + k : Math.ceil(v / k) * k - k); buzz(15); };
+  document.getElementById('decBig')?.addEventListener('click', () => go(-1));
+  document.getElementById('incBig')?.addEventListener('click', () => go(1));
   inp?.addEventListener('input', () => { curVal = Math.max(0, Number(inp.value) || 0); });
   inp?.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
 }
@@ -1202,7 +1209,7 @@ function renderAmrap() {
     <div class="actionbar"><div class="btn-row am-bar"><button class="btn secondary" id="rdMinus" aria-label="Undo last round">↶</button><button class="btn lg" id="rdPlus">Round done ✓</button><button class="btn ghost" id="endAmrap">End</button></div></div>`);
   const redraw = () => renderAmrap();
   host.querySelectorAll('[data-am]').forEach(btn => btn.addEventListener('click', () => {
-    const i = +btn.dataset.am; S.amrapCur[i] = Math.max(0, S.amrapCur[i] + Number(btn.dataset.d)); R.save(S);
+    const i = +btn.dataset.am; S.amrapCur[i] = nudge(b.items[i], S.amrapCur[i], Number(btn.dataset.d)); R.save(S);
     btn.parentElement.querySelector('b').innerHTML = `${S.amrapCur[i]}${mvUnit(b.items[i]) ? '<small>s</small>' : ''}`; buzz(10);
   }));
   host.querySelectorAll('[data-amr]').forEach(btn => btn.addEventListener('click', () => editAmrapRound(+btn.dataset.amr, redraw)));
@@ -1228,7 +1235,7 @@ function editAmrapRound(k, done) {
       <h2 style="margin:6px 0 12px;">What you did</h2>
       <div class="mvr-list">${b.items.map((it, i) => mvRow({ ...it, exId: null }, { val: r.reps[i], unit: mvUnit(it), step: `data-e="${i}"` })).join('')}</div>
       <button class="btn" id="amEditDone" style="margin-top:14px;">Done</button></div>`;
-    ov.querySelectorAll('[data-e]').forEach(btn => btn.addEventListener('click', () => { const i = +btn.dataset.e; r.reps[i] = Math.max(0, r.reps[i] + Number(btn.dataset.d)); R.save(S); draw(); }));
+    ov.querySelectorAll('[data-e]').forEach(btn => btn.addEventListener('click', () => { const i = +btn.dataset.e; r.reps[i] = nudge(b.items[i], r.reps[i], Number(btn.dataset.d)); R.save(S); draw(); }));
     ov.querySelector('#amEditDone').addEventListener('click', () => { ov.remove(); done(); });
   };
   draw(); host.appendChild(ov); requestAnimationFrame(fitNames);
@@ -1375,7 +1382,7 @@ function renderInterval() {
     say(pre + (lad ? (all ? `Round ${S.iv + 1}.` : `${item.reps}.`) : all ? '' : `${item.reps ? item.reps + ' ' : ''}${item.name}`));
   }
   host.querySelectorAll('[data-ivr]').forEach(btn => btn.addEventListener('click', () => {
-    const j = +btn.dataset.ivr; S.ivCur[j] = Math.max(0, (S.ivCur[j] || 0) + Number(btn.dataset.d));
+    const j = +btn.dataset.ivr; S.ivCur[j] = nudge(b.items[moves[j]], S.ivCur[j], Number(btn.dataset.d));
     if (S.ivLog[S.iv]) S.ivLog[S.iv].reps = [...S.ivCur];
     R.save(S); btn.parentElement.querySelector('b').innerHTML = `${S.ivCur[j]}${mvUnit(b.items[moves[j]] || {}) ? '<small>s</small>' : ''}`; buzz(10);
   }));
@@ -1400,7 +1407,7 @@ function editIvRound(k, done) {
       <h2 style="margin:6px 0 12px;">What you did</h2>
       <div class="mvr-list">${L.m.map((i, j) => mvRow({ ...(b.items[i] || {}), exId: null }, { val: L.reps[j], unit: mvUnit(b.items[i] || {}), step: `data-e="${j}"` })).join('')}</div>
       <button class="btn" id="ivEditDone" style="margin-top:14px;">Done</button></div>`;
-    ov.querySelectorAll('[data-e]').forEach(btn => btn.addEventListener('click', () => { const j = +btn.dataset.e; L.reps[j] = Math.max(0, (L.reps[j] || 0) + Number(btn.dataset.d)); R.save(S); draw(); }));
+    ov.querySelectorAll('[data-e]').forEach(btn => btn.addEventListener('click', () => { const j = +btn.dataset.e; L.reps[j] = nudge(b.items[L.m[j]], L.reps[j], Number(btn.dataset.d)); R.save(S); draw(); }));
     ov.querySelector('#ivEditDone').addEventListener('click', () => { ov.remove(); done(); });
   };
   draw(); host.appendChild(ov); requestAnimationFrame(fitNames);
@@ -1854,5 +1861,5 @@ function finishSession(opts = {}) {
     <p class="muted">${S.plan.name} · ${fmt(elapsed)}${partial ? ' · ended early' : S.plan.quick ? '' : ` · ${S.plan.duration} min plan`}</p>
     <div style="height:16px;"></div>${resultHtml}${prHtml}${effHtml}
     <div class="actionbar"><button class="btn lg" id="home">${S.plan.finishLabel || 'Back to week'}</button></div></div>`;
-  document.getElementById('home').addEventListener('click', async () => { try { await R.flushRunState(); } catch (e) {} clearWorkTheme(); cb.onFinish?.(); });
+  document.getElementById('home').addEventListener('click', async () => { const leavesPage = !!S?.plan?.returnTo; try { await R.flushRunState(); } catch (e) {} if (!leavesPage) clearWorkTheme(); cb.onFinish?.(); });
 }

@@ -57,6 +57,9 @@ const rememberReturn = (plan) => { returnTo = (plan && plan.returnTo) || null; }
 function leaveWorkout() {
   const back = returnTo;
   returnTo = null;
+  /* the Quick Timer goes back to its own setup IN PLACE: a reload showed
+     the app's plain colours for a moment between the timer's two screens */
+  if (back && back.startsWith('index.html?quick') && new URLSearchParams(location.search).has('quick')) { render(); scrollTo(0, 0); return; }
   if (back) { location.replace(back); return; }
   go('home');
 }
