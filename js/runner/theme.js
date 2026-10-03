@@ -312,6 +312,14 @@ function injectStyle() {
   html.wm .ld-reps span { flex:1; font-size: 14px; font-weight: 600; z-index: 1; } html.wm .ld-reps b { font-family: var(--tnum); font-size: 17px; z-index: 1; }
   html.wm .ld-reps small { color: var(--muted); font-family: var(--tnum); z-index: 1; }
   html.wm .ld-reps i { position:absolute; left:0; top:0; bottom:0; background: var(--wm-accent-soft); }
+  /* THE MOVE YOU ARE ON: the app's lit-habit look. A glowing neon edge on
+     the left, a neon wash fading off it, a neon outline. */
+  html.wm .ld-reps div { border: 1px solid transparent; transition: border-color .25s, box-shadow .25s; }
+  html.wm .ld-reps div::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background: var(--wm-neon); opacity:0; box-shadow: 0 0 10px var(--wm-neon); transition: opacity .25s; z-index: 2; }
+  html.wm .ld-reps div::after { content:''; position:absolute; left:0; top:0; bottom:0; width: 70%; background: linear-gradient(90deg, var(--wm-neon-soft), transparent); opacity:0; transition: opacity .25s; pointer-events:none; }
+  html.wm .ld-reps div.now { border-color: var(--wm-neon-line); box-shadow: 0 0 16px var(--wm-neon-soft); }
+  html.wm .ld-reps div.now::before, html.wm .ld-reps div.now::after { opacity: 1; }
+  html.wm .ld-reps div.now span { color: var(--wm-neon); }
   /* the round-done burst (workmode.js celebrate) */
   .wm-burst { position: fixed; z-index: 150; width: 0; height: 0; pointer-events: none; }
   .wm-burst i { position: absolute; width: 8px; height: 8px; margin: -4px; border-radius: 50%; background: var(--c); box-shadow: 0 0 10px var(--c);

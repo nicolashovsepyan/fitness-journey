@@ -1357,10 +1357,11 @@ function renderInterval() {
     return mvRow(it, hasReps ? { val: S.ivCur[j], unit: mvUnit(it), step: `data-ivr="${j}"` } : {}); }).join('') : '';
   const nextItem = !all && S.iv + 1 < totalIv ? b.items[(S.iv + 1) % per] : null;
   /* only the numbers that say something: no "total reps" on a bare clock */
-  const nxName = nextItem && phaseWork && !lad && b.items.some(it => it.exId || (it.name && it.name !== 'Work')) ? nextItem.name : '';
   const stats = [`<div><small>Rounds</small><b class="wm-pop">${doneCount}${lad ? '' : `<i>/${totalIv}</i>`}</b></div>`,
-    times.length ? `<div><small>Last</small><b>${fmt(times.at(-1))}</b></div>` : nxName ? `<div><small>Next</small><b><span class="iv-nx">${nxName}</span></b></div>` : '',
+    times.length ? `<div><small>Last</small><b>${fmt(times.at(-1))}</b></div>` : '',
     hasReps ? `<div><small>Total reps</small><b class="wm-pop">${doneReps.reduce((a, x) => a + x, 0)}</b></div>` : ''].filter(Boolean);
+  /* the move you are on lights up in the list (in a rest, the one coming) */
+  const onNow = phaseWork ? moves : nextItem ? [b.items.indexOf(nextItem)] : [];
   const restLine = !phaseWork ? `<div class="mvr rest"><span class="mvr-sp"></span><span class="mvr-n">Rest${nextItem ? ` <small>· next: ${nextItem.name}</small>` : ''}</span></div>` : '';
 
   shell(`<div class="now-ex"><div class="label">${kind}${counter}</div></div>
@@ -1368,7 +1369,7 @@ function renderInterval() {
     <div class="mvr-list">${moveLines}${restLine}</div>
     <div class="timer-wrap iv-ring">${timerSvg(phaseWork ? 'buffer' : 'rest')}</div>
     <div class="ld-stats" style="grid-template-columns: repeat(${stats.length}, 1fr)">${stats.join('')}</div>
-    ${hasReps && per > 1 ? `<div class="ld-reps">${b.items.map((it, i) => `<div><span>${it.name}</span><b>${doneReps[i]}</b>${planTot[i] ? `<small>/ ${planTot[i]}</small>` : ''}<i style="width:${planTot[i] ? Math.min(100, 100 * doneReps[i] / planTot[i]).toFixed(1) : 0}%"></i></div>`).join('')}</div>` : ''}
+    ${hasReps && per > 1 ? `<div class="ld-reps">${b.items.map((it, i) => `<div class="${onNow.includes(i) ? 'now' : ''}"><span>${it.name}</span><b>${doneReps[i]}</b>${planTot[i] ? `<small>/ ${planTot[i]}</small>` : ''}<i style="width:${planTot[i] ? Math.min(100, 100 * doneReps[i] / planTot[i]).toFixed(1) : 0}%"></i></div>`).join('')}</div>` : ''}
     <div class="actionbar"><div class="btn-row am-bar">${lad ? '<button class="btn ghost iv-out" id="dbOut">Can\'t finish</button>' : '<button class="btn ghost" id="skip">Skip ▸</button>'}
       ${doneable ? `<button class="btn lg ${logged?.t != null ? 'secondary' : ''}" id="ivDone">${logged?.t != null ? `Done in ${fmt(logged.t)} ✓` : 'Done ✓'}</button>` : ''}</div></div>`);
   const dur = phaseWork ? work : rest;
