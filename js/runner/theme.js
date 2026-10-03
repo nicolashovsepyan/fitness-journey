@@ -254,6 +254,18 @@ function injectStyle() {
   html.wm .am-bar .btn.lg { flex: 2.4; }
   /* LADDER screen */
   html.wm .ld-bars { width: 100%; height: 64px; display:block; margin: 6px 0 12px; }
+  html.wm .iv-bars { height: 40px; margin: 4px 0 8px; } html.wm .iv-bars rect.done { cursor:pointer; }
+  html.wm .iv-moves { display:flex; flex-direction:column; gap: 6px; }
+  html.wm .iv-mv { display:flex; align-items:center; gap: 8px; background: var(--box); border-radius: 14px; padding: 6px 8px 6px 10px; }
+  html.wm .iv-mv .nm { flex:1; min-width:0; font-size: 17px; font-weight: 700; white-space: nowrap; overflow:hidden; text-overflow: ellipsis; }
+  html.wm .iv-mv small { color: var(--muted); font-size: 12px; min-width: 28px; }
+  html.wm .iv-mv.rest { justify-content: space-between; padding: 12px 14px; } html.wm .iv-mv.rest .nm { color: var(--wm-rest, var(--text)); }
+  html.wm .iv-mv .ci-vid { flex: 0 0 auto; }
+  html.wm .iv-ring { margin: 10px 0 6px; }
+  html.wm .iv-out { white-space: nowrap; font-size: 15px; padding-left: 8px; padding-right: 8px; }
+  html.wm .iv-ring .timer { width: min(74vw, 300px) !important; height: min(74vw, 300px) !important; }
+  html.wm .ld-stats b i { font-style: normal; color: var(--muted); font-size: 14px; }
+  html.wm .iv-nx { font-family: inherit; font-size: 13px; font-weight: 700; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding-top: 6px; }
   html.wm .ld-bars rect { fill: #fff; fill-opacity: .08; }
   html.wm .ld-bars rect.done { fill: var(--wm-accent); fill-opacity: .55; }
   html.wm .ld-bars rect.now { fill: var(--wm-neon); fill-opacity: 1; filter: drop-shadow(0 0 6px var(--wm-neon)); }

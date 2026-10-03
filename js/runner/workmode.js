@@ -347,6 +347,7 @@ function enterBlock(i, opts = {}) {
   if (!resuming) {
     S.ii = 0; S.si = 0; S.ci = 0; S.round = 1; S.sub = 'work'; S.amrapRounds = 0; S.amrapReps = null;
     S.iv = null; S.ivPhase = 'work'; S.blockStart = Date.now(); S.roundBuf = {}; S.laps = []; S.amrapSplits = []; S.amrapLog = []; S.amrapCur = null;
+    S.ivLog = []; S.ivCur = null; S.ivCurAt = null;
     R.clearStep(S);
   }
   roundBuf = S.roundBuf || (S.roundBuf = {});
@@ -1271,8 +1272,9 @@ function renderInterval() {
   const rounds = b.rounds || 8;
   const per = b.items.length || 1;
   if (S.iv == null) { S.iv = 0; S.ivPhase = 'work'; R.save(S); }   // iv = interval index across rounds×items
+  if (!Array.isArray(S.ivLog)) S.ivLog = [];
   const totalIv = intervalTotal(b);
-  if (S.iv >= totalIv) { if (b.ladder) return endDeathBy(totalIv); captureRounds(b.intervals || rounds); return completeBlock(); }
+  if (S.iv >= totalIv) { if (b.ladder) return endDeathBy(totalIv); captureIntervals(b, b.intervals || rounds); return completeBlock(); }
   /* `all`: every move inside each interval (A then B, every minute),
      instead of the moves taking turns one interval each */
   const all = !!b.allEach && per > 1;
@@ -1285,27 +1287,61 @@ function renderInterval() {
   const pr = b.perRound > 1 ? b.perRound : 0;
   const counter = pr ? ` · round ${Math.floor(S.iv / pr) + 1}/${b.rounds}`
     : b.intervals ? (totalIv > 1 ? ` · ${S.iv + 1}/${totalIv}` : '') : ` · round ${roundN}/${rounds}`;
-  /* what the minute asks for, and what comes after it: an EMOM you can't
-     read the reps off is only a clock */
   /* DEATH BY: the reps climb every interval until you can't finish inside
      it. Each move climbs on its own: `dbStart` + round × `dbStep` (burpees
      1 +1 beside squats 2 +2). An older plan's block-wide `ladder` =
      { start, step } still reads. */
   const lad = b.ladder;
-  const ladOf = it => !lad ? it.reps
-    : (it.dbStart != null ? +it.dbStart : lad.start) + S.iv * (it.dbStep != null ? +it.dbStep : lad.step);
-  const ladReps = lad && !all ? ladOf(item) : null;
-  if (lad && !all) { item.reps = ladReps; }
-  const target = phaseWork && !all && item.reps ? `<div class="side">${qty(item.reps, UNIT[item.measure] || 'reps')}</div>` : '';
+  const ivMoves = iv => all ? b.items.map((_, i) => i) : [iv % per];
+  const planned = (iv, i) => { const it = b.items[i] || {};
+    return lad ? (it.dbStart != null ? +it.dbStart : lad.start) + iv * (it.dbStep != null ? +it.dbStep : lad.step) : Number(it.reps) || 0; };
+  const moves = ivMoves(S.iv);
+  if (lad && !all) item.reps = planned(S.iv, moves[0]);
+  /* THE REPS YOU ACTUALLY DID this interval, one per move on it: start at
+     the plan, fixed with − + (8 instead of 10), kept when the interval ends
+     whether or not anything was tapped */
+  if (S.ivCurAt !== S.iv) { S.ivCur = moves.map(i => planned(S.iv, i)); S.ivCurAt = S.iv; R.save(S); }
+  const hasReps = lad || b.items.some(it => Number(it.reps) > 0);
+  /* EMOM and Death By are "do the reps, then rest out the minute": Done
+     clocks how long the reps took. Tabata / Timer are time on, time off. */
+  const doneable = phaseWork && (b.format === 'emom' || lad) && hasReps;
+  const logged = S.ivLog[S.iv];
+  const unitOf = it => UNIT[it.measure] === 'sec' ? 'sec' : 'reps';
+
+  /* the whole block as bars: done lit, this one glowing; Death By climbs */
+  const nBars = totalIv;
+  const barVal = iv => { const L = S.ivLog[iv]; return L ? L.reps.reduce((a, x) => a + (Number(x) || 0), 0) : ivMoves(iv).reduce((a, i) => a + planned(iv, i), 0); };
+  const maxV = lad ? Math.max(1, ...Array.from({ length: nBars }, (_, j) => barVal(j))) : 1;
+  const W = 320, H = 40, gap = nBars > 40 ? 1 : 2, bw = (W - gap * (nBars - 1)) / nBars;
+  const bars = Array.from({ length: nBars }, (_, j) => { const h = lad ? 4 + (H - 4) * barVal(j) / maxV : H;
+    return `<rect data-ivb="${j}" class="${j < S.iv ? 'done' : j === S.iv ? 'now' : ''}" x="${(j * (bw + gap)).toFixed(1)}" y="${(H - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="${Math.min(3, bw / 3).toFixed(1)}"/>`; }).join('');
+
+  /* totals so far, per move (the interval on screen counts once logged) */
+  const doneReps = b.items.map(() => 0);
+  S.ivLog.forEach((L, iv) => { if (!L || iv >= S.iv && !(iv === S.iv && logged)) return; L.m.forEach((i, j) => { doneReps[i] += Number(L.reps[j]) || 0; }); });
+  const planTot = b.items.map((_, i) => lad ? 0 : Array.from({ length: totalIv }, (_, iv) => ivMoves(iv).includes(i) ? planned(iv, i) : 0).reduce((a, x) => a + x, 0));
+  const times = S.ivLog.filter(L => L && L.t != null).map(L => L.t);
+  const doneCount = Math.min(S.iv + (logged ? 1 : 0), totalIv);
+
+  const stepper = (j, v) => `<span class="am-step"><button data-ivr="${j}" data-d="-1" aria-label="Less">−</button><b>${v}</b><button data-ivr="${j}" data-d="1" aria-label="More">+</button></span>`;
+  const moveLines = phaseWork ? moves.map((i, j) => { const it = b.items[i];
+    return `<div class="iv-mv">${rowVid(it)}<span class="nm">${it.name}</span>${hasReps ? `${stepper(j, S.ivCur[j])}<small>${unitOf(it)}</small>` : ''}</div>`; }).join('') : '';
   const nextItem = !all && S.iv + 1 < totalIv ? b.items[(S.iv + 1) % per] : null;
-  const upNext = per > 1 && nextItem ? `<div class="ss-hint">Next: ${nextItem.name}${nextItem.reps ? ` · ${nextItem.reps}` : ''}</div>` : '';
-  const allList = all && phaseWork ? `<div class="circuit-list">${b.items.map(it => { const r = lad ? ladOf(it) : it.reps; return `<div class="ci">${rowVid(it)}<span class="nm">${it.name}</span><span class="tg">${r ? qty(r, UNIT[it.measure] || 'reps') : ''}</span></div>`; }).join('')}</div>` : '';
-  shell(`<div class="now-ex"><div class="label">${kind}${counter}</div>
-      <div class="name">${phaseWork ? item.name : 'Rest'}</div>${target}</div>
-    ${phaseWork && !all ? exActions(item) : ''}
-    <div class="timer-wrap">${timerSvg(phaseWork ? 'buffer' : 'rest')}</div>
-    ${allList}${lad ? '' : upNext}
-    <div class="actionbar">${lad ? '<button class="btn secondary" id="dbOut">I can\'t finish this one</button>' : '<button class="btn ghost" id="skip">Skip ▸</button>'}</div>`);
+  /* only the numbers that say something: no "total reps" on a bare clock */
+  const nxName = nextItem && phaseWork && !lad && b.items.some(it => it.exId || (it.name && it.name !== 'Work')) ? nextItem.name : '';
+  const stats = [`<div><small>Rounds</small><b class="wm-pop">${doneCount}${lad ? '' : `<i>/${totalIv}</i>`}</b></div>`,
+    times.length ? `<div><small>Last</small><b>${fmt(times.at(-1))}</b></div>` : nxName ? `<div><small>Next</small><b><span class="iv-nx">${nxName}</span></b></div>` : '',
+    hasReps ? `<div><small>Total reps</small><b class="wm-pop">${doneReps.reduce((a, x) => a + x, 0)}</b></div>` : ''].filter(Boolean);
+  const restLine = !phaseWork ? `<div class="iv-mv rest"><span class="nm">Rest</span>${nextItem ? `<small>Next: ${nextItem.name}</small>` : ''}</div>` : '';
+
+  shell(`<div class="now-ex"><div class="label">${kind}${counter}</div></div>
+    <svg class="ld-bars iv-bars" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${bars}</svg>
+    <div class="iv-moves">${moveLines}${restLine}</div>
+    <div class="timer-wrap iv-ring">${timerSvg(phaseWork ? 'buffer' : 'rest')}</div>
+    <div class="ld-stats" style="grid-template-columns: repeat(${stats.length}, 1fr)">${stats.join('')}</div>
+    ${hasReps && per > 1 ? `<div class="ld-reps">${b.items.map((it, i) => `<div><span>${it.name}</span><b>${doneReps[i]}</b>${planTot[i] ? `<small>/ ${planTot[i]}</small>` : ''}<i style="width:${planTot[i] ? Math.min(100, 100 * doneReps[i] / planTot[i]).toFixed(1) : 0}%"></i></div>`).join('')}</div>` : ''}
+    <div class="actionbar"><div class="btn-row am-bar">${lad ? '<button class="btn ghost iv-out" id="dbOut">Can\'t finish</button>' : '<button class="btn ghost" id="skip">Skip ▸</button>'}
+      ${doneable ? `<button class="btn lg ${logged?.t != null ? 'secondary' : ''}" id="ivDone">${logged?.t != null ? `Done in ${fmt(logged.t)} ✓` : 'Done ✓'}</button>` : ''}</div></div>`);
   const dur = phaseWork ? work : rest;
   if (dur <= 0) return nextInterval();
   /* the call at the top of each interval: halfway through the block and
@@ -1314,18 +1350,64 @@ function renderInterval() {
     const step = pr || 1, nR = Math.round(totalIv / step);
     const pre = nR >= 2 && S.iv === totalIv - step ? 'Last round. '
       : nR >= 6 && S.iv === Math.floor(nR / 2) * step ? 'Halfway. ' : '';
-    say(pre + (lad ? (all ? `Round ${S.iv + 1}.` : `${ladReps}.`) : all ? '' : item.name));
+    say(pre + (lad ? (all ? `Round ${S.iv + 1}.` : `${item.reps}.`) : all ? '' : `${item.reps ? item.reps + ' ' : ''}${item.name}`));
   }
+  host.querySelectorAll('[data-ivr]').forEach(btn => btn.addEventListener('click', () => {
+    const j = +btn.dataset.ivr; S.ivCur[j] = Math.max(0, (S.ivCur[j] || 0) + Number(btn.dataset.d));
+    if (S.ivLog[S.iv]) S.ivLog[S.iv].reps = [...S.ivCur];
+    R.save(S); btn.parentElement.querySelector('b').textContent = S.ivCur[j]; buzz(10);
+  }));
+  host.querySelectorAll('[data-ivb]').forEach(r => r.addEventListener('click', () => { const k = +r.dataset.ivb; if (S.ivLog[k] && k < S.iv) editIvRound(k, renderInterval); }));
+  document.getElementById('ivDone')?.addEventListener('click', e => {
+    if (S.ivLog[S.iv]?.t != null) return;
+    const used = Math.max(1, Math.round((S.stepDur || dur) - (R.stepRemaining(S) ?? 0)));
+    S.ivLog[S.iv] = { m: moves, reps: [...S.ivCur], t: used }; R.save(S);
+    celebrate(e.currentTarget, fmt(used));
+    renderInterval();
+  });
   document.getElementById('dbOut')?.addEventListener('click', () => { buzz(60); endDeathBy(S.iv); });
   onStepDone = nextInterval;
   document.getElementById('skip')?.addEventListener('click', () => { R.clearStep(S); onStepDone = null; nextInterval(); });
+}
+/* a finished interval's reps, fixed from its bar, without stopping the clock */
+function editIvRound(k, done) {
+  const b = block(), L = S.ivLog[k]; if (!L) return;
+  const ov = document.createElement('div'); ov.className = 'overlay';
+  const draw = () => {
+    ov.innerHTML = `<div class="overlay-card"><div class="eyebrow">Round ${k + 1}${L.t != null ? ` · ${fmt(L.t)}` : ''}</div>
+      <h2 style="margin:6px 0 12px;">What you did</h2>
+      ${L.m.map((i, j) => `<div class="am-move"><span class="nm">${b.items[i]?.name || ''}</span><span class="am-step"><button data-e="${j}" data-d="-1">−</button><b>${L.reps[j]}</b><button data-e="${j}" data-d="1">+</button></span></div>`).join('')}
+      <button class="btn" id="ivEditDone" style="margin-top:14px;">Done</button></div>`;
+    ov.querySelectorAll('[data-e]').forEach(btn => btn.addEventListener('click', () => { const j = +btn.dataset.e; L.reps[j] = Math.max(0, (L.reps[j] || 0) + Number(btn.dataset.d)); R.save(S); draw(); }));
+    ov.querySelector('#ivEditDone').addEventListener('click', () => { ov.remove(); done(); });
+  };
+  draw(); host.appendChild(ov);
+}
+/* every interval's reps, per move, onto the block's entries: the total,
+   each interval's reps, and the times of the ones you clocked */
+function ivTotals(b) {
+  const tot = b.items.map(() => 0), each = b.items.map(() => []);
+  (S.ivLog || []).forEach(L => L && L.m.forEach((i, j) => { tot[i] += Number(L.reps[j]) || 0; each[i].push(Number(L.reps[j]) || 0); }));
+  const clocked = (S.ivLog || []).map((L, k) => L && L.t != null ? k + 1 : 0).filter(Boolean);
+  return { tot, each, times: clocked.map(k => S.ivLog[k - 1].t), clocked };
+}
+function captureIntervals(b, n) {
+  captureRounds(n);
+  const { tot, each, times, clocked } = ivTotals(b);
+  if (tot.some(x => x > 0)) (S.captured[b.id] || []).forEach((e, i) => { e.ivReps = { total: tot[i], each: each[i] }; if (times.length) { e.laps = times; e.lapN = clocked; } });
+  R.save(S);
 }
 /* Death By is over: `done` intervals finished, the one after it was not */
 function endDeathBy(done) {
   const b = block(); R.clearStep(S); onStepDone = null;
   /* each move's reps in the last round finished */
   const lastOf = it => done > 0 ? (it.dbStart != null ? +it.dbStart : b.ladder.start) + (done - 1) * (it.dbStep != null ? +it.dbStep : b.ladder.step) : 0;
-  (S.captured[b.id] || []).forEach((e, i) => { e.sets = [{ value: done }]; e.rounds = true; e.unit = 'rounds'; e.deathBy = { rounds: done, lastReps: lastOf(b.items[i] || {}) }; });
+  /* the round you couldn't finish: whatever − + says you got */
+  const per = b.items.length || 1, failedM = b.allEach && per > 1 ? b.items.map((_, i) => i) : [done % per];
+  const partial = b.items.map((_, i) => { const j = failedM.indexOf(i); return S.ivCurAt === done && j >= 0 && done < intervalTotal(b) ? Number(S.ivCur?.[j]) || 0 : 0; });
+  const { tot, times, clocked } = ivTotals(b);
+  (S.captured[b.id] || []).forEach((e, i) => { e.sets = [{ value: done }]; e.rounds = true; e.unit = 'rounds';
+    e.deathBy = { rounds: done, lastReps: lastOf(b.items[i] || {}), partial: partial[i], total: tot[i] + partial[i] }; if (times.length) { e.laps = times; e.lapN = clocked; } });
   R.save(S); say(`${done} rounds. Strong work.`, 2500);
   completeBlock();
 }
@@ -1333,6 +1415,12 @@ function nextInterval() {
   const b = block();
   /* no rest after the LAST interval: 10 seconds of nothing before "done" */
   const last = S.iv >= intervalTotal(b) - 1;
+  /* an interval nobody tapped still counts, at the reps on screen */
+  if (S.ivPhase === 'work' && Array.isArray(S.ivCur) && S.ivCurAt === S.iv) {
+    const per = b.items.length || 1, m = b.allEach && per > 1 ? b.items.map((_, i) => i) : [S.iv % per];
+    S.ivLog = S.ivLog || [];
+    S.ivLog[S.iv] = S.ivLog[S.iv] ? { ...S.ivLog[S.iv], reps: [...S.ivCur] } : { m, reps: [...S.ivCur], t: null };
+  }
   if (S.ivPhase === 'work' && !last && (b.rest ?? (b.format === 'emom' ? 0 : 10)) > 0) { S.ivPhase = 'rest'; R.save(S); return renderInterval(); }
   S.ivPhase = 'work'; S.iv += 1; R.save(S);
   renderInterval();
@@ -1684,9 +1772,12 @@ function quickResult(session) {
       : `${v} interval${v === 1 ? '' : 's'}`;
     const word = b.name.startsWith('Stopwatch') ? 'Lap' : b.name.startsWith('Ladder') ? 'Rung' : 'Round';
     const splits = e.laps?.length ? e.laps : e.amrap?.splits?.length ? e.amrap.splits : [];
-    const laps = splits.map((t, i) => `<div class="eff-row"><span class="muted">${word} ${i + 1}</span><span style="margin-left:auto;">${fmt(t)}</span></div>`).join('');
-    if (e.deathBy) return `<div class="eff-row"><span>${b.name}</span><span class="pr-flash" style="margin-left:auto;">${qty(e.deathBy.rounds, 'rounds')}</span></div>`
-      + b.entries.map(x => `<div class="eff-row"><span class="muted">${x.name} · last round</span><span style="margin-left:auto;">${qty(x.deathBy?.lastReps ?? 0)}</span></div>`).join('');
+    const laps = splits.map((t, i) => `<div class="eff-row"><span class="muted">${word} ${e.lapN?.[i] ?? i + 1}</span><span style="margin-left:auto;">${fmt(t)}</span></div>`).join('');
+    if (e.deathBy) return `<div class="eff-row"><span>${b.name}</span><span class="pr-flash" style="margin-left:auto;">${qty(e.deathBy.rounds, 'rounds')}${e.deathBy.partial ? ` + ${qty(e.deathBy.partial)}` : ''}</span></div>`
+      + b.entries.map(x => `<div class="eff-row"><span class="muted">${x.name} · last round</span><span style="margin-left:auto;">${qty(x.deathBy?.lastReps ?? 0)}</span></div>`
+        + (x.deathBy?.total ? `<div class="eff-row"><span class="muted">${x.name} · total</span><span style="margin-left:auto;">${qty(x.deathBy.total)}</span></div>` : '')).join('') + laps;
+    if (b.entries.some(x => x.ivReps)) return `<div class="eff-row"><span>${b.name}</span><span class="pr-flash" style="margin-left:auto;">${val}</span></div>`
+      + b.entries.filter(x => x.ivReps).map(x => `<div class="eff-row"><span class="muted">${x.name} · total</span><span style="margin-left:auto;">${qty(x.ivReps.total)}</span></div>`).join('') + laps;
     return `<div class="eff-row"><span>${b.name}</span><span class="pr-flash" style="margin-left:auto;">${val}</span></div>${laps}`;
   }).join('');
   return rows ? `<div class="card"><div class="eyebrow">Result</div>${rows}</div>` : '';
