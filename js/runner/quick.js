@@ -38,10 +38,10 @@ const FORMATS = [
       'Add a time cap and the clock stops you there if you are not finished.'] },
   { id: 'tabata', name: 'Tabata', sub: '20s on, 10s off', moves: true,
     how: ['20 seconds all out, 10 seconds rest, 8 rounds. 4 minutes.', 'With 2 moves it becomes 16 rounds, 8 of each, alternating: move 1, move 2, move 1… Lower the rounds if you want it shorter.', 'Change the times in Customize if you want a different mix.'] },
-  { id: 'timer', name: 'Timer', sub: 'Work, rest, rounds', moves: true,
-    how: ['A plain timer.', 'Set how long to work. Add rest and more rounds to repeat it.',
+  { id: 'timer', name: 'Interval timer', sub: 'Work, rest, rounds', moves: true,
+    how: ['Work, rest, repeat.', 'Set how long to work. Add rest and more rounds to repeat it.',
       'Examples: a 2:00 plank (1 round, no rest). Or 5:00 work, 2:00 rest, 3 rounds.',
-      'Customize adds sets, with a longer rest between them.'] },
+      'Customize can repeat the whole thing, with a longer break in between: 3 times 4 rounds, 2:00 off between them.'] },
   { id: 'deathby', name: 'Death By', sub: '+1 rep every minute', moves: true,
     how: ['Death By.', 'Minute 1: 1 rep. Minute 2: 2 reps. Minute 3: 3 reps. Every minute the reps go up.',
       'Keep going until you can\'t finish the reps inside the minute, then tap "I can\'t finish this one". Your score is the last round you completed.',
@@ -67,8 +67,8 @@ const FIELDS = {
   work:     ['Work',              'time',  5,  5, 3600],
   rest:     ['Rest',              'time',  5,  0, 1800],
   rounds:   ['Rounds',            '',      1,  1,  60],
-  sets:     ['Sets',              '',      1,  1,  10],
-  setRest:  ['Rest between sets', 'time', 15,  0, 1800],
+  sets:     ['Repeat the whole thing', 'times', 1,  1,  10],
+  setRest:  ['Break in between', 'time', 15,  0, 1800],
   pace:     ['Pace',              'a min', 1, 10,  40],
   dbEvery:  ['Every',             'time', 15, 15, 300],
   dbMax:    ['Stop after',        'rounds', 1, 1,  60],
@@ -313,7 +313,7 @@ function summary() {
       const r = cfg.tRounds;
       const n = perRound();
       const core = `${r > 1 ? `${r} rounds of ` : ''}${n > 1 ? `${n} moves, ` : ''}${secs(cfg.tWork)} work${cfg.tRest && (r > 1 || n > 1) ? `, ${secs(cfg.tRest)} rest` : ''}`;
-      return cfg.sets > 1 ? `${cfg.sets} sets of ${core}, ${secs(cfg.setRest)} between sets` : core;
+      return cfg.sets > 1 ? `${core}, done ${cfg.sets} times, ${secs(cfg.setRest)} break in between` : core;
     }
     case 'deathby': { const ms = ladderMoves(); return `Round 1: ${ms.map(m => `${ldStart(m)}${String(m.name || '').trim() ? ' ' + m.name.trim() : ''}`).join(' + ')}, then more every ${secs(cfg.dbEvery)} until you can't`; }
     case 'ladder': {
@@ -332,7 +332,7 @@ function planName() {
   if (f === 'amrap') return `AMRAP · ${cfg.cap} min`;
   if (f === 'fortime') return `For time${cfg.ftCap ? ` · ${cfg.ftCap} min cap` : ''}`;
   if (f === 'tabata') return `Tabata · ${tbTotal()} × ${cfg.work}/${cfg.rest}`;
-  if (f === 'timer') return `Timer · ${cfg.tRounds > 1 ? `${cfg.tRounds} × ` : ''}${fmt(cfg.tWork)}${cfg.tRest && cfg.tRounds > 1 ? ` / ${fmt(cfg.tRest)}` : ''}${cfg.sets > 1 ? ` · ${cfg.sets} sets` : ''}`;
+  if (f === 'timer') return `Interval timer · ${cfg.tRounds > 1 ? `${cfg.tRounds} × ` : ''}${fmt(cfg.tWork)}${cfg.tRest && cfg.tRounds > 1 ? ` / ${fmt(cfg.tRest)}` : ''}${cfg.sets > 1 ? ` · ${cfg.sets} times` : ''}`;
   if (f === 'pushup') return `Push-up test · ${cfg.pace} a min`;
   if (f === 'deathby') { const ms = ladderMoves().filter(m => String(m.name || '').trim()); return `Death By${ms.length ? ' · ' + ms.map(m => m.name.trim()).join(', ') : ''}${cfg.dbEvery !== 60 ? ` every ${fmt(cfg.dbEvery)}` : ''}`; }
   if (f === 'ladder') { const ms = ladderMoves(); return `Ladder · ${ms.map(m => `${String(m.name || '').trim() || 'reps'} ${ldStart(m)} ${ldStep(m) >= 0 ? '+' : '−'}${Math.abs(ldStep(m))}`).join(', ')}${cfg.ldShape === 'mirror' ? ' and back' : cfg.ldShape === 'wave' ? ' wave' : ''}`; }
@@ -390,8 +390,8 @@ export function buildPlan(c = cfg) {
         break;
       case 'timer':
         for (let i = 0; i < cfg.sets; i++) {
-          blocks.push({ ...base, id: id(i + 1), format: 'tabata', label: 'Timer',
-            name: cfg.sets > 1 ? `Set ${i + 1} of ${cfg.sets}` : name,
+          blocks.push({ ...base, id: id(i + 1), format: 'tabata', label: 'Intervals',
+            name: cfg.sets > 1 ? `${i + 1} of ${cfg.sets}` : name,
             work: cfg.tWork, rest: cfg.tRest, rounds: cfg.tRounds, perRound: perRound(), intervals: cfg.tRounds * perRound(), restAfter: cfg.setRest,
             items: moves.length ? moves : work });
         }
@@ -509,7 +509,8 @@ function movesCard() {
 
 function draw() {
   const def = fmtDef();
-  const main = MAIN[cfg.fmt], more = MORE[cfg.fmt];
+  /* the break between repeats only shows once there is more than one */
+  const main = MAIN[cfg.fmt], more = (MORE[cfg.fmt] || []).filter(k => k !== 'setRest' || cfg.sets > 1);
   const named = namedMoves().length;
   const lad = cfg.fmt === 'ladder', db = cfg.fmt === 'deathby';
   /* SETTINGS: the main numbers, and the ladder's shape as one more row */
