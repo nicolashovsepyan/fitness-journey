@@ -19,6 +19,7 @@ import { activeUserId } from '../users.js';
 import { applyWorkTheme } from './theme.js';
 import { loadPrefs, openPrefs, pref } from './prefs.js';
 import { installHold } from './hold.js';
+import { makeSortable } from './drag.js';
 import { ringHTML, ringBaseCss, ringDesign } from './ring.js';
 
 /* ?demo adds the Work Mode preview: a sample of every program format */
@@ -973,6 +974,10 @@ function wire() {
     cfg.wUnit = toKg ? 'kg' : 'lb'; persist(); draw();
   }));
   requestAnimationFrame(fitMoveNames);
+  /* hold a move and drag it to change the order */
+  makeSortable(host.querySelector('.qt-mvlist'), '.qt-mvr', (from, to) => {
+    const list = MV(); list.splice(to, 0, list.splice(from, 1)[0]); persist(); draw();
+  });
   host.querySelectorAll('[data-mvx]').forEach(b => b.addEventListener('click', () => {
     MV().splice(+b.dataset.mvx, 1);
     if (!MV().length) MV().push(newMove());

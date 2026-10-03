@@ -1,6 +1,7 @@
 {
-  "version": "2026-10-03.19",
+  "version": "2026-10-03.20",
   "notes": [
+    "Hold a move and drag it to change the order, when setting up and during the workout",
     "Your music keeps playing during a workout: the timer now plays over it (turn on Sound on silent mode in Timer settings if you train without music)",
     "Hold − or + to go fast, Tabata logs your reps and every round, and colors are simpler: a main color, a second color, and a preview",
     "Weights sit right under the reps, and tapping lb switches everything to kg (and back)",

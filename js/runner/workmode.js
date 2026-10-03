@@ -12,6 +12,7 @@ import { EXERCISES } from '../data/exercises.js';
 import { alternatives } from '../core/resolve.js';
 import { applyWorkTheme, clearWorkTheme } from './theme.js';
 import { installHold } from './hold.js';
+import { makeSortable, orderAfter } from './drag.js';
 import { ringHTML, ringBaseCss, RING_R, snapToSegments } from './ring.js';
 import { loadPrefs, pref, openPrefs } from './prefs.js';
 import { say, beep, buzz, fmt, initAudio, stopAudio, keepAwake, releaseAwake, setMuted } from '../timer.js';
@@ -1220,6 +1221,7 @@ function renderAmrap() {
     btn.parentElement.querySelector('b').innerHTML = `${S.amrapCur[i]}${mvUnit(b.items[i]) ? '<small>s</small>' : ''}`; buzz(10);
   }));
   host.querySelectorAll('[data-amr]').forEach(btn => btn.addEventListener('click', () => editAmrapRound(+btn.dataset.amr, redraw)));
+  makeSortable(host.querySelector('.am-moves'), '.mvr', (from, to) => { reorderMoves(b, from, to); redraw(); });
   document.getElementById('rdPlus').addEventListener('click', e => {
     S.amrapRounds++; S.amrapSplits = [...(S.amrapSplits || []), upElapsed()];
     S.amrapLog.push({ reps: [...S.amrapCur] }); R.save(S);
@@ -1246,6 +1248,21 @@ function editAmrapRound(k, done) {
     ov.querySelector('#amEditDone').addEventListener('click', () => { ov.remove(); done(); });
   };
   draw(); host.appendChild(ov); requestAnimationFrame(fitNames);
+}
+
+/* REORDER A BLOCK'S MOVES MID-WORKOUT (hold and drag). Everything indexed
+   by move follows it: the logged entries, the AMRAP reps, the rounds each
+   interval logged. Returns new index by old index. */
+function reorderMoves(b, from, to) {
+  const order = orderAfter(b.items.length, from, to), at = [];
+  order.forEach((old, i) => { at[old] = i; });
+  b.items = order.map(o => b.items[o]);
+  const cap = S.captured[b.id]; if (Array.isArray(cap) && cap.length === order.length) S.captured[b.id] = order.map(o => cap[o]);
+  if (Array.isArray(S.amrapCur) && S.amrapCur.length === order.length) S.amrapCur = order.map(o => S.amrapCur[o]);
+  (S.amrapLog || []).forEach(r => { if (r.reps?.length === order.length) r.reps = order.map(o => r.reps[o]); });
+  (S.ivLog || []).forEach(L => { if (L) L.m = L.m.map(old => at[old]); });
+  R.save(S);
+  return at;
 }
 
 /* A ROUND DONE SHOULD FEEL LIKE ONE. A buzz pattern, a victory chime, a
@@ -1386,7 +1403,7 @@ function renderInterval() {
     <div class="mvr-list">${moveLines}${restLine}</div>
     <div class="timer-wrap iv-ring">${timerSvg(phaseWork ? 'buffer' : 'rest')}</div>
     <div class="ld-stats" style="grid-template-columns: repeat(${stats.length}, 1fr)">${stats.join('')}</div>
-    ${hasReps && per > 1 ? `<div class="ld-reps">${b.items.map((it, i) => `<div class="${onNow.includes(i) ? 'now' : ''}"><span>${it.name}</span><b>${doneReps[i]}</b>${planTot[i] ? `<small>/ ${planTot[i]}</small>` : ''}<i style="width:${planTot[i] ? Math.min(100, 100 * doneReps[i] / planTot[i]).toFixed(1) : 0}%"></i></div>`).join('')}</div>` : ''}
+    ${hasReps && per > 1 ? `<div class="ld-reps iv-track">${b.items.map((it, i) => `<div class="${onNow.includes(i) ? 'now' : ''}"><span>${it.name}</span><b>${doneReps[i]}</b>${planTot[i] ? `<small>/ ${planTot[i]}</small>` : ''}<i style="width:${planTot[i] ? Math.min(100, 100 * doneReps[i] / planTot[i]).toFixed(1) : 0}%"></i></div>`).join('')}</div>` : ''}
     ${roundLog}
     <div class="actionbar"><div class="btn-row am-bar">${lad ? '<button class="btn ghost iv-out" id="dbOut">Can\'t finish</button>' : '<button class="btn ghost" id="skip">Skip ▸</button>'}
       ${doneable ? `<button class="btn lg ${logged?.t != null ? 'secondary' : ''}" id="ivDone">${logged?.t != null ? `Done in ${fmt(logged.t)} ✓` : 'Done ✓'}</button>` : ''}</div></div>`);
@@ -1406,6 +1423,16 @@ function renderInterval() {
     R.save(S); btn.parentElement.querySelector('b').innerHTML = `${S.ivCur[j]}${mvUnit(b.items[moves[j]] || {}) ? '<small>s</small>' : ''}`; buzz(10);
   }));
   host.querySelectorAll('[data-ivb]').forEach(r => r.addEventListener('click', () => { const k = +r.dataset.ivb; if (S.ivLog[k] && k < S.iv) editIvRound(k, renderInterval); }));
+  /* hold a move in the list and drag it: the order the moves come in from
+     the next interval on (all-in-one-interval Death By: the order inside it) */
+  makeSortable(host.querySelector('.iv-track'), ':scope > div', (from, to) => {
+    const at = reorderMoves(b, from, to);
+    /* this interval's reps follow their moves too */
+    if (S.ivCurAt === S.iv && Array.isArray(S.ivCur) && all) S.ivCur = orderAfter(S.ivCur.length, from, to).map(o => S.ivCur[o]);
+    /* moves taking turns: if the move on screen changed, its reps start from its own plan */
+    else if (!all && !S.ivLog?.[S.iv] && at[S.iv % per] !== S.iv % per) S.ivCurAt = null;
+    R.save(S); renderInterval();
+  });
   host.querySelectorAll('[data-ivl]').forEach(r => r.addEventListener('click', () => { const k = +r.dataset.ivl; if (S.ivLog[k]) editIvRound(k, renderInterval); }));
   document.getElementById('ivDone')?.addEventListener('click', e => {
     if (S.ivLog[S.iv]?.t != null) return;
