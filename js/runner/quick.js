@@ -528,7 +528,7 @@ function draw() {
   <div class="screen qt fade-in">
     <div class="qt-top">
       ${guest ? '' : '<button class="qt-back" id="qtBack" aria-label="Back">‹</button>'}
-      <h1>Interval Timer</h1>
+      <h1>Training Timer</h1>
       <button class="qt-star" id="qtPrefs" aria-label="Timer settings" title="Timer settings">⚙︎</button>
       <button class="qt-star" id="qtShare" aria-label="Share this timer" title="Share this timer"><svg width="20" height="22" viewBox="0 0 20 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14V2M5 7l5-5 5 5"/><path d="M4 11H2.5v9h15v-9H16"/></svg></button>
       <button class="qt-star ${favIdx != null ? 'on' : ''}" id="qtFav" aria-label="Save this timer" title="Save this timer">${favIdx != null ? '★' : '☆'}</button>

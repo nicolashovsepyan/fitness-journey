@@ -1,6 +1,6 @@
 {
-  "name": "Interval Timer",
-  "short_name": "Interval Timer",
+  "name": "Training Timer",
+  "short_name": "Training Timer",
   "description": "EMOM, AMRAP, Tabata, ladders, push-up test. Your timer.",
   "start_url": "./index.html?quick",
   "scope": "./",

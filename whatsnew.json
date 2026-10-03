@@ -1,6 +1,7 @@
 {
-  "version": "2026-10-03.11",
+  "version": "2026-10-03.12",
   "notes": [
+    "The timer is now called Training Timer",
     "Timer is now called Interval timer, and its Customize reads Repeat the whole thing, with the break in between only when you repeat",
     "Segmented rings drop one square at a time, even on short timers",
     "The move you're on lights up in the list with the neon glow, and the Next box is gone",

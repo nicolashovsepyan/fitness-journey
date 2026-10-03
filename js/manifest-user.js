@@ -44,8 +44,8 @@ export async function applyUserManifest() {
        on the timer, on every phone. */
     if (quick) {
       link.setAttribute('href', 'manifest-timer.webmanifest');
-      document.querySelector('meta[name="apple-mobile-web-app-title"]')?.setAttribute('content', 'Interval Timer');
-      document.title = 'Interval Timer';
+      document.querySelector('meta[name="apple-mobile-web-app-title"]')?.setAttribute('content', 'Training Timer');
+      document.title = 'Training Timer';
       /* the timer's own face (J5 Sunray). iOS takes the icon from this tag
          at the moment of "Add to Home Screen", not from the manifest */
       document.querySelector('link[rel="apple-touch-icon"]')?.setAttribute('href', 'images/timer-icon/timer-180.png');
