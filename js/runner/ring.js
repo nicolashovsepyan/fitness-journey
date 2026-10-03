@@ -22,9 +22,8 @@ const CHOICE = 'fj.ringChoice';
 const OVR = 'fj.ringOverrides';
 const OLD = 'fj.ringDesign';                     // the lab's first format: one free design
 
-/* the starting points; every number in them is a lab control */
-/* the starting points (Nicolas's three: Chrono, LED, Laser); every
-   number in them is a lab control. Colours are electro only. */
+/* Nicolas's three, as finalised in the lab ("Copy all 3", 3 Oct 2026).
+   Every number in them is a lab control. Colours are electro only. */
 export const PRESETS = [
   { id: 'chrono', name: 'Chrono', note: 'Like the app icon: pink dial, lit ticks',
     arc: { width: 8, style: 'solid', core: 0.42, coreColor: 'tint', coreSoft: 0.45, coreOpacity: 0.92, glow: 0.8, glare: false, cap: 'round', segments: 60, gap: 0.35 },
@@ -34,18 +33,18 @@ export const PRESETS = [
     digits: { font: 'mono', weight: 700, glow: 0.8, color: 'phase', size: 1 },
     colors: { work: 'neon', rest: 'accent', ready: 'royal', grad: 'accent' } },
   { id: 'led', name: 'LED', note: 'Segments, like an 80s display',
-    arc: { width: 14, style: 'segments', core: 0, coreColor: 'white', coreSoft: 0.3, coreOpacity: 0.92, glow: 0.6, glare: false, cap: 'butt', segments: 60, gap: 0.4 },
-    track: { width: 14, opacity: 0.08, core: false },
-    ticks: { count: 0, length: 5, quarters: false, opacity: 0.4, color: 'muted', position: 'outside' },
-    rays: 0, crown: true, face: 'none',
-    digits: { font: 'mono', weight: 700, glow: 0.7, color: 'phase', size: 1 },
+    arc: { width: 14, style: 'segments', core: 0.46, coreColor: 'white', coreSoft: 0.97, coreOpacity: 0.76, glow: 0.6, glare: false, cap: 'butt', segments: 60, gap: 0.4 },
+    track: { width: 3, opacity: 0.3, core: false },
+    ticks: { count: 12, length: 5, quarters: true, opacity: 0.38, color: 'phase', position: 'outside' },
+    rays: 0, crown: true, face: 'glow',
+    digits: { font: 'mono', weight: 700, glow: 0.7, color: 'white', size: 1 },
     colors: { work: 'accent', rest: 'neon', ready: 'royal', grad: 'neon' } },
   { id: 'laser', name: 'Laser', note: 'A thin white beam with a big glow',
-    arc: { width: 3.5, style: 'solid', core: 1, coreColor: 'white', coreSoft: 0.2, coreOpacity: 0.95, glow: 2, glare: false, cap: 'round', segments: 60, gap: 0.35 },
+    arc: { width: 2.5, style: 'gradient', core: 1, coreColor: 'white', coreSoft: 1, coreOpacity: 1, glow: 2.5, glare: false, cap: 'round', segments: 60, gap: 0.35, glareSize: 2.5 },
     track: { width: 2, opacity: 0.06, core: false },
     ticks: { count: 60, length: 4, quarters: true, opacity: 0.3, color: 'muted', position: 'outside' },
     rays: 0.03, crown: true, face: 'none',
-    digits: { font: 'system', weight: 300, glow: 1, color: 'white', size: 1.1 },
+    digits: { font: 'system', weight: 300, glow: 1, color: 'phase', size: 1.1 },
     colors: { work: 'accent', rest: 'neon', ready: 'royal', grad: 'neon' } },
 ];
 const clone = o => JSON.parse(JSON.stringify(o));

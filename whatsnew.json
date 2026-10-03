@@ -1,6 +1,7 @@
 {
-  "version": "2026-10-03.12",
+  "version": "2026-10-03.13",
   "notes": [
+    "The final Chrono, LED and Laser ring designs are in: LED glows with a white core, Laser is a brighter beam",
     "The timer is now called Training Timer",
     "Timer is now called Interval timer, and its Customize reads Repeat the whole thing, with the break in between only when you repeat",
     "Segmented rings drop one square at a time, even on short timers",
