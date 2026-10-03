@@ -41,16 +41,30 @@ function miniRing(p) {
   ringBaseCss();
   return `<span class="wm-mini">${ringHTML('work', designFor(p.id), '-m' + p.id).replace('stroke-dashoffset="0"', 'stroke-dashoffset="188"').replace('stroke-dashoffset="0"', 'stroke-dashoffset="188"').replace('>0:00<', '><')}</span>`;
 }
+/* the two colours, named by what they light in the timer (the dashboard
+   calls the same two slots "Buttons & rings" and "Glow & edges") */
+const SLOT_TEXT = { accent: ['Main color', 'Buttons and the work timer'], neon: ['Second color', 'The rest timer and highlights'] };
+const slotName = sl => (SLOT_TEXT[sl.id] || [sl.name])[0];
+const slotHint = sl => (SLOT_TEXT[sl.id] || [, sl.hint])[1];
+/* a live preview: the chosen ring in its three phases */
+function phasePreview() {
+  ringBaseCss();
+  const d = designFor(ringChoice());
+  const one = (cls, label) => `<span class="wm-ph"><span class="wm-mini">${ringHTML(cls, d, '-p' + cls).replace(/stroke-dashoffset="0"/g, 'stroke-dashoffset="188"').replace('>0:00<', '><')}</span><small>${label}</small></span>`;
+  return `<div class="wm-phases">${one('ready', 'Get ready')}${one('work', 'Work')}${one('rest', 'Rest')}</div>`;
+}
 function vibeHtml() {
   const { palettes, slots, pick, vibe } = vibeOptions();
   const cur = ringChoice();
   if (!palettes.length) return '';
   const glow = vibe.glow || 'normal';
-  return `<div class="wm-sheet-sub">Customize your vibe</div>
+  return `<div class="wm-sheet-sub">Colors</div>
+    ${phasePreview()}
+    <p class="wm-note">Get ready is always blue. These are the same colors as your Fitness Journey app.</p>
     <button class="wm-lookrow" data-look="1">${miniRing(PRESETS.find(p => p.id === cur) || PRESETS[0])}<span><b>Timer look</b><small>${(PRESETS.find(p => p.id === cur) || PRESETS[0]).name} · swipe through the designs and colours</small></span><i>›</i></button>
-    ${slots.map(sl => `<div class="wm-vrow"><div class="wm-vl"><b>${sl.name}</b><small>${sl.hint}</small></div>
+    ${slots.map(sl => `<div class="wm-vrow"><div class="wm-vl"><b>${slotName(sl)}</b><small>${slotHint(sl)}</small></div>
       <div class="wm-sw6">${palettes.map(p => `<button class="wm-dot ${pick[sl.id] === p.id ? 'on' : ''}" style="--c:${p.hex}" data-vslot="${sl.id}:${p.id}" aria-label="${p.name}" title="${p.name}"></button>`).join('')}</div></div>`).join('')}
-    <div class="wm-vrow"><div class="wm-vl"><b>Glow</b><small>How hard everything shines</small></div>
+    <div class="wm-vrow"><div class="wm-vl"><b>Glow strength</b><small>How hard everything shines</small></div>
       <div class="wm-seg3">${[['soft', 'Soft'], ['normal', 'Normal'], ['bold', 'Bold']].map(([v, l]) => `<button class="${glow === v ? 'on' : ''}" data-vglow="${v}">${l}</button>`).join('')}</div></div>
     <button class="btn ${vibe.themeRandom ? '' : 'secondary'}" data-vshuffle="1">${vibe.themeRandom ? 'Shuffling weekly. Turn off' : 'Surprise me every week'}</button>`;
 }
@@ -73,7 +87,7 @@ export function openLook(host, onDone) {
     <b>${p.name}</b><small>${p.note}</small></div>`).join('');
   const strips = () => {
     const { palettes, slots, pick } = vibeOptions();
-    return slots.map(sl => `<div class="wm-strip"><div class="wm-stl">${sl.name}</div><div class="wm-swipe">${palettes.map(p => `<button class="wm-dot ${pick[sl.id] === p.id ? 'on' : ''}" style="--c:${p.hex}" data-lslot="${sl.id}:${p.id}" aria-label="${p.name}"><span>${p.name}</span></button>`).join('')}</div></div>`).join('');
+    return slots.map(sl => `<div class="wm-strip"><div class="wm-stl">${slotName(sl)}</div><div class="wm-swipe">${palettes.map(p => `<button class="wm-dot ${pick[sl.id] === p.id ? 'on' : ''}" style="--c:${p.hex}" data-lslot="${sl.id}:${p.id}" aria-label="${p.name}"><span>${p.name}</span></button>`).join('')}</div></div>`).join('');
   };
   ov.innerHTML = `<div class="wm-look-top"><button class="wm-look-x" aria-label="Back">‹</button><b>Timer look</b>
       ${isCoachDevice() ? '<a class="wm-look-edit" href="ring-lab.html">Edit designs</a>' : '<span></span>'}</div>

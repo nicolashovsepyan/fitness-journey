@@ -175,6 +175,10 @@ function injectStyle() {
   html.wm .wm-ringopt { display:flex; flex-direction:column; align-items:center; gap: 4px; background: var(--box); border: 1px solid var(--line); border-radius: 14px; padding: 8px 4px 6px; color: var(--muted); font-size: 11.5px; font-weight: 600; cursor:pointer; }
   html.wm .wm-ringopt.on { border-color: var(--wm-accent); color: var(--wm-accent); background: var(--wm-accent-soft); }
   html.wm .wm-mini { display:block; width: 58px; height: 58px; }
+  html.wm .wm-phases { display:flex; justify-content: space-around; padding: 6px 0 2px; }
+  html.wm .wm-ph { display:flex; flex-direction:column; align-items:center; gap: 4px; }
+  html.wm .wm-ph small { color: var(--muted); font-size: 12px; font-weight: 700; }
+  html.wm .wm-note { color: var(--faint); font-size: 12.5px; text-align:center; margin: 4px 0 10px; }
   html.wm .wm-mini .timer { width: 58px !important; height: 58px !important; }
   html.wm .wm-mini .read { display: none; }
   html.wm .wm-lab { display:block; text-align:center; text-decoration:none; margin-top: 10px; }

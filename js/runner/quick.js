@@ -18,6 +18,7 @@ import { DEMOS } from './demo.js';
 import { activeUserId } from '../users.js';
 import { applyWorkTheme } from './theme.js';
 import { loadPrefs, openPrefs, pref } from './prefs.js';
+import { installHold } from './hold.js';
 import { ringHTML, ringBaseCss, ringDesign } from './ring.js';
 
 /* ?demo adds the Work Mode preview: a sample of every program format */
@@ -117,7 +118,7 @@ const setVal = (k, v) => { if (cfg.fmt === 'tabata' && k === 'rounds') { cfg.tbT
 
 export async function renderQuick(el, opts = {}) {
   host = el; onStart = opts.onStart; guest = !!opts.guest;
-  injectStyle(); applyWorkTheme(); loadPrefs();
+  injectStyle(); applyWorkTheme(); loadPrefs(); installHold();
   /* The address itself names the person, so "Add to Home Screen" from here
      gives a timer icon that opens as THEM (an installed iPhone app cannot
      see Safari's storage). */
@@ -196,7 +197,7 @@ const namedMoves = () => (FORMATS.find(f => f.id === cfg.fmt)?.moves ? MV() : []
   .filter(m => String(m.name || '').trim())
   .map(m => {
     const ex = m.exId && EXERCISES[m.exId];
-    const n = Number(m.reps) > 0 ? Number(m.reps) : null;
+    const n = Number(m.reps) > 0 && cfg.fmt !== 'tabata' && cfg.fmt !== 'timer' ? Number(m.reps) : null;   // time-based types carry no rep target
     return ex
       ? { exId: m.exId, name: ex.name, measure: ex.measure || 'reps', load: ex.load, laterality: ex.laterality, cue: ex.cues, reps: n, ...(ex.measure === 'hold' && n ? { hold: n } : {}), ...(Number(m.wt) > 0 ? { weight: Number(m.wt), wUnit: wUnit() } : {}), noPR: true }
       : { name: String(m.name).trim(), measure: 'reps', reps: n, ...(Number(m.wt) > 0 ? { weight: Number(m.wt), wUnit: wUnit() } : {}), noPR: true };
@@ -495,7 +496,7 @@ function moveCard(m, i) {
     const step = ldStep(m);
     right.push(line(`data-lm="${i}" data-lf="ldStart"`, `${ldStart(m)}${sec ? '<small>s</small>' : ''}`, 'start'));
     right.push(line(`data-lm="${i}" data-lf="ldStep"`, `${step > 0 ? '+' : ''}${step}`, db ? 'add' : 'per rung'));
-  } else {
+  } else if (cfg.fmt !== 'tabata' && cfg.fmt !== 'timer') {   // time-based: no rep target, you log reps in the workout
     right.push(line(`data-mr="${i}"`, `<input data-mv="${i}" data-k="reps" type="number" inputmode="numeric" placeholder="–" value="${esc(m.reps)}" onfocus="this.select()"/>${sec ? '<small>s</small>' : ''}`));
   }
   /* the weight sits under the reps: always for a loaded move, on request

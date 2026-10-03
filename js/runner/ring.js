@@ -167,7 +167,10 @@ export function ringHTML(phase, d = ringDesign(), uid = '') {
   const face = d.face === 'disc'
     ? `<circle cx="${C}" cy="${C}" r="${f1(RING_R - a.width / 2 - 2)}" fill="url(#${id('rf')})"/>`
     : d.face === 'glow' ? `<circle cx="${C}" cy="${C}" r="${f1(RING_R - a.width / 2 - 2)}" fill="url(#${id('rgw')})"/>` : '';
-  const vars = `--ring-work:${colour(d.colors.work)};--ring-rest:${colour(d.colors.rest)};--ring-ready:${colour(d.colors.ready)};--ring-grad:${colour(d.colors.grad)};`;
+  /* ONE RULE FOR EVERY DESIGN: work is your main colour, rest your second
+     colour, get ready blue. (Designs used to pick their own, so the same
+     choice in settings lit different rings on different designs.) */
+  const vars = `--ring-work:${colour('accent')};--ring-rest:${colour('neon')};--ring-ready:${colour(d.colors.ready)};--ring-grad:${colour(d.colors.grad)};`;
   const digitCol = dg.color === 'phase' ? rc : colour(dg.color);
   const digitStyle = `color:${digitCol};font-family:${FONTS[dg.font] || FONTS.mono};font-weight:${dg.weight};`
     + `font-size:calc(min(19vw, 76px) * ${dg.size});`

@@ -11,6 +11,7 @@ import { store } from '../store.js';
 import { EXERCISES } from '../data/exercises.js';
 import { alternatives } from '../core/resolve.js';
 import { applyWorkTheme, clearWorkTheme } from './theme.js';
+import { installHold } from './hold.js';
 import { ringHTML, ringBaseCss, RING_R, snapToSegments } from './ring.js';
 import { loadPrefs, pref, openPrefs } from './prefs.js';
 import { say, beep, buzz, fmt, initAudio, stopAudio, keepAwake, releaseAwake, setMuted } from '../timer.js';
@@ -573,6 +574,7 @@ function openDemo(item) {
 function shell(inner, { progress = true } = {}) {
   stopCadence();
   document.documentElement.classList.add('wm');   // Work Mode's look, whatever path drew this screen
+  installHold();
   const b = block();
   const pct = overallPct();
   host.innerHTML = `
@@ -1329,15 +1331,18 @@ function renderInterval() {
      { start, step } still reads. */
   const lad = b.ladder;
   const ivMoves = iv => all ? b.items.map((_, i) => i) : [iv % per];
+  /* TABATA / INTERVAL TIMER ARE TIME ON, TIME OFF: no rep target. The reps
+     start at 0 and are what you log (− + during the rest). */
+  const timeBased = b.format === 'tabata';
   const planned = (iv, i) => { const it = b.items[i] || {};
-    return lad ? (it.dbStart != null ? +it.dbStart : lad.start) + iv * (it.dbStep != null ? +it.dbStep : lad.step) : Number(it.reps) || 0; };
+    return timeBased ? 0 : lad ? (it.dbStart != null ? +it.dbStart : lad.start) + iv * (it.dbStep != null ? +it.dbStep : lad.step) : Number(it.reps) || 0; };
   const moves = ivMoves(S.iv);
   if (lad && !all) item.reps = planned(S.iv, moves[0]);
   /* THE REPS YOU ACTUALLY DID this interval, one per move on it: start at
      the plan, fixed with − + (8 instead of 10), kept when the interval ends
      whether or not anything was tapped */
   if (S.ivCurAt !== S.iv) { S.ivCur = moves.map(i => planned(S.iv, i)); S.ivCurAt = S.iv; R.save(S); }
-  const hasReps = lad || b.items.some(it => Number(it.reps) > 0);
+  const hasReps = lad || b.items.some(it => Number(it.reps) > 0) || (timeBased && b.items.some(it => it.exId || (it.name && !['Work', 'Time', 'Reps'].includes(it.name))));
   /* EMOM and Death By are "do the reps, then rest out the minute": Done
      clocks how long the reps took. Tabata / Timer are time on, time off. */
   const doneable = phaseWork && (b.format === 'emom' || lad) && hasReps;
@@ -1358,13 +1363,20 @@ function renderInterval() {
   const times = S.ivLog.filter(L => L && L.t != null).map(L => L.t);
   const doneCount = Math.min(S.iv + (logged ? 1 : 0), totalIv);
 
-  const moveLines = phaseWork ? moves.map((i, j) => { const it = b.items[i];
+  /* time-based: in the rest after it, the move you just did stays up so you
+     can put in your reps */
+  const moveLines = phaseWork || (timeBased && hasReps) ? moves.map((i, j) => { const it = b.items[i];
     return mvRow(it, hasReps ? { val: S.ivCur[j], unit: mvUnit(it), step: `data-ivr="${j}"` } : {}); }).join('') : '';
   const nextItem = !all && S.iv + 1 < totalIv ? b.items[(S.iv + 1) % per] : null;
   /* only the numbers that say something: no "total reps" on a bare clock */
   const stats = [`<div><small>Rounds</small><b class="wm-pop">${doneCount}${lad ? '' : `<i>/${totalIv}</i>`}</b></div>`,
     times.length ? `<div><small>Last</small><b>${fmt(times.at(-1))}</b></div>` : '',
     hasReps ? `<div><small>Total reps</small><b class="wm-pop">${doneReps.reduce((a, x) => a + x, 0)}</b></div>` : ''].filter(Boolean);
+  /* EVERY ROUND, LOGGED, like AMRAP's: newest first, its move(s) and reps,
+     its time when clocked; tap one to fix it */
+  const short = n => String(n || '').replace(/\s*\(.*?\)/g, '');
+  const roundLog = hasReps ? `<div class="am-log">${S.ivLog.map((L, k) => ({ L, k })).filter(({ L, k }) => L && k <= S.iv).reverse().map(({ L, k }) =>
+    `<button class="am-r" data-ivl="${k}"><span>Round ${k + 1}</span><b>${L.t != null ? fmt(L.t) : ''}</b><small>${L.m.map((i, j) => `${per > 1 ? short(b.items[i]?.name) + ' ' : ''}${L.reps[j] ?? 0}`).join(' · ')}</small></button>`).join('')}</div>` : '';
   /* the move you are on lights up in the list (in a rest, the one coming) */
   const onNow = phaseWork ? moves : nextItem ? [b.items.indexOf(nextItem)] : [];
   const restLine = !phaseWork ? `<div class="mvr rest"><span class="mvr-sp"></span><span class="mvr-n">Rest${nextItem ? ` <small>· next: ${nextItem.name}</small>` : ''}</span></div>` : '';
@@ -1375,6 +1387,7 @@ function renderInterval() {
     <div class="timer-wrap iv-ring">${timerSvg(phaseWork ? 'buffer' : 'rest')}</div>
     <div class="ld-stats" style="grid-template-columns: repeat(${stats.length}, 1fr)">${stats.join('')}</div>
     ${hasReps && per > 1 ? `<div class="ld-reps">${b.items.map((it, i) => `<div class="${onNow.includes(i) ? 'now' : ''}"><span>${it.name}</span><b>${doneReps[i]}</b>${planTot[i] ? `<small>/ ${planTot[i]}</small>` : ''}<i style="width:${planTot[i] ? Math.min(100, 100 * doneReps[i] / planTot[i]).toFixed(1) : 0}%"></i></div>`).join('')}</div>` : ''}
+    ${roundLog}
     <div class="actionbar"><div class="btn-row am-bar">${lad ? '<button class="btn ghost iv-out" id="dbOut">Can\'t finish</button>' : '<button class="btn ghost" id="skip">Skip ▸</button>'}
       ${doneable ? `<button class="btn lg ${logged?.t != null ? 'secondary' : ''}" id="ivDone">${logged?.t != null ? `Done in ${fmt(logged.t)} ✓` : 'Done ✓'}</button>` : ''}</div></div>`);
   const dur = phaseWork ? work : rest;
@@ -1385,14 +1398,15 @@ function renderInterval() {
     const step = pr || 1, nR = Math.round(totalIv / step);
     const pre = nR >= 2 && S.iv === totalIv - step ? 'Last round. '
       : nR >= 6 && S.iv === Math.floor(nR / 2) * step ? 'Halfway. ' : '';
-    say(pre + (lad ? (all ? `Round ${S.iv + 1}.` : `${item.reps}.`) : all ? '' : `${item.reps ? item.reps + ' ' : ''}${item.name}`));
+    say(pre + (lad ? (all ? `Round ${S.iv + 1}.` : `${item.reps}.`) : all ? '' : `${item.reps && !timeBased ? item.reps + ' ' : ''}${item.name}`));
   }
   host.querySelectorAll('[data-ivr]').forEach(btn => btn.addEventListener('click', () => {
     const j = +btn.dataset.ivr; S.ivCur[j] = nudge(b.items[moves[j]], S.ivCur[j], Number(btn.dataset.d));
-    if (S.ivLog[S.iv]) S.ivLog[S.iv].reps = [...S.ivCur];
+    if (S.ivLog[S.iv]) { S.ivLog[S.iv].reps = [...S.ivCur]; R.save(S); buzz(10); return renderInterval(); }   // already logged: the log and totals move with it
     R.save(S); btn.parentElement.querySelector('b').innerHTML = `${S.ivCur[j]}${mvUnit(b.items[moves[j]] || {}) ? '<small>s</small>' : ''}`; buzz(10);
   }));
   host.querySelectorAll('[data-ivb]').forEach(r => r.addEventListener('click', () => { const k = +r.dataset.ivb; if (S.ivLog[k] && k < S.iv) editIvRound(k, renderInterval); }));
+  host.querySelectorAll('[data-ivl]').forEach(r => r.addEventListener('click', () => { const k = +r.dataset.ivl; if (S.ivLog[k]) editIvRound(k, renderInterval); }));
   document.getElementById('ivDone')?.addEventListener('click', e => {
     if (S.ivLog[S.iv]?.t != null) return;
     const used = Math.max(1, Math.round((S.stepDur || dur) - (R.stepRemaining(S) ?? 0)));

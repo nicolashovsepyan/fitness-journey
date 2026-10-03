@@ -1,6 +1,7 @@
 {
-  "version": "2026-10-03.17",
+  "version": "2026-10-03.18",
   "notes": [
+    "Hold − or + to go fast, Tabata logs your reps and every round, and colors are simpler: a main color, a second color, and a preview",
     "Weights sit right under the reps, and tapping lb switches everything to kg (and back)",
     "Setting up moves uses the same slim rows as the workout, any move can carry a weight (+lb), and the move you're on glows with white text",
     "Timer types are listed simplest first: Stopwatch, Interval timer, Tabata, EMOM, AMRAP, For time, Ladder, Death By, Push-up test",
