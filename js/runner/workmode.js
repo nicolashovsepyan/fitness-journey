@@ -1428,7 +1428,9 @@ function lapRows() {
      · this rung's time, the total, and reps done of each move
      · one big target: the rung card AND the button both mean "rung done" */
 function renderLadder() {
-  const b = block(); const rungs = b.rungs, n = rungs.length;
+  const b = block();
+  /* a rung of nothing is never a rung (older saved ladders could hold them) */
+  const rungs = b.rungs.filter(r => (Array.isArray(r) ? r : [r]).some(x => Number(x) > 0)), n = rungs.length;
   const cap = (Number(b.minutes) || 0) * 60, dur = cap || NO_CAP;
   const k = Math.min((S.laps || []).length, n - 1);
   const val = (r, i) => Array.isArray(r) ? r[i] : r;

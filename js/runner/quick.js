@@ -216,15 +216,31 @@ const LD_PRESETS = [
   { id: 'wave',   name: 'Wave 1-10-2-9', n: 10, shape: 'wave',   m: [[1, 1]] },
   { id: '21159',  name: '21-15-9',       n: 3,  shape: 'one',    m: [[21, -6]] },
 ];
-const ldStart = m => Number.isFinite(+m.ldStart) && m.ldStart !== '' ? +m.ldStart : 1;
+const ldStart = m => Number.isFinite(+m.ldStart) && m.ldStart !== '' ? Math.max(1, +m.ldStart) : 1;   // never a 0-rep start, even from an old save
 const ldStep = m => Number.isFinite(+m.ldStep) && m.ldStep !== '' ? +m.ldStep : 1;
 /* the ladder's moves: the named ones, or the first row as plain "Reps" */
 function ladderMoves() {
   const rows = MV().filter(m => String(m.name || '').trim());
   return rows.length ? rows : [MV()[0]];
 }
+/* NO RUNG EVER HITS 0. A dropping move can only go as far as 1, so the
+   ladder stops there: 20 down by 2 is 10 rungs (20 … 2), whatever the
+   rung count says. */
+function maxRungs() {
+  return ladderMoves().reduce((n, m) => {
+    const st = ldStep(m), a = ldStart(m);
+    return st < 0 ? Math.min(n, Math.max(1, Math.floor((a - 1) / -st) + 1)) : n;
+  }, 50);
+}
+const rungCount = () => Math.max(1, Math.min(cfg.ldRungs, maxRungs()));
+/* typing the top (or bottom) number: the rung count that reaches it */
+function setLadderEnd(v) {
+  const m = ladderMoves()[0], st = ldStep(m);
+  cfg.ldRungs = st ? Math.floor((v - ldStart(m)) / st) + 1 : v;
+  cfg.ldRungs = Math.max(1, Math.min(cfg.ldRungs, maxRungs()));
+}
 function rungOrder() {
-  const n = Math.max(1, cfg.ldRungs), idx = [...Array(n).keys()];
+  const n = rungCount(), idx = [...Array(n).keys()];
   if (cfg.ldShape === 'mirror') return [...idx, ...idx.slice(0, -1).reverse()];
   if (cfg.ldShape === 'wave') { const o = []; for (let a = 0, b = n - 1; a <= b; a++, b--) { o.push(a); if (a !== b) o.push(b); } return o; }
   return idx;
@@ -235,8 +251,7 @@ function rungs() { const ms = ladderMoves(); return rungOrder().map(i => ms.map(
 function ladderPreview(m) {
   const seq = rungOrder().map(i => repsAt(m, i)); const total = seq.reduce((a, b) => a + b, 0);
   const shown = seq.length > 10 ? `${seq.slice(0, 5).join(', ')} … ${seq.slice(-2).join(', ')}` : seq.join(', ');
-  const zero = seq.indexOf(0);
-  return `${shown} · ${total} total${zero >= 0 ? ` · hits 0 at rung ${zero + 1}` : ''}`;
+  return `${shown} · ${total} total`;
 }
 /* Death By: the first rounds, so the climb is obvious */
 function deathPreview(m) {
@@ -419,7 +434,7 @@ function rowShell(k, label, face, foot, minus, plus, extra = '') {
    It follows the first move; the rest keep their own start and change.
    + and − always move the shown number up or down. */
 function ladderEndRow() {
-  const m = ladderMoves()[0], st = ldStep(m), n = Math.max(1, cfg.ldRungs);
+  const m = ladderMoves()[0], st = ldStep(m), n = rungCount();
   const label = st > 0 ? 'Up to' : st < 0 ? 'Down to' : 'Rungs';
   const v = st ? repsAt(m, n - 1) : n;
   const foot = st ? `${n} rung${n === 1 ? '' : 's'}${cfg.ldShape === 'mirror' ? ' · and back' : ''}` : '';
@@ -848,7 +863,7 @@ function wire() {
   host.querySelectorAll('[data-pace]').forEach(b => b.addEventListener('click', () => { cfg.pace = +b.dataset.pace; persist(); draw(); }));
   host.querySelectorAll('[data-ldend-d]').forEach(b => b.addEventListener('click', () => {
     const st = ldStep(ladderMoves()[0]), d = +b.dataset.ldendD;
-    cfg.ldRungs = Math.min(50, Math.max(1, cfg.ldRungs + (st < 0 ? -d : d)));   // the shown number moves the way the button says
+    cfg.ldRungs = Math.min(maxRungs(), Math.max(1, rungCount() + (st < 0 ? -d : d)));   // the shown number moves the way the button says
     persist(); draw();
   }));
   host.querySelector('[data-ldend]')?.addEventListener('change', e => { setLadderEnd(+e.target.value || 0); persist(); draw(); });
@@ -859,7 +874,7 @@ function wire() {
   }));
   host.querySelectorAll('[data-lm]').forEach(b => b.addEventListener('click', () => {
     const m = MV()[+b.dataset.lm], f = b.dataset.lf, d = +b.dataset.d;
-    if (f === 'ldStart') m.ldStart = Math.min(500, Math.max(0, ldStart(m) + d));
+    if (f === 'ldStart') m.ldStart = Math.min(500, Math.max(1, ldStart(m) + d));
     else m.ldStep = Math.min(50, Math.max(cfg.fmt === 'deathby' ? 0 : -50, ldStep(m) + d));
     persist(); draw();
   }));
