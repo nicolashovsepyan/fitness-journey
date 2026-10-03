@@ -822,13 +822,34 @@ function passes(e) {
   if (f.eq && !(EQUIP_TEST[f.eq] ? EQUIP_TEST[f.eq](e) : e.eq.includes(f.eq))) return false;
   return true;
 }
+/* THE MOVE LIST'S TOP, before anything is typed: your favourites (★ on any
+   row), what you picked lately, moves like those, then the fundamentals
+   everyone knows. Everything else sits under "All moves". Kept per device. */
+const FUNDAMENTALS = ['pushup', 'pullup', 'bodyweight_squat', 'burpee', 'forearm_plank', 'dip', 'chin_up', 'mountain_climber',
+  'jump_squat', 'glute_bridge', 'sit_up', 'ring_row', 'hollow_hold', 'dead_hang', 'wall_sit', 'kb_swing', 'goblet_squat',
+  'deadlift', 'back_squat', 'bench_press', 'overhead_press', 'bent_over_row', 'farmers_carry'];
+const lsList = k => { try { const v = JSON.parse(localStorage.getItem(k) || '[]'); return Array.isArray(v) ? v.filter(id => EXERCISES[id]) : []; } catch (e) { return []; } };
+const lsSave = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+const favMoves = () => lsList('fj.favMoves');
+const recentMoves = () => lsList('fj.recentMoves');
+function rememberPick(id) { if (id && EXERCISES[id]) lsSave('fj.recentMoves', [id, ...recentMoves().filter(x => x !== id)].slice(0, 8)); }
+function toggleFav(id) { const f = favMoves(); lsSave('fj.favMoves', f.includes(id) ? f.filter(x => x !== id) : [id, ...f]); }
+/* like what you picked lately: same movement pattern or main muscles */
+function suggestedMoves(skip) {
+  const rec = recentMoves().map(id => LIB().find(e => e.id === id)).filter(Boolean);
+  if (!rec.length) return [];
+  const pats = new Set(rec.flatMap(e => e.pat)), mus = new Set(rec.flatMap(e => e.mus));
+  return LIB().filter(e => !skip.has(e.id))
+    .map(e => ({ e, sc: e.pat.filter(x => pats.has(x)).length * 2 + e.mus.filter(x => mus.has(x)).length }))
+    .filter(x => x.sc > 0).sort((a, b) => b.sc - a.sc || a.e.name.localeCompare(b.e.name)).slice(0, 6).map(x => x.e);
+}
 async function openMovePicker(i) {
   const { ov, close } = sheet(`<div class="qt-sheet-h">Pick a move</div>
-    <input class="qt-search" id="mvQ" placeholder="Search by name, or tap the filters" autocomplete="off" value="${esc(MV()[i]?.name || '')}"/>
+    <input class="qt-search" id="mvQ" placeholder="${MV()[i]?.name ? `${esc(MV()[i].name)} · search to change` : 'Search by name, or tap the filters'}" autocomplete="off" value=""/>
     <div class="qt-filters" id="mvF"></div>
     <div class="qt-results" id="mvR"></div>`, 'tall');
   const q = ov.querySelector('#mvQ'), out = ov.querySelector('#mvR');
-  const pick = m => { MV()[i] = { ...MV()[i], ...m }; persist(); close(); draw(); };
+  const pick = m => { rememberPick(m.exId); MV()[i] = { ...MV()[i], ...m }; persist(); close(); draw(); };
   const chipRow = (opts, key) => `<div class="qt-frow">${opts.map(([v, l]) => `<button class="${moveFilter[key] === v ? 'on' : ''}" data-f="${key}" data-v="${v}">${l}</button>`).join('')}</div>`;
   const filters = () => {
     ov.querySelector('#mvF').innerHTML = chipRow(PARTS, 'part') + chipRow(LEVELS, 'lvl') + chipRow(EQUIP, 'eq');
@@ -838,12 +859,29 @@ async function openMovePicker(i) {
     const t = norm(q.value);
     const all = search(t).filter(passes);
     const filtered = moveFilter.part !== 'all' || moveFilter.lvl || moveFilter.eq;
-    const hits = all.slice(0, 80);
     const exact = t && LIB().some(e => e.n === t);
-    out.innerHTML = (t && !exact ? `<button class="qt-res own" data-own="1"><b>Use "${esc(q.value.trim())}"</b><small>your own move, not from the library</small></button>` : '')
-      + (t || filtered ? `<div class="qt-count">${all.length} move${all.length === 1 ? '' : 's'}</div>` : '')
-      + hits.map(e => { const img = exerciseImage(e.id);
-        return `<button class="qt-res pic" data-ex="${e.id}"><span class="qt-th">${img ? `<img src="${img}" alt="" loading="lazy" decoding="async"/>` : esc(e.name[0])}</span><span class="qt-rt"><b>${esc(e.name)}</b><small>${esc(e.tag)}</small></span></button>`; }).join('');
+    const favs = new Set(favMoves());
+    const row = e => { const img = exerciseImage(e.id);
+      return `<button class="qt-res pic" data-ex="${e.id}"><span class="qt-th">${img ? `<img src="${img}" alt="" loading="lazy" decoding="async"/>` : esc(e.name[0])}</span><span class="qt-rt"><b>${esc(e.name)}</b><small>${esc(e.tag)}</small></span><span class="qt-star ${favs.has(e.id) ? 'on' : ''}" data-fav="${e.id}" role="button" aria-label="Favourite">${favs.has(e.id) ? '★' : '☆'}</span></button>`; };
+    const head = (title, n) => `<div class="qt-count qt-grp">${title}${n != null ? ` <span>${n}</span>` : ''}</div>`;
+    let html = '';
+    if (t) {
+      html = (!exact ? `<button class="qt-res own" data-own="1"><b>Use "${esc(q.value.trim())}"</b><small>your own move, not from the library</small></button>` : '')
+        + head(`${all.length} move${all.length === 1 ? '' : 's'}`) + all.slice(0, 120).map(row).join('');
+    } else {
+      /* nothing typed: the groups first, then the rest, each move once */
+      const byId = new Map(all.map(e => [e.id, e])), shown = new Set();
+      const grp = ids => ids.map(id => byId.get(id)).filter(e => e && !shown.has(e.id) && shown.add(e.id));
+      const fav = grp([...favs]), rec = grp(recentMoves()), sug = grp(suggestedMoves(new Set([...favs, ...recentMoves()])).map(e => e.id)), fun = grp(FUNDAMENTALS);
+      const rest = all.filter(e => !shown.has(e.id));
+      html = (fav.length ? head('★ Favorites') + fav.map(row).join('') : '')
+        + (rec.length ? head('Recent') + rec.map(row).join('') : '')
+        + (sug.length ? head('Suggested for you') + sug.map(row).join('') : '')
+        + (fun.length ? head('Fundamentals') + fun.map(row).join('') : '')
+        + head(filtered ? 'More moves' : 'All moves', rest.length) + rest.map(row).join('');
+    }
+    out.innerHTML = html;
+    out.querySelectorAll('[data-fav]').forEach(st => st.addEventListener('click', e => { e.stopPropagation(); toggleFav(st.dataset.fav); const top = out.scrollTop; list(); out.scrollTop = top; }));
     out.querySelectorAll('[data-ex]').forEach(b => b.addEventListener('click', () => pick({ exId: b.dataset.ex, name: EXERCISES[b.dataset.ex].name })));
     out.querySelector('[data-own]')?.addEventListener('click', () => pick({ exId: null, name: q.value.trim() }));
   };
@@ -1047,6 +1085,11 @@ function injectStyle() {
   .qt-res b { font-size: 16px; font-weight: 600; } .qt-res small { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
   .qt-res.own b { color: var(--wm-accent); }
   .qt-res.pic { flex-direction:row; align-items:center; gap: 12px; }
+  .qt-rt { flex: 1; }
+  .qt-star { flex: 0 0 auto; width: 40px; height: 40px; display:grid; place-items:center; font-size: 22px; color: var(--faint); cursor:pointer; }
+  .qt-star.on { color: var(--wm-neon); text-shadow: 0 0 10px var(--wm-neon); }
+  .qt-grp { margin-top: 14px; color: var(--wm-accent); font-weight: 800; text-transform: uppercase; letter-spacing: .1em; font-size: 11px; }
+  .qt-grp span { color: var(--faint); font-weight: 600; margin-left: 4px; }
   .qt-rt { display:flex; flex-direction:column; min-width:0; }
   .qt-th { flex: 0 0 64px; width:64px; height:64px; border-radius: 12px; overflow:hidden; background: #eef1f5; display:grid; place-items:center; font-weight:800; font-size:20px; color: var(--wm-accent); }
   .qt-th:not(:has(img)) { background: color-mix(in srgb, var(--wm-accent) 14%, transparent); }
