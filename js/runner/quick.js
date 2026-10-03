@@ -81,12 +81,12 @@ const isTime = k => FIELDS[k][1] === 'time';
 const MAIN = {
   emom: ['mins'], amrap: ['cap'], fortime: ['ftRounds', 'ftCap'], tabata: ['rounds'],
   timer: ['work', 'rest', 'rounds'], stopwatch: [], pushup: ['pace'],
-  deathby: [], ladder: ['ldRungs'],
+  deathby: ['dbEvery', 'dbMax'], ladder: ['ldRungs', 'ldCap'],
 };
 const MORE = {
   emom: ['every'], amrap: [], fortime: [], tabata: ['work', 'rest'],
   timer: ['sets', 'setRest'], stopwatch: [], pushup: ['ptCap'],
-  deathby: ['dbEvery', 'dbMax'], ladder: ['ldCap'],
+  deathby: [], ladder: [],
 };
 const DEFAULTS = {
   fmt: 'emom', every: 60, mins: 12, cap: 10, ftCap: 0, ftRounds: 1,
@@ -545,8 +545,8 @@ function draw() {
     ${lad || db ? `${sec('Moves')}${movesCard()}` : ''}
     ${!settings.length && !lad && !db ? `<div class="qt-empty">Nothing to set. Hit start.</div>` : ''}
 
-    <button class="qt-more ${moreOpen ? 'open' : ''}" id="qtMore"><span>Customize</span><i>›</i>${!moreOpen && named && !lad && !db ? `<em>${named} move${named > 1 ? 's' : ''}</em>` : ''}</button>
-    ${moreOpen ? `<div class="qt-details">
+    ${custom.length || (def.moves && !lad && !db) ? `<button class="qt-more ${moreOpen ? 'open' : ''}" id="qtMore"><span>${custom.length ? 'Customize' : 'Pick your exercises'}</span><i>›</i>${!moreOpen && named && !lad && !db ? `<em>${named} move${named > 1 ? 's' : ''}</em>` : ''}</button>` : ''}
+    ${moreOpen && (custom.length || (def.moves && !lad && !db)) ? `<div class="qt-details">
       <div class="qt-rows">${custom.join('')}</div>
       ${def.moves && !lad && !db ? `${sec('Moves', '<small>optional</small>')}${movesCard()}` : ''}
       ${cfg.fmt === 'tabata' && (cfg.work !== TABATA.work || cfg.rest !== TABATA.rest) ? '<button class="qt-link" id="qtClassic">Back to classic 20s / 10s</button>' : ''}
@@ -905,7 +905,7 @@ function wire() {
   $('#qtSignIn')?.addEventListener('click', () => { try { localStorage.removeItem('fj.launchTimer'); } catch (e) {} location.href = 'index.html'; });
   $('#qtType').addEventListener('click', openTypes);
   $('#qtPrefs').addEventListener('click', () => openPrefs(host));
-  $('#qtMore').addEventListener('click', () => { moreOpen = !moreOpen; draw(); });
+  $('#qtMore')?.addEventListener('click', () => { moreOpen = !moreOpen; draw(); });
   host.querySelectorAll('[data-q]').forEach(b => b.addEventListener('click', () => { bump(b.dataset.q, Number(b.dataset.d)); persist(); draw(); }));
   host.querySelectorAll('[data-qt]').forEach(b => b.addEventListener('click', () => openTime(b.dataset.qt)));
   host.querySelectorAll('[data-qf]').forEach(inp => {

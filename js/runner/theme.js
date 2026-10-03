@@ -302,6 +302,8 @@ function injectStyle() {
   html.wm .ld-mv { display:flex; flex-direction:column; align-items:center; }
   html.wm .ld-mv b { font-family: var(--tnum); font-size: min(20vw, 84px); line-height: 1; color: var(--wm-neon); text-shadow: 0 0 22px var(--wm-neon-soft); display:inline-block; }
   html.wm .ld-mv span { font-size: 15px; font-weight: 700; margin-top: 4px; }
+  /* two moves side by side: a thin line between them, so 5 and 12 read as two numbers */
+  html.wm .ld-mv + .ld-mv { border-left: 1px solid var(--wm-neon-line); padding-left: 22px; }
   html.wm .ld-next { color: var(--muted); font-size: 13.5px; margin-top: 10px; }
   html.wm .ld-stats { display:grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; }
   html.wm .ld-stats div { background: var(--box); border-radius: 14px; padding: 9px 6px; text-align:center; }
