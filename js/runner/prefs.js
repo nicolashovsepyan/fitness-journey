@@ -10,7 +10,7 @@ import { checkForUpdate, runningVersion } from '../update-banner.js';
 import { PRESETS, designFor, ringChoice, chooseRing, ringHTML, ringBaseCss, setRingProgress } from './ring.js';
 
 const KEY = 'workModePrefs';
-const DEFAULTS = { voice: true, beeps: true, flash: true };
+const DEFAULTS = { voice: true, beeps: true, flash: true, ready: 8 };
 let prefs = { ...DEFAULTS };
 let loaded = false;
 
@@ -114,6 +114,8 @@ export function openPrefs(host) {
   const draw = () => {
     ov.innerHTML = `<div class="wm-sheet-card">
       <div class="wm-sheet-h">Timer settings</div>
+      <div class="wm-vrow wm-readyrow"><div class="wm-vl"><b>Get-ready countdown</b><small>Seconds to get in position before every timer starts</small></div>
+        <div class="wm-rstep"><button data-rd="-1" aria-label="Less">−</button><b>${prefs.ready}s</b><button data-rd="1" aria-label="More">+</button></div></div>
       ${ROWS.map(([k, name, sub]) => `<button class="wm-pref" data-pref="${k}">
         <span><b>${name}</b><small>${sub}</small></span><i class="wm-sw ${prefs[k] ? 'on' : ''}"></i></button>`).join('')}
       ${vibeHtml()}
@@ -129,6 +131,7 @@ export function openPrefs(host) {
       draw();
     }));
     ov.querySelector('#wmPrefDone').addEventListener('click', close);
+    ov.querySelectorAll('[data-rd]').forEach(b => b.addEventListener('click', () => { set('ready', Math.max(0, Math.min(30, (prefs.ready ?? 8) + Number(b.dataset.rd)))); draw(); }));
     runningVersion().then(v => { const el = ov.querySelector('#wmVer'); if (el) el.textContent = v || 'unknown'; });
     ov.querySelector('#wmCheck').addEventListener('click', async e => {
       e.currentTarget.textContent = 'Checking…';

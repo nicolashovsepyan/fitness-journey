@@ -245,7 +245,15 @@ export function resumeWorkout(callbacks = {}) {
   if (S.pausedAt) showPaused();
   return true;
 }
-function quit() { delete document.documentElement.dataset.phase; stopCadence(); stopTicker(); releaseAwake(); stopAudio(); R.clear(); clearWorkTheme(); cb.onExit?.(); }
+/* LEAVING MUST LAND ON DISK FIRST. The run is cleared through a queued
+   writer; leaving the page straight after could beat it, and a discarded
+   workout came back on the next open. Wait for the write, then leave. */
+async function quit() {
+  delete document.documentElement.dataset.phase; stopCadence(); stopTicker(); releaseAwake(); stopAudio();
+  R.clear();
+  try { await R.flushRunState(); } catch (e) {}
+  clearWorkTheme(); cb.onExit?.();
+}
 
 const block = () => S.plan.blocks[S.bi];
 const isLastBlock = () => S.bi >= S.plan.blocks.length - 1;
@@ -338,7 +346,7 @@ function enterBlock(i, opts = {}) {
      already typed this round. Only a fresh block wipes them. */
   if (!resuming) {
     S.ii = 0; S.si = 0; S.ci = 0; S.round = 1; S.sub = 'work'; S.amrapRounds = 0; S.amrapReps = null;
-    S.iv = null; S.ivPhase = 'work'; S.blockStart = Date.now(); S.roundBuf = {}; S.laps = []; S.amrapSplits = [];
+    S.iv = null; S.ivPhase = 'work'; S.blockStart = Date.now(); S.roundBuf = {}; S.laps = []; S.amrapSplits = []; S.amrapLog = []; S.amrapCur = null;
     R.clearStep(S);
   }
   roundBuf = S.roundBuf || (S.roundBuf = {});
@@ -533,6 +541,7 @@ function openDemo(item) {
 /* ---------------- shells ---------------- */
 function shell(inner, { progress = true } = {}) {
   stopCadence();
+  document.documentElement.classList.add('wm');   // Work Mode's look, whatever path drew this screen
   const b = block();
   const pct = overallPct();
   host.innerHTML = `
@@ -673,7 +682,7 @@ function updateTimer(rem, total) {
   if (countUpDisplay) {
     shown = total - rem;
     const ft = document.getElementById('ftTotal');
-    if (ft) ft.textContent = `Total ${fmt(shown)}`;
+    if (ft) ft.textContent = fmt(shown);
     const last = (S.laps || []).at(-1);
     if (last != null) shown = Math.max(0, upElapsed() - last);
     /* no cap: the ring sweeps once a minute, like a second hand */
@@ -1144,19 +1153,77 @@ function renderAmrap() {
     return;
   }
 
+  /* THE AMRAP SCREEN. The reps for this round sit beside each move with
+     − and +, so a round that came up short (8 instead of 10) is fixed right
+     there, between rounds. "Round done" records the round, its time and its
+     reps, celebrates, and keeps today's numbers for the next round. Every
+     round is listed, clocked; tap one to fix it. */
   if (!S.amrapRounds) S.amrapRounds = 0;
-  const list = b.items.map(it => `<div class="ci">${rowVid(it)}<span class="nm">${it.name}</span><span class="tg">${it.measure === 'hold' ? it.hold + 's' : (it.reps ?? it.target ?? 'max') + (it.reps ? ' reps' : '')}</span></div>`).join('');
-  shell(`<div class="now-ex"><div class="label">AMRAP · ${mins} min</div><div class="name">As many rounds as possible</div></div>${exActions(b.items[0])}
-    <div class="timer-wrap">${timerSvg('buffer')}</div>
-    <div class="center" style="margin:4px 0 4px;"><span class="eyebrow">Rounds</span> <span class="big" style="font-size:40px;" id="amrapN">${S.amrapRounds}</span></div>
-    <div class="ft-total" id="amrapLast">${amrapLast()}</div>
-    ${b.hideList ? '' : `<div class="circuit-list">${list}</div>`}
-    <div class="actionbar"><div class="btn-row"><button class="btn secondary" id="rdMinus">−</button><button class="btn" id="rdPlus">+ Round</button><button class="btn ghost" id="endAmrap">End ▸</button></div></div>`);
-  /* each + records WHEN the round ended, so every round gets its own time */
-  const show = () => { document.getElementById('amrapN').textContent = S.amrapRounds; document.getElementById('amrapLast').textContent = amrapLast(); };
-  document.getElementById('rdPlus').addEventListener('click', () => { S.amrapRounds++; S.amrapSplits = [...(S.amrapSplits || []), upElapsed()]; R.save(S); show(); buzz(30); });
-  document.getElementById('rdMinus').addEventListener('click', () => { S.amrapRounds = Math.max(0, S.amrapRounds - 1); S.amrapSplits = (S.amrapSplits || []).slice(0, S.amrapRounds); R.save(S); show(); });
+  if (!Array.isArray(S.amrapCur)) S.amrapCur = b.items.map(it => Number(it.reps) || 0);
+  if (!Array.isArray(S.amrapLog)) S.amrapLog = [];
+  const showReps = !b.countRounds && b.items.some(it => it.reps);
+  const unitOf = it => UNIT[it.measure] === 'sec' ? 'sec' : 'reps';
+  const moveRows = () => b.items.map((it, i) => `<div class="am-move">${rowVid(it)}<span class="nm">${it.name}</span>
+      ${showReps ? `<span class="am-step"><button data-am="${i}" data-d="-1" aria-label="Less">−</button><b>${S.amrapCur[i]}</b><button data-am="${i}" data-d="1" aria-label="More">+</button></span><small>${unitOf(it)}</small>` : ''}</div>`).join('');
+  const logRows = () => {
+    const times = amrapTimes();
+    return S.amrapLog.map((r, k) => ({ r, k, t: times[k] })).reverse().map(({ r, k, t }) => `<button class="am-r" data-amr="${k}"><span>Round ${k + 1}</span><b>${t != null ? fmt(t) : ''}</b><small>${showReps ? r.reps.join(' · ') : ''}</small></button>`).join('');
+  };
+  shell(`<div class="now-ex"><div class="label">AMRAP · ${mins} min</div></div>
+    <div class="am-top"><div class="timer-wrap am-ring">${timerSvg('buffer')}</div>
+      <div class="am-count"><small>Rounds</small><b class="wm-pop" id="amrapN">${S.amrapRounds}</b><span id="amrapLast">${amrapLast()}</span></div></div>
+    ${b.hideList ? '' : `<div class="am-moves"><div class="am-h">Round ${S.amrapRounds + 1}${showReps ? '<small> · fix the reps with − +</small>' : ''}</div>${moveRows()}</div>`}
+    <div class="am-log" id="amLog">${logRows()}</div>
+    <div class="actionbar"><div class="btn-row am-bar"><button class="btn secondary" id="rdMinus" aria-label="Undo last round">↶</button><button class="btn lg" id="rdPlus">Round done ✓</button><button class="btn ghost" id="endAmrap">End</button></div></div>`);
+  const redraw = () => renderAmrap();
+  host.querySelectorAll('[data-am]').forEach(btn => btn.addEventListener('click', () => {
+    const i = +btn.dataset.am; S.amrapCur[i] = Math.max(0, S.amrapCur[i] + Number(btn.dataset.d)); R.save(S);
+    btn.parentElement.querySelector('b').textContent = S.amrapCur[i]; buzz(10);
+  }));
+  host.querySelectorAll('[data-amr]').forEach(btn => btn.addEventListener('click', () => editAmrapRound(+btn.dataset.amr, redraw)));
+  document.getElementById('rdPlus').addEventListener('click', e => {
+    S.amrapRounds++; S.amrapSplits = [...(S.amrapSplits || []), upElapsed()];
+    S.amrapLog.push({ reps: [...S.amrapCur] }); R.save(S);
+    celebrate(e.currentTarget, `+1`);
+    say(`Round ${S.amrapRounds}.`);
+    redraw();
+  });
+  document.getElementById('rdMinus').addEventListener('click', () => {
+    if (!S.amrapRounds) return;
+    S.amrapRounds--; S.amrapSplits = (S.amrapSplits || []).slice(0, S.amrapRounds); S.amrapLog = S.amrapLog.slice(0, S.amrapRounds); R.save(S); buzz(20); redraw();
+  });
   document.getElementById('endAmrap').addEventListener('click', finish);
+}
+/* fix a finished round's reps, mid-AMRAP, without stopping the clock */
+function editAmrapRound(k, done) {
+  const b = block(), r = S.amrapLog[k]; if (!r) return;
+  const ov = document.createElement('div'); ov.className = 'overlay';
+  const draw = () => {
+    ov.innerHTML = `<div class="overlay-card"><div class="eyebrow">Round ${k + 1}${amrapTimes()[k] != null ? ` · ${fmt(amrapTimes()[k])}` : ''}</div>
+      <h2 style="margin:6px 0 12px;">What you did</h2>
+      ${b.items.map((it, i) => `<div class="am-move"><span class="nm">${it.name}</span><span class="am-step"><button data-e="${i}" data-d="-1">−</button><b>${r.reps[i]}</b><button data-e="${i}" data-d="1">+</button></span></div>`).join('')}
+      <button class="btn" id="amEditDone" style="margin-top:14px;">Done</button></div>`;
+    ov.querySelectorAll('[data-e]').forEach(btn => btn.addEventListener('click', () => { const i = +btn.dataset.e; r.reps[i] = Math.max(0, r.reps[i] + Number(btn.dataset.d)); R.save(S); draw(); }));
+    ov.querySelector('#amEditDone').addEventListener('click', () => { ov.remove(); done(); });
+  };
+  draw(); host.appendChild(ov);
+}
+
+/* A ROUND DONE SHOULD FEEL LIKE ONE. A buzz pattern, a victory chime, a
+   burst of neon sparks out of what was tapped, a "+1" that floats up, and
+   the counter pops. Used by every "round / rung done" in Work Mode. */
+function celebrate(from, text = '+1') {
+  buzz([30, 40, 30, 40, 80]); beep('round');
+  const r = (from || document.querySelector('.actionbar .btn'))?.getBoundingClientRect?.();
+  const x = r ? r.left + r.width / 2 : innerWidth / 2, y = r ? r.top + r.height / 2 : innerHeight * 0.7;
+  const box = document.createElement('div'); box.className = 'wm-burst'; box.style.left = x + 'px'; box.style.top = y + 'px';
+  const cols = ['var(--wm-accent)', 'var(--wm-neon)', '#fff', 'var(--wm-ready)'];
+  box.innerHTML = Array.from({ length: 18 }, (_, i) => {
+    const ang = (i / 18) * Math.PI * 2 + Math.random() * 0.4, dist = 60 + Math.random() * 70;
+    return `<i style="--dx:${(Math.cos(ang) * dist).toFixed(0)}px;--dy:${(Math.sin(ang) * dist - 30).toFixed(0)}px;--c:${cols[i % cols.length]};animation-delay:${(Math.random() * 60).toFixed(0)}ms"></i>`;
+  }).join('') + `<b>${text}</b>`;
+  document.body.appendChild(box); setTimeout(() => box.remove(), 1100);
+  document.querySelectorAll('.wm-pop').forEach(el => { el.classList.remove('popping'); void el.offsetWidth; el.classList.add('popping'); });
 }
 
 /* seconds each AMRAP round took, from the + taps */
@@ -1170,7 +1237,7 @@ function renderAmrapLog() {
   onScreen('amraplog');
   const moveCells = (key, vals) => b.items.map((it, i) => `<div class="logset"><span class="sn">${it.name}</span>${cellInputs({ measure: it.measure }, `${key}_${i}`, vals[i], null, null)}</div>`).join('');
   const times = amrapTimes();
-  const rounds = Array.from({ length: n }, (_, r) => `<div class="loggroup"><div class="gname">Round ${r + 1}${times[r] != null ? ` <small class="muted">${fmt(times[r])}</small>` : ''}</div>${moveCells(`ar${r}`, b.items.map(it => it.reps ?? ''))}</div>`).join('');
+  const rounds = Array.from({ length: n }, (_, r) => `<div class="loggroup"><div class="gname">Round ${r + 1}${times[r] != null ? ` <small class="muted">${fmt(times[r])}</small>` : ''}</div>${moveCells(`ar${r}`, b.items.map((it, i) => S.amrapLog?.[r]?.reps?.[i] ?? it.reps ?? ''))}</div>`).join('');
   shell(`<div class="center"><div class="eyebrow">AMRAP done</div><h2 style="font-size:22px;margin:8px 0 4px;">${n} round${n === 1 ? '' : 's'}</h2>
       <p class="muted" style="margin:0 0 14px;">Fix any round where you dropped reps.</p></div>
     <div class="card logcard">${rounds}
@@ -1353,8 +1420,66 @@ function lapRows() {
   const rows = laps.map((t, i) => ({ n: i + 1, split: t - (laps[i - 1] || 0), total: t })).reverse();
   return `<div class="laps">${rows.map(r => `<div class="lap"><span>${word} ${r.n}</span><b>${fmt(r.split)}</b><small>${fmt(r.total)}</small></div>`).join('')}</div>`;
 }
+/* THE LADDER SCREEN. Built for someone who looks up between rungs, not
+   every second:
+     · the whole ladder drawn as bars, so the shape (up, down, pyramid) and
+       how far along you are read at a glance: done lit, this rung glowing
+     · this rung's reps big, one per move; the next rung small
+     · this rung's time, the total, and reps done of each move
+     · one big target: the rung card AND the button both mean "rung done" */
+function renderLadder() {
+  const b = block(); const rungs = b.rungs, n = rungs.length;
+  const cap = (Number(b.minutes) || 0) * 60, dur = cap || NO_CAP;
+  const k = Math.min((S.laps || []).length, n - 1);
+  const val = (r, i) => Array.isArray(r) ? r[i] : r;
+  const tot = r => b.items.reduce((a, _, i) => a + (Number(val(r, i)) || 0), 0);
+  const maxT = Math.max(1, ...rungs.map(tot));
+  const W = 320, H = 64, gap = n > 30 ? 1 : 2, bw = (W - gap * (n - 1)) / n;
+  const bars = rungs.map((r, j) => { const h = 5 + (H - 5) * tot(r) / maxT;
+    return `<rect class="${j < k ? 'done' : j === k ? 'now' : ''}" x="${(j * (bw + gap)).toFixed(1)}" y="${(H - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="${Math.min(3, bw / 3).toFixed(1)}"/>`; }).join('');
+  const named = b.items.map(it => it.name && it.name !== 'Reps' ? it.name : 'reps');
+  const done = b.items.map((_, i) => rungs.slice(0, k).reduce((a, r) => a + (Number(val(r, i)) || 0), 0));
+  const all = b.items.map((_, i) => rungs.reduce((a, r) => a + (Number(val(r, i)) || 0), 0));
+  const laps = S.laps || [], lastRung = laps.length ? laps.at(-1) - (laps.at(-2) || 0) : null;
+  const next = rungs[k + 1];
+  shell(`<div class="now-ex"><div class="label">Ladder · rung ${k + 1} of ${n}${cap ? ` · cap ${fmt(cap)}` : ''}</div></div>
+    <svg class="ld-bars" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${bars}</svg>
+    <button class="ld-card" id="ldCard" aria-label="Rung done">
+      <div class="ld-mvs">${b.items.map((it, i) => `<div class="ld-mv"><b class="wm-pop">${val(rungs[k], i)}</b><span>${named[i]}</span></div>`).join('')}</div>
+      <div class="ld-next">${next != null ? `Next: ${b.items.map((_, i) => `${val(next, i)} ${named[i]}`).join(' · ')}` : 'Last rung. Finish it!'}</div>
+    </button>
+    <div class="ld-stats">
+      <div><small>This rung</small><b id="timerText">0:00</b></div>
+      <div><small>Total</small><b id="ftTotal">0:00</b></div>
+      <div><small>Last rung</small><b>${lastRung != null ? fmt(lastRung) : '–'}</b></div>
+    </div>
+    <div class="ld-reps">${b.items.map((_, i) => `<div><span>${named[i]}</span><b>${done[i]}</b><small>/ ${all[i]}</small><i style="width:${all[i] ? (100 * done[i] / all[i]).toFixed(1) : 0}%"></i></div>`).join('')}</div>
+    <div class="actionbar"><div class="btn-row am-bar"><button class="btn ghost" id="ftDone">End</button><button class="btn lg" id="ftLap">Rung done ✓</button></div></div>`);
+  const finish = secs => {
+    R.clearStep(S); onStepDone = null;
+    const ls = (S.laps || []).map((t, i, a) => Math.round(t - (a[i - 1] || 0)));
+    (S.captured[b.id] || []).forEach(e => { e.sets = [{ value: secs }]; e.unit = 'sec'; e.rounds = true; if (ls.length) e.laps = ls; });
+    R.save(S); say(`Ladder done in ${Math.floor(secs / 60)} minutes ${secs % 60} seconds.`, 2500);
+    completeBlock();
+  };
+  if (beginStep(dur, cap ? 'work' : 'rest', 'fortime')) say(`Go. ${b.items.map((_, i) => `${val(rungs[k], i)} ${named[i]}`).join(', ')}.`);
+  onStepDone = () => finish(dur);
+  const rungDone = el => {
+    S.laps = [...(S.laps || []), upElapsed()]; R.save(S);
+    const fin = S.laps.length >= n;
+    celebrate(el, fin ? 'Done!' : `${S.laps.length}/${n}`);
+    if (fin) return finish(Math.round(upElapsed()));
+    say(`${b.items.map((_, i) => `${val(rungs[S.laps.length], i)} ${named[i]}`).join(', ')}.`);
+    renderLadder();
+  };
+  document.getElementById('ftLap').addEventListener('click', e => rungDone(e.currentTarget));
+  document.getElementById('ldCard').addEventListener('click', e => rungDone(e.currentTarget));
+  document.getElementById('ftDone').addEventListener('click', () => { if (confirm('End the ladder here?')) finish(Math.round(upElapsed())); });
+  tick();
+}
 function renderForTime() {
   const b = block();
+  if (Array.isArray(b.rungs) && b.rungs.length) return renderLadder();
   const cap = (Number(b.minutes) || 0) * 60;
   const dur = cap || NO_CAP;
   /* Stopwatch: Lap. For time with rounds: Round, a split per round. The big
@@ -1375,7 +1500,7 @@ function renderForTime() {
   shell(`<div class="now-ex"><div class="label">${rounds}${cap ? `cap ${fmt(cap)}` : b.hideList ? 'tap the ring to pause' : 'no cap'}</div>
       <div class="name">${rungs ? (one ? qty(rungReps(rungs[k], 0)) : `Rung ${k + 1}`) : b.hideList ? (b.label || 'Go') : 'For time'}</div>${rungs && rungs[k + 1] != null ? `<div class="side">next: ${rungLine(rungs[k + 1])}</div>` : ''}</div>
     <div class="timer-wrap">${timerSvg('buffer')}</div>
-    ${lapWord ? `<div class="ft-total" id="ftTotal"></div>` : ''}
+    ${lapWord ? `<div class="ft-total">Total <span id="ftTotal"></span></div>` : ''}
     <div id="lapList">${lapRows()}</div>
     ${list}
     <div class="actionbar">${lapWord ? `<div class="btn-row"><button class="btn secondary" id="ftLap">${lapWord}</button><button class="btn" id="ftDone">Done ✓</button></div>` : '<button class="btn lg" id="ftDone">Done ✓</button>'}</div>`);
@@ -1390,7 +1515,7 @@ function renderForTime() {
   onStepDone = () => finish(dur);
   document.getElementById('ftDone').addEventListener('click', () => { buzz(40); finish(dur - (R.stepRemaining(S) ?? 0)); });
   document.getElementById('ftLap')?.addEventListener('click', () => {
-    S.laps = [...(S.laps || []), upElapsed()]; R.save(S); buzz(30); beep('tick');
+    S.laps = [...(S.laps || []), upElapsed()]; R.save(S); celebrate(document.getElementById('ftLap'), b.label === 'Stopwatch' ? 'Lap' : '+1');
     if (rungs) {
       if (S.laps.length >= rungs.length) return finish(Math.round(upElapsed()));
       say(`${rungLine(rungs[S.laps.length])}.`);
@@ -1614,5 +1739,5 @@ function finishSession(opts = {}) {
     <p class="muted">${S.plan.name} · ${fmt(elapsed)}${partial ? ' · ended early' : S.plan.quick ? '' : ` · ${S.plan.duration} min plan`}</p>
     <div style="height:16px;"></div>${resultHtml}${prHtml}${effHtml}
     <div class="actionbar"><button class="btn lg" id="home">${S.plan.finishLabel || 'Back to week'}</button></div></div>`;
-  document.getElementById('home').addEventListener('click', () => { clearWorkTheme(); cb.onFinish?.(); });
+  document.getElementById('home').addEventListener('click', async () => { try { await R.flushRunState(); } catch (e) {} clearWorkTheme(); cb.onFinish?.(); });
 }

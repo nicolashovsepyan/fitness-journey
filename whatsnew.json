@@ -1,6 +1,7 @@
 {
-  "version": "2026-10-02.11",
+  "version": "2026-10-03.1",
   "notes": [
+    "Round done now celebrates (buzz, chime, sparks), AMRAP logs every round with its time and lets you fix the reps, the ladder shows your progress rung by rung, and moves filter by body part, level and equipment",
     "Ring glare works: a light streak and sparkle on the glass, with a size control in the lab",
     "Timer look: swipe through the ring designs at full size and pick your colours (Timer settings → Timer look)",
     "Timer ring: pick Chrono, LED or Laser in Timer settings",

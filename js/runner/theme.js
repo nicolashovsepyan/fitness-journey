@@ -115,6 +115,7 @@ function injectStyle() {
   html.wm .btn.lg:not(.ghost):not(.secondary) { box-shadow: var(--wm-glow-accent); }
   html.wm .timer .read .t { letter-spacing: -0.02em; }
   html.wm .run-head { border-bottom: 1px solid var(--wm-neon-soft); }
+  html.wm .run-head .blk { white-space: nowrap !important; overflow: hidden; text-overflow: ellipsis; }
   html.wm .wprog-fill { background: linear-gradient(90deg, var(--wm-neon), var(--wm-accent)); }
   html.wm .bchip.now { background: var(--wm-accent); color: #0C1512; }
   html.wm .sessclock { color: var(--wm-accent); }
@@ -207,6 +208,11 @@ function injectStyle() {
   html.wm .wm-swipe .wm-dot span { position:absolute; top: 58px; left: 50%; transform: translateX(-50%); color: var(--muted); font-size: 11px; white-space: nowrap; }
   html.wm .wm-swipe { padding-bottom: 26px; }
   html.wm .wm-look-bar { padding: 8px 16px 0; }
+  html.wm .wm-readyrow { display:flex; align-items:center; gap: 10px; border-top: none; }
+  html.wm .wm-readyrow .wm-vl { flex: 1; margin: 0; }
+  html.wm .wm-rstep { display:flex; align-items:center; background: var(--box); border: 1px solid var(--line); border-radius: 12px; }
+  html.wm .wm-rstep button { width: 42px; height: 42px; background:none; border:none; color: var(--text); font-size: 22px; cursor:pointer; }
+  html.wm .wm-rstep b { min-width: 42px; text-align:center; font-family: var(--tnum); font-size: 18px; color: var(--wm-ready); }
   html.wm .wm-seg3 { display:flex; gap: 6px; }
   html.wm .wm-seg3 button { flex:1; background: var(--box); border: 1px solid var(--line); border-radius: 10px; color: var(--text); padding: 10px 0; font-weight: 600; cursor:pointer; }
   html.wm .wm-seg3 button.on { border-color: var(--wm-accent); color: var(--wm-accent); background: var(--wm-accent-soft); }
@@ -222,6 +228,62 @@ function injectStyle() {
   /* the ring itself is drawn by js/runner/ring.js, every property inline */
   html.wm .timer.dial svg { transform: none; overflow: visible; }
   html.wm[data-phase] .timer.dial { width: min(80vw, 310px); height: min(80vw, 310px); }
+  /* AMRAP screen */
+  html.wm .am-top { display:flex; align-items:center; justify-content:center; gap: 18px; }
+  html.wm .am-ring .timer { width: min(52vw, 210px) !important; height: min(52vw, 210px) !important; }
+  html.wm .am-ring .timer .read .t { font-size: min(12vw, 48px) !important; }
+  html.wm .am-count { display:flex; flex-direction:column; align-items:center; min-width: 86px; }
+  html.wm .am-count small { color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+  html.wm .am-count b { font-family: var(--tnum); font-size: 64px; line-height: 1; color: var(--text); display:inline-block; }
+  html.wm .am-count span { color: var(--muted); font-size: 12px; text-align:center; margin-top: 4px; max-width: 110px; }
+  html.wm .am-moves { background: var(--box); border-radius: 16px; padding: 6px 12px; margin-top: 10px; }
+  html.wm .am-h { color: var(--wm-accent); font-size: 11.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; padding: 6px 0 2px; }
+  html.wm .am-h small { color: var(--muted); text-transform: none; letter-spacing: 0; font-weight: 500; font-size: 12px; }
+  html.wm .am-move { display:flex; align-items:center; gap: 8px; padding: 8px 0; border-top: 1px solid var(--line); }
+  html.wm .am-h + .am-move { border-top: none; }
+  html.wm .am-move .nm { flex:1; font-size: 16px; font-weight: 600; }
+  html.wm .am-move small { color: var(--muted); font-size: 12px; min-width: 30px; }
+  html.wm .am-step { display:flex; align-items:center; background: var(--bg); border-radius: 12px; }
+  html.wm .am-step button { width: 42px; height: 40px; background:none; border:none; color: var(--text); font-size: 22px; cursor:pointer; touch-action: manipulation; }
+  html.wm .am-step b { min-width: 34px; text-align:center; font-family: var(--tnum); font-size: 20px; }
+  html.wm .am-log { display:flex; flex-direction:column; gap: 6px; margin-top: 10px; }
+  html.wm .am-r { display:grid; grid-template-columns: 1fr auto; text-align:left; background: var(--box); border: 1px solid var(--line); border-radius: 12px; padding: 9px 12px; color: var(--text); cursor:pointer; }
+  html.wm .am-r span { color: var(--muted); font-size: 13px; font-weight: 700; } html.wm .am-r b { font-family: var(--tnum); font-size: 16px; grid-row: span 2; align-self:center; }
+  html.wm .am-r small { color: var(--faint); font-size: 12px; font-family: var(--tnum); }
+  html.wm .am-r:first-child { border-color: var(--wm-accent); }
+  html.wm .am-bar .btn.lg { flex: 2.4; }
+  /* LADDER screen */
+  html.wm .ld-bars { width: 100%; height: 64px; display:block; margin: 6px 0 12px; }
+  html.wm .ld-bars rect { fill: #fff; fill-opacity: .08; }
+  html.wm .ld-bars rect.done { fill: var(--wm-accent); fill-opacity: .55; }
+  html.wm .ld-bars rect.now { fill: var(--wm-neon); fill-opacity: 1; filter: drop-shadow(0 0 6px var(--wm-neon)); }
+  html.wm .ld-card { width:100%; background: var(--box); border: 1.5px solid var(--wm-neon-line); border-radius: 22px; padding: 16px 12px 12px; color: var(--text); cursor:pointer;
+    box-shadow: var(--wm-glow-neon); touch-action: manipulation; }
+  html.wm .ld-card:active { transform: scale(.985); }
+  html.wm .ld-mvs { display:flex; justify-content:center; gap: 22px; flex-wrap: wrap; }
+  html.wm .ld-mv { display:flex; flex-direction:column; align-items:center; }
+  html.wm .ld-mv b { font-family: var(--tnum); font-size: min(20vw, 84px); line-height: 1; color: var(--wm-neon); text-shadow: 0 0 22px var(--wm-neon-soft); display:inline-block; }
+  html.wm .ld-mv span { font-size: 15px; font-weight: 700; margin-top: 4px; }
+  html.wm .ld-next { color: var(--muted); font-size: 13.5px; margin-top: 10px; }
+  html.wm .ld-stats { display:grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; }
+  html.wm .ld-stats div { background: var(--box); border-radius: 14px; padding: 9px 6px; text-align:center; }
+  html.wm .ld-stats small { display:block; color: var(--muted); font-size: 10.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+  html.wm .ld-stats b { font-family: var(--tnum); font-size: 22px; }
+  html.wm .ld-reps { display:flex; flex-direction:column; gap: 6px; margin-top: 8px; }
+  html.wm .ld-reps div { position: relative; overflow: hidden; display:flex; align-items: baseline; gap: 6px; background: var(--box); border-radius: 12px; padding: 9px 12px; }
+  html.wm .ld-reps span { flex:1; font-size: 14px; font-weight: 600; z-index: 1; } html.wm .ld-reps b { font-family: var(--tnum); font-size: 17px; z-index: 1; }
+  html.wm .ld-reps small { color: var(--muted); font-family: var(--tnum); z-index: 1; }
+  html.wm .ld-reps i { position:absolute; left:0; top:0; bottom:0; background: var(--wm-accent-soft); }
+  /* the round-done burst (workmode.js celebrate) */
+  .wm-burst { position: fixed; z-index: 150; width: 0; height: 0; pointer-events: none; }
+  .wm-burst i { position: absolute; width: 8px; height: 8px; margin: -4px; border-radius: 50%; background: var(--c); box-shadow: 0 0 10px var(--c);
+    animation: wmSpark .8s cubic-bezier(.15,.7,.3,1) forwards; }
+  .wm-burst b { position: absolute; transform: translate(-50%, -50%); font-size: 34px; font-weight: 900; color: #fff; text-shadow: 0 0 18px var(--wm-accent);
+    animation: wmPlus .9s ease-out forwards; font-family: var(--tnum); }
+  @keyframes wmSpark { 0% { transform: translate(0,0) scale(1); opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) scale(.3); opacity: 0; } }
+  @keyframes wmPlus { 0% { opacity: 0; transform: translate(-50%, -30%) scale(.6); } 25% { opacity: 1; transform: translate(-50%, -90%) scale(1.15); } 100% { opacity: 0; transform: translate(-50%, -190%) scale(1); } }
+  .wm-pop.popping { animation: wmPop .45s cubic-bezier(.2,1.6,.4,1); }
+  @keyframes wmPop { 0% { transform: scale(1); } 40% { transform: scale(1.35); color: var(--wm-accent); text-shadow: 0 0 24px var(--wm-accent); } 100% { transform: scale(1); } }
   /* push-up test: the cue flips pink (down) / accent (up) on each beep */
   html.wm .cad { text-align:center; margin-top: 14px; }
   html.wm .cad-cue { font-size: 68px; font-weight: 800; letter-spacing: -0.03em; text-transform: uppercase; color: var(--muted); }

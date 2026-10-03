@@ -16,7 +16,8 @@ import { EXERCISES } from '../data/exercises.js';
 import { DEMOS } from './demo.js';
 import { activeUserId } from '../users.js';
 import { applyWorkTheme } from './theme.js';
-import { loadPrefs, openPrefs } from './prefs.js';
+import { loadPrefs, openPrefs, pref } from './prefs.js';
+import { ringHTML, ringBaseCss, ringDesign } from './ring.js';
 
 /* ?demo adds the Work Mode preview: a sample of every program format */
 const showDemo = () => new URLSearchParams(location.search).has('demo');
@@ -378,7 +379,9 @@ export function buildPlan(c = cfg) {
     }
     return {
       name, sessionId: 'quick', quick: true, duration: Math.round((totalSec() || 0) / 60),
-      getReady: cfg.ready, returnTo: 'index.html?quick', finishLabel: 'Done', blocks,
+      /* the get-ready countdown is one setting for every timer (Timer
+         settings, 8 s unless changed); a plan built in code can still pin it */
+      getReady: cfg.readyOverride ?? pref('ready') ?? 8, returnTo: 'index.html?quick', finishLabel: 'Done', blocks,
     };
   } finally { cfg = prev; }
 }
@@ -496,7 +499,6 @@ function draw() {
     ...more.map(stepRow),
     ...(cfg.fmt === 'emom' && named > 1 ? [segRow('How the moves run', 'accent', [['turns', 'Take turns'], ['all', 'All every minute']], cfg.emomStyle === 'all' ? 'all' : 'turns', 'data-style',
         cfg.emomStyle === 'all' ? `All ${named} moves inside each minute` : 'Minute 1 is move 1, minute 2 is move 2')] : []),
-    segRow('Get-ready countdown', 'ready', [[0, 'None'], [3, '3s'], [5, '5s'], [10, '10s']], cfg.ready, 'data-ready', 'Time to get in position before the clock starts'),
   ];
   host.innerHTML = `
   <div class="screen qt fade-in">
@@ -535,12 +537,19 @@ function draw() {
     <div class="actionbar qt-bar">
       <div class="qt-sum">${summary()}</div>
       <div class="qt-go">
-        <div class="qt-badge ${totalBadge().big.length > 5 ? 'long' : ''}"><b>${totalBadge().big}</b><small>${totalBadge().small}</small></div>
+        ${badgeRing()}
         <button class="btn lg" id="qtGo">Start</button>
       </div>
     </div>
   </div>`;
   wire();
+}
+/* THE TOTAL, as a small version of the user's own timer ring with the
+   time in the middle: what they are about to start, in the look they chose */
+function badgeRing() {
+  ringBaseCss();
+  const tb = totalBadge();
+  return `<div class="qt-badge2 ${tb.big.length > 5 ? 'long' : ''}" title="Total time">${ringHTML('work', ringDesign(), '-badge').replace('>0:00<', `>${tb.big}<`)}</div>`;
 }
 /* the ladder presets, one tap away instead of a strip of chips */
 function openPresets() {
@@ -719,7 +728,7 @@ function LIB() {
     Object.values(c.aliases || {}).forEach(v => add(main, v));
     add(also, c.musclesAlso);
     const muscles = (c.muscles || []).map(m => m.replace(/-/g, ' '));
-    return { id, name: e.name, n: norm(e.name), lvl, wn: wordsOf(`${e.name} ${id}`), wm: wordsOf(main.join(' ')), wa: wordsOf(also.join(' ')),
+    return { id, name: e.name, n: norm(e.name), lvl, mus: c.muscles || [], pat: [e.pattern, ...(c.patterns || [])].filter(Boolean), eq: e.equipment || [], gym: !!e.gymOnly, wn: wordsOf(`${e.name} ${id}`), wm: wordsOf(main.join(' ')), wa: wordsOf(also.join(' ')),
       tag: [muscles.join(', ') || e.pattern || '', LEVEL_NAME[lvl] || '', e.gymOnly ? 'gym' : ''].filter(Boolean).join(' · ') };
   }).sort((a, b) => a.name.localeCompare(b.name));
   return lib;
@@ -757,27 +766,66 @@ function search(q) {
   }
   return out.sort((a, b) => b.score - a.score || a.e.name.localeCompare(b.e.name)).map(x => x.e);
 }
+/* FILTERS YOU TAP, not words you type. A body part is the move's MAIN
+   muscles (or its pattern); level and equipment are exact. They combine
+   with each other and with the search box. */
+const PARTS = [
+  ['all', 'All'], ['chest', 'Chest'], ['back', 'Back'], ['shoulders', 'Shoulders'], ['arms', 'Arms'],
+  ['core', 'Core'], ['legs', 'Legs'], ['glutes', 'Glutes'], ['full', 'Full body'],
+];
+const PART_TEST = {
+  chest: e => e.mus.includes('chest'),
+  back: e => e.mus.some(m => ['lat', 'mid-back', 'lower-back', 'traps'].includes(m)) || e.pat.includes('pull'),
+  shoulders: e => e.mus.some(m => ['front-delt', 'side-delt', 'rear-delt'].includes(m)),
+  arms: e => e.mus.some(m => ['biceps', 'triceps', 'forearm', 'grip'].includes(m)),
+  core: e => e.mus.some(m => ['abs', 'obliques', 'hip-flexor'].includes(m)) || e.pat.includes('core'),
+  legs: e => e.mus.some(m => ['quad', 'hamstring', 'calf', 'tibialis', 'adductor', 'glute'].includes(m)) || e.pat.some(p => ['quad', 'hinge', 'hamstring', 'calf', 'squat', 'lunge'].includes(p)),
+  glutes: e => e.mus.includes('glute') || e.pat.includes('glute'),
+  full: e => e.pat.some(p => ['full', 'conditioning', 'locomotion'].includes(p)) || e.mus.length >= 4,
+};
+const LEVELS = [['', 'Any level'], ['beg', 'Easy'], ['int', 'Medium'], ['adv', 'Hard']];
+const EQUIP = [
+  ['', 'Any kit'], ['none', 'No equipment'], ['db', 'Dumbbell'], ['kb', 'Kettlebell'], ['band', 'Band'],
+  ['pullupbar', 'Pull-up bar'], ['bb', 'Barbell'], ['rings', 'Rings'], ['gym', 'Gym machine'],
+];
+const EQUIP_TEST = {
+  none: e => e.eq.every(x => ['bw', 'mat'].includes(x)),
+  gym: e => e.gym || e.eq.some(x => ['machine', 'cable'].includes(x)),
+};
+let moveFilter = { part: 'all', lvl: '', eq: '' };
+function passes(e) {
+  const f = moveFilter;
+  if (f.part !== 'all' && !PART_TEST[f.part]?.(e)) return false;
+  if (f.lvl && e.lvl !== f.lvl) return false;
+  if (f.eq && !(EQUIP_TEST[f.eq] ? EQUIP_TEST[f.eq](e) : e.eq.includes(f.eq))) return false;
+  return true;
+}
 async function openMovePicker(i) {
   const { ov, close } = sheet(`<div class="qt-sheet-h">Pick a move</div>
-    <input class="qt-search" id="mvQ" placeholder="Name, muscle, body part, equipment…" autocomplete="off" value="${esc(MV()[i]?.name || '')}"/>
-    <div class="qt-chips">${CHIPS.map(c => `<button data-chip="${c}">${c}</button>`).join('')}</div>
+    <input class="qt-search" id="mvQ" placeholder="Search by name, or tap the filters" autocomplete="off" value="${esc(MV()[i]?.name || '')}"/>
+    <div class="qt-filters" id="mvF"></div>
     <div class="qt-results" id="mvR"></div>`, 'tall');
   const q = ov.querySelector('#mvQ'), out = ov.querySelector('#mvR');
   const pick = m => { MV()[i] = { ...MV()[i], ...m }; persist(); close(); draw(); };
+  const chipRow = (opts, key) => `<div class="qt-frow">${opts.map(([v, l]) => `<button class="${moveFilter[key] === v ? 'on' : ''}" data-f="${key}" data-v="${v}">${l}</button>`).join('')}</div>`;
+  const filters = () => {
+    ov.querySelector('#mvF').innerHTML = chipRow(PARTS, 'part') + chipRow(LEVELS, 'lvl') + chipRow(EQUIP, 'eq');
+    ov.querySelectorAll('[data-f]').forEach(b => b.addEventListener('click', () => { moveFilter[b.dataset.f] = b.dataset.v; filters(); list(); }));
+  };
   const list = () => {
     const t = norm(q.value);
-    const all = search(t);
+    const all = search(t).filter(passes);
+    const filtered = moveFilter.part !== 'all' || moveFilter.lvl || moveFilter.eq;
     const hits = all.slice(0, 80);
     const exact = t && LIB().some(e => e.n === t);
-    ov.querySelectorAll('[data-chip]').forEach(c => c.classList.toggle('on', norm(c.dataset.chip) === t));
     out.innerHTML = (t && !exact ? `<button class="qt-res own" data-own="1"><b>Use "${esc(q.value.trim())}"</b><small>your own move, not from the library</small></button>` : '')
-      + (t ? `<div class="qt-count">${all.length} move${all.length === 1 ? '' : 's'}</div>` : '')
+      + (t || filtered ? `<div class="qt-count">${all.length} move${all.length === 1 ? '' : 's'}</div>` : '')
       + hits.map(e => `<button class="qt-res" data-ex="${e.id}"><b>${esc(e.name)}</b><small>${esc(e.tag)}</small></button>`).join('');
     out.querySelectorAll('[data-ex]').forEach(b => b.addEventListener('click', () => pick({ exId: b.dataset.ex, name: EXERCISES[b.dataset.ex].name })));
     out.querySelector('[data-own]')?.addEventListener('click', () => pick({ exId: null, name: q.value.trim() }));
   };
   q.addEventListener('input', list);
-  ov.querySelectorAll('[data-chip]').forEach(c => c.addEventListener('click', () => { q.value = norm(q.value) === norm(c.dataset.chip) ? '' : c.dataset.chip; list(); }));
+  filters();
   loadCatalog().then(() => { lib = null; list(); });
   q.addEventListener('keydown', e => { if (e.key === 'Enter') { const first = out.querySelector('.qt-res'); first?.click(); } });
   list();
@@ -833,7 +881,6 @@ function wire() {
     openMovePicker(MV().length - 1);
   });
   $('#qtClassic')?.addEventListener('click', () => { Object.assign(cfg, TABATA); persist(); draw(); });
-  host.querySelectorAll('[data-ready]').forEach(b => b.addEventListener('click', () => { cfg.ready = +b.dataset.ready; persist(); draw(); }));
   host.querySelectorAll('[data-fav]').forEach(b => b.addEventListener('click', () => {
     const f = favs[+b.dataset.fav]; if (!f) return;
     cfg = migrate({ ...DEFAULTS, ...JSON.parse(JSON.stringify(f.cfg)), paceV: 2 }); favIdx = +b.dataset.fav; persist(); draw();
@@ -994,6 +1041,12 @@ function injectStyle() {
   .qt-opt b i { color: var(--wm-accent); font-style: normal; font-size: 15px; margin-left: 4px; }
   .qt-go { display:flex; align-items:center; gap: 12px; }
   .qt-go .btn { flex: 1; }
+  .qt-badge2 { flex: none; width: 92px; height: 92px; position: relative; }
+  .qt-badge2 .timer { width: 92px !important; height: 92px !important; position: relative; }
+  .qt-badge2 .timer .read { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+  .qt-badge2 .timer .read .t { font-size: 20px !important; letter-spacing: -0.03em; }
+  .qt-badge2.long .timer .read .t { font-size: 15px !important; }
+  .qt-badge2 .timer .read .cap { display: none; }
   .qt-badge { flex: none; width: 84px; height: 84px; border-radius: 50%; display:flex; flex-direction:column; align-items:center; justify-content:center;
     border: 3px solid var(--wm-neon); background: radial-gradient(circle at 50% 35%, var(--wm-neon-soft), var(--bg) 70%);
     box-shadow: 0 0 22px var(--wm-neon-line), inset 0 0 14px var(--wm-neon-soft); }
@@ -1004,6 +1057,12 @@ function injectStyle() {
   .qt-chips::-webkit-scrollbar { display:none; }
   .qt-chips button { flex: none; background: var(--box); border: 1px solid var(--line); border-radius: 999px; color: var(--text); font-size: 13.5px; padding: 7px 13px; cursor:pointer; }
   .qt-chips button.on { border-color: var(--wm-neon); color: var(--wm-neon); background: var(--wm-neon-soft); }
+  .qt-filters { flex: none; padding-top: 8px; }
+  .qt-frow { display:flex; gap: 6px; overflow-x:auto; padding: 4px 0; scrollbar-width: none; }
+  .qt-frow::-webkit-scrollbar { display:none; }
+  .qt-frow button { flex: none; background: var(--box); border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-size: 13.5px; font-weight: 600; padding: 8px 13px; cursor:pointer; }
+  .qt-frow button.on { color: var(--text); border-color: var(--wm-neon); background: var(--wm-neon-soft); }
+  .qt-frow + .qt-frow button.on { border-color: var(--wm-accent); background: var(--wm-accent-soft); }
   .qt-count { color: var(--faint); font-size: 12px; padding: 8px 4px 2px; }
   .qt-rows { display:flex; flex-direction:column; gap: 3px; margin-top: 12px; border-radius: 18px; overflow: hidden; }
   .qt-srow { background: var(--box); padding: 12px 14px 10px; text-align:center; }
