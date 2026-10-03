@@ -105,6 +105,7 @@ Market research and the ranked proposal of what to add: **`docs/TIMER-RESEARCH.m
 ## Changelog
 
 Newest first. One line per shipped change: date, what changed, commit.
+- 3 Oct 2026 · **Type menu ordered simplest and best known first:** Stopwatch, Interval timer, Tabata, EMOM, AMRAP, For time, Ladder, Death By, Push-up test (`FORMATS` order; the default type is unchanged).
 - 3 Oct 2026 · **Less behind Customize.** Ladder's Time cap and Death By's Every / Stop after moved into Settings (their moves were already up top), so neither has a Customize button. Where Customize only opens the moves (AMRAP, For time) it reads **Pick your exercises**; no button when there is nothing behind it. Ladder card: a thin neon divider between the moves' numbers.
 - 3 Oct 2026 · **Final ring designs baked in.** Nicolas's lab export (Copy all 3) is now `PRESETS` in ring.js. Chrono unchanged. LED: white core 0.46 (soft 0.97, opacity 0.76), thin bright track (3 / 0.3), 12 phase-coloured ticks with quarters, glow face, white digits. Laser: gradient beam 2.5 wide, full white core, glow 2.5, phase-coloured digits. Devices with lab edits (`fj.ringOverrides`) keep their edits until Reset in the lab.
 - 3 Oct 2026 · **App renamed Training Timer** (was Interval Timer, which undersold 9 modes): `manifest-timer.webmanifest` name + short_name, the setup screen title, the page / apple-mobile-web-app-title set by `manifest-user.js`, and the dashboard section heading. Installed icons keep their old label until re-added to the home screen.
