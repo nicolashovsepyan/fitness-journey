@@ -24,8 +24,8 @@ from df.enhance import enhance, init_df, load_audio
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ap = argparse.ArgumentParser()
-ap.add_argument('--t60', type=float, default=0.9)
-ap.add_argument('--floor', type=float, default=0.06)
+ap.add_argument('--t60', type=float, default=1.3)        # Nico's pick: strong
+ap.add_argument('--floor', type=float, default=0.04)
 args = ap.parse_args()
 SRC = os.path.join(ROOT, 'audio/voice-src'); OUT = os.path.join(SRC, 'clean'); os.makedirs(OUT, exist_ok=True)
 cuts = json.load(open(os.path.join(ROOT, 'tools/voice-cuts.json')))

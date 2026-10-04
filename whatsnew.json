@@ -1,6 +1,7 @@
 {
-  "version": "2026-10-04.1",
+  "version": "2026-10-04.2",
   "notes": [
+    "Cleaner coach voice: the room echo is mostly gone, and the female voice is softer",
     "The coach calls every round (halfway, last two, last round), never talks over the beeps, and every phone now shows the same timer rings",
     "Timer sound is more reliable: it wakes back up after a call, Siri or a notification",
     "Fine-tune the coach voice: Timer settings, under Coach voice",

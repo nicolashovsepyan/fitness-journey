@@ -17,8 +17,8 @@ import numpy as np, pyworld as pw, soundfile as sf
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ap = argparse.ArgumentParser()
-ap.add_argument('--pitch', type=float, default=1.75)
-ap.add_argument('--formant', type=float, default=1.17)
+ap.add_argument('--pitch', type=float, default=1.6)       # Nico's pick: A (190 Hz from his 120)
+ap.add_argument('--formant', type=float, default=1.12)
 ap.add_argument('--out', default='audio/voice-f')
 ap.add_argument('--only', default='')            # comma list of keys, for quick samples
 args = ap.parse_args()
@@ -47,8 +47,10 @@ keys = args.only.split(',') if args.only else list(cuts['pieces'])
 tmp = tempfile.mkdtemp()
 for key in keys:
     c = cuts['pieces'][key]
-    src = os.path.join(ROOT, 'audio/voice-src', cuts['sources'][c['src']])
-    a, b = max(0, c['a'] - 0.06), c['b'] + 0.12
+    name = cuts['sources'][c['src']]
+    clean = os.path.join(ROOT, 'audio/voice-src/clean', os.path.splitext(name)[0] + '.wav')   # echo removed (tools/dereverb.py)
+    src = clean if os.path.exists(clean) else os.path.join(ROOT, 'audio/voice-src', name)
+    a, b = max(0, c['a'] - 0.06), c['b'] + 0.09
     raw = os.path.join(tmp, 'raw.wav'); fem = os.path.join(tmp, 'fem.wav')
     subprocess.run(['ffmpeg', '-y', '-v', 'error', '-ss', str(a), '-to', str(b), '-i', src, '-af', 'highpass=f=80,afftdn=nf=-45', '-ac', '1', '-ar', str(FS), raw], check=True)
     x, _ = sf.read(raw); sf.write(fem, female(x.astype(np.float64)), FS)
