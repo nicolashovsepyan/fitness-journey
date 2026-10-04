@@ -1,6 +1,7 @@
 {
-  "version": "2026-10-04.2",
+  "version": "2026-10-04.3",
   "notes": [
+    "New timer type: VO2 max, with 5 proven protocols (Norwegian 4×4, Huberman 2×2, Zone 5 bike, 20/40 sprints, the 1-minute workout)",
     "Cleaner coach voice: the room echo is mostly gone, and the female voice is softer",
     "The coach calls every round (halfway, last two, last round), never talks over the beeps, and every phone now shows the same timer rings",
     "Timer sound is more reliable: it wakes back up after a call, Siri or a notification",

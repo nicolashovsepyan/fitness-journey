@@ -1891,7 +1891,7 @@ function cadenceRating(reps, rpm) {
 function quickResult(session) {
   const rows = session.blocks.map(b => {
     const e = b.entries[0]; const v = e?.sets?.[0]?.value;
-    if (v == null || b.name.startsWith('Countdown')) return '';
+    if (v == null || b.name.startsWith('Countdown') || /^(Warm-up|Cool-down)/.test(b.name)) return '';   // a VO2 warm-up is not a result
     if (b.format === 'cadence') return `<div class="eff-row"><span>${b.name}</span><span class="pr-flash" style="margin-left:auto;">${v} reps</span></div>${cadenceRating(v, e.cadence)}`;
     const val = b.format === 'fortime' ? fmt(v)
       : b.format === 'amrap' ? (e.amrap ? `${e.amrap.rounds} rounds${e.amrap.extra ? ` + ${e.amrap.extra} reps` : ''}` : `${v} ${e.unit || 'rounds'}`)

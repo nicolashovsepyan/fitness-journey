@@ -48,6 +48,10 @@ const FORMATS = [
   { id: 'fortime', name: 'For time', sub: 'Finish fast, beat the clock', moves: true,
     how: ['Race the clock.', 'Do all the work as fast as you can, then tap Done. Your time is your score.',
       'Add a time cap and the clock stops you there if you are not finished.'] },
+  { id: 'vo2', name: 'VO2 max', sub: 'Proven cardio intervals', moves: false,
+    how: ['Intervals that raise your VO2 max: the most oxygen your body can use. The best predictor of fitness and long life.',
+      'Pick a protocol. Hard means hard: you should not be able to hold a conversation. Easy means moving, slowly.',
+      'Any cardio works: bike, rower, running, ski erg, jump rope. Once or twice a week is plenty.'] },
   { id: 'ladder', name: 'Ladder', sub: 'Reps climb or drop', moves: true,
     how: ['A rep ladder, for time.', 'Each move has its own start and its own change per rung. Pull-ups start at 1 and go up by 1, push-ups start at 40 and go down by 2: rung 1 is 1 + 40, rung 2 is 2 + 38…',
       'Shape: one way (up or down), there and back (pyramid 1→10→1, or valley 10→1→10), or wave (1, 10, 2, 9…).',
@@ -85,12 +89,12 @@ const isTime = k => FIELDS[k][1] === 'time';
 const MAIN = {
   emom: ['mins'], amrap: ['cap'], fortime: ['ftRounds', 'ftCap'], tabata: ['rounds'],
   timer: ['work', 'rest', 'rounds'], stopwatch: [], pushup: ['pace'],
-  deathby: ['dbEvery', 'dbMax'], ladder: ['ldRungs', 'ldCap'],
+  deathby: ['dbEvery', 'dbMax'], ladder: ['ldRungs', 'ldCap'], vo2: [],
 };
 const MORE = {
   emom: ['every'], amrap: [], fortime: [], tabata: ['work', 'rest'],
   timer: ['sets', 'setRest'], stopwatch: [], pushup: ['ptCap'],
-  deathby: [], ladder: [],
+  deathby: [], ladder: [], vo2: [],
 };
 const DEFAULTS = {
   fmt: 'emom', every: 60, mins: 12, cap: 10, ftCap: 0, ftRounds: 1,
@@ -98,7 +102,7 @@ const DEFAULTS = {
   tWork: 120, tRest: 0, tRounds: 1, pace: 20, paceV: 2, ptCap: 0,
   dbEvery: 60, dbMax: 30,
   ldRungs: 10, ldShape: 'one', ldCap: 0,
-  emomStyle: 'turns', ready: 10,
+  emomStyle: 'turns', ready: 10, vo2: 'n4x4',
 };
 const TABATA = { work: 20, rest: 10, rounds: 8 };
 const PREF = 'quickTimer';
@@ -277,6 +281,16 @@ function applyPreset(p) {
   list.forEach((m, i) => { const [a, d] = p.m[Math.min(i, p.m.length - 1)]; m.ldStart = a; m.ldStep = d; });
 }
 function emomCount() { return Math.max(1, Math.floor((cfg.mins * 60) / cfg.every)); }
+/* VO2 MAX: the five protocols Nico picked (docs/WORK-MODE.md has the sources).
+   work / rest in seconds, n rounds, an optional warm-up and cool-down. */
+const VO2 = [
+  { id: 'n4x4', name: 'Norwegian 4×4', sub: '4 min hard, 3 min easy, × 4', note: 'Hard is 90 to 95% of your max heart rate. The most studied VO2 max workout. Warm up 10 minutes first.', work: 240, rest: 180, n: 4 },
+  { id: 'h2x2', name: 'Huberman 2×2', sub: '2 min max effort, 2 min rest, × 3', note: 'As hard as you can hold for the full 2 minutes.', work: 120, rest: 120, n: 3 },
+  { id: 'z5', name: 'Zone 5 bike', sub: '20 s all-out, 10 s rest, × 8', note: 'Best on an assault bike. Every interval is a sprint.', work: 20, rest: 10, n: 8 },
+  { id: 's2040', name: '20/40 sprints', sub: '20 s all-out, 40 s easy, × 8', note: 'Sprint, then keep moving easy while you recover.', work: 20, rest: 40, n: 8 },
+  { id: 'g1min', name: 'The 1-minute workout', sub: '3 × 20 s all-out, 2 min easy between', note: 'Gibala\'s study: 2 min warm-up and 3 min cool-down included. 10 minutes in all.', work: 20, rest: 120, n: 3, warm: 120, cool: 180 },
+];
+const vo2 = () => VO2.find(p => p.id === cfg.vo2) || VO2[0];
 function intervalSec(work, rest, rounds, sets = 1, setRest = 0) {
   const one = rounds * work + (rounds - 1) * rest;
   return sets * one + (sets - 1) * setRest;
@@ -292,6 +306,7 @@ function totalSec() {
     case 'pushup': return cfg.ptCap ? cfg.ptCap * 60 : null;
     case 'deathby': return cfg.dbMax * cfg.dbEvery;
     case 'ladder': return cfg.ldCap ? cfg.ldCap * 60 : null;
+    case 'vo2': { const p = vo2(); return intervalSec(p.work, p.rest, p.n) + (p.warm || 0) + (p.cool || 0); }
     default: return null;
   }
 }
@@ -316,6 +331,7 @@ function summary() {
       const n = perRound();
       return `${tbTotal()} rounds${n > 1 ? `, alternating ${n} moves` : ''}, ${secs(cfg.work)} on, ${secs(cfg.rest)} off`;
     }
+    case 'vo2': return vo2().note;
     case 'timer': {
       const r = cfg.tRounds;
       const n = perRound();
@@ -341,6 +357,7 @@ function planName() {
   if (f === 'tabata') return `Tabata · ${tbTotal()} × ${cfg.work}/${cfg.rest}`;
   if (f === 'timer') return `Interval timer · ${cfg.tRounds > 1 ? `${cfg.tRounds} × ` : ''}${fmt(cfg.tWork)}${cfg.tRest && cfg.tRounds > 1 ? ` / ${fmt(cfg.tRest)}` : ''}${cfg.sets > 1 ? ` · ${cfg.sets} times` : ''}`;
   if (f === 'pushup') return `Push-up test · ${cfg.pace} a min`;
+  if (f === 'vo2') return `VO2 max · ${vo2().name}`;
   if (f === 'deathby') { const ms = ladderMoves().filter(m => String(m.name || '').trim()); return `Death By${ms.length ? ' · ' + ms.map(m => m.name.trim()).join(', ') : ''}${cfg.dbEvery !== 60 ? ` every ${fmt(cfg.dbEvery)}` : ''}`; }
   if (f === 'ladder') { const ms = ladderMoves(); return `Ladder · ${ms.map(m => `${String(m.name || '').trim() || 'reps'} ${ldStart(m)} ${ldStep(m) >= 0 ? '+' : '−'}${Math.abs(ldStep(m))}`).join(', ')}${cfg.ldShape === 'mirror' ? ' and back' : cfg.ldShape === 'wave' ? ' wave' : ''}`; }
   return 'Stopwatch';
@@ -395,6 +412,15 @@ export function buildPlan(c = cfg) {
           work: cfg.work, rest: cfg.rest, rounds: tbTotal(), perRound: 1, intervals: tbTotal(),
           items: moves.length ? moves : work }];
         break;
+      case 'vo2': {
+        /* the protocol on the interval engine (round calls, halfway, one
+           minute left); a warm-up and cool-down are blocks of their own */
+        const p = vo2(), easy = n => ({ name: n, measure: 'rounds' });
+        if (p.warm) blocks.push({ ...base, id: id(1), name: 'Warm-up · easy pace', format: 'tabata', label: 'Warm-up', work: p.warm, rest: 0, rounds: 1, perRound: 1, intervals: 1, restAfter: 0, items: [easy('Work')] });
+        blocks.push({ ...base, id: id(2), name, format: 'tabata', label: 'VO2 max', work: p.work, rest: p.rest, rounds: p.n, perRound: 1, intervals: p.n, restAfter: 0, items: work });
+        if (p.cool) blocks.push({ ...base, id: id(3), name: 'Cool-down · easy pace', format: 'tabata', label: 'Cool-down', work: p.cool, rest: 0, rounds: 1, perRound: 1, intervals: 1, items: [easy('Work')] });
+        break;
+      }
       case 'timer':
         for (let i = 0; i < cfg.sets; i++) {
           blocks.push({ ...base, id: id(i + 1), format: 'tabata', label: 'Intervals',
@@ -557,6 +583,8 @@ function draw() {
   const settings = [
     ...main.map(stepRow),
     ...(lad ? [segRow('Shape', 'violet', LD_SHAPES, cfg.ldShape, 'data-ldshape')] : []),
+    ...(cfg.fmt === 'vo2' ? [`<div class="qt-srow qt-vo2"><span class="qt-sl" style="color:var(--wm-accent)">Protocol</span>
+      ${VO2.map(p => `<button class="qt-vo2p ${p.id === vo2().id ? 'on' : ''}" data-vo2="${p.id}"><b>${p.name}</b><small>${p.sub}</small></button>`).join('')}</div>`] : []),
   ];
   /* CUSTOMIZE: the rest, same rows */
   const custom = [
@@ -635,6 +663,7 @@ function pack() {
   if (cfg.fmt === 'emom') keep.push('emomStyle');
   if (cfg.fmt === 'ladder') keep.push('ldShape');
   if (cfg.fmt === 'timer') keep.push('sets', 'setRest');
+  if (cfg.fmt === 'vo2') keep.push('vo2');
   const o = {}; keep.forEach(k => { if (cfg[k] != null) o[k] = cfg[k]; });
   const mv = MV().filter(m => String(m.name || '').trim()).map(m => ({ name: m.name, reps: m.reps || '', ...(m.exId ? { exId: m.exId } : {}), ...(cfg.fmt === 'ladder' || cfg.fmt === 'deathby' ? { ldStart: ldStart(m), ldStep: ldStep(m) } : {}), ...(Number(m.wt) > 0 ? { wt: Number(m.wt) } : {}) }));
   if (mv.length && fmtDef().moves) o.moves = mv;
@@ -963,6 +992,7 @@ function wire() {
   host.querySelector('[data-ldend]')?.addEventListener('change', e => { setLadderEnd(+e.target.value || 0); persist(); draw(); });
   host.querySelectorAll('[data-ldshape]').forEach(b => b.addEventListener('click', () => { cfg.ldShape = b.dataset.ldshape; persist(); draw(); }));
   $('#qtPresets')?.addEventListener('click', openPresets);
+  host.querySelectorAll('[data-vo2]').forEach(b => b.addEventListener('click', () => { cfg.vo2 = b.dataset.vo2; persist(); draw(); }));
   host.querySelectorAll('[data-mr]').forEach(b => b.addEventListener('click', () => {
     const m = MV()[+b.dataset.mr], k = isHold(m) ? 5 : 1, v = Number(m.reps) || 0;
     /* seconds move 5 at a time, landing on a multiple of 5 (12 → 15, not 17) */
@@ -1252,6 +1282,10 @@ function injectStyle() {
   .qt-addwt { background:none; border:none; color: var(--wm-accent); opacity: .75; font-size: 12.5px; font-weight: 600; padding: 0 30px 6px 0; cursor:pointer; }
   .qt-addrow2 { width:100%; background:none; border:none; border-top: 1px solid var(--line); color: var(--wm-accent); font-size: 15px; font-weight: 700; padding: 13px 0; cursor:pointer; }
   .qt-mvlist .qt-mnote { margin: 0 0 6px; }
+  .qt-vo2 { display:flex; flex-direction:column; gap: 8px; text-align:left; }
+  .qt-vo2p { display:flex; flex-direction:column; gap: 2px; text-align:left; background: var(--bg); border: 1.5px solid var(--line); border-radius: 14px; padding: 11px 14px; color: var(--text); cursor:pointer; font: inherit; }
+  .qt-vo2p b { font-size: 16px; } .qt-vo2p small { color: var(--muted); font-size: 13px; }
+  .qt-vo2p.on { border-color: var(--wm-accent); background: var(--wm-accent-soft); box-shadow: 0 0 14px var(--wm-accent-soft); }
   .qt-last { width:100%; display:flex; align-items:center; gap: 8px; margin-top: 8px; background: var(--box); border: 1px solid var(--line); border-radius: 14px; padding: 10px 14px; color: var(--text); cursor:pointer; font: inherit; text-align:left; }
   .qt-last span { color: var(--muted); font-size: 13px; flex: 1; } .qt-last b { font-family: var(--tnum); font-size: 14px; } .qt-last i { font-style: normal; color: var(--wm-accent); font-size: 13px; }
   .qt-hist { display:flex; flex-direction:column; gap: 8px; margin-bottom: 12px; text-align:left; }
