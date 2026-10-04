@@ -14,6 +14,7 @@ import { applyWorkTheme, clearWorkTheme } from './theme.js';
 import { installHold } from './hold.js';
 import { makeSortable, orderAfter } from './drag.js';
 import { roundCall, cueFor, pick } from './coach-lines.js';
+import { t, t2, num, exName, exCues } from '../i18n.js';
 import { bodyWeight, setTimerBodyWeight, moveLoadKg, showWeight, needsBody, readHistory, addHistory, sigOf } from './tally.js';
 import { ringHTML, ringBaseCss, RING_R, snapToSegments } from './ring.js';
 import { loadPrefs, pref, openPrefs } from './prefs.js';
@@ -21,7 +22,7 @@ import { say, beep, buzz, fmt, initAudio, stopAudio, keepAwake, releaseAwake, se
 
 const UNIT = { reps: 'reps', hold: 'sec', cals: 'cals', rounds: 'rounds' };
 /* "1 rep", "10 reps" */
-const qty = (n, unit = 'reps') => `${n} ${Number(n) === 1 && /s$/.test(unit) && unit !== 'sec' ? unit.slice(0, -1) : unit}`;
+const qty = (n, unit = 'reps') => `${n} ${t(Number(n) === 1 && /s$/.test(unit) && unit !== 'sec' ? unit.slice(0, -1) : unit)}`;
 const WUNIT = 'lb';                       // weight unit (Nicolas trains in pounds)
 let S = null, host = null, cb = {}, ticker = null, onStepDone = null, curVal = 0, roundBuf = {};
 let lastSec = null;                       // last whole-second of the active step (for once-per-second beeps)
@@ -104,7 +105,7 @@ if (typeof document !== 'undefined') {
     kb.classList.toggle('on', on);
     kb.textContent = on ? '🦵 knee flagged' : '🦵 knee';
     buzz(on ? 60 : 20);
-    if (on) say('Flagged. Skip it if it hurts.');
+    if (on) say(t('Flagged. Skip it if it hurts.'));
   });
 }
 
@@ -116,12 +117,12 @@ function openNote(exId, name) {
   const ov = document.createElement('div'); ov.className = 'overlay';
   ov.innerHTML = `
     <div class="overlay-card">
-      <div class="eyebrow">Note</div>
+      <div class="eyebrow">${t('Note')}</div>
       <h2 style="margin:6px 0 4px;">${name || EXERCISES[exId]?.name || ''}</h2>
-      <p class="muted" style="margin:0 0 12px;">How did it feel? Too easy, too hard, couldn't find it in the gym?</p>
+      <p class="muted" style="margin:0 0 12px;">${t("How did it feel? Too easy, too hard, couldn't find it in the gym?")}</p>
       <textarea id="noteTxt" class="note-input" rows="4" placeholder="Type anything…">${cur.replace(/</g, '&lt;')}</textarea>
-      <button class="btn" id="noteSave" style="margin-top:12px;">Save note</button>
-      <button class="btn ghost" id="noteCancel" style="margin-top:8px;">Cancel</button>
+      <button class="btn" id="noteSave" style="margin-top:12px;">${t('Save note')}</button>
+      <button class="btn ghost" id="noteCancel" style="margin-top:8px;">${t('Cancel')}</button>
     </div>`;
   host.appendChild(ov);
   const ta = ov.querySelector('#noteTxt'); ta.focus();
@@ -138,12 +139,12 @@ function demoBtnHtml(item) {
   if (!item || !item.exId) return '';
   const has = !!(item.demoUrl || EXERCISES[item.exId]?.demoUrl);
   const attr = v => String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
-  return `<button class="demo-btn ${has ? 'has' : ''}" data-ex="${item.exId}" data-exname="${attr(item.name)}" data-cue="${attr(item.cue || EXERCISES[item.exId]?.cues)}">▶ ${has ? 'watch the move' : 'demo'}</button>`;
+  return `<button class="demo-btn ${has ? 'has' : ''}" data-ex="${item.exId}" data-exname="${attr(item.name)}" data-cue="${attr(item.cue || EXERCISES[item.exId]?.cues)}">▶ ${has ? t('watch the move') : t('demo')}</button>`;
 }
 /* swap the current exercise (button on the exercise screen) */
 function swapBtnHtml(item) {
   if (!item || !item.exId) return '';
-  return `<button class="swap-btn" data-swapex="${item.exId}">⇄ swap</button>`;
+  return `<button class="swap-btn" data-swapex="${item.exId}">⇄ ${t('swap')}</button>`;
 }
 /* the plain-language cue, ALWAYS on screen next to the video button —
    never buried in the demo overlay (coaching requirement). */
@@ -178,7 +179,7 @@ function rowVid(it) {
   if (!it || !it.exId) return '';
   const a = v => String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
   const has = !!(it.demoUrl || EXERCISES[it.exId]?.demoUrl);
-  return `<button class="ci-vid demo-btn ${has ? 'has' : ''}" data-ex="${it.exId}" data-exname="${a(it.name)}" data-cue="${a(it.cue || EXERCISES[it.exId]?.cues)}" title="Watch it">▶</button>`;
+  return `<button class="ci-vid demo-btn ${has ? 'has' : ''}" data-ex="${it.exId}" data-exname="${a(it.name)}" data-cue="${a(it.cue || EXERCISES[it.exId]?.cues)}" title="${t('Watch it')}">▶</button>`;
 }
 
 /* ONE MOVE ROW, the same in every timer mode: a small ▶ (or an empty slot,
@@ -188,7 +189,7 @@ function rowVid(it) {
 function mvRow(it, { val = null, unit = '', step = '', wIdx = null } = {}) {
   const v = val == null || val === '' ? '' : `${val}${unit === 'sec' ? '<small>s</small>' : ''}`;
   const right = step
-    ? `<span class="mvr-st"><button ${step} data-d="-1" aria-label="Less">−</button><b>${v || 0}</b><button ${step} data-d="1" aria-label="More">+</button></span>`
+    ? `<span class="mvr-st"><button ${step} data-d="-1" aria-label="${t('Less')}">−</button><b>${v || 0}</b><button ${step} data-d="1" aria-label="${t('More')}">+</button></span>`
     : v ? `<b class="mvr-v">${v}</b>` : '';
   const wt = Number(it.weight) > 0 ? ` <small class="mvr-wt">${it.weight} ${it.wUnit || 'lb'}</small>` : '';
   return `<div class="mvr">${rowVid(it) || '<span class="mvr-sp"></span>'}<span class="mvr-n"${wIdx != null ? ` data-mvw="${wIdx}" role="button"` : ''}>${it.name}${wt}</span>${right}</div>`;
@@ -226,25 +227,25 @@ function openWorkoutSwap() {
      swaps that were designed in, not generic library neighbours */
   const subs = (item.subs || []).filter(id => EXERCISES[id] && id !== item.exId);
   const subRows = subs.length
-    ? `<div class="swap-divider first">Swap it for</div>` + subs.map(id =>
-        `<div class="swap-opt sub" data-id="${id}"><span>${EXERCISES[id].name}</span><span class="muted">recommended</span></div>`).join('')
+    ? `<div class="swap-divider first">${t('Swap it for')}</div>` + subs.map(id =>
+        `<div class="swap-opt sub" data-id="${id}"><span>${EXERCISES[id].name}</span><span class="muted">${t('recommended')}</span></div>`).join('')
     : '';
   const alts = alternatives(from, { constraint: S.plan.constraint }, used.concat(subs));
   let dividerInserted = false;
   const rows = alts.map(a => {
     let pre = '';
-    if (!a.recommended && !dividerInserted) { dividerInserted = true; pre = '<div class="swap-divider">More from your library</div>'; }
-    return pre + `<div class="swap-opt ${a.id === item.exId ? 'cur' : ''}" data-id="${a.id}"><span>${a.name}</span><span class="muted">${a.id === item.exId ? 'current' : `${a.pattern}${a.diff ? ` · d${a.diff}` : ''}`}</span></div>`;
+    if (!a.recommended && !dividerInserted) { dividerInserted = true; pre = `<div class="swap-divider">${t('More from your library')}</div>`; }
+    return pre + `<div class="swap-opt ${a.id === item.exId ? 'cur' : ''}" data-id="${a.id}"><span>${a.name}</span><span class="muted">${a.id === item.exId ? t('current') : `${a.pattern}${a.diff ? ` · d${a.diff}` : ''}`}</span></div>`;
   }).join('');
   const ov = document.createElement('div'); ov.className = 'overlay';
   ov.innerHTML = `
     <div class="overlay-card scroll">
-      <div class="eyebrow">Swap exercise · saved for next week too</div>
+      <div class="eyebrow">${t('Swap exercise · saved for next week too')}</div>
       <h2 style="margin:6px 0 12px;">${item.name}</h2>
       ${subRows}
-      ${alts.length ? rows : (subs.length ? '' : '<div class="muted" style="padding:8px 0;">No alternatives.</div>')}
-      ${item.exId !== from ? `<div class="swap-opt revert" data-id="__revert"><span>↩ Back to ${EXERCISES[from]?.name || from}</span></div>` : ''}
-      <button class="btn ghost" id="wswapCancel" style="margin-top:12px;">Cancel</button>
+      ${alts.length ? rows : (subs.length ? '' : `<div class="muted" style="padding:8px 0;">${t('No alternatives.')}</div>`)}
+      ${item.exId !== from ? `<div class="swap-opt revert" data-id="__revert"><span>↩ ${t('Back to {x}', { x: EXERCISES[from]?.name || from })}</span></div>` : ''}
+      <button class="btn ghost" id="wswapCancel" style="margin-top:12px;">${t('Cancel')}</button>
     </div>`;
   host.appendChild(ov);
   ov.querySelector('#wswapCancel').addEventListener('click', () => ov.remove());
@@ -265,8 +266,18 @@ function swapCurrentExercise(newId, from) {
 }
 
 /* ---------------- lifecycle ---------------- */
+/* in French, a program's moves show and speak their French names and cues
+   (js/data/exercises-fr.js); the plan is translated once, as it starts */
+function localize(plan) {
+  for (const b of plan.blocks || []) for (const it of b.items || []) {
+    if (!it.exId) continue;
+    it.name = exName(it.exId, it.name);
+    if (it.cue) it.cue = exCues(it.exId, it.cue);
+  }
+  return plan;
+}
 export function startWorkout(plan, callbacks = {}) {
-  S = R.start(plan); cb = callbacks; host = document.getElementById('app');
+  S = R.start(localize(plan)); cb = callbacks; host = document.getElementById('app');
   applyWorkTheme(); loadPrefs(); initAudio(); keepAwake(); startTicker();
   enterBlock(0);
 }
@@ -334,9 +345,9 @@ function tick() {
        saying "halfway" every minute was noise), 1 minute left from 3 minutes
        up, and a double beep 10 seconds out on anything of 30 seconds or more. */
     if (curStepKind === 'work' && rem > 0) {
-      if (!saidHalf && S.stepDur >= 90 && rem <= Math.round(S.stepDur / 2)) { saidHalf = true; if (rem > 60 || S.stepDur < 180) say(pick('halfway') || 'Halfway.'); }
-      if (!saidLastMin && S.stepDur >= 180 && rem <= 60) { saidLastMin = true; say(pick('minute') || '1 minute left.'); }
-      if (!said10 && S.stepDur >= 30 && rem <= 10 && rem > 3) { said10 = true; beep('warn'); buzz(30); flash(false); const t = pick('ten'); if (t) say(t); }
+      if (!saidHalf && S.stepDur >= 90 && rem <= Math.round(S.stepDur / 2)) { saidHalf = true; if (rem > 60 || S.stepDur < 180) say(pick('halfway') || t('Halfway.')); }
+      if (!saidLastMin && S.stepDur >= 180 && rem <= 60) { saidLastMin = true; say(pick('minute') || t('1 minute left.')); }
+      if (!said10 && S.stepDur >= 30 && rem <= 10 && rem > 3) { said10 = true; beep('warn'); buzz(30); flash(false); const ten = pick('ten'); if (ten) say(ten); }
     }
     if (rem <= 3 && rem > 0) {                  // 3 · 2 · 1 audible countdown
       beep('count'); buzz(20);
@@ -412,17 +423,17 @@ function renderGetReady() {
   const b = block();
   if (readySec() <= 0) { beep('go'); return renderActive(); }
   onScreen('ready');
-  shell(`<div class="now-ex getready"><div class="label">Get ready</div><div class="name">${b.name}</div>${b.format === 'cadence' ? '<div class="cad-start">Start on the <b>double beep</b></div>' : ''}
+  shell(`<div class="now-ex getready"><div class="label">${t('Get ready')}</div><div class="name">${t(b.name)}</div>${b.format === 'cadence' ? `<div class="cad-start">${t('Start on the <b>double beep</b>')}</div>` : ''}
       ${S.plan.quick ? '' : `<div class="side">${b.role}</div>`}</div>
     <div class="timer-wrap">${timerSvg('ready')}</div>
-    <div class="actionbar"><button class="btn lg" id="go">I'm ready ▸</button></div>`);
+    <div class="actionbar"><button class="btn lg" id="go">${t("I'm ready ▸")}</button></div>`);
   const begin = () => { R.clearStep(S); onStepDone = null; renderActive(); };
   if (beginStep(readySec(), 'rest', 'ready')) {
     beep('go');
     if (b.format === 'cadence') {
       /* short enough to finish before the spoken 3-2-1 */
-      say(`Push-up test. Start on the double beep. Then one push-up on every beep. I'll count.`, 5500);
-    } else say(S.plan.quick || String(b.name).includes('·') ? 'Get ready.' : `Get ready. ${b.name}.`)   // a Training Timer's name is not a thing to read out;
+      say(t("Push-up test. Start on the double beep. Then one push-up on every beep. I'll count."), 5500);
+    } else say(S.plan.quick || String(b.name).includes('·') ? t('Get ready.') : `${t('Get ready.')} ${b.name}.`)   // a Training Timer's name is not a thing to read out;
   }
   onStepDone = begin;
   document.getElementById('go').addEventListener('click', () => {
@@ -474,18 +485,18 @@ function completeBlock() {
 /* short prescription line for the "up next" card (so you know time / sets before you start) */
 function nextRx(b) {
   const it = b.items && b.items[0];
-  if (b.format === 'amrap') return `AMRAP · ${b.minutes || 5} min${b.items && b.items.length === 1 ? ' · max reps' : ''}`;
-  if (b.format === 'tabata') return `Tabata · ${b.rounds || 8} rounds · ${b.work || 20}s on / ${b.rest ?? 10}s off`;
-  if (b.label && b.intervals) return `${b.label} · ${b.intervals} × ${b.work}s${b.rest ? ` / ${b.rest}s` : ''}`;
+  if (b.format === 'amrap') return `AMRAP · ${b.minutes || 5} min${b.items && b.items.length === 1 ? ` · ${t('max reps')}` : ''}`;
+  if (b.format === 'tabata') return `Tabata · ${t('{n} rounds', { n: b.rounds || 8 })} · ${t('{a} s on / {b} s off', { a: b.work || 20, b: b.rest ?? 10 })}`;
+  if (b.label && b.intervals) return `${t(b.label)} · ${b.intervals} × ${b.work} s${b.rest ? ` / ${b.rest} s` : ''}`;
   if (b.format === 'emom') return `EMOM · ${b.rounds || 10} min`;
-  if (b.format === 'fortime') return b.minutes ? `For time · ${b.minutes} min cap` : 'For time';
-  if (b.format === 'superset') return `Superset · ${b.rounds || 3} rounds · rest ${b.rest ?? 75}s`;
-  if (b.format === 'skill') return `Skill · ${b.items.length} drill${b.items.length > 1 ? 's' : ''}`;
-  if (b.format === 'circuit') return `${b.rounds || 1} rounds · ${b.items.length} moves`;
+  if (b.format === 'fortime') return b.minutes ? `${t('For time')} · ${t('{n} min cap', { n: b.minutes })}` : t('For time');
+  if (b.format === 'superset') return `${t('Superset')} · ${t('{n} rounds', { n: b.rounds || 3 })} · ${t('rest {n} s', { n: b.rest ?? 75 })}`;
+  if (b.format === 'skill') return `${t('Skill')} · ${t2(b.items.length, '{n} drill', '{n} drills')}`;
+  if (b.format === 'circuit') return `${t('{n} rounds', { n: b.rounds || 1 })} · ${t2(b.items.length, '{n} move', '{n} moves')}`;
   if (it) {
-    if (it.toFailure || it.warmups) return `${it.warmups ? it.warmups + ' warm-up → ' : ''}all-out${it.reps ? ` (~${it.reps})` : ''}`;
-    if (it.measure === 'hold') return `${it.sets || 1} × ${it.hold}s${it.rest ? ` · rest ${fmt(it.rest)}` : ''}`;
-    return `${it.sets || 1} × ${it.reps ?? it.target ?? ''}${it.perSide ? '/side' : ''}${it.rest ? ` · rest ${fmt(it.rest)}` : ''}`;
+    if (it.toFailure || it.warmups) return `${it.warmups ? it.warmups + ' ' + t('warm-up') + ' → ' : ''}${t('all-out')}${it.reps ? ` (~${it.reps})` : ''}`;
+    if (it.measure === 'hold') return `${it.sets || 1} × ${it.hold} s${it.rest ? ` · ${t('rest {t}', { t: fmt(it.rest) })}` : ''}`;
+    return `${it.sets || 1} × ${it.reps ?? it.target ?? ''}${it.perSide ? t('/side') : ''}${it.rest ? ` · ${t('rest {t}', { t: fmt(it.rest) })}` : ''}`;
   }
   return '';
 }
@@ -508,21 +519,21 @@ function sectionNext() {
   const fin = remaining.filter(b => /finish/i.test(b.role)).length;
   const other = remaining.length - work - fin;
   const sp = [];
-  if (work) sp.push(`${work} main block${work > 1 ? 's' : ''}`);
-  if (fin) sp.push(`${fin} finisher`);
-  if (other) sp.push(`${other} more`);
-  const summary = (sp.join(' · ') || `${remaining.length} block${remaining.length > 1 ? 's' : ''}`) + ' to go';
-  const motiv = pct >= 80 ? 'Almost there. Finish strong. 🔥' : pct >= 50 ? "Past halfway. Hold the pace." : pct >= 25 ? "Locked in. Keep stacking blocks." : "Settle in. You've got this.";
+  if (work) sp.push(t2(work, '{n} main block', '{n} main blocks'));
+  if (fin) sp.push(t('{n} finisher', { n: fin }));
+  if (other) sp.push(t('{n} more', { n: other }));
+  const summary = t('{x} to go', { x: sp.join(' · ') || t2(remaining.length, '{n} block', '{n} blocks') });
+  const motiv = t(pct >= 80 ? 'Almost there. Finish strong. 🔥' : pct >= 50 ? "Past halfway. Hold the pace." : pct >= 25 ? "Locked in. Keep stacking blocks." : "Settle in. You've got this.");
   host.innerHTML = `
     <div class="screen run fade-in transscreen ${S.plan.coachMode ? 'bgn' : ''}">
       <div class="run-head">
         <button class="x back" id="backBtn">‹</button>
-        <div class="blk">✓ ${done.name} done</div>
+        <div class="blk">✓ ${t('{x} done', { x: t(done.name) })}</div>
         <div class="right"><span class="sessclock" id="sessClock">${fmt(R.sessionElapsed(S))}</span><button class="x pausebtn" id="pauseBtn" aria-label="Pause"><svg width="14" height="16" viewBox="0 0 14 16" fill="currentColor"><rect x="1" y="1" width="4" height="14" rx="1.2"/><rect x="9" y="1" width="4" height="14" rx="1.2"/></svg></button><button class="x" id="exitBtn">✕</button></div>
       </div>
 
       <div class="trans-rest">
-        <div class="eyebrow">Rest</div>
+        <div class="eyebrow">${t('Rest')}</div>
         <div class="timer-wrap">${timerSvg('rest')}</div>
         <div class="btn-row tight"><button class="btn secondary" id="sub20">−20s</button><button class="btn secondary" id="add20">+20s</button></div>
       </div>
@@ -539,13 +550,13 @@ function sectionNext() {
         <div class="lc-list">${remaining.map((bl, i) => `<div class="lc-row ${i === 0 ? 'up' : ''}"><span class="lc-bn">${bl.name}</span><span class="lc-role">${nextRx(bl)}</span></div>`).join('')}</div>
       </div>
 
-      <div class="actionbar"><button class="btn lg" id="goNext">Start ${next.name} ▸</button></div>
+      <div class="actionbar"><button class="btn lg" id="goNext">${t('Start {x} ▸', { x: next.name })}</button></div>
     </div>`;
   document.getElementById('exitBtn').addEventListener('click', confirmExit);
   document.getElementById('pauseBtn').addEventListener('click', pauseSession);
   document.getElementById('backBtn').addEventListener('click', backBlock);
   const begin = () => { R.clearStep(S); onStepDone = null; enterBlock(S.bi + 1, { skipReady: true }); };
-  if (beginStep(rest, 'rest', 'trans')) say(`Rest. Next, ${next.name}.`); onStepDone = begin;
+  if (beginStep(rest, 'rest', 'trans')) say(t('Rest. Next, {x}.', { x: next.name })); onStepDone = begin;
   document.getElementById('add20').addEventListener('click', () => { S.stepDur += 20; R.save(S); });
   document.getElementById('sub20').addEventListener('click', () => { if (R.stepRemaining(S) > 25) { S.stepDur -= 20; R.save(S); } });
   document.getElementById('goNext').addEventListener('click', begin);
@@ -556,17 +567,17 @@ function openDemo(item) {
   const ex = EXERCISES[item.exId] || {};
   const url = item.demoUrl || ex.demoUrl;
   const cue = item.cue || ex.cues || '';
-  const q = encodeURIComponent(`${item.name || ex.name} form tutorial`);
+  const q = encodeURIComponent(`${item.name || ex.name} ${t('form tutorial')}`);
   const ov = document.createElement('div'); ov.className = 'overlay';
   ov.innerHTML = `
     <div class="overlay-card">
-      <div class="eyebrow">Demo</div>
+      <div class="eyebrow">${t('Demo')}</div>
       <h2 style="margin:6px 0 12px;">${item.name}</h2>
       ${url ? `<div class="video-wrap"><iframe src="${url}" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe></div>`
-            : `<div class="video-stub"><div class="pl">▶</div><div>Video coming soon</div>
-                 <a class="ytlink" href="https://www.youtube.com/results?search_query=${q}" target="_blank" rel="noopener">Search YouTube meanwhile</a></div>`}
+            : `<div class="video-stub"><div class="pl">▶</div><div>${t('Video coming soon')}</div>
+                 <a class="ytlink" href="https://www.youtube.com/results?search_query=${q}" target="_blank" rel="noopener">${t('Search YouTube meanwhile')}</a></div>`}
       <p class="cue-big">${cue}</p>
-      <button class="btn" id="demoClose" style="margin-top:14px;">Close</button>
+      <button class="btn" id="demoClose" style="margin-top:14px;">${t('Close')}</button>
     </div>`;
   host.appendChild(ov);
   ov.querySelector('#demoClose').addEventListener('click', () => ov.remove());
@@ -584,7 +595,7 @@ function shell(inner, { progress = true } = {}) {
     <div class="screen run fade-in ${S.plan.coachMode ? 'bgn' : ''} ${S.plan.blocks.length === 1 ? 'single' : ''}">
       <div class="run-head">
         <button class="x back" id="backBtn" ${S.bi <= 0 ? 'disabled' : ''}>‹</button>
-        <div class="blk">${b.role} · ${b.name}</div>
+        <div class="blk">${t(b.role)} · ${t(b.name)}</div>
         <div class="right"><span class="sessclock" id="sessClock">${fmt(R.sessionElapsed(S))}</span><button class="x pausebtn" id="pauseBtn" aria-label="Pause"><svg width="14" height="16" viewBox="0 0 14 16" fill="currentColor"><rect x="1" y="1" width="4" height="14" rx="1.2"/><rect x="9" y="1" width="4" height="14" rx="1.2"/></svg></button><button class="x" id="exitBtn">✕</button></div>
       </div>
       <div class="wprog-row">
@@ -606,7 +617,7 @@ function reflectPause() {
   const paused = S && R.isStepPaused(S);
   document.querySelector('.timer')?.classList.toggle('paused', !!paused);
   const cap = document.getElementById('timerCap');
-  if (cap) cap.textContent = (S && S.stepDur != null) ? (paused ? '❚❚ paused, tap to resume' : 'tap to pause') : '';
+  if (cap) cap.textContent = (S && S.stepDur != null) ? (t(paused ? '❚❚ paused, tap to resume' : 'tap to pause')) : '';
 }
 /* overall workout completion (0–100), climbs with the clock */
 function overallPct() {
@@ -656,11 +667,11 @@ function showPaused() {
   document.getElementById('wmPaused')?.remove();
   const ov = document.createElement('div'); ov.className = 'wm-paused-ov'; ov.id = 'wmPaused';
   ov.innerHTML = `<div class="wm-paused-card">
-    <div class="eyebrow">Paused</div>
+    <div class="eyebrow">${t('Paused')}</div>
     <div class="wm-paused-t" id="pausedClock">${fmt(R.sessionElapsed(S))}</div>
-    <p class="muted">The clock is stopped. Take your time.</p>
-    <button class="btn lg" id="wmResume">Resume ▸</button>
-    <div class="btn-row" style="margin-top:10px;"><button class="btn secondary" id="wmSettings">Settings</button><button class="btn secondary" id="wmEnd">End workout</button></div>
+    <p class="muted">${t('The clock is stopped. Take your time.')}</p>
+    <button class="btn lg" id="wmResume">${t('Resume ▸')}</button>
+    <div class="btn-row" style="margin-top:10px;"><button class="btn secondary" id="wmSettings">${t('Settings')}</button><button class="btn secondary" id="wmEnd">${t('End workout')}</button></div>
   </div>`;
   host.appendChild(ov);
   ov.querySelector('#wmResume').addEventListener('click', resumeSession);
@@ -682,14 +693,14 @@ function confirmExit() {
   const ov = document.createElement('div'); ov.className = 'overlay';
   ov.innerHTML = `
     <div class="overlay-card">
-      <div class="eyebrow">End workout</div>
-      <h2 style="margin:6px 0 4px;">Stop here?</h2>
+      <div class="eyebrow">${t('End workout')}</div>
+      <h2 style="margin:6px 0 4px;">${t('Stop here?')}</h2>
       <p class="muted" style="margin:0 0 14px;">${logged
-        ? `You've logged ${logged} set${logged > 1 ? 's' : ''} so far.`
-        : 'Nothing logged yet.'}</p>
-      ${logged ? '<button class="btn" id="exSave">Save what I did</button>' : ''}
-      <button class="btn ${logged ? 'ghost' : ''}" id="exDiscard" style="margin-top:8px;">${logged ? 'Discard it' : 'End workout'}</button>
-      <button class="btn ghost" id="exKeep" style="margin-top:8px;">Keep going</button>
+        ? t2(logged, "You've logged {n} set so far.", "You've logged {n} sets so far.")
+        : t('Nothing logged yet.')}</p>
+      ${logged ? `<button class="btn" id="exSave">${t('Save what I did')}</button>` : ''}
+      <button class="btn ${logged ? 'ghost' : ''}" id="exDiscard" style="margin-top:8px;">${logged ? t('Discard it') : t('End workout')}</button>
+      <button class="btn ghost" id="exKeep" style="margin-top:8px;">${t('Keep going')}</button>
     </div>`;
   host.appendChild(ov);
   ov.querySelector('#exSave')?.addEventListener('click', () => { ov.remove(); finishSession({ partial: true }); });
@@ -735,7 +746,7 @@ function updateTimer(rem, total) {
   document.querySelectorAll('.timer-wrap .timer .core').forEach(el => { el.style.strokeDashoffset = String(c * (1 - frac)); });   // the core and its halo
   document.getElementById('timerGlare')?.classList.toggle('off', frac < 0.16);   // no glare floating past the end of the tube
   const paused = R.isStepPaused(S);
-  const cap = document.getElementById('timerCap'); if (cap) cap.textContent = paused ? '❚❚ paused, tap to resume' : 'tap to pause';
+  const cap = document.getElementById('timerCap'); if (cap) cap.textContent = t(paused ? '❚❚ paused, tap to resume' : 'tap to pause');
   document.querySelector('.timer')?.classList.toggle('paused', paused);
 }
 function bigEditable(val, unit) {
@@ -772,7 +783,7 @@ function lastTimeLine(item) {
   } else {
     for (const s of seq.sets) parts.push(`${s.value}${s.weight ? `@${s.weight}` : ''}`);
   }
-  return `<div class="lasttime"><span class="lt-lbl">last time</span> ${parts.join(' · ')}</div>`;
+  return `<div class="lasttime"><span class="lt-lbl">${t('last time')}</span> ${parts.join(' · ')}</div>`;
 }
 /* "beat last time" target on a top set — big & glanceable (weight pops, plain wording) */
 function failureTarget(item) {
@@ -782,9 +793,9 @@ function failureTarget(item) {
     if (pr.weight != null) {
       beat = (pr.l != null || pr.r != null)
         ? `<span class="w">${pr.weight}</span> lb · L${pr.l ?? '–'} R${pr.r ?? '–'}`
-        : `<span class="w">${pr.weight}</span> lb · ${pr.value} reps`;
+        : `<span class="w">${pr.weight}</span> lb · ${t('{n} reps', { n: pr.value })}`;
     } else {
-      beat = `<span class="w">${pr.value}</span> ${pr.unit === 'sec' ? 'sec hold' : pr.unit}`;
+      beat = `<span class="w">${pr.value}</span> ${pr.unit === 'sec' ? t('sec hold') : t(pr.unit)}`;
     }
   }
   // warm-ups done this session → a small ramp line
@@ -793,8 +804,8 @@ function failureTarget(item) {
   const warm = weights.length ? `${weights.join(' → ')} lb` : (sets.length ? [...new Set(sets.map(s => s.value))].join(' · ') : '');
   if (!beat && !warm) return '';
   return `<div class="failure-target">
-    ${beat ? `<div class="ft-beat"><span class="ft-lbl">🏆 best set, beat it</span><span class="ft-val">${beat}</span></div>` : `<div class="ft-beat first"><span class="ft-lbl">first time — set the bar 💪</span></div>`}
-    ${warm ? `<div class="ft-warm">warm-ups today · ${warm}</div>` : ''}
+    ${beat ? `<div class="ft-beat"><span class="ft-lbl">${t('🏆 best set, beat it')}</span><span class="ft-val">${beat}</span></div>` : `<div class="ft-beat first"><span class="ft-lbl">${t('first time, set the bar 💪')}</span></div>`}
+    ${warm ? `<div class="ft-warm">${t('warm-ups today')} · ${warm}</div>` : ''}
   </div>`;
 }
 function renderSets() {
@@ -808,7 +819,7 @@ function renderSets() {
   const totalSets = isYates ? warmups + 1 : (item.sets || 1);
   const setNo = S.si + 1;
   const failureSet = isYates && S.si === totalSets - 1;
-  const label = isYates ? (failureSet ? 'ALL-OUT SET, to failure' : `Warm-up ${setNo}/${warmups}`) : `Set ${setNo} / ${totalSets}`;
+  const label = isYates ? (failureSet ? t('ALL-OUT SET, to failure') : t('Warm-up {a}/{b}', { a: setNo, b: warmups })) : t('Set {a} / {b}', { a: setNo, b: totalSets });
 
   if (S.sub === 'rest') return renderRest(item);
 
@@ -817,9 +828,9 @@ function renderSets() {
     shell(`<div class="now-ex"><div class="label">${label}</div><div class="name">${item.name}</div></div>${exActions(item)}
       ${lastTimeLine(item)}
       <div class="timer-wrap">${timerSvg('buffer')}</div>
-      <div class="actionbar"><button class="btn ghost" id="skip">Skip ▸</button></div>`);
+      <div class="actionbar"><button class="btn ghost" id="skip">${t('Skip ▸')}</button></div>`);
     document.getElementById('skip').addEventListener('click', () => { R.clearStep(S); onStepDone = null; capture(target); afterSet(); });
-    if (beginStep(target, 'work', 'hold')) say(`${item.name}. Hold it.`); onStepDone = () => { capture(target); afterSet(); };
+    if (beginStep(target, 'work', 'hold')) say(t('{x}. Hold it.', { x: item.name })); onStepDone = () => { capture(target); afterSet(); };
   } else {                                              // reps set → tap-to-type, weight + R/L
     const weighted = item.load === 'weighted';
     const uni = item.laterality === 'unilateral' || item.perSide;
@@ -845,19 +856,19 @@ function renderSets() {
     const lastW = (step && step.weight != null) ? step.weight
                 : (item.exId ? (store.getLast(item.exId)?.weight ?? '') : '') || (item.weight ?? '');
     const wField = weighted
-      ? `<div class="wfield"><input id="wMain" type="number" inputmode="decimal" placeholder="weight" value="${lastW}" onfocus="this.select()"/><span class="u">${WUNIT}</span></div>` : '';
+      ? `<div class="wfield"><input id="wMain" type="number" inputmode="decimal" placeholder="${t('weight')}" value="${lastW}" onfocus="this.select()"/><span class="u">${WUNIT}</span></div>` : '';
     const inputArea = uni
       ? `<div class="sides">
-           <div class="side-col"><div class="lbl">Left</div><input class="big-input" id="valL" type="number" inputmode="numeric" value="${base}" onfocus="this.select()"/></div>
-           <div class="side-col"><div class="lbl">Right</div><input class="big-input" id="valR" type="number" inputmode="numeric" value="${base}" onfocus="this.select()"/></div>
+           <div class="side-col"><div class="lbl">${t('Left')}</div><input class="big-input" id="valL" type="number" inputmode="numeric" value="${base}" onfocus="this.select()"/></div>
+           <div class="side-col"><div class="lbl">${t('Right')}</div><input class="big-input" id="valR" type="number" inputmode="numeric" value="${base}" onfocus="this.select()"/></div>
          </div><div class="center unit">${unit} · per side</div>`
-      : `<div class="target">${bigEditable(base, `${unit} · tap to type`)}</div>`;
+      : `<div class="target">${bigEditable(base, `${t(unit)} · ${t('tap to type')}`)}</div>`;
     const showTarget = failureSet || (!isYates && weighted && setNo === 1);   // top set → show what to beat
-    shell(`<div class="now-ex"><div class="label">${label}</div><div class="name">${item.name}</div>${item.tempo ? `<div class="side">tempo ${item.tempo}</div>` : ''}</div>${exActions(item)}
+    shell(`<div class="now-ex"><div class="label">${label}</div><div class="name">${item.name}</div>${item.tempo ? `<div class="side">${t('tempo')} ${item.tempo}</div>` : ''}</div>${exActions(item)}
       ${lastTimeLine(item)}
       ${showTarget ? failureTarget(item) : ''}
       ${inputArea}${wField}
-      <div class="actionbar"><button class="btn lg" id="done">${failureSet ? 'Failure set done ✓' : 'Set done ✓'}</button></div>`);
+      <div class="actionbar"><button class="btn lg" id="done">${failureSet ? t('Failure set done ✓') : t('Set done ✓')}</button></div>`);
     if (!uni) wireBig();
     document.querySelectorAll('.big-input, #wMain').forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') el.blur(); }));
     document.getElementById('done').addEventListener('click', () => {
@@ -905,7 +916,7 @@ function blockProgress() {
     const allDone = done >= total;
     return `<div class="bp-row ${cur ? 'cur' : ''} ${allDone ? 'fin' : ''}"><span class="bp-name">${it.name}</span><span class="bp-dots">${dots}</span></div>`;
   }).join('');
-  return `<div class="bp-head">This block: ✓ done · ● now · left</div><div class="blockprog">${rows}</div>`;
+  return `<div class="bp-head">${t('This block: ✓ done · ● now · left')}</div><div class="blockprog">${rows}</div>`;
 }
 function renderRest(prevItem) {
   const b = block();
@@ -915,13 +926,13 @@ function renderRest(prevItem) {
   const suggested = prevItem.rest != null ? Number(prevItem.rest) : (isYates ? 120 : 60);
   const resume = () => block().format === 'skill' ? renderSkill() : renderSets();
   if (suggested <= 0) { S.sub = 'work'; R.save(S); return resume(); }
-  shell(`<div class="now-ex"><div class="label">Rest</div><div class="name">Recover</div></div>
+  shell(`<div class="now-ex"><div class="label">${t('Rest')}</div><div class="name">${t('Recover')}</div></div>
     <div class="timer-wrap">${timerSvg('rest')}</div>
     ${blockProgress()}
     <div class="actionbar"><div class="btn-row">
       <button class="btn secondary" id="sub20">−20s</button><button class="btn secondary" id="add20">+20s</button>
-      <button class="btn" id="skip">Skip ▸</button></div></div>`);
-  if (beginStep(suggested, 'rest', 'rest')) say(`Rest. ${suggested} seconds.`);
+      <button class="btn" id="skip">${t('Skip ▸')}</button></div></div>`);
+  if (beginStep(suggested, 'rest', 'rest')) say(t('Rest. {n} seconds.', { n: suggested }));
   onStepDone = () => { S.sub = 'work'; R.save(S); resume(); };
   document.getElementById('add20').addEventListener('click', () => { S.stepDur += 20; R.save(S); });
   document.getElementById('sub20').addEventListener('click', () => { if (R.stepRemaining(S) > 25) { S.stepDur -= 20; R.save(S); } });
@@ -935,26 +946,26 @@ function renderSkill() {
   if (S.sub === 'rest') return renderRest(item);
   const n = b.items.length;
   const drillList = b.items.map((it, i) => `<div class="ci ${i === S.ii ? 'active' : ''}">${rowVid(it)}<span class="nm">${it.name}</span><span class="tg">${it.minutes ? it.minutes + ' min' : (it.sets || 1) + '×' + (it.measure === 'hold' ? (it.hold || 20) + 's' : (it.reps || 5))}</span></div>`).join('');
-  const head = `<div class="now-ex"><div class="label">Skill ${S.ii + 1}/${n}${item.minutes ? ' · practice' : ` · set ${S.si + 1}/${item.sets || 3}`}</div><div class="name">${item.name}</div></div>${exActions(item)}`;
+  const head = `<div class="now-ex"><div class="label">${t('Skill')} ${S.ii + 1}/${n}${item.minutes ? ` · ${t('practice')}` : ` · ${t('set {a}/{b}', { a: S.si + 1, b: item.sets || 3 })}`}</div><div class="name">${item.name}</div></div>${exActions(item)}`;
 
   if (item.minutes) {                         // freeform practice block for this drill
     shell(`${head}<div class="timer-wrap">${timerSvg('buffer')}</div><div class="circuit-list">${drillList}</div>
-      <div class="actionbar"><button class="btn" id="doneSkill">Done ▸</button></div>`);
+      <div class="actionbar"><button class="btn" id="doneSkill">${t('Done ▸')}</button></div>`);
     if (beginStep(item.minutes * 60, 'work', 'skillmin')) say(`${item.name}.`);
     const adv = () => { R.clearStep(S); onStepDone = null; afterSkillItem(); };
     onStepDone = adv;
     document.getElementById('doneSkill').addEventListener('click', adv);
   } else if (item.measure === 'hold') {        // timed-hold drill (e.g. wall handstand / front lever tuck)
     shell(`${head}<div class="timer-wrap">${timerSvg('buffer')}</div><div class="circuit-list">${drillList}</div>
-      <div class="actionbar"><button class="btn ghost" id="skip">Skip ▸</button></div>`);
-    if (beginStep(item.hold || 20, 'work', 'skillhold')) say(`${item.name}. Hold.`);
+      <div class="actionbar"><button class="btn ghost" id="skip">${t('Skip ▸')}</button></div>`);
+    if (beginStep(item.hold || 20, 'work', 'skillhold')) say(t('{x}. Hold.', { x: item.name }));
     const adv = () => { capture(item.hold || 20); afterSkillSet(item); };
     onStepDone = adv;
     document.getElementById('skip').addEventListener('click', () => { R.clearStep(S); onStepDone = null; adv(); });
   } else {                                      // reps drill (e.g. negatives)
     curVal = item.reps || 0;
     shell(`${head}<div class="target">${bigEditable(curVal, UNIT[item.measure])}</div><div class="circuit-list">${drillList}</div>
-      <div class="actionbar"><button class="btn lg" id="done">Set done ✓</button></div>`);
+      <div class="actionbar"><button class="btn lg" id="done">${t('Set done ✓')}</button></div>`);
     wireBig();
     document.getElementById('done').addEventListener('click', () => { buzz(40); capture(curVal); afterSkillSet(item); });
   }
@@ -991,13 +1002,13 @@ function renderSuperset() {
   if (S.sub === 'rest') return renderSupersetRest();
 
   const rounds = supersetRounds(b);
-  if (rounds > 1 && S.round === rounds && S.ci === 0) sayOnce(`last|${S.bi}`, 'Last round.');
+  if (rounds > 1 && S.round === rounds && S.ci === 0) sayOnce(`last|${S.bi}`, t('Last round.'));
   const dots = Array.from({ length: rounds }, (_, i) =>
     `<div class="r ${i + 1 < S.round ? 'done' : i + 1 === S.round ? 'now' : ''}">${i + 1}</div>`).join('');
-  const label = `${item.pair || ''} · round ${S.round} / ${rounds}`;
+  const label = `${item.pair || ''} · ${t('round {a} / {b}', { a: S.round, b: rounds })}`;
   const noRestHint = S.ci < b.items.length - 1
-    ? `<div class="ss-hint">No rest. Go straight into ${b.items[S.ci + 1].name}</div>`
-    : `<div class="ss-hint">Then rest ${b.rest ?? 75} sec</div>`;
+    ? `<div class="ss-hint">${t('No rest. Go straight into {x}', { x: b.items[S.ci + 1].name })}</div>`
+    : `<div class="ss-hint">${t('Then rest {n} sec', { n: b.rest ?? 75 })}</div>`;
 
   if (item.measure === 'hold') {                       // e.g. chin-up top hold, dip support hold
     const target = item.hold || 20;
@@ -1006,9 +1017,9 @@ function renderSuperset() {
       ${lastTimeLine(item)}
       <div class="timer-wrap">${timerSvg('buffer')}</div>
       ${pairStrip(b)}${noRestHint}<div class="spacer" style="height:86px;"></div>
-      <div class="actionbar"><button class="btn ghost" id="skip">Skip ▸</button></div>`);
+      <div class="actionbar"><button class="btn ghost" id="skip">${t('Skip ▸')}</button></div>`);
     const adv = () => { roundBuf[S.ci] = { value: target }; afterSupersetItem(); };
-    if (beginStep(target, 'work', 'sshold')) say(`${item.name}. Hold.`);
+    if (beginStep(target, 'work', 'sshold')) say(t('{x}. Hold.', { x: item.name }));
     onStepDone = adv;
     document.getElementById('skip').addEventListener('click', () => { R.clearStep(S); onStepDone = null; adv(); });
     return;
@@ -1021,14 +1032,14 @@ function renderSuperset() {
      starting weight when there is none */
   const lastW = (item.exId ? (store.getLast(item.exId)?.weight ?? '') : '') || (item.weight ?? '');
   const wField = weighted
-    ? `<div class="wfield"><input id="wMain" type="number" inputmode="decimal" placeholder="weight" value="${lastW}" onfocus="this.select()"/><span class="u">${WUNIT}</span></div>` : '';
-  const unitLbl = `${UNIT[item.measure]}${item.repsText ? ` · aim ${item.repsText}` : ''}`;
+    ? `<div class="wfield"><input id="wMain" type="number" inputmode="decimal" placeholder="${t('weight')}" value="${lastW}" onfocus="this.select()"/><span class="u">${WUNIT}</span></div>` : '';
+  const unitLbl = `${t(UNIT[item.measure])}${item.repsText ? ` · ${t('aim {x}', { x: item.repsText })}` : ''}`;
   shell(`<div class="rounds">${dots}</div>
     <div class="now-ex"><div class="label">${label}</div><div class="name">${item.name}</div></div>${exActions(item)}
     ${lastTimeLine(item)}
     <div class="target">${bigEditable(base, unitLbl)}</div>${wField}
     ${pairStrip(b)}${noRestHint}<div class="spacer" style="height:86px;"></div>
-    <div class="actionbar"><button class="btn lg" id="done">${S.ci >= b.items.length - 1 ? 'Round done ✓' : 'Next ▸'}</button></div>`);
+    <div class="actionbar"><button class="btn lg" id="done">${S.ci >= b.items.length - 1 ? t('Round done ✓') : t('Next ▸')}</button></div>`);
   wireBig();
   document.querySelectorAll('.big-input, #wMain').forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') el.blur(); }));
   document.getElementById('done').addEventListener('click', () => {
@@ -1050,7 +1061,7 @@ function endSupersetRound() {
     if (r.weight != null && !Number.isNaN(r.weight)) rec.weight = r.weight;
     S.captured[b.id][i].sets.push(rec);
   });
-  R.save(S); buzz(60); say(`Round ${S.round} done.`);
+  R.save(S); buzz(60); say(t('Round {n} done.', { n: S.round }));
   if (S.round < supersetRounds(b)) { S.sub = 'rest'; R.save(S); return renderSupersetRest(); }
   completeBlock();
 }
@@ -1061,23 +1072,23 @@ function renderSupersetRest() {
     `<div class="r ${i + 1 <= S.round ? 'done' : i + 1 === S.round + 1 ? 'now' : ''}">${i + 1 <= S.round ? '✓' : i + 1}</div>`).join('');
   const justDid = b.items.map((it, i) => {
     const last = S.captured[b.id][i].sets.at(-1);
-    const v = it.measure === 'hold' ? `${last?.value ?? '–'}s` : `${last?.value ?? '–'} reps`;
+    const v = it.measure === 'hold' ? `${last?.value ?? '–'} s` : t('{n} reps', { n: last?.value ?? '–' });
     return `<div class="ci"><span class="nm">${it.pair ? it.pair + ' · ' : ''}${it.name}</span><span class="tg">${v}${last?.weight != null ? ` @ ${last.weight} ${WUNIT}` : ''}</span></div>`;
   }).join('');
-  shell(`<div class="center"><div class="eyebrow">Round ${S.round} of ${rounds} done · rest</div></div>
+  shell(`<div class="center"><div class="eyebrow">${t('Round {a} of {b} done · rest', { a: S.round, b: rounds })}</div></div>
     <div class="rounds">${dots}</div>
     <div class="timer-wrap" style="margin:6px 0;">${timerSvg('rest')}</div>
     <div class="circuit-list">${justDid}</div>
-    <div class="rir-note">Leave 2–3 reps in the tank. Never to failure.</div>
+    <div class="rir-note">${t('Leave 2 to 3 reps in the tank. Never to failure.')}</div>
     <div class="actionbar"><div class="btn-row">
       <button class="btn secondary" id="sub20">−20s</button><button class="btn secondary" id="add20">+20s</button>
-      <button class="btn" id="nextRound">Round ${S.round + 1} ▸</button></div></div>`);
+      <button class="btn" id="nextRound">${t('Round {n} ▸', { n: S.round + 1 })}</button></div></div>`);
   const proceed = () => {
     R.clearStep(S); onStepDone = null;
     S.round += 1; S.ci = 0; roundBuf = S.roundBuf = {}; S.sub = 'work'; R.save(S);
     renderSuperset();
   };
-  if (beginStep(rest, 'rest', 'ssrest')) say(`Rest. ${rest} seconds.`);
+  if (beginStep(rest, 'rest', 'ssrest')) say(t('Rest. {n} seconds.', { n: rest }));
   onStepDone = proceed;
   document.getElementById('add20').addEventListener('click', () => { S.stepDur += 20; R.save(S); });
   document.getElementById('sub20').addEventListener('click', () => { if (R.stepRemaining(S) > 25) { S.stepDur -= 20; R.save(S); } });
@@ -1089,7 +1100,7 @@ function renderCircuit() {
   const b = block(); const item = b.items[S.ci || (S.ci = 0)];
   if (S.sub === 'roundrest') return renderRoundRest();
   if (S.sub === 'buffer') return renderBuffer();
-  if ((b.rounds || 1) > 1 && S.round === b.rounds && S.ci === 0) sayOnce(`last|${S.bi}`, 'Last round.');
+  if ((b.rounds || 1) > 1 && S.round === b.rounds && S.ci === 0) sayOnce(`last|${S.bi}`, t('Last round.'));
   const unit = UNIT[item.measure];
   const dots = Array.from({ length: b.rounds || 1 }, (_, i) => `<div class="r ${i + 1 < S.round ? 'done' : i + 1 === S.round ? 'now' : ''}">${i + 1}</div>`).join('');
   const ps = it => (it.laterality === 'unilateral' || it.perSide) && !it.side ? ' /side' : '';
@@ -1097,20 +1108,20 @@ function renderCircuit() {
   const uniNote = (item.laterality === 'unilateral' || item.perSide) && !item.side ? ' · per side' : '';
 
   if (item.measure === 'hold') {
-    shell(`<div class="rounds">${dots}</div><div class="now-ex"><div class="label">Round ${S.round} / ${b.rounds}</div><div class="name">${item.name}${item.side ? ' ' + item.side : ''}</div></div>${exActions(item)}
+    shell(`<div class="rounds">${dots}</div><div class="now-ex"><div class="label">${t('Round {a} / {b}', { a: S.round, b: b.rounds })}</div><div class="name">${item.name}${item.side ? ' ' + item.side : ''}</div></div>${exActions(item)}
       <div class="timer-wrap">${timerSvg('buffer')}</div><div class="circuit-list">${list}</div>
-      <div class="actionbar"><button class="btn ghost" id="skip">Skip ▸</button></div>`);
-    if (beginStep(item.hold || 30, 'work', 'chold')) say(`${item.name}. Go.`);
+      <div class="actionbar"><button class="btn ghost" id="skip">${t('Skip ▸')}</button></div>`);
+    if (beginStep(item.hold || 30, 'work', 'chold')) say(t('{x}. Go.', { x: item.name }));
     const adv = () => { roundBuf[S.ci] = item.hold; afterCircuitItem(); };
     onStepDone = adv;
     document.getElementById('skip').addEventListener('click', () => { R.clearStep(S); onStepDone = null; adv(); });
   } else {
     curVal = Number(roundBuf[S.ci] ?? item.reps ?? item.target) || 0;
-    shell(`<div class="rounds">${dots}</div><div class="now-ex"><div class="label">Round ${S.round} / ${b.rounds}</div><div class="name">${item.name}</div></div>${exActions(item)}
+    shell(`<div class="rounds">${dots}</div><div class="now-ex"><div class="label">${t('Round {a} / {b}', { a: S.round, b: b.rounds })}</div><div class="name">${item.name}</div></div>${exActions(item)}
       <div class="target">${bigEditable(curVal, unit + uniNote)}</div><div class="circuit-list">${list}</div>
       <div class="actionbar"><div class="btn-row">
-        <button class="btn ghost" id="skipEx">Skip</button>
-        <button class="btn lg" id="next">${S.ci >= b.items.length - 1 ? 'Round done ✓' : 'Next ▸'}</button></div></div>`);
+        <button class="btn ghost" id="skipEx">${t('Skip')}</button>
+        <button class="btn lg" id="next">${S.ci >= b.items.length - 1 ? t('Round done ✓') : t('Next ▸')}</button></div></div>`);
     wireBig();
     document.getElementById('next').addEventListener('click', () => { buzz(40); roundBuf[S.ci] = curVal; afterCircuitItem(); });
     document.getElementById('skipEx').addEventListener('click', () => { roundBuf[S.ci] = 0; afterCircuitItem(); });
@@ -1118,11 +1129,11 @@ function renderCircuit() {
 }
 function renderBuffer() {
   const b = block(); const next = b.items[S.ci];
-  shell(`<div class="now-ex"><div class="label">Get ready</div><div class="name">${next.name}</div></div>
+  shell(`<div class="now-ex"><div class="label">${t('Get ready')}</div><div class="name">${next.name}</div></div>
     <div class="timer-wrap">${timerSvg('buffer')}</div>
-    <div class="actionbar"><button class="btn" id="go">Go now ▸</button></div>`);
-  const t = Number(b.transition) > 0 ? Number(b.transition) : 8;   // 8s default set-up before a hold
-  if (beginStep(t, 'rest', 'buffer')) say(`Next. ${next.name}.`);
+    <div class="actionbar"><button class="btn" id="go">${t('Go now ▸')}</button></div>`);
+  const secsBefore = Number(b.transition) > 0 ? Number(b.transition) : 8;   // 8s default set-up before a hold
+  if (beginStep(secsBefore, 'rest', 'buffer')) say(t('Next. {x}.', { x: next.name }));
   onStepDone = () => { S.sub = 'work'; R.save(S); renderCircuit(); };
   document.getElementById('go').addEventListener('click', () => { R.clearStep(S); onStepDone = null; S.sub = 'work'; R.save(S); renderCircuit(); });
 }
@@ -1143,7 +1154,7 @@ function afterCircuitItem() {
 function endRound() {
   const b = block();
   b.items.forEach((it, i) => S.captured[b.id][i].sets.push({ value: roundBuf[i] ?? (it.hold ?? it.reps ?? it.target) }));
-  R.save(S); buzz(60); say(`Round ${S.round} done.`);
+  R.save(S); buzz(60); say(t('Round {n} done.', { n: S.round }));
   if (S.round < (b.rounds || 1)) {
     if ((b.roundRest ?? 30) > 0) { S.sub = 'roundrest'; R.save(S); renderRoundRest(); }
     else { S.round += 1; S.ci = 0; roundBuf = S.roundBuf = {}; S.sub = 'work'; R.save(S); renderCircuit(); }
@@ -1153,11 +1164,11 @@ function renderRoundRest() {
   const b = block(); const rest = Number(b.roundRest) || 30;
   const rows = b.items.map((it, i) => logRow(it, `rr_${i}`, S.captured[b.id][i].sets.at(-1)?.value)).join('');
   const roundDots = Array.from({ length: b.rounds || 1 }, (_, i) => `<div class="r ${i + 1 <= S.round ? 'done' : i + 1 === S.round + 1 ? 'now' : ''}">${i + 1 <= S.round ? '✓' : i + 1}</div>`).join('');
-  shell(`<div class="center"><div class="eyebrow">Round ${S.round} of ${b.rounds} done · rest</div></div>
+  shell(`<div class="center"><div class="eyebrow">${t('Round {a} of {b} done · rest', { a: S.round, b: b.rounds })}</div></div>
     <div class="rounds">${roundDots}</div>
     <div class="timer-wrap" style="margin:6px 0;">${timerSvg('rest')}</div>
     <div class="card logcard">${rows}</div>
-    <div class="actionbar"><button class="btn lg" id="nextRound">Start round ${S.round + 1} ▸</button></div>`, { progress: false });
+    <div class="actionbar"><button class="btn lg" id="nextRound">${t('Start round {n} ▸', { n: S.round + 1 })}</button></div>`, { progress: false });
   const proceed = () => {
     b.items.forEach((it, i) => { const v = readInput(`rr_${i}`); if (v != null) S.captured[b.id][i].sets[S.captured[b.id][i].sets.length - 1].value = v; });
     R.clearStep(S); onStepDone = null; S.round += 1; S.ci = 0; roundBuf = S.roundBuf = {}; S.sub = 'work'; R.save(S); renderCircuit();
@@ -1170,7 +1181,7 @@ function renderRoundRest() {
 function renderAmrap() {
   const b = block(); const mins = b.minutes || 5;
   const single = b.items.length === 1 && !b.countRounds;   // single-exercise max-out → log reps, not rounds
-  if (beginStep(mins * 60, 'work', 'amrap')) { say(`${single ? 'Max reps.' : 'As many rounds as possible.'}${mins > 1 ? ` ${mins} minutes.` : ''} Go.`); }
+  if (beginStep(mins * 60, 'work', 'amrap')) { say(`${single ? t('Max reps.') : t('As many rounds as possible.')}${mins > 1 ? ' ' + t('{n} minutes.', { n: mins }) : ''} ${t('Go.')}`); }
   const finish = () => {
     R.clearStep(S); onStepDone = null;
     if (single) { S.captured[b.id][0].sets = [{ value: curVal }]; R.save(S); return completeBlock(); }
@@ -1187,10 +1198,10 @@ function renderAmrap() {
     const it = b.items[0];
     if (S.amrapReps == null) S.amrapReps = 0;
     curVal = S.amrapReps;
-    shell(`<div class="now-ex"><div class="label">Max reps · ${mins} min</div><div class="name">${it.name}</div></div>${exActions(it)}
+    shell(`<div class="now-ex"><div class="label">${t('Max reps')} · ${mins} min</div><div class="name">${it.name}</div></div>${exActions(it)}
       <div class="timer-wrap">${timerSvg('buffer')}</div>
-      <div class="target">${bigEditable(curVal, `${UNIT[it.measure] || 'reps'} · tap to log your total`)}</div>
-      <div class="actionbar"><button class="btn lg" id="endAmrap">Done ▸</button></div>`);
+      <div class="target">${bigEditable(curVal, `${t(UNIT[it.measure] || 'reps')} · ${t('tap to log your total')}`)}</div>
+      <div class="actionbar"><button class="btn lg" id="endAmrap">${t('Done ▸')}</button></div>`);
     wireBig();
     document.getElementById('bigVal')?.addEventListener('input', () => { S.amrapReps = curVal; R.save(S); });
     document.getElementById('endAmrap').addEventListener('click', () => { S.amrapReps = curVal; finish(); });
@@ -1209,14 +1220,14 @@ function renderAmrap() {
   const moveRows = () => b.items.map((it, i) => mvRow(it, showReps ? { val: S.amrapCur[i], unit: mvUnit(it), step: `data-am="${i}"`, wIdx: i } : { wIdx: i })).join('');
   const logRows = () => {
     const times = amrapTimes();
-    return S.amrapLog.map((r, k) => ({ r, k, t: times[k] })).reverse().map(({ r, k, t }) => `<button class="am-r" data-amr="${k}"><span>Round ${k + 1}</span><b>${t != null ? fmt(t) : ''}</b><small>${showReps ? r.reps.join(' · ') : ''}</small></button>`).join('');
+    return S.amrapLog.map((r, k) => ({ r, k, tm: times[k] })).reverse().map(({ r, k, tm }) => `<button class="am-r" data-amr="${k}"><span>${t('Round {n}', { n: k + 1 })}</span><b>${tm != null ? fmt(tm) : ''}</b><small>${showReps ? r.reps.join(' · ') : ''}</small></button>`).join('');
   };
   shell(`<div class="now-ex"><div class="label">AMRAP · ${mins} min</div></div>
     <div class="am-top"><div class="timer-wrap am-ring">${timerSvg('buffer')}</div>
-      <div class="am-count"><small>Rounds</small><b class="wm-pop" id="amrapN">${S.amrapRounds}</b><span id="amrapLast">${amrapLast()}</span></div></div>
-    ${b.hideList ? '' : `<div class="am-moves"><div class="am-h">Round ${S.amrapRounds + 1}</div>${moveRows()}</div>`}
+      <div class="am-count"><small>${t('Rounds')}</small><b class="wm-pop" id="amrapN">${S.amrapRounds}</b><span id="amrapLast">${amrapLast()}</span></div></div>
+    ${b.hideList ? '' : `<div class="am-moves"><div class="am-h">${t('Round {n}', { n: S.amrapRounds + 1 })}</div>${moveRows()}</div>`}
     <div class="am-log" id="amLog">${logRows()}</div>
-    <div class="actionbar"><div class="btn-row am-bar"><button class="btn secondary" id="rdMinus" aria-label="Undo last round">↶</button><button class="btn lg" id="rdPlus">Round done ✓</button><button class="btn ghost" id="endAmrap">End</button></div></div>`);
+    <div class="actionbar"><div class="btn-row am-bar"><button class="btn secondary" id="rdMinus" aria-label="${t('Undo last round')}">↶</button><button class="btn lg" id="rdPlus">${t('Round done ✓')}</button><button class="btn ghost" id="endAmrap">End</button></div></div>`);
   const redraw = () => renderAmrap();
   host.querySelectorAll('[data-am]').forEach(btn => btn.addEventListener('click', () => {
     const i = +btn.dataset.am; S.amrapCur[i] = nudge(b.items[i], S.amrapCur[i], Number(btn.dataset.d)); R.save(S);
@@ -1230,7 +1241,7 @@ function renderAmrap() {
     S.amrapLog.push({ reps: [...S.amrapCur] }); R.save(S);
     celebrate(e.currentTarget, `+1`);
     const praise = S.amrapRounds % 2 === 0 ? pick('round') : null;   // every other round, a word (if recorded)
-    say(`Round ${S.amrapRounds}.${praise ? ' ' + praise : ''}`);
+    say(`${t('Round {n}.', { n: S.amrapRounds })}${praise ? ' ' + praise : ''}`);
     redraw();
   });
   document.getElementById('rdMinus').addEventListener('click', () => {
@@ -1244,10 +1255,10 @@ function editAmrapRound(k, done) {
   const b = block(), r = S.amrapLog[k]; if (!r) return;
   const ov = document.createElement('div'); ov.className = 'overlay';
   const draw = () => {
-    ov.innerHTML = `<div class="overlay-card"><div class="eyebrow">Round ${k + 1}${amrapTimes()[k] != null ? ` · ${fmt(amrapTimes()[k])}` : ''}</div>
-      <h2 style="margin:6px 0 12px;">What you did</h2>
+    ov.innerHTML = `<div class="overlay-card"><div class="eyebrow">${t('Round {n}', { n: k + 1 })}${amrapTimes()[k] != null ? ` · ${fmt(amrapTimes()[k])}` : ''}</div>
+      <h2 style="margin:6px 0 12px;">${t('What you did')}</h2>
       <div class="mvr-list">${b.items.map((it, i) => mvRow({ ...it, exId: null }, { val: r.reps[i], unit: mvUnit(it), step: `data-e="${i}"` })).join('')}</div>
-      <button class="btn" id="amEditDone" style="margin-top:14px;">Done</button></div>`;
+      <button class="btn" id="amEditDone" style="margin-top:14px;">${t('Done')}</button></div>`;
     ov.querySelectorAll('[data-e]').forEach(btn => btn.addEventListener('click', () => { const i = +btn.dataset.e; r.reps[i] = nudge(b.items[i], r.reps[i], Number(btn.dataset.d)); R.save(S); draw(); }));
     ov.querySelector('#amEditDone').addEventListener('click', () => { ov.remove(); done(); });
   };
@@ -1261,11 +1272,11 @@ function editMoveWeight(b, i, done) {
   const ov = document.createElement('div'); ov.className = 'overlay';
   let unit = it.wUnit || 'lb', v = Number(it.weight) || 0;
   const draw = () => {
-    ov.innerHTML = `<div class="overlay-card"><div class="eyebrow">Weight</div>
+    ov.innerHTML = `<div class="overlay-card"><div class="eyebrow">${t('Weight')}</div>
       <h2 style="margin:6px 0 14px;">${it.name}</h2>
-      <div class="mvr-list"><div class="mvr"><span class="mvr-sp"></span><span class="mvr-n">${v > 0 ? 'Added weight' : 'Bodyweight'}</span>
+      <div class="mvr-list"><div class="mvr"><span class="mvr-sp"></span><span class="mvr-n">${v > 0 ? t('Added weight') : t('Bodyweight')}</span>
         <span class="mvr-st"><button data-w="-1" aria-label="Less">−</button><b>${v || 0}<small class="wm-wu" data-wu="1" role="button">${unit}</small></b><button data-w="1" aria-label="More">+</button></span></div></div>
-      <button class="btn" id="mwDone" style="margin-top:14px;">Done</button></div>`;
+      <button class="btn" id="mwDone" style="margin-top:14px;">${t('Done')}</button></div>`;
     const k = unit === 'kg' ? 2.5 : 5;
     ov.querySelectorAll('[data-w]').forEach(btn => btn.addEventListener('click', () => {
       const d = Number(btn.dataset.w); v = Math.max(0, Math.round((d > 0 ? Math.floor(v / k + 1e-9) * k + k : Math.ceil(v / k - 1e-9) * k - k) * 10) / 10); buzz(10); draw(); }));
@@ -1298,7 +1309,7 @@ function reorderMoves(b, from, to) {
    seconds", "4 minutes" (no "0 minutes") */
 function spokenTime(secs) {
   const m = Math.floor(secs / 60), s = Math.round(secs % 60);
-  return [m ? `${m} minutes` : '', s || !m ? `${s} seconds` : ''].filter(Boolean).join(' ');
+  return [m ? t('{n} minutes', { n: m }) : '', s || !m ? t('{n} seconds', { n: s }) : ''].filter(Boolean).join(' ');
 }
 
 /* A ROUND DONE SHOULD FEEL LIKE ONE. A buzz pattern, a victory chime, a
@@ -1320,7 +1331,7 @@ function celebrate(from, text = '+1') {
 
 /* seconds each AMRAP round took, from the + taps */
 const amrapTimes = () => (S.amrapSplits || []).map((t, i, a) => Math.round(t - (a[i - 1] || 0)));
-function amrapLast() { const t = amrapTimes(); return t.length ? `Last round ${fmt(t.at(-1))}${t.length > 1 ? ` · best ${fmt(Math.min(...t))}` : ''}` : ''; }
+function amrapLast() { const ts = amrapTimes(); return ts.length ? `${t('Last round {t}', { t: fmt(ts.at(-1)) })}${ts.length > 1 ? ` · ${t('best {t}', { t: fmt(Math.min(...ts)) })}` : ''}` : ''; }
 /* AMRAP, done: each round's reps per move, prefilled with the plan, plus
    the reps of the round you didn't finish. What gets saved is what you
    actually did, round by round. */
@@ -1329,13 +1340,13 @@ function renderAmrapLog() {
   onScreen('amraplog');
   const moveCells = (key, vals) => b.items.map((it, i) => `<div class="logset"><span class="sn">${it.name}</span>${cellInputs({ measure: it.measure }, `${key}_${i}`, vals[i], null, null)}</div>`).join('');
   const times = amrapTimes();
-  const rounds = Array.from({ length: n }, (_, r) => `<div class="loggroup"><div class="gname">Round ${r + 1}${times[r] != null ? ` <small class="muted">${fmt(times[r])}</small>` : ''}</div>${moveCells(`ar${r}`, b.items.map((it, i) => S.amrapLog?.[r]?.reps?.[i] ?? it.reps ?? ''))}</div>`).join('');
-  shell(`<div class="center"><div class="eyebrow">AMRAP done</div><h2 style="font-size:22px;margin:8px 0 4px;">${n} round${n === 1 ? '' : 's'}</h2>
-      <p class="muted" style="margin:0 0 14px;">Fix any round where you dropped reps.</p></div>
+  const rounds = Array.from({ length: n }, (_, r) => `<div class="loggroup"><div class="gname">${t('Round {n}', { n: r + 1 })}${times[r] != null ? ` <small class="muted">${fmt(times[r])}</small>` : ''}</div>${moveCells(`ar${r}`, b.items.map((it, i) => S.amrapLog?.[r]?.reps?.[i] ?? it.reps ?? ''))}</div>`).join('');
+  shell(`<div class="center"><div class="eyebrow">${t('AMRAP done')}</div><h2 style="font-size:22px;margin:8px 0 4px;">${t2(n, '{n} round', '{n} rounds')}</h2>
+      <p class="muted" style="margin:0 0 14px;">${t('Fix any round where you dropped reps.')}</p></div>
     <div class="card logcard">${rounds}
-      <div class="loggroup"><div class="gname">Unfinished round <small class="muted">extra reps</small></div>${moveCells('arx', b.items.map(() => 0))}</div>
+      <div class="loggroup"><div class="gname">${t('Unfinished round')} <small class="muted">${t('extra reps')}</small></div>${moveCells('arx', b.items.map(() => 0))}</div>
     </div>
-    <div class="actionbar"><button class="btn lg" id="confirm">${isLastBlock() ? 'Finish workout ✓' : 'Confirm ▸'}</button></div>`, { progress: false });
+    <div class="actionbar"><button class="btn lg" id="confirm">${isLastBlock() ? t('Finish workout ✓') : t('Confirm ▸')}</button></div>`, { progress: false });
   document.getElementById('confirm').addEventListener('click', () => {
     let extra = 0;
     b.items.forEach((it, i) => {
@@ -1369,15 +1380,15 @@ function renderInterval() {
   /* `all`: every move inside each interval (A then B, every minute),
      instead of the moves taking turns one interval each */
   const all = !!b.allEach && per > 1;
-  const item = all ? { name: `Round ${S.iv + 1}` } : b.items[S.iv % per];
+  const item = all ? { name: t('Round {n}', { n: S.iv + 1 }) } : b.items[S.iv % per];
   const roundN = Math.floor(S.iv / per) + 1;
   const phaseWork = S.ivPhase === 'work';
-  const kind = b.label || (b.format === 'emom' ? 'EMOM' : 'Tabata');
+  const kind = t(b.label || (b.format === 'emom' ? 'EMOM' : 'Tabata'));
   /* `perRound`: a round is every move once (Tabata with 2 moves, 8 rounds
      = 16 intervals), so count rounds, not intervals */
   const pr = b.perRound > 1 ? b.perRound : 0;
-  const counter = pr ? ` · round ${Math.floor(S.iv / pr) + 1}/${b.rounds}`
-    : b.intervals ? (totalIv > 1 ? ` · ${S.iv + 1}/${totalIv}` : '') : ` · round ${roundN}/${rounds}`;
+  const counter = pr ? ` · ${t('round {a}/{b}', { a: Math.floor(S.iv / pr) + 1, b: b.rounds })}`
+    : b.intervals ? (totalIv > 1 ? ` · ${S.iv + 1}/${totalIv}` : '') : ` · ${t('round {a}/{b}', { a: roundN, b: rounds })}`;
   /* DEATH BY: the reps climb every interval until you can't finish inside
      it. Each move climbs on its own: `dbStart` + round × `dbStep` (burpees
      1 +1 beside squats 2 +2). An older plan's block-wide `ladder` =
@@ -1423,17 +1434,17 @@ function renderInterval() {
     return mvRow(it, hasReps ? { val: S.ivCur[j], unit: mvUnit(it), step: `data-ivr="${j}"`, wIdx: i } : { wIdx: i }); }).join('') : '';
   const nextItem = !all && S.iv + 1 < totalIv ? b.items[(S.iv + 1) % per] : null;
   /* only the numbers that say something: no "total reps" on a bare clock */
-  const stats = [`<div><small>Rounds</small><b class="wm-pop">${doneCount}${lad ? '' : `<i>/${totalIv}</i>`}</b></div>`,
-    times.length ? `<div><small>Last</small><b>${fmt(times.at(-1))}</b></div>` : '',
-    hasReps ? `<div><small>Total reps</small><b class="wm-pop">${doneReps.reduce((a, x) => a + x, 0)}</b></div>` : ''].filter(Boolean);
+  const stats = [`<div><small>${t('Rounds')}</small><b class="wm-pop">${doneCount}${lad ? '' : `<i>/${totalIv}</i>`}</b></div>`,
+    times.length ? `<div><small>${t('Last')}</small><b>${fmt(times.at(-1))}</b></div>` : '',
+    hasReps ? `<div><small>${t('Total reps')}</small><b class="wm-pop">${doneReps.reduce((a, x) => a + x, 0)}</b></div>` : ''].filter(Boolean);
   /* EVERY ROUND, LOGGED, like AMRAP's: newest first, its move(s) and reps,
      its time when clocked; tap one to fix it */
   const short = n => String(n || '').replace(/\s*\(.*?\)/g, '');
   const roundLog = hasReps ? `<div class="am-log">${S.ivLog.map((L, k) => ({ L, k })).filter(({ L, k }) => L && k <= S.iv).reverse().map(({ L, k }) =>
-    `<button class="am-r" data-ivl="${k}"><span>Round ${k + 1}</span><b>${L.t != null ? fmt(L.t) : ''}</b><small>${L.m.map((i, j) => `${per > 1 ? short(b.items[i]?.name) + ' ' : ''}${L.reps[j] ?? 0}`).join(' · ')}</small></button>`).join('')}</div>` : '';
+    `<button class="am-r" data-ivl="${k}"><span>${t('Round {n}', { n: k + 1 })}</span><b>${L.t != null ? fmt(L.t) : ''}</b><small>${L.m.map((i, j) => `${per > 1 ? short(b.items[i]?.name) + ' ' : ''}${L.reps[j] ?? 0}`).join(' · ')}</small></button>`).join('')}</div>` : '';
   /* the move you are on lights up in the list (in a rest, the one coming) */
   const onNow = phaseWork ? moves : nextItem ? [b.items.indexOf(nextItem)] : [];
-  const restLine = !phaseWork ? `<div class="mvr rest"><span class="mvr-sp"></span><span class="mvr-n">Rest${nextItem ? ` <small>· next: ${nextItem.name}</small>` : ''}</span></div>` : '';
+  const restLine = !phaseWork ? `<div class="mvr rest"><span class="mvr-sp"></span><span class="mvr-n">${t('Rest')}${nextItem ? ` <small>· ${t('next: {x}', { x: nextItem.name })}</small>` : ''}</span></div>` : '';
 
   shell(`<div class="now-ex"><div class="label">${kind}${counter}</div></div>
     <svg class="ld-bars iv-bars" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${bars}</svg>
@@ -1442,8 +1453,8 @@ function renderInterval() {
     <div class="ld-stats" style="grid-template-columns: repeat(${stats.length}, 1fr)">${stats.join('')}</div>
     ${hasReps && per > 1 ? `<div class="ld-reps iv-track">${b.items.map((it, i) => `<div class="${onNow.includes(i) ? 'now' : ''}"><span>${it.name}</span><b>${doneReps[i]}</b>${planTot[i] ? `<small>/ ${planTot[i]}</small>` : ''}<i style="width:${planTot[i] ? Math.min(100, 100 * doneReps[i] / planTot[i]).toFixed(1) : 0}%"></i></div>`).join('')}</div>` : ''}
     ${roundLog}
-    <div class="actionbar"><div class="btn-row am-bar">${lad ? '<button class="btn ghost iv-out" id="dbOut">Can\'t finish</button>' : '<button class="btn ghost" id="skip">Skip ▸</button>'}
-      ${doneable ? `<button class="btn lg ${logged?.t != null ? 'secondary' : ''}" id="ivDone">${logged?.t != null ? `Done in ${fmt(logged.t)} ✓` : 'Done ✓'}</button>` : ''}</div></div>`);
+    <div class="actionbar"><div class="btn-row am-bar">${lad ? `<button class="btn ghost iv-out" id="dbOut">${t("Can't finish")}</button>` : `<button class="btn ghost" id="skip">${t('Skip ▸')}</button>`}
+      ${doneable ? `<button class="btn lg ${logged?.t != null ? 'secondary' : ''}" id="ivDone">${logged?.t != null ? t('Done in {t} ✓', { t: fmt(logged.t) }) : t('Done ✓')}</button>` : ''}</div></div>`);
   const dur = phaseWork ? work : rest;
   if (dur <= 0) return nextInterval();
   /* the call at the top of each interval: halfway through the block and
@@ -1499,10 +1510,10 @@ function editIvRound(k, done) {
   const b = block(), L = S.ivLog[k]; if (!L) return;
   const ov = document.createElement('div'); ov.className = 'overlay';
   const draw = () => {
-    ov.innerHTML = `<div class="overlay-card"><div class="eyebrow">Round ${k + 1}${L.t != null ? ` · ${fmt(L.t)}` : ''}</div>
-      <h2 style="margin:6px 0 12px;">What you did</h2>
+    ov.innerHTML = `<div class="overlay-card"><div class="eyebrow">${t('Round {n}', { n: k + 1 })}${L.t != null ? ` · ${fmt(L.t)}` : ''}</div>
+      <h2 style="margin:6px 0 12px;">${t('What you did')}</h2>
       <div class="mvr-list">${L.m.map((i, j) => mvRow({ ...(b.items[i] || {}), exId: null }, { val: L.reps[j], unit: mvUnit(b.items[i] || {}), step: `data-e="${j}"` })).join('')}</div>
-      <button class="btn" id="ivEditDone" style="margin-top:14px;">Done</button></div>`;
+      <button class="btn" id="ivEditDone" style="margin-top:14px;">${t('Done')}</button></div>`;
     ov.querySelectorAll('[data-e]').forEach(btn => btn.addEventListener('click', () => { const j = +btn.dataset.e; L.reps[j] = nudge(b.items[L.m[j]], L.reps[j], Number(btn.dataset.d)); R.save(S); draw(); }));
     ov.querySelector('#ivEditDone').addEventListener('click', () => { ov.remove(); done(); });
   };
@@ -1533,7 +1544,7 @@ function endDeathBy(done) {
   const { tot, times, clocked } = ivTotals(b);
   (S.captured[b.id] || []).forEach((e, i) => { e.sets = [{ value: done }]; e.rounds = true; e.unit = 'rounds';
     e.deathBy = { rounds: done, lastReps: lastOf(b.items[i] || {}), partial: partial[i], total: tot[i] + partial[i] }; if (times.length) { e.laps = times; e.lapN = clocked; } });
-  R.save(S); say(`${done} rounds. Strong work.`, 2500);
+  R.save(S); say(`${t('{n} rounds.', { n: done })} ${pick('done') || t('Strong work.')}`, 2500);
   completeBlock();
 }
 function nextInterval() {
@@ -1564,18 +1575,18 @@ let cadLoop = null;
 let cadStartBooked = false;
 function stopCadence() { if (cadLoop) clearInterval(cadLoop); cadLoop = null; }
 function renderCadence() {
-  const b = block(); const it = b.items[0] || { name: 'Push-ups' };
+  const b = block(); const it = b.items[0] || { name: t('Push-ups') };
   const rpm = Number(b.rpm) || 20;
   const period = 60 / rpm;                          // seconds per rep: 3 at 20 a minute
   const cap = (Number(b.minutes) || 0) * 60;
-  shell(`<div class="now-ex"><div class="label">Push-up test · ${rpm} a minute</div><div class="name">${it.name}</div></div>
+  shell(`<div class="now-ex"><div class="label">${t('Push-up test')} · ${t('{n} a minute', { n: rpm })}</div><div class="name">${it.name}</div></div>
     <div class="cad">
-      <div class="cad-cue" id="cadCue">Down</div>
-      <div class="cad-reps"><b id="cadReps">0</b><small>reps on the beat</small></div>
+      <div class="cad-cue" id="cadCue">${t('Down')}</div>
+      <div class="cad-reps"><b id="cadReps">0</b><small>${t('reps on the beat')}</small></div>
       <div class="cad-time" id="cadTime">0:00${cap ? ` / ${fmt(cap)}` : ''}</div>
-      <p class="muted cad-how">Double beep = start. Then 1 beep every ${+period.toFixed(2)} seconds: down, then up before the next one. Tap Stop when you can't keep the rhythm.</p>
+      <p class="muted cad-how">${t("Double beep = start. Then 1 beep every {n} seconds: down, then up before the next one. Tap Stop when you can't keep the rhythm.", { n: num(+period.toFixed(2), 2) })}</p>
     </div>
-    <div class="actionbar"><button class="btn lg" id="cadStop">Stop</button></div>`);
+    <div class="actionbar"><button class="btn lg" id="cadStop">${t('Stop')}</button></div>`);
   /* ONE BEEP PER REP, AND THE COACH COUNTS. The first beep is the start
      (it lands the instant the get-ready countdown hits 0, chained to it);
      every beep after it says the reps finished so far, so the last number
@@ -1586,7 +1597,7 @@ function renderCadence() {
   const finish = reps => {
     stopCadence(); R.clearStep(S); onStepDone = null;
     (S.captured[b.id] || []).forEach(e => { e.sets = [{ value: reps }]; e.unit = 'reps'; e.cadence = rpm; });
-    R.save(S); say(`${reps} push-ups. Well done.`, 2500);
+    R.save(S); say(t('{n} push-ups. Well done.', { n: reps }), 2500);
     completeBlock();
   };
   const beatAt = k => t0() + k * period * 1000;
@@ -1611,7 +1622,7 @@ function renderCadence() {
     const down = (since % period) < period / 2;
     const go = since < Math.min(1.2, period / 2);       // the first moment: GO, not "down"
     const cue = document.getElementById('cadCue');
-    if (cue) { cue.textContent = go ? 'Go' : down ? 'Down' : 'Up'; cue.className = 'cad-cue ' + (go ? 'go' : down ? 'down' : 'up'); }
+    if (cue) { cue.textContent = t(go ? 'Go' : down ? 'Down' : 'Up'); cue.className = 'cad-cue ' + (go ? 'go' : down ? 'down' : 'up'); }
     const r = document.getElementById('cadReps'); if (r) r.textContent = String(done);
     const tm = document.getElementById('cadTime'); if (tm) tm.textContent = fmt(since) + (cap ? ` / ${fmt(cap)}` : '');
   };
@@ -1629,7 +1640,7 @@ const NO_CAP = 99 * 60;
 const upElapsed = () => S.stepStartedAt == null ? 0 : Math.max(0, ((S.stepPausedAt || Date.now()) - S.stepStartedAt) / 1000);
 function lapRows() {
   const laps = S.laps || []; if (!laps.length) return '';
-  const word = block().label === 'Stopwatch' ? 'Lap' : block().rungs ? 'Rung' : 'Round';
+  const word = t(block().label === 'Stopwatch' ? 'Lap' : block().rungs ? 'Rung' : 'Round');
   const rows = laps.map((t, i) => ({ n: i + 1, split: t - (laps[i - 1] || 0), total: t })).reverse();
   return `<div class="laps">${rows.map(r => `<div class="lap"><span>${word} ${r.n}</span><b>${fmt(r.split)}</b><small>${fmt(r.total)}</small></div>`).join('')}</div>`;
 }
@@ -1652,45 +1663,45 @@ function renderLadder() {
   const W = 320, H = 64, gap = n > 30 ? 1 : 2, bw = (W - gap * (n - 1)) / n;
   const bars = rungs.map((r, j) => { const h = 5 + (H - 5) * tot(r) / maxT;
     return `<rect class="${j < k ? 'done' : j === k ? 'now' : ''}" x="${(j * (bw + gap)).toFixed(1)}" y="${(H - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="${Math.min(3, bw / 3).toFixed(1)}"/>`; }).join('');
-  const named = b.items.map(it => it.name && it.name !== 'Reps' ? it.name : 'reps');
+  const named = b.items.map(it => it.name && it.name !== 'Reps' ? it.name : t('reps'));
   const done = b.items.map((_, i) => rungs.slice(0, k).reduce((a, r) => a + (Number(val(r, i)) || 0), 0));
   const all = b.items.map((_, i) => rungs.reduce((a, r) => a + (Number(val(r, i)) || 0), 0));
   const laps = S.laps || [], lastRung = laps.length ? laps.at(-1) - (laps.at(-2) || 0) : null;
   const next = rungs[k + 1];
-  shell(`<div class="now-ex"><div class="label">Ladder · rung ${k + 1} of ${n}${cap ? ` · cap ${fmt(cap)}` : ''}</div></div>
+  shell(`<div class="now-ex"><div class="label">${t('Ladder')} · ${t('rung {a} of {b}', { a: k + 1, b: n })}${cap ? ` · ${t('cap {t}', { t: fmt(cap) })}` : ''}</div></div>
     <svg class="ld-bars" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${bars}</svg>
     <button class="ld-card" id="ldCard" aria-label="Rung done">
       <div class="ld-mvs">${b.items.map((it, i) => `<div class="ld-mv"><b class="wm-pop">${val(rungs[k], i)}</b><span>${named[i]}</span></div>`).join('')}</div>
-      <div class="ld-next">${next != null ? `Next: ${b.items.map((_, i) => `${val(next, i)} ${named[i]}`).join(' · ')}` : 'Last rung. Finish it!'}</div>
+      <div class="ld-next">${next != null ? `${t('Next:')} ${b.items.map((_, i) => `${val(next, i)} ${named[i]}`).join(' · ')}` : t('Last rung. Finish it!')}</div>
     </button>
     <div class="ld-stats">
-      <div><small>This rung</small><b id="timerText">0:00</b></div>
-      <div><small>Total</small><b id="ftTotal">0:00</b></div>
-      <div><small>Last rung</small><b>${lastRung != null ? fmt(lastRung) : '–'}</b></div>
+      <div><small>${t('This rung')}</small><b id="timerText">0:00</b></div>
+      <div><small>${t('Total')}</small><b id="ftTotal">0:00</b></div>
+      <div><small>${t('Last rung')}</small><b>${lastRung != null ? fmt(lastRung) : '–'}</b></div>
     </div>
     <div class="ld-reps">${b.items.map((_, i) => `<div><span>${named[i]}</span><b>${done[i]}</b><small>/ ${all[i]}</small><i style="width:${all[i] ? (100 * done[i] / all[i]).toFixed(1) : 0}%"></i></div>`).join('')}</div>
-    <div class="actionbar"><div class="btn-row am-bar"><button class="btn ghost" id="ftDone">End</button><button class="btn lg" id="ftLap">Rung done ✓</button></div></div>`);
+    <div class="actionbar"><div class="btn-row am-bar"><button class="btn ghost" id="ftDone">${t('End')}</button><button class="btn lg" id="ftLap">${t('Rung done ✓')}</button></div></div>`);
   const finish = secs => {
     R.clearStep(S); onStepDone = null;
     const ls = (S.laps || []).map((t, i, a) => Math.round(t - (a[i - 1] || 0)));
     const doneRungs = rungs.slice(0, (S.laps || []).length);
     (S.captured[b.id] || []).forEach((e, i) => { e.sets = [{ value: secs }]; e.unit = 'sec'; e.rounds = true; if (ls.length) e.laps = ls; e.ladReps = doneRungs.reduce((a, r) => a + (Number(val(r, i)) || 0), 0); });
-    R.save(S); say(`Done. ${spokenTime(secs)}.`, 2500);
+    R.save(S); say(`${t('Done.')} ${spokenTime(secs)}.`, 2500);
     completeBlock();
   };
-  if (beginStep(dur, cap ? 'work' : 'rest', 'fortime')) say(`Go. ${b.items.map((_, i) => `${val(rungs[k], i)} ${named[i]}`).join(', ')}.`);
+  if (beginStep(dur, cap ? 'work' : 'rest', 'fortime')) say(`${t('Go.')} ${b.items.map((_, i) => `${val(rungs[k], i)} ${named[i]}`).join(', ')}.`);
   onStepDone = () => finish(dur);
   const rungDone = el => {
     S.laps = [...(S.laps || []), upElapsed()]; R.save(S);
     const fin = S.laps.length >= n;
-    celebrate(el, fin ? 'Done!' : `${S.laps.length}/${n}`);
+    celebrate(el, fin ? t('Done!') : `${S.laps.length}/${n}`);
     if (fin) return finish(Math.round(upElapsed()));
     say(`${roundCall(S.laps.length + 1, n)} ${b.items.map((_, i) => `${val(rungs[S.laps.length], i)} ${named[i]}`).join(', ')}.`);
     renderLadder();
   };
   document.getElementById('ftLap').addEventListener('click', e => rungDone(e.currentTarget));
   document.getElementById('ldCard').addEventListener('click', e => rungDone(e.currentTarget));
-  document.getElementById('ftDone').addEventListener('click', () => { if (confirm('End the ladder here?')) finish(Math.round(upElapsed())); });
+  document.getElementById('ftDone').addEventListener('click', () => { if (confirm(t('End the ladder here?'))) finish(Math.round(upElapsed())); });
   tick();
 }
 function renderForTime() {
@@ -1706,20 +1717,20 @@ function renderForTime() {
      finishes a rung and records its time; the last rung finishes it. */
   const rungs = Array.isArray(b.rungs) && b.rungs.length ? b.rungs : null;
   const k = rungs ? Math.min((S.laps || []).length, rungs.length - 1) : 0;
-  const lapWord = rungs ? 'Rung done ✓' : b.label === 'Stopwatch' ? 'Lap' : (b.rounds > 1 ? 'Round ✓' : '');
+  const lapWord = rungs ? t('Rung done ✓') : b.label === 'Stopwatch' ? t('Lap') : (b.rounds > 1 ? t('Round ✓') : '');
   const rungReps = (r, i) => Array.isArray(r) ? r[i] : r;
   const repsOf = (it, i = b.items.indexOf(it)) => rungs ? rungReps(rungs[k], i) : it.reps;
   const one = b.items.length === 1;
   const rungLine = r => b.items.map((it, i) => one ? qty(rungReps(r, i)) : `${rungReps(r, i)} ${it.name}`).join(' · ');
   const list = b.hideList ? '' : `<div class="mvr-list">${b.items.map(it => mvRow(it, { val: repsOf(it) || null, unit: mvUnit(it) })).join('')}</div>`;
-  const rounds = rungs ? `rung ${k + 1}/${rungs.length} · ` : b.rounds > 1 ? `${b.rounds} rounds · ` : '';
-  shell(`<div class="now-ex"><div class="label">${rounds}${cap ? `cap ${fmt(cap)}` : b.hideList ? 'tap the ring to pause' : 'no cap'}</div>
-      <div class="name">${rungs ? (one ? qty(rungReps(rungs[k], 0)) : `Rung ${k + 1}`) : b.hideList ? (b.label || 'Go') : 'For time'}</div>${rungs && rungs[k + 1] != null ? `<div class="side">next: ${rungLine(rungs[k + 1])}</div>` : ''}</div>
+  const rounds = rungs ? `${t('rung {a}/{b}', { a: k + 1, b: rungs.length })} · ` : b.rounds > 1 ? `${t('{n} rounds', { n: b.rounds })} · ` : '';
+  shell(`<div class="now-ex"><div class="label">${rounds}${cap ? t('cap {t}', { t: fmt(cap) }) : b.hideList ? t('tap the ring to pause') : t('no cap')}</div>
+      <div class="name">${rungs ? (one ? qty(rungReps(rungs[k], 0)) : t('Rung {n}', { n: k + 1 })) : b.hideList ? t(b.label || 'Go') : t('For time')}</div>${rungs && rungs[k + 1] != null ? `<div class="side">${t('next: {x}', { x: rungLine(rungs[k + 1]) })}</div>` : ''}</div>
     <div class="timer-wrap">${timerSvg('buffer')}</div>
-    ${lapWord ? `<div class="ft-total">Total <span id="ftTotal"></span></div>` : ''}
+    ${lapWord ? `<div class="ft-total">${t('Total')} <span id="ftTotal"></span></div>` : ''}
     <div id="lapList">${lapRows()}</div>
     ${list}
-    <div class="actionbar">${lapWord ? `<div class="btn-row"><button class="btn secondary" id="ftLap">${lapWord}</button><button class="btn" id="ftDone">Done ✓</button></div>` : '<button class="btn lg" id="ftDone">Done ✓</button>'}</div>`);
+    <div class="actionbar">${lapWord ? `<div class="btn-row"><button class="btn secondary" id="ftLap">${lapWord}</button><button class="btn" id="ftDone">${t('Done ✓')}</button></div>` : `<button class="btn lg" id="ftDone">${t('Done ✓')}</button>`}</div>`);
   const finish = secs => {
     R.clearStep(S); onStepDone = null;
     const laps = (S.laps || []).map((t, i, a) => Math.round(t - (a[i - 1] || 0)));
@@ -1745,10 +1756,10 @@ function renderForTime() {
 /* ---------------- BENCHMARK / MAX TEST ---------------- */
 function renderBenchmark() {
   const b = block(); const item = b.items[0]; const unit = UNIT[item.measure];
-  shell(`<div class="center"><div class="eyebrow">Benchmark</div><div class="now-ex"><div class="name">${item.name}</div></div>
-    <p class="muted" style="margin:0 0 16px;">One all-out set. It sets your benchmark.</p></div>
+  shell(`<div class="center"><div class="eyebrow">${t('Benchmark')}</div><div class="now-ex"><div class="name">${item.name}</div></div>
+    <p class="muted" style="margin:0 0 16px;">${t('One all-out set. It sets your benchmark.')}</p></div>
     <div class="card logcard">${logRow(item, 'bench', '')}</div>
-    <div class="actionbar"><button class="btn lg" id="saveBench">Log my max ✓</button></div>`, { progress: false });
+    <div class="actionbar"><button class="btn lg" id="saveBench">${t('Log my max ✓')}</button></div>`, { progress: false });
   document.getElementById('saveBench').addEventListener('click', () => {
     S.captured[b.id][0].sets = [{ value: readInput('bench') }]; R.save(S); completeBlock();
   });
@@ -1759,7 +1770,7 @@ function renderLog() {
   const b = block(); const entries = S.captured[b.id];
   onScreen('log');
   // grouped: exercise name once, its sets underneath (no repeated names)
-  const word = (b.format === 'circuit' || b.format === 'superset' || entries.some(e => e.rounds)) ? 'Round' : 'Set';
+  const word = (b.format === 'circuit' || b.format === 'superset' || entries.some(e => e.rounds)) ? t('Round') : t('Set');
   const groups = entries.map((e, ei) => {
     const sets = e.sets.length ? e.sets : [{ value: null }];
     const rows = sets.map((st, si) => {
@@ -1768,10 +1779,10 @@ function renderLog() {
     }).join('');
     return `<div class="loggroup"><div class="gname">${e.name}</div>${rows}</div>`;
   }).join('');
-  shell(`<div class="center"><div class="eyebrow">${b.role}</div><h2 style="font-size:22px;margin:8px 0 4px;">Log · ${b.name}</h2>
-      <p class="muted" style="margin:0 0 14px;">Tweak then confirm.</p></div>
+  shell(`<div class="center"><div class="eyebrow">${b.role}</div><h2 style="font-size:22px;margin:8px 0 4px;">${t('Log')} · ${b.name}</h2>
+      <p class="muted" style="margin:0 0 14px;">${t('Tweak then confirm.')}</p></div>
     <div class="card logcard">${groups}</div>
-    <div class="actionbar"><button class="btn lg" id="confirm">${isLastBlock() ? 'Finish workout ✓' : 'Confirm ▸'}</button></div>`, { progress: false });
+    <div class="actionbar"><button class="btn lg" id="confirm">${isLastBlock() ? t('Finish workout ✓') : t('Confirm ▸')}</button></div>`, { progress: false });
   document.getElementById('confirm').addEventListener('click', () => {
     entries.forEach((e, ei) => {
       const sets = e.sets.length ? e.sets : [{}];
@@ -1784,10 +1795,10 @@ function renderLog() {
 function renderSummary() {
   const b = block();
   onScreen('summary');
-  const rows = S.captured[b.id].map(e => `<div class="row"><span class="nm">${e.name}</span><span class="tg">${e.sets.map(s => s.value ?? '–').join(' · ')} ${e.unit}</span></div>`).join('');
+  const rows = S.captured[b.id].map(e => `<div class="row"><span class="nm">${e.name}</span><span class="tg">${e.sets.map(s => s.value ?? '–').join(' · ')} ${t(e.unit)}</span></div>`).join('');
   shell(`<div class="center"><div class="eyebrow">${b.role}</div><h2 style="font-size:22px;margin:8px 0 4px;">${b.name} done</h2></div>
-    <div class="card logcard">${rows || '<div class="muted">Logged.</div>'}</div>
-    <div class="actionbar"><button class="btn lg" id="confirm">${isLastBlock() ? 'Finish workout ✓' : 'Confirm ▸'}</button></div>`, { progress: false });
+    <div class="card logcard">${rows || `<div class="muted">${t('Logged.')}</div>`}</div>
+    <div class="actionbar"><button class="btn lg" id="confirm">${isLastBlock() ? t('Finish workout ✓') : t('Confirm ▸')}</button></div>`, { progress: false });
   document.getElementById('confirm').addEventListener('click', sectionNext);
 }
 
@@ -1818,12 +1829,12 @@ function efficiencyCallouts(session) {
   const clean = n => (n || '').replace(/[—·].*$/, '').trim();
   const out = [];
   if (!prev.length) {
-    if (session.seconds > 0) out.push({ icon: '📌', text: `Baseline set: ${fmt(session.seconds)} for ${session.name}. Beat it next time.` });
+    if (session.seconds > 0) out.push({ icon: '📌', text: t('Baseline set: {t} for {x}. Beat it next time.', { t: fmt(session.seconds), x: session.name }) });
     return out;
   }
   const bestPrev = Math.min(...prev.map(s => s.seconds));
   if (session.seconds > 0 && session.seconds <= bestPrev) {
-    out.push({ icon: '🏆', text: `Most efficient ${session.name} yet: ${fmt(session.seconds)} (was ${fmt(bestPrev)}). Tight work.` });
+    out.push({ icon: '🏆', text: t('Most efficient {x} yet: {t} (was {p}). Tight work.', { x: session.name, t: fmt(session.seconds), p: fmt(bestPrev) }) });
   }
   // biggest single-block speed-up vs its own best
   let bestImp = null;
@@ -1834,8 +1845,8 @@ function efficiencyCallouts(session) {
     const bp = Math.min(...pts);
     if (b.seconds < bp && (!bestImp || bp - b.seconds > bestImp.imp)) bestImp = { name: clean(b.name), t: b.seconds, imp: bp - b.seconds };
   });
-  if (bestImp) out.push({ icon: '⚡', text: `Fastest ${bestImp.name} block yet: ${fmt(bestImp.t)}.` });
-  if (!out.length && session.seconds > 0) out.push({ icon: '⏱', text: `${fmt(session.seconds)} today · best is ${fmt(bestPrev)}. Chase it next time.` });
+  if (bestImp) out.push({ icon: '⚡', text: t('Fastest {x} block yet: {t}.', { x: bestImp.name, t: fmt(bestImp.t) }) });
+  if (!out.length && session.seconds > 0) out.push({ icon: '⏱', text: t('{t} today · best is {p}. Chase it next time.', { t: fmt(session.seconds), p: fmt(bestPrev) }) });
   return out.slice(0, 2);
 }
 /* ---- end-of-session feedback (coachMode plans only) ----
@@ -1846,16 +1857,16 @@ function renderFeedback(next) {
   host.innerHTML = `
     <div class="screen fade-in bgn">
       <div class="center"><div class="big-emoji">💬</div>
-        <h1 style="font-size:24px;margin:4px 0 2px;">How did that feel?</h1>
-        <p class="muted" style="margin:0 0 16px;">One tap. It goes straight to your coach.</p></div>
+        <h1 style="font-size:24px;margin:4px 0 2px;">${t('How did that feel?')}</h1>
+        <p class="muted" style="margin:0 0 16px;">${t('One tap. It goes straight to your coach.')}</p></div>
       <div class="fb-grid">
-        <button class="fb" data-r="easy"><span class="e">🙂</span><span>Easy</span></button>
-        <button class="fb" data-r="right"><span class="e">💪</span><span>About right</span></button>
-        <button class="fb" data-r="hard"><span class="e">🥵</span><span>Too hard</span></button>
+        <button class="fb" data-r="easy"><span class="e">🙂</span><span>${t('Easy')}</span></button>
+        <button class="fb" data-r="right"><span class="e">💪</span><span>${t('About right')}</span></button>
+        <button class="fb" data-r="hard"><span class="e">🥵</span><span>${t('Too hard')}</span></button>
       </div>
       <textarea id="fbTxt" class="note-input" rows="3" placeholder="Anything else? (optional)"></textarea>
-      ${flagged.length ? `<div class="callout warn"><span class="ico">🦵</span><span class="txt">Knee flagged today: <b>${flagged.map(f => f.name).join(', ')}</b></span></div>` : ''}
-      <div class="actionbar"><button class="btn lg" id="fbDone">Done ✓</button></div>
+      ${flagged.length ? `<div class="callout warn"><span class="ico">🦵</span><span class="txt">${t('Knee flagged today:')} <b>${flagged.map(f => f.name).join(', ')}</b></span></div>` : ''}
+      <div class="actionbar"><button class="btn lg" id="fbDone">${t('Done ✓')}</button></div>
     </div>`;
   let rating = null;
   host.querySelectorAll('.fb').forEach(el => el.addEventListener('click', () => {
@@ -1876,37 +1887,37 @@ function renderFeedback(next) {
 function cadenceRating(reps, rpm) {
   let band, M, F;
   if (rpm === 20) {
-    band = (r, [lo, hi]) => r > hi ? 'Above the healthy zone' : r >= lo ? 'Healthy zone' : 'Below the healthy zone';
+    band = (r, [lo, hi]) => t(r > hi ? 'Above the healthy zone' : r >= lo ? 'Healthy zone' : 'Below the healthy zone');
     M = [20, 40]; F = [10, 25];
   } else if (rpm === 25) {
-    band = (r, [e, x, g, a]) => r >= e ? 'Elite' : r >= x ? 'Excellent' : r >= g ? 'Good' : r >= a ? 'Average' : 'Below average';
+    band = (r, [e, x, g, a]) => t(r >= e ? 'Elite' : r >= x ? 'Excellent' : r >= g ? 'Good' : r >= a ? 'Average' : 'Below average');
     M = [50, 40, 30, 20]; F = [40, 30, 20, 12];
   } else return '';
   let sex = null;
   try { sex = JSON.parse(localStorage.getItem('fj.v1.profile.' + (S.plan.uid || localStorage.getItem('fj.v1.current'))) || 'null')?.a?.sex; } catch (e) {}
-  const line = sex === 'f' ? band(reps, F) : sex === 'm' ? band(reps, M) : `Men: ${band(reps, M)} · Women: ${band(reps, F)}`;
-  return `<div class="eff-row"><span class="muted">Rating</span><span style="margin-left:auto;">${line}</span></div>`;
+  const line = sex === 'f' ? band(reps, F) : sex === 'm' ? band(reps, M) : `${t('Men')}: ${band(reps, M)} · ${t('Women')}: ${band(reps, F)}`;
+  return `<div class="eff-row"><span class="muted">${t('Rating')}</span><span style="margin-left:auto;">${line}</span></div>`;
 }
 /* the one number a Quick Timer produced, per block: rounds, reps or time */
 function quickResult(session) {
   const rows = session.blocks.map(b => {
     const e = b.entries[0]; const v = e?.sets?.[0]?.value;
     if (v == null || b.name.startsWith('Countdown') || /^(Warm-up|Cool-down)/.test(b.name)) return '';   // a VO2 warm-up is not a result
-    if (b.format === 'cadence') return `<div class="eff-row"><span>${b.name}</span><span class="pr-flash" style="margin-left:auto;">${v} reps</span></div>${cadenceRating(v, e.cadence)}`;
+    if (b.format === 'cadence') return `<div class="eff-row"><span>${b.name}</span><span class="pr-flash" style="margin-left:auto;">${t('{n} reps', { n: v })}</span></div>${cadenceRating(v, e.cadence)}`;
     const val = b.format === 'fortime' ? fmt(v)
-      : b.format === 'amrap' ? (e.amrap ? `${e.amrap.rounds} rounds${e.amrap.extra ? ` + ${e.amrap.extra} reps` : ''}` : `${v} ${e.unit || 'rounds'}`)
-      : `${v} interval${v === 1 ? '' : 's'}`;
-    const word = b.name.startsWith('Stopwatch') ? 'Lap' : b.name.startsWith('Ladder') ? 'Rung' : 'Round';
+      : b.format === 'amrap' ? (e.amrap ? `${t('{n} rounds', { n: e.amrap.rounds })}${e.amrap.extra ? ` + ${t('{n} reps', { n: e.amrap.extra })}` : ''}` : `${v} ${t(e.unit || 'rounds')}`)
+      : t2(v, '{n} interval', '{n} intervals');
+    const word = t(b.label === 'Stopwatch' || b.name.startsWith('Stopwatch') ? 'Lap' : b.rungs || b.name.startsWith('Ladder') ? 'Rung' : 'Round');
     const splits = e.laps?.length ? e.laps : e.amrap?.splits?.length ? e.amrap.splits : [];
-    const laps = splits.map((t, i) => `<div class="eff-row"><span class="muted">${word} ${e.lapN?.[i] ?? i + 1}</span><span style="margin-left:auto;">${fmt(t)}</span></div>`).join('');
+    const laps = splits.map((sp, i) => `<div class="eff-row"><span class="muted">${word} ${e.lapN?.[i] ?? i + 1}</span><span style="margin-left:auto;">${fmt(sp)}</span></div>`).join('');
     if (e.deathBy) return `<div class="eff-row"><span>${b.name}</span><span class="pr-flash" style="margin-left:auto;">${qty(e.deathBy.rounds, 'rounds')}${e.deathBy.partial ? ` + ${qty(e.deathBy.partial)}` : ''}</span></div>`
-      + b.entries.map(x => `<div class="eff-row"><span class="muted">${x.name} · last round</span><span style="margin-left:auto;">${qty(x.deathBy?.lastReps ?? 0)}</span></div>`
-        + (x.deathBy?.total ? `<div class="eff-row"><span class="muted">${x.name} · total</span><span style="margin-left:auto;">${qty(x.deathBy.total)}</span></div>` : '')).join('') + laps;
+      + b.entries.map(x => `<div class="eff-row"><span class="muted">${x.name} · ${t('last round')}</span><span style="margin-left:auto;">${qty(x.deathBy?.lastReps ?? 0)}</span></div>`
+        + (x.deathBy?.total ? `<div class="eff-row"><span class="muted">${x.name} · ${t('total')}</span><span style="margin-left:auto;">${qty(x.deathBy.total)}</span></div>` : '')).join('') + laps;
     if (b.entries.some(x => x.ivReps)) return `<div class="eff-row"><span>${b.name}</span><span class="pr-flash" style="margin-left:auto;">${val}</span></div>`
-      + b.entries.filter(x => x.ivReps).map(x => `<div class="eff-row"><span class="muted">${x.name} · total</span><span style="margin-left:auto;">${qty(x.ivReps.total)}</span></div>`).join('') + laps;
+      + b.entries.filter(x => x.ivReps).map(x => `<div class="eff-row"><span class="muted">${x.name} · ${t('total')}</span><span style="margin-left:auto;">${qty(x.ivReps.total)}</span></div>`).join('') + laps;
     return `<div class="eff-row"><span>${b.name}</span><span class="pr-flash" style="margin-left:auto;">${val}</span></div>${laps}`;
   }).join('');
-  return rows ? `<div class="card"><div class="eyebrow">Result</div>${rows}</div>` : '';
+  return rows ? `<div class="card"><div class="eyebrow">${t('Result')}</div>${rows}</div>` : '';
 }
 /* THE TALLY at the end of a timer workout: reps per move, total reps, the
    load (added weight + the share of body weight each bodyweight move
@@ -1942,17 +1953,17 @@ function quickTally(session, partial) {
   const askBody = !body && needsBody(list.map(m => m.item));
   const fmtName = S.plan.blocks[0]?.label || S.plan.blocks[0]?.format || '';
   /* the timer is its type and ALL its moves (a move left at 0 reps today is still part of it) */
-  const planNames = [...new Set(S.plan.blocks.flatMap(b => b.items || []).map(it => it.name).filter(n => n && !/^(Work|Time|Reps|Rounds)$/.test(n)))];
+  const planNames = [...new Set(S.plan.blocks.flatMap(b => b.items || []).filter(it => it.name && !/^(Work|Time|Reps|Rounds)$/.test(it.name)).map(it => it.exId || it.name))];   // ids: the same timer in either language
   const sig = sigOf(S.plan.fmt || fmtName, planNames);
   const row = (l, r, cls = '') => `<div class="eff-row ${cls}"><span>${l}</span><span style="margin-left:auto;" class="tnum">${r}</span></div>`;
-  const loadRow = () => { const kg = loadKg(bodyWeight()); return kg > 0 ? row('Total load <small class="muted">est.</small>', showWeight(kg, unit)) : ''; };
-  const html = `<div class="card tally"><div class="eyebrow">Totals</div>
-    ${list.map(m => row(`${m.name}${Number(m.item.weight) > 0 ? ` <small class="muted">@ ${m.item.weight} ${m.item.wUnit || 'lb'}</small>` : ''}`, `${m.reps} ${mvUnit(m.item) ? 'sec' : 'reps'}`)).join('')}
-    ${row('<b>Total reps</b>', `<b>${total}</b>`, 'tally-sum')}
-    ${held ? row('Total time held', fmt(held)) : ''}
+  const loadRow = () => { const kg = loadKg(bodyWeight()); return kg > 0 ? row(`${t('Total load')} <small class="muted">${t('est.')}</small>`, showWeight(kg, unit)) : ''; };
+  const html = `<div class="card tally"><div class="eyebrow">${t('Totals')}</div>
+    ${list.map(m => row(`${m.name}${Number(m.item.weight) > 0 ? ` <small class="muted">@ ${m.item.weight} ${m.item.wUnit || 'lb'}</small>` : ''}`, `${m.reps} ${t(mvUnit(m.item) ? 'sec' : 'reps')}`)).join('')}
+    ${row(`<b>${t('Total reps')}</b>`, `<b>${total}</b>`, 'tally-sum')}
+    ${held ? row(t('Total time held'), fmt(held)) : ''}
     <div id="tallyLoad">${loadRow()}</div>
-    ${askBody ? `<div class="tally-body" id="tallyBody"><span>Your body weight, to count bodyweight moves in the load</span>
-      <span class="mvr-st"><input id="tbW" type="number" inputmode="decimal" placeholder="–"/><small>${unit}</small><button class="btn secondary" id="tbSave">Save</button></span></div>` : ''}
+    ${askBody ? `<div class="tally-body" id="tallyBody"><span>${t('Your body weight, to count bodyweight moves in the load')}</span>
+      <span class="mvr-st"><input id="tbW" type="number" inputmode="decimal" placeholder="–"/><small>${unit}</small><button class="btn secondary" id="tbSave">${t('Save')}</button></span></div>` : ''}
     <div id="tallyLast" class="tally-last"></div></div>`;
   const rec = { at: new Date().toISOString(), sig, title: S.plan.name, seconds: session.seconds, partial: !!partial,
     moves: list.map(m => ({ name: m.name, reps: m.reps, weight: m.item.weight || null, wUnit: m.item.wUnit || null })), total, loadKg: Math.round(loadKg(body)) };
@@ -1968,7 +1979,7 @@ function quickTally(session, partial) {
       const el = document.getElementById('tallyLast');
       if (prev && el) {
         const d = new Date(prev.at), diff = total - prev.total;
-        el.innerHTML = `<div class="eff-row"><span class="muted">Last time · ${d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span><span style="margin-left:auto;">${prev.total} reps <b class="${diff > 0 ? 'up' : diff < 0 ? 'down' : ''}">${diff > 0 ? `+${diff}` : diff < 0 ? diff : '='}</b></span></div>`;
+        el.innerHTML = `<div class="eff-row"><span class="muted">${t('Last time')} · ${d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span><span style="margin-left:auto;">${t('{n} reps', { n: prev.total })} <b class="${diff > 0 ? 'up' : diff < 0 ? 'down' : ''}">${diff > 0 ? `+${diff}` : diff < 0 ? diff : '='}</b></span></div>`;
       }
       return addHistory(rec);
     });
@@ -2015,18 +2026,18 @@ function finishSession(opts = {}) {
   const prText = p => p.weight != null
     ? ((p.l != null || p.r != null) ? `${p.weight}lb · L${p.l ?? '–'} · R${p.r ?? '–'}` : `${p.weight}lb × ${p.value}`)
     : `${p.value} ${p.unit}`;
-  if (prs.length) say(`New record. ${prText(prs[0])}.`);
-  else if (partial) say('Saved.');
-  else if (effs[0]?.icon === '🏆') say('Most efficient session yet. Great work.');
-  else say(pick('done') || 'Workout complete. Strong work.');
-  const prHtml = prs.length ? `<div class="card"><div class="eyebrow">New PRs</div>${prs.map(p => `<div class="row" style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);"><span>${p.name}</span><span class="pr-flash">${prText(p)}</span></div>`).join('')}</div>` : '';
-  const effHtml = effs.length ? `<div class="card"><div class="eyebrow">Pace</div>${effs.map(e => `<div class="eff-row"><span class="eff-ico">${e.icon}</span><span>${e.text}</span></div>`).join('')}</div>` : '';
+  if (prs.length) say(`${t('New record.')} ${prText(prs[0])}.`);
+  else if (partial) say(t('Saved.'));
+  else if (effs[0]?.icon === '🏆') say(t('Most efficient session yet. Great work.'));
+  else say(pick('done') || t('Workout complete. Strong work.'));
+  const prHtml = prs.length ? `<div class="card"><div class="eyebrow">${t('New PRs')}</div>${prs.map(p => `<div class="row" style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);"><span>${p.name}</span><span class="pr-flash">${prText(p)}</span></div>`).join('')}</div>` : '';
+  const effHtml = effs.length ? `<div class="card"><div class="eyebrow">${t('Pace')}</div>${effs.map(e => `<div class="eff-row"><span class="eff-ico">${e.icon}</span><span>${e.text}</span></div>`).join('')}</div>` : '';
   host.innerHTML = `<div class="screen fade-in center ${S.plan.coachMode ? 'bgn' : ''}">
     <div class="big-emoji">${prs.length ? '🏆' : '✅'}</div>
-    <h1 style="font-size:28px;">${prs.length ? 'New records!' : partial ? 'Saved.' : 'Done.'}</h1>
-    <p class="muted">${S.plan.name} · ${fmt(elapsed)}${partial ? ' · ended early' : S.plan.quick ? '' : ` · ${S.plan.duration} min plan`}</p>
+    <h1 style="font-size:28px;">${t(prs.length ? 'New records!' : partial ? 'Saved.' : 'Done.')}</h1>
+    <p class="muted">${S.plan.name} · ${fmt(elapsed)}${partial ? ` · ${t('ended early')}` : S.plan.quick ? '' : ` · ${t('{n} min plan', { n: S.plan.duration })}`}</p>
     <div style="height:16px;"></div>${resultHtml}${tally ? tally.html : ''}${prHtml}${effHtml}
-    <div class="actionbar"><button class="btn lg" id="home">${S.plan.finishLabel || 'Back to week'}</button></div></div>`;
+    <div class="actionbar"><button class="btn lg" id="home">${t(S.plan.finishLabel || 'Back to week')}</button></div></div>`;
   if (tally) tally.wire();
   document.getElementById('home').addEventListener('click', async () => { const leavesPage = !!S?.plan?.returnTo; try { await R.flushRunState(); } catch (e) {} if (!leavesPage) clearWorkTheme(); cb.onFinish?.(); });
 }

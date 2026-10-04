@@ -22,6 +22,7 @@ import { installHold } from './hold.js';
 import { makeSortable } from './drag.js';
 import { readHistory, sigOf, showWeight } from './tally.js';
 import { ringHTML, ringBaseCss, ringDesign } from './ring.js';
+import { t, t2, num, exName, exCues, lang, setLang } from '../i18n.js';
 
 /* ?demo adds the Work Mode preview: a sample of every program format */
 const showDemo = () => new URLSearchParams(location.search).has('demo');
@@ -127,6 +128,7 @@ const setVal = (k, v) => { if (cfg.fmt === 'tabata' && k === 'rounds') { cfg.tbT
 export async function renderQuick(el, opts = {}) {
   host = el; onStart = opts.onStart; guest = !!opts.guest;
   injectStyle(); applyWorkTheme(); loadPrefs(); installHold();
+  if (!window.__qtLang) { window.__qtLang = 1; document.addEventListener('fj-lang', () => { if (host && cfg) draw(); }); }   // a new language: redraw
   readHistory().then(h => { hist = h; if (host && cfg) draw(); });
   /* The address itself names the person, so "Add to Home Screen" from here
      gives a timer icon that opens as THEM (an installed iPhone app cannot
@@ -154,7 +156,7 @@ export async function renderQuick(el, opts = {}) {
     }
   } catch (e) {}
   draw();
-  if (shared) toast(`Timer loaded: ${planName()}`);
+  if (shared) toast(t('Timer loaded: {x}', { x: planName() }));
 }
 /* setups saved before Intervals and Countdown became Timer */
 function migrate(c) {
@@ -208,7 +210,7 @@ const namedMoves = () => (FORMATS.find(f => f.id === cfg.fmt)?.moves ? MV() : []
     const ex = m.exId && EXERCISES[m.exId];
     const n = Number(m.reps) > 0 && cfg.fmt !== 'tabata' && cfg.fmt !== 'timer' ? Number(m.reps) : null;   // time-based types carry no rep target
     return ex
-      ? { exId: m.exId, name: ex.name, measure: ex.measure || 'reps', load: ex.load, laterality: ex.laterality, cue: ex.cues, reps: n, ...(ex.measure === 'hold' && n ? { hold: n } : {}), ...(Number(m.wt) > 0 ? { weight: Number(m.wt), wUnit: wUnit() } : {}), noPR: true }
+      ? { exId: m.exId, name: exName(m.exId, ex.name), measure: ex.measure || 'reps', load: ex.load, laterality: ex.laterality, cue: exCues(m.exId, ex.cues), reps: n, ...(ex.measure === 'hold' && n ? { hold: n } : {}), ...(Number(m.wt) > 0 ? { weight: Number(m.wt), wUnit: wUnit() } : {}), noPR: true }
       : { name: String(m.name).trim(), measure: 'reps', reps: n, ...(Number(m.wt) > 0 ? { weight: Number(m.wt), wUnit: wUnit() } : {}), noPR: true };
   });
 
@@ -267,12 +269,12 @@ function rungs() { const ms = ladderMoves(); return rungOrder().map(i => ms.map(
 function ladderPreview(m) {
   const seq = rungOrder().map(i => repsAt(m, i)); const total = seq.reduce((a, b) => a + b, 0);
   const shown = seq.length > 10 ? `${seq.slice(0, 5).join(', ')} … ${seq.slice(-2).join(', ')}` : seq.join(', ');
-  return `${shown} · ${total} total`;
+  return `${shown} · ${t('{n} total', { n: total })}`;
 }
 /* Death By: the first rounds, so the climb is obvious */
 function deathPreview(m) {
   const r = [0, 1, 2, 3, 4].map(i => Math.max(0, ldStart(m) + i * Math.max(0, ldStep(m))));
-  return `round 1: ${r[0]}, round 2: ${r[1]}, round 3: ${r[2]} …`;
+  return t('round 1: {a}, round 2: {b}, round 3: {c} …', { a: r[0], b: r[1], c: r[2] });
 }
 function applyPreset(p) {
   cfg.ldRungs = p.n; cfg.ldShape = p.shape;
@@ -316,51 +318,54 @@ function totalBadge() {
   if (t) return { big: fmt(t), small: ['fortime', 'pushup', 'deathby', 'ladder'].includes(cfg.fmt) ? 'max' : 'total' };
   return { big: '∞', small: cfg.fmt === 'pushup' ? 'till you miss' : 'open' };
 }
-const secs = v => v >= 60 ? fmt(v) : `${v}s`;
+const secs = v => v >= 60 ? fmt(v) : t('{n} s', { n: v });
+/* a move's name in the current language (library moves have a French name) */
+const mvName = m => exName(m?.exId, String(m?.name || '').trim());
 /* one line under it: what you're about to do, in plain words */
 function summary() {
   const moves = namedMoves();
   switch (cfg.fmt) {
     case 'emom': {
-      const style = moves.length > 1 ? (cfg.emomStyle === 'all' ? ` · all ${moves.length} moves each round` : ` · ${moves.length} moves take turns`) : '';
-      return `${emomCount()} rounds, a new one every ${secs(cfg.every)}${style}`;
+      const style = moves.length > 1 ? (cfg.emomStyle === 'all' ? t(' · all {n} moves each round', { n: moves.length }) : t(' · {n} moves take turns', { n: moves.length })) : '';
+      return t('{n} rounds, a new one every {every}', { n: emomCount(), every: secs(cfg.every) }) + style;
     }
-    case 'amrap': return moves.length ? `${moves.length} move${moves.length > 1 ? 's' : ''} per round` : 'Tap + for every round you finish';
-    case 'fortime': return `${cfg.ftRounds} round${cfg.ftRounds > 1 ? 's' : ''}, ${cfg.ftCap ? `${cfg.ftCap} min cap` : 'no cap'}`;
+    case 'amrap': return moves.length ? t2(moves.length, '{n} move per round', '{n} moves per round') : t('Tap + for every round you finish');
+    case 'fortime': return `${t2(cfg.ftRounds, '{n} round', '{n} rounds')}, ${cfg.ftCap ? t('{n} min cap', { n: cfg.ftCap }) : t('no cap')}`;
     case 'tabata': {
       const n = perRound();
-      return `${tbTotal()} rounds${n > 1 ? `, alternating ${n} moves` : ''}, ${secs(cfg.work)} on, ${secs(cfg.rest)} off`;
+      return t('{n} rounds', { n: tbTotal() }) + (n > 1 ? t(', alternating {n} moves', { n }) : '') + t(', {on} on, {off} off', { on: secs(cfg.work), off: secs(cfg.rest) });
     }
-    case 'vo2': return vo2().note;
+    case 'vo2': return t(vo2().note);
     case 'timer': {
       const r = cfg.tRounds;
       const n = perRound();
-      const core = `${r > 1 ? `${r} rounds of ` : ''}${n > 1 ? `${n} moves, ` : ''}${secs(cfg.tWork)} work${cfg.tRest && (r > 1 || n > 1) ? `, ${secs(cfg.tRest)} rest` : ''}`;
-      return cfg.sets > 1 ? `${core}, done ${cfg.sets} times, ${secs(cfg.setRest)} break in between` : core;
+      const core = `${r > 1 ? t('{n} rounds of ', { n: r }) : ''}${n > 1 ? t('{n} moves, ', { n }) : ''}${t('{t} work', { t: secs(cfg.tWork) })}${cfg.tRest && (r > 1 || n > 1) ? t(', {t} rest', { t: secs(cfg.tRest) }) : ''}`;
+      return cfg.sets > 1 ? core + t(', done {n} times, {t} break in between', { n: cfg.sets, t: secs(cfg.setRest) }) : core;
     }
-    case 'deathby': { const ms = ladderMoves(); return `Round 1: ${ms.map(m => `${ldStart(m)}${String(m.name || '').trim() ? ' ' + m.name.trim() : ''}`).join(' + ')}, then more every ${secs(cfg.dbEvery)} until you can't`; }
+    case 'deathby': { const ms = ladderMoves(); return t('Round 1: {what}, then more every {t} until you can\'t', { what: ms.map(m => `${ldStart(m)}${mvName(m) ? ' ' + mvName(m) : ''}`).join(' + '), t: secs(cfg.dbEvery) }); }
     case 'ladder': {
       const ms = ladderMoves(), r = rungs();
-      const tot = ms.map((m, i) => `${r.reduce((a, x) => a + x[i], 0)} ${String(m.name || '').trim() || 'reps'}`).join(', ');
-      return `${r.length} rungs · ${tot}${cfg.ldCap ? ` · ${cfg.ldCap} min cap` : ''}`;
+      const tot = ms.map((m, i) => `${r.reduce((a, x) => a + x[i], 0)} ${mvName(m) || t('reps')}`).join(', ');
+      return `${t('{n} rungs', { n: r.length })} · ${tot}${cfg.ldCap ? ` · ${t('{n} min cap', { n: cfg.ldCap })}` : ''}`;
     }
-    case 'stopwatch': return 'Tap the ring to pause';
-    case 'pushup': { const h = Math.round(3000 * 20 / cfg.pace / 2) / 1000; return `${cfg.pace} a minute: ${h}s down, ${h}s up${cfg.pace === 25 ? ' (NHL)' : ''}`; }
+    case 'stopwatch': return t('Tap the ring to pause');
+    case 'pushup': { const h = num(Math.round(3000 * 20 / cfg.pace / 2) / 1000, 2); return t('{n} a minute: {h} s down, {h} s up', { n: cfg.pace, h }) + (cfg.pace === 25 ? ' (NHL)' : ''); }
     default: return '';
   }
 }
+/* the name of what is about to run (header, result card, history) */
 function planName() {
   const f = cfg.fmt;
-  if (f === 'emom') return cfg.every === 60 ? `EMOM · ${cfg.mins} min` : `Every ${fmt(cfg.every)} · ${cfg.mins} min`;
+  if (f === 'emom') return cfg.every === 60 ? `EMOM · ${cfg.mins} min` : `${t('Every {t}', { t: fmt(cfg.every) })} · ${cfg.mins} min`;
   if (f === 'amrap') return `AMRAP · ${cfg.cap} min`;
-  if (f === 'fortime') return `For time${cfg.ftCap ? ` · ${cfg.ftCap} min cap` : ''}`;
+  if (f === 'fortime') return `${t('For time')}${cfg.ftCap ? ` · ${t('{n} min cap', { n: cfg.ftCap })}` : ''}`;
   if (f === 'tabata') return `Tabata · ${tbTotal()} × ${cfg.work}/${cfg.rest}`;
-  if (f === 'timer') return `Interval timer · ${cfg.tRounds > 1 ? `${cfg.tRounds} × ` : ''}${fmt(cfg.tWork)}${cfg.tRest && cfg.tRounds > 1 ? ` / ${fmt(cfg.tRest)}` : ''}${cfg.sets > 1 ? ` · ${cfg.sets} times` : ''}`;
-  if (f === 'pushup') return `Push-up test · ${cfg.pace} a min`;
-  if (f === 'vo2') return `VO2 max · ${vo2().name}`;
-  if (f === 'deathby') { const ms = ladderMoves().filter(m => String(m.name || '').trim()); return `Death By${ms.length ? ' · ' + ms.map(m => m.name.trim()).join(', ') : ''}${cfg.dbEvery !== 60 ? ` every ${fmt(cfg.dbEvery)}` : ''}`; }
-  if (f === 'ladder') { const ms = ladderMoves(); return `Ladder · ${ms.map(m => `${String(m.name || '').trim() || 'reps'} ${ldStart(m)} ${ldStep(m) >= 0 ? '+' : '−'}${Math.abs(ldStep(m))}`).join(', ')}${cfg.ldShape === 'mirror' ? ' and back' : cfg.ldShape === 'wave' ? ' wave' : ''}`; }
-  return 'Stopwatch';
+  if (f === 'timer') return `${t('Interval timer')} · ${cfg.tRounds > 1 ? `${cfg.tRounds} × ` : ''}${fmt(cfg.tWork)}${cfg.tRest && cfg.tRounds > 1 ? ` / ${fmt(cfg.tRest)}` : ''}${cfg.sets > 1 ? ` · ${t('{n} times', { n: cfg.sets })}` : ''}`;
+  if (f === 'pushup') return `${t('Push-up test')} · ${t('{n} a min', { n: cfg.pace })}`;
+  if (f === 'vo2') return `VO2 max · ${t(vo2().name)}`;
+  if (f === 'deathby') { const ms = ladderMoves().filter(m => mvName(m)); return `Death By${ms.length ? ' · ' + ms.map(mvName).join(', ') : ''}${cfg.dbEvery !== 60 ? ` ${t('every {t}', { t: fmt(cfg.dbEvery) })}` : ''}`; }
+  if (f === 'ladder') { const ms = ladderMoves(); return `${t('Ladder')} · ${ms.map(m => `${mvName(m) || t('reps')} ${ldStart(m)} ${ldStep(m) >= 0 ? '+' : '−'}${Math.abs(ldStep(m))}`).join(', ')}${cfg.ldShape === 'mirror' ? t(' and back') : cfg.ldShape === 'wave' ? t(' wave') : ''}`; }
+  return t('Stopwatch');
 }
 
 /* the RunPlan Work Mode will play */
@@ -463,9 +468,9 @@ const ROW_TONE = {
 };
 function rowShell(k, label, face, foot, minus, plus, extra = '') {
   return `<div class="qt-srow tone-${ROW_TONE[k] || 'accent'}">
-    <div class="qt-sl">${label}</div>
+    <div class="qt-sl">${t(label)}</div>
     <div class="qt-sline">${minus}<div class="qt-sval">${face}</div>${plus}</div>
-    ${foot ? `<div class="qt-su">${foot}</div>` : ''}${extra}
+    ${foot ? `<div class="qt-su">${t(foot)}</div>` : ''}${extra}
   </div>`;
 }
 /* THE LADDER'S TOP (or bottom), not a rung count. "Up to 10" is how a
@@ -476,7 +481,7 @@ function ladderEndRow() {
   const m = ladderMoves()[0], st = ldStep(m), n = rungCount();
   const label = st > 0 ? 'Up to' : st < 0 ? 'Down to' : 'Rungs';
   const v = st ? repsAt(m, n - 1) : n;
-  const foot = st ? `${n} rung${n === 1 ? '' : 's'}${cfg.ldShape === 'mirror' ? ' · and back' : ''}` : '';
+  const foot = st ? `${t2(n, '{n} rung', '{n} rungs')}${cfg.ldShape === 'mirror' ? t(' · and back') : ''}` : '';
   return rowShell('ldRungs', label,
     `<input class="qt-tv" data-ldend="1" type="number" inputmode="numeric" value="${v}" onfocus="this.select()"/>`, foot,
     '<button class="qt-pm" data-ldend-d="-1" aria-label="Lower">−</button>', '<button class="qt-pm" data-ldend-d="1" aria-label="Higher">+</button>');
@@ -487,11 +492,11 @@ function stepRow(k) {
   const v = val(k);
   const none = ((k === 'ftCap' || k === 'ptCap' || k === 'ldCap') && !v) || ((k === 'rest' || k === 'setRest') && !v);
   const face = isTime(k)
-    ? `<button class="qt-tv time" data-qt="${k}">${none ? 'none' : fmt(v)}</button>`
-    : `<input class="qt-tv ${none ? 'none' : ''}" data-qf="${k}" type="number" inputmode="numeric" value="${none ? '' : v}" placeholder="${none ? 'none' : ''}" onfocus="this.select()"/>`;
+    ? `<button class="qt-tv time" data-qt="${k}">${none ? t('none') : fmt(v)}</button>`
+    : `<input class="qt-tv ${none ? 'none' : ''}" data-qf="${k}" type="number" inputmode="numeric" value="${none ? '' : v}" placeholder="${none ? t('none') : ''}" onfocus="this.select()"/>`;
   const tbn = cfg.fmt === 'tabata' && k === 'rounds' ? perRound() : 1;
-  const foot = none ? '' : isTime(k) ? 'min : sec' : tbn > 1 ? (v % tbn ? `alternating ${tbn} moves` : `${v / tbn} of each, alternating`) : unit;
-  const extra = k === 'pace' ? `<div class="qt-presets"><button class="${v === 20 ? 'on' : ''}" data-pace="20">20 standard</button><button class="${v === 25 ? 'on' : ''}" data-pace="25">25 NHL</button></div>` : '';
+  const foot = none ? '' : isTime(k) ? 'min : sec' : tbn > 1 ? (v % tbn ? t('alternating {n} moves', { n: tbn }) : t('{n} of each, alternating', { n: v / tbn })) : unit;
+  const extra = k === 'pace' ? `<div class="qt-presets"><button class="${v === 20 ? 'on' : ''}" data-pace="20">${t('20 standard')}</button><button class="${v === 25 ? 'on' : ''}" data-pace="25">25 NHL</button></div>` : '';
   return rowShell(k, label, face, foot,
     `<button class="qt-pm" data-q="${k}" data-d="-1" aria-label="Less">−</button>`, `<button class="qt-pm" data-q="${k}" data-d="1" aria-label="More">+</button>`, extra);
 }
@@ -500,12 +505,12 @@ function stepRow(k) {
    stack of rows; every row has a small coloured label on top. Numbers are
    − value +; choices are equal buttons; a move is its name, then the same
    small −/+ controls. Nothing on this screen is drawn any other way. */
-const sec = (title, right = '') => `<div class="qt-sec"><span>${title}</span>${right}</div>`;
+const sec = (title, right = '') => `<div class="qt-sec"><span>${t(title)}</span>${right}</div>`;
 /* a row of equal choices (shape, countdown, EMOM style) */
 function segRow(label, tone, opts, cur, attr, foot = '') {
-  return `<div class="qt-srow tone-${tone}"><div class="qt-sl">${label}</div>
-    <div class="qt-seg2">${opts.map(([v, l]) => `<button class="${String(cur) === String(v) ? 'on' : ''}" ${attr}="${v}">${l}</button>`).join('')}</div>
-    ${foot ? `<div class="qt-su">${foot}</div>` : ''}</div>`;
+  return `<div class="qt-srow tone-${tone}"><div class="qt-sl">${t(label)}</div>
+    <div class="qt-seg2">${opts.map(([v, l]) => `<button class="${String(cur) === String(v) ? 'on' : ''}" ${attr}="${v}">${t(l)}</button>`).join('')}</div>
+    ${foot ? `<div class="qt-su">${t(foot)}</div>` : ''}</div>`;
 }
 /* a timed move (plank, hang, wall sit): its numbers are seconds */
 const isHold = m => !!(m && m.exId && EXERCISES[m.exId]?.measure === 'hold');
@@ -522,31 +527,31 @@ function moveCard(m, i) {
   const lad = cfg.fmt === 'ladder', db = cfg.fmt === 'deathby';
   const sec = isHold(m);
   /* one slim − value + line; `label` sits small on its left */
-  const line = (attr, face, label = '') => `<span class="qt-st">${label ? `<span class="qt-stl">${label}</span>` : ''}<button ${attr} data-d="-1" aria-label="Less">−</button><b>${face}</b><button ${attr} data-d="1" aria-label="More">+</button></span>`;
+  const line = (attr, face, label = '') => `<span class="qt-st">${label ? `<span class="qt-stl">${label}</span>` : ''}<button ${attr} data-d="-1" aria-label="${t('Less')}">−</button><b>${face}</b><button ${attr} data-d="1" aria-label="${t('More')}">+</button></span>`;
   const right = [];
   if (lad || db) {
     const step = ldStep(m);
-    right.push(line(`data-lm="${i}" data-lf="ldStart"`, `${ldStart(m)}${sec ? '<small>s</small>' : ''}`, 'start'));
-    right.push(line(`data-lm="${i}" data-lf="ldStep"`, `${step > 0 ? '+' : ''}${step}`, db ? 'add' : 'per rung'));
+    right.push(line(`data-lm="${i}" data-lf="ldStart"`, `${ldStart(m)}${sec ? '<small>s</small>' : ''}`, t('start')));
+    right.push(line(`data-lm="${i}" data-lf="ldStep"`, `${step > 0 ? '+' : ''}${step}`, db ? t('add') : t('per rung')));
   } else if (cfg.fmt !== 'tabata' && cfg.fmt !== 'timer') {   // time-based: no rep target, you log reps in the workout
     right.push(line(`data-mr="${i}"`, `<input data-mv="${i}" data-k="reps" type="number" inputmode="numeric" placeholder="–" value="${esc(m.reps)}" onfocus="this.select()"/>${sec ? '<small>s</small>' : ''}`));
   }
   /* the weight sits under the reps: always for a loaded move, on request
      (a faint "+ weight") for a bodyweight one */
   const hasWt = m.name && (isWeighted(m) || Number(m.wt) > 0);
-  if (hasWt) right.push(line(`data-mw="${i}"`, `${Number(m.wt) > 0 ? m.wt : '–'}<span class="qt-wu" data-wu="1" role="button" aria-label="Switch kg / lb">${wUnit()}</span>`));
-  else if (m.name) right.push(`<button class="qt-addwt" data-mw="${i}" data-d="1">+ weight</button>`);
+  if (hasWt) right.push(line(`data-mw="${i}"`, `${Number(m.wt) > 0 ? m.wt : '–'}<span class="qt-wu" data-wu="1" role="button" aria-label="${t('Switch kg / lb')}">${wUnit()}</span>`));
+  else if (m.name) right.push(`<button class="qt-addwt" data-mw="${i}" data-d="1">${t('+ weight')}</button>`);
   const note = lad ? ladderPreview(m) : db ? deathPreview(m) : '';
   return `<div class="qt-mvr">
-    <div class="qt-mvr-top"><button class="qt-mvr-n ${m.name ? '' : 'empty'}" data-pick-move="${i}">${m.name ? esc(m.name) : `Choose move ${i + 1}`}</button>
+    <div class="qt-mvr-top"><button class="qt-mvr-n ${m.name ? '' : 'empty'}" data-pick-move="${i}">${m.name ? esc(mvName(m)) : t('Choose move {n}', { n: i + 1 })}</button>
       <div class="qt-mvr-r">${right.join('')}</div>
-      ${MV().length > 1 || m.name ? `<button class="qt-mx" data-mvx="${i}" aria-label="Remove">✕</button>` : ''}</div>
+      ${MV().length > 1 || m.name ? `<button class="qt-mx" data-mvx="${i}" aria-label="${t('Remove')}">✕</button>` : ''}</div>
     ${note ? `<div class="qt-mnote">${note}</div>` : ''}
   </div>`;
 }
 function movesCard() {
   return `<div class="qt-mvlist">${MV().map(moveCard).join('')}
-    <button class="qt-addrow2" id="qtAdd">+ Add a move</button></div>`;
+    <button class="qt-addrow2" id="qtAdd">${t('+ Add a move')}</button></div>`;
 }
 /* full names on one line: a list's names at the size its longest needs */
 function fitMoveNames() {
@@ -557,20 +562,20 @@ function fitMoveNames() {
 }
 
 /* LAST TIME, for this same timer (its type and its moves) */
-const curSig = () => sigOf(fmtDef().name, namedMoves().map(m => m.name));
+const curSig = () => sigOf(fmtDef().name, namedMoves().map(m => m.exId || m.name));   // ids: the same timer in either language
 const pastRuns = () => hist.filter(x => x.sig === curSig());
 const shortDate = iso => new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 function lastLine() {
   const runs = pastRuns(); if (!runs.length) return '';
   const r = runs[0];
-  return `<button class="qt-last" id="qtLast"><span>Last time · ${shortDate(r.at)}</span><b>${r.total} reps${r.loadKg ? ` · ${showWeight(r.loadKg, wUnit())}` : ''}</b><i>${runs.length > 1 ? `${runs.length} times ›` : '›'}</i></button>`;
+  return `<button class="qt-last" id="qtLast"><span>${t('Last time')} · ${shortDate(r.at)}</span><b>${t('{n} reps', { n: r.total })}${r.loadKg ? ` · ${showWeight(r.loadKg, wUnit())}` : ''}</b><i>${runs.length > 1 ? `${t('{n} times', { n: runs.length })} ›` : '›'}</i></button>`;
 }
 function openHistory() {
   const runs = pastRuns();
-  const { ov, close } = sheet(`<div class="qt-sheet-h">${fmtDef().name} · history</div>
-    <div class="qt-hist">${runs.map(r => `<div class="qt-hrow"><div class="qt-hh"><b>${shortDate(r.at)}</b><span>${r.total} reps${r.loadKg ? ` · ${showWeight(r.loadKg, wUnit())}` : ''}${r.seconds ? ` · ${fmt(r.seconds)}` : ''}${r.partial ? ' · ended early' : ''}</span></div>
+  const { ov, close } = sheet(`<div class="qt-sheet-h">${t(fmtDef().name)} · ${t('history')}</div>
+    <div class="qt-hist">${runs.map(r => `<div class="qt-hrow"><div class="qt-hh"><b>${shortDate(r.at)}</b><span>${t('{n} reps', { n: r.total })}${r.loadKg ? ` · ${showWeight(r.loadKg, wUnit())}` : ''}${r.seconds ? ` · ${fmt(r.seconds)}` : ''}${r.partial ? ` · ${t('ended early')}` : ''}</span></div>
       <small>${r.moves.map(m => `${esc(m.name)} ${m.reps}${m.weight ? ` @ ${m.weight} ${m.wUnit || 'lb'}` : ''}`).join(' · ')}</small></div>`).join('')}</div>
-    <button class="btn" id="qtHistOk">Close</button>`, 'tall');
+    <button class="btn" id="qtHistOk">${t('Close')}</button>`, 'tall');
   ov.querySelector('#qtHistOk').addEventListener('click', close);
 }
 function draw() {
@@ -583,55 +588,55 @@ function draw() {
   const settings = [
     ...main.map(stepRow),
     ...(lad ? [segRow('Shape', 'violet', LD_SHAPES, cfg.ldShape, 'data-ldshape')] : []),
-    ...(cfg.fmt === 'vo2' ? [`<div class="qt-srow qt-vo2"><span class="qt-sl" style="color:var(--wm-accent)">Protocol</span>
-      ${VO2.map(p => `<button class="qt-vo2p ${p.id === vo2().id ? 'on' : ''}" data-vo2="${p.id}"><b>${p.name}</b><small>${p.sub}</small></button>`).join('')}</div>`] : []),
+    ...(cfg.fmt === 'vo2' ? [`<div class="qt-srow qt-vo2"><span class="qt-sl" style="color:var(--wm-accent)">${t('Protocol')}</span>
+      ${VO2.map(p => `<button class="qt-vo2p ${p.id === vo2().id ? 'on' : ''}" data-vo2="${p.id}"><b>${t(p.name)}</b><small>${t(p.sub)}</small></button>`).join('')}</div>`] : []),
   ];
   /* CUSTOMIZE: the rest, same rows */
   const custom = [
     ...more.map(stepRow),
     ...(cfg.fmt === 'emom' && named > 1 ? [segRow('How the moves run', 'accent', [['turns', 'Take turns'], ['all', 'All every minute']], cfg.emomStyle === 'all' ? 'all' : 'turns', 'data-style',
-        cfg.emomStyle === 'all' ? `All ${named} moves inside each minute` : 'Minute 1 is move 1, minute 2 is move 2')] : []),
+        cfg.emomStyle === 'all' ? t('All {n} moves inside each minute', { n: named }) : t('Minute 1 is move 1, minute 2 is move 2'))] : []),
   ];
   host.innerHTML = `
   <div class="screen qt fade-in">
     <div class="qt-top">
-      ${guest ? '' : '<button class="qt-back" id="qtBack" aria-label="Back">‹</button>'}
-      <h1>Training Timer</h1>
-      <button class="qt-star" id="qtPrefs" aria-label="Timer settings" title="Timer settings">⚙︎</button>
-      <button class="qt-star" id="qtShare" aria-label="Share this timer" title="Share this timer"><svg width="20" height="22" viewBox="0 0 20 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14V2M5 7l5-5 5 5"/><path d="M4 11H2.5v9h15v-9H16"/></svg></button>
-      <button class="qt-star ${favIdx != null ? 'on' : ''}" id="qtFav" aria-label="Save this timer" title="Save this timer">${favIdx != null ? '★' : '☆'}</button>
+      ${guest ? '' : `<button class="qt-back" id="qtBack" aria-label="${t('Back')}">‹</button>`}
+      <h1>${t('Training Timer')}</h1>
+      <button class="qt-star" id="qtPrefs" aria-label="${t('Timer settings')}" title="${t('Timer settings')}">⚙︎</button>
+      <button class="qt-star" id="qtShare" aria-label="${t('Share this timer')}" title="${t('Share this timer')}"><svg width="20" height="22" viewBox="0 0 20 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14V2M5 7l5-5 5 5"/><path d="M4 11H2.5v9h15v-9H16"/></svg></button>
+      <button class="qt-star ${favIdx != null ? 'on' : ''}" id="qtFav" aria-label="${t('Save this timer')}" title="${t('Save this timer')}">${favIdx != null ? '★' : '☆'}</button>
     </div>
 
-    ${favs.length ? `<div class="qt-favs">${favs.map((f, i) => `<span class="qt-fav ${i === favIdx ? 'on' : ''}"><button data-fav="${i}">${esc(f.label)}</button><button class="qt-favx" data-favx="${i}" aria-label="Remove">✕</button></span>`).join('')}</div>` : ''}
+    ${favs.length ? `<div class="qt-favs">${favs.map((f, i) => `<span class="qt-fav ${i === favIdx ? 'on' : ''}"><button data-fav="${i}">${esc(f.label)}</button><button class="qt-favx" data-favx="${i}" aria-label="${t('Remove')}">✕</button></span>`).join('')}</div>` : ''}
 
     <button class="qt-type" id="qtType">
-      <span class="qt-type-t"><small>Type</small><b>${def.name}</b><em>${def.sub}</em></span>
+      <span class="qt-type-t"><small>${t('Type')}</small><b>${t(def.name)}</b><em>${t(def.sub)}</em></span>
       <span class="qt-chev">▾</span>
     </button>
     ${lastLine()}
 
-    ${settings.length ? `${sec('Settings', lad ? '<button class="qt-seclink" id="qtPresets">Presets</button>' : '')}<div class="qt-rows">${settings.join('')}</div>` : ''}
+    ${settings.length ? `${sec('Settings', lad ? `<button class="qt-seclink" id="qtPresets">${t('Presets')}</button>` : '')}<div class="qt-rows">${settings.join('')}</div>` : ''}
     ${lad || db ? `${sec('Moves')}${movesCard()}` : ''}
-    ${!settings.length && !lad && !db ? `<div class="qt-empty">Nothing to set. Hit start.</div>` : ''}
+    ${!settings.length && !lad && !db ? `<div class="qt-empty">${t('Nothing to set. Hit start.')}</div>` : ''}
 
-    ${custom.length || (def.moves && !lad && !db) ? `<button class="qt-more ${moreOpen ? 'open' : ''}" id="qtMore"><span>${custom.length ? 'Customize' : 'Pick your exercises'}</span><i>›</i>${!moreOpen && named && !lad && !db ? `<em>${named} move${named > 1 ? 's' : ''}</em>` : ''}</button>` : ''}
+    ${custom.length || (def.moves && !lad && !db) ? `<button class="qt-more ${moreOpen ? 'open' : ''}" id="qtMore"><span>${custom.length ? t('Customize') : t('Pick your exercises')}</span><i>›</i>${!moreOpen && named && !lad && !db ? `<em>${t2(named, '{n} move', '{n} moves')}</em>` : ''}</button>` : ''}
     ${moreOpen && (custom.length || (def.moves && !lad && !db)) ? `<div class="qt-details">
       <div class="qt-rows">${custom.join('')}</div>
-      ${def.moves && !lad && !db ? `${sec('Moves', '<small>optional</small>')}${movesCard()}` : ''}
-      ${cfg.fmt === 'tabata' && (cfg.work !== TABATA.work || cfg.rest !== TABATA.rest) ? '<button class="qt-link" id="qtClassic">Back to classic 20s / 10s</button>' : ''}
-      ${standalone() ? '' : `<p class="qt-hint">Want the timer as its own app? In Safari tap Share, then Add to Home Screen, while this page is open.</p>`}
+      ${def.moves && !lad && !db ? `${sec('Moves', `<small>${t('optional')}</small>`)}${movesCard()}` : ''}
+      ${cfg.fmt === 'tabata' && (cfg.work !== TABATA.work || cfg.rest !== TABATA.rest) ? `<button class="qt-link" id="qtClassic">${t('Back to classic 20s / 10s')}</button>` : ''}
+      ${standalone() ? '' : `<p class="qt-hint">${t('Want the timer as its own app? In Safari tap Share, then Add to Home Screen, while this page is open.')}</p>`}
     </div>` : ''}
 
     ${showDemo() ? `${sec('Work Mode preview')}
     <div class="qt-demos">${DEMOS.map(d => `<button class="qt-demo" data-demo="${d.id}"><b>${d.name}</b><small>${d.sub}</small><span>▸</span></button>`).join('')}</div>` : ''}
 
-    ${guest ? '<button class="qt-link center qt-signin" id="qtSignIn">Have a program from Nico? Sign in</button>' : ''}
+    ${guest ? `<button class="qt-link center qt-signin" id="qtSignIn">${t('Have a program from Nico? Sign in')}</button>` : ''}
     <div style="height:200px"></div>
     <div class="actionbar qt-bar">
       <div class="qt-sum">${summary()}</div>
       <div class="qt-go">
         ${badgeRing()}
-        <button class="btn lg" id="qtGo">Start</button>
+        <button class="btn lg" id="qtGo">${t('Start')}</button>
       </div>
     </div>
   </div>`;
@@ -642,12 +647,12 @@ function draw() {
 function badgeRing() {
   ringBaseCss();
   const tb = totalBadge();
-  return `<div class="qt-badge2 ${tb.big.length > 5 ? 'long' : ''}" title="Total time">${ringHTML('work', ringDesign(), '-badge').replace('>0:00<', `>${tb.big}<`)}</div>`;
+  return `<div class="qt-badge2 ${tb.big.length > 5 ? 'long' : ''}" title="${t('Total time')}">${ringHTML('work', ringDesign(), '-badge').replace('>0:00<', `>${tb.big}<`)}</div>`;
 }
 /* the ladder presets, one tap away instead of a strip of chips */
 function openPresets() {
-  const { ov, close } = sheet(`<div class="qt-sheet-h">Ladder presets</div>
-    ${LD_PRESETS.map(p => `<button class="qt-opt" data-ldp="${p.id}"><b>${p.name}</b><small>${presetHint(p)}</small></button>`).join('')}`);
+  const { ov, close } = sheet(`<div class="qt-sheet-h">${t('Ladder presets')}</div>
+    ${LD_PRESETS.map(p => `<button class="qt-opt" data-ldp="${p.id}"><b>${t(p.name)}</b><small>${t(presetHint(p))}</small></button>`).join('')}`);
   ov.querySelectorAll('[data-ldp]').forEach(b => b.addEventListener('click', () => { applyPreset(LD_PRESETS.find(p => p.id === b.dataset.ldp)); persist(); close(); draw(); }));
 }
 const presetHint = p => ({ up: 'Reps go 1, 2, 3 … 10', down: 'Reps go 10, 9, 8 … 1', pyr: 'Up to 10, then back down',
@@ -676,10 +681,10 @@ async function shareTimer() {
   const url = `${location.origin}${location.pathname}?quick&t=${pack()}`;
   const title = planName();
   try {
-    if (navigator.share) { await navigator.share({ title: `Timer: ${title}`, text: `${title}. Tap to open it ready to go.`, url }); return; }
+    if (navigator.share) { await navigator.share({ title: t('Timer: {x}', { x: title }), text: t('{x}. Tap to open it ready to go.', { x: title }), url }); return; }
   } catch (e) { if (e && e.name === 'AbortError') return; }
-  try { await navigator.clipboard.writeText(url); toast('Link copied. Paste it anywhere.'); }
-  catch (e) { prompt('Copy this link', url); }
+  try { await navigator.clipboard.writeText(url); toast(t('Link copied. Paste it anywhere.')); }
+  catch (e) { prompt(t('Copy this link'), url); }
 }
 function toast(text) {
   document.getElementById('qtToast')?.remove();
@@ -690,16 +695,16 @@ const defaultLabel = () => { const m = namedMoves().map(x => x.name); return pla
 /* name it, update it, save a copy, or delete it */
 function openSave() {
   const cur = favIdx != null ? favs[favIdx] : null;
-  const { ov, close } = sheet(`<div class="qt-sheet-h">${cur ? 'Saved timer' : 'Save this timer'}</div>
-    <input class="qt-search" id="svName" value="${esc(cur ? cur.label : defaultLabel())}" placeholder="Give it a name" autocomplete="off"/>
-    ${cur ? `<button class="btn" id="svUpdate">Save changes</button>
-      <button class="btn secondary" id="svNew">Save as a new timer</button>
-      <button class="btn ghost" id="svDel">Delete this timer</button>`
-    : '<button class="btn" id="svNew">Save</button>'}`);
+  const { ov, close } = sheet(`<div class="qt-sheet-h">${cur ? t('Saved timer') : t('Save this timer')}</div>
+    <input class="qt-search" id="svName" value="${esc(cur ? cur.label : defaultLabel())}" placeholder="${t('Give it a name')}" autocomplete="off"/>
+    ${cur ? `<button class="btn" id="svUpdate">${t('Save changes')}</button>
+      <button class="btn secondary" id="svNew">${t('Save as a new timer')}</button>
+      <button class="btn ghost" id="svDel">${t('Delete this timer')}</button>`
+    : `<button class="btn" id="svNew">${t('Save')}</button>`}`);
   const name = () => (ov.querySelector('#svName').value.trim() || defaultLabel()).slice(0, 60);
   const snap = () => JSON.parse(JSON.stringify(cfg));
-  ov.querySelector('#svUpdate')?.addEventListener('click', () => { favs[favIdx] = { label: name(), cfg: snap() }; persist(); close(); draw(); toast('Saved'); });
-  ov.querySelector('#svNew').addEventListener('click', () => { favs.unshift({ label: name(), cfg: snap() }); favs = favs.slice(0, 20); favIdx = 0; persist(); close(); draw(); toast('Saved'); });
+  ov.querySelector('#svUpdate')?.addEventListener('click', () => { favs[favIdx] = { label: name(), cfg: snap() }; persist(); close(); draw(); toast(t('Saved')); });
+  ov.querySelector('#svNew').addEventListener('click', () => { favs.unshift({ label: name(), cfg: snap() }); favs = favs.slice(0, 20); favIdx = 0; persist(); close(); draw(); toast(t('Saved')); });
   ov.querySelector('#svDel')?.addEventListener('click', () => { favs.splice(favIdx, 1); favIdx = null; persist(); close(); draw(); });
   setTimeout(() => ov.querySelector('#svName').select(), 60);
 }
@@ -716,8 +721,8 @@ function sheet(inner, cls = '') {
 }
 /* the type list */
 function openTypes() {
-  const { ov, close } = sheet(`<div class="qt-sheet-h">Type of timer</div>
-    ${FORMATS.map(f => `<div class="qt-optrow"><button class="qt-opt ${f.id === cfg.fmt ? 'on' : ''}" data-pick="${f.id}"><b>${f.name}${f.id === cfg.fmt ? ' <i>✓</i>' : ''}</b><small>${f.sub}</small></button><button class="qt-how" data-how="${f.id}" aria-label="How ${f.name} works">?</button></div>`).join('')}`);
+  const { ov, close } = sheet(`<div class="qt-sheet-h">${t('Type of timer')}</div>
+    ${FORMATS.map(f => `<div class="qt-optrow"><button class="qt-opt ${f.id === cfg.fmt ? 'on' : ''}" data-pick="${f.id}"><b>${t(f.name)}${f.id === cfg.fmt ? ' <i>✓</i>' : ''}</b><small>${t(f.sub)}</small></button><button class="qt-how" data-how="${f.id}" aria-label="${t('How {x} works', { x: t(f.name) })}">?</button></div>`).join('')}`);
   ov.querySelectorAll('[data-how]').forEach(b => b.addEventListener('click', () => openHow(b.dataset.how)));
   ov.querySelectorAll('[data-pick]').forEach(b => b.addEventListener('click', () => {
     if (cfg.fmt !== b.dataset.pick) {
@@ -735,22 +740,22 @@ const NO_SETUP = new Set(['stopwatch']);
 /* how the chosen type works */
 function openHow(id) {
   const def = FORMATS.find(f => f.id === id) || fmtDef();
-  const { ov, close } = sheet(`<div class="qt-sheet-h">How ${def.name} works</div>
-    <div class="qt-howbody"><p class="lead">${def.how[0]}</p>${def.how.slice(1).map(p => `<p>${p}</p>`).join('')}</div>
-    <button class="btn" id="qtHowOk">Got it</button>`);
+  const { ov, close } = sheet(`<div class="qt-sheet-h">${t('How {x} works', { x: t(def.name) })}</div>
+    <div class="qt-howbody"><p class="lead">${t(def.how[0])}</p>${def.how.slice(1).map(p => `<p>${t(p)}</p>`).join('')}</div>
+    <button class="btn" id="qtHowOk">${t('Got it')}</button>`);
   ov.querySelector('#qtHowOk').addEventListener('click', close);
 }
 /* minutes and seconds, for any time field */
 function openTime(k) {
   let v = val(k);
   const [label, , , lo, hi] = FIELDS[k];
-  const { ov, close } = sheet(`<div class="qt-sheet-h">${label}</div>
+  const { ov, close } = sheet(`<div class="qt-sheet-h">${t(label)}</div>
     <div class="qt-tp">
       <div><button data-tp="m" data-d="1">+</button><b id="tpM"></b><small>min</small><button data-tp="m" data-d="-1">−</button></div>
       <span class="qt-tpc">:</span>
-      <div><button data-tp="s" data-d="5">+</button><b id="tpS"></b><small>sec</small><button data-tp="s" data-d="-5">−</button></div>
+      <div><button data-tp="s" data-d="5">+</button><b id="tpS"></b><small>${t('sec')}</small><button data-tp="s" data-d="-5">−</button></div>
     </div>
-    <button class="btn" id="tpOk">Done</button>`);
+    <button class="btn" id="tpOk">${t('Done')}</button>`);
   const show = () => { ov.querySelector('#tpM').textContent = Math.floor(v / 60); ov.querySelector('#tpS').textContent = String(v % 60).padStart(2, '0'); };
   ov.querySelectorAll('[data-tp]').forEach(b => b.addEventListener('click', () => {
     const d = Number(b.dataset.d);
@@ -802,7 +807,7 @@ const CHIPS = ['Easy', 'Medium', 'Hard', 'Core', 'Abs', 'Legs', 'Glutes', 'Push'
    prep with none count as easy */
 const LEVEL_NAME = { beg: 'beginner', int: 'intermediate', adv: 'advanced' };
 function levelOf(e, c) { return e.level || c.level || (e.pattern === 'mobility' || c.role === 'joint-prep' ? 'beg' : null); }
-const norm = s => String(s || '').toLowerCase().replace(/[-_/]/g, ' ').replace(/\s+/g, ' ').trim();
+const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[-_/’']/g, ' ').replace(/\s+/g, ' ').trim();   // accents off: "developpe" finds Développé
 let catalog = null, lib = null;
 async function loadCatalog() {
   if (catalog) return;
@@ -813,8 +818,10 @@ async function loadCatalog() {
    muscles, pattern, equipment, aliases) and what it also touches (secondary
    muscles). Whole words only, so "lats" never matches "bilateral". */
 const wordsOf = str => new Set(norm(str).split(' ').filter(Boolean));
+let libLang = null;
 function LIB() {
-  if (lib) return lib;
+  if (lib && libLang === lang()) return lib;
+  libLang = lang();
   const add = (set, v) => [].concat(v || []).forEach(x => { if (!x || typeof x !== 'string') return; set.push(x); if (WORDS[x]) set.push(WORDS[x]); });
   lib = Object.entries(EXERCISES).filter(([, e]) => e.name).map(([id, e]) => {
     const c = (catalog && catalog[id]) || {};
@@ -825,9 +832,10 @@ function LIB() {
     if (e.laterality === 'unilateral') add(main, 'unilateral');
     Object.values(c.aliases || {}).forEach(v => add(main, v));
     add(also, c.musclesAlso);
-    const muscles = (c.muscles || []).map(m => m.replace(/-/g, ' '));
-    return { id, name: e.name, n: norm(e.name), lvl, mus: c.muscles || [], pat: [e.pattern, ...(c.patterns || [])].filter(Boolean), eq: e.equipment || [], gym: !!e.gymOnly, wn: wordsOf(`${e.name} ${id}`), wm: wordsOf(main.join(' ')), wa: wordsOf(also.join(' ')),
-      tag: [muscles.join(', ') || e.pattern || '', LEVEL_NAME[lvl] || '', e.gymOnly ? 'gym' : ''].filter(Boolean).join(' · ') };
+    const muscles = (c.muscles || []).map(m => t(m.replace(/-/g, ' ')));
+    const shown = exName(id, e.name);                 // the French name in French, searchable in both
+    return { id, name: shown, n: norm(shown), lvl, mus: c.muscles || [], pat: [e.pattern, ...(c.patterns || [])].filter(Boolean), eq: e.equipment || [], gym: !!e.gymOnly, wn: wordsOf(`${e.name} ${shown} ${id}`), wm: wordsOf(main.join(' ')), wa: wordsOf(also.join(' ')),
+      tag: [muscles.join(', ') || t(e.pattern || ''), t(LEVEL_NAME[lvl] || ''), e.gymOnly ? t('gym') : ''].filter(Boolean).join(' · ') };
   }).sort((a, b) => a.name.localeCompare(b.name));
   return lib;
 }
@@ -920,13 +928,13 @@ function suggestedMoves(skip) {
     .filter(x => x.sc > 0).sort((a, b) => b.sc - a.sc || a.e.name.localeCompare(b.e.name)).slice(0, 6).map(x => x.e);
 }
 async function openMovePicker(i) {
-  const { ov, close } = sheet(`<div class="qt-sheet-h">Pick a move</div>
-    <input class="qt-search" id="mvQ" placeholder="${MV()[i]?.name ? `${esc(MV()[i].name)} · search to change` : 'Search by name, or tap the filters'}" autocomplete="off" value=""/>
+  const { ov, close } = sheet(`<div class="qt-sheet-h">${t('Pick a move')}</div>
+    <input class="qt-search" id="mvQ" placeholder="${MV()[i]?.name ? t('{x} · search to change', { x: esc(mvName(MV()[i])) }) : t('Search by name, or tap the filters')}" autocomplete="off" value=""/>
     <div class="qt-filters" id="mvF"></div>
     <div class="qt-results" id="mvR"></div>`, 'tall');
   const q = ov.querySelector('#mvQ'), out = ov.querySelector('#mvR');
   const pick = m => { rememberPick(m.exId); MV()[i] = { ...MV()[i], ...m }; persist(); close(); draw(); };
-  const chipRow = (opts, key) => `<div class="qt-frow">${opts.map(([v, l]) => `<button class="${moveFilter[key] === v ? 'on' : ''}" data-f="${key}" data-v="${v}">${l}</button>`).join('')}</div>`;
+  const chipRow = (opts, key) => `<div class="qt-frow">${opts.map(([v, l]) => `<button class="${moveFilter[key] === v ? 'on' : ''}" data-f="${key}" data-v="${v}">${t(l)}</button>`).join('')}</div>`;
   const filters = () => {
     ov.querySelector('#mvF').innerHTML = chipRow(PARTS, 'part') + chipRow(LEVELS, 'lvl') + chipRow(EQUIP, 'eq');
     ov.querySelectorAll('[data-f]').forEach(b => b.addEventListener('click', () => { moveFilter[b.dataset.f] = b.dataset.v; filters(); list(); }));
@@ -938,23 +946,23 @@ async function openMovePicker(i) {
     const exact = t && LIB().some(e => e.n === t);
     const favs = new Set(favMoves());
     const row = e => { const img = exerciseImage(e.id);
-      return `<button class="qt-res pic" data-ex="${e.id}"><span class="qt-th">${img ? `<img src="${img}" alt="" loading="lazy" decoding="async"/>` : esc(e.name[0])}</span><span class="qt-rt"><b>${esc(e.name)}</b><small>${esc(e.tag)}</small></span><span class="qt-star ${favs.has(e.id) ? 'on' : ''}" data-fav="${e.id}" role="button" aria-label="Favourite">${favs.has(e.id) ? '★' : '☆'}</span></button>`; };
+      return `<button class="qt-res pic" data-ex="${e.id}"><span class="qt-th">${img ? `<img src="${img}" alt="" loading="lazy" decoding="async"/>` : esc(e.name[0])}</span><span class="qt-rt"><b>${esc(e.name)}</b><small>${esc(e.tag)}</small></span><span class="qt-star ${favs.has(e.id) ? 'on' : ''}" data-fav="${e.id}" role="button" aria-label="${t('Favorite')}">${favs.has(e.id) ? '★' : '☆'}</span></button>`; };
     const head = (title, n) => `<div class="qt-count qt-grp">${title}${n != null ? ` <span>${n}</span>` : ''}</div>`;
     let html = '';
     if (t) {
-      html = (!exact ? `<button class="qt-res own" data-own="1"><b>Use "${esc(q.value.trim())}"</b><small>your own move, not from the library</small></button>` : '')
-        + head(`${all.length} move${all.length === 1 ? '' : 's'}`) + all.slice(0, 120).map(row).join('');
+      html = (!exact ? `<button class="qt-res own" data-own="1"><b>${t('Use "{x}"', { x: esc(q.value.trim()) })}</b><small>${t('your own move, not from the library')}</small></button>` : '')
+        + head(t2(all.length, '{n} move', '{n} moves')) + all.slice(0, 120).map(row).join('');
     } else {
       /* nothing typed: the groups first, then the rest, each move once */
       const byId = new Map(all.map(e => [e.id, e])), shown = new Set();
       const grp = ids => ids.map(id => byId.get(id)).filter(e => e && !shown.has(e.id) && shown.add(e.id));
       const fav = grp([...favs]), rec = grp(recentMoves()), sug = grp(suggestedMoves(new Set([...favs, ...recentMoves()])).map(e => e.id)), fun = grp(FUNDAMENTALS);
       const rest = all.filter(e => !shown.has(e.id));
-      html = (fav.length ? head('★ Favorites') + fav.map(row).join('') : '')
-        + (rec.length ? head('Recent') + rec.map(row).join('') : '')
-        + (sug.length ? head('Suggested for you') + sug.map(row).join('') : '')
-        + (fun.length ? head('Fundamentals') + fun.map(row).join('') : '')
-        + head(filtered ? 'More moves' : 'All moves', rest.length) + rest.map(row).join('');
+      html = (fav.length ? head('★ ' + t('Favorites')) + fav.map(row).join('') : '')
+        + (rec.length ? head(t('Recent')) + rec.map(row).join('') : '')
+        + (sug.length ? head(t('Suggested for you')) + sug.map(row).join('') : '')
+        + (fun.length ? head(t('Fundamentals')) + fun.map(row).join('') : '')
+        + head(filtered ? t('More moves') : t('All moves'), rest.length) + rest.map(row).join('');
     }
     out.innerHTML = html;
     out.querySelectorAll('[data-fav]').forEach(st => st.addEventListener('click', e => { e.stopPropagation(); toggleFav(st.dataset.fav); const top = out.scrollTop; list(); out.scrollTop = top; }));

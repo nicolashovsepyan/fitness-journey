@@ -10,6 +10,7 @@
    ============================================================ */
 import { USERS, claimDevice, displayName } from '../users.js';
 import { applySurveyPayload } from '../intake.js';
+import { t } from '../i18n.js';
 
 export function renderClaim(host, { onDone }) {
   const people = Object.values(USERS);
@@ -41,7 +42,7 @@ export function renderClaim(host, { onDone }) {
       <div class="claim-inner">
         <button class="claim-timer" id="claimTimer">
           <img src="images/timer-icon/timer-180.png" alt="" />
-          <span><b>Just need the timer?</b><small>Open it. No sign-in needed.</small></span>
+          <span><b>${t('Just need the timer?')}</b><small>${t('Open it. No sign-in needed.')}</small></span>
           <i>›</i>
         </button>
         <h1>${people.length ? 'Whose phone is this?' : 'Let us find you'}</h1>

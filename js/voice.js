@@ -12,6 +12,7 @@
    would take the audio focus and pause it).
    ============================================================ */
 import { EXERCISES } from './data/exercises.js';
+import { lang } from './i18n.js';
 
 let index = null, loading = null;
 const buffers = new Map();
@@ -19,7 +20,9 @@ const buffers = new Map();
 /* MALE OR FEMALE. Both are Nico's takes; the female set is rebuilt from
    them by tools/build-voice-female.py (pitch and formants raised). */
 let kind = 'm';
-const dirFor = k => k === 'f' ? 'audio/voice-f' : 'audio/voice';
+/* per language: English audio/voice(-f), French audio/voice-fr(-f), the
+   French one recorded from docs/VOICE-SCRIPT-FR.md */
+const dirFor = k => (lang() === 'fr' ? 'audio/voice-fr' : 'audio/voice') + (k === 'f' ? '-f' : '');
 export function setVoiceKind(k) { kind = k === 'f' ? 'f' : 'm'; }
 export const voiceKind = () => kind;
 
@@ -95,9 +98,11 @@ function buildDict(pieces) {
 
 /* load the index once; the pieces themselves load as they are first needed
    (and all of them in the background after the first gesture) */
+let packLang = null;
 export function loadVoicePack() {
+  if (packLang !== lang()) { packLang = lang(); loading = null; index = null; dict = null; buffers.clear(); }
   if (loading) return loading;
-  loading = fetch('audio/voice/index.json').then(r => r.ok ? r.json() : null)
+  loading = fetch(`${lang() === 'fr' ? 'audio/voice-fr' : 'audio/voice'}/index.json`).then(r => r.ok ? r.json() : null)
     .then(j => { if (j?.pieces) { index = j.pieces; dict = buildDict(index); } })
     .catch(() => {});
   return loading;
@@ -122,6 +127,7 @@ export async function warmVoice(actx) {
 
 /* a line → [{ key } | { tts }] */
 export function plan(text) {
+  if (packLang !== lang()) { loadVoicePack(); return null; }     // a new language: its pack loads, the phone's voice meanwhile
   if (!dict) return null;
   /* the whole line recorded as one piece ("Workout complete. Strong work.") */
   const whole = dict.get(norm(text).replace(/[.,]/g, '').replace(/\s+/g, ' ').trim());

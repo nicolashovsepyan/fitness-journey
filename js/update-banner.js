@@ -11,7 +11,10 @@
    bumps its `version` and puts the newest line first. Self-contained
    (its own styles) because the two pages share no stylesheet.
    ============================================================ */
+import { t, isFr } from './i18n.js';
 const SEEN = 'fj.seenVersion';
+/* what changed, in the reader's language (whatsnew.json may carry notes_fr) */
+const note = w => (isFr() && w?.notes_fr?.[0]) || w?.notes?.[0] || '';
 
 /* the version this page is RUNNING (through the offline cache), and the
    one on the site RIGHT NOW (?live skips the cache, see build-sw.mjs) */
@@ -33,7 +36,7 @@ export async function checkForUpdate({ manual = false, canShow = () => true } = 
   const newer = !!(now?.version && live?.version && live.version !== now.version);
   if (newer) { try { (await navigator.serviceWorker?.getRegistration())?.update(); } catch (e) {} }
   if (newer && canShow()) updateReady(live);
-  else if (manual) toast(newer ? 'An update is ready. Finish your workout, then refresh.' : `You're on the latest version (${now?.version || 'this one'}).`);
+  else if (manual) toast(newer ? t('An update is ready. Finish your workout, then refresh.') : t("You're on the latest version ({v}).", { v: now?.version || t('this one') }));
   return newer;
 }
 /* after a check, the same check every time the app comes back to the front */
@@ -51,7 +54,7 @@ function toast(text) {
 /* Refresh = take the new version for real: ask the service worker to fetch
    it, wait (briefly) until it is in charge, then reload onto it. */
 async function refreshNow(btn) {
-  if (btn) { btn.disabled = true; btn.textContent = 'Updating…'; }
+  if (btn) { btn.disabled = true; btn.textContent = t('Updating…'); }
   try {
     const reg = await navigator.serviceWorker?.getRegistration();
     if (reg) {
@@ -86,8 +89,8 @@ export async function updateReady(known) {
   const w = known || await whatsNew(true) || await whatsNew();
   style();
   const el = document.createElement('div'); el.id = 'fjUpd'; el.className = 'fj-upd';
-  el.innerHTML = `<span class="tx"><b>Update ready</b>${w?.notes?.[0] ? `<small>${esc(w.notes[0])}</small>` : ''}</span>
-    <button class="go">Refresh</button><button class="x" aria-label="Later">✕</button>`;
+  el.innerHTML = `<span class="tx"><b>${t('Update ready')}</b>${note(w) ? `<small>${esc(note(w))}</small>` : ''}</span>
+    <button class="go">${t('Refresh')}</button><button class="x" aria-label="${t('Later')}">✕</button>`;
   el.querySelector('.go').addEventListener('click', e => refreshNow(e.currentTarget));
   el.querySelector('.x').addEventListener('click', () => el.remove());
   document.body.appendChild(el);
@@ -100,7 +103,7 @@ export async function announceUpdate() {
   if (!seen || seen === w.version) return;          // first visit, or nothing new
   style();
   const el = document.createElement('div'); el.className = 'fj-upd done';
-  el.innerHTML = `<span class="tx"><b>Updated ✓</b><small>${esc(w.notes?.[0] || 'You have the latest version.')}</small></span><button class="x" aria-label="Close">✕</button>`;
+  el.innerHTML = `<span class="tx"><b>${t('Updated ✓')}</b><small>${esc(note(w) || t('You have the latest version.'))}</small></span><button class="x" aria-label="${t('Close')}">✕</button>`;
   el.querySelector('.x').addEventListener('click', () => el.remove());
   document.body.appendChild(el);
   setTimeout(() => el.remove(), 7000);

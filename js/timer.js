@@ -9,6 +9,7 @@
 
 import { storage } from './core/storage.js';
 import { loadVoicePack, warmVoice, plan, playLine, stopVoice } from './voice.js';
+import { lang } from './i18n.js';
 loadVoicePack();
 
 /* ---- coach voice ---- */
@@ -37,7 +38,16 @@ export async function loadVoicePref() {
 }
 
 function enVoices() { try { return speechSynthesis.getVoices().filter(v => /^en/i.test(v.lang)); } catch (e) { return []; } }
+/* the phone's French voice, from France (fr-FR), never Canadian French */
+function frVoice() {
+  try {
+    const vs = speechSynthesis.getVoices().filter(v => /^fr[-_]FR/i.test(v.lang));
+    for (const name of ['Thomas', 'Audrey', 'Aurélie', 'Amélie', 'Google français', 'Microsoft Denise', 'Microsoft Henri']) { const v = vs.find(x => x.name.includes(name)); if (v) return v; }
+    return vs[0] || null;
+  } catch (e) { return null; }
+}
 function pickVoice() {
+  if (lang() === 'fr') return frVoice();
   try {
     const vs = speechSynthesis.getVoices(); if (!vs.length) return null;
     if (savedVoiceName) { const s = vs.find(v => v.name === savedVoiceName); if (s) return s; }
@@ -67,8 +77,9 @@ function speakNow(text) {
   return new Promise(done => {
     try {
       if (!text) return done();
-      if (!preferredVoice) preferredVoice = pickVoice();
+      preferredVoice = pickVoice();
       const u = new SpeechSynthesisUtterance(text);
+      if (lang() === 'fr') u.lang = 'fr-FR';
       if (preferredVoice) { u.voice = preferredVoice; u.lang = preferredVoice.lang; }
       u.rate = 0.92;
       const t = setTimeout(done, 600 + text.length * 90);      // onend is not reliable everywhere
@@ -92,9 +103,9 @@ export function say(text, keep = 0) {
     return;
   }
   try {
-    if (!preferredVoice) preferredVoice = pickVoice();
+    if (!preferredVoice || (lang() === 'fr') !== /^fr/i.test(preferredVoice.lang || '')) preferredVoice = pickVoice();   // the language changed
     const u = new SpeechSynthesisUtterance(text);
-    if (preferredVoice) { u.voice = preferredVoice; u.lang = preferredVoice.lang; }
+    if (preferredVoice) { u.voice = preferredVoice; u.lang = preferredVoice.lang; } else if (lang() === 'fr') u.lang = 'fr-FR';
     u.rate = 0.92; u.pitch = 1.0; u.volume = 1.0;   // slightly slower = less robotic
     if (Date.now() >= keepUntil) speechSynthesis.cancel();   // never let lines pile up
     if (keep) keepUntil = Date.now() + keep;

@@ -10,18 +10,22 @@
    recorded it, else joined from his pieces ("Round" + "6").
    ============================================================ */
 import { recorded } from '../voice.js';
+import { t } from '../i18n.js';
 
 /* the call for round k of n (n unknown: Death By). A random one of the
    versions Nico has recorded, so it never sounds the same twice; else the
    nearest thing built only from what he has recorded ("Round 4. Halfway."),
    never half his voice and half the robot. */
 const any = list => { const ok = list.filter(recorded); return ok.length ? ok[Math.floor(Math.random() * ok.length)] : null; };
+/* in the current language (the English line is the key, js/i18n-fr.js has the French) */
+const L = (en, vars) => t(en, vars);
 export function roundCall(k, n, word = 'Round') {
-  const w = word.toLowerCase(), R = `${word} ${k}.`;
-  if (n && n > 1 && k === n) return any([`Last ${w}. Make it count.`, `Last ${w}. Empty the tank.`, `Final ${w}. Let's go.`]) || (recorded(`Last ${w}.`) ? `Last ${w}.` : 'Last round.');
-  if (n >= 6 && k === n - 1) return any([`${R} Last two. Push yourself.`, `${R} Two to go. Stay with it.`]) || R;
-  if (n >= 8 && k === n - 2) return any([`${R} Three to go.`, `${R} Three more. Keep it up.`]) || R;
-  if (n >= 4 && k === Math.floor(n / 2) + (n % 2)) return any([`${R} Halfway there.`, `${R} Halfway. Keep going.`]) || `${R} Halfway.`;
+  const rung = word !== 'Round';
+  const R = L(rung ? 'Rung {n}.' : 'Round {n}.', { n: k });
+  if (n && n > 1 && k === n) return any([L('Last round. Make it count.'), L('Last round. Empty the tank.'), L("Final round. Let's go.")]) || L('Last round.');
+  if (n >= 6 && k === n - 1) return any([L('Round {n}. Last two. Push yourself.', { n: k }), L('Round {n}. Two to go. Stay with it.', { n: k })]) || R;
+  if (n >= 8 && k === n - 2) return any([L('Round {n}. Three to go.', { n: k }), L('Round {n}. Three more. Keep it up.', { n: k })]) || R;
+  if (n >= 4 && k === Math.floor(n / 2) + (n % 2)) return any([L('Round {n}. Halfway there.', { n: k }), L('Round {n}. Halfway. Keep going.', { n: k })]) || L('Round {n}. Halfway.', { n: k });
   return R;
 }
 
@@ -66,8 +70,8 @@ export const LINES = {
 
 /* a recorded line for this moment, or nothing */
 export function pick(moment) {
-  const ok = (LINES[moment] || []).filter(recorded);
+  const ok = (LINES[moment] || []).map(x => L(x)).filter(recorded);
   return ok.length ? ok[Math.floor(Math.random() * ok.length)] : null;
 }
 /* the cue for a move, if recorded */
-export function cueFor(exId) { const c = exId && CUES[exId]; return c && recorded(c) ? c : null; }
+export function cueFor(exId) { const c = exId && CUES[exId] && L(CUES[exId]); return c && recorded(c) ? c : null; }

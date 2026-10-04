@@ -45,6 +45,27 @@ still appears, but says nothing about what changed.
 
 ---
 
+## French (France) — every user-facing string, every chat
+
+The app is going bilingual, English and French from France (not Québec).
+Started 4 Oct 2026 in the Work Mode chat (Training Timer and workout
+screens done first).
+
+- **Write strings through `t()`** from `js/i18n.js`: `t('Start')`,
+  `t('Round {n}.', { n })`, `t2(n, '{n} move', '{n} moves')`. The English
+  text is the key; French lives in `js/i18n-fr.js`. A missing key shows English.
+- **Exercise names and cues:** `exName(id, name)` / `exCues(id, cues)`
+  (French in `js/data/exercises-fr.js`, all 322 moves).
+- **Words and style:** `docs/FRENCH.md` is binding: "tu", France terms, kg,
+  decimal comma, no-break space before ! ? : ;.
+- **Language** is per device (`fj.lang`), switched in Timer settings; pages
+  can listen for the `fj-lang` event to redraw.
+- **Not yet in French:** dashboard.html, onboarding.html, coach pages (coach
+  pages stay English by design). Their chats: wrap strings with `t()` and add
+  the French to js/i18n-fr.js.
+- **Release notes:** `whatsnew.json` can carry `notes_fr` next to `notes`;
+  the update bar shows the French one to French users.
+
 ## Work Mode has its own chat
 
 The live timer (program workouts AND the standalone Quick Timer) is built from

@@ -6,6 +6,7 @@
 import { storage } from '../core/storage.js';
 import { setVoice, setBeeps, say, beep, setSilentOverride } from '../timer.js';
 import { setVoiceKind } from '../voice.js';
+import { t, lang, setLang } from '../i18n.js';
 import { vibeOptions, setVibe } from './theme.js';
 import { checkForUpdate, runningVersion } from '../update-banner.js';
 import { PRESETS, designFor, ringChoice, chooseRing, ringHTML, ringBaseCss, setRingProgress } from './ring.js';
@@ -47,13 +48,13 @@ function miniRing(p) {
 /* the two colours, named by what they light in the timer (the dashboard
    calls the same two slots "Buttons & rings" and "Glow & edges") */
 const SLOT_TEXT = { accent: ['Main color', 'Buttons and the work timer'], neon: ['Second color', 'The rest timer and highlights'] };
-const slotName = sl => (SLOT_TEXT[sl.id] || [sl.name])[0];
-const slotHint = sl => (SLOT_TEXT[sl.id] || [, sl.hint])[1];
+const slotName = sl => t((SLOT_TEXT[sl.id] || [sl.name])[0]);
+const slotHint = sl => t((SLOT_TEXT[sl.id] || [, sl.hint])[1]);
 /* a live preview: the chosen ring in its three phases */
 function phasePreview() {
   ringBaseCss();
   const d = designFor(ringChoice());
-  const one = (cls, label) => `<span class="wm-ph"><span class="wm-mini">${ringHTML(cls, d, '-p' + cls).replace(/stroke-dashoffset="0"/g, 'stroke-dashoffset="188"').replace('>0:00<', '><')}</span><small>${label}</small></span>`;
+  const one = (cls, label) => `<span class="wm-ph"><span class="wm-mini">${ringHTML(cls, d, '-p' + cls).replace(/stroke-dashoffset="0"/g, 'stroke-dashoffset="188"').replace('>0:00<', '><')}</span><small>${t(label)}</small></span>`;
   return `<div class="wm-phases">${one('ready', 'Get ready')}${one('work', 'Work')}${one('rest', 'Rest')}</div>`;
 }
 function vibeHtml() {
@@ -61,15 +62,15 @@ function vibeHtml() {
   const cur = ringChoice();
   if (!palettes.length) return '';
   const glow = vibe.glow || 'normal';
-  return `<div class="wm-sheet-sub">Colors</div>
+  return `<div class="wm-sheet-sub">${t('Colors')}</div>
     ${phasePreview()}
-    <p class="wm-note">Get ready is always blue. These are the same colors as your Fitness Journey app.</p>
-    <button class="wm-lookrow" data-look="1">${miniRing(PRESETS.find(p => p.id === cur) || PRESETS[0])}<span><b>Timer look</b><small>${(PRESETS.find(p => p.id === cur) || PRESETS[0]).name} · swipe through the designs and colours</small></span><i>›</i></button>
+    <p class="wm-note">${t('Get ready is always blue. These are the same colors as your Fitness Journey app.')}</p>
+    <button class="wm-lookrow" data-look="1">${miniRing(PRESETS.find(p => p.id === cur) || PRESETS[0])}<span><b>${t('Timer look')}</b><small>${(PRESETS.find(p => p.id === cur) || PRESETS[0]).name} · ${t('swipe through the designs and colors')}</small></span><i>›</i></button>
     ${slots.map(sl => `<div class="wm-vrow"><div class="wm-vl"><b>${slotName(sl)}</b><small>${slotHint(sl)}</small></div>
       <div class="wm-sw6">${palettes.map(p => `<button class="wm-dot ${pick[sl.id] === p.id ? 'on' : ''}" style="--c:${p.hex}" data-vslot="${sl.id}:${p.id}" aria-label="${p.name}" title="${p.name}"></button>`).join('')}</div></div>`).join('')}
-    <div class="wm-vrow"><div class="wm-vl"><b>Glow strength</b><small>How hard everything shines</small></div>
-      <div class="wm-seg3">${[['soft', 'Soft'], ['normal', 'Normal'], ['bold', 'Bold']].map(([v, l]) => `<button class="${glow === v ? 'on' : ''}" data-vglow="${v}">${l}</button>`).join('')}</div></div>
-    <button class="btn ${vibe.themeRandom ? '' : 'secondary'}" data-vshuffle="1">${vibe.themeRandom ? 'Shuffling weekly. Turn off' : 'Surprise me every week'}</button>`;
+    <div class="wm-vrow"><div class="wm-vl"><b>${t('Glow strength')}</b><small>${t('How hard everything shines')}</small></div>
+      <div class="wm-seg3">${[['soft', 'Soft'], ['normal', 'Normal'], ['bold', 'Bold']].map(([v, l]) => `<button class="${glow === v ? 'on' : ''}" data-vglow="${v}">${t(l)}</button>`).join('')}</div></div>
+    <button class="btn ${vibe.themeRandom ? '' : 'secondary'}" data-vshuffle="1">${vibe.themeRandom ? t('Shuffling weekly. Turn off') : t('Surprise me every week')}</button>`;
 }
 
 /* is this the coach's phone? (the coach console has run here, or the lab
@@ -92,12 +93,12 @@ export function openLook(host, onDone) {
     const { palettes, slots, pick } = vibeOptions();
     return slots.map(sl => `<div class="wm-strip"><div class="wm-stl">${slotName(sl)}</div><div class="wm-swipe">${palettes.map(p => `<button class="wm-dot ${pick[sl.id] === p.id ? 'on' : ''}" style="--c:${p.hex}" data-lslot="${sl.id}:${p.id}" aria-label="${p.name}"><span>${p.name}</span></button>`).join('')}</div></div>`).join('');
   };
-  ov.innerHTML = `<div class="wm-look-top"><button class="wm-look-x" aria-label="Back">‹</button><b>Timer look</b>
+  ov.innerHTML = `<div class="wm-look-top"><button class="wm-look-x" aria-label="${t('Back')}">‹</button><b>${t('Timer look')}</b>
       <span></span></div>
     <div class="wm-car" id="lookCar">${slides()}</div>
     <div class="wm-dots">${ids.map((_, i) => `<i class="${i === idx ? 'on' : ''}"></i>`).join('')}</div>
     <div class="wm-strips" id="lookStrips">${strips()}</div>
-    <div class="wm-look-bar"><button class="btn lg" id="lookUse">Use this look</button></div>`;
+    <div class="wm-look-bar"><button class="btn lg" id="lookUse">${t('Use this look')}</button></div>`;
   host.appendChild(ov);
   const car = ov.querySelector('#lookCar');
   requestAnimationFrame(() => { car.scrollLeft = idx * car.clientWidth; ov.classList.add('open'); });
@@ -130,33 +131,37 @@ export function openPrefs(host) {
   const ov = document.createElement('div'); ov.className = 'wm-sheet';
   const draw = () => {
     ov.innerHTML = `<div class="wm-sheet-card">
-      <div class="wm-sheet-h">Timer settings</div>
-      <div class="wm-vrow wm-readyrow"><div class="wm-vl"><b>Get-ready countdown</b><small>Seconds to get in position before every timer starts</small></div>
+      <div class="wm-sheet-h">${t('Timer settings')}</div>
+      <div class="wm-vrow"><div class="wm-vl"><b>${t('Language')}</b><small>${t('The whole app, and the coach voice')}</small></div>
+        <div class="wm-seg3">${[['en', 'English'], ['fr', 'Français']].map(([v, l]) => `<button class="${lang() === v ? 'on' : ''}" data-lang="${v}">${l}</button>`).join('')}</div></div>
+      <div class="wm-vrow wm-readyrow"><div class="wm-vl"><b>${t('Get-ready countdown')}</b><small>${t('Seconds to get in position before every timer starts')}</small></div>
         <div class="wm-rstep"><button data-rd="-1" aria-label="Less">−</button><b>${prefs.ready}s</b><button data-rd="1" aria-label="More">+</button></div></div>
-      <div class="wm-vrow"><div class="wm-vl"><b>Coach voice</b><small>Nico's voice, or the same coaching in a female voice</small></div>
-        <div class="wm-seg3">${[['m', 'Male'], ['f', 'Female']].map(([v, l]) => `<button class="${prefs.voiceKind === v ? 'on' : ''}" data-vk="${v}">${l}</button>`).join('')}</div></div>
+      <div class="wm-vrow"><div class="wm-vl"><b>${t('Coach voice')}</b><small>${t("Nico's voice, or the same coaching in a female voice")}</small></div>
+        <div class="wm-seg3">${[['m', 'Male'], ['f', 'Female']].map(([v, l]) => `<button class="${prefs.voiceKind === v ? 'on' : ''}" data-vk="${v}">${t(l)}</button>`).join('')}</div></div>
       ${ROWS.map(([k, name, sub]) => `<button class="wm-pref" data-pref="${k}">
-        <span><b>${name}</b><small>${sub}</small></span><i class="wm-sw ${prefs[k] ? 'on' : ''}"></i></button>`).join('')}
+        <span><b>${t(name)}</b><small>${t(sub)}</small></span><i class="wm-sw ${prefs[k] ? 'on' : ''}"></i></button>`).join('')}
       ${vibeHtml()}
-      <div class="wm-sheet-sub">App</div>
-      <div class="wm-vrow wm-ver"><div class="wm-vl"><b>Version</b><small id="wmVer">…</small></div>
-        <button class="btn secondary" id="wmCheck">Check for updates</button></div>
-      <button class="btn" id="wmPrefDone">Done</button>
+      <div class="wm-sheet-sub">${t('App')}</div>
+      <div class="wm-vrow wm-ver"><div class="wm-vl"><b>${t('Version')}</b><small id="wmVer">…</small></div>
+        <button class="btn secondary" id="wmCheck">${t('Check for updates')}</button></div>
+      <button class="btn" id="wmPrefDone">${t('Done')}</button>
     </div>`;
     ov.querySelectorAll('[data-pref]').forEach(b => b.addEventListener('click', () => {
       const k = b.dataset.pref; set(k, !prefs[k]);
-      if (k === 'voice' && prefs.voice) say('Voice on.');
+      if (k === 'voice' && prefs.voice) say(t('Voice on.'));
       if (k === 'beeps' && prefs.beeps) beep('go');
       draw();
     }));
     ov.querySelector('#wmPrefDone').addEventListener('click', close);
+    /* a new language: everything on screen redraws in it */
+    ov.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => { setLang(b.dataset.lang); draw(); }));
     ov.querySelectorAll('[data-vk]').forEach(b => b.addEventListener('click', () => { set('voiceKind', b.dataset.vk); say('Get ready.'); draw(); }));
     ov.querySelectorAll('[data-rd]').forEach(b => b.addEventListener('click', () => { set('ready', Math.max(0, Math.min(30, (prefs.ready ?? 8) + Number(b.dataset.rd)))); draw(); }));
     runningVersion().then(v => { const el = ov.querySelector('#wmVer'); if (el) el.textContent = v || 'unknown'; });
     ov.querySelector('#wmCheck').addEventListener('click', async e => {
-      e.currentTarget.textContent = 'Checking…';
+      e.currentTarget.textContent = t('Checking…');
       const newer = await checkForUpdate({ manual: true });
-      if (newer) close(); else { const b = ov.querySelector('#wmCheck'); if (b) b.textContent = 'Check for updates'; }
+      if (newer) close(); else { const b = ov.querySelector('#wmCheck'); if (b) b.textContent = t('Check for updates'); }
     });
     ov.querySelectorAll('[data-vslot]').forEach(b => b.addEventListener('click', () => {
       const [slot, pal] = b.dataset.vslot.split(':'); setVibe({ slots: { [slot]: pal }, themeRandom: false }); draw();

@@ -1,6 +1,7 @@
 {
-  "version": "2026-10-04.3",
+  "version": "2026-10-04.4",
   "notes": [
+    "The Training Timer now speaks French: pick Français in Timer settings (it follows your phone's language)",
     "New timer type: VO2 max, with 5 proven protocols (Norwegian 4×4, Huberman 2×2, Zone 5 bike, 20/40 sprints, the 1-minute workout)",
     "Cleaner coach voice: the room echo is mostly gone, and the female voice is softer",
     "The coach calls every round (halfway, last two, last round), never talks over the beeps, and every phone now shows the same timer rings",
@@ -33,5 +34,8 @@
     "Timer ring: pick Chrono, LED or Laser in Timer settings",
     "Segmented rings now drop one whole segment at a time",
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
+  ],
+  "notes_fr": [
+    "Le Training Timer parle français : choisis Français dans les réglages du minuteur (il suit la langue de ton téléphone)"
   ]
 }
