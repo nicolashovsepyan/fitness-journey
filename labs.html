@@ -36,6 +36,11 @@
     <a class="open" id="open" target="_blank" rel="noopener" title="Open this lab on its own">↗</a>
   </header>
   <iframe id="frame" title="Lab"></iframe>
+<script type="module">
+  /* the labs get updates like the app: the same "Update ready · Refresh" bar */
+  import { watchForUpdates, announceUpdate } from './js/update-banner.js';
+  announceUpdate(); watchForUpdates(() => true);
+</script>
 <script>
   const LABS = [
     { id: 'logo', name: 'Logo', src: 'logo/LOGO%20LAB.html' },

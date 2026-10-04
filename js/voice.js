@@ -160,16 +160,20 @@ export function plan(text) {
   return out.some(x => x.key) ? out : null;
 }
 
+/* is this line fully recorded? (no piece left to the phone's voice) —
+   the extras (cues, motivation) are only said when it is */
+export function recorded(text) { const p = plan(text); return !!p && p.every(x => x.key); }
+
 /* PLAYBACK. One line at a time; a new line cuts the old one (the timer's
    rule), unless the caller queues it. Pieces carry a little air at each
    end, so they overlap slightly to sound like one sentence. */
 let playing = null;
 export function stopVoice() { if (playing) { playing.cancelled = true; playing.sources.forEach(s => { try { s.stop(); } catch (e) {} }); playing = null; } }
 
-export async function playLine(actx, steps, speak) {
+export async function playLine(actx, steps, speak, notBefore = 0) {
   const run = { cancelled: false, sources: [] };
   playing = run;
-  let t = actx.currentTime + 0.03;
+  let t = Math.max(actx.currentTime + 0.03, notBefore);       // after a chime that is still playing
   for (const st of steps) {
     if (run.cancelled) return;
     if (st.tts) {

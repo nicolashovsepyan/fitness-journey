@@ -87,8 +87,8 @@ export function say(text, keep = 0) {
   if (steps) {
     const now = Date.now() >= keepUntil;
     if (keep) keepUntil = Date.now() + keep;
-    if (now) { stopVoice(); try { speechSynthesis.cancel(); } catch (e) {} voiceChain = playLine(actx, steps, speakNow).catch(() => {}); }
-    else voiceChain = voiceChain.then(() => playLine(actx, steps, speakNow)).catch(() => {});
+    if (now) { stopVoice(); try { speechSynthesis.cancel(); } catch (e) {} voiceChain = playLine(actx, steps, speakNow, beepUntil).catch(() => {}); }
+    else voiceChain = voiceChain.then(() => playLine(actx, steps, speakNow, beepUntil)).catch(() => {});
     return;
   }
   try {
@@ -275,10 +275,15 @@ const VOL_END = 1.0;
 /* `at` = seconds from now. Scheduled on the audio clock, which is exact to
    the sample, so a cadence (the push-up test) stays on the beat even when
    the page's timers wobble. */
+/* when the last beep finishes, on the audio clock: the voice waits for it
+   instead of talking over the end-of-step chime */
+let beepUntil = 0;
+const BEEP_LEN = { go: 0.3, end: 0.5, count: 0.1, warn: 0.2, round: 0.45, start: 0.33, rep: 0.15, down: 0.12, up: 0.12 };
 export function beep(kind = 'tick', at = 0) {
   if (muted || !beepsOn) return;
   initAudio();
   const w = Math.max(0, at);
+  try { if (kind !== 'count' && kind !== 'rep') beepUntil = Math.max(beepUntil, actx.currentTime + w + (BEEP_LEN[kind] || 0.1) + 0.06); } catch (e) {}
   if (kind === 'go') {                       // start — rising two-tone
     tone(1046, 110, w,        0.85, 'square');
     tone(1568, 190, w + 0.09, VOL,  'square');

@@ -11,7 +11,7 @@ import { checkForUpdate, runningVersion } from '../update-banner.js';
 import { PRESETS, designFor, ringChoice, chooseRing, ringHTML, ringBaseCss, setRingProgress } from './ring.js';
 
 const KEY = 'workModePrefs';
-const DEFAULTS = { voice: true, beeps: true, flash: true, ready: 8, silent: false, voiceKind: 'm' };
+const DEFAULTS = { voice: true, beeps: true, flash: true, ready: 8, silent: false, voiceKind: 'm', cues: true };
 let prefs = { ...DEFAULTS };
 let loaded = false;
 
@@ -29,7 +29,8 @@ function set(k, v) {
 }
 
 const ROWS = [
-  ['voice', 'Coach voice', 'Move names, halfway, last round, 1 minute left'],
+  ['voice', 'Coach voice', 'Rounds, move names, halfway, last round, 1 minute left'],
+  ['cues', 'Exercise cues', 'A short coaching tip the first time each move comes up'],
   ['beeps', 'Beeps', 'Countdown ticks, the end of each step, the 10-second warning'],
   ['flash', 'Screen flash', 'The screen flashes when a step ends. Handy in a loud gym'],
   ['silent', 'Sound on silent mode', 'Plays even with the silent switch on. iPhone pauses your music for it. Want both? Leave the switch off and turn on Do Not Disturb or a Focus: no distractions, music and timer together'],

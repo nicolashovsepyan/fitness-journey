@@ -20,6 +20,11 @@ const C = 120;
    loses work. Final versions get baked into PRESETS for everyone. */
 const CHOICE = 'fj.ringChoice';
 const OVR = 'fj.ringOverrides';
+/* THE DESIGNS' VERSION. Bumped every time PRESETS change (Nico's final
+   designs baked in). A lab edit is saved with the version it was made on;
+   an edit made on older designs no longer wins, so every phone shows the
+   same, current rings: Nico's own phone included. */
+const DESIGNS_V = 2;
 const OLD = 'fj.ringDesign';                     // the lab's first format: one free design
 
 /* Nicolas's three, as finalised in the lab ("Copy all 3", 3 Oct 2026).
@@ -75,16 +80,17 @@ const write = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } ca
 export const ringIds = () => PRESETS.map(p => p.id);
 /* one of the three, with this device's edits on top */
 export function designFor(id) {
-  const o = read(OVR, {})[id];
+  const o0 = read(OVR, {})[id];
+  const o = o0 && o0.v === DESIGNS_V ? o0 : null;          // an edit of older designs: ignored
   const d = complete(o ? { ...presetById(id), ...o } : presetById(id));
   d.id = id; delete d.custom; return d;
 }
 export function ringChoice() { const c = read(CHOICE, 'chrono'); return PRESETS.some(p => p.id === c) ? c : 'chrono'; }
 export function chooseRing(id) { write(CHOICE, id); }
 export function ringDesign() { return designFor(ringChoice()); }
-export function saveDesign(id, d) { const o = read(OVR, {}); o[id] = { ...complete(d), id }; write(OVR, o); }
+export function saveDesign(id, d) { const o = read(OVR, {}); o[id] = { ...complete(d), id, v: DESIGNS_V }; write(OVR, o); }
 export function resetDesign(id) { const o = read(OVR, {}); delete o[id]; write(OVR, o); }
-export function isEdited(id) { return !!read(OVR, {})[id]; }
+export function isEdited(id) { return read(OVR, {})[id]?.v === DESIGNS_V; }
 /* all three as they stand on this device: what "Copy all 3" hands over */
 export function allDesigns() { return PRESETS.map(p => designFor(p.id)); }
 

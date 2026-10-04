@@ -1,6 +1,7 @@
 {
-  "version": "2026-10-03.24",
+  "version": "2026-10-04.1",
   "notes": [
+    "The coach calls every round (halfway, last two, last round), never talks over the beeps, and every phone now shows the same timer rings",
     "Timer sound is more reliable: it wakes back up after a call, Siri or a notification",
     "Fine-tune the coach voice: Timer settings, under Coach voice",
     "Pick a male or female coach voice in Timer settings. No sound on iPhone? Turn off silent mode: the timer plays over your music, and the silent switch mutes it",

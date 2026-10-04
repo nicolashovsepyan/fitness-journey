@@ -13,6 +13,7 @@ import { alternatives } from '../core/resolve.js';
 import { applyWorkTheme, clearWorkTheme } from './theme.js';
 import { installHold } from './hold.js';
 import { makeSortable, orderAfter } from './drag.js';
+import { roundCall, cueFor, pick } from './coach-lines.js';
 import { bodyWeight, setTimerBodyWeight, moveLoadKg, showWeight, needsBody, readHistory, addHistory, sigOf } from './tally.js';
 import { ringHTML, ringBaseCss, RING_R, snapToSegments } from './ring.js';
 import { loadPrefs, pref, openPrefs } from './prefs.js';
@@ -333,9 +334,9 @@ function tick() {
        saying "halfway" every minute was noise), 1 minute left from 3 minutes
        up, and a double beep 10 seconds out on anything of 30 seconds or more. */
     if (curStepKind === 'work' && rem > 0) {
-      if (!saidHalf && S.stepDur >= 90 && rem <= Math.round(S.stepDur / 2)) { saidHalf = true; if (rem > 60 || S.stepDur < 180) say('Halfway.'); }
-      if (!saidLastMin && S.stepDur >= 180 && rem <= 60) { saidLastMin = true; say('1 minute left.'); }
-      if (!said10 && S.stepDur >= 30 && rem <= 10 && rem > 3) { said10 = true; beep('warn'); buzz(30); flash(false); }
+      if (!saidHalf && S.stepDur >= 90 && rem <= Math.round(S.stepDur / 2)) { saidHalf = true; if (rem > 60 || S.stepDur < 180) say(pick('halfway') || 'Halfway.'); }
+      if (!saidLastMin && S.stepDur >= 180 && rem <= 60) { saidLastMin = true; say(pick('minute') || '1 minute left.'); }
+      if (!said10 && S.stepDur >= 30 && rem <= 10 && rem > 3) { said10 = true; beep('warn'); buzz(30); flash(false); const t = pick('ten'); if (t) say(t); }
     }
     if (rem <= 3 && rem > 0) {                  // 3 · 2 · 1 audible countdown
       beep('count'); buzz(20);
@@ -421,7 +422,7 @@ function renderGetReady() {
     if (b.format === 'cadence') {
       /* short enough to finish before the spoken 3-2-1 */
       say(`Push-up test. Start on the double beep. Then one push-up on every beep. I'll count.`, 5500);
-    } else say(String(b.name).includes('·') ? 'Get ready.' : `Get ready. ${b.name}.`);
+    } else say(S.plan.quick || String(b.name).includes('·') ? 'Get ready.' : `Get ready. ${b.name}.`)   // a Training Timer's name is not a thing to read out;
   }
   onStepDone = begin;
   document.getElementById('go').addEventListener('click', () => {
@@ -1169,7 +1170,7 @@ function renderRoundRest() {
 function renderAmrap() {
   const b = block(); const mins = b.minutes || 5;
   const single = b.items.length === 1 && !b.countRounds;   // single-exercise max-out → log reps, not rounds
-  if (beginStep(mins * 60, 'work', 'amrap')) { say(single ? `Max reps. ${mins} minutes. Go.` : `As many rounds as possible. ${mins} minutes. Go.`); }
+  if (beginStep(mins * 60, 'work', 'amrap')) { say(`${single ? 'Max reps.' : 'As many rounds as possible.'}${mins > 1 ? ` ${mins} minutes.` : ''} Go.`); }
   const finish = () => {
     R.clearStep(S); onStepDone = null;
     if (single) { S.captured[b.id][0].sets = [{ value: curVal }]; R.save(S); return completeBlock(); }
@@ -1228,7 +1229,8 @@ function renderAmrap() {
     S.amrapRounds++; S.amrapSplits = [...(S.amrapSplits || []), upElapsed()];
     S.amrapLog.push({ reps: [...S.amrapCur] }); R.save(S);
     celebrate(e.currentTarget, `+1`);
-    say(`Round ${S.amrapRounds}.`);
+    const praise = S.amrapRounds % 2 === 0 ? pick('round') : null;   // every other round, a word (if recorded)
+    say(`Round ${S.amrapRounds}.${praise ? ' ' + praise : ''}`);
     redraw();
   });
   document.getElementById('rdMinus').addEventListener('click', () => {
@@ -1290,6 +1292,13 @@ function reorderMoves(b, from, to) {
   (S.ivLog || []).forEach(L => { if (L) L.m = L.m.map(old => at[old]); });
   R.save(S);
   return at;
+}
+
+/* a time out loud, from recorded pieces: "21 seconds", "3 minutes 12
+   seconds", "4 minutes" (no "0 minutes") */
+function spokenTime(secs) {
+  const m = Math.floor(secs / 60), s = Math.round(secs % 60);
+  return [m ? `${m} minutes` : '', s || !m ? `${s} seconds` : ''].filter(Boolean).join(' ');
 }
 
 /* A ROUND DONE SHOULD FEEL LIKE ONE. A buzz pattern, a victory chime, a
@@ -1379,7 +1388,8 @@ function renderInterval() {
      start at 0 and are what you log (− + during the rest). */
   const timeBased = b.format === 'tabata';
   const planned = (iv, i) => { const it = b.items[i] || {};
-    return timeBased ? 0 : lad ? (it.dbStart != null ? +it.dbStart : lad.start) + iv * (it.dbStep != null ? +it.dbStep : lad.step) : Number(it.reps) || 0; };
+    /* time-based: no rep target, but a hold is held for the whole work */
+    return timeBased ? (UNIT[it.measure] === 'sec' ? work : 0) : lad ? (it.dbStart != null ? +it.dbStart : lad.start) + iv * (it.dbStep != null ? +it.dbStep : lad.step) : Number(it.reps) || 0; };
   const moves = ivMoves(S.iv);
   if (lad && !all) item.reps = planned(S.iv, moves[0]);
   /* THE REPS YOU ACTUALLY DID this interval, one per move on it: start at
@@ -1438,14 +1448,25 @@ function renderInterval() {
   if (dur <= 0) return nextInterval();
   /* the call at the top of each interval: halfway through the block and
      the last round get said out loud, then the move */
-  if (beginStep(dur, phaseWork ? 'work' : 'rest', 'iv') && phaseWork) {
-    const step = pr || 1, nR = Math.round(totalIv / step);
-    const pre = nR >= 2 && S.iv === totalIv - step ? 'Last round. '
-      : nR >= 6 && S.iv === Math.floor(nR / 2) * step ? 'Halfway. ' : '';
-    say(pre + (lad ? (all ? `Round ${S.iv + 1}.` : `${item.reps}.`) : all ? '' : `${item.reps && !timeBased ? item.reps + ' ' : ''}${item.name}`));
+  /* THE CALL AT THE TOP OF EACH ROUND (coach-lines.js, the same in every
+     timer): "Round 3.", halfway, three to go, last two, "Last round. Make
+     it count.", then the move (and its reps, when they are a target), then
+     the move's cue the first time it comes up */
+  const isNew = beginStep(dur, phaseWork ? 'work' : 'rest', 'iv');
+  if (isNew && phaseWork) {
+    const step = pr || 1, nR = Math.round(totalIv / step), k = Math.floor(S.iv / step) + 1;
+    const call = S.iv % step === 0 ? roundCall(k, lad ? null : nR) : '';
+    const named = it => it && it.name && !/^(Work|Time|Reps|Rounds)$/.test(it.name);
+    const what = all || !named(item) ? (lad && !all ? `${item.reps}.` : '') : `${item.reps && !timeBased ? item.reps + ' ' : ''}${item.name}.`;
+    S.cued = S.cued || {};
+    const cue = !all && item.exId && !S.cued[item.exId] && pref('cues') !== false ? cueFor(item.exId) : null;
+    if (cue) { S.cued[item.exId] = 1; R.save(S); }
+    say(`${call} ${what} ${cue || ''}`.replace(/\s+/g, ' ').trim());
+  } else if (isNew && dur >= 20) {
+    const r = pick('rest'); if (r) say(r);                    // a longer rest: a word, if recorded
   }
   host.querySelectorAll('[data-ivr]').forEach(btn => btn.addEventListener('click', () => {
-    const j = +btn.dataset.ivr; S.ivCur[j] = nudge(b.items[moves[j]], S.ivCur[j], Number(btn.dataset.d));
+    const j = +btn.dataset.ivr; S.ivCur[j] = nudge(b.items[moves[j]], S.ivCur[j], Number(btn.dataset.d)); S.ivTouched = S.iv;
     if (S.ivLog[S.iv]) { S.ivLog[S.iv].reps = [...S.ivCur]; R.save(S); buzz(10); return renderInterval(); }   // already logged: the log and totals move with it
     R.save(S); btn.parentElement.querySelector('b').innerHTML = `${S.ivCur[j]}${mvUnit(b.items[moves[j]] || {}) ? '<small>s</small>' : ''}`; buzz(10);
   }));
@@ -1508,7 +1529,7 @@ function endDeathBy(done) {
   const lastOf = it => done > 0 ? (it.dbStart != null ? +it.dbStart : b.ladder.start) + (done - 1) * (it.dbStep != null ? +it.dbStep : b.ladder.step) : 0;
   /* the round you couldn't finish: whatever − + says you got */
   const per = b.items.length || 1, failedM = b.allEach && per > 1 ? b.items.map((_, i) => i) : [done % per];
-  const partial = b.items.map((_, i) => { const j = failedM.indexOf(i); return S.ivCurAt === done && j >= 0 && done < intervalTotal(b) ? Number(S.ivCur?.[j]) || 0 : 0; });
+  const partial = b.items.map((_, i) => { const j = failedM.indexOf(i); return S.ivCurAt === done && S.ivTouched === done && j >= 0 && done < intervalTotal(b) ? Number(S.ivCur?.[j]) || 0 : 0; });   // only reps the person put in
   const { tot, times, clocked } = ivTotals(b);
   (S.captured[b.id] || []).forEach((e, i) => { e.sets = [{ value: done }]; e.rounds = true; e.unit = 'rounds';
     e.deathBy = { rounds: done, lastReps: lastOf(b.items[i] || {}), partial: partial[i], total: tot[i] + partial[i] }; if (times.length) { e.laps = times; e.lapN = clocked; } });
@@ -1654,7 +1675,7 @@ function renderLadder() {
     const ls = (S.laps || []).map((t, i, a) => Math.round(t - (a[i - 1] || 0)));
     const doneRungs = rungs.slice(0, (S.laps || []).length);
     (S.captured[b.id] || []).forEach((e, i) => { e.sets = [{ value: secs }]; e.unit = 'sec'; e.rounds = true; if (ls.length) e.laps = ls; e.ladReps = doneRungs.reduce((a, r) => a + (Number(val(r, i)) || 0), 0); });
-    R.save(S); say(`Done. ${Math.floor(secs / 60)} minutes ${secs % 60} seconds.`, 2500);
+    R.save(S); say(`Done. ${spokenTime(secs)}.`, 2500);
     completeBlock();
   };
   if (beginStep(dur, cap ? 'work' : 'rest', 'fortime')) say(`Go. ${b.items.map((_, i) => `${val(rungs[k], i)} ${named[i]}`).join(', ')}.`);
@@ -1664,7 +1685,7 @@ function renderLadder() {
     const fin = S.laps.length >= n;
     celebrate(el, fin ? 'Done!' : `${S.laps.length}/${n}`);
     if (fin) return finish(Math.round(upElapsed()));
-    say(`${b.items.map((_, i) => `${val(rungs[S.laps.length], i)} ${named[i]}`).join(', ')}.`);
+    say(`${roundCall(S.laps.length + 1, n)} ${b.items.map((_, i) => `${val(rungs[S.laps.length], i)} ${named[i]}`).join(', ')}.`);
     renderLadder();
   };
   document.getElementById('ftLap').addEventListener('click', e => rungDone(e.currentTarget));
@@ -1703,7 +1724,7 @@ function renderForTime() {
     R.clearStep(S); onStepDone = null;
     const laps = (S.laps || []).map((t, i, a) => Math.round(t - (a[i - 1] || 0)));
     (S.captured[b.id] || []).forEach(e => { e.sets = [{ value: secs }]; e.unit = 'sec'; e.rounds = true; if (laps.length) e.laps = laps; });
-    R.save(S); say(`Done in ${Math.floor(secs / 60)} minutes ${secs % 60} seconds.`);
+    R.save(S); say(`Done. ${spokenTime(secs)}.`);
     completeBlock();
   };
   if (beginStep(dur, cap ? 'work' : 'rest', 'fortime')) say('Go.');
@@ -1997,7 +2018,7 @@ function finishSession(opts = {}) {
   if (prs.length) say(`New record. ${prText(prs[0])}.`);
   else if (partial) say('Saved.');
   else if (effs[0]?.icon === '🏆') say('Most efficient session yet. Great work.');
-  else say('Workout complete. Strong work.');
+  else say(pick('done') || 'Workout complete. Strong work.');
   const prHtml = prs.length ? `<div class="card"><div class="eyebrow">New PRs</div>${prs.map(p => `<div class="row" style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);"><span>${p.name}</span><span class="pr-flash">${prText(p)}</span></div>`).join('')}</div>` : '';
   const effHtml = effs.length ? `<div class="card"><div class="eyebrow">Pace</div>${effs.map(e => `<div class="eff-row"><span class="eff-ico">${e.icon}</span><span>${e.text}</span></div>`).join('')}</div>` : '';
   host.innerHTML = `<div class="screen fade-in center ${S.plan.coachMode ? 'bgn' : ''}">
