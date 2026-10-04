@@ -45,3 +45,9 @@ audio/voice-src/
 audio/nico-voice-sample.mp3
 audio/samples/
 .venv/
+
+# the native iPhone app: the project is tracked, its installs and copies are not
+native-ios/node_modules/
+native-ios/ios/App/App/public/
+native-ios/ios/App/build/
+native-ios/ios/DerivedData/

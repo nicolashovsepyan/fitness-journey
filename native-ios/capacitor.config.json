@@ -1,0 +1,15 @@
+{
+  "appId": "com.fitnessjourney.trainingtimer",
+  "appName": "Training Timer",
+  "webDir": "www",
+  "server": {
+    "url": "https://nicolashovsepyan.github.io/fitness-journey/index.html?quick",
+    "allowNavigation": ["nicolashovsepyan.github.io"]
+  },
+  "ios": {
+    "appendUserAgent": "FJNative",
+    "limitsNavigationsToAppBoundDomains": true,
+    "contentInset": "never",
+    "backgroundColor": "#14171B"
+  }
+}

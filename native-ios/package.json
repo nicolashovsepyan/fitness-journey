@@ -1,0 +1,11 @@
+{
+  "name": "training-timer-ios",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Training Timer as a native iPhone app (Capacitor shell around the live site)",
+  "dependencies": {
+    "@capacitor/cli": "^8.5.2",
+    "@capacitor/core": "^8.5.2",
+    "@capacitor/ios": "^8.5.2"
+  }
+}

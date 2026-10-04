@@ -109,8 +109,13 @@ let speechPrimed = false;
    an iPhone the only way past the ringer switch also stops the music */
 let silentOverride = false;
 let voiceWarm = false;
+/* inside the native iPhone app (native-ios/, user agent "FJNative") the app
+   itself holds a playback + mix-with-others session: it plays through the
+   silent switch AND over music. The page must not touch it. */
+const NATIVE = /FJNative/.test(navigator.userAgent || '');
 let sessionType = null;
 function setSessionType() {
+  if (NATIVE) return;
   const want = silentOverride ? 'playback' : 'ambient';
   if (want === sessionType) return;
   try { if (navigator.audioSession) { navigator.audioSession.type = want; sessionType = want; } } catch (e) {}
@@ -186,7 +191,7 @@ export function initAudio() {
   try {
     const ios = /iP(hone|ad|od)/.test(navigator.userAgent)
       || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    if (!ios || !silentOverride) { keepalive?.pause?.(); throw 0; }
+    if (!ios || !silentOverride || NATIVE) { keepalive?.pause?.(); throw 0; }
     if (!keepalive) {
       keepalive = new Audio(SILENCE);
       keepalive.loop = true;
