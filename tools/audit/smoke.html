@@ -54,7 +54,7 @@ async function check(lang, mode) {
   localStorage.setItem('fj.lang', lang);
   const { w, d, errs } = await load('../../index.html?quick&nosw');
   for (let i = 0; i < 40 && !d.querySelector('.screen.qt, .screen.run'); i++) await wait(100);
-  const R = await w.eval("import('/js/runner/runstate.js')").catch(() => null);
+  const R = await w.eval(`import('${new URL('js/runner/runstate.js', w.location.href)}')`).catch(() => null);
   if (d.querySelector('.screen.run')) { R?.clear(); await R?.flushRunState(); w.location.reload(); await wait(1500); }
   /* SETUP */
   const qt = d.querySelector('.screen.qt');
@@ -92,6 +92,13 @@ async function check(lang, mode) {
 document.getElementById('go').addEventListener('click', async () => {
   const saved = Object.fromEntries(KEEP.map(k => [k, localStorage.getItem(k)]));
   out.innerHTML = ''; let pass = 0, total = 0;
+  /* test the newest files, not this browser's 10-minute copy: every code
+     file the app ships (sw.js lists them) fetched fresh first */
+  sum.textContent = 'Getting the newest version…';
+  const app = new URL('../../', location.href);
+  const list = ((await (await fetch(new URL('sw.js', app), { cache: 'reload' })).text()).match(/"\.\/[^"]+\.(?:js|css|json|html)"/g) || []).map(x => x.slice(1, -1));
+  await Promise.all(list.map(f => fetch(new URL(f, app), { cache: 'reload' }).catch(() => {})));
+  const ver = (await (await fetch(new URL('whatsnew.json', app), { cache: 'reload' })).json()).version;
   try {
     const only = new URLSearchParams(location.search).get('only');   // ?only=tabata runs one type
     for (const lang of ['en', 'fr']) for (const mode of Object.keys(ALL).filter(m => !only || m === only)) {
@@ -102,7 +109,7 @@ document.getElementById('go').addEventListener('click', async () => {
     for (const [k, v] of Object.entries(saved)) v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v);
     stage.src = 'about:blank';
   }
-  sum.innerHTML = `<span class="${pass === total ? 'ok' : 'bad'}">${pass} of ${total} passed</span>`;
+  sum.innerHTML = `<span class="${pass === total ? 'ok' : 'bad'}">${pass} of ${total} passed</span> · version ${ver}`;
   window.__smoke = { pass, total };
 });
 </script>
