@@ -29,6 +29,20 @@
      opened full screen with all 12,000 characters intact. Everything else
      still gets the manifest, because Android's one-tap install needs it. -->
 <script>if(!/iPad|iPhone|iPod/.test(navigator.userAgent)){var m=document.createElement('link');m.rel='manifest';m.href='manifest.webmanifest';document.head.appendChild(m);}</script>
+<!-- A CLIENT WHO ALREADY DID THE SURVEY, OPENING THE SURVEY LINK AGAIN.
+     The coach's one link is this page with the program attached (#tpl= or
+     #prg=). Opened a second time - the icon got lost, the link was still in
+     their messages - it asked them to do the whole survey again on the
+     morning they were going to train. If this phone already knows them,
+     they go straight to their app; the program link there keeps whatever
+     program they have and only fills it in if it is missing. -->
+<script>(function(){try{
+  var h=location.hash||''; var t=h.match(/^#tpl=([a-z0-9_]+)/i); if(!t&&!/^#prg=/.test(h)) return;
+  var cur=localStorage.getItem('fj.user')||localStorage.getItem('fj.v1.current');
+  var known=!!(localStorage.getItem('fj.user')||(cur&&localStorage.getItem('fj.v1.profile.'+cur)));
+  if(!known) return;
+  location.replace('dashboard.html'+(t?'#tpl='+t[1]+'&keep':''));
+}catch(e){}})();</script>
 <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
