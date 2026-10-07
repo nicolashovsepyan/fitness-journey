@@ -2558,11 +2558,29 @@ addEventListener('hashchange', function(){
    this phone kept - and that goes through the normal path above. Same
    short form the survey takes (onboarding.html). */
 function fromTemplate(){
-  const m = (location.hash || '').match(/^#tpl=([a-z0-9_]+)(?:&name=([^&]+))?$/i);
+  const m = (location.hash || '').match(/^#tpl=([a-z0-9_]+)((?:&[a-z]+(?:=[^&]*)?)*)$/i);
   if(!m) return;
+  const opt = {};
+  (m[2] || '').split('&').filter(Boolean).forEach(kv => { const i = kv.indexOf('='); opt[i < 0 ? kv : kv.slice(0, i)] = i < 0 ? '1' : kv.slice(i + 1); });
   /* &name= corrects a name typed wrong in the survey ("Sevab") */
   let rename = null;
-  try{ rename = m[2] ? decodeURIComponent(m[2]).trim().slice(0, 60) : null; }catch(e){}
+  try{ rename = opt.name ? decodeURIComponent(opt.name).trim().slice(0, 60) : null; }catch(e){}
+  /* &keep: A LINK FOR SOMEBODY WHO LOST THE APP. If this phone still holds
+     their program, it is theirs, possibly newer than the template and with
+     their whole history beside it: touch nothing, just open. Only a phone
+     that has lost it gets the template back. One link for both cases,
+     because from the outside nobody can tell which one they are in. */
+  if(opt.keep){
+    let has = false;
+    try{
+      const uid = localStorage.getItem('fj.user');
+      const row = JSON.parse(localStorage.getItem('fj.programs') || '[]').find(p => p.assignedTo === uid);
+      const cur = uid || localStorage.getItem('fj.v1.current');
+      const ck = cur && JSON.parse(localStorage.getItem('fj.v1.' + cur + '.coach') || 'null');
+      has = !!((row && row.profile && row.profile.raw && row.profile.raw.days) || (ck && ck.program && ck.program.days));
+    }catch(e){}
+    if(has){ try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){} return; }
+  }
   fetch('spine/programs/' + m[1] + '.json', {cache:'no-cache'})
     .then(r => r.ok ? r.json() : null)
     .then(t => {

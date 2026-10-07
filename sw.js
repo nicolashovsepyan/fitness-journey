@@ -15,7 +15,7 @@
    Training data lives in localStorage, not here, so an update never
    touches a logged session.
    ============================================================ */
-const VERSION = 'df171c0c93';
+const VERSION = '8309670c53';
 const CACHE = 'fj-' + VERSION;
 const ASSETS = [
   "./audio/voice-f/c-as-many-rounds-as-possible.mp3",
@@ -494,6 +494,7 @@ const ASSETS = [
   "./spine/programs/main.json",
   "./spine/theme.json",
   "./styles.css",
+  "./timer/index.html",
   "./voice-lab.html",
   "./whatsnew.json"
 ];

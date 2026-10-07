@@ -23,6 +23,7 @@ import { makeSortable } from './drag.js';
 import { readHistory, sigOf, showWeight } from './tally.js';
 import { ringHTML, ringBaseCss, ringDesign } from './ring.js';
 import { t, t2, num, exName, exCues, lang, setLang } from '../i18n.js';
+import { isInstalled, isIOS, isIOSSafari, isIOSOtherBrowser, isAndroid, canPromptInstall, promptInstall, onInstallStateChange } from '../install.js';
 
 /* ?demo adds the Work Mode preview: a sample of every program format */
 const showDemo = () => new URLSearchParams(location.search).has('demo');
@@ -128,6 +129,7 @@ const setVal = (k, v) => { if (cfg.fmt === 'tabata' && k === 'rounds') { cfg.tbT
 export async function renderQuick(el, opts = {}) {
   host = el; onStart = opts.onStart; guest = !!opts.guest;
   injectStyle(); applyWorkTheme(); loadPrefs(); installHold();
+  onInstallStateChange(() => { if (host && cfg) draw(); });   // Android announces it can install a moment after load
   if (!window.__qtLang) { window.__qtLang = 1; document.addEventListener('fj-lang', () => { if (host && cfg) draw(); }); }   // a new language: redraw
   readHistory().then(h => { hist = h; if (host && cfg) draw(); });
   /* The address itself names the person, so "Add to Home Screen" from here
@@ -561,6 +563,45 @@ function fitMoveNames() {
   els.forEach(el => { el.style.fontSize = f + 'px'; });
 }
 
+/* GET IT ON THE HOME SCREEN. iPhones never offer it for a website (only
+   Android does), so a new user who isn't told never finds it under Share.
+   One card at the top until it is installed, in the words their phone
+   needs: a real Install button on Android, the 3 Share steps in iPhone
+   Safari, "open it in Safari first" anywhere it cannot be done (Chrome on
+   iPhone, links opened inside Instagram / Facebook / WhatsApp). ✕ hides it
+   for 2 weeks. */
+const INSTALL_HIDE = 'fj.installCardHidden';
+const inAppBrowser = () => /Instagram|FBAN|FBAV|FB_IAB|Messenger|WhatsApp|Line\/|Snapchat|TikTok|LinkedInApp/i.test(navigator.userAgent || '');
+function installCard() {
+  if (isInstalled()) return '';
+  try { const h = Number(localStorage.getItem(INSTALL_HIDE)); if (h && Date.now() - h < 14 * 864e5) return ''; } catch (e) {}
+  const share = '<svg class="qt-ishare" viewBox="0 0 20 24" aria-hidden="true"><path d="M10 15V2M5.5 6.5L10 2l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10H3.5v12h13V10H14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  let body = '';
+  if (canPromptInstall()) {
+    body = `<b>${t('Put the timer on your home screen')}</b><small>${t('Its own icon, full screen, works with no signal at the gym.')}</small>
+      <button class="btn" id="qtInstall">${t('Install')}</button>`;
+  } else if (isIOS() && (isIOSOtherBrowser() || inAppBrowser())) {
+    body = `<b>${t('Open this in Safari to install it')}</b><small>${t('On iPhone, only Safari can put the timer on your home screen.')}</small>
+      <ol><li>${t('Tap Copy link')}</li><li>${t('Open Safari, paste it in the address bar')}</li><li>${t('Then Share {i}, Add to Home Screen', { i: share })}</li></ol>
+      <button class="btn secondary" id="qtCopyLink">${t('Copy link')}</button>`;
+  } else if (isIOSSafari()) {
+    body = `<b>${t('Put the timer on your home screen')}</b>
+      <ol><li>${t('Tap Share {i} at the bottom of Safari', { i: share })}</li><li>${t('Scroll down, tap Add to Home Screen')}</li><li>${t('Tap Add. Then open it from the new icon.')}</li></ol>`;
+  } else if (isAndroid()) {
+    body = `<b>${t('Put the timer on your home screen')}</b>
+      <ol><li>${t('Tap the ⋮ menu, top right')}</li><li>${t('Tap Install app or Add to Home screen')}</li><li>${t('Open it from the new icon')}</li></ol>`;
+  } else return '';                                  // a computer: nothing to install
+  return `<div class="qt-install" id="qtInstallCard"><button class="qt-ix" id="qtInstallX" aria-label="${t('Hide')}">✕</button>${body}</div>`;
+}
+function wireInstall($) {
+  $('#qtInstallX')?.addEventListener('click', () => { try { localStorage.setItem(INSTALL_HIDE, String(Date.now())); } catch (e) {} $('#qtInstallCard')?.remove(); });
+  $('#qtInstall')?.addEventListener('click', async () => { const r = await promptInstall(); if (r === 'accepted') $('#qtInstallCard')?.remove(); });
+  $('#qtCopyLink')?.addEventListener('click', async e => {
+    const url = location.origin + location.pathname + '?quick';
+    try { await navigator.clipboard.writeText(url); e.target.textContent = t('Copied'); } catch (err) { prompt(t('Copy this link'), url); }
+  });
+}
+
 /* LAST TIME, for this same timer (its type and its moves) */
 const curSig = () => sigOf(fmtDef().name, namedMoves().map(m => m.exId || m.name));   // ids: the same timer in either language
 const pastRuns = () => hist.filter(x => x.sig === curSig());
@@ -609,6 +650,7 @@ function draw() {
 
     ${favs.length ? `<div class="qt-favs">${favs.map((f, i) => `<span class="qt-fav ${i === favIdx ? 'on' : ''}"><button data-fav="${i}">${esc(f.label)}</button><button class="qt-favx" data-favx="${i}" aria-label="${t('Remove')}">✕</button></span>`).join('')}</div>` : ''}
 
+    ${installCard()}
     <button class="qt-type" id="qtType">
       <span class="qt-type-t"><small>${t('Type')}</small><b>${t(def.name)}</b><em>${t(def.sub)}</em></span>
       <span class="qt-chev">▾</span>
@@ -624,7 +666,6 @@ function draw() {
       <div class="qt-rows">${custom.join('')}</div>
       ${def.moves && !lad && !db ? `${sec('Moves', `<small>${t('optional')}</small>`)}${movesCard()}` : ''}
       ${cfg.fmt === 'tabata' && (cfg.work !== TABATA.work || cfg.rest !== TABATA.rest) ? `<button class="qt-link" id="qtClassic">${t('Back to classic 20s / 10s')}</button>` : ''}
-      ${standalone() ? '' : `<p class="qt-hint">${t('Want the timer as its own app? In Safari tap Share, then Add to Home Screen, while this page is open.')}</p>`}
     </div>` : ''}
 
     ${showDemo() ? `${sec('Work Mode preview')}
@@ -981,6 +1022,7 @@ function wire() {
   const $ = s => host.querySelector(s);
   $('#qtBack')?.addEventListener('click', () => { location.href = 'dashboard.html'; });
   $('#qtSignIn')?.addEventListener('click', () => { try { localStorage.removeItem('fj.launchTimer'); } catch (e) {} location.href = 'index.html'; });
+  wireInstall($);
   $('#qtType').addEventListener('click', openTypes);
   $('#qtLast')?.addEventListener('click', openHistory);
   $('#qtPrefs').addEventListener('click', () => openPrefs(host));
@@ -1290,6 +1332,12 @@ function injectStyle() {
   .qt-addwt { background:none; border:none; color: var(--wm-accent); opacity: .75; font-size: 12.5px; font-weight: 600; padding: 0 30px 6px 0; cursor:pointer; }
   .qt-addrow2 { width:100%; background:none; border:none; border-top: 1px solid var(--line); color: var(--wm-accent); font-size: 15px; font-weight: 700; padding: 13px 0; cursor:pointer; }
   .qt-mvlist .qt-mnote { margin: 0 0 6px; }
+  .qt-install { position: relative; background: linear-gradient(135deg, var(--wm-accent-soft), transparent 70%), var(--box); border: 1.5px solid var(--wm-accent); border-radius: 18px; padding: 14px 40px 14px 16px; margin-bottom: 12px; display:flex; flex-direction:column; gap: 6px; box-shadow: 0 0 18px var(--wm-accent-soft); }
+  .qt-install b { font-size: 16px; } .qt-install small { color: var(--muted); font-size: 13px; }
+  .qt-install ol { margin: 2px 0 0; padding-left: 20px; display:flex; flex-direction:column; gap: 5px; font-size: 14.5px; }
+  .qt-install .btn { margin-top: 6px; }
+  .qt-ishare { width: 15px; height: 18px; vertical-align: -3px; color: var(--wm-accent); margin: 0 2px; }
+  .qt-ix { position:absolute; top: 8px; right: 8px; width: 30px; height: 30px; background:none; border:none; color: var(--faint); font-size: 15px; cursor:pointer; }
   .qt-vo2 { display:flex; flex-direction:column; gap: 8px; text-align:left; }
   .qt-vo2p { display:flex; flex-direction:column; gap: 2px; text-align:left; background: var(--bg); border: 1.5px solid var(--line); border-radius: 14px; padding: 11px 14px; color: var(--text); cursor:pointer; font: inherit; }
   .qt-vo2p b { font-size: 16px; } .qt-vo2p small { color: var(--muted); font-size: 13px; }
