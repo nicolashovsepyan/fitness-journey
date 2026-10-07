@@ -53,7 +53,7 @@ async function check(lang, mode) {
   localStorage.setItem('fj.quickTimer', JSON.stringify({ last: { ...(prev.last || {}), ...c, movesBy: { ...(prev.last?.movesBy || {}), ...(c.movesBy || {}) } }, favs: prev.favs || [] }));
   localStorage.setItem('fj.lang', lang);
   const { w, d, errs } = await load('../../index.html?quick&nosw');
-  for (let i = 0; i < 40 && !d.querySelector('.screen.qt, .screen.run'); i++) await wait(100);
+  for (let i = 0; i < 100 && !d.querySelector('.screen.qt, .screen.run'); i++) await wait(100);   // a cold first load on the live site can take a few seconds
   const R = await w.eval(`import('${new URL('js/runner/runstate.js', w.location.href)}')`).catch(() => null);
   if (d.querySelector('.screen.run')) { R?.clear(); await R?.flushRunState(); w.location.reload(); await wait(1500); }
   /* SETUP */
