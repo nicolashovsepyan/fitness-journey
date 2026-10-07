@@ -638,8 +638,10 @@ function draw() {
     ...(cfg.fmt === 'emom' && named > 1 ? [segRow('How the moves run', 'accent', [['turns', 'Take turns'], ['all', 'All every minute']], cfg.emomStyle === 'all' ? 'all' : 'turns', 'data-style',
         cfg.emomStyle === 'all' ? t('All {n} moves inside each minute', { n: named }) : t('Minute 1 is move 1, minute 2 is move 2'))] : []),
   ];
+  /* fades in when it opens, never on the redraw after each tap */
+  const fade = host.querySelector('.screen.qt') ? '' : 'fade-in';
   host.innerHTML = `
-  <div class="screen qt fade-in">
+  <div class="screen qt ${fade}">
     <div class="qt-top">
       ${guest ? '' : `<button class="qt-back" id="qtBack" aria-label="${t('Back')}">‹</button>`}
       <h1>${t('Training Timer')}</h1>
@@ -981,16 +983,16 @@ async function openMovePicker(i) {
     ov.querySelectorAll('[data-f]').forEach(b => b.addEventListener('click', () => { moveFilter[b.dataset.f] = b.dataset.v; filters(); list(); }));
   };
   const list = () => {
-    const t = norm(q.value);
-    const all = search(t).filter(passes);
+    const qs = norm(q.value);
+    const all = search(qs).filter(passes);
     const filtered = moveFilter.part !== 'all' || moveFilter.lvl || moveFilter.eq;
-    const exact = t && LIB().some(e => e.n === t);
+    const exact = qs && LIB().some(e => e.n === qs);
     const favs = new Set(favMoves());
     const row = e => { const img = exerciseImage(e.id);
       return `<button class="qt-res pic" data-ex="${e.id}"><span class="qt-th">${img ? `<img src="${img}" alt="" loading="lazy" decoding="async"/>` : esc(e.name[0])}</span><span class="qt-rt"><b>${esc(e.name)}</b><small>${esc(e.tag)}</small></span><span class="qt-star ${favs.has(e.id) ? 'on' : ''}" data-fav="${e.id}" role="button" aria-label="${t('Favorite')}">${favs.has(e.id) ? '★' : '☆'}</span></button>`; };
     const head = (title, n) => `<div class="qt-count qt-grp">${title}${n != null ? ` <span>${n}</span>` : ''}</div>`;
     let html = '';
-    if (t) {
+    if (qs) {
       html = (!exact ? `<button class="qt-res own" data-own="1"><b>${t('Use "{x}"', { x: esc(q.value.trim()) })}</b><small>${t('your own move, not from the library')}</small></button>` : '')
         + head(t2(all.length, '{n} move', '{n} moves')) + all.slice(0, 120).map(row).join('');
     } else {

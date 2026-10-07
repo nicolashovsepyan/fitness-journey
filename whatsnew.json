@@ -1,6 +1,7 @@
 {
-  "version": "2026-10-07.1",
+  "version": "2026-10-07.2",
   "notes": [
+    "Fixed: the move library was empty, and the Start bar floated up the screen while scrolling",
     "New users see how to put the timer on their home screen, step by step for their phone",
     "The Training Timer now speaks French: pick Français in Timer settings (it follows your phone's language)",
     "New timer type: VO2 max, with 5 proven protocols (Norwegian 4×4, Huberman 2×2, Zone 5 bike, 20/40 sprints, the 1-minute workout)",
@@ -37,6 +38,7 @@
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
   ],
   "notes_fr": [
+    "Corrigé : la bibliothèque d’exercices était vide, et la barre Démarrer remontait à l’écran pendant le défilement",
     "Les nouveaux utilisateurs voient comment mettre le minuteur sur leur écran d’accueil, étape par étape pour leur téléphone"
   ]
 }

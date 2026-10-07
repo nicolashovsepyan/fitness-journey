@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Timer Smoke Test</title>
+<style>
+  :root { --bg:#0b0b10; --box:#15151d; --line:#2a2a36; --text:#f2f2f7; --muted:#9a9aab; --ok:#39ff88; --bad:#ff3b6b; --acc:#c084fc; }
+  body { margin:0; background:var(--bg); color:var(--text); font:15px/1.4 -apple-system, system-ui, sans-serif; padding:16px; }
+  h1 { font-size:20px; margin:0 0 4px; }
+  p { color:var(--muted); margin:0 0 14px; }
+  button { background:var(--acc); color:#120a1c; border:0; border-radius:10px; padding:12px 18px; font-weight:700; font-size:15px; }
+  #sum { margin:14px 0; font-weight:700; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  td { border-bottom:1px solid var(--line); padding:7px 4px; vertical-align:top; }
+  .ok { color:var(--ok); } .bad { color:var(--bad); }
+  #stage { position:fixed; right:16px; bottom:16px; width:375px; height:812px; transform:scale(.45); transform-origin:bottom right; border:1px solid var(--line); border-radius:12px; background:#000; }
+  @media (max-width:700px) { #stage { opacity:.15; pointer-events:none; } }
+</style>
+</head>
+<body>
+<h1>Timer Smoke Test</h1>
+<p>Opens every Training Timer type in English and French, checks the setup screen, the move library and the Start bar, starts it, and checks the clock runs. Your own timer settings are put back at the end.</p>
+<button id="go">Run all checks</button>
+<div id="sum"></div>
+<table id="out"></table>
+<iframe id="stage" title="app"></iframe>
+<script type="module">
+import { MODES } from './timer-audit.js';
+const ALL = { ...MODES, vo2: { cfg: { fmt: 'vo2', vo2: 'z5' } } };
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const out = document.getElementById('out'), sum = document.getElementById('sum'), stage = document.getElementById('stage');
+const KEEP = ['fj.quickTimer', 'fj.lang', 'fj.workModePrefs'];
+const row = (name, lines) => {
+  const bad = lines.filter(l => l.startsWith('✗'));
+  out.insertAdjacentHTML('beforeend', `<tr><td class="${bad.length ? 'bad' : 'ok'}">${bad.length ? '✗' : '✓'} ${name}</td><td>${(bad.length ? bad : lines).join('<br>')}</td></tr>`);
+  return !bad.length;
+};
+async function load(url) {
+  stage.src = 'about:blank'; await wait(100);
+  stage.src = url;
+  await new Promise(r => stage.onload = r);
+  const w = stage.contentWindow, errs = [];
+  w.addEventListener('error', e => errs.push(e.message));
+  w.addEventListener('unhandledrejection', e => errs.push(String(e.reason?.message || e.reason)));
+  const ce = w.console.error; w.console.error = (...a) => { errs.push(a.map(String).join(' ')); ce.apply(w.console, a); };
+  return { w, d: w.document, errs };
+}
+async function check(lang, mode) {
+  const res = [];
+  const prev = JSON.parse(localStorage.getItem('fj.quickTimer') || '{}');
+  const c = ALL[mode].cfg;
+  localStorage.setItem('fj.quickTimer', JSON.stringify({ last: { ...(prev.last || {}), ...c, movesBy: { ...(prev.last?.movesBy || {}), ...(c.movesBy || {}) } }, favs: prev.favs || [] }));
+  localStorage.setItem('fj.lang', lang);
+  const { w, d, errs } = await load('../../index.html?quick&nosw');
+  for (let i = 0; i < 40 && !d.querySelector('.screen.qt, .screen.run'); i++) await wait(100);
+  const R = await w.eval("import('/js/runner/runstate.js')").catch(() => null);
+  if (d.querySelector('.screen.run')) { R?.clear(); await R?.flushRunState(); w.location.reload(); await wait(1500); }
+  /* SETUP */
+  const qt = d.querySelector('.screen.qt');
+  if (!qt && mode !== 'stopwatch') return [...res, '✗ setup screen did not draw', ...errs.map(e => '✗ ' + e)];
+  if (qt) {
+    const bar = d.querySelector('.qt-bar');
+    w.scrollTo(0, 99999); await wait(150);
+    const bb = bar && Math.round(bar.getBoundingClientRect().bottom);
+    res.push(bar && Math.abs(bb - w.innerHeight) <= 1 ? 'Start bar pinned to the bottom' : `✗ Start bar off the bottom (${bb} vs ${w.innerHeight})`);
+    if (getComputedStyle(qt).transform !== 'none') res.push('✗ setup screen has a transform (fixed bars will drift)');
+    w.scrollTo(0, 0);
+    /* the move library */
+    if (!d.querySelector('[data-pick-move]')) d.querySelector('#qtMore')?.click(), await wait(200);
+    const pick = d.querySelector('[data-pick-move]');
+    if (pick) {
+      pick.click(); await wait(900);
+      const n = d.querySelectorAll('#mvR [data-ex]').length;
+      res.push(n > 300 ? `library lists ${n} moves` : `✗ library lists ${n} moves`);
+      const q = d.querySelector('#mvQ'); q.value = lang === 'fr' ? 'pompe' : 'squat'; q.dispatchEvent(new w.Event('input'));
+      const hits = d.querySelectorAll('#mvR [data-ex]').length;
+      res.push(hits ? `search finds ${hits}` : '✗ search finds nothing');
+      d.querySelectorAll('.ov, .sheet, .qt-sheet').forEach(o => o.remove());
+    }
+    d.querySelector('#qtGo')?.click();
+  }
+  /* RUN */
+  for (let i = 0; i < 30 && !d.querySelector('.screen.run, .timer'); i++) await wait(100);
+  const a = d.body.innerText; await wait(2500); const b = d.body.innerText;
+  res.push(d.querySelector('.screen.run, .timer') ? 'workout screen drew' : '✗ workout screen did not draw');
+  res.push(a !== b ? 'clock is moving' : '✗ clock frozen');
+  R?.clear(); await R?.flushRunState();
+  errs.forEach(e => res.push('✗ error: ' + e));
+  return res;
+}
+document.getElementById('go').addEventListener('click', async () => {
+  const saved = Object.fromEntries(KEEP.map(k => [k, localStorage.getItem(k)]));
+  out.innerHTML = ''; let pass = 0, total = 0;
+  try {
+    const only = new URLSearchParams(location.search).get('only');   // ?only=tabata runs one type
+    for (const lang of ['en', 'fr']) for (const mode of Object.keys(ALL).filter(m => !only || m === only)) {
+      sum.textContent = `Running ${mode} (${lang})…`;
+      total++; if (row(`${mode} · ${lang}`, await check(lang, mode).catch(e => ['✗ ' + e.message]))) pass++;
+    }
+  } finally {
+    for (const [k, v] of Object.entries(saved)) v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v);
+    stage.src = 'about:blank';
+  }
+  sum.innerHTML = `<span class="${pass === total ? 'ok' : 'bad'}">${pass} of ${total} passed</span>`;
+  window.__smoke = { pass, total };
+});
+</script>
+</body>
+</html>
