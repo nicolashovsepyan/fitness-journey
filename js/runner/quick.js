@@ -23,6 +23,7 @@ import { makeSortable } from './drag.js';
 import { readHistory, sigOf, showWeight } from './tally.js';
 import { ringHTML, ringBaseCss, ringDesign } from './ring.js';
 import { t, t2, num, exName, exCues, lang, setLang } from '../i18n.js';
+import { PICKS, LEVEL } from './quick-picks.js';
 import { isInstalled, isIOS, isIOSSafari, isIOSOtherBrowser, isAndroid, canPromptInstall, promptInstall, onInstallStateChange } from '../install.js';
 
 /* ?demo adds the Work Mode preview: a sample of every program format */
@@ -392,7 +393,7 @@ export function buildPlan(c = cfg) {
         break;
       case 'fortime':
         blocks = [{ ...base, id: id(1), name, format: 'fortime', minutes: cfg.ftCap, rounds: cfg.ftRounds, label: 'For time',
-          ...(moves.length ? {} : { hideList: true, items: [{ name: 'Time', measure: 'hold' }] }) }];
+          ...(moves.length ? { bites: true } : { hideList: true, items: [{ name: 'Time', measure: 'hold' }] }) }];   // moves: tap reps in as you go
         break;
       case 'stopwatch':
         blocks = [{ ...base, id: id(1), name, format: 'fortime', minutes: 0, label: 'Stopwatch', hideList: true,
@@ -619,6 +620,23 @@ function openHistory() {
     <button class="btn" id="qtHistOk">${t('Close')}</button>`, 'tall');
   ov.querySelector('#qtHistOk').addEventListener('click', close);
 }
+/* QUICK PICKS (quick-picks.js): ready-made workouts for this type, easy
+   to hard, one tap fills the setup in */
+function picksRow() {
+  const ps = PICKS[cfg.fmt]; if (!ps?.length) return '';
+  return `${sec('Quick picks')}<div class="qt-picks">${ps.map(p => `<button class="qt-pick l${p.lvl}" data-qp="${p.id}">
+    <em>${t(LEVEL[p.lvl])}</em><b>${t(p.name)}</b><small>${t(p.sub)}</small></button>`).join('')}</div>`;
+}
+function applyPick(p) {
+  Object.assign(cfg, p.cfg);
+  const lad = ['ladder', 'deathby'].includes(cfg.fmt);
+  if (p.m.length) cfg.movesBy[cfg.fmt] = p.m.map(([k, a, b]) => {
+    const ex = EXERCISES[k], base = ex ? { exId: k, name: ex.name } : { exId: null, name: t(k) };
+    return lad ? { ...base, reps: '', ldStart: a, ldStep: b } : { ...base, reps: a };
+  });
+  favIdx = null; moreOpen = p.m.length > 0 && !lad;
+  persist(); draw(); toast(t('Loaded: {x}', { x: t(p.name) }));
+}
 function draw() {
   const def = fmtDef();
   /* the break between repeats only shows once there is more than one */
@@ -658,6 +676,7 @@ function draw() {
       <span class="qt-chev">▾</span>
     </button>
     ${lastLine()}
+    ${picksRow()}
 
     ${settings.length ? `${sec('Settings', lad ? `<button class="qt-seclink" id="qtPresets">${t('Presets')}</button>` : '')}<div class="qt-rows">${settings.join('')}</div>` : ''}
     ${lad || db ? `${sec('Moves')}${movesCard()}` : ''}
@@ -1029,6 +1048,7 @@ function wire() {
   $('#qtLast')?.addEventListener('click', openHistory);
   $('#qtPrefs').addEventListener('click', () => openPrefs(host));
   $('#qtMore')?.addEventListener('click', () => { moreOpen = !moreOpen; draw(); });
+  host.querySelectorAll('[data-qp]').forEach(b => b.addEventListener('click', () => { const p = PICKS[cfg.fmt]?.find(x => x.id === b.dataset.qp); if (p) applyPick(p); }));
   host.querySelectorAll('[data-q]').forEach(b => b.addEventListener('click', () => { bump(b.dataset.q, Number(b.dataset.d)); persist(); draw(); }));
   host.querySelectorAll('[data-qt]').forEach(b => b.addEventListener('click', () => openTime(b.dataset.qt)));
   host.querySelectorAll('[data-qf]').forEach(inp => {
@@ -1134,6 +1154,15 @@ function injectStyle() {
   .qt-fav button { background:none; border:none; color: var(--text); font-size: 13.5px; padding: 8px 4px 8px 13px; cursor:pointer; white-space:nowrap; }
   .qt-fav .qt-favx { color: var(--faint); padding: 8px 11px 8px 6px; font-size: 11px; }
 
+  .qt-picks { display:flex; gap: 10px; overflow-x: auto; margin: 0 calc(-1 * var(--pad)) 6px; padding: 2px var(--pad) 10px; scroll-snap-type: x mandatory; scroll-padding: 0 var(--pad); scrollbar-width: none; }
+  .qt-picks::-webkit-scrollbar { display: none; }
+  .qt-pick { flex: 0 0 158px; scroll-snap-align: start; display:flex; flex-direction:column; align-items:flex-start; gap: 4px; text-align:left; padding: 11px 12px 12px;
+    background: var(--box); border: 1px solid var(--line); border-radius: 14px; color: var(--text); cursor:pointer; }
+  .qt-pick:active { border-color: var(--wm-accent); }
+  .qt-pick em { font-style: normal; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; border: 1px solid currentColor; }
+  .qt-pick.l1 em { color: var(--wm-neon); } .qt-pick.l2 em { color: var(--wm-accent); } .qt-pick.l3 em { color: #FF3B6B; }
+  .qt-pick b { font-size: 16px; line-height: 1.2; }
+  .qt-pick small { color: var(--muted); font-size: 12.5px; line-height: 1.3; }
   .qt-type { width:100%; display:flex; align-items:center; gap: 12px; text-align:left; cursor:pointer;
     background: var(--box); border: 1px solid var(--wm-neon-line); border-radius: 18px; padding: 16px 18px; color: var(--text);
     box-shadow: 0 0 0 1px rgba(0,0,0,.2), var(--wm-glow-neon); }

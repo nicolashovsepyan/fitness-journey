@@ -1,6 +1,8 @@
 {
-  "version": "2026-10-07.2",
+  "version": "2026-10-08.1",
   "notes": [
+    "Quick picks: ready-made workouts for every timer type, easy to hard (Pull-up 150, Cindy, Murph, Chelsea and more)",
+    "For time: tap your reps in as you go (+5, +10, +20) and watch the bar fill to 100%",
     "Fixed: the move library was empty, and the Start bar floated up the screen while scrolling",
     "New users see how to put the timer on their home screen, step by step for their phone",
     "The Training Timer now speaks French: pick Français in Timer settings (it follows your phone's language)",
@@ -38,6 +40,8 @@
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
   ],
   "notes_fr": [
+    "Séances express : des séances prêtes pour chaque type de minuteur, de facile à difficile (Tractions 150, Cindy, Murph, Chelsea et plus)",
+    "For Time : ajoute tes répétitions au fur et à mesure (+5, +10, +20) et regarde la barre se remplir jusqu’à 100 %",
     "Corrigé : la bibliothèque d’exercices était vide, et la barre Démarrer remontait à l’écran pendant le défilement",
     "Les nouveaux utilisateurs voient comment mettre le minuteur sur leur écran d’accueil, étape par étape pour leur téléphone"
   ]

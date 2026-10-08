@@ -1704,9 +1704,71 @@ function renderLadder() {
   document.getElementById('ftDone').addEventListener('click', () => { if (confirm(t('End the ladder here?'))) finish(Math.round(upElapsed())); });
   tick();
 }
+/* FOR TIME, BY BITES: 100 push-ups (or Murph's 100 / 200 / 300) done in
+   whatever pieces you can, tapped in as you go: +5, +10, +20. Each move
+   fills its own bar, the total fills the big one, and it finishes itself
+   at 100%. A move with no rep count (a run) is one tap: done. */
+const biteSteps = n => n <= 1 ? [1] : n <= 20 ? [1, 2, 5] : n <= 60 ? [1, 5, 10] : n <= 200 ? [5, 10, 20] : [10, 20, 50];
+function renderBites() {
+  const b = block();
+  const cap = (Number(b.minutes) || 0) * 60, dur = cap || NO_CAP;
+  const goal = b.items.map(it => Math.max(1, (Number(it.reps) || 0) * (b.rounds || 1)));
+  if (!Array.isArray(S.bites) || S.bites.length !== b.items.length) { S.bites = b.items.map(() => 0); S.biteLog = []; R.save(S); }
+  const total = goal.reduce((a, x) => a + x, 0);
+  const done = () => S.bites.reduce((a, x, i) => a + Math.min(x, goal[i]), 0);
+  const now = () => S.bites.findIndex((x, i) => x < goal[i]);
+  const row = (it, i) => {
+    const g = goal[i], d = Math.min(S.bites[i], g), full = d >= g, pct = Math.round(d / g * 100);
+    const chips = full ? `<span class="bt-ok">✓</span>`
+      : (Number(it.reps) > 0 ? biteSteps(g) : [1]).map(n => `<button class="bt-c" data-bt="${i}" data-n="${n}">${Number(it.reps) > 0 ? '+' + n : t('Done ✓')}</button>`).join('');
+    return `<div class="bt-row ${full ? 'full' : ''} ${i === now() ? 'now' : ''}">
+      <div class="bt-top"><span class="mvr-n">${it.name}</span><b class="bt-v">${Number(it.reps) > 0 ? `${d}<small>/${g}</small>` : ''}</b></div>
+      <div class="bt-bar"><i style="width:${pct}%"></i></div>
+      <div class="bt-cs">${chips}</div></div>`;
+  };
+  const draw = () => {
+    const pct = Math.round(done() / total * 100);
+    document.getElementById('btTank').innerHTML = `<div class="bt-fill" style="width:${pct}%"></div><span>${pct}%</span>`;
+    document.getElementById('btTankN').textContent = b.items.length > 1 || Number(b.items[0].reps) > 0 ? `${done()} / ${total}` : '';
+    document.getElementById('btRows').innerHTML = b.items.map(row).join('');
+    document.getElementById('btUndo').disabled = !S.biteLog.length;
+  };
+  shell(`<div class="now-ex"><div class="label">${cap ? t('cap {t}', { t: fmt(cap) }) : t('no cap')}</div><div class="name">${t('For time')}</div></div>
+    <div class="timer-wrap bt-sm">${timerSvg('buffer')}</div>
+    <div class="bt-tank" id="btTank"></div>
+    <div class="bt-tankn"><span id="btTankN"></span><button class="bt-undo" id="btUndo" aria-label="${t('Undo')}">↶ ${t('Undo')}</button></div>
+    <div class="bt-rows" id="btRows"></div>
+    <div class="actionbar"><button class="btn lg" id="ftDone">${t('Done ✓')}</button></div>`);
+  const finish = secs => {
+    R.clearStep(S); onStepDone = null;
+    (S.captured[b.id] || []).forEach((e, i) => { e.sets = [{ value: secs }]; e.unit = 'sec'; e.rounds = true; e.bites = Math.min(S.bites[i] || 0, goal[i]); });
+    R.save(S); say(`Done. ${spokenTime(secs)}.`);
+    completeBlock();
+  };
+  draw();
+  if (beginStep(dur, cap ? 'work' : 'rest', 'fortime')) say('Go.');
+  onStepDone = () => finish(dur);
+  document.getElementById('ftDone').addEventListener('click', () => { buzz(40); finish(dur - (R.stepRemaining(S) ?? 0)); });
+  document.getElementById('btUndo').addEventListener('click', () => {
+    const last = S.biteLog.pop(); if (!last) return;
+    S.bites[last[0]] = Math.max(0, S.bites[last[0]] - last[1]); R.save(S); buzz(15); draw();
+  });
+  document.getElementById('btRows').addEventListener('click', e => {
+    const c = e.target.closest('[data-bt]'); if (!c) return;
+    const i = +c.dataset.bt, before = done(), wasFull = S.bites[i] >= goal[i];
+    const n = Math.min(+c.dataset.n, goal[i] - S.bites[i]); if (n <= 0) return;
+    S.bites[i] += n; S.biteLog.push([i, n]); R.save(S); buzz(20);
+    const after = done();
+    if (after >= total) { celebrate(c, '100%'); draw(); return finish(Math.round(upElapsed())); }
+    if (!wasFull && S.bites[i] >= goal[i]) celebrate(c, '✓');
+    else if (before < total / 2 && after >= total / 2) say(pick('halfway') || t('Halfway.'));
+    draw();
+  });
+}
 function renderForTime() {
   const b = block();
   if (Array.isArray(b.rungs) && b.rungs.length) return renderLadder();
+  if (b.bites) return renderBites();
   const cap = (Number(b.minutes) || 0) * 60;
   const dur = cap || NO_CAP;
   /* Stopwatch: Lap. For time with rounds: Round, a split per round. The big
@@ -1923,6 +1985,7 @@ function quickResult(session) {
    load (added weight + the share of body weight each bodyweight move
    lifts), and the same timer's last time. Saved to the timer's history. */
 function repsOfEntry(e, b, item, partial) {
+  if (e.bites != null) return e.bites;                     // For time by bites: what was tapped in
   if (e.ivReps) return e.ivReps.total;
   if (e.deathBy) return e.deathBy.total || 0;
   if (e.ladReps != null) return e.ladReps;

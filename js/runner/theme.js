@@ -259,6 +259,28 @@ function injectStyle() {
   /* LADDER screen */
   html.wm .ld-bars { width: 100%; height: 64px; display:block; margin: 6px 0 12px; }
   /* THE MOVE ROW (mvRow), every mode: one slim list, full names, small − + */
+  /* For time by bites: a big tank for the total, a bar and quick-add chips per move */
+  html.wm .bt-sm { zoom: .68; margin: 6px 0 14px; }
+  html.wm .bt-tank { position: relative; height: 34px; border-radius: 17px; background: var(--box); border: 1px solid var(--wm-neon-line); overflow: hidden; margin: 4px 0 6px; }
+  html.wm .bt-fill { position:absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, var(--wm-neon), var(--wm-accent)); box-shadow: 0 0 18px var(--wm-neon-line); transition: width .35s cubic-bezier(.2,.9,.3,1.2); }
+  html.wm .bt-tank span { position: relative; display:grid; place-items:center; height:100%; font-family: var(--tnum); font-weight: 800; font-size: 17px; color:#fff; text-shadow: 0 1px 4px rgba(0,0,0,.6); }
+  html.wm .bt-tankn { display:flex; align-items:center; justify-content:space-between; color: var(--muted); font-family: var(--tnum); font-size: 15px; margin: 0 4px 10px; }
+  html.wm .bt-undo { background:none; border: 1px solid var(--line); color: var(--muted); border-radius: 999px; padding: 5px 12px; font-size: 13px; font-weight: 700; }
+  html.wm .bt-undo:disabled { opacity: .35; }
+  html.wm .bt-rows { background: var(--box); border-radius: 16px; padding: 2px 12px; }
+  html.wm .bt-row { padding: 10px 0; border-top: 1px solid var(--line); }
+  html.wm .bt-row:first-child { border-top: none; }
+  html.wm .bt-top { display:flex; align-items:baseline; gap: 8px; }
+  html.wm .bt-row.now .mvr-n { color: #fff; text-shadow: 0 0 10px var(--wm-neon-line); }
+  html.wm .bt-row.full .mvr-n, html.wm .bt-row.full .bt-v { color: var(--muted); }
+  html.wm .bt-v { font-family: var(--tnum); font-size: 18px; }
+  html.wm .bt-v small { color: var(--muted); font-size: 13px; }
+  html.wm .bt-bar { height: 6px; border-radius: 3px; background: var(--line); margin: 7px 0 9px; overflow:hidden; }
+  html.wm .bt-bar i { display:block; height:100%; background: var(--wm-neon); box-shadow: 0 0 8px var(--wm-neon); transition: width .3s ease; }
+  html.wm .bt-cs { display:flex; gap: 8px; }
+  html.wm .bt-c { flex: 1; height: 40px; border-radius: 12px; background: transparent; border: 1.5px solid var(--wm-neon-line); color: #fff; font-family: var(--tnum); font-size: 17px; font-weight: 800; }
+  html.wm .bt-c:active { background: var(--wm-neon-soft); border-color: var(--wm-neon); }
+  html.wm .bt-ok { color: var(--wm-neon); font-weight: 800; font-size: 18px; }
   html.wm .mvr-list { background: var(--box); border-radius: 16px; padding: 2px 10px; }
   html.wm .mvr { display:flex; align-items:center; gap: 8px; min-height: 44px; padding: 3px 0; border-top: 1px solid var(--line); }
   html.wm .mvr:first-child { border-top: none; }
