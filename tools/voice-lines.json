@@ -1,0 +1,4817 @@
+[
+ {
+  "key": "n1",
+  "text": "1",
+  "say": "One."
+ },
+ {
+  "key": "n2",
+  "text": "2",
+  "say": "Two."
+ },
+ {
+  "key": "n3",
+  "text": "3",
+  "say": "Three."
+ },
+ {
+  "key": "n4",
+  "text": "4",
+  "say": "Four."
+ },
+ {
+  "key": "n5",
+  "text": "5",
+  "say": "Five."
+ },
+ {
+  "key": "n6",
+  "text": "6",
+  "say": "Six."
+ },
+ {
+  "key": "n7",
+  "text": "7",
+  "say": "Seven."
+ },
+ {
+  "key": "n8",
+  "text": "8",
+  "say": "Eight."
+ },
+ {
+  "key": "n9",
+  "text": "9",
+  "say": "Nine."
+ },
+ {
+  "key": "n10",
+  "text": "10",
+  "say": "Ten."
+ },
+ {
+  "key": "n11",
+  "text": "11",
+  "say": "Eleven."
+ },
+ {
+  "key": "n12",
+  "text": "12",
+  "say": "Twelve."
+ },
+ {
+  "key": "n13",
+  "text": "13",
+  "say": "Thirteen."
+ },
+ {
+  "key": "n14",
+  "text": "14",
+  "say": "Fourteen."
+ },
+ {
+  "key": "n15",
+  "text": "15",
+  "say": "Fifteen."
+ },
+ {
+  "key": "n16",
+  "text": "16",
+  "say": "Sixteen."
+ },
+ {
+  "key": "n17",
+  "text": "17",
+  "say": "Seventeen."
+ },
+ {
+  "key": "n18",
+  "text": "18",
+  "say": "Eighteen."
+ },
+ {
+  "key": "n19",
+  "text": "19",
+  "say": "Nineteen."
+ },
+ {
+  "key": "n20",
+  "text": "20",
+  "say": "Twenty."
+ },
+ {
+  "key": "n21",
+  "text": "21",
+  "say": "Twenty-one."
+ },
+ {
+  "key": "n22",
+  "text": "22",
+  "say": "Twenty-two."
+ },
+ {
+  "key": "n23",
+  "text": "23",
+  "say": "Twenty-three."
+ },
+ {
+  "key": "n24",
+  "text": "24",
+  "say": "Twenty-four."
+ },
+ {
+  "key": "n25",
+  "text": "25",
+  "say": "Twenty-five."
+ },
+ {
+  "key": "n26",
+  "text": "26",
+  "say": "Twenty-six."
+ },
+ {
+  "key": "n27",
+  "text": "27",
+  "say": "Twenty-seven."
+ },
+ {
+  "key": "n28",
+  "text": "28",
+  "say": "Twenty-eight."
+ },
+ {
+  "key": "n29",
+  "text": "29",
+  "say": "Twenty-nine."
+ },
+ {
+  "key": "n30",
+  "text": "30",
+  "say": "Thirty."
+ },
+ {
+  "key": "n31",
+  "text": "31",
+  "say": "Thirty-one."
+ },
+ {
+  "key": "n32",
+  "text": "32",
+  "say": "Thirty-two."
+ },
+ {
+  "key": "n33",
+  "text": "33",
+  "say": "Thirty-three."
+ },
+ {
+  "key": "n34",
+  "text": "34",
+  "say": "Thirty-four."
+ },
+ {
+  "key": "n35",
+  "text": "35",
+  "say": "Thirty-five."
+ },
+ {
+  "key": "n36",
+  "text": "36",
+  "say": "Thirty-six."
+ },
+ {
+  "key": "n37",
+  "text": "37",
+  "say": "Thirty-seven."
+ },
+ {
+  "key": "n38",
+  "text": "38",
+  "say": "Thirty-eight."
+ },
+ {
+  "key": "n39",
+  "text": "39",
+  "say": "Thirty-nine."
+ },
+ {
+  "key": "n40",
+  "text": "40",
+  "say": "Forty."
+ },
+ {
+  "key": "n41",
+  "text": "41",
+  "say": "Forty-one."
+ },
+ {
+  "key": "n42",
+  "text": "42",
+  "say": "Forty-two."
+ },
+ {
+  "key": "n43",
+  "text": "43",
+  "say": "Forty-three."
+ },
+ {
+  "key": "n44",
+  "text": "44",
+  "say": "Forty-four."
+ },
+ {
+  "key": "n45",
+  "text": "45",
+  "say": "Forty-five."
+ },
+ {
+  "key": "n46",
+  "text": "46",
+  "say": "Forty-six."
+ },
+ {
+  "key": "n47",
+  "text": "47",
+  "say": "Forty-seven."
+ },
+ {
+  "key": "n48",
+  "text": "48",
+  "say": "Forty-eight."
+ },
+ {
+  "key": "n49",
+  "text": "49",
+  "say": "Forty-nine."
+ },
+ {
+  "key": "n50",
+  "text": "50",
+  "say": "Fifty."
+ },
+ {
+  "key": "n51",
+  "text": "51",
+  "say": "Fifty-one."
+ },
+ {
+  "key": "n52",
+  "text": "52",
+  "say": "Fifty-two."
+ },
+ {
+  "key": "n53",
+  "text": "53",
+  "say": "Fifty-three."
+ },
+ {
+  "key": "n54",
+  "text": "54",
+  "say": "Fifty-four."
+ },
+ {
+  "key": "n55",
+  "text": "55",
+  "say": "Fifty-five."
+ },
+ {
+  "key": "n56",
+  "text": "56",
+  "say": "Fifty-six."
+ },
+ {
+  "key": "n57",
+  "text": "57",
+  "say": "Fifty-seven."
+ },
+ {
+  "key": "n58",
+  "text": "58",
+  "say": "Fifty-eight."
+ },
+ {
+  "key": "n59",
+  "text": "59",
+  "say": "Fifty-nine."
+ },
+ {
+  "key": "n60",
+  "text": "60",
+  "say": "Sixty."
+ },
+ {
+  "key": "n61",
+  "text": "61",
+  "say": "Sixty-one."
+ },
+ {
+  "key": "n62",
+  "text": "62",
+  "say": "Sixty-two."
+ },
+ {
+  "key": "n63",
+  "text": "63",
+  "say": "Sixty-three."
+ },
+ {
+  "key": "n64",
+  "text": "64",
+  "say": "Sixty-four."
+ },
+ {
+  "key": "n65",
+  "text": "65",
+  "say": "Sixty-five."
+ },
+ {
+  "key": "n66",
+  "text": "66",
+  "say": "Sixty-six."
+ },
+ {
+  "key": "n67",
+  "text": "67",
+  "say": "Sixty-seven."
+ },
+ {
+  "key": "n68",
+  "text": "68",
+  "say": "Sixty-eight."
+ },
+ {
+  "key": "n69",
+  "text": "69",
+  "say": "Sixty-nine."
+ },
+ {
+  "key": "n70",
+  "text": "70",
+  "say": "Seventy."
+ },
+ {
+  "key": "n71",
+  "text": "71",
+  "say": "Seventy-one."
+ },
+ {
+  "key": "n72",
+  "text": "72",
+  "say": "Seventy-two."
+ },
+ {
+  "key": "n73",
+  "text": "73",
+  "say": "Seventy-three."
+ },
+ {
+  "key": "n74",
+  "text": "74",
+  "say": "Seventy-four."
+ },
+ {
+  "key": "n75",
+  "text": "75",
+  "say": "Seventy-five."
+ },
+ {
+  "key": "n76",
+  "text": "76",
+  "say": "Seventy-six."
+ },
+ {
+  "key": "n77",
+  "text": "77",
+  "say": "Seventy-seven."
+ },
+ {
+  "key": "n78",
+  "text": "78",
+  "say": "Seventy-eight."
+ },
+ {
+  "key": "n79",
+  "text": "79",
+  "say": "Seventy-nine."
+ },
+ {
+  "key": "n80",
+  "text": "80",
+  "say": "Eighty."
+ },
+ {
+  "key": "n81",
+  "text": "81",
+  "say": "Eighty-one."
+ },
+ {
+  "key": "n82",
+  "text": "82",
+  "say": "Eighty-two."
+ },
+ {
+  "key": "n83",
+  "text": "83",
+  "say": "Eighty-three."
+ },
+ {
+  "key": "n84",
+  "text": "84",
+  "say": "Eighty-four."
+ },
+ {
+  "key": "n85",
+  "text": "85",
+  "say": "Eighty-five."
+ },
+ {
+  "key": "n86",
+  "text": "86",
+  "say": "Eighty-six."
+ },
+ {
+  "key": "n87",
+  "text": "87",
+  "say": "Eighty-seven."
+ },
+ {
+  "key": "n88",
+  "text": "88",
+  "say": "Eighty-eight."
+ },
+ {
+  "key": "n89",
+  "text": "89",
+  "say": "Eighty-nine."
+ },
+ {
+  "key": "n90",
+  "text": "90",
+  "say": "Ninety."
+ },
+ {
+  "key": "n91",
+  "text": "91",
+  "say": "Ninety-one."
+ },
+ {
+  "key": "n92",
+  "text": "92",
+  "say": "Ninety-two."
+ },
+ {
+  "key": "n93",
+  "text": "93",
+  "say": "Ninety-three."
+ },
+ {
+  "key": "n94",
+  "text": "94",
+  "say": "Ninety-four."
+ },
+ {
+  "key": "n95",
+  "text": "95",
+  "say": "Ninety-five."
+ },
+ {
+  "key": "n96",
+  "text": "96",
+  "say": "Ninety-six."
+ },
+ {
+  "key": "n97",
+  "text": "97",
+  "say": "Ninety-seven."
+ },
+ {
+  "key": "n98",
+  "text": "98",
+  "say": "Ninety-eight."
+ },
+ {
+  "key": "n99",
+  "text": "99",
+  "say": "Ninety-nine."
+ },
+ {
+  "key": "n100",
+  "text": "100",
+  "say": "One hundred."
+ },
+ {
+  "key": "n101",
+  "text": "101",
+  "say": "One hundred one."
+ },
+ {
+  "key": "n102",
+  "text": "102",
+  "say": "One hundred two."
+ },
+ {
+  "key": "n103",
+  "text": "103",
+  "say": "One hundred three."
+ },
+ {
+  "key": "n104",
+  "text": "104",
+  "say": "One hundred four."
+ },
+ {
+  "key": "n105",
+  "text": "105",
+  "say": "One hundred five."
+ },
+ {
+  "key": "n106",
+  "text": "106",
+  "say": "One hundred six."
+ },
+ {
+  "key": "n107",
+  "text": "107",
+  "say": "One hundred seven."
+ },
+ {
+  "key": "n108",
+  "text": "108",
+  "say": "One hundred eight."
+ },
+ {
+  "key": "n109",
+  "text": "109",
+  "say": "One hundred nine."
+ },
+ {
+  "key": "n110",
+  "text": "110",
+  "say": "One hundred ten."
+ },
+ {
+  "key": "n111",
+  "text": "111",
+  "say": "One hundred eleven."
+ },
+ {
+  "key": "n112",
+  "text": "112",
+  "say": "One hundred twelve."
+ },
+ {
+  "key": "n113",
+  "text": "113",
+  "say": "One hundred thirteen."
+ },
+ {
+  "key": "n114",
+  "text": "114",
+  "say": "One hundred fourteen."
+ },
+ {
+  "key": "n115",
+  "text": "115",
+  "say": "One hundred fifteen."
+ },
+ {
+  "key": "n116",
+  "text": "116",
+  "say": "One hundred sixteen."
+ },
+ {
+  "key": "n117",
+  "text": "117",
+  "say": "One hundred seventeen."
+ },
+ {
+  "key": "n118",
+  "text": "118",
+  "say": "One hundred eighteen."
+ },
+ {
+  "key": "n119",
+  "text": "119",
+  "say": "One hundred nineteen."
+ },
+ {
+  "key": "n120",
+  "text": "120",
+  "say": "One hundred twenty."
+ },
+ {
+  "key": "c-three",
+  "text": "Three",
+  "say": "Three!"
+ },
+ {
+  "key": "c-two",
+  "text": "Two",
+  "say": "Two!"
+ },
+ {
+  "key": "c-one",
+  "text": "One",
+  "say": "One!"
+ },
+ {
+  "key": "c-go",
+  "text": "Go",
+  "say": "Go!"
+ },
+ {
+  "key": "c-get-ready",
+  "text": "Get ready",
+  "say": "Get ready."
+ },
+ {
+  "key": "c-rest",
+  "text": "Rest",
+  "say": "Rest."
+ },
+ {
+  "key": "c-switch",
+  "text": "Switch",
+  "say": "Switch!"
+ },
+ {
+  "key": "c-next",
+  "text": "Next",
+  "say": "Next."
+ },
+ {
+  "key": "c-halfway",
+  "text": "Halfway",
+  "say": "Halfway!"
+ },
+ {
+  "key": "c-last-round",
+  "text": "Last round",
+  "say": "Last round!"
+ },
+ {
+  "key": "c-one-minute-left",
+  "text": "One minute left",
+  "say": "One minute left."
+ },
+ {
+  "key": "c-ten-seconds",
+  "text": "Ten seconds",
+  "say": "Ten seconds!"
+ },
+ {
+  "key": "c-hold-it",
+  "text": "Hold it",
+  "say": "Hold it."
+ },
+ {
+  "key": "c-hold",
+  "text": "Hold",
+  "say": "Hold."
+ },
+ {
+  "key": "c-round",
+  "text": "Round",
+  "say": "Round."
+ },
+ {
+  "key": "c-rounds",
+  "text": "Rounds",
+  "say": "rounds."
+ },
+ {
+  "key": "c-done",
+  "text": "Done",
+  "say": "Done!"
+ },
+ {
+  "key": "c-round-done",
+  "text": "Round done",
+  "say": "Round done!"
+ },
+ {
+  "key": "c-rung-done",
+  "text": "Rung done",
+  "say": "Rung done!"
+ },
+ {
+  "key": "c-seconds",
+  "text": "Seconds",
+  "say": "seconds."
+ },
+ {
+  "key": "c-minutes",
+  "text": "Minutes",
+  "say": "minutes."
+ },
+ {
+  "key": "c-push-ups",
+  "text": "Push-ups",
+  "say": "Push-ups."
+ },
+ {
+  "key": "c-strong-work",
+  "text": "Strong work",
+  "say": "Strong work!"
+ },
+ {
+  "key": "c-well-done",
+  "text": "Well done",
+  "say": "Well done!"
+ },
+ {
+  "key": "c-saved",
+  "text": "Saved",
+  "say": "Saved."
+ },
+ {
+  "key": "c-new-record",
+  "text": "New record",
+  "say": "New record!"
+ },
+ {
+  "key": "c-max-reps",
+  "text": "Max reps",
+  "say": "Max reps!"
+ },
+ {
+  "key": "c-every-minute-on-the-minute",
+  "text": "Every minute on the minute",
+  "say": "Every minute, on the minute."
+ },
+ {
+  "key": "c-times-up",
+  "text": "Time's up",
+  "say": "Time's up!"
+ },
+ {
+  "key": "c-keep-going",
+  "text": "Keep going",
+  "say": "Keep going!"
+ },
+ {
+  "key": "c-breathe",
+  "text": "Breathe",
+  "say": "Breathe."
+ },
+ {
+  "key": "c-as-many-rounds-as-possible",
+  "text": "As many rounds as possible",
+  "say": "As many rounds as possible!"
+ },
+ {
+  "key": "c-pushup-test-intro",
+  "text": "This is the push-up test. Start on the double beep. Then one push-up on every beep. I'll count",
+  "say": "This is the push-up test. Start on the double beep. Then one push-up on every beep. I'll count."
+ },
+ {
+  "key": "c-for-time",
+  "text": "For time",
+  "say": "For time."
+ },
+ {
+  "key": "c-minute",
+  "text": "Minute",
+  "say": "minute."
+ },
+ {
+  "key": "c-second",
+  "text": "Second",
+  "say": "second."
+ },
+ {
+  "key": "c-flagged",
+  "text": "Flagged. Skip it if it hurts",
+  "say": "Flagged. Skip it if it hurts."
+ },
+ {
+  "key": "c-rung",
+  "text": "Rung",
+  "say": "Rung."
+ },
+ {
+  "key": "r-1",
+  "text": "Round 1",
+  "say": "Round one."
+ },
+ {
+  "key": "r-2",
+  "text": "Round 2",
+  "say": "Round two."
+ },
+ {
+  "key": "r-3",
+  "text": "Round 3",
+  "say": "Round three."
+ },
+ {
+  "key": "r-4",
+  "text": "Round 4",
+  "say": "Round four."
+ },
+ {
+  "key": "r-5",
+  "text": "Round 5",
+  "say": "Round five."
+ },
+ {
+  "key": "r-6",
+  "text": "Round 6",
+  "say": "Round six."
+ },
+ {
+  "key": "r-7",
+  "text": "Round 7",
+  "say": "Round seven."
+ },
+ {
+  "key": "r-8",
+  "text": "Round 8",
+  "say": "Round eight."
+ },
+ {
+  "key": "r-9",
+  "text": "Round 9",
+  "say": "Round nine."
+ },
+ {
+  "key": "r-10",
+  "text": "Round 10",
+  "say": "Round ten."
+ },
+ {
+  "key": "r-11",
+  "text": "Round 11",
+  "say": "Round eleven."
+ },
+ {
+  "key": "r-12",
+  "text": "Round 12",
+  "say": "Round twelve."
+ },
+ {
+  "key": "r-13",
+  "text": "Round 13",
+  "say": "Round thirteen."
+ },
+ {
+  "key": "r-14",
+  "text": "Round 14",
+  "say": "Round fourteen."
+ },
+ {
+  "key": "r-15",
+  "text": "Round 15",
+  "say": "Round fifteen."
+ },
+ {
+  "key": "r-16",
+  "text": "Round 16",
+  "say": "Round sixteen."
+ },
+ {
+  "key": "r-17",
+  "text": "Round 17",
+  "say": "Round seventeen."
+ },
+ {
+  "key": "r-18",
+  "text": "Round 18",
+  "say": "Round eighteen."
+ },
+ {
+  "key": "r-19",
+  "text": "Round 19",
+  "say": "Round nineteen."
+ },
+ {
+  "key": "r-20",
+  "text": "Round 20",
+  "say": "Round twenty."
+ },
+ {
+  "key": "r-21",
+  "text": "Round 21",
+  "say": "Round twenty-one."
+ },
+ {
+  "key": "r-22",
+  "text": "Round 22",
+  "say": "Round twenty-two."
+ },
+ {
+  "key": "r-23",
+  "text": "Round 23",
+  "say": "Round twenty-three."
+ },
+ {
+  "key": "r-24",
+  "text": "Round 24",
+  "say": "Round twenty-four."
+ },
+ {
+  "key": "r-25",
+  "text": "Round 25",
+  "say": "Round twenty-five."
+ },
+ {
+  "key": "r-26",
+  "text": "Round 26",
+  "say": "Round twenty-six."
+ },
+ {
+  "key": "r-27",
+  "text": "Round 27",
+  "say": "Round twenty-seven."
+ },
+ {
+  "key": "r-28",
+  "text": "Round 28",
+  "say": "Round twenty-eight."
+ },
+ {
+  "key": "r-29",
+  "text": "Round 29",
+  "say": "Round twenty-nine."
+ },
+ {
+  "key": "r-30",
+  "text": "Round 30",
+  "say": "Round thirty."
+ },
+ {
+  "key": "r-31",
+  "text": "Round 31",
+  "say": "Round thirty-one."
+ },
+ {
+  "key": "r-32",
+  "text": "Round 32",
+  "say": "Round thirty-two."
+ },
+ {
+  "key": "r-33",
+  "text": "Round 33",
+  "say": "Round thirty-three."
+ },
+ {
+  "key": "r-34",
+  "text": "Round 34",
+  "say": "Round thirty-four."
+ },
+ {
+  "key": "r-35",
+  "text": "Round 35",
+  "say": "Round thirty-five."
+ },
+ {
+  "key": "r-36",
+  "text": "Round 36",
+  "say": "Round thirty-six."
+ },
+ {
+  "key": "r-37",
+  "text": "Round 37",
+  "say": "Round thirty-seven."
+ },
+ {
+  "key": "r-38",
+  "text": "Round 38",
+  "say": "Round thirty-eight."
+ },
+ {
+  "key": "r-39",
+  "text": "Round 39",
+  "say": "Round thirty-nine."
+ },
+ {
+  "key": "r-40",
+  "text": "Round 40",
+  "say": "Round forty."
+ },
+ {
+  "key": "g-1",
+  "text": "Rung 1",
+  "say": "Rung one."
+ },
+ {
+  "key": "g-2",
+  "text": "Rung 2",
+  "say": "Rung two."
+ },
+ {
+  "key": "g-3",
+  "text": "Rung 3",
+  "say": "Rung three."
+ },
+ {
+  "key": "g-4",
+  "text": "Rung 4",
+  "say": "Rung four."
+ },
+ {
+  "key": "g-5",
+  "text": "Rung 5",
+  "say": "Rung five."
+ },
+ {
+  "key": "g-6",
+  "text": "Rung 6",
+  "say": "Rung six."
+ },
+ {
+  "key": "g-7",
+  "text": "Rung 7",
+  "say": "Rung seven."
+ },
+ {
+  "key": "g-8",
+  "text": "Rung 8",
+  "say": "Rung eight."
+ },
+ {
+  "key": "g-9",
+  "text": "Rung 9",
+  "say": "Rung nine."
+ },
+ {
+  "key": "g-10",
+  "text": "Rung 10",
+  "say": "Rung ten."
+ },
+ {
+  "key": "g-11",
+  "text": "Rung 11",
+  "say": "Rung eleven."
+ },
+ {
+  "key": "g-12",
+  "text": "Rung 12",
+  "say": "Rung twelve."
+ },
+ {
+  "key": "g-13",
+  "text": "Rung 13",
+  "say": "Rung thirteen."
+ },
+ {
+  "key": "g-14",
+  "text": "Rung 14",
+  "say": "Rung fourteen."
+ },
+ {
+  "key": "g-15",
+  "text": "Rung 15",
+  "say": "Rung fifteen."
+ },
+ {
+  "key": "g-16",
+  "text": "Rung 16",
+  "say": "Rung sixteen."
+ },
+ {
+  "key": "g-17",
+  "text": "Rung 17",
+  "say": "Rung seventeen."
+ },
+ {
+  "key": "g-18",
+  "text": "Rung 18",
+  "say": "Rung eighteen."
+ },
+ {
+  "key": "g-19",
+  "text": "Rung 19",
+  "say": "Rung nineteen."
+ },
+ {
+  "key": "g-20",
+  "text": "Rung 20",
+  "say": "Rung twenty."
+ },
+ {
+  "key": "g-21",
+  "text": "Rung 21",
+  "say": "Rung twenty-one."
+ },
+ {
+  "key": "g-22",
+  "text": "Rung 22",
+  "say": "Rung twenty-two."
+ },
+ {
+  "key": "g-23",
+  "text": "Rung 23",
+  "say": "Rung twenty-three."
+ },
+ {
+  "key": "g-24",
+  "text": "Rung 24",
+  "say": "Rung twenty-four."
+ },
+ {
+  "key": "g-25",
+  "text": "Rung 25",
+  "say": "Rung twenty-five."
+ },
+ {
+  "key": "g-26",
+  "text": "Rung 26",
+  "say": "Rung twenty-six."
+ },
+ {
+  "key": "g-27",
+  "text": "Rung 27",
+  "say": "Rung twenty-seven."
+ },
+ {
+  "key": "g-28",
+  "text": "Rung 28",
+  "say": "Rung twenty-eight."
+ },
+ {
+  "key": "g-29",
+  "text": "Rung 29",
+  "say": "Rung twenty-nine."
+ },
+ {
+  "key": "g-30",
+  "text": "Rung 30",
+  "say": "Rung thirty."
+ },
+ {
+  "key": "s-lets-go",
+  "text": "Let's go",
+  "say": "Let's go!"
+ },
+ {
+  "key": "s-lets-work",
+  "text": "Let's work",
+  "say": "Let's work!"
+ },
+ {
+  "key": "s-here-we-go",
+  "text": "Here we go",
+  "say": "Here we go."
+ },
+ {
+  "key": "s-go-time",
+  "text": "Go time",
+  "say": "Go time!"
+ },
+ {
+  "key": "s-lets-get-it",
+  "text": "Let's get it",
+  "say": "Let's get it!"
+ },
+ {
+  "key": "s-time-to-work",
+  "text": "Time to work",
+  "say": "Time to work."
+ },
+ {
+  "key": "s-keep-it-up",
+  "text": "Keep it up",
+  "say": "Keep it up."
+ },
+ {
+  "key": "s-halfway-there",
+  "text": "Halfway there",
+  "say": "Halfway there."
+ },
+ {
+  "key": "s-stay-strong",
+  "text": "Stay strong",
+  "say": "Stay strong."
+ },
+ {
+  "key": "s-youve-got-this",
+  "text": "You've got this",
+  "say": "You've got this."
+ },
+ {
+  "key": "s-stay-on-pace",
+  "text": "Stay on pace",
+  "say": "Stay on pace."
+ },
+ {
+  "key": "s-halfway-done",
+  "text": "Halfway done",
+  "say": "Halfway done."
+ },
+ {
+  "key": "s-keep-moving",
+  "text": "Keep moving",
+  "say": "Keep moving."
+ },
+ {
+  "key": "s-dont-slow-down",
+  "text": "Don't slow down",
+  "say": "Don't slow down."
+ },
+ {
+  "key": "s-halfway-home",
+  "text": "Halfway home",
+  "say": "Halfway home."
+ },
+ {
+  "key": "s-stay-with-it",
+  "text": "Stay with it",
+  "say": "Stay with it."
+ },
+ {
+  "key": "s-breathe-and-keep-going",
+  "text": "Breathe and keep going",
+  "say": "Breathe and keep going."
+ },
+ {
+  "key": "s-one-minute-to-go",
+  "text": "One minute to go",
+  "say": "One minute to go."
+ },
+ {
+  "key": "s-last-minute",
+  "text": "Last minute",
+  "say": "Last minute."
+ },
+ {
+  "key": "s-dig-in",
+  "text": "Dig in",
+  "say": "Dig in!"
+ },
+ {
+  "key": "s-sixty-seconds",
+  "text": "Sixty seconds",
+  "say": "Sixty seconds."
+ },
+ {
+  "key": "s-everything-you-have",
+  "text": "Everything you have",
+  "say": "Everything you have!"
+ },
+ {
+  "key": "s-one-minute",
+  "text": "One minute",
+  "say": "One minute."
+ },
+ {
+  "key": "s-finish-what-you-started",
+  "text": "Finish what you started",
+  "say": "Finish what you started!"
+ },
+ {
+  "key": "s-make-it-count",
+  "text": "Make it count",
+  "say": "Make it count!"
+ },
+ {
+  "key": "s-finish-strong",
+  "text": "Finish strong",
+  "say": "Finish strong!"
+ },
+ {
+  "key": "s-ten-more-seconds",
+  "text": "Ten more seconds",
+  "say": "Ten more seconds."
+ },
+ {
+  "key": "s-push",
+  "text": "Push",
+  "say": "Push!"
+ },
+ {
+  "key": "s-dont-stop-now",
+  "text": "Don't stop now",
+  "say": "Don't stop now."
+ },
+ {
+  "key": "s-empty-the-tank",
+  "text": "Empty the tank",
+  "say": "Empty the tank!"
+ },
+ {
+  "key": "s-strong-finish",
+  "text": "Strong finish",
+  "say": "Strong finish."
+ },
+ {
+  "key": "s-shake-it-out",
+  "text": "Shake it out",
+  "say": "Shake it out."
+ },
+ {
+  "key": "s-good-work",
+  "text": "Good work",
+  "say": "Good work!"
+ },
+ {
+  "key": "s-recover",
+  "text": "Recover",
+  "say": "Recover."
+ },
+ {
+  "key": "s-nice",
+  "text": "Nice",
+  "say": "Nice."
+ },
+ {
+  "key": "s-get-your-breath-back",
+  "text": "Get your breath back",
+  "say": "Get your breath back."
+ },
+ {
+  "key": "s-slow-your-breathing",
+  "text": "Slow your breathing",
+  "say": "Slow your breathing."
+ },
+ {
+  "key": "s-shake-out-the-arms",
+  "text": "Shake out the arms",
+  "say": "Shake out the arms."
+ },
+ {
+  "key": "s-good",
+  "text": "Good",
+  "say": "Good!"
+ },
+ {
+  "key": "s-breathe-deep",
+  "text": "Breathe deep",
+  "say": "Breathe deep."
+ },
+ {
+  "key": "s-rest-up",
+  "text": "Rest up",
+  "say": "Rest up."
+ },
+ {
+  "key": "s-the-next-one-is-coming",
+  "text": "The next one is coming",
+  "say": "The next one is coming."
+ },
+ {
+  "key": "s-easy-breathing",
+  "text": "Easy breathing",
+  "say": "Easy breathing."
+ },
+ {
+  "key": "s-stay-loose",
+  "text": "Stay loose",
+  "say": "Stay loose."
+ },
+ {
+  "key": "s-nice-work",
+  "text": "Nice work",
+  "say": "Nice work."
+ },
+ {
+  "key": "s-recover-fast",
+  "text": "Recover fast",
+  "say": "Recover fast."
+ },
+ {
+  "key": "s-walk-it-off",
+  "text": "Walk it off",
+  "say": "Walk it off."
+ },
+ {
+  "key": "s-slow-breaths",
+  "text": "Slow breaths",
+  "say": "Slow breaths."
+ },
+ {
+  "key": "s-nice-round",
+  "text": "Nice round",
+  "say": "Nice round."
+ },
+ {
+  "key": "s-keep-that-pace",
+  "text": "Keep that pace",
+  "say": "Keep that pace."
+ },
+ {
+  "key": "s-strong",
+  "text": "Strong",
+  "say": "Strong."
+ },
+ {
+  "key": "s-thats-it",
+  "text": "That's it",
+  "say": "That's it."
+ },
+ {
+  "key": "s-good-round",
+  "text": "Good round",
+  "say": "Good round!"
+ },
+ {
+  "key": "s-clean-reps",
+  "text": "Clean reps",
+  "say": "Clean reps."
+ },
+ {
+  "key": "s-same-again",
+  "text": "Same again",
+  "say": "Same again."
+ },
+ {
+  "key": "s-love-it",
+  "text": "Love it",
+  "say": "Love it."
+ },
+ {
+  "key": "s-solid",
+  "text": "Solid",
+  "say": "Solid."
+ },
+ {
+  "key": "s-stay-smooth",
+  "text": "Stay smooth",
+  "say": "Stay smooth."
+ },
+ {
+  "key": "s-strong-round",
+  "text": "Strong round",
+  "say": "Strong round."
+ },
+ {
+  "key": "s-next-one",
+  "text": "Next one",
+  "say": "Next one."
+ },
+ {
+  "key": "s-workout-complete",
+  "text": "Workout complete",
+  "say": "Workout complete."
+ },
+ {
+  "key": "s-great-session",
+  "text": "Great session",
+  "say": "Great session."
+ },
+ {
+  "key": "s-proud-of-you",
+  "text": "Proud of you",
+  "say": "Proud of you."
+ },
+ {
+  "key": "s-finished",
+  "text": "Finished",
+  "say": "Finished!"
+ },
+ {
+  "key": "s-that-was-solid",
+  "text": "That was solid",
+  "say": "That was solid."
+ },
+ {
+  "key": "s-great-work-today",
+  "text": "Great work today",
+  "say": "Great work today."
+ },
+ {
+  "key": "s-thats-how-its-done",
+  "text": "That's how it's done",
+  "say": "That's how it's done."
+ },
+ {
+  "key": "s-session-done",
+  "text": "Session done",
+  "say": "Session done."
+ },
+ {
+  "key": "s-recover-well",
+  "text": "Recover well",
+  "say": "Recover well."
+ },
+ {
+  "key": "s-you-showed-up",
+  "text": "You showed up",
+  "say": "You showed up."
+ },
+ {
+  "key": "s-great-work",
+  "text": "Great work",
+  "say": "Great work."
+ },
+ {
+  "key": "s-hard-work-pays-off",
+  "text": "Hard work pays off",
+  "say": "Hard work pays off."
+ },
+ {
+  "key": "s-be-proud-of-that",
+  "text": "Be proud of that",
+  "say": "Be proud of that."
+ },
+ {
+  "key": "s-thats-a-wrap",
+  "text": "That's a wrap",
+  "say": "That's a wrap."
+ },
+ {
+  "key": "s-great-job",
+  "text": "Great job",
+  "say": "Great job."
+ },
+ {
+  "key": "s-workout-done",
+  "text": "Workout done",
+  "say": "Workout done."
+ },
+ {
+  "key": "s-hydrate-and-recover",
+  "text": "Hydrate and recover",
+  "say": "Hydrate and recover."
+ },
+ {
+  "key": "s-final-round",
+  "text": "Final round",
+  "say": "Final round."
+ },
+ {
+  "key": "s-leave-it-all-here",
+  "text": "Leave it all here",
+  "say": "Leave it all here."
+ },
+ {
+  "key": "s-last-two",
+  "text": "Last two",
+  "say": "Last two."
+ },
+ {
+  "key": "s-push-yourself",
+  "text": "Push yourself",
+  "say": "Push yourself!"
+ },
+ {
+  "key": "s-two-to-go",
+  "text": "Two to go",
+  "say": "Two to go."
+ },
+ {
+  "key": "s-two-left",
+  "text": "Two left",
+  "say": "Two left."
+ },
+ {
+  "key": "s-dig-deep",
+  "text": "Dig deep",
+  "say": "Dig deep!"
+ },
+ {
+  "key": "s-three-to-go",
+  "text": "Three to go",
+  "say": "Three to go."
+ },
+ {
+  "key": "s-three-more",
+  "text": "Three more",
+  "say": "Three more."
+ },
+ {
+  "key": "s-three-left",
+  "text": "Three left",
+  "say": "Three left."
+ },
+ {
+  "key": "s-stay-sharp",
+  "text": "Stay sharp",
+  "say": "Stay sharp."
+ },
+ {
+  "key": "s-1-minute-left",
+  "text": "1 minute left",
+  "say": "1 minute left."
+ },
+ {
+  "key": "s-most-efficient-session-yet",
+  "text": "Most efficient session yet",
+  "say": "Most efficient session yet."
+ },
+ {
+  "key": "m-bodyweight_squat",
+  "text": "Bodyweight squats",
+  "say": "Bodyweight squats."
+ },
+ {
+  "key": "m-back_squat",
+  "text": "Back squats",
+  "say": "Back squats."
+ },
+ {
+  "key": "m-reverse_nordic",
+  "text": "Assisted reverse Nordic curls",
+  "say": "Assisted reverse Nordic curls."
+ },
+ {
+  "key": "m-bulgarian_split",
+  "text": "Bulgarian split squats",
+  "say": "Bulgarian split squats."
+ },
+ {
+  "key": "m-goblet_squat",
+  "text": "Goblet squats",
+  "say": "Goblet squats."
+ },
+ {
+  "key": "m-horse_stance",
+  "text": "Horse stance",
+  "say": "Horse stance."
+ },
+ {
+  "key": "m-jump_squat",
+  "text": "Jump squats",
+  "say": "Jump squats."
+ },
+ {
+  "key": "m-sissy_squat",
+  "text": "Sissy squats",
+  "say": "Sissy squats."
+ },
+ {
+  "key": "m-slant_pulse",
+  "text": "Slant squat pulses",
+  "say": "Slant squat pulses."
+ },
+ {
+  "key": "m-slant_board_squat",
+  "text": "Slant board squats",
+  "say": "Slant board squats."
+ },
+ {
+  "key": "m-touchdown_squat",
+  "text": "Touchdown squats",
+  "say": "Touchdown squats."
+ },
+ {
+  "key": "m-deadlift",
+  "text": "Deadlifts",
+  "say": "Deadlifts."
+ },
+ {
+  "key": "m-db_swing",
+  "text": "Dumbbell swings",
+  "say": "Dumbbell swings."
+ },
+ {
+  "key": "m-romanian_deadlift",
+  "text": "Romanian deadlifts",
+  "say": "Romanian deadlifts."
+ },
+ {
+  "key": "m-single_leg_rdl",
+  "text": "Single-leg Romanian deadlifts",
+  "say": "Single-leg Romanian deadlifts."
+ },
+ {
+  "key": "m-banded_glute_bridge",
+  "text": "Banded glute bridges",
+  "say": "Banded glute bridges."
+ },
+ {
+  "key": "m-banded_sidewalk",
+  "text": "Banded lateral walks",
+  "say": "Banded lateral walks."
+ },
+ {
+  "key": "m-hip_thrust",
+  "text": "Hip thrusts",
+  "say": "Hip thrusts."
+ },
+ {
+  "key": "m-single_leg_bridge",
+  "text": "Single-leg bridges",
+  "say": "Single-leg bridges."
+ },
+ {
+  "key": "m-nordic_curl",
+  "text": "Nordic curls",
+  "say": "Nordic curls."
+ },
+ {
+  "key": "m-sliding_ham_curl",
+  "text": "Sliding hamstring curls",
+  "say": "Sliding hamstring curls."
+ },
+ {
+  "key": "m-kot_calf",
+  "text": "Knees over toes calf raises",
+  "say": "Knees over toes calf raises."
+ },
+ {
+  "key": "m-tibialis_raise",
+  "text": "Tibialis raises",
+  "say": "Tibialis raises."
+ },
+ {
+  "key": "m-bench_press",
+  "text": "Bench press",
+  "say": "Bench press."
+ },
+ {
+  "key": "m-overhead_press",
+  "text": "Overhead press",
+  "say": "Overhead press."
+ },
+ {
+  "key": "m-wall_push_up",
+  "text": "Wall push-ups",
+  "say": "Wall push-ups."
+ },
+ {
+  "key": "m-incline_push_up",
+  "text": "Incline push-ups",
+  "say": "Incline push-ups."
+ },
+ {
+  "key": "m-knee_push_up",
+  "text": "Knee push-ups",
+  "say": "Knee push-ups."
+ },
+ {
+  "key": "m-pike_hold",
+  "text": "Pike hold",
+  "say": "Pike hold."
+ },
+ {
+  "key": "m-shorties",
+  "text": "Shorties",
+  "say": "Shorties."
+ },
+ {
+  "key": "m-bench_dip",
+  "text": "Bench dips",
+  "say": "Bench dips."
+ },
+ {
+  "key": "m-dip_support_hold",
+  "text": "Dip support hold",
+  "say": "Dip support hold."
+ },
+ {
+  "key": "m-frog_stand",
+  "text": "Frog stand",
+  "say": "Frog stand."
+ },
+ {
+  "key": "m-pike_pulses",
+  "text": "Pike pulses",
+  "say": "Pike pulses."
+ },
+ {
+  "key": "m-pushup",
+  "text": "Push-ups",
+  "say": "Push-ups."
+ },
+ {
+  "key": "m-seated_knee_tuck_raises",
+  "text": "Seated knee tuck raises",
+  "say": "Seated knee tuck raises."
+ },
+ {
+  "key": "m-banded_dip",
+  "text": "Banded dips",
+  "say": "Banded dips."
+ },
+ {
+  "key": "m-db_preacher_curl",
+  "text": "Dumbbell preacher curls",
+  "say": "Dumbbell preacher curls."
+ },
+ {
+  "key": "m-decline_push_up",
+  "text": "Decline push-ups",
+  "say": "Decline push-ups."
+ },
+ {
+  "key": "m-dip_bottom_hold",
+  "text": "Dip bottom hold",
+  "say": "Dip bottom hold."
+ },
+ {
+  "key": "m-dip_negative",
+  "text": "Dip negatives",
+  "say": "Dip negatives."
+ },
+ {
+  "key": "m-feet_on_wall_90_degree",
+  "text": "Feet on wall ninety degree hold",
+  "say": "Feet on wall ninety degree hold."
+ },
+ {
+  "key": "m-full_burpee",
+  "text": "Full burpees",
+  "say": "Full burpees."
+ },
+ {
+  "key": "m-hindu_push_up",
+  "text": "Hindu push-ups",
+  "say": "Hindu push-ups."
+ },
+ {
+  "key": "m-pike_lean",
+  "text": "Pike lean",
+  "say": "Pike lean."
+ },
+ {
+  "key": "m-pike_push_up",
+  "text": "Pike push-ups",
+  "say": "Pike push-ups."
+ },
+ {
+  "key": "m-ring_support_hold",
+  "text": "Ring support hold",
+  "say": "Ring support hold."
+ },
+ {
+  "key": "m-straight_bar_push_up",
+  "text": "Straight bar push-ups",
+  "say": "Straight bar push-ups."
+ },
+ {
+  "key": "m-bottoms_up_kb_hold",
+  "text": "Bottoms-up kettlebell hold",
+  "say": "Bottoms-up kettlebell hold."
+ },
+ {
+  "key": "m-chest_to_wall_handstand_hold",
+  "text": "Chest to wall handstand hold",
+  "say": "Chest to wall handstand hold."
+ },
+ {
+  "key": "m-deadstop_pushup",
+  "text": "Dead-stop push-ups",
+  "say": "Dead-stop push-ups."
+ },
+ {
+  "key": "m-deep_pike_pushup",
+  "text": "Deep parallette pike push-ups",
+  "say": "Deep parallette pike push-ups."
+ },
+ {
+  "key": "m-diamond_push_up",
+  "text": "Diamond push-ups",
+  "say": "Diamond push-ups."
+ },
+ {
+  "key": "m-dip",
+  "text": "Dips",
+  "say": "Dips."
+ },
+ {
+  "key": "m-elephant_walk",
+  "text": "Elephant walks",
+  "say": "Elephant walks."
+ },
+ {
+  "key": "m-elevated_pike_lean",
+  "text": "Elevated pike lean",
+  "say": "Elevated pike lean."
+ },
+ {
+  "key": "m-elevated_pike_push_up",
+  "text": "Elevated pike push-ups",
+  "say": "Elevated pike push-ups."
+ },
+ {
+  "key": "m-handstand_kick_ups",
+  "text": "Handstand kick-ups",
+  "say": "Handstand kick-ups."
+ },
+ {
+  "key": "m-navy_seal_push_up_3_pump",
+  "text": "Navy Seal push-ups",
+  "say": "Navy Seal push-ups."
+ },
+ {
+  "key": "m-planche_lean",
+  "text": "Planche lean",
+  "say": "Planche lean."
+ },
+ {
+  "key": "m-ring_push_up",
+  "text": "Ring push-ups",
+  "say": "Ring push-ups."
+ },
+ {
+  "key": "m-seated_straight_leg_raises",
+  "text": "Seated straight leg raises",
+  "say": "Seated straight leg raises."
+ },
+ {
+  "key": "m-straddle_leg_lifts",
+  "text": "Straddle leg lifts",
+  "say": "Straddle leg lifts."
+ },
+ {
+  "key": "m-straight_arm_db_fly",
+  "text": "Straight-arm dumbbell flys",
+  "say": "Straight-arm dumbbell flys."
+ },
+ {
+  "key": "m-t_rotation_push_up",
+  "text": "T rotation push-ups",
+  "say": "T rotation push-ups."
+ },
+ {
+  "key": "m-wall_walk",
+  "text": "Wall walks",
+  "say": "Wall walks."
+ },
+ {
+  "key": "m-ring_pushup",
+  "text": "Weighted deep ring push-ups",
+  "say": "Weighted deep ring push-ups."
+ },
+ {
+  "key": "m-weighted_dip",
+  "text": "Weighted dips",
+  "say": "Weighted dips."
+ },
+ {
+  "key": "m-zanetti_db_press",
+  "text": "Zanetti dumbbell press",
+  "say": "Zanetti dumbbell press."
+ },
+ {
+  "key": "m-archer_complex",
+  "text": "Archer complex",
+  "say": "Archer complex."
+ },
+ {
+  "key": "m-back_to_wall_handstand_hold",
+  "text": "Back to wall handstand hold",
+  "say": "Back to wall handstand hold."
+ },
+ {
+  "key": "m-burpee_pull_up",
+  "text": "Burpee pull-ups",
+  "say": "Burpee pull-ups."
+ },
+ {
+  "key": "m-diamond_push_up_on_kettlebell",
+  "text": "Diamond push-ups on a kettlebell",
+  "say": "Diamond push-ups on a kettlebell."
+ },
+ {
+  "key": "m-frog_planche",
+  "text": "Frog planche",
+  "say": "Frog planche."
+ },
+ {
+  "key": "m-navy_seal_burpee",
+  "text": "Navy Seal burpees",
+  "say": "Navy Seal burpees."
+ },
+ {
+  "key": "m-pike_lean_on_parallettes",
+  "text": "Pike lean on parallettes",
+  "say": "Pike lean on parallettes."
+ },
+ {
+  "key": "m-turkish_get_up",
+  "text": "Turkish get-ups",
+  "say": "Turkish get-ups."
+ },
+ {
+  "key": "m-wall_handstand",
+  "text": "Wall handstand",
+  "say": "Wall handstand."
+ },
+ {
+  "key": "m-archer_push_up",
+  "text": "Archer push-ups",
+  "say": "Archer push-ups."
+ },
+ {
+  "key": "m-devil_s_press",
+  "text": "Devil's press",
+  "say": "Devil's press."
+ },
+ {
+  "key": "m-half_one_arm_push_up",
+  "text": "Half one-arm push-ups",
+  "say": "Half one-arm push-ups."
+ },
+ {
+  "key": "m-open_tuck_planche",
+  "text": "Open tuck planche",
+  "say": "Open tuck planche."
+ },
+ {
+  "key": "m-planche_lean_raises",
+  "text": "Planche lean raises",
+  "say": "Planche lean raises."
+ },
+ {
+  "key": "m-ring_dip",
+  "text": "Ring dips",
+  "say": "Ring dips."
+ },
+ {
+  "key": "m-ring_dip_knee_raise",
+  "text": "Ring dip knee raises",
+  "say": "Ring dip knee raises."
+ },
+ {
+  "key": "m-tuck_planche_hold",
+  "text": "Tuck planche hold",
+  "say": "Tuck planche hold."
+ },
+ {
+  "key": "m-adv_tuck_planche",
+  "text": "Advanced tuck planche",
+  "say": "Advanced tuck planche."
+ },
+ {
+  "key": "m-assisted_one_arm_push_up",
+  "text": "Assisted one-arm push-ups",
+  "say": "Assisted one-arm push-ups."
+ },
+ {
+  "key": "m-bulgarian_dip",
+  "text": "Bulgarian dips",
+  "say": "Bulgarian dips."
+ },
+ {
+  "key": "m-chest_to_wall_deficit_hspu",
+  "text": "Chest to wall deficit handstand push-ups",
+  "say": "Chest to wall deficit handstand push-ups."
+ },
+ {
+  "key": "m-l_sit_push_back_to_planche",
+  "text": "L-sit push back to planche",
+  "say": "L-sit push back to planche."
+ },
+ {
+  "key": "m-man_maker",
+  "text": "Man makers",
+  "say": "Man makers."
+ },
+ {
+  "key": "m-one_arm_push_up",
+  "text": "One-arm push-ups",
+  "say": "One-arm push-ups."
+ },
+ {
+  "key": "m-pseudo_planche_push_up",
+  "text": "Pseudo planche push-ups",
+  "say": "Pseudo planche push-ups."
+ },
+ {
+  "key": "m-russian_dip",
+  "text": "Russian dips",
+  "say": "Russian dips."
+ },
+ {
+  "key": "m-semi_straddle_planche",
+  "text": "Semi-straddle planche",
+  "say": "Semi-straddle planche."
+ },
+ {
+  "key": "m-single_leg_planche",
+  "text": "Single-leg planche",
+  "say": "Single-leg planche."
+ },
+ {
+  "key": "m-straight_arm_dip_rings",
+  "text": "Straight-arm ring dips",
+  "say": "Straight-arm ring dips."
+ },
+ {
+  "key": "m-wall_hspu",
+  "text": "Wall handstand push-ups",
+  "say": "Wall handstand push-ups."
+ },
+ {
+  "key": "m-x90_degree_hspu_negative",
+  "text": "Ninety degree handstand push-up negatives",
+  "say": "Ninety degree handstand push-up negatives."
+ },
+ {
+  "key": "m-freestanding_hs",
+  "text": "Freestanding handstand",
+  "say": "Freestanding handstand."
+ },
+ {
+  "key": "m-handstand_push_up",
+  "text": "Handstand push-ups",
+  "say": "Handstand push-ups."
+ },
+ {
+  "key": "m-handstand_to_planche_negative",
+  "text": "Handstand to planche negatives",
+  "say": "Handstand to planche negatives."
+ },
+ {
+  "key": "m-straddle_planche",
+  "text": "Straddle planche",
+  "say": "Straddle planche."
+ },
+ {
+  "key": "m-full_90_degree_hspu",
+  "text": "Full ninety degree handstand push-ups",
+  "say": "Full ninety degree handstand push-ups."
+ },
+ {
+  "key": "m-full_planche",
+  "text": "Full planche",
+  "say": "Full planche."
+ },
+ {
+  "key": "m-planche_push_up",
+  "text": "Planche push-ups",
+  "say": "Planche push-ups."
+ },
+ {
+  "key": "m-press_to_handstand",
+  "text": "Press to handstand",
+  "say": "Press to handstand."
+ },
+ {
+  "key": "m-active_hang",
+  "text": "Active hang",
+  "say": "Active hang."
+ },
+ {
+  "key": "m-banded_pullapart",
+  "text": "Banded pull-aparts",
+  "say": "Banded pull-aparts."
+ },
+ {
+  "key": "m-dead_hang",
+  "text": "Dead hang",
+  "say": "Dead hang."
+ },
+ {
+  "key": "m-incline_row",
+  "text": "Incline rows",
+  "say": "Incline rows."
+ },
+ {
+  "key": "m-scap_pushup",
+  "text": "Scapular push-ups",
+  "say": "Scapular push-ups."
+ },
+ {
+  "key": "m-scap_pullup",
+  "text": "Scapular pull-ups",
+  "say": "Scapular pull-ups."
+ },
+ {
+  "key": "m-australian_pullup",
+  "text": "Australian pull-ups",
+  "say": "Australian pull-ups."
+ },
+ {
+  "key": "m-band_assisted_pullup",
+  "text": "Band-assisted pull-ups",
+  "say": "Band-assisted pull-ups."
+ },
+ {
+  "key": "m-jumping_pullup",
+  "text": "Jumping pull-ups",
+  "say": "Jumping pull-ups."
+ },
+ {
+  "key": "m-negative_pullup",
+  "text": "Negative pull-ups",
+  "say": "Negative pull-ups."
+ },
+ {
+  "key": "m-ring_row",
+  "text": "Ring rows",
+  "say": "Ring rows."
+ },
+ {
+  "key": "m-straight_arm_lat_raise",
+  "text": "Straight-arm lat raises",
+  "say": "Straight-arm lat raises."
+ },
+ {
+  "key": "m-band_front_lever",
+  "text": "Band-assisted front lever",
+  "say": "Band-assisted front lever."
+ },
+ {
+  "key": "m-chin_up",
+  "text": "Chin-ups",
+  "say": "Chin-ups."
+ },
+ {
+  "key": "m-neutral_pullup",
+  "text": "Neutral-grip pull-ups",
+  "say": "Neutral-grip pull-ups."
+ },
+ {
+  "key": "m-seal_row",
+  "text": "Seal rows",
+  "say": "Seal rows."
+ },
+ {
+  "key": "m-wide_inverted_row",
+  "text": "Wide inverted rows",
+  "say": "Wide inverted rows."
+ },
+ {
+  "key": "m-bent_over_row",
+  "text": "Bent-over rows",
+  "say": "Bent-over rows."
+ },
+ {
+  "key": "m-feet_elevated_ring_row",
+  "text": "Feet-elevated ring rows",
+  "say": "Feet-elevated ring rows."
+ },
+ {
+  "key": "m-pullup",
+  "text": "Pull-ups",
+  "say": "Pull-ups."
+ },
+ {
+  "key": "m-single_arm_row",
+  "text": "Single-arm rows",
+  "say": "Single-arm rows."
+ },
+ {
+  "key": "m-skin_the_cat",
+  "text": "Skin the cat",
+  "say": "Skin the cat."
+ },
+ {
+  "key": "m-towel_hang",
+  "text": "Towel hang",
+  "say": "Towel hang."
+ },
+ {
+  "key": "m-tuck_fl_raise",
+  "text": "Tuck front lever raises",
+  "say": "Tuck front lever raises."
+ },
+ {
+  "key": "m-wide_pullup",
+  "text": "Wide-grip pull-ups",
+  "say": "Wide-grip pull-ups."
+ },
+ {
+  "key": "m-adv_tuck_fl_raise",
+  "text": "Advanced tuck front lever raises",
+  "say": "Advanced tuck front lever raises."
+ },
+ {
+  "key": "m-adv_tuck_front_lever",
+  "text": "Advanced tuck front lever",
+  "say": "Advanced tuck front lever."
+ },
+ {
+  "key": "m-archer_row",
+  "text": "Archer rows",
+  "say": "Archer rows."
+ },
+ {
+  "key": "m-commando_pullup",
+  "text": "Commando pull-ups",
+  "say": "Commando pull-ups."
+ },
+ {
+  "key": "m-explosive_chinup",
+  "text": "Explosive chin-ups",
+  "say": "Explosive chin-ups."
+ },
+ {
+  "key": "m-explosive_pullup",
+  "text": "Explosive pull-ups",
+  "say": "Explosive pull-ups."
+ },
+ {
+  "key": "m-german_hang",
+  "text": "German hang",
+  "say": "German hang."
+ },
+ {
+  "key": "m-high_pullup",
+  "text": "High pull-ups",
+  "say": "High pull-ups."
+ },
+ {
+  "key": "m-pull_over",
+  "text": "Pull-overs",
+  "say": "Pull-overs."
+ },
+ {
+  "key": "m-single_arm_ring_row",
+  "text": "Single-arm ring rows",
+  "say": "Single-arm ring rows."
+ },
+ {
+  "key": "m-towel_pullup",
+  "text": "Towel pull-ups",
+  "say": "Towel pull-ups."
+ },
+ {
+  "key": "m-band_muscle_up",
+  "text": "Band-assisted muscle-ups",
+  "say": "Band-assisted muscle-ups."
+ },
+ {
+  "key": "m-chest_to_bar",
+  "text": "Chest-to-bar pull-ups",
+  "say": "Chest-to-bar pull-ups."
+ },
+ {
+  "key": "m-l_sit_pullup",
+  "text": "L-sit pull-ups",
+  "say": "L-sit pull-ups."
+ },
+ {
+  "key": "m-negative_muscle_up_bar",
+  "text": "Negative muscle-ups",
+  "say": "Negative muscle-ups."
+ },
+ {
+  "key": "m-one_arm_hang",
+  "text": "One-arm hang",
+  "say": "One-arm hang."
+ },
+ {
+  "key": "m-single_leg_fl_raise",
+  "text": "Single-leg front lever raises",
+  "say": "Single-leg front lever raises."
+ },
+ {
+  "key": "m-single_leg_front_lever",
+  "text": "Single-leg front lever",
+  "say": "Single-leg front lever."
+ },
+ {
+  "key": "m-skin_cat_front_support",
+  "text": "Skin the cat to front support",
+  "say": "Skin the cat to front support."
+ },
+ {
+  "key": "m-weighted_chinup",
+  "text": "Weighted chin-ups",
+  "say": "Weighted chin-ups."
+ },
+ {
+  "key": "m-archer_pullup",
+  "text": "Archer pull-ups",
+  "say": "Archer pull-ups."
+ },
+ {
+  "key": "m-around_world_pullup",
+  "text": "Around the world pull-ups",
+  "say": "Around the world pull-ups."
+ },
+ {
+  "key": "m-false_grip_pullup",
+  "text": "False-grip pull-ups",
+  "say": "False-grip pull-ups."
+ },
+ {
+  "key": "m-front_lever_row",
+  "text": "Front lever rows",
+  "say": "Front lever rows."
+ },
+ {
+  "key": "m-ice_cream_maker",
+  "text": "Ice cream makers",
+  "say": "Ice cream makers."
+ },
+ {
+  "key": "m-straddle_fl_raise",
+  "text": "Straddle front lever raises",
+  "say": "Straddle front lever raises."
+ },
+ {
+  "key": "m-straddle_front_lever",
+  "text": "Straddle front lever",
+  "say": "Straddle front lever."
+ },
+ {
+  "key": "m-typewriter_pullup",
+  "text": "Typewriter pull-ups",
+  "say": "Typewriter pull-ups."
+ },
+ {
+  "key": "m-front_lever_pullup",
+  "text": "Front lever pull-ups",
+  "say": "Front lever pull-ups."
+ },
+ {
+  "key": "m-full_fl_raise",
+  "text": "Full front lever raises",
+  "say": "Full front lever raises."
+ },
+ {
+  "key": "m-full_front_lever",
+  "text": "Full front lever",
+  "say": "Full front lever."
+ },
+ {
+  "key": "m-muscle_up_bar",
+  "text": "Bar muscle-ups",
+  "say": "Bar muscle-ups."
+ },
+ {
+  "key": "m-muscle_up_rings",
+  "text": "Ring muscle-ups",
+  "say": "Ring muscle-ups."
+ },
+ {
+  "key": "m-one_arm_negative",
+  "text": "One-arm negative pull-ups",
+  "say": "One-arm negative pull-ups."
+ },
+ {
+  "key": "m-one_arm_pullup",
+  "text": "One-arm pull-ups",
+  "say": "One-arm pull-ups."
+ },
+ {
+  "key": "m-crunch",
+  "text": "Crunches",
+  "say": "Crunches."
+ },
+ {
+  "key": "m-incline_plank",
+  "text": "Incline plank",
+  "say": "Incline plank."
+ },
+ {
+  "key": "m-lying_knee_tuck",
+  "text": "Lying knee tucks",
+  "say": "Lying knee tucks."
+ },
+ {
+  "key": "m-loaded_beast",
+  "text": "Loaded beast",
+  "say": "Loaded beast."
+ },
+ {
+  "key": "m-bear_crawl",
+  "text": "Bear crawl",
+  "say": "Bear crawl."
+ },
+ {
+  "key": "m-bear_crawl_back",
+  "text": "Backward bear crawl",
+  "say": "Backward bear crawl."
+ },
+ {
+  "key": "m-sit_through",
+  "text": "Sit-throughs",
+  "say": "Sit-throughs."
+ },
+ {
+  "key": "m-crab_hold",
+  "text": "Crab hold",
+  "say": "Crab hold."
+ },
+ {
+  "key": "m-crab_reach",
+  "text": "Crab reaches",
+  "say": "Crab reaches."
+ },
+ {
+  "key": "m-crab_walk",
+  "text": "Crab walk",
+  "say": "Crab walk."
+ },
+ {
+  "key": "m-lizard_crawl",
+  "text": "Lizard crawl",
+  "say": "Lizard crawl."
+ },
+ {
+  "key": "m-duck_walk",
+  "text": "Duck walk",
+  "say": "Duck walk."
+ },
+ {
+  "key": "m-monkey_lateral",
+  "text": "Lateral monkey",
+  "say": "Lateral monkey."
+ },
+ {
+  "key": "m-cossack_squat",
+  "text": "Cossack squats",
+  "say": "Cossack squats."
+ },
+ {
+  "key": "m-scorpion_reach",
+  "text": "Scorpion reaches",
+  "say": "Scorpion reaches."
+ },
+ {
+  "key": "m-inchworm",
+  "text": "Inchworms",
+  "say": "Inchworms."
+ },
+ {
+  "key": "m-bear_hold",
+  "text": "Bear hold",
+  "say": "Bear hold."
+ },
+ {
+  "key": "m-bent_knee_hollow_hold",
+  "text": "Bent-knee hollow hold",
+  "say": "Bent-knee hollow hold."
+ },
+ {
+  "key": "m-bird_dog",
+  "text": "Bird dogs",
+  "say": "Bird dogs."
+ },
+ {
+  "key": "m-dead_bug",
+  "text": "Dead bugs",
+  "say": "Dead bugs."
+ },
+ {
+  "key": "m-flutter_kicks",
+  "text": "Flutter kicks",
+  "say": "Flutter kicks."
+ },
+ {
+  "key": "m-foot_supported_l_sit",
+  "text": "Foot-supported L-sit",
+  "say": "Foot-supported L-sit."
+ },
+ {
+  "key": "m-reverse_crunch",
+  "text": "Reverse crunches",
+  "say": "Reverse crunches."
+ },
+ {
+  "key": "m-scissor_kicks",
+  "text": "Scissor kicks",
+  "say": "Scissor kicks."
+ },
+ {
+  "key": "m-sit_up",
+  "text": "Sit-ups",
+  "say": "Sit-ups."
+ },
+ {
+  "key": "m-superman",
+  "text": "Supermans",
+  "say": "Supermans."
+ },
+ {
+  "key": "m-toe_touch_crunch",
+  "text": "Toe touch crunches",
+  "say": "Toe touch crunches."
+ },
+ {
+  "key": "m-alternating_single_leg_l_sit",
+  "text": "Alternating single-leg L-sits",
+  "say": "Alternating single-leg L-sits."
+ },
+ {
+  "key": "m-bear_hold_taps",
+  "text": "Bear hold taps",
+  "say": "Bear hold taps."
+ },
+ {
+  "key": "m-bicycle_crunch",
+  "text": "Bicycle crunches",
+  "say": "Bicycle crunches."
+ },
+ {
+  "key": "m-bodyline_drill",
+  "text": "Body line drill",
+  "say": "Body line drill."
+ },
+ {
+  "key": "m-forearm_plank",
+  "text": "Forearm plank",
+  "say": "Forearm plank."
+ },
+ {
+  "key": "m-hanging_knee_raise",
+  "text": "Hanging knee raises",
+  "say": "Hanging knee raises."
+ },
+ {
+  "key": "m-high_plank",
+  "text": "High plank",
+  "say": "High plank."
+ },
+ {
+  "key": "m-hollow_body_crunch",
+  "text": "Hollow body crunches",
+  "say": "Hollow body crunches."
+ },
+ {
+  "key": "m-hollow_hold",
+  "text": "Hollow hold",
+  "say": "Hollow hold."
+ },
+ {
+  "key": "m-lying_leg_raise",
+  "text": "Lying leg raises",
+  "say": "Lying leg raises."
+ },
+ {
+  "key": "m-russian_twist",
+  "text": "Russian twists",
+  "say": "Russian twists."
+ },
+ {
+  "key": "m-side_plank",
+  "text": "Side plank",
+  "say": "Side plank."
+ },
+ {
+  "key": "m-tuck_up",
+  "text": "Tuck-ups",
+  "say": "Tuck-ups."
+ },
+ {
+  "key": "m-bear_limb_lift",
+  "text": "Bear limb lifts",
+  "say": "Bear limb lifts."
+ },
+ {
+  "key": "m-bear_opposing_limb_lift",
+  "text": "Bear opposite limb lifts",
+  "say": "Bear opposite limb lifts."
+ },
+ {
+  "key": "m-full_dragon_flag",
+  "text": "Full dragon flag",
+  "say": "Full dragon flag."
+ },
+ {
+  "key": "m-dragon_flag_candlestick",
+  "text": "Dragon flag candlesticks",
+  "say": "Dragon flag candlesticks."
+ },
+ {
+  "key": "m-pike_compression",
+  "text": "Pike compression lifts",
+  "say": "Pike compression lifts."
+ },
+ {
+  "key": "m-plank_leg_lift",
+  "text": "Plank leg lifts",
+  "say": "Plank leg lifts."
+ },
+ {
+  "key": "m-plank_opposite_arm_leg",
+  "text": "Plank opposite arm and leg",
+  "say": "Plank opposite arm and leg."
+ },
+ {
+  "key": "m-shoulder_tap",
+  "text": "Plank shoulder taps",
+  "say": "Plank shoulder taps."
+ },
+ {
+  "key": "m-single_leg_v_up",
+  "text": "Single-leg V-ups",
+  "say": "Single-leg V-ups."
+ },
+ {
+  "key": "m-straddle_v_up",
+  "text": "Straddle V-ups",
+  "say": "Straddle V-ups."
+ },
+ {
+  "key": "m-tuck_l_sit",
+  "text": "Tuck L-sit",
+  "say": "Tuck L-sit."
+ },
+ {
+  "key": "m-tuck_v_sit_hold",
+  "text": "Tuck V-sit hold",
+  "say": "Tuck V-sit hold."
+ },
+ {
+  "key": "m-v_up",
+  "text": "V-ups",
+  "say": "V-ups."
+ },
+ {
+  "key": "m-bird_dog_crunch",
+  "text": "Bird dog crunches",
+  "say": "Bird dog crunches."
+ },
+ {
+  "key": "m-dragon_flag",
+  "text": "Dragon flag",
+  "say": "Dragon flag."
+ },
+ {
+  "key": "m-elevated_feet_plank",
+  "text": "Elevated feet plank",
+  "say": "Elevated feet plank."
+ },
+ {
+  "key": "m-hanging_leg_raise",
+  "text": "Hanging leg raises",
+  "say": "Hanging leg raises."
+ },
+ {
+  "key": "m-hollow_rocks",
+  "text": "Hollow rocks",
+  "say": "Hollow rocks."
+ },
+ {
+  "key": "m-long_lever_plank",
+  "text": "Long-lever plank",
+  "say": "Long-lever plank."
+ },
+ {
+  "key": "m-plank_updown",
+  "text": "Plank up-downs",
+  "say": "Plank up-downs."
+ },
+ {
+  "key": "m-rkc_plank",
+  "text": "Hard-style plank",
+  "say": "Hard-style plank."
+ },
+ {
+  "key": "m-side_plank_hip_dip",
+  "text": "Side plank hip dips",
+  "say": "Side plank hip dips."
+ },
+ {
+  "key": "m-side_plank_leg_raise",
+  "text": "Side plank leg raises",
+  "say": "Side plank leg raises."
+ },
+ {
+  "key": "m-walk_up_plank",
+  "text": "Walk-up planks",
+  "say": "Walk-up planks."
+ },
+ {
+  "key": "m-ab_wheel_rollout",
+  "text": "Ab wheel rollouts",
+  "say": "Ab wheel rollouts."
+ },
+ {
+  "key": "m-copenhagen_plank",
+  "text": "Copenhagen plank",
+  "say": "Copenhagen plank."
+ },
+ {
+  "key": "m-hollow_to_v_sit_snap_up",
+  "text": "Hollow to V-sit snap-ups",
+  "say": "Hollow to V-sit snap-ups."
+ },
+ {
+  "key": "m-l_sit",
+  "text": "L-sit hold",
+  "say": "L-sit hold."
+ },
+ {
+  "key": "m-one_leg_l_sit",
+  "text": "One-leg L-sit",
+  "say": "One-leg L-sit."
+ },
+ {
+  "key": "m-plank_bodysaw",
+  "text": "Plank body saws",
+  "say": "Plank body saws."
+ },
+ {
+  "key": "m-squeeze_loaded_hollow_hold",
+  "text": "Squeeze-loaded hollow hold",
+  "say": "Squeeze-loaded hollow hold."
+ },
+ {
+  "key": "m-straddle_l_sit",
+  "text": "Straddle L-sit",
+  "say": "Straddle L-sit."
+ },
+ {
+  "key": "m-toes_to_bar",
+  "text": "Toes-to-bar",
+  "say": "Toes-to-bar."
+ },
+ {
+  "key": "m-tuck_dragon_flag_hold",
+  "text": "Tuck dragon flag hold",
+  "say": "Tuck dragon flag hold."
+ },
+ {
+  "key": "m-hanging_inverted_hold",
+  "text": "Hanging inverted hold",
+  "say": "Hanging inverted hold."
+ },
+ {
+  "key": "m-jamaican_plank",
+  "text": "Jamaican planks",
+  "say": "Jamaican planks."
+ },
+ {
+  "key": "m-one_leg_v_sit",
+  "text": "One-leg V-sit",
+  "say": "One-leg V-sit."
+ },
+ {
+  "key": "m-ring_l_sit",
+  "text": "Ring L-sit",
+  "say": "Ring L-sit."
+ },
+ {
+  "key": "m-single_arm_plank",
+  "text": "Single-arm plank",
+  "say": "Single-arm plank."
+ },
+ {
+  "key": "m-single_leg_dragon_flag",
+  "text": "Single-leg dragon flags",
+  "say": "Single-leg dragon flags."
+ },
+ {
+  "key": "m-star_side_plank",
+  "text": "Star side plank",
+  "say": "Star side plank."
+ },
+ {
+  "key": "m-straddle_v_sit",
+  "text": "Straddle V-sit",
+  "say": "Straddle V-sit."
+ },
+ {
+  "key": "m-windshield_wipers",
+  "text": "Windshield wipers",
+  "say": "Windshield wipers."
+ },
+ {
+  "key": "m-single_arm_leg_plank",
+  "text": "Single arm and leg plank",
+  "say": "Single arm and leg plank."
+ },
+ {
+  "key": "m-v_sit",
+  "text": "V-sit",
+  "say": "V-sit."
+ },
+ {
+  "key": "m-inverted_candle",
+  "text": "Inverted candle",
+  "say": "Inverted candle."
+ },
+ {
+  "key": "m-handstand",
+  "text": "Freestanding handstand attempts",
+  "say": "Freestanding handstand attempts."
+ },
+ {
+  "key": "m-front_lever_tuck",
+  "text": "Tuck front lever",
+  "say": "Tuck front lever."
+ },
+ {
+  "key": "m-kick_up_practice",
+  "text": "Kick-up practice",
+  "say": "Kick-up practice."
+ },
+ {
+  "key": "m-wall_handstand_hold",
+  "text": "Wall handstand hold",
+  "say": "Wall handstand hold."
+ },
+ {
+  "key": "m-mountain_climber",
+  "text": "Mountain climbers",
+  "say": "Mountain climbers."
+ },
+ {
+  "key": "m-burpee",
+  "text": "Burpees",
+  "say": "Burpees."
+ },
+ {
+  "key": "m-ankle_mobility",
+  "text": "Ankle mobility",
+  "say": "Ankle mobility."
+ },
+ {
+  "key": "m-cat_cow",
+  "text": "Cat cow",
+  "say": "Cat cow."
+ },
+ {
+  "key": "m-deep_squat_rock",
+  "text": "Deep squat rocks",
+  "say": "Deep squat rocks."
+ },
+ {
+  "key": "m-chest_stretch",
+  "text": "Doorway chest stretch",
+  "say": "Doorway chest stretch."
+ },
+ {
+  "key": "m-hip_cars",
+  "text": "Hip circles",
+  "say": "Hip circles."
+ },
+ {
+  "key": "m-hip_flexor_stretch",
+  "text": "Hip flexor stretch",
+  "say": "Hip flexor stretch."
+ },
+ {
+  "key": "m-leg_swings",
+  "text": "Leg swings",
+  "say": "Leg swings."
+ },
+ {
+  "key": "m-shoulder_stretch",
+  "text": "Overhead shoulder stretch",
+  "say": "Overhead shoulder stretch."
+ },
+ {
+  "key": "m-thoracic_open",
+  "text": "Thoracic opener",
+  "say": "Thoracic opener."
+ },
+ {
+  "key": "m-thoracic_rotation",
+  "text": "Thoracic rotations",
+  "say": "Thoracic rotations."
+ },
+ {
+  "key": "m-kb_deadlift",
+  "text": "Kettlebell deadlifts",
+  "say": "Kettlebell deadlifts."
+ },
+ {
+  "key": "m-kb_rdl",
+  "text": "Kettlebell Romanian deadlifts",
+  "say": "Kettlebell Romanian deadlifts."
+ },
+ {
+  "key": "m-kb_floor_press",
+  "text": "Kettlebell floor press",
+  "say": "Kettlebell floor press."
+ },
+ {
+  "key": "m-kb_press",
+  "text": "Kettlebell overhead press",
+  "say": "Kettlebell overhead press."
+ },
+ {
+  "key": "m-kb_high_pull",
+  "text": "Kettlebell high pulls",
+  "say": "Kettlebell high pulls."
+ },
+ {
+  "key": "m-kb_halo",
+  "text": "Kettlebell halos",
+  "say": "Kettlebell halos."
+ },
+ {
+  "key": "m-goblet_march",
+  "text": "Goblet marches",
+  "say": "Goblet marches."
+ },
+ {
+  "key": "m-suitcase_carry",
+  "text": "Suitcase carry",
+  "say": "Suitcase carry."
+ },
+ {
+  "key": "m-turkish_getup",
+  "text": "Turkish get-ups",
+  "say": "Turkish get-ups."
+ },
+ {
+  "key": "m-prying_goblet",
+  "text": "Prying goblet squat",
+  "say": "Prying goblet squat."
+ },
+ {
+  "key": "m-glute_bridge",
+  "text": "Glute bridges",
+  "say": "Glute bridges."
+ },
+ {
+  "key": "m-box_squat",
+  "text": "Bench squats",
+  "say": "Bench squats."
+ },
+ {
+  "key": "m-march_in_place",
+  "text": "Fast march",
+  "say": "Fast march."
+ },
+ {
+  "key": "m-straight_bar_dip",
+  "text": "Straight bar dips",
+  "say": "Straight bar dips."
+ },
+ {
+  "key": "m-ring_dip_support_hold",
+  "text": "Ring dip support hold",
+  "say": "Ring dip support hold."
+ },
+ {
+  "key": "m-wrist_prep",
+  "text": "Wrist prep rocks",
+  "say": "Wrist prep rocks."
+ },
+ {
+  "key": "m-arm_circles",
+  "text": "Arm circles",
+  "say": "Arm circles."
+ },
+ {
+  "key": "m-down_dog_up_dog",
+  "text": "Down dog to up dog",
+  "say": "Down dog to up dog."
+ },
+ {
+  "key": "m-down_dog_up_dog_bar",
+  "text": "Down dog to up dog",
+  "say": "Down dog to up dog."
+ },
+ {
+  "key": "m-deep_squat_thoracic",
+  "text": "Deep squat hold and chest opening",
+  "say": "Deep squat hold and chest opening."
+ },
+ {
+  "key": "m-high_knee_march",
+  "text": "Standing high-knee march",
+  "say": "Standing high-knee march."
+ },
+ {
+  "key": "m-hip_90_90",
+  "text": "Ninety ninety hip switches",
+  "say": "Ninety ninety hip switches."
+ },
+ {
+  "key": "m-worlds_greatest_stretch",
+  "text": "World's greatest stretch",
+  "say": "World's greatest stretch."
+ },
+ {
+  "key": "m-lat_pulldown",
+  "text": "Lat pulldowns",
+  "say": "Lat pulldowns."
+ },
+ {
+  "key": "m-seated_cable_row",
+  "text": "Seated cable rows",
+  "say": "Seated cable rows."
+ },
+ {
+  "key": "m-chest_supported_row",
+  "text": "Chest-supported rows",
+  "say": "Chest-supported rows."
+ },
+ {
+  "key": "m-face_pull",
+  "text": "Face pulls",
+  "say": "Face pulls."
+ },
+ {
+  "key": "m-reverse_fly",
+  "text": "Reverse flys",
+  "say": "Reverse flys."
+ },
+ {
+  "key": "m-rear_delt_row",
+  "text": "Chest-supported rear delt rows",
+  "say": "Chest-supported rear delt rows."
+ },
+ {
+  "key": "m-cable_rear_delt_fly",
+  "text": "Cable rear delt flys",
+  "say": "Cable rear delt flys."
+ },
+ {
+  "key": "m-prone_ytw",
+  "text": "Prone Y T W raises",
+  "say": "Prone Y T W raises."
+ },
+ {
+  "key": "m-barbell_curl",
+  "text": "Barbell curls",
+  "say": "Barbell curls."
+ },
+ {
+  "key": "m-assisted_chinup_top_hold",
+  "text": "Chin-up top hold",
+  "say": "Chin-up top hold."
+ },
+ {
+  "key": "m-db_pullover",
+  "text": "Dumbbell pullovers",
+  "say": "Dumbbell pullovers."
+ },
+ {
+  "key": "m-db_shoulder_press",
+  "text": "Dumbbell shoulder press",
+  "say": "Dumbbell shoulder press."
+ },
+ {
+  "key": "m-farmers_carry",
+  "text": "Farmer's carry",
+  "say": "Farmer's carry."
+ },
+ {
+  "key": "m-chest_press_machine",
+  "text": "Chest press machine",
+  "say": "Chest press machine."
+ },
+ {
+  "key": "m-shoulder_press_machine",
+  "text": "Shoulder press machine",
+  "say": "Shoulder press machine."
+ },
+ {
+  "key": "m-assisted_dip",
+  "text": "Assisted dips",
+  "say": "Assisted dips."
+ },
+ {
+  "key": "m-lateral_raise",
+  "text": "Lateral raises",
+  "say": "Lateral raises."
+ },
+ {
+  "key": "m-triceps_pushdown",
+  "text": "Triceps pushdowns",
+  "say": "Triceps pushdowns."
+ },
+ {
+  "key": "m-pushup_on_dumbbells",
+  "text": "Push-ups on dumbbells",
+  "say": "Push-ups on dumbbells."
+ },
+ {
+  "key": "m-db_rdl",
+  "text": "Dumbbell Romanian deadlifts",
+  "say": "Dumbbell Romanian deadlifts."
+ },
+ {
+  "key": "m-back_extension_45",
+  "text": "Back extensions",
+  "say": "Back extensions."
+ },
+ {
+  "key": "m-kb_swing",
+  "text": "Kettlebell swings",
+  "say": "Kettlebell swings."
+ },
+ {
+  "key": "m-wall_sit",
+  "text": "Wall sit",
+  "say": "Wall sit."
+ },
+ {
+  "key": "m-spanish_squat",
+  "text": "Spanish squat",
+  "say": "Spanish squat."
+ },
+ {
+  "key": "m-banded_tke",
+  "text": "Banded knee extensions",
+  "say": "Banded knee extensions."
+ },
+ {
+  "key": "m-hip_abduction_machine",
+  "text": "Hip abduction machine",
+  "say": "Hip abduction machine."
+ },
+ {
+  "key": "m-hip_adduction_machine",
+  "text": "Hip adduction machine",
+  "say": "Hip adduction machine."
+ },
+ {
+  "key": "m-hollow_heels_down",
+  "text": "Hollow hold",
+  "say": "Hollow hold."
+ },
+ {
+  "key": "m-incline_side_plank",
+  "text": "Side plank",
+  "say": "Side plank."
+ },
+ {
+  "key": "s-sit-back",
+  "text": "Sit back",
+  "say": "Sit back."
+ },
+ {
+  "key": "s-chest-up",
+  "text": "Chest up",
+  "say": "Chest up."
+ },
+ {
+  "key": "s-drive-through-the-heels",
+  "text": "Drive through the heels",
+  "say": "Drive through the heels."
+ },
+ {
+  "key": "s-brace",
+  "text": "Brace",
+  "say": "Brace."
+ },
+ {
+  "key": "s-break-at-the-hips",
+  "text": "Break at the hips",
+  "say": "Break at the hips."
+ },
+ {
+  "key": "s-hips-straight",
+  "text": "Hips straight",
+  "say": "Hips straight."
+ },
+ {
+  "key": "s-lean-back-slow",
+  "text": "Lean back slow",
+  "say": "Lean back slow."
+ },
+ {
+  "key": "s-front-knee-tracks-the-toes",
+  "text": "Front knee tracks the toes",
+  "say": "Front knee tracks the toes."
+ },
+ {
+  "key": "s-elbows-inside-the-knees",
+  "text": "Elbows inside the knees",
+  "say": "Elbows inside the knees."
+ },
+ {
+  "key": "s-sink-low",
+  "text": "Sink low",
+  "say": "Sink low."
+ },
+ {
+  "key": "s-thighs-parallel",
+  "text": "Thighs parallel",
+  "say": "Thighs parallel."
+ },
+ {
+  "key": "s-land-soft",
+  "text": "Land soft",
+  "say": "Land soft."
+ },
+ {
+  "key": "s-explode-up",
+  "text": "Explode up",
+  "say": "Explode up."
+ },
+ {
+  "key": "s-knees-forward",
+  "text": "Knees forward",
+  "say": "Knees forward."
+ },
+ {
+  "key": "s-lean-back",
+  "text": "Lean back",
+  "say": "Lean back."
+ },
+ {
+  "key": "s-heels-up",
+  "text": "Heels up",
+  "say": "Heels up."
+ },
+ {
+  "key": "s-small-pulses",
+  "text": "Small pulses",
+  "say": "Small pulses."
+ },
+ {
+  "key": "s-sit-all-the-way-down",
+  "text": "Sit all the way down",
+  "say": "Sit all the way down."
+ },
+ {
+  "key": "s-knees-over-toes",
+  "text": "Knees over toes",
+  "say": "Knees over toes."
+ },
+ {
+  "key": "s-control-the-reach",
+  "text": "Control the reach",
+  "say": "Control the reach."
+ },
+ {
+  "key": "s-flat-back",
+  "text": "Flat back",
+  "say": "Flat back."
+ },
+ {
+  "key": "s-push-the-floor-away",
+  "text": "Push the floor away",
+  "say": "Push the floor away."
+ },
+ {
+  "key": "s-snap-the-hips",
+  "text": "Snap the hips",
+  "say": "Snap the hips."
+ },
+ {
+  "key": "s-arms-are-ropes",
+  "text": "Arms are ropes",
+  "say": "Arms are ropes."
+ },
+ {
+  "key": "s-hips-back",
+  "text": "Hips back",
+  "say": "Hips back."
+ },
+ {
+  "key": "s-soft-knees",
+  "text": "Soft knees",
+  "say": "Soft knees."
+ },
+ {
+  "key": "s-hips-square",
+  "text": "Hips square",
+  "say": "Hips square."
+ },
+ {
+  "key": "s-hinge-back",
+  "text": "Hinge back",
+  "say": "Hinge back."
+ },
+ {
+  "key": "s-knees-out",
+  "text": "Knees out",
+  "say": "Knees out."
+ },
+ {
+  "key": "s-squeeze-at-the-top",
+  "text": "Squeeze at the top",
+  "say": "Squeeze at the top."
+ },
+ {
+  "key": "s-stay-low",
+  "text": "Stay low",
+  "say": "Stay low."
+ },
+ {
+  "key": "s-keep-the-band-tight",
+  "text": "Keep the band tight",
+  "say": "Keep the band tight."
+ },
+ {
+  "key": "s-chin-tucked",
+  "text": "Chin tucked",
+  "say": "Chin tucked."
+ },
+ {
+  "key": "s-hips-level",
+  "text": "Hips level",
+  "say": "Hips level."
+ },
+ {
+  "key": "s-fight-it-all-the-way-down",
+  "text": "Fight it all the way down",
+  "say": "Fight it all the way down."
+ },
+ {
+  "key": "s-hips-up",
+  "text": "Hips up",
+  "say": "Hips up."
+ },
+ {
+  "key": "s-slow-on-the-way-out",
+  "text": "Slow on the way out",
+  "say": "Slow on the way out."
+ },
+ {
+  "key": "s-deep-stretch",
+  "text": "Deep stretch",
+  "say": "Deep stretch."
+ },
+ {
+  "key": "s-toes-all-the-way-up",
+  "text": "Toes all the way up",
+  "say": "Toes all the way up."
+ },
+ {
+  "key": "s-shoulder-blades-back",
+  "text": "Shoulder blades back",
+  "say": "Shoulder blades back."
+ },
+ {
+  "key": "s-feet-planted",
+  "text": "Feet planted",
+  "say": "Feet planted."
+ },
+ {
+  "key": "s-squeeze-the-glutes",
+  "text": "Squeeze the glutes",
+  "say": "Squeeze the glutes."
+ },
+ {
+  "key": "s-press-straight-up",
+  "text": "Press straight up",
+  "say": "Press straight up."
+ },
+ {
+  "key": "s-body-straight",
+  "text": "Body straight",
+  "say": "Body straight."
+ },
+ {
+  "key": "s-chest-to-the-wall",
+  "text": "Chest to the wall",
+  "say": "Chest to the wall."
+ },
+ {
+  "key": "s-chest-to-the-bench",
+  "text": "Chest to the bench",
+  "say": "Chest to the bench."
+ },
+ {
+  "key": "s-elbows-in",
+  "text": "Elbows in",
+  "say": "Elbows in."
+ },
+ {
+  "key": "s-chest-to-the-floor",
+  "text": "Chest to the floor",
+  "say": "Chest to the floor."
+ },
+ {
+  "key": "s-hips-high",
+  "text": "Hips high",
+  "say": "Hips high."
+ },
+ {
+  "key": "s-keep-the-tension",
+  "text": "Keep the tension",
+  "say": "Keep the tension."
+ },
+ {
+  "key": "s-shoulders-down",
+  "text": "Shoulders down",
+  "say": "Shoulders down."
+ },
+ {
+  "key": "s-go-deep",
+  "text": "Go deep",
+  "say": "Go deep."
+ },
+ {
+  "key": "s-arms-locked",
+  "text": "Arms locked",
+  "say": "Arms locked."
+ },
+ {
+  "key": "s-lean-forward",
+  "text": "Lean forward",
+  "say": "Lean forward."
+ },
+ {
+  "key": "s-lift-the-feet",
+  "text": "Lift the feet",
+  "say": "Lift the feet."
+ },
+ {
+  "key": "s-pull-with-the-hip-flexors",
+  "text": "Pull with the hip flexors",
+  "say": "Pull with the hip flexors."
+ },
+ {
+  "key": "s-arms-straight",
+  "text": "Arms straight",
+  "say": "Arms straight."
+ },
+ {
+  "key": "s-knees-to-the-chest",
+  "text": "Knees to the chest",
+  "say": "Knees to the chest."
+ },
+ {
+  "key": "s-elbows-back",
+  "text": "Elbows back",
+  "say": "Elbows back."
+ },
+ {
+  "key": "s-squeeze-up",
+  "text": "Squeeze up",
+  "say": "Squeeze up."
+ },
+ {
+  "key": "s-lower-slow",
+  "text": "Lower slow",
+  "say": "Lower slow."
+ },
+ {
+  "key": "s-lead-with-the-chest",
+  "text": "Lead with the chest",
+  "say": "Lead with the chest."
+ },
+ {
+  "key": "s-stay-tight-at-the-bottom",
+  "text": "Stay tight at the bottom",
+  "say": "Stay tight at the bottom."
+ },
+ {
+  "key": "s-fight-it-down",
+  "text": "Fight it down",
+  "say": "Fight it down."
+ },
+ {
+  "key": "s-hips-over-hands",
+  "text": "Hips over hands",
+  "say": "Hips over hands."
+ },
+ {
+  "key": "s-chest-to-the-floor-then-jump",
+  "text": "Chest to the floor, then jump",
+  "say": "Chest to the floor, then jump."
+ },
+ {
+  "key": "s-sweep-the-chest-low-and-through",
+  "text": "Sweep the chest low and through",
+  "say": "Sweep the chest low and through."
+ },
+ {
+  "key": "s-shoulders-forward-over-the-wrists",
+  "text": "Shoulders forward over the wrists",
+  "say": "Shoulders forward over the wrists."
+ },
+ {
+  "key": "s-head-through-the-arms",
+  "text": "Head through the arms",
+  "say": "Head through the arms."
+ },
+ {
+  "key": "s-turn-the-rings-out",
+  "text": "Turn the rings out",
+  "say": "Turn the rings out."
+ },
+ {
+  "key": "s-chest-below-the-hands",
+  "text": "Chest below the hands",
+  "say": "Chest below the hands."
+ },
+ {
+  "key": "s-wrist-straight",
+  "text": "Wrist straight",
+  "say": "Wrist straight."
+ },
+ {
+  "key": "s-squeeze-the-handle",
+  "text": "Squeeze the handle",
+  "say": "Squeeze the handle."
+ },
+ {
+  "key": "s-lock-the-elbows",
+  "text": "Lock the elbows",
+  "say": "Lock the elbows."
+ },
+ {
+  "key": "s-push-tall",
+  "text": "Push tall",
+  "say": "Push tall."
+ },
+ {
+  "key": "s-full-stop-at-the-bottom",
+  "text": "Full stop at the bottom",
+  "say": "Full stop at the bottom."
+ },
+ {
+  "key": "s-press",
+  "text": "Press",
+  "say": "Press."
+ },
+ {
+  "key": "s-hips-stacked",
+  "text": "Hips stacked",
+  "say": "Hips stacked."
+ },
+ {
+  "key": "s-head-below-the-hands",
+  "text": "Head below the hands",
+  "say": "Head below the hands."
+ },
+ {
+  "key": "s-squeeze-the-triceps",
+  "text": "Squeeze the triceps",
+  "say": "Squeeze the triceps."
+ },
+ {
+  "key": "s-legs-straight",
+  "text": "Legs straight",
+  "say": "Legs straight."
+ },
+ {
+  "key": "s-kick-up-soft",
+  "text": "Kick up soft",
+  "say": "Kick up soft."
+ },
+ {
+  "key": "s-find-the-balance",
+  "text": "Find the balance",
+  "say": "Find the balance."
+ },
+ {
+  "key": "s-pulse-then-press",
+  "text": "Pulse, then press",
+  "say": "Pulse, then press."
+ },
+ {
+  "key": "s-lean-past-the-wrists",
+  "text": "Lean past the wrists",
+  "say": "Lean past the wrists."
+ },
+ {
+  "key": "s-rings-close",
+  "text": "Rings close",
+  "say": "Rings close."
+ },
+ {
+  "key": "s-turn-out-at-the-top",
+  "text": "Turn out at the top",
+  "say": "Turn out at the top."
+ },
+ {
+  "key": "s-lift-them-high",
+  "text": "Lift them high",
+  "say": "Lift them high."
+ },
+ {
+  "key": "s-knees-locked",
+  "text": "Knees locked",
+  "say": "Knees locked."
+ },
+ {
+  "key": "s-lift-both-legs",
+  "text": "Lift both legs",
+  "say": "Lift both legs."
+ },
+ {
+  "key": "s-lift-slow",
+  "text": "Lift slow",
+  "say": "Lift slow."
+ },
+ {
+  "key": "s-push-up-then-open-to-a-t",
+  "text": "Push up, then open to a T",
+  "say": "Push up, then open to a T."
+ },
+ {
+  "key": "s-walk-the-hands-in",
+  "text": "Walk the hands in",
+  "say": "Walk the hands in."
+ },
+ {
+  "key": "s-stay-tight",
+  "text": "Stay tight",
+  "say": "Stay tight."
+ },
+ {
+  "key": "s-elbows-locked",
+  "text": "Elbows locked",
+  "say": "Elbows locked."
+ },
+ {
+  "key": "s-control-every-rep",
+  "text": "Control every rep",
+  "say": "Control every rep."
+ },
+ {
+  "key": "s-heels-light-on-the-wall",
+  "text": "Heels light on the wall",
+  "say": "Heels light on the wall."
+ },
+ {
+  "key": "s-jump-straight-into-the-pull",
+  "text": "Jump straight into the pull",
+  "say": "Jump straight into the pull."
+ },
+ {
+  "key": "s-knees-light-on-the-elbows",
+  "text": "Knees light on the elbows",
+  "say": "Knees light on the elbows."
+ },
+ {
+  "key": "s-eyes-on-the-bell",
+  "text": "Eyes on the bell",
+  "say": "Eyes on the bell."
+ },
+ {
+  "key": "s-every-step",
+  "text": "Every step",
+  "say": "Every step."
+ },
+ {
+  "key": "s-straight-line",
+  "text": "Straight line",
+  "say": "Straight line."
+ },
+ {
+  "key": "s-other-arm-straight",
+  "text": "Other arm straight",
+  "say": "Other arm straight."
+ },
+ {
+  "key": "s-elbow-in",
+  "text": "Elbow in",
+  "say": "Elbow in."
+ },
+ {
+  "key": "s-rings-tight",
+  "text": "Rings tight",
+  "say": "Rings tight."
+ },
+ {
+  "key": "s-control-the-descent",
+  "text": "Control the descent",
+  "say": "Control the descent."
+ },
+ {
+  "key": "s-lock-out",
+  "text": "Lock out",
+  "say": "Lock out."
+ },
+ {
+  "key": "s-round-the-back",
+  "text": "Round the back",
+  "say": "Round the back."
+ },
+ {
+  "key": "s-back-flat",
+  "text": "Back flat",
+  "say": "Back flat."
+ },
+ {
+  "key": "s-light-assist-only",
+  "text": "Light assist only",
+  "say": "Light assist only."
+ },
+ {
+  "key": "s-turn-the-palms-forward-at-the-top",
+  "text": "Turn the palms forward at the top",
+  "say": "Turn the palms forward at the top."
+ },
+ {
+  "key": "s-press-tall",
+  "text": "Press tall",
+  "say": "Press tall."
+ },
+ {
+  "key": "s-hips-back-and-up",
+  "text": "Hips back and up",
+  "say": "Hips back and up."
+ },
+ {
+  "key": "s-feet-wide",
+  "text": "Feet wide",
+  "say": "Feet wide."
+ },
+ {
+  "key": "s-stay-hollow",
+  "text": "Stay hollow",
+  "say": "Stay hollow."
+ },
+ {
+  "key": "s-down-to-the-forearms",
+  "text": "Down to the forearms",
+  "say": "Down to the forearms."
+ },
+ {
+  "key": "s-press-back-up",
+  "text": "Press back up",
+  "say": "Press back up."
+ },
+ {
+  "key": "s-one-leg-long",
+  "text": "One leg long",
+  "say": "One leg long."
+ },
+ {
+  "key": "s-lean-over-the-rings",
+  "text": "Lean over the rings",
+  "say": "Lean over the rings."
+ },
+ {
+  "key": "s-ribs-closed",
+  "text": "Ribs closed",
+  "say": "Ribs closed."
+ },
+ {
+  "key": "s-press-to-lockout",
+  "text": "Press to lockout",
+  "say": "Press to lockout."
+ },
+ {
+  "key": "s-slow-down",
+  "text": "Slow down",
+  "say": "Slow down."
+ },
+ {
+  "key": "s-catch-the-planche",
+  "text": "Catch the planche",
+  "say": "Catch the planche."
+ },
+ {
+  "key": "s-press-the-fingers",
+  "text": "Press the fingers",
+  "say": "Press the fingers."
+ },
+ {
+  "key": "s-stay-relaxed",
+  "text": "Stay relaxed",
+  "say": "Stay relaxed."
+ },
+ {
+  "key": "s-control-down",
+  "text": "Control down",
+  "say": "Control down."
+ },
+ {
+  "key": "s-lower-to-the-planche",
+  "text": "Lower to the planche",
+  "say": "Lower to the planche."
+ },
+ {
+  "key": "s-press-up",
+  "text": "Press up",
+  "say": "Press up."
+ },
+ {
+  "key": "s-hold-the-line",
+  "text": "Hold the line",
+  "say": "Hold the line."
+ },
+ {
+  "key": "s-shoulders-forward",
+  "text": "Shoulders forward",
+  "say": "Shoulders forward."
+ },
+ {
+  "key": "s-press-no-jump",
+  "text": "Press, no jump",
+  "say": "Press, no jump."
+ },
+ {
+  "key": "s-shoulders-packed",
+  "text": "Shoulders packed",
+  "say": "Shoulders packed."
+ },
+ {
+  "key": "s-ribs-down",
+  "text": "Ribs down",
+  "say": "Ribs down."
+ },
+ {
+  "key": "s-straight-arms",
+  "text": "Straight arms",
+  "say": "Straight arms."
+ },
+ {
+  "key": "s-squeeze-the-blades",
+  "text": "Squeeze the blades",
+  "say": "Squeeze the blades."
+ },
+ {
+  "key": "s-relax-the-shoulders",
+  "text": "Relax the shoulders",
+  "say": "Relax the shoulders."
+ },
+ {
+  "key": "s-chest-to-the-bar",
+  "text": "Chest to the bar",
+  "say": "Chest to the bar."
+ },
+ {
+  "key": "s-spread-the-shoulder-blades",
+  "text": "Spread the shoulder blades",
+  "say": "Spread the shoulder blades."
+ },
+ {
+  "key": "s-full-hang-at-the-bottom",
+  "text": "Full hang at the bottom",
+  "say": "Full hang at the bottom."
+ },
+ {
+  "key": "s-chin-over-the-bar",
+  "text": "Chin over the bar",
+  "say": "Chin over the bar."
+ },
+ {
+  "key": "s-jump-up",
+  "text": "Jump up",
+  "say": "Jump up."
+ },
+ {
+  "key": "s-chest-to-the-rings",
+  "text": "Chest to the rings",
+  "say": "Chest to the rings."
+ },
+ {
+  "key": "s-pull-with-the-lats",
+  "text": "Pull with the lats",
+  "say": "Pull with the lats."
+ },
+ {
+  "key": "s-pull-the-bar-down",
+  "text": "Pull the bar down",
+  "say": "Pull the bar down."
+ },
+ {
+  "key": "s-pull-the-elbows-to-your-ribs",
+  "text": "Pull the elbows to your ribs",
+  "say": "Pull the elbows to your ribs."
+ },
+ {
+  "key": "s-no-momentum",
+  "text": "No momentum",
+  "say": "No momentum."
+ },
+ {
+  "key": "s-pull-with-the-back",
+  "text": "Pull with the back",
+  "say": "Pull with the back."
+ },
+ {
+  "key": "s-pull-to-the-belly",
+  "text": "Pull to the belly",
+  "say": "Pull to the belly."
+ },
+ {
+  "key": "s-elbow-back",
+  "text": "Elbow back",
+  "say": "Elbow back."
+ },
+ {
+  "key": "s-slow-rotation",
+  "text": "Slow rotation",
+  "say": "Slow rotation."
+ },
+ {
+  "key": "s-stay-in-control",
+  "text": "Stay in control",
+  "say": "Stay in control."
+ },
+ {
+  "key": "s-crush-the-towels",
+  "text": "Crush the towels",
+  "say": "Crush the towels."
+ },
+ {
+  "key": "s-pull-the-tuck-up",
+  "text": "Pull the tuck up",
+  "say": "Pull the tuck up."
+ },
+ {
+  "key": "s-wide-grip",
+  "text": "Wide grip",
+  "say": "Wide grip."
+ },
+ {
+  "key": "s-hips-open",
+  "text": "Hips open",
+  "say": "Hips open."
+ },
+ {
+  "key": "s-one-arm-pulls",
+  "text": "One arm pulls",
+  "say": "One arm pulls."
+ },
+ {
+  "key": "s-alternate-sides",
+  "text": "Alternate sides",
+  "say": "Alternate sides."
+ },
+ {
+  "key": "s-chin-past-the-bar",
+  "text": "Chin past the bar",
+  "say": "Chin past the bar."
+ },
+ {
+  "key": "s-pull-fast",
+  "text": "Pull fast",
+  "say": "Pull fast."
+ },
+ {
+  "key": "s-pull-fast-and-high",
+  "text": "Pull fast and high",
+  "say": "Pull fast and high."
+ },
+ {
+  "key": "s-relax-into-the-stretch",
+  "text": "Relax into the stretch",
+  "say": "Relax into the stretch."
+ },
+ {
+  "key": "s-pull-the-bar-to-your-waist",
+  "text": "Pull the bar to your waist",
+  "say": "Pull the bar to your waist."
+ },
+ {
+  "key": "s-pull-high",
+  "text": "Pull high",
+  "say": "Pull high."
+ },
+ {
+  "key": "s-roll-the-hips-over",
+  "text": "Roll the hips over",
+  "say": "Roll the hips over."
+ },
+ {
+  "key": "s-fight-the-rotation",
+  "text": "Fight the rotation",
+  "say": "Fight the rotation."
+ },
+ {
+  "key": "s-elbows-over-fast",
+  "text": "Elbows over fast",
+  "say": "Elbows over fast."
+ },
+ {
+  "key": "s-pull-higher",
+  "text": "Pull higher",
+  "say": "Pull higher."
+ },
+ {
+  "key": "s-hold-the-l",
+  "text": "Hold the L",
+  "say": "Hold the L."
+ },
+ {
+  "key": "s-pull-all-the-way",
+  "text": "Pull all the way",
+  "say": "Pull all the way."
+ },
+ {
+  "key": "s-lower-slow-through-the-transition",
+  "text": "Lower slow through the transition",
+  "say": "Lower slow through the transition."
+ },
+ {
+  "key": "s-shoulder-packed",
+  "text": "Shoulder packed",
+  "say": "Shoulder packed."
+ },
+ {
+  "key": "s-squeeze-the-grip",
+  "text": "Squeeze the grip",
+  "say": "Squeeze the grip."
+ },
+ {
+  "key": "s-body-flat",
+  "text": "Body flat",
+  "say": "Body flat."
+ },
+ {
+  "key": "s-rotate-through",
+  "text": "Rotate through",
+  "say": "Rotate through."
+ },
+ {
+  "key": "s-press-to-support",
+  "text": "Press to support",
+  "say": "Press to support."
+ },
+ {
+  "key": "s-chin-over",
+  "text": "Chin over",
+  "say": "Chin over."
+ },
+ {
+  "key": "s-arc-side-to-side",
+  "text": "Arc side to side",
+  "say": "Arc side to side."
+ },
+ {
+  "key": "s-hold-the-false-grip",
+  "text": "Hold the false grip",
+  "say": "Hold the false grip."
+ },
+ {
+  "key": "s-row-to-the-bar",
+  "text": "Row to the bar",
+  "say": "Row to the bar."
+ },
+ {
+  "key": "s-body-rigid",
+  "text": "Body rigid",
+  "say": "Body rigid."
+ },
+ {
+  "key": "s-pull-to-the-bar",
+  "text": "Pull to the bar",
+  "say": "Pull to the bar."
+ },
+ {
+  "key": "s-slide-across",
+  "text": "Slide across",
+  "say": "Slide across."
+ },
+ {
+  "key": "s-false-grip",
+  "text": "False grip",
+  "say": "False grip."
+ },
+ {
+  "key": "s-deep-transition",
+  "text": "Deep transition",
+  "say": "Deep transition."
+ },
+ {
+  "key": "s-abs-do-the-work",
+  "text": "Abs do the work",
+  "say": "Abs do the work."
+ },
+ {
+  "key": "s-relax-the-neck",
+  "text": "Relax the neck",
+  "say": "Relax the neck."
+ },
+ {
+  "key": "s-curl-the-hips",
+  "text": "Curl the hips",
+  "say": "Curl the hips."
+ },
+ {
+  "key": "s-knees-off-the-floor",
+  "text": "Knees off the floor",
+  "say": "Knees off the floor."
+ },
+ {
+  "key": "s-hips-low-and-quiet",
+  "text": "Hips low and quiet",
+  "say": "Hips low and quiet."
+ },
+ {
+  "key": "s-thread-the-leg-through",
+  "text": "Thread the leg through",
+  "say": "Thread the leg through."
+ },
+ {
+  "key": "s-chest-open",
+  "text": "Chest open",
+  "say": "Chest open."
+ },
+ {
+  "key": "s-drive-the-hips-up",
+  "text": "Drive the hips up",
+  "say": "Drive the hips up."
+ },
+ {
+  "key": "s-reach-back",
+  "text": "Reach back",
+  "say": "Reach back."
+ },
+ {
+  "key": "s-hips-up-the-whole-way",
+  "text": "Hips up the whole way",
+  "say": "Hips up the whole way."
+ },
+ {
+  "key": "s-chest-low",
+  "text": "Chest low",
+  "say": "Chest low."
+ },
+ {
+  "key": "s-knee-outside-the-hand",
+  "text": "Knee outside the hand",
+  "say": "Knee outside the hand."
+ },
+ {
+  "key": "s-stay-deep",
+  "text": "Stay deep",
+  "say": "Stay deep."
+ },
+ {
+  "key": "s-heels-down",
+  "text": "Heels down",
+  "say": "Heels down."
+ },
+ {
+  "key": "s-land-quiet",
+  "text": "Land quiet",
+  "say": "Land quiet."
+ },
+ {
+  "key": "s-heel-down",
+  "text": "Heel down",
+  "say": "Heel down."
+ },
+ {
+  "key": "s-other-leg-straight",
+  "text": "Other leg straight",
+  "say": "Other leg straight."
+ },
+ {
+  "key": "s-let-the-hip-roll",
+  "text": "Let the hip roll",
+  "say": "Let the hip roll."
+ },
+ {
+  "key": "s-walk-it-out",
+  "text": "Walk it out",
+  "say": "Walk it out."
+ },
+ {
+  "key": "s-knees-hover",
+  "text": "Knees hover",
+  "say": "Knees hover."
+ },
+ {
+  "key": "s-lower-back-to-the-floor",
+  "text": "Lower back to the floor",
+  "say": "Lower back to the floor."
+ },
+ {
+  "key": "s-reach-long",
+  "text": "Reach long",
+  "say": "Reach long."
+ },
+ {
+  "key": "s-hips-still",
+  "text": "Hips still",
+  "say": "Hips still."
+ },
+ {
+  "key": "s-curl-the-hips-to-the-ribs",
+  "text": "Curl the hips to the ribs",
+  "say": "Curl the hips to the ribs."
+ },
+ {
+  "key": "s-control-it-on-the-way-down",
+  "text": "Control it on the way down",
+  "say": "Control it on the way down."
+ },
+ {
+  "key": "s-lift-everything",
+  "text": "Lift everything",
+  "say": "Lift everything."
+ },
+ {
+  "key": "s-reach-for-the-toes",
+  "text": "Reach for the toes",
+  "say": "Reach for the toes."
+ },
+ {
+  "key": "s-slow-taps",
+  "text": "Slow taps",
+  "say": "Slow taps."
+ },
+ {
+  "key": "s-elbow-to-knee",
+  "text": "Elbow to knee",
+  "say": "Elbow to knee."
+ },
+ {
+  "key": "s-slow-and-controlled",
+  "text": "Slow and controlled",
+  "say": "Slow and controlled."
+ },
+ {
+  "key": "s-squeeze-everything",
+  "text": "Squeeze everything",
+  "say": "Squeeze everything."
+ },
+ {
+  "key": "s-no-swing",
+  "text": "No swing",
+  "say": "No swing."
+ },
+ {
+  "key": "s-ribs-to-the-hips",
+  "text": "Ribs to the hips",
+  "say": "Ribs to the hips."
+ },
+ {
+  "key": "s-rotate-side-to-side",
+  "text": "Rotate side to side",
+  "say": "Rotate side to side."
+ },
+ {
+  "key": "s-stay-stacked",
+  "text": "Stay stacked",
+  "say": "Stay stacked."
+ },
+ {
+  "key": "s-reach",
+  "text": "Reach",
+  "say": "Reach."
+ },
+ {
+  "key": "s-lower-back-flat",
+  "text": "Lower back flat",
+  "say": "Lower back flat."
+ },
+ {
+  "key": "s-legs-straight-up",
+  "text": "Legs straight up",
+  "say": "Legs straight up."
+ },
+ {
+  "key": "s-grip-hard",
+  "text": "Grip hard",
+  "say": "Grip hard."
+ },
+ {
+  "key": "s-squeeze-the-glute",
+  "text": "Squeeze the glute",
+  "say": "Squeeze the glute."
+ },
+ {
+  "key": "s-reach-for-the-foot",
+  "text": "Reach for the foot",
+  "say": "Reach for the foot."
+ },
+ {
+  "key": "s-legs-wide",
+  "text": "Legs wide",
+  "say": "Legs wide."
+ },
+ {
+  "key": "s-reach-through",
+  "text": "Reach through",
+  "say": "Reach through."
+ },
+ {
+  "key": "s-hands-meet-the-feet",
+  "text": "Hands meet the feet",
+  "say": "Hands meet the feet."
+ },
+ {
+  "key": "s-hips-locked",
+  "text": "Hips locked",
+  "say": "Hips locked."
+ },
+ {
+  "key": "s-rock-from-the-core",
+  "text": "Rock from the core",
+  "say": "Rock from the core."
+ },
+ {
+  "key": "s-one-hand-at-a-time",
+  "text": "One hand at a time",
+  "say": "One hand at a time."
+ },
+ {
+  "key": "s-squeeze-the-fists-and-glutes",
+  "text": "Squeeze the fists and glutes",
+  "say": "Squeeze the fists and glutes."
+ },
+ {
+  "key": "s-dip-low",
+  "text": "Dip low",
+  "say": "Dip low."
+ },
+ {
+  "key": "s-drive-the-hip-up",
+  "text": "Drive the hip up",
+  "say": "Drive the hip up."
+ },
+ {
+  "key": "s-lift-the-top-leg",
+  "text": "Lift the top leg",
+  "say": "Lift the top leg."
+ },
+ {
+  "key": "s-long-body",
+  "text": "Long body",
+  "say": "Long body."
+ },
+ {
+  "key": "s-hips-never-sag",
+  "text": "Hips never sag",
+  "say": "Hips never sag."
+ },
+ {
+  "key": "s-straight-body",
+  "text": "Straight body",
+  "say": "Straight body."
+ },
+ {
+  "key": "s-squeeze-the-top-leg",
+  "text": "Squeeze the top leg",
+  "say": "Squeeze the top leg."
+ },
+ {
+  "key": "s-snap-up",
+  "text": "Snap up",
+  "say": "Snap up."
+ },
+ {
+  "key": "s-touch-the-toes",
+  "text": "Touch the toes",
+  "say": "Touch the toes."
+ },
+ {
+  "key": "s-legs-up",
+  "text": "Legs up",
+  "say": "Legs up."
+ },
+ {
+  "key": "s-leg-straight",
+  "text": "Leg straight",
+  "say": "Leg straight."
+ },
+ {
+  "key": "s-slide-slow",
+  "text": "Slide slow",
+  "say": "Slide slow."
+ },
+ {
+  "key": "s-legs-wide-and-up",
+  "text": "Legs wide and up",
+  "say": "Legs wide and up."
+ },
+ {
+  "key": "s-toes-to-the-bar",
+  "text": "Toes to the bar",
+  "say": "Toes to the bar."
+ },
+ {
+  "key": "s-control-the-drop",
+  "text": "Control the drop",
+  "say": "Control the drop."
+ },
+ {
+  "key": "s-freeze",
+  "text": "Freeze",
+  "say": "Freeze."
+ },
+ {
+  "key": "s-feet-to-the-ceiling",
+  "text": "Feet to the ceiling",
+  "say": "Feet to the ceiling."
+ },
+ {
+  "key": "s-rotate-open",
+  "text": "Rotate open",
+  "say": "Rotate open."
+ },
+ {
+  "key": "s-leg-high",
+  "text": "Leg high",
+  "say": "Leg high."
+ },
+ {
+  "key": "s-fight-the-rings",
+  "text": "Fight the rings",
+  "say": "Fight the rings."
+ },
+ {
+  "key": "s-open-the-star",
+  "text": "Open the star",
+  "say": "Open the star."
+ },
+ {
+  "key": "s-push-the-hips-up",
+  "text": "Push the hips up",
+  "say": "Push the hips up."
+ },
+ {
+  "key": "s-legs-high",
+  "text": "Legs high",
+  "say": "Legs high."
+ },
+ {
+  "key": "s-legs-together",
+  "text": "Legs together",
+  "say": "Legs together."
+ },
+ {
+  "key": "s-control-the-swing",
+  "text": "Control the swing",
+  "say": "Control the swing."
+ },
+ {
+  "key": "s-kick-up",
+  "text": "Kick up",
+  "say": "Kick up."
+ },
+ {
+  "key": "s-ride-the-balance",
+  "text": "Ride the balance",
+  "say": "Ride the balance."
+ },
+ {
+  "key": "s-hips-low",
+  "text": "Hips low",
+  "say": "Hips low."
+ },
+ {
+  "key": "s-knees-fast",
+  "text": "Knees fast",
+  "say": "Knees fast."
+ },
+ {
+  "key": "s-knee-over-toe",
+  "text": "Knee over toe",
+  "say": "Knee over toe."
+ },
+ {
+  "key": "s-slow",
+  "text": "Slow",
+  "say": "Slow."
+ },
+ {
+  "key": "s-move-the-whole-spine",
+  "text": "Move the whole spine",
+  "say": "Move the whole spine."
+ },
+ {
+  "key": "s-sit-deep",
+  "text": "Sit deep",
+  "say": "Sit deep."
+ },
+ {
+  "key": "s-rock-side-to-side",
+  "text": "Rock side to side",
+  "say": "Rock side to side."
+ },
+ {
+  "key": "s-forearm-on-the-frame",
+  "text": "Forearm on the frame",
+  "say": "Forearm on the frame."
+ },
+ {
+  "key": "s-turn-away",
+  "text": "Turn away",
+  "say": "Turn away."
+ },
+ {
+  "key": "s-slow-full-circles",
+  "text": "Slow, full circles",
+  "say": "Slow, full circles."
+ },
+ {
+  "key": "s-tuck-the-hips",
+  "text": "Tuck the hips",
+  "say": "Tuck the hips."
+ },
+ {
+  "key": "s-stay-tall",
+  "text": "Stay tall",
+  "say": "Stay tall."
+ },
+ {
+  "key": "s-controlled-swings",
+  "text": "Controlled swings",
+  "say": "Controlled swings."
+ },
+ {
+  "key": "s-follow-the-hand",
+  "text": "Follow the hand",
+  "say": "Follow the hand."
+ },
+ {
+  "key": "s-reach-for-the-ceiling",
+  "text": "Reach for the ceiling",
+  "say": "Reach for the ceiling."
+ },
+ {
+  "key": "s-eyes-follow",
+  "text": "Eyes follow",
+  "say": "Eyes follow."
+ },
+ {
+  "key": "s-press-over-the-shoulder",
+  "text": "Press over the shoulder",
+  "say": "Press over the shoulder."
+ },
+ {
+  "key": "s-hips-drive-it",
+  "text": "Hips drive it",
+  "say": "Hips drive it."
+ },
+ {
+  "key": "s-elbow-high",
+  "text": "Elbow high",
+  "say": "Elbow high."
+ },
+ {
+  "key": "s-slow-circles",
+  "text": "Slow circles",
+  "say": "Slow circles."
+ },
+ {
+  "key": "s-close-to-the-head",
+  "text": "Close to the head",
+  "say": "Close to the head."
+ },
+ {
+  "key": "s-stand-tall",
+  "text": "Stand tall",
+  "say": "Stand tall."
+ },
+ {
+  "key": "s-resist-the-tilt",
+  "text": "Resist the tilt",
+  "say": "Resist the tilt."
+ },
+ {
+  "key": "s-elbows-push-the-knees-out",
+  "text": "Elbows push the knees out",
+  "say": "Elbows push the knees out."
+ },
+ {
+  "key": "s-touch-the-bench",
+  "text": "Touch the bench",
+  "say": "Touch the bench."
+ },
+ {
+  "key": "s-knees-high",
+  "text": "Knees high",
+  "say": "Knees high."
+ },
+ {
+  "key": "s-arms-drive",
+  "text": "Arms drive",
+  "say": "Arms drive."
+ },
+ {
+  "key": "s-rock-slow",
+  "text": "Rock slow",
+  "say": "Rock slow."
+ },
+ {
+  "key": "s-all-directions",
+  "text": "All directions",
+  "say": "All directions."
+ },
+ {
+  "key": "s-big-slow-circles",
+  "text": "Big, slow circles",
+  "say": "Big, slow circles."
+ },
+ {
+  "key": "s-hips-high-then-chest-through",
+  "text": "Hips high, then chest through",
+  "say": "Hips high, then chest through."
+ },
+ {
+  "key": "s-open-the-chest",
+  "text": "Open the chest",
+  "say": "Open the chest."
+ },
+ {
+  "key": "s-knees-to-hip-height",
+  "text": "Knees to hip height",
+  "say": "Knees to hip height."
+ },
+ {
+  "key": "s-sit-tall",
+  "text": "Sit tall",
+  "say": "Sit tall."
+ },
+ {
+  "key": "s-switch-slow",
+  "text": "Switch slow",
+  "say": "Switch slow."
+ },
+ {
+  "key": "s-deep-lunge",
+  "text": "Deep lunge",
+  "say": "Deep lunge."
+ },
+ {
+  "key": "s-reach-to-the-sky",
+  "text": "Reach to the sky",
+  "say": "Reach to the sky."
+ },
+ {
+  "key": "s-lead-with-the-elbows",
+  "text": "Lead with the elbows",
+  "say": "Lead with the elbows."
+ },
+ {
+  "key": "s-squeeze-the-shoulder-blades",
+  "text": "Squeeze the shoulder blades",
+  "say": "Squeeze the shoulder blades."
+ },
+ {
+  "key": "s-chest-stays-down",
+  "text": "Chest stays down",
+  "say": "Chest stays down."
+ },
+ {
+  "key": "s-row-to-the-ribs",
+  "text": "Row to the ribs",
+  "say": "Row to the ribs."
+ },
+ {
+  "key": "s-pull-to-the-forehead",
+  "text": "Pull to the forehead",
+  "say": "Pull to the forehead."
+ },
+ {
+  "key": "s-hands-apart",
+  "text": "Hands apart",
+  "say": "Hands apart."
+ },
+ {
+  "key": "s-arms-long",
+  "text": "Arms long",
+  "say": "Arms long."
+ },
+ {
+  "key": "s-elbows-wide",
+  "text": "Elbows wide",
+  "say": "Elbows wide."
+ },
+ {
+  "key": "s-row-it-out",
+  "text": "Row it out",
+  "say": "Row it out."
+ },
+ {
+  "key": "s-arm-long",
+  "text": "Arm long",
+  "say": "Arm long."
+ },
+ {
+  "key": "s-sweep-it-back",
+  "text": "Sweep it back",
+  "say": "Sweep it back."
+ },
+ {
+  "key": "s-thumbs-up",
+  "text": "Thumbs up",
+  "say": "Thumbs up."
+ },
+ {
+  "key": "s-elbows-pinned",
+  "text": "Elbows pinned",
+  "say": "Elbows pinned."
+ },
+ {
+  "key": "s-elbows-fixed",
+  "text": "Elbows fixed",
+  "say": "Elbows fixed."
+ },
+ {
+  "key": "s-big-stretch",
+  "text": "Big stretch",
+  "say": "Big stretch."
+ },
+ {
+  "key": "s-tall-posture",
+  "text": "Tall posture",
+  "say": "Tall posture."
+ },
+ {
+  "key": "s-small-steps",
+  "text": "Small steps",
+  "say": "Small steps."
+ },
+ {
+  "key": "s-press-out",
+  "text": "Press out",
+  "say": "Press out."
+ },
+ {
+  "key": "s-control-the-return",
+  "text": "Control the return",
+  "say": "Control the return."
+ },
+ {
+  "key": "s-elbows-glued",
+  "text": "Elbows glued",
+  "say": "Elbows glued."
+ },
+ {
+  "key": "s-hinge-at-the-hips",
+  "text": "Hinge at the hips",
+  "say": "Hinge at the hips."
+ },
+ {
+  "key": "s-stop-at-straight",
+  "text": "Stop at straight",
+  "say": "Stop at straight."
+ },
+ {
+  "key": "s-thighs-flat",
+  "text": "Thighs flat",
+  "say": "Thighs flat."
+ },
+ {
+  "key": "s-sit-back-into-the-band",
+  "text": "Sit back into the band",
+  "say": "Sit back into the band."
+ },
+ {
+  "key": "s-straighten-the-knee",
+  "text": "Straighten the knee",
+  "say": "Straighten the knee."
+ },
+ {
+  "key": "s-squeeze",
+  "text": "Squeeze",
+  "say": "Squeeze."
+ },
+ {
+  "key": "s-squeeze-the-knees-in",
+  "text": "Squeeze the knees in",
+  "say": "Squeeze the knees in."
+ }
+]
