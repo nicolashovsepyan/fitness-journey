@@ -3525,9 +3525,9 @@
   "say": "Hips over hands."
  },
  {
-  "key": "s-chest-to-the-floor-then-jump",
-  "text": "Chest to the floor, then jump",
-  "say": "Chest to the floor, then jump."
+  "key": "s-then-jump",
+  "text": "then jump",
+  "say": "then jump."
  },
  {
   "key": "s-sweep-the-chest-low-and-through",
@@ -3615,9 +3615,14 @@
   "say": "Find the balance."
  },
  {
-  "key": "s-pulse-then-press",
-  "text": "Pulse, then press",
-  "say": "Pulse, then press."
+  "key": "s-pulse",
+  "text": "Pulse",
+  "say": "Pulse."
+ },
+ {
+  "key": "s-then-press",
+  "text": "then press",
+  "say": "then press."
  },
  {
   "key": "s-lean-past-the-wrists",
@@ -3655,9 +3660,14 @@
   "say": "Lift slow."
  },
  {
-  "key": "s-push-up-then-open-to-a-t",
-  "text": "Push up, then open to a T",
-  "say": "Push up, then open to a T."
+  "key": "s-push-up",
+  "text": "Push up",
+  "say": "Push up."
+ },
+ {
+  "key": "s-then-open-to-a-t",
+  "text": "then open to a T",
+  "say": "then open to a T."
  },
  {
   "key": "s-walk-the-hands-in",
@@ -3850,9 +3860,9 @@
   "say": "Shoulders forward."
  },
  {
-  "key": "s-press-no-jump",
-  "text": "Press, no jump",
-  "say": "Press, no jump."
+  "key": "s-no-jump",
+  "text": "no jump",
+  "say": "no jump."
  },
  {
   "key": "s-shoulders-packed",
@@ -4540,9 +4550,9 @@
   "say": "Turn away."
  },
  {
-  "key": "s-slow-full-circles",
-  "text": "Slow, full circles",
-  "say": "Slow, full circles."
+  "key": "s-full-circles",
+  "text": "full circles",
+  "say": "full circles."
  },
  {
   "key": "s-tuck-the-hips",
@@ -4640,14 +4650,14 @@
   "say": "All directions."
  },
  {
-  "key": "s-big-slow-circles",
-  "text": "Big, slow circles",
-  "say": "Big, slow circles."
+  "key": "s-big",
+  "text": "Big",
+  "say": "Big."
  },
  {
-  "key": "s-hips-high-then-chest-through",
-  "text": "Hips high, then chest through",
-  "say": "Hips high, then chest through."
+  "key": "s-then-chest-through",
+  "text": "then chest through",
+  "say": "then chest through."
  },
  {
   "key": "s-open-the-chest",

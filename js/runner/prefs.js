@@ -5,7 +5,7 @@
    ============================================================ */
 import { storage } from '../core/storage.js';
 import { setVoice, setBeeps, say, beep, setSilentOverride } from '../timer.js';
-import { setVoiceKind } from '../voice.js';
+import { setVoiceKind, studioVoices, studioReady } from '../voice.js';
 import { t, lang, setLang } from '../i18n.js';
 import { vibeOptions, setVibe } from './theme.js';
 import { checkForUpdate, runningVersion } from '../update-banner.js';
@@ -136,8 +136,9 @@ export function openPrefs(host) {
         <div class="wm-seg3">${[['en', 'English'], ['fr', 'Français']].map(([v, l]) => `<button class="${lang() === v ? 'on' : ''}" data-lang="${v}">${l}</button>`).join('')}</div></div>
       <div class="wm-vrow wm-readyrow"><div class="wm-vl"><b>${t('Get-ready countdown')}</b><small>${t('Seconds to get in position before every timer starts')}</small></div>
         <div class="wm-rstep"><button data-rd="-1" aria-label="Less">−</button><b>${prefs.ready}s</b><button data-rd="1" aria-label="More">+</button></div></div>
-      <div class="wm-vrow"><div class="wm-vl"><b>${t('Coach voice')}</b><small>${t("Nico's voice, or the same coaching in a female voice")}</small></div>
-        <div class="wm-seg3">${[['m', 'Male'], ['f', 'Female']].map(([v, l]) => `<button class="${prefs.voiceKind === v ? 'on' : ''}" data-vk="${v}">${t(l)}</button>`).join('')}</div></div>
+      <div class="wm-vrow wm-vkrow"><div class="wm-vl"><b>${t('Coach voice')}</b><small>${studioVoices().length ? t('Pick who coaches you. Studio voices speak English; in French the coach is Nico.') : t("Nico's voice, or the same coaching in a female voice")}</small></div>
+        <div class="wm-vks">${[['m', t('Nico'), t('Male')], ['f', t('Nico'), t('Female')], ...studioVoices().map(v => [v.id, v.label, `${t(v.kind === 'f' ? 'Female' : 'Male')} · ${t(v.accent)}`])]
+          .map(([v, l, sub]) => `<button class="${prefs.voiceKind === v ? 'on' : ''}" data-vk="${v}"><b>${l}</b><small>${sub}</small></button>`).join('')}</div></div>
       ${ROWS.map(([k, name, sub]) => `<button class="wm-pref" data-pref="${k}">
         <span><b>${t(name)}</b><small>${t(sub)}</small></span><i class="wm-sw ${prefs[k] ? 'on' : ''}"></i></button>`).join('')}
       ${vibeHtml()}
@@ -157,6 +158,7 @@ export function openPrefs(host) {
     ov.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => { setLang(b.dataset.lang); draw(); }));
     ov.querySelectorAll('[data-vk]').forEach(b => b.addEventListener('click', () => { set('voiceKind', b.dataset.vk); say('Get ready.'); draw(); }));
     ov.querySelectorAll('[data-rd]').forEach(b => b.addEventListener('click', () => { set('ready', Math.max(0, Math.min(30, (prefs.ready ?? 8) + Number(b.dataset.rd)))); draw(); }));
+    if (!draw.studio) { draw.studio = 1; studioReady.then(() => { if (ov.isConnected) draw(); }); }
     runningVersion().then(v => { const el = ov.querySelector('#wmVer'); if (el) el.textContent = v || 'unknown'; });
     ov.querySelector('#wmCheck').addEventListener('click', async e => {
       e.currentTarget.textContent = t('Checking…');

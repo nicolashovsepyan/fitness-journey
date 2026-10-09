@@ -20,7 +20,8 @@ const out = [], seen = new Set();
 const norm = t => String(t).toLowerCase().replace(/[’']/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
 const add = (key, text, say = text) => { const n = norm(text); if (!n || seen.has(n)) return; seen.add(n); out.push({ key, text, say }); };
 const slug = t => 's-' + norm(t).replace(/ /g, '-').slice(0, 48);
-const sentences = line => line.split(/(?<=[.!?])\s+/).map(x => x.trim()).filter(Boolean);
+/* split where voice.js splits a line: at . , ! ? */
+const sentences = line => line.split(/(?<=[.,!?])\s+/).map(x => x.trim().replace(/,$/, '.')).filter(Boolean);
 
 /* numbers, said as a count */
 const ONES = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];

@@ -218,6 +218,12 @@ function injectStyle() {
   html.wm .wm-rstep button { width: 42px; height: 42px; background:none; border:none; color: var(--text); font-size: 22px; cursor:pointer; }
   html.wm .wm-rstep b { min-width: 42px; text-align:center; font-family: var(--tnum); font-size: 18px; color: var(--wm-ready); }
   html.wm .wm-seg3 { display:flex; gap: 6px; }
+  /* the coach voice: Nico, Nico female, then the studio voices, two a row */
+  html.wm .wm-vks { display:grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
+  html.wm .wm-vks button { display:flex; flex-direction:column; align-items:flex-start; gap: 2px; text-align:left; background: var(--box); border: 1px solid var(--line); border-radius: 10px; color: var(--text); padding: 9px 12px; cursor:pointer; }
+  html.wm .wm-vks button b { font-size: 15px; } html.wm .wm-vks button small { color: var(--muted); font-size: 12px; }
+  html.wm .wm-vks button.on { border-color: var(--wm-accent); background: var(--wm-accent-soft); }
+  html.wm .wm-vks button.on b { color: var(--wm-accent); }
   html.wm .wm-seg3 button { flex:1; background: var(--box); border: 1px solid var(--line); border-radius: 10px; color: var(--text); padding: 10px 0; font-weight: 600; cursor:pointer; }
   html.wm .wm-seg3 button.on { border-color: var(--wm-accent); color: var(--wm-accent); background: var(--wm-accent-soft); }
 

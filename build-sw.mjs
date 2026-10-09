@@ -54,6 +54,9 @@ const KEEP_EXT = /\.(html|css|js|mjs|png|svg|webmanifest|json|woff2?|mp3)$/i;
    That folder was archived on 25 Aug 2026 and both addresses now serve the
    top level, so 'site/' is gone from this list: ARCHIVE/ covers it. */
 const SKIP_PREFIX = ['test/', 'docs/', 'ARCHIVE/', 'lab/', 'native-ios/',   /* the iPhone app's project, not the site */
+  /* the studio coach voices: about 6 MB each, so a phone loads only the one
+     picked (voice.js warms it in the background, the service worker keeps it) */
+  'audio/voices/',
   /* The exercise database is an AUTHORING surface, not part of the app: the
      workbook, the derived JSON and the build tools. dist/ is what gets
      uploaded, so shipping half a megabyte of internal data to a public URL

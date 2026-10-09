@@ -15,7 +15,7 @@
    Training data lives in localStorage, not here, so an update never
    touches a logged session.
    ============================================================ */
-const VERSION = 'd6c1f75b78';
+const VERSION = '06880c4782';
 const CACHE = 'fj-' + VERSION;
 const ASSETS = [
   "./audio/voice-f/c-as-many-rounds-as-possible.mp3",
@@ -426,6 +426,7 @@ const ASSETS = [
   "./js/data/program.js",
   "./js/data/sessions-beginner.js",
   "./js/data/sessions.js",
+  "./js/data/voice-cues.js",
   "./js/i18n-fr.js",
   "./js/i18n.js",
   "./js/install.js",

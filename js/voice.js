@@ -20,10 +20,24 @@ const buffers = new Map();
 /* MALE OR FEMALE. Both are Nico's takes; the female set is rebuilt from
    them by tools/build-voice-female.py (pitch and formants raised). */
 let kind = 'm';
+/* THE STUDIO VOICES (audio/voices/<id>/, made by tools/voice-generate.mjs
+   from tools/voice-lines.json): Coach Kevin, Tess… listed in
+   audio/voices/voices.json once their clips exist. English only: in
+   French the coach is Nico's French voice, male or female to match. */
+let studio = [];
+export const studioVoices = () => studio;
+export const studioReady = typeof location === 'undefined' ? Promise.resolve([])
+  : fetch('audio/voices/voices.json').then(r => r.ok ? r.json() : null).then(j => (studio = j?.voices || [])).catch(() => []);
+const isStudio = k => studio.some(v => v.id === k);
+/* the voice actually speaking now */
+function effKind() {
+  if (isStudio(kind)) return lang() === 'fr' ? (studio.find(v => v.id === kind).kind === 'f' ? 'f' : 'm') : kind;
+  return kind === 'f' ? 'f' : 'm';
+}
 /* per language: English audio/voice(-f), French audio/voice-fr(-f), the
    French one recorded from docs/VOICE-SCRIPT-FR.md */
-const dirFor = k => (lang() === 'fr' ? 'audio/voice-fr' : 'audio/voice') + (k === 'f' ? '-f' : '');
-export function setVoiceKind(k) { kind = k === 'f' ? 'f' : 'm'; }
+const dirFor = k => isStudio(k) ? `audio/voices/${k}` : (lang() === 'fr' ? 'audio/voice-fr' : 'audio/voice') + (k === 'f' ? '-f' : '');
+export function setVoiceKind(k) { kind = typeof k === 'string' && k ? k : 'm'; }
 export const voiceKind = () => kind;
 
 /* THE SOUND OF IT (the Voice lab's dials). Applied live on playback, so a
@@ -34,11 +48,12 @@ export const voiceKind = () => kind;
 export const FX_DEFAULTS = {
   m: { rate: 1, bass: 0, presence: 2, air: 1, punch: 0.3, room: 0, volume: 1, gap: 0 },
   f: { rate: 1, bass: -2, presence: 2, air: 2, punch: 0.3, room: 0, volume: 1, gap: 0 },
+  studio: { rate: 1, bass: 0, presence: 0, air: 0, punch: 0.15, room: 0, volume: 1, gap: 0 },   // already mastered: a light touch
 };
-export function fxFor(k = kind) {
+export function fxFor(k = effKind()) {
   let saved = {};
   try { saved = JSON.parse(localStorage.getItem('fj.voiceFx') || '{}')[k] || {}; } catch (e) {}
-  return { ...FX_DEFAULTS[k], ...saved };
+  return { ...(FX_DEFAULTS[k] || FX_DEFAULTS.studio), ...saved };
 }
 let chain = null;
 function fxChain(actx) {
@@ -99,17 +114,20 @@ function buildDict(pieces) {
 /* load the index once; the pieces themselves load as they are first needed
    (and all of them in the background after the first gesture) */
 let packLang = null;
+/* which pack is loaded: the language, and the studio voice if one speaks */
+const packId = () => lang() + '|' + (isStudio(effKind()) ? effKind() : 'nico');
 export function loadVoicePack() {
-  if (packLang !== lang()) { packLang = lang(); loading = null; index = null; dict = null; buffers.clear(); }
+  if (packLang !== packId()) { packLang = packId(); loading = null; index = null; dict = null; buffers.clear(); }
   if (loading) return loading;
-  loading = fetch(`${lang() === 'fr' ? 'audio/voice-fr' : 'audio/voice'}/index.json`).then(r => r.ok ? r.json() : null)
+  const at = isStudio(effKind()) ? dirFor(effKind()) : lang() === 'fr' ? 'audio/voice-fr' : 'audio/voice';
+  loading = fetch(`${at}/index.json`).then(r => r.ok ? r.json() : null)
     .then(j => { if (j?.pieces) { index = j.pieces; dict = buildDict(index); } })
     .catch(() => {});
   return loading;
 }
 export const hasVoicePack = () => !!dict;
 
-async function bufferFor(actx, key, k = kind) {
+async function bufferFor(actx, key, k = effKind()) {
   const id = `${k}:${key}`;
   if (buffers.has(id)) return buffers.get(id);
   const p = fetch(`${dirFor(k)}/${key}.mp3`).then(r => r.arrayBuffer())
@@ -127,7 +145,7 @@ export async function warmVoice(actx) {
 
 /* a line → [{ key } | { tts }] */
 export function plan(text) {
-  if (packLang !== lang()) { loadVoicePack(); return null; }     // a new language: its pack loads, the phone's voice meanwhile
+  if (packLang !== packId()) { loadVoicePack(); return null; }   // a new language or voice: its pack loads, the phone's voice meanwhile
   if (!dict) return null;
   /* the whole line recorded as one piece ("Workout complete. Strong work.") */
   const whole = dict.get(norm(text).replace(/[.,]/g, '').replace(/\s+/g, ' ').trim());

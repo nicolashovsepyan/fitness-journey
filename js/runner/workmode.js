@@ -1746,7 +1746,7 @@ function renderBites() {
     completeBlock();
   };
   draw();
-  if (beginStep(dur, cap ? 'work' : 'rest', 'fortime')) say('Go.');
+  if (beginStep(dur, cap ? 'work' : 'rest', 'fortime')) say(pick('go') || 'Go.');
   onStepDone = () => finish(dur);
   document.getElementById('ftDone').addEventListener('click', () => { buzz(40); finish(dur - (R.stepRemaining(S) ?? 0)); });
   document.getElementById('btUndo').addEventListener('click', () => {
@@ -1800,7 +1800,7 @@ function renderForTime() {
     R.save(S); say(`Done. ${spokenTime(secs)}.`);
     completeBlock();
   };
-  if (beginStep(dur, cap ? 'work' : 'rest', 'fortime')) say('Go.');
+  if (beginStep(dur, cap ? 'work' : 'rest', 'fortime')) say(pick('go') || 'Go.');
   onStepDone = () => finish(dur);
   document.getElementById('ftDone').addEventListener('click', () => { buzz(40); finish(dur - (R.stepRemaining(S) ?? 0)); });
   document.getElementById('ftLap')?.addEventListener('click', () => {

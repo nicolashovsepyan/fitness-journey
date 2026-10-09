@@ -11,6 +11,7 @@
    ============================================================ */
 import { recorded } from '../voice.js';
 import { t } from '../i18n.js';
+import { VOICE_CUES } from '../data/voice-cues.js';
 
 /* the call for round k of n (n unknown: Death By). A random one of the
    versions Nico has recorded, so it never sounds the same twice; else the
@@ -19,13 +20,18 @@ import { t } from '../i18n.js';
 const any = list => { const ok = list.filter(recorded); return ok.length ? ok[Math.floor(Math.random() * ok.length)] : null; };
 /* in the current language (the English line is the key, js/i18n-fr.js has the French) */
 const L = (en, vars) => t(en, vars);
+/* the round calls, several of each so they never repeat in a row */
+export const LAST = ['Last round. Make it count.', 'Last round. Empty the tank.', "Final round. Let's go.", 'Last round. Leave it all here.', 'Final round. Finish strong.'];
+export const TWO = ['Round {n}. Last two. Push yourself.', 'Round {n}. Two to go. Stay with it.', 'Round {n}. Two left. Dig deep.'];
+export const THREE = ['Round {n}. Three to go.', 'Round {n}. Three more. Keep it up.', 'Round {n}. Three left. Stay sharp.'];
+export const HALF = ['Round {n}. Halfway there.', 'Round {n}. Halfway. Keep going.', 'Round {n}. Halfway home.'];
 export function roundCall(k, n, word = 'Round') {
   const rung = word !== 'Round';
   const R = L(rung ? 'Rung {n}.' : 'Round {n}.', { n: k });
-  if (n && n > 1 && k === n) return any([L('Last round. Make it count.'), L('Last round. Empty the tank.'), L("Final round. Let's go.")]) || L('Last round.');
-  if (n >= 6 && k === n - 1) return any([L('Round {n}. Last two. Push yourself.', { n: k }), L('Round {n}. Two to go. Stay with it.', { n: k })]) || R;
-  if (n >= 8 && k === n - 2) return any([L('Round {n}. Three to go.', { n: k }), L('Round {n}. Three more. Keep it up.', { n: k })]) || R;
-  if (n >= 4 && k === Math.floor(n / 2) + (n % 2)) return any([L('Round {n}. Halfway there.', { n: k }), L('Round {n}. Halfway. Keep going.', { n: k })]) || L('Round {n}. Halfway.', { n: k });
+  if (n && n > 1 && k === n) return any(LAST.map(x => L(x))) || L('Last round.');
+  if (n >= 6 && k === n - 1) return any(TWO.map(x => L(x, { n: k }))) || R;
+  if (n >= 8 && k === n - 2) return any(THREE.map(x => L(x, { n: k }))) || R;
+  if (n >= 4 && k === Math.floor(n / 2) + (n % 2)) return any(HALF.map(x => L(x, { n: k }))) || L('Round {n}. Halfway.', { n: k });
   return R;
 }
 
@@ -59,13 +65,21 @@ export const CUES = {
 /* motivation, by moment: several each, one picked at random among the
    recorded ones (docs/VOICE-SCRIPT-2.md is the list to record) */
 export const LINES = {
-  halfway: ['Halfway. Keep it up.', 'Halfway there. Stay strong.', "Halfway. You've got this."],
-  minute: ['One minute to go.', 'Last minute. Dig in.', 'One minute left. Stay with it.'],
-  ten: ['Ten seconds. Finish strong.', 'Ten seconds. Everything you have.', 'Ten more seconds. Push.'],
-  rest: ['Breathe. Shake it out.', 'Good work. Recover.', 'Nice. Get your breath back.', 'Rest. Slow your breathing.'],
-  round: ['Nice round.', 'Good. Keep that pace.', 'Strong. Keep moving.', "That's it. Keep going."],
+  go: ["Let's go.", "Let's work.", 'Here we go.', 'Go time.', "Let's get it.", 'Time to work.'],
+  halfway: ['Halfway. Keep it up.', 'Halfway there. Stay strong.', "Halfway. You've got this.", 'Halfway. Stay on pace.',
+    'Halfway done. Keep moving.', "Halfway. Don't slow down.", 'Halfway home. Stay with it.', 'Halfway. Breathe and keep going.'],
+  minute: ['One minute to go.', 'Last minute. Dig in.', 'One minute left. Stay with it.', 'Sixty seconds. Everything you have.',
+    'One minute. Finish what you started.', 'Last minute. Make it count.'],
+  ten: ['Ten seconds. Finish strong.', 'Ten seconds. Everything you have.', 'Ten more seconds. Push.', "Ten seconds. Don't stop now.",
+    'Ten seconds. Empty the tank.', 'Ten seconds. Strong finish.'],
+  rest: ['Breathe. Shake it out.', 'Good work. Recover.', 'Nice. Get your breath back.', 'Rest. Slow your breathing.',
+    'Shake out the arms.', 'Good. Breathe deep.', 'Rest up. The next one is coming.', 'Easy breathing. Stay loose.',
+    'Nice work. Recover fast.', 'Walk it off. Slow breaths.'],
+  round: ['Nice round.', 'Good. Keep that pace.', 'Strong. Keep moving.', "That's it. Keep going.", 'Good round.',
+    'Clean reps. Keep it up.', 'Nice. Same again.', 'Love it. Keep going.', 'Solid. Stay smooth.', 'Strong round. Next one.'],
   done: ['Workout complete. Strong work.', "That's it. Great session.", 'Done. Proud of you.', 'Finished. That was solid.',
-    'Great work today.', "That's how it's done.", 'Session done. Recover well.', 'You showed up. Great work.'],
+    'Great work today.', "That's how it's done.", 'Session done. Recover well.', 'You showed up. Great work.',
+    'Done. Hard work pays off.', 'Finished. Be proud of that.', "That's a wrap. Great job.", 'Workout done. Hydrate and recover.'],
 };
 
 /* a recorded line for this moment, or nothing */
@@ -74,4 +88,5 @@ export function pick(moment) {
   return ok.length ? ok[Math.floor(Math.random() * ok.length)] : null;
 }
 /* the cue for a move, if recorded */
-export function cueFor(exId) { const c = exId && CUES[exId] && L(CUES[exId]); return c && recorded(c) ? c : null; }
+/* (every move has one: the fundamentals above, the rest in data/voice-cues.js) */
+export function cueFor(exId) { const en = exId && (CUES[exId] || VOICE_CUES[exId]); const c = en && L(en); return c && recorded(c) ? c : null; }
