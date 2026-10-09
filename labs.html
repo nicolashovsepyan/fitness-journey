@@ -7,11 +7,29 @@
   <title>Labs</title>
   <link rel="icon" type="image/png" href="images/timer-icon/timer-192.png" />
   <!--
-    LABS. Every design lab behind one link, for Nico, not for clients:
-    the logo, the timer ring, the coach voice, the dashboard. Each lab is
-    its own page (kept by the chat that owns it); this page only switches
-    between them. The tab last used opens next time; #voice etc. opens one
-    directly.
+    LABS. Every design lab behind one link, for Nico, not for clients. Each
+    lab is its own page; this page only switches between them. The tab last
+    used opens next time; #voice etc. opens one directly.
+
+    WHAT IS HERE, AND WHAT EACH ONE OWNS:
+      Logo        logo/LOGO LAB.html   the hero mark: triangle, dumbbell, tube
+      App icon    icon-lab.html        the home-screen tile: ground, brick, fj
+      Timer icon  timer-icon-lab.html  the Quick Timer's chronograph tile
+      Timer ring  ring-lab.html        the countdown circle inside work mode
+      Weights     logo/DUMBBELL.html   the onboarding gauges: dumbbell,
+                                       barbell and kettlebell, all three
+      Voice       voice-lab.html       the coach voice
+      Dashboard   dashboard-lab.html   dashboard layout experiments
+
+    NOT LISTED, ON PURPOSE. logo/LOGO PREVIEW.html is a showreel of the mark
+    in motion, not something with dials. logo/WEIGHT GAUGE.html is the
+    barbell-only ancestor of the Weights lab and is kept only for reference.
+    Neither takes a tab; both still open directly if you want them.
+
+    NO LAB MAY LIVE ONLY IN A CHAT. The app icon lab was built as an artifact
+    and was lost twice when the scratchpad was cleared, and had to be pulled
+    back out of the published copy. If a lab is worth keeping it is worth a
+    file in here.
   -->
   <style>
     :root { --bg:#171A1E; --box:#212630; --line:#2F3640; --text:#ECEFF3; --muted:#A9B2BC; --acc:#3ECBA8; --neon:#FF5FA2; }
@@ -42,9 +60,14 @@
   announceUpdate(); watchForUpdates(() => true);
 </script>
 <script>
+  /* Order is by what the thing IS, not by when it was built: the three marks
+     first, then the two moving parts, then voice, then the dashboard. */
   const LABS = [
     { id: 'logo', name: 'Logo', src: 'logo/LOGO%20LAB.html' },
+    { id: 'icon', name: 'App icon', src: 'icon-lab.html' },
+    { id: 'timericon', name: 'Timer icon', src: 'timer-icon-lab.html' },
     { id: 'ring', name: 'Timer ring', src: 'ring-lab.html' },
+    { id: 'weights', name: 'Weights', src: 'logo/DUMBBELL.html' },
     { id: 'voice', name: 'Voice', src: 'voice-lab.html' },
     { id: 'dashboard', name: 'Dashboard', src: 'dashboard-lab.html' },
   ];

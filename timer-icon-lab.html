@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0E1114" />
+  <title>Timer icon lab</title>
+  <!--
+    TIMER ICON LAB. The Quick Timer's home-screen mark: the chronograph.
+
+    WHY THIS EXISTS. The shipped icon was a flat hand-drawn SVG sitting in
+    images/timer-icon/ with nothing behind it. Nothing could regenerate it, so
+    "move the hand to 18" meant editing 60 path elements by hand. This page is
+    the geometry, so the art is now a function of numbers again.
+
+    WHAT IT OPENS ON. Exactly what ships today, read back out of
+    images/timer-icon/timer-j5-sunray.svg: hand at 21 seconds, register at 00,
+    two marks cleared either side of each number, one pink ring, the sunray
+    face, jade crown.
+
+    THE VALUES HERE DO NOT DRIVE THE BUILD. tools/build-timer-icon.mjs
+    rasterises the SVG in images/timer-icon/. Copy the block at the bottom of
+    the panel and paste it back into the chat, and the SVG is regenerated from
+    it properly. Until then this page is a sketchpad, not a source.
+  -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&display=swap">
+  <style>
+    :root{--bg:#0E1114;--card:#171B20;--card2:#1D2229;--line:#262C34;--line2:#333B45;
+      --ink:#E8EDF2;--ink2:#9AA5B1;--ink3:#6B7681;--jade:#3ECBA8;--warn:#E8A87C;--bad:#F0857A;
+      --display:'Archivo',-apple-system,BlinkMacSystemFont,sans-serif;
+      --sans:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Roboto,sans-serif;
+      --mono:ui-monospace,SFMono-Regular,Menlo,monospace}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.55 var(--sans);letter-spacing:-.006em}
+    .wrap{max-width:1120px;margin:0 auto;padding:0 clamp(18px,4vw,36px) 80px}
+    header{padding:clamp(28px,5vh,52px) 0 0}
+    .eyebrow{font:600 10.5px/1 var(--mono);letter-spacing:.22em;text-transform:uppercase;color:var(--ink3);margin:0 0 14px}
+    h1{margin:0;font-family:var(--display);font-size:clamp(26px,4.2vw,38px);line-height:1.04;letter-spacing:-.03em;font-weight:700}
+    .lede{margin:14px 0 0;max-width:64ch;color:var(--ink2);font-size:16px}
+    .lede b{color:var(--ink);font-weight:550}
+
+    .rig{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;align-items:start;margin-top:26px}
+    @media(max-width:900px){.rig{grid-template-columns:1fr}}
+    .stage{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px}
+    .sizes{display:flex;gap:28px;align-items:flex-end;flex-wrap:wrap}
+    .sizes figure{margin:0;text-align:center}
+    .sizes figcaption{margin-top:10px;font:600 10px/1.5 var(--mono);letter-spacing:.1em;color:var(--ink3)}
+    .sizes figcaption span{display:block;font-weight:400;letter-spacing:.04em;text-transform:none;color:#586470}
+    .real figcaption{color:var(--jade)}
+    .onscreen{margin-top:22px;padding-top:20px;border-top:1px solid var(--line)}
+    .onscreen .row{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+    .onscreen .pill{width:60px;height:60px;border-radius:14px;background:#2A2F36;flex:0 0 auto}
+    .onscreen p{margin:12px 0 0;font-size:12.5px;color:var(--ink3)}
+    .sizes svg,.onscreen svg{display:block;border-radius:22%}
+
+    .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;
+      display:flex;flex-direction:column;gap:17px;position:sticky;top:18px;max-height:calc(100vh - 36px);overflow-y:auto}
+    .grp{display:flex;flex-direction:column;gap:9px}
+    .grp>.eyebrow{margin:0}
+    .ctl{display:grid;grid-template-columns:1fr auto;gap:6px 12px;align-items:center}
+    .ctl label{font:600 10.5px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink3)}
+    .ctl output{font:500 12px/1 var(--mono);color:var(--jade);font-variant-numeric:tabular-nums}
+    .ctl input[type=range]{grid-column:1/-1;width:100%;margin:0;accent-color:var(--jade)}
+    .sw{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center}
+    .sw label{font:600 10.5px/1.3 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
+    .sw input[type=color]{width:32px;height:25px;padding:0;border:1px solid var(--line2);border-radius:6px;background:none;cursor:pointer}
+    .sw code{font:500 10.5px/1 var(--mono);color:var(--ink2);min-width:60px;text-align:right}
+    .seg{display:flex;gap:6px;flex-wrap:wrap}
+    .seg button{font:550 12px/1 var(--sans);color:var(--ink2);background:var(--card2);
+      border:1px solid var(--line2);border-radius:8px;padding:8px 10px;cursor:pointer;transition:.15s}
+    .seg button:hover{background:#252B33;color:var(--ink)}
+    .seg button[aria-pressed=true]{border-color:var(--jade);color:var(--jade);background:#16241F}
+    button:focus-visible,input:focus-visible{outline:2px solid var(--jade);outline-offset:2px}
+    .read{margin:0;font:400 11.5px/1.75 var(--mono);color:var(--ink2);font-variant-numeric:tabular-nums;white-space:pre-wrap}
+    .read b{color:var(--ink);font-weight:500}
+    .read .good{color:var(--jade)} .read .mid{color:var(--warn)} .read .bad{color:var(--bad)}
+    .why{margin:0;font-size:12.5px;line-height:1.5;color:var(--ink3)}
+    .why b{color:var(--ink2);font-weight:550}
+    .cfg{width:100%;background:#0C0F12;color:var(--jade);border:1px solid var(--line2);border-radius:8px;
+      padding:9px 10px;font:400 10.5px/1.6 var(--mono);resize:vertical}
+    .lockbox{border-top:1px solid var(--line);padding-top:15px}
+    .slots{display:flex;gap:6px;flex-wrap:wrap}
+    .slot{display:flex;align-items:center;gap:7px;font:550 12px/1 var(--sans);color:var(--ink2);
+      background:var(--card2);border:1px solid var(--line2);border-radius:8px;padding:7px 8px 7px 10px;cursor:pointer}
+    .slot:hover{background:#252B33;color:var(--ink)}
+    .slot.on{border-color:var(--jade);color:var(--jade);background:#16241F}
+    .slot i{font-style:normal;font-size:14px;line-height:1;color:var(--ink3);padding:0 2px;border-radius:4px}
+    .slot i:hover{color:var(--bad);background:#2A1E1E}
+    .saverow{display:grid;grid-template-columns:1fr auto;gap:6px}
+    .saverow input[type=text],.txtin{background:#0C0F12;border:1px solid var(--line2);border-radius:8px;
+      color:var(--ink);font:500 12px/1 var(--sans);padding:8px 10px;min-width:0}
+    .dirtyflag{font:600 10px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--warn)}
+    [hidden]{display:none!important}
+    @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <p class="eyebrow">Quick Timer &mdash; home screen icon</p>
+  <h1>The chronograph.</h1>
+  <p class="lede">Every part of the timer mark, live, at the sizes the phone actually draws.
+    It opens on <b>exactly what ships today</b>, read back out of the SVG rather than
+    remembered: hand at 21, register at 00, two marks cleared either side of each number,
+    the sunray face, jade crown.</p>
+  <p class="lede">The number worth watching here is <b>clear</b> &mdash; how much graduation
+    comes off around each numeral. At <b>0</b> the tick lines sit directly behind the digits
+    and the 30 turns to mush, because at six o'clock the numerals run sideways and are about
+    three times wider across the dial than 15 and 45 are. The lab works this out from each
+    numeral's real footprint at its own angle, so it stays right when you change the size.</p>
+  <p class="lede"><b>Save anything you like before you go wandering.</b> Named sets sit under
+    Saved, survive a reload, and put everything back exactly. <b>Undo</b> keeps whatever was
+    on screen before the last switch.</p>
+</header>
+
+<div class="rig">
+  <div class="stage">
+    <div class="sizes">
+      <figure><div id="s180"></div><figcaption>180<span>App Store</span></figcaption></figure>
+      <figure><div id="s120"></div><figcaption>120<span>iPad</span></figcaption></figure>
+      <figure class="real"><div id="s60"></div><figcaption>60<span>home screen</span></figcaption></figure>
+      <figure><div id="s40"></div><figcaption>40<span>spotlight</span></figcaption></figure>
+    </div>
+    <div class="onscreen">
+      <div class="row">
+        <div class="pill"></div><div class="pill"></div>
+        <div id="sRow"></div>
+        <div class="pill"></div><div class="pill"></div>
+      </div>
+      <p>Among neighbours. An icon's job is to be found on a screen of thirty, not to look good alone.</p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="grp">
+      <p class="eyebrow">Presets</p>
+      <div class="seg" id="presets">
+        <button data-p="SHIP">Shipped</button>
+        <button data-p="FLAT">Flat face</button>
+        <button data-p="RIM">Recessed rim</button>
+        <button data-p="DISH">Dished</button>
+        <button data-p="PINKTIP">Pink tip</button>
+        <button data-p="BARE">No numbers</button>
+      </div>
+    </div>
+
+    <div class="grp">
+      <p class="eyebrow" style="display:flex;justify-content:space-between;align-items:center">
+        <span>Saved</span><span class="dirtyflag" id="dirty" hidden>unsaved</span></p>
+      <div class="saverow">
+        <input type="text" id="slotName" placeholder="Name this one" maxlength="22">
+        <button class="seg" id="saveBtn" style="font:550 12px/1 var(--sans);color:var(--ink2);
+          background:var(--card2);border:1px solid var(--line2);border-radius:8px;padding:8px 12px;cursor:pointer">Save</button>
+      </div>
+      <div class="slots" id="slots"></div>
+      <div class="seg"><button id="undo" disabled>Undo last switch</button></div>
+    </div>
+
+    <div class="grp">
+      <p class="eyebrow">The dial face</p>
+      <div class="seg" id="segFace">
+        <button data-v="flat">Flat</button><button data-v="dish">Dished</button>
+        <button data-v="dome">Domed</button><button data-v="rim">Rim</button>
+        <button data-v="sun">Sunray</button><button data-v="glass">Glass</button>
+      </div>
+      <div class="ctl"><label for="faceAmt">Strength</label><output id="faceAmtV"></output>
+        <input type="range" id="faceAmt" min="0" max="200" step="5"></div>
+      <div class="sw"><label for="cTile">Tile</label><input type="color" id="cTile"><code id="kTile"></code></div>
+      <p class="why">All of these are meant to be felt rather than seen. <b>Rim</b> is the only
+        one that does something structural &mdash; darkening just the outer edge makes the ring
+        read as standing above the face instead of drawn on it &mdash; and it is the only one
+        still doing anything at 60px.</p>
+    </div>
+
+    <div class="grp">
+      <p class="eyebrow">The ring</p>
+      <div class="sw"><label for="cRing">Colour</label><input type="color" id="cRing"><code id="kRing"></code></div>
+      <div class="ctl"><label for="ringR">Radius</label><output id="ringRV"></output>
+        <input type="range" id="ringR" min="100" max="175" step="1"></div>
+      <div class="ctl"><label for="ringW">Thickness</label><output id="ringWV"></output>
+        <input type="range" id="ringW" min="6" max="30" step="0.5"></div>
+      <div class="ctl"><label for="ringCore">Core width</label><output id="ringCoreV"></output>
+        <input type="range" id="ringCore" min="0" max="70" step="1"></div>
+      <div class="ctl"><label for="ringGlow">Glow</label><output id="ringGlowV"></output>
+        <input type="range" id="ringGlow" min="0" max="50" step="1"></div>
+      <div class="ctl"><label for="openDeg">Opening</label><output id="openDegV"></output>
+        <input type="range" id="openDeg" min="0" max="70" step="1"></div>
+      <p class="why">The <b>opening</b> is the gap at the top the crown stands in. Close it and
+        the crown sits on the tube instead of in it.</p>
+    </div>
+
+    <div class="grp">
+      <p class="eyebrow">The graduation</p>
+      <div class="ctl"><label for="majLen">Major length</label><output id="majLenV"></output>
+        <input type="range" id="majLen" min="0" max="40" step="1"></div>
+      <div class="ctl"><label for="majW">Major width</label><output id="majWV"></output>
+        <input type="range" id="majW" min="2" max="18" step="0.5"></div>
+      <div class="ctl"><label for="minLen">Minor length</label><output id="minLenV"></output>
+        <input type="range" id="minLen" min="0" max="26" step="1"></div>
+      <div class="ctl"><label for="minW">Minor width</label><output id="minWV"></output>
+        <input type="range" id="minW" min="1" max="10" step="0.5"></div>
+      <div class="ctl"><label for="clear">Clear</label><output id="clearV"></output>
+        <input type="range" id="clear" min="0" max="5" step="1"></div>
+      <p class="why"><b>Clear</b> is how many marks come off each side of a number. One tick is
+        six degrees. At 0 the lines sit behind the digits.</p>
+    </div>
+
+    <div class="grp">
+      <p class="eyebrow">The numbers</p>
+      <div class="seg" id="segNums"><button data-v="on">On</button><button data-v="off">Off</button></div>
+      <div class="sw"><label for="cNum">Colour</label><input type="color" id="cNum"><code id="kNum"></code></div>
+      <div class="ctl"><label for="numW">Size</label><output id="numWV"></output>
+        <input type="range" id="numW" min="7" max="24" step="0.5"></div>
+      <div class="ctl"><label for="numR">Radius</label><output id="numRV"></output>
+        <input type="range" id="numR" min="70" max="200" step="1"></div>
+      <p class="why">15, 30 and 45 stand <b>where their tick lines were</b>, out in the
+        graduation band, which is what leaves the middle of the dial to the hand and the
+        register. 60 is missing because the crown is standing on it.</p>
+    </div>
+
+    <div class="grp">
+      <p class="eyebrow">The register</p>
+      <div class="sw"><label for="regTxt">Reads</label><input class="txtin" type="text" id="regTxt" maxlength="5" style="width:70px"><code></code></div>
+      <div class="sw"><label for="cReg">Colour</label><input type="color" id="cReg"><code id="kReg"></code></div>
+      <div class="ctl"><label for="regW">Size</label><output id="regWV"></output>
+        <input type="range" id="regW" min="10" max="48" step="1"></div>
+      <div class="ctl"><label for="regR">Height</label><output id="regRV"></output>
+        <input type="range" id="regR" min="0" max="110" step="1"></div>
+      <p class="why">It sits at <b>12 o'clock</b>, in the window the crown gap already leaves
+        open. That is what pushed the hand into the lower half, and it is why nothing crowds
+        the middle any more.</p>
+    </div>
+
+    <div class="grp">
+      <p class="eyebrow">The hand</p>
+      <div class="seg" id="segHand"><button data-v="on">On</button><button data-v="off">Off</button></div>
+      <div class="ctl"><label for="handSec">Points at</label><output id="handSecV"></output>
+        <input type="range" id="handSec" min="0" max="59" step="1"></div>
+      <div class="ctl"><label for="handLen">Length</label><output id="handLenV"></output>
+        <input type="range" id="handLen" min="20" max="95" step="1"></div>
+      <div class="ctl"><label for="handW">Thickness</label><output id="handWV"></output>
+        <input type="range" id="handW" min="5" max="24" step="0.5"></div>
+      <div class="sw"><label for="cHand">Colour</label><input type="color" id="cHand"><code id="kHand"></code></div>
+    </div>
+
+    <div class="grp">
+      <p class="eyebrow">The case</p>
+      <div class="seg" id="segCrown"><button data-v="on">Crown</button><button data-v="off">Off</button></div>
+      <div class="sw"><label for="cCrown">Crown</label><input type="color" id="cCrown"><code id="kCrown"></code></div>
+      <div class="ctl"><label for="crownLen">Crown length</label><output id="crownLenV"></output>
+        <input type="range" id="crownLen" min="8" max="40" step="1"></div>
+      <div class="seg" id="segPush"><button data-v="on">Pusher</button><button data-v="off">Off</button></div>
+      <div class="ctl"><label for="pushDeg">Pusher at</label><output id="pushDegV"></output>
+        <input type="range" id="pushDeg" min="24" max="80" step="1"></div>
+      <p class="why">The crown is the one piece that can go either way. <b>Jade</b> ties the top
+        of the mark to the hand and the register; <b>pink</b> makes it part of the case and
+        quietens the top. The icon ships jade.</p>
+    </div>
+
+    <div class="grp">
+      <p class="eyebrow">Reading</p>
+      <pre class="read" id="read"></pre>
+      <p class="why" id="why"></p>
+    </div>
+
+    <div class="grp lockbox">
+      <p class="eyebrow">Your settings</p>
+      <div class="seg"><button id="reset">Reset</button><button id="copy">Copy</button></div>
+      <textarea class="cfg" id="cfg" readonly rows="12"></textarea>
+      <p class="why">These survive a reload. <b>Paste this block back to me</b> and I will
+        regenerate images/timer-icon/timer-j5-sunray.svg and rerun the icon build &mdash; it is
+        the only way the values reach the shipped art.</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+'use strict';
+/* ============================================================
+   GEOMETRY. Ported from the chat's timer-dial rig. Everything is
+   derived from the live settings, so nothing here remembers a number
+   the art does not actually use.
+   ============================================================ */
+var S = 512, C = 256, CY = 250;
+
+var DEF = {
+  tile:'#1D1B1B',
+  face:'sun', faceAmt:100,
+  ring:'#FF5FA2', ringR:150, ringW:17, ringCore:42, ringGlow:26, openDeg:20,
+  majLen:18, majW:9, minLen:9, minW:4, clear:2,
+  nums:1, numCol:'#FF5FA2', numW:13, numR:118,
+  regTxt:'00', regCol:'#3ECBA8', regW:26, regR:60,
+  hand:1, handSec:21, handLen:56, handW:13, handCol:'#3ECBA8',
+  crown:1, crownCol:'#3ECBA8', crownLen:20,
+  push:1, pushDeg:42
+};
+var CORE = '#FFF0F6', JCORE = '#D6FFF3';
+var st = Object.assign({}, DEF);
+
+var f = function(n){ return Number(n).toFixed(2); };
+var rad = function(d){ return (d - 90) * Math.PI / 180; };
+var pt = function(cx, cy, r, d){ return [cx + r*Math.cos(rad(d)), cy + r*Math.sin(rad(d))]; };
+var delta = function(a, b){ return Math.abs(((a - b + 540) % 360) - 180); };
+var sec = function(s){ return s * 6; };
+
+function arc(cx, cy, r, a, b){
+  var p1 = pt(cx,cy,r,a), p2 = pt(cx,cy,r,b);
+  var large = ((b - a + 360) % 360) > 180 ? 1 : 0;
+  return 'M' + f(p1[0]) + ' ' + f(p1[1]) + ' A' + f(r) + ' ' + f(r) +
+         ' 0 ' + large + ' 1 ' + f(p2[0]) + ' ' + f(p2[1]);
+}
+/* the seven-segment cell, the most 1983 way to write a number there is */
+var SEG = { a:[0,0,1,0], b:[1,0,1,1], c:[1,1,1,2], d:[0,2,1,2], e:[0,1,0,2], f:[0,0,0,1], g:[0,1,1,1] };
+var DIG = { '0':'abcdef','1':'bc','2':'abdeg','3':'abcdg','4':'bcfg','5':'acdfg',
+            '6':'acdefg','7':'abc','8':'abcdefg','9':'abcdfg' };
+function seven(txt, x, y, w, h, gap, col, sw){
+  var out = '', cx = x, i, s, cell;
+  for (i = 0; i < txt.length; i++){
+    var ch = txt[i];
+    if (ch === ':'){
+      out += '<circle cx="' + f(cx+w*0.18) + '" cy="' + f(y+h*0.34) + '" r="' + f(w*0.13) + '" fill="' + col + '"/>'
+           + '<circle cx="' + f(cx+w*0.18) + '" cy="' + f(y+h*0.70) + '" r="' + f(w*0.13) + '" fill="' + col + '"/>';
+      cx += w*0.42 + gap; continue;
+    }
+    var segs = DIG[ch] || '';
+    for (s = 0; s < segs.length; s++){
+      cell = SEG[segs[s]];
+      out += '<path d="M' + f(cx+cell[0]*w) + ' ' + f(y+cell[1]*h/2) +
+             ' L' + f(cx+cell[2]*w) + ' ' + f(y+cell[3]*h/2) + '" stroke="' + col +
+             '" stroke-width="' + f(sw) + '" stroke-linecap="round" fill="none"/>';
+    }
+    cx += w + gap;
+  }
+  return out;
+}
+var textWidth = function(txt, w, gap){ return txt.length * w + (txt.length - 1) * gap; };
+
+/* a tube: body, then a lit core at a fraction of it */
+function tube(d, w, col, core, frac){
+  return '<path d="' + d + '" fill="none" stroke="' + col + '" stroke-width="' + f(w) +
+         '" stroke-linecap="round" stroke-linejoin="round"/>' +
+    (st.ringCore > 0 ? '<path d="' + d + '" fill="none" stroke="' + core + '" stroke-width="' +
+         f(w * frac) + '" stroke-linecap="round" stroke-linejoin="round"/>' : '');
+}
+var QUARTERS = [15, 30, 45].map(sec);
+var inCrown = function(d){ return delta(d, 0) < st.openDeg + 6; };
+
+/* How wide a numeral is measured ALONG the dial rather than across the
+   page: at 3 and 9 o'clock that is its height, at 6 o'clock its width.
+   This is why the 30 needs more room than the 15 and the 45. */
+function clearDeg(){ return st.clear * 6 + 0.5; }
+
+function ticks(r0, len, w, majors){
+  var n = majors ? 12 : 60, step = 360 / n, s = '', i;
+  if (len <= 0) return '';
+  for (i = 0; i < n; i++){
+    var d = i * step;
+    if (inCrown(d)) continue;
+    if (!majors && i % 5 === 0) continue;
+    if (st.nums && QUARTERS.some(function(q){ return delta(d, q) <= clearDeg(); })) continue;
+    var a = pt(C, CY, r0, d), b = pt(C, CY, r0 - len, d);
+    s += '<path d="M' + f(a[0]) + ' ' + f(a[1]) + ' L' + f(b[0]) + ' ' + f(b[1]) +
+         '" stroke="' + st.ring + '" stroke-width="' + f(w) + '" stroke-linecap="round" fill="none"/>';
+  }
+  return s;
+}
+function band(){
+  if (!st.nums) return '';
+  var w = st.numW, h = w * 1.7, gap = w * .45, s = '';
+  [15, 30, 45].forEach(function(n){
+    var txt = String(n), wide = textWidth(txt, w, gap);
+    var p = pt(C, CY, st.numR, sec(n));
+    s += seven(txt, p[0] - wide/2, p[1] - h/2, w, h, gap, st.numCol, w * .34);
+  });
+  return s;
+}
+function register(){
+  var txt = st.regTxt || '', w = st.regW, h = w * 1.46, gap = w * .46;
+  if (!txt) return '';
+  return seven(txt, C - textWidth(txt, w, gap)/2, CY - st.regR - h/2, w, h, gap, st.regCol, w * .31);
+}
+function hand(){
+  if (!st.hand) return '';
+  var p = pt(C, CY, st.ringR * st.handLen / 100, sec(st.handSec));
+  var d = 'M' + C + ' ' + CY + ' L' + f(p[0]) + ' ' + f(p[1]);
+  return tube(d, st.handW, st.handCol, JCORE, .38) +
+    '<circle cx="' + C + '" cy="' + CY + '" r="' + f(st.handW * .77) + '" fill="' + JCORE + '"/>';
+}
+function crown(){
+  if (!st.crown) return '';
+  var top = CY - st.ringR - 4;
+  var d = 'M' + C + ' ' + f(top) + ' L' + C + ' ' + f(top - st.crownLen);
+  var core = st.crownCol === st.ring ? CORE : JCORE;
+  return '<path d="' + d + '" fill="none" stroke="' + st.crownCol + '" stroke-width="22" stroke-linecap="round"/>'
+       + '<path d="' + d + '" fill="none" stroke="' + core + '" stroke-width="9" stroke-linecap="round"/>';
+}
+function pusher(){
+  if (!st.push) return '';
+  var a = pt(C, CY, st.ringR + 2, st.pushDeg), b = pt(C, CY, st.ringR + 26, st.pushDeg);
+  return tube('M' + f(a[0]) + ' ' + f(a[1]) + ' L' + f(b[0]) + ' ' + f(b[1]), 15, st.ring, CORE, .42);
+}
+
+/* ---- the dial face. All of these are deliberately quiet. ---------------- */
+function faceParts(id){
+  var FACE = st.ringR - st.ringW / 2, k = st.faceAmt / 100, defs = '', body = '';
+  var o = function(v){ return (v * k).toFixed(3); };
+  if (st.face === 'dish'){
+    defs = '<linearGradient id="d'+id+'" x1="0" y1="0" x2="0.75" y2="1">' +
+      '<stop offset="0%" stop-color="#000000" stop-opacity="'+o(.42)+'"/>' +
+      '<stop offset="52%" stop-color="#000000" stop-opacity="'+o(.10)+'"/>' +
+      '<stop offset="100%" stop-color="#FFFFFF" stop-opacity="'+o(.045)+'"/></linearGradient>';
+    body = '<circle cx="'+C+'" cy="'+CY+'" r="'+f(FACE)+'" fill="url(#d'+id+')"/>';
+  } else if (st.face === 'dome'){
+    defs = '<linearGradient id="d'+id+'" x1="0" y1="0" x2="0.75" y2="1">' +
+      '<stop offset="0%" stop-color="#FFFFFF" stop-opacity="'+o(.055)+'"/>' +
+      '<stop offset="48%" stop-color="#000000" stop-opacity="'+o(.10)+'"/>' +
+      '<stop offset="100%" stop-color="#000000" stop-opacity="'+o(.40)+'"/></linearGradient>';
+    body = '<circle cx="'+C+'" cy="'+CY+'" r="'+f(FACE)+'" fill="url(#d'+id+')"/>';
+  } else if (st.face === 'rim'){
+    defs = '<radialGradient id="d'+id+'" gradientUnits="userSpaceOnUse" cx="'+C+'" cy="'+CY+'" r="'+f(FACE)+'">' +
+      '<stop offset="62%" stop-color="#000000" stop-opacity="0"/>' +
+      '<stop offset="100%" stop-color="#000000" stop-opacity="'+o(.55)+'"/></radialGradient>';
+    body = '<circle cx="'+C+'" cy="'+CY+'" r="'+f(FACE)+'" fill="url(#d'+id+')"/>';
+  } else if (st.face === 'glass'){
+    defs = '<linearGradient id="d'+id+'" x1="0.08" y1="0" x2="0.72" y2="1">' +
+      '<stop offset="0%" stop-color="#FFFFFF" stop-opacity="'+o(.085)+'"/>' +
+      '<stop offset="38%" stop-color="#FFFFFF" stop-opacity="'+o(.012)+'"/>' +
+      '<stop offset="55%" stop-color="#000000" stop-opacity="'+o(.12)+'"/>' +
+      '<stop offset="100%" stop-color="#000000" stop-opacity="'+o(.34)+'"/></linearGradient>';
+    body = '<circle cx="'+C+'" cy="'+CY+'" r="'+f(FACE)+'" fill="url(#d'+id+')"/>';
+  } else if (st.face === 'sun'){
+    defs = '<radialGradient id="fs'+id+'" gradientUnits="userSpaceOnUse" cx="'+C+'" cy="'+CY+'" r="'+f(FACE)+'">' +
+      '<stop offset="0%" stop-color="#FFFFFF" stop-opacity="0"/>' +
+      '<stop offset="72%" stop-color="#FFFFFF" stop-opacity="1"/>' +
+      '<stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.25"/></radialGradient>' +
+      '<mask id="ms'+id+'"><circle cx="'+C+'" cy="'+CY+'" r="'+f(FACE)+'" fill="url(#fs'+id+')"/></mask>';
+    var rays = '';
+    for (var i = 0; i < 60; i++){
+      var p = pt(C, CY, FACE, i * 6);
+      rays += '<path d="M'+C+' '+CY+' L'+f(p[0])+' '+f(p[1])+'" stroke="#FFFFFF" stroke-width="1.6" stroke-opacity="' +
+              o(i % 2 ? .038 : .018) + '"/>';
+    }
+    body = '<circle cx="'+C+'" cy="'+CY+'" r="'+f(FACE)+'" fill="#000000" opacity="'+o(.26)+'"/>' +
+           '<g mask="url(#ms'+id+')">' + rays + '</g>';
+  }
+  return { defs: defs, body: body };
+}
+
+function svg(id, px){
+  var fp = faceParts(id);
+  var A0 = st.openDeg, A1 = 360 - st.openDeg;
+  var ringBody = tube(arc(C, CY, st.ringR, A0, A1), st.ringW, st.ring, CORE, st.ringCore / 100)
+    + pusher()
+    + ticks(st.ringR - st.ringW + 1, st.majLen, st.majW, 1)
+    + ticks(st.ringR - st.ringW + 1, st.minLen, st.minW, 0)
+    + band();
+  var inner = crown() + hand() + register();
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+S+' '+S+'" width="'+px+'" height="'+px+'"><defs>' +
+    '<radialGradient id="gh'+id+'" gradientUnits="userSpaceOnUse" cx="'+C+'" cy="'+(S*0.41)+'" r="'+(S*0.62)+'">' +
+      '<stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.07"/>' +
+      '<stop offset="60%" stop-color="#FFFFFF" stop-opacity="0"/></radialGradient>' +
+    '<radialGradient id="gv'+id+'" gradientUnits="userSpaceOnUse" cx="'+C+'" cy="'+C+'" r="'+(S*0.72)+'">' +
+      '<stop offset="55%" stop-color="#000000" stop-opacity="0"/>' +
+      '<stop offset="100%" stop-color="#000000" stop-opacity="0.45"/></radialGradient>' +
+    '<filter id="ng'+id+'" x="-60%" y="-60%" width="220%" height="220%">' +
+      '<feDropShadow dx="0" dy="0" stdDeviation="'+st.ringGlow+'" flood-color="'+st.ring+'" flood-opacity=".62"/>' +
+      '<feDropShadow dx="0" dy="0" stdDeviation="27" flood-color="'+CORE+'" flood-opacity=".50"/></filter>' +
+    '<filter id="jg'+id+'" x="-60%" y="-60%" width="220%" height="220%">' +
+      '<feDropShadow dx="0" dy="0" stdDeviation="14" flood-color="'+st.handCol+'" flood-opacity=".55"/>' +
+      '<feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="'+JCORE+'" flood-opacity=".45"/></filter>' +
+    '<clipPath id="t'+id+'"><rect width="'+S+'" height="'+S+'" rx="112"/></clipPath>' + fp.defs + '</defs>' +
+    '<g clip-path="url(#t'+id+')">' +
+      '<rect width="'+S+'" height="'+S+'" fill="'+st.tile+'"/>' +
+      '<rect width="'+S+'" height="'+S+'" fill="url(#gh'+id+')"/>' + fp.body +
+      '<rect width="'+S+'" height="'+S+'" fill="url(#gv'+id+')"/>' +
+      '<g filter="url(#ng'+id+')">' + ringBody + '</g>' +
+      '<g filter="url(#jg'+id+')">' + inner + '</g>' +
+    '</g></svg>';
+}
+
+/* ============================================================
+   THE PANEL
+   ============================================================ */
+var $ = function(id){ return document.getElementById(id); };
+var RANGES = {
+  faceAmt:'faceAmt', ringR:'ringR', ringW:'ringW', ringCore:'ringCore', ringGlow:'ringGlow',
+  openDeg:'openDeg', majLen:'majLen', majW:'majW', minLen:'minLen', minW:'minW', clear:'clear',
+  numW:'numW', numR:'numR', regW:'regW', regR:'regR',
+  handSec:'handSec', handLen:'handLen', handW:'handW', crownLen:'crownLen', pushDeg:'pushDeg'
+};
+var COLORS = { tile:'cTile', ring:'cRing', numCol:'cNum', regCol:'cReg', handCol:'cHand', crownCol:'cCrown' };
+var SEGS = { face:'segFace', nums:'segNums', hand:'segHand', crown:'segCrown', push:'segPush' };
+var UNIT = { ringR:'', ringW:'', faceAmt:'%', ringCore:'%', handLen:'%', handSec:' s',
+             openDeg:'°', pushDeg:'°', clear:'' };
+
+function readings(){
+  /* The one number worth watching: how much room each numeral really has.
+     The 30 is the tight one because at six o'clock the digits run sideways. */
+  var w = st.numW, h = w * 1.7, gap = w * .45;
+  var worst = null;
+  [15, 30, 45].forEach(function(n){
+    var deg = sec(n), t = rad(deg);
+    var wide = textWidth(String(n), w, gap);
+    var across = Math.abs(wide/2 * Math.sin(t)) + Math.abs(h/2 * Math.cos(t));
+    var need = Math.atan2(across + 3, st.numR) * 180 / Math.PI;
+    if (!worst || need > worst.need) worst = { n: n, need: need, across: across };
+  });
+  var have = clearDeg();
+  var ok = !st.nums || have >= worst.need;
+  /* and whether the numerals are inside the ring at all */
+  var reach = st.numR + worst.across;
+  var innerEdge = st.ringR - st.ringW / 2;
+  var room = innerEdge - reach;
+
+  var cls = function(good){ return good ? 'good' : 'bad'; };
+  $('read').innerHTML =
+    'numerals        <b>' + (st.nums ? '15 / 30 / 45' : 'off') + '</b>\n' +
+    'tightest        <b>' + worst.n + '</b> needs <b>' + worst.need.toFixed(1) + '°</b>\n' +
+    'cleared         <span class="' + cls(ok) + '">' + have.toFixed(1) + '°</span>  (' + st.clear + ' marks a side)\n' +
+    'room to ring    <span class="' + cls(room > 4) + '">' + room.toFixed(1) + '</span>\n' +
+    'hand            <b>' + st.handSec + ' s</b>  (' + sec(st.handSec) + '°)\n' +
+    'register        <b>' + (st.regTxt || '—') + '</b>';
+
+  var why = [];
+  if (st.nums && !ok) why.push('<b>Tick lines are sitting behind the ' + worst.n + '.</b> Raise Clear until it goes green — at six o’clock the digits run sideways, so the 30 needs about three times the room 15 and 45 do.');
+  if (st.nums && room <= 4) why.push('<b>The numbers are touching the ring.</b> Pull Radius in or take Size down.');
+  if (st.ringCore === 0) why.push('A flat stroke is a picture <b>of</b> neon. The core is the thing that makes it neon.');
+  if (st.regTxt && st.hand && st.regTxt !== '00' && Number(st.regTxt) !== st.handSec)
+    why.push('The register says <b>' + st.regTxt + '</b> and the hand is at <b>' + st.handSec + '</b>. Either match them or set the register to 00, or the mark says two things at once.');
+  if (!why.length) why.push('Nothing is fighting anything. The dial face is meant to be felt rather than seen, so judge it at <b>60</b>, not 180.');
+  $('why').innerHTML = why.join('<br><br>');
+}
+
+function paint(){
+  $('s180').innerHTML = svg('a', 180);
+  $('s120').innerHTML = svg('b', 120);
+  $('s60').innerHTML  = svg('c', 60);
+  $('s40').innerHTML  = svg('d', 40);
+  $('sRow').innerHTML = svg('e', 60);
+  Object.keys(RANGES).forEach(function(k){
+    var el = $(RANGES[k]); if (!el) return;
+    el.value = st[k];
+    var out = $(RANGES[k] + 'V'); if (out) out.textContent = st[k] + (UNIT[k] != null ? UNIT[k] : '');
+  });
+  Object.keys(COLORS).forEach(function(k){
+    var el = $(COLORS[k]); if (!el) return;
+    el.value = st[k];
+    var code = $('k' + COLORS[k].slice(1)); if (code) code.textContent = st[k].toUpperCase();
+  });
+  Object.keys(SEGS).forEach(function(k){
+    var box = $(SEGS[k]); if (!box) return;
+    [].forEach.call(box.querySelectorAll('button'), function(b){
+      var v = b.dataset.v;
+      var on = (k === 'face') ? (st.face === v) : (st[k] ? v === 'on' : v === 'off');
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  });
+  $('regTxt').value = st.regTxt;
+  $('cfg').value = cfgText();
+  readings();
+  save();
+  markDirty();
+}
+
+function cfgText(){
+  return '/* Quick Timer icon */\nexport const TIMER = ' +
+    JSON.stringify(st, null, 2).replace(/"([a-zA-Z]+)":/g, '$1:').replace(/"/g, "'") + ';';
+}
+
+/* ---- storage. Named, never numbered: a numbered key gets silently
+   reused by a later rig and the lab opens on a dead one's settings. ---- */
+var KEY = 'fj.timericon.v1', SLOTKEY = 'fj.timericon.slots.v1';
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
+function load(){
+  try {
+    var raw = localStorage.getItem(KEY);
+    if (raw) st = Object.assign({}, DEF, JSON.parse(raw));
+  } catch (e) { st = Object.assign({}, DEF); }
+}
+var slots = [];
+function loadSlots(){ try { slots = JSON.parse(localStorage.getItem(SLOTKEY) || '[]'); } catch (e) { slots = []; } }
+function saveSlots(){ try { localStorage.setItem(SLOTKEY, JSON.stringify(slots)); } catch (e) {} }
+function drawSlots(){
+  $('slots').innerHTML = slots.map(function(s, i){
+    return '<span class="slot" data-i="' + i + '">' + s.name.replace(/</g,'&lt;') + ' <i data-del="' + i + '">×</i></span>';
+  }).join('');
+}
+var before = null;
+function remember(){ before = JSON.parse(JSON.stringify(st)); $('undo').disabled = false; }
+function markDirty(){ $('dirty').hidden = true; }
+
+var PRESETS = {
+  SHIP:    {},
+  FLAT:    { face:'flat' },
+  RIM:     { face:'rim', faceAmt:100 },
+  DISH:    { face:'dish', faceAmt:100 },
+  PINKTIP: { crownCol:'#FF5FA2' },
+  BARE:    { nums:0, clear:0 }
+};
+
+function apply(patch){ remember(); st = Object.assign({}, DEF, patch); paint(); }
+
+/* wiring */
+Object.keys(RANGES).forEach(function(k){
+  var el = $(RANGES[k]); if (!el) return;
+  el.addEventListener('input', function(){ st[k] = Number(el.value); paint(); });
+});
+Object.keys(COLORS).forEach(function(k){
+  var el = $(COLORS[k]); if (!el) return;
+  el.addEventListener('input', function(){ st[k] = el.value; paint(); });
+});
+Object.keys(SEGS).forEach(function(k){
+  var box = $(SEGS[k]); if (!box) return;
+  box.addEventListener('click', function(e){
+    var b = e.target.closest('button'); if (!b) return;
+    st[k] = (k === 'face') ? b.dataset.v : (b.dataset.v === 'on' ? 1 : 0);
+    paint();
+  });
+});
+$('regTxt').addEventListener('input', function(){ st.regTxt = $('regTxt').value.replace(/[^0-9:]/g, ''); paint(); });
+$('presets').addEventListener('click', function(e){
+  var b = e.target.closest('button'); if (!b) return;
+  apply(PRESETS[b.dataset.p] || {});
+});
+$('saveBtn').addEventListener('click', function(){
+  var name = ($('slotName').value || '').trim(); if (!name) return;
+  slots.push({ name: name, st: JSON.parse(JSON.stringify(st)) });
+  saveSlots(); drawSlots(); $('slotName').value = '';
+});
+$('slots').addEventListener('click', function(e){
+  var del = e.target.dataset.del;
+  if (del != null){ slots.splice(Number(del), 1); saveSlots(); drawSlots(); return; }
+  var slot = e.target.closest('.slot'); if (!slot) return;
+  remember(); st = Object.assign({}, DEF, slots[Number(slot.dataset.i)].st); paint();
+});
+$('undo').addEventListener('click', function(){
+  if (!before) return;
+  var now = JSON.parse(JSON.stringify(st));
+  st = before; before = now; paint();
+});
+$('reset').addEventListener('click', function(){ apply({}); });
+$('copy').addEventListener('click', function(){
+  var t = $('cfg');
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(t.value).catch(function(){ t.select(); });
+  } else { t.select(); }
+});
+
+load(); loadSlots(); drawSlots(); paint();
+</script>
+</body>
+</html>

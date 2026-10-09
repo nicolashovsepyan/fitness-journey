@@ -24,9 +24,21 @@ const ROOT = fileURLToPath(new URL('.', import.meta.url));
 /* dashboard-lab.html is the coach's sandbox: the real dashboard plus
    whatever is being tried this week. It is 400 KB, no client will ever
    open it, and precaching it would download an experiment onto every
-   phone. lab/ goes with it for the same reason. */
+   phone. lab/ goes with it for the same reason.
+
+   icon-lab.html is here on the same grounds and then some: 157 KB, of which
+   95 KB is the fj signature carried as a data URI. Nothing on a client's
+   phone will ever draw it. timer-icon-lab.html is only 36 KB but is just as
+   useless to a client, and a lab that is cheap today is a lab that grows.
+
+   NOT ALL THE LABS ARE EXCLUDED YET. ring-lab.html, voice-lab.html,
+   labs.html and logo/DUMBBELL.html are still in the shell, and DUMBBELL
+   alone is 130 KB. That predates this list and is left alone deliberately —
+   taking them out is a decision about whether Nico wants the labs to work
+   in a gym with no signal, not a cleanup. */
 const SKIP_FILE = new Set(['sw.js', 'build-sw.mjs', 'VIDEO-TODO.md', 'MEMORY.md',
-  'Yates_HIT_Hybrid_Protocol.md', 'dashboard-lab.html']);
+  'Yates_HIT_Hybrid_Protocol.md', 'dashboard-lab.html',
+  'icon-lab.html', 'timer-icon-lab.html']);
 // mp3: the coach voice (audio/voice), ~10 KB a piece, needed offline in a gym
 const KEEP_EXT = /\.(html|css|js|mjs|png|svg|webmanifest|json|woff2?|mp3)$/i;
 
