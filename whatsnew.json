@@ -1,6 +1,7 @@
 {
-  "version": "2026-10-09.1",
+  "version": "2026-10-10.1",
   "notes": [
+    "New coach voices: Coach Kevin, Tess, Dominic and Louise (Timer settings, Coach voice). They know every move by name, with a coaching cue for each",
     "Getting ready for new studio coach voices: more things for the coach to say, and a cue for every move",
     "Quick picks: ready-made workouts for every timer type, easy to hard (Pull-up 150, Cindy, Murph, Chelsea and more)",
     "For time: tap your reps in as you go (+5, +10, +20) and watch the bar fill to 100%",
@@ -41,6 +42,7 @@
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
   ],
   "notes_fr": [
+    "Nouvelles voix de coach : Coach Kevin, Tess, Dominic et Louise (Réglages du minuteur, Voix du coach). En anglais, avec le nom et un conseil pour chaque exercice",
     "En préparation : de nouvelles voix de coach studio, plus de phrases variées et un conseil pour chaque exercice",
     "Séances express : des séances prêtes pour chaque type de minuteur, de facile à difficile (Tractions 150, Cindy, Murph, Chelsea et plus)",
     "For Time : ajoute tes répétitions au fur et à mesure (+5, +10, +20) et regarde la barre se remplir jusqu’à 100 %",

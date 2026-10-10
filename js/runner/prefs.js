@@ -23,7 +23,11 @@ export async function loadPrefs() {
   return prefs;
 }
 export const pref = k => prefs[k];
-function apply() { setVoice(!!prefs.voice); setBeeps(!!prefs.beeps); setSilentOverride(!!prefs.silent); setVoiceKind(prefs.voiceKind); }
+/* the coach voice: the one the person picked, else Coach Kevin (the studio
+   voice) once the studio voices are there, else Nico */
+const voiceChoice = () => prefs.voicePicked ? prefs.voiceKind : (studioVoices()[0]?.id || prefs.voiceKind);
+function apply() { setVoice(!!prefs.voice); setBeeps(!!prefs.beeps); setSilentOverride(!!prefs.silent); setVoiceKind(voiceChoice()); }
+studioReady.then(() => { if (prefs) apply(); });
 function set(k, v) {
   prefs[k] = v; apply();
   try { storage().setDevicePref(KEY, prefs); } catch (e) {}
@@ -138,7 +142,7 @@ export function openPrefs(host) {
         <div class="wm-rstep"><button data-rd="-1" aria-label="Less">−</button><b>${prefs.ready}s</b><button data-rd="1" aria-label="More">+</button></div></div>
       <div class="wm-vrow wm-vkrow"><div class="wm-vl"><b>${t('Coach voice')}</b><small>${studioVoices().length ? t('Pick who coaches you. Studio voices speak English; in French the coach is Nico.') : t("Nico's voice, or the same coaching in a female voice")}</small></div>
         <div class="wm-vks">${[['m', t('Nico'), t('Male')], ['f', t('Nico'), t('Female')], ...studioVoices().map(v => [v.id, v.label, `${t(v.kind === 'f' ? 'Female' : 'Male')} · ${t(v.accent)}`])]
-          .map(([v, l, sub]) => `<button class="${prefs.voiceKind === v ? 'on' : ''}" data-vk="${v}"><b>${l}</b><small>${sub}</small></button>`).join('')}</div></div>
+          .map(([v, l, sub]) => `<button class="${voiceChoice() === v ? 'on' : ''}" data-vk="${v}"><b>${l}</b><small>${sub}</small></button>`).join('')}</div></div>
       ${ROWS.map(([k, name, sub]) => `<button class="wm-pref" data-pref="${k}">
         <span><b>${t(name)}</b><small>${t(sub)}</small></span><i class="wm-sw ${prefs[k] ? 'on' : ''}"></i></button>`).join('')}
       ${vibeHtml()}
@@ -156,7 +160,7 @@ export function openPrefs(host) {
     ov.querySelector('#wmPrefDone').addEventListener('click', close);
     /* a new language: everything on screen redraws in it */
     ov.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => { setLang(b.dataset.lang); draw(); }));
-    ov.querySelectorAll('[data-vk]').forEach(b => b.addEventListener('click', () => { set('voiceKind', b.dataset.vk); say('Get ready.'); draw(); }));
+    ov.querySelectorAll('[data-vk]').forEach(b => b.addEventListener('click', () => { set('voicePicked', true); set('voiceKind', b.dataset.vk); say('Get ready.'); draw(); }));
     ov.querySelectorAll('[data-rd]').forEach(b => b.addEventListener('click', () => { set('ready', Math.max(0, Math.min(30, (prefs.ready ?? 8) + Number(b.dataset.rd)))); draw(); }));
     if (!draw.studio) { draw.studio = 1; studioReady.then(() => { if (ov.isConnected) draw(); }); }
     runningVersion().then(v => { const el = ov.querySelector('#wmVer'); if (el) el.textContent = v || 'unknown'; });

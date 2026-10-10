@@ -1,0 +1,28 @@
+{
+ "voices": [
+  {
+   "id": "kevin",
+   "label": "Coach Kevin",
+   "kind": "m",
+   "accent": "American"
+  },
+  {
+   "id": "tess",
+   "label": "Tess",
+   "kind": "f",
+   "accent": "British"
+  },
+  {
+   "id": "dominic",
+   "label": "Dominic",
+   "kind": "m",
+   "accent": "British"
+  },
+  {
+   "id": "louise",
+   "label": "Louise",
+   "kind": "f",
+   "accent": "British"
+  }
+ ]
+}

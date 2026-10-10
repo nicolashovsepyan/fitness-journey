@@ -181,6 +181,10 @@ export function plan(text) {
     const k = { n3: 'c-three', n2: 'c-two', n1: 'c-one' }[out[0].key];
     if (index[k]) out[0].key = k;
   }
+  /* a studio voice covers everything the app says: a word it lacks is left
+     out, never handed to the phone's robot voice (which also takes another
+     audio route: off the Bluetooth speaker the clips play on) */
+  if (isStudio(effKind())) return out.filter(x => x.key);
   return out.some(x => x.key) ? out : null;
 }
 
