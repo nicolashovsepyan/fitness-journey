@@ -336,6 +336,13 @@ function injectStyle() {
   html.wm .ld-mv span { font-size: 15px; font-weight: 700; margin-top: 4px; }
   /* two moves side by side: a thin line between them, so 5 and 12 read as two numbers */
   html.wm .ld-mv + .ld-mv { border-left: 1px solid var(--wm-neon-line); padding-left: 22px; }
+  /* 2 or more moves: one line each, the number then the name, the numbers lined up */
+  html.wm .ld-mvs.rows { flex-direction: column; flex-wrap: nowrap; gap: 4px; align-items: stretch; padding: 0 6px; }
+  html.wm .ld-mvs.rows .ld-mv { flex-direction: row; align-items: center; gap: 14px; border: none; padding: 0; }
+  html.wm .ld-mvs.rows .ld-mv + .ld-mv { border-left: none; padding-left: 0; border-top: 1px solid var(--line); padding-top: 4px; }
+  html.wm .ld-mvs.rows .ld-mv b { min-width: 2.2ch; text-align: right; font-size: 56px; }
+  html.wm .ld-mvs.rows.n3 .ld-mv b { font-size: 48px; } html.wm .ld-mvs.rows.n4 .ld-mv b { font-size: 42px; } html.wm .ld-mvs.rows.n5 .ld-mv b { font-size: 36px; }
+  html.wm .ld-mvs.rows .ld-mv span { margin: 0; font-size: 19px; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   html.wm .ld-next { color: var(--muted); font-size: 13.5px; margin-top: 10px; }
   html.wm .ld-stats { display:grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; }
   html.wm .ld-stats div { background: var(--box); border-radius: 14px; padding: 9px 6px; text-align:center; }

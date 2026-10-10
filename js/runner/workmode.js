@@ -7,6 +7,7 @@
             · amrap · tabata · emom · rest_pause · benchmark/max_test
    ============================================================ */
 import * as R from './runstate.js';
+import { videoEmbed } from '../data/exercise-videos.js';
 import { store } from '../store.js';
 import { EXERCISES } from '../data/exercises.js';
 import { alternatives } from '../core/resolve.js';
@@ -178,7 +179,7 @@ function exActions(item) {
 function rowVid(it) {
   if (!it || !it.exId) return '';
   const a = v => String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
-  const has = !!(it.demoUrl || EXERCISES[it.exId]?.demoUrl);
+  const has = !!(it.demoUrl || EXERCISES[it.exId]?.demoUrl || videoEmbed(it.exId));
   return `<button class="ci-vid demo-btn ${has ? 'has' : ''}" data-ex="${it.exId}" data-exname="${a(it.name)}" data-cue="${a(it.cue || EXERCISES[it.exId]?.cues)}" title="${t('Watch it')}">▶</button>`;
 }
 
@@ -572,7 +573,7 @@ function sectionNext() {
 /* exercise demo overlay — wires the ▶ play button now; real clips drop in via demoUrl later */
 function openDemo(item) {
   const ex = EXERCISES[item.exId] || {};
-  const url = item.demoUrl || ex.demoUrl;
+  const url = item.demoUrl || ex.demoUrl || videoEmbed(item.exId);
   const cue = item.cue || ex.cues || '';
   const q = encodeURIComponent(`${item.name || ex.name} ${t('form tutorial')}`);
   const ov = document.createElement('div'); ov.className = 'overlay';
@@ -1678,7 +1679,7 @@ function renderLadder() {
   shell(`<div class="now-ex"><div class="label">${t('Ladder')} · ${t('rung {a} of {b}', { a: k + 1, b: n })}${cap ? ` · ${t('cap {t}', { t: fmt(cap) })}` : ''}</div></div>
     <svg class="ld-bars" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${bars}</svg>
     <button class="ld-card" id="ldCard" aria-label="Rung done">
-      <div class="ld-mvs">${b.items.map((it, i) => `<div class="ld-mv"><b class="wm-pop">${val(rungs[k], i)}</b><span>${named[i]}</span></div>`).join('')}</div>
+      <div class="ld-mvs ${b.items.length > 1 ? `rows n${Math.min(b.items.length, 5)}` : ''}">${b.items.map((it, i) => `<div class="ld-mv"><b class="wm-pop">${val(rungs[k], i)}</b><span>${named[i]}</span></div>`).join('')}</div>
       <div class="ld-next">${next != null ? `${t('Next:')} ${b.items.map((_, i) => `${val(next, i)} ${named[i]}`).join(' · ')}` : t('Last rung. Finish it!')}</div>
     </button>
     <div class="ld-stats">
@@ -2088,7 +2089,7 @@ function quickTally(session, partial) {
     ${askBody ? `<div class="tally-body" id="tallyBody"><span>${t('Your body weight, to count bodyweight moves in the load')}</span>
       <span class="mvr-st"><input id="tbW" type="number" inputmode="decimal" placeholder="–"/><small>${unit}</small><button class="btn secondary" id="tbSave">${t('Save')}</button></span></div>` : ''}
     <div id="tallyLast" class="tally-last"></div></div>`;
-  const rec = { at: new Date().toISOString(), sig, title: S.plan.name, seconds: session.seconds, partial: !!partial,
+  const rec = { at: new Date().toISOString(), sig, title: S.plan.name, seconds: session.seconds, partial: !!partial, cfg: S.plan.quickCfg || null,
     moves: list.map(m => ({ name: m.name, reps: m.reps, weight: m.item.weight || null, wUnit: m.item.wUnit || null })), total, loadKg: Math.round(loadKg(body)) };
   const wire = () => {
     document.getElementById('tbSave')?.addEventListener('click', () => {

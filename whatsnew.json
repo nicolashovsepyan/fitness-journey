@@ -1,6 +1,10 @@
 {
-  "version": "2026-10-10.2",
+  "version": "2026-10-10.3",
   "notes": [
+    "History: the clock button at the top shows every workout with its time and reps. Do it again or save it in 1 tap",
+    "Saved workouts now sit first in Quick picks",
+    "Ladder: each move can Climb, go as a Pyramid or stay the Same. Rung reps now read on one line",
+    "Picking a move: tap ▶ to see it before you choose",
     "New: Rep goal. Set your totals (200 push-ups, 75 pull-ups…), pick EMOM, Ladder, Sets or For time, and the timer builds the workout",
     "New: You go, I go. Your rest is as long as your set took. Burpee Club 300, 500 and 1,000 push-ups inside burpees",
     "New coach voices: Coach Kevin, Tess, Dominic and Louise (Timer settings, Coach voice). They know every move by name, with a coaching cue for each",
@@ -44,6 +48,10 @@
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
   ],
   "notes_fr": [
+    "Historique : le bouton horloge en haut montre chaque séance avec son temps et ses reps. Refais-la ou enregistre-la en 1 geste",
+    "Tes séances enregistrées sont en tête des Séances express",
+    "Échelle : chaque exercice peut monter, faire une pyramide ou rester constant. Les reps du palier tiennent sur une ligne",
+    "Choisir un exercice : touche ▶ pour le voir avant",
     "Nouveau : Objectif reps. Fixe tes totaux (200 pompes, 75 tractions…), choisis EMOM, Échelle, Séries ou For Time, le minuteur construit la séance",
     "Nouveau : Chacun son tour. Ton repos dure autant que ta série. Burpee Club 300, 500 et 1 000 pompes dans des burpees",
     "Nouvelles voix de coach : Coach Kevin, Tess, Dominic et Louise (Réglages du minuteur, Voix du coach). En anglais, avec le nom et un conseil pour chaque exercice",

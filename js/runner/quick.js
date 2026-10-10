@@ -25,6 +25,8 @@ import { ringHTML, ringBaseCss, ringDesign } from './ring.js';
 import { t, t2, num, exName, exCues, lang, setLang } from '../i18n.js';
 import { PICKS, LEVEL } from './quick-picks.js';
 import { buildFromGoal, burpeeClub } from './rep-goal.js';
+import { videoEmbed, videoSearch } from '../data/exercise-videos.js';
+import { VOICE_CUES } from '../data/voice-cues.js';
 import { isInstalled, isIOS, isIOSSafari, isIOSOtherBrowser, isAndroid, canPromptInstall, promptInstall, onInstallStateChange } from '../install.js';
 
 /* ?demo adds the Work Mode preview: a sample of every program format */
@@ -260,7 +262,7 @@ function ladderMoves() {
 function maxRungs() {
   return ladderMoves().reduce((n, m) => {
     const st = ldStep(m), a = ldStart(m);
-    return st < 0 ? Math.min(n, Math.max(1, Math.floor((a - 1) / -st) + 1)) : n;
+    return st < 0 && ldMode(m) !== 'flat' ? Math.min(n, Math.max(1, Math.floor((a - 1) / -st) + 1)) : n;
   }, 50);
 }
 const rungCount = () => Math.max(1, Math.min(cfg.ldRungs, maxRungs()));
@@ -277,10 +279,20 @@ function rungOrder() {
   return idx;
 }
 const repsAt = (m, i) => Math.max(0, ldStart(m) + i * ldStep(m));
+/* EACH MOVE ITS OWN SHAPE on the same rungs: Climb (start, then + or − the
+   step each rung), Pyramid (climbs to the middle rung, then back down) or
+   Same (the start number every rung). 10 pull-ups climbing, push-ups as a
+   pyramid, 20 squats every rung. */
+const LD_MODES = [['line', 'Climb'], ['pyr', 'Pyramid'], ['flat', 'Same']];
+const ldMode = m => LD_MODES.some(x => x[0] === m?.ldMode) ? m.ldMode : 'line';
+function moveSeq(m) {
+  const order = rungOrder(), L = order.length, mode = ldMode(m);
+  return order.map((i, j) => mode === 'flat' ? ldStart(m) : mode === 'pyr' ? Math.max(1, ldStart(m) + Math.min(j, L - 1 - j) * ldStep(m)) : repsAt(m, i));
+}
 /* rungs[k] = one number per move */
-function rungs() { if (Array.isArray(cfg.ldList)) return cfg.ldList; const ms = ladderMoves(); return rungOrder().map(i => ms.map(m => repsAt(m, i))); }
+function rungs() { if (Array.isArray(cfg.ldList)) return cfg.ldList; const seqs = ladderMoves().map(moveSeq); return rungOrder().map((_, j) => seqs.map(q => q[j])); }
 function ladderPreview(m) {
-  const seq = rungOrder().map(i => repsAt(m, i)); const total = seq.reduce((a, b) => a + b, 0);
+  const seq = moveSeq(m); const total = seq.reduce((a, b) => a + b, 0);
   const shown = seq.length > 10 ? `${seq.slice(0, 5).join(', ')} … ${seq.slice(-2).join(', ')}` : seq.join(', ');
   return `${shown} · ${t('{n} total', { n: total })}`;
 }
@@ -383,10 +395,11 @@ function planName() {
   if (f === 'deathby') { const ms = ladderMoves().filter(m => mvName(m)); return `Death By${ms.length ? ' · ' + ms.map(mvName).join(', ') : ''}${cfg.dbEvery !== 60 ? ` ${t('every {t}', { t: fmt(cfg.dbEvery) })}` : ''}`; }
   if (f === 'goal') return `${t('Rep goal')} · ${namedMoves().map(m => `${m.reps || 0} ${m.name}`).join(', ')}`;
   if (f === 'igyg') return `${t('You go, I go')} · ${t2(namedMoves().length, '{n} set', '{n} sets')}`;
-  if (f === 'ladder') { const ms = ladderMoves(); return `${t('Ladder')} · ${ms.map(m => `${mvName(m) || t('reps')} ${ldStart(m)} ${ldStep(m) >= 0 ? '+' : '−'}${Math.abs(ldStep(m))}`).join(', ')}${cfg.ldShape === 'mirror' ? t(' and back') : cfg.ldShape === 'wave' ? t(' wave') : ''}`; }
+  if (f === 'ladder') { const ms = ladderMoves(); return `${t('Ladder')} · ${ms.map(m => `${mvName(m) || t('reps')} ${ldMode(m) === 'flat' ? t('{n} each rung', { n: ldStart(m) }) : `${ldStart(m)} ${ldStep(m) >= 0 ? '+' : '−'}${Math.abs(ldStep(m))}${ldMode(m) === 'pyr' ? ' ' + t('pyramid') : ''}`}`).join(', ')}${cfg.ldShape === 'mirror' ? t(' and back') : cfg.ldShape === 'wave' ? t(' wave') : ''}`; }
   return t('Stopwatch');
 }
 
+const withCfg = (c, plan) => (plan && (plan.quickCfg = c), plan);
 /* the RunPlan Work Mode will play */
 export function buildPlan(c = cfg) {
   const prev = cfg; cfg = migrate({ ...DEFAULTS, ...c });
@@ -430,8 +443,9 @@ export function buildPlan(c = cfg) {
       case 'goal': {
         /* the goal, built into the type picked, then planned as that type */
         const g = goalBuilt(); if (!g) break;
+        const goalCfg = JSON.parse(JSON.stringify(cfg));
         cfg = prev;   // restored below by the recursive call's finally
-        return buildPlan({ ...c, ...g.cfg, movesBy: { ...(c.movesBy || {}), [g.cfg.fmt]: g.moves }, ...(g.list ? { ldList: g.list } : {}) });
+        return withCfg(goalCfg, buildPlan({ ...c, ...g.cfg, movesBy: { ...(c.movesBy || {}), [g.cfg.fmt]: g.moves }, ...(g.list ? { ldList: g.list } : {}) }));
       }
       case 'igyg': {
         /* each set is a row; the moves (for the totals) are the rows' moves, once each */
@@ -473,6 +487,7 @@ export function buildPlan(c = cfg) {
     }
     return {
       name, sessionId: 'quick', quick: true, duration: Math.round((totalSec() || 0) / 60),
+      quickCfg: JSON.parse(JSON.stringify(cfg)),   // the setup, so the history can run it again or save it
       /* the get-ready countdown is one setting for every timer (Timer
          settings, 8 s unless changed); a plan built in code can still pin it */
       fmt: FORMATS.find(f => f.id === cfg.fmt)?.name || cfg.fmt,
@@ -568,7 +583,7 @@ function moveCard(m, i) {
   if (lad || db) {
     const step = ldStep(m);
     right.push(line(`data-lm="${i}" data-lf="ldStart"`, `${ldStart(m)}${sec ? '<small>s</small>' : ''}`, t('start')));
-    right.push(line(`data-lm="${i}" data-lf="ldStep"`, `${step > 0 ? '+' : ''}${step}`, db ? t('add') : t('per rung')));
+    if (!(lad && ldMode(m) === 'flat')) right.push(line(`data-lm="${i}" data-lf="ldStep"`, `${step > 0 ? '+' : ''}${step}`, db ? t('add') : t('per rung')));
   } else if (cfg.fmt !== 'tabata' && cfg.fmt !== 'timer') {   // time-based: no rep target, you log reps in the workout
     right.push(line(`data-mr="${i}"`, `<input data-mv="${i}" data-k="reps" type="number" inputmode="numeric" placeholder="–" value="${esc(m.reps)}" onfocus="this.select()"/>${sec ? '<small>s</small>' : ''}`, goal ? t('total') : ''));
     if (cfg.fmt === 'igyg' && canPump(m)) right.push(line(`data-mp="${i}"`, `${Number(m.pumps) || 0}`, t('push-ups each')));
@@ -583,6 +598,7 @@ function moveCard(m, i) {
     <div class="qt-mvr-top"><button class="qt-mvr-n ${m.name ? '' : 'empty'}" data-pick-move="${i}">${m.name ? esc(mvName(m)) : t('Choose move {n}', { n: i + 1 })}</button>
       <div class="qt-mvr-r">${right.join('')}</div>
       ${MV().length > 1 || m.name ? `<button class="qt-mx" data-mvx="${i}" aria-label="${t('Remove')}">✕</button>` : ''}</div>
+    ${lad && m.name ? `<div class="qt-ldm">${LD_MODES.map(([v, l]) => `<button class="${ldMode(m) === v ? 'on' : ''}" data-ldmode="${i}" data-v="${v}">${t(l)}</button>`).join('')}</div>` : ''}
     ${note ? `<div class="qt-mnote">${note}</div>` : ''}
   </div>`;
 }
@@ -654,6 +670,26 @@ function openHistory() {
     <button class="btn" id="qtHistOk">${t('Close')}</button>`, 'tall');
   ov.querySelector('#qtHistOk').addEventListener('click', close);
 }
+/* EVERY WORKOUT DONE on this device, newest first: the week at a glance,
+   then each one with its time, total reps and reps per move; run it again
+   or save it with the quick picks */
+function openAllHistory() {
+  const week = hist.filter(r => Date.now() - new Date(r.at) < 7 * 864e5);
+  const sum = (a, k) => a.reduce((s, r) => s + (Number(r[k]) || 0), 0);
+  const { ov, close } = sheet(`<div class="qt-sheet-h">${t('History')}</div>
+    ${hist.length ? `<div class="qt-hweek"><div><b>${week.length}</b><small>${t('workouts this week')}</small></div><div><b>${num(sum(week, 'total'))}</b><small>${t('reps')}</small></div><div><b>${fmt(sum(week, 'seconds'))}</b><small>${t('time')}</small></div></div>` : `<p class="muted center">${t('Your workouts show up here when you finish them.')}</p>`}
+    <div class="qt-hist">${hist.map((r, i) => `<div class="qt-hrow"><div class="qt-hh"><b>${shortDate(r.at)} · ${esc(r.title || '')}</b></div>
+      <div class="qt-hnums">${r.seconds ? `<span>${fmt(r.seconds)}</span>` : ''}<span>${t('{n} reps', { n: r.total })}</span>${r.loadKg ? `<span>${showWeight(r.loadKg, wUnit())}</span>` : ''}${r.partial ? `<span>${t('ended early')}</span>` : ''}</div>
+      <small>${r.moves.map(m => `${esc(m.name)} ${m.reps}${m.weight ? ` @ ${m.weight} ${m.wUnit || 'lb'}` : ''}`).join(' · ')}</small>
+      ${r.cfg ? `<div class="qt-hacts"><button data-hagain="${i}">${t('Do it again')}</button><button data-hsave="${i}">★ ${t('Save')}</button></div>` : ''}</div>`).join('')}</div>
+    <button class="btn" id="qtAllHistOk">${t('Close')}</button>`, 'tall');
+  ov.querySelector('#qtAllHistOk').addEventListener('click', close);
+  const load = r => { cfg = migrate({ ...DEFAULTS, ...JSON.parse(JSON.stringify(r.cfg)), paceV: 2 }); favIdx = null; moreOpen = false; persist(); };
+  ov.querySelectorAll('[data-hagain]').forEach(b => b.addEventListener('click', () => { load(hist[+b.dataset.hagain]); close(); draw(); scrollTo(0, 0); }));
+  ov.querySelectorAll('[data-hsave]').forEach(b => b.addEventListener('click', () => {
+    const r = hist[+b.dataset.hsave]; load(r); favs.unshift({ label: r.title || planName(), cfg: JSON.parse(JSON.stringify(cfg)), sub: summary() }); favs = favs.slice(0, 20); favIdx = 0;
+    persist(); close(); draw(); toast(t('Saved')); }));
+}
 /* REP GOAL (rep-goal.js): the totals, built into the type picked */
 const GOAL_AS = [['emom', 'EMOM'], ['ladder', 'Ladder'], ['igyg', 'Sets'], ['fortime', 'For time']];
 function goalBuilt() { return buildFromGoal(MV().map(m => ({ ...m, name: mvName(m) })), cfg.goalAs); }
@@ -677,8 +713,11 @@ const canPump = m => /burpee/i.test(`${m.exId || ''} ${m.name || ''}`);
 /* QUICK PICKS (quick-picks.js): ready-made workouts for this type, easy
    to hard, one tap fills the setup in */
 function picksRow() {
-  const ps = PICKS[cfg.fmt]; if (!ps?.length) return '';
-  return `${sec('Quick picks')}<div class="qt-picks">${ps.map(p => `<button class="qt-pick l${p.lvl}" data-qp="${p.id}">
+  const ps = PICKS[cfg.fmt] || [];
+  const mine = favs.map((f, i) => [f, i]).filter(([f]) => f.cfg?.fmt === cfg.fmt);
+  if (!ps.length && !mine.length) return '';
+  return `${sec('Quick picks')}<div class="qt-picks">${mine.map(([f, i]) => `<span class="qt-pick mine ${i === favIdx ? 'on' : ''}" data-fav="${i}" role="button">
+    <em>★ ${t('Saved')}</em><b>${esc(f.label)}</b><small>${esc(f.sub || '')}</small><i class="qt-pickx" data-favx="${i}" role="button" aria-label="${t('Remove')}">✕</i></span>`).join('')}${ps.map(p => `<button class="qt-pick l${p.lvl}" data-qp="${p.id}">
     <em>${t(LEVEL[p.lvl])}</em><b>${t(p.name)}</b><small>${t(p.sub)}</small></button>`).join('')}</div>`;
 }
 function applyPick(p) {
@@ -720,12 +759,12 @@ function draw() {
     <div class="qt-top">
       ${guest ? '' : `<button class="qt-back" id="qtBack" aria-label="${t('Back')}">‹</button>`}
       <h1>${t('Training Timer')}</h1>
+      <button class="qt-star" id="qtHist" aria-label="${t('History')}" title="${t('History')}"><svg width="21" height="21" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11a8 8 0 1 0 2.4-5.7"/><path d="M3 3v4h4"/><path d="M11 7v4l3 2"/></svg></button>
       <button class="qt-star" id="qtPrefs" aria-label="${t('Timer settings')}" title="${t('Timer settings')}">⚙︎</button>
       <button class="qt-star" id="qtShare" aria-label="${t('Share this timer')}" title="${t('Share this timer')}"><svg width="20" height="22" viewBox="0 0 20 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14V2M5 7l5-5 5 5"/><path d="M4 11H2.5v9h15v-9H16"/></svg></button>
       <button class="qt-star ${favIdx != null ? 'on' : ''}" id="qtFav" aria-label="${t('Save this timer')}" title="${t('Save this timer')}">${favIdx != null ? '★' : '☆'}</button>
     </div>
 
-    ${favs.length ? `<div class="qt-favs">${favs.map((f, i) => `<span class="qt-fav ${i === favIdx ? 'on' : ''}"><button data-fav="${i}">${esc(f.label)}</button><button class="qt-favx" data-favx="${i}" aria-label="${t('Remove')}">✕</button></span>`).join('')}</div>` : ''}
 
     ${installCard()}
     <button class="qt-type" id="qtType">
@@ -823,8 +862,8 @@ function openSave() {
     : `<button class="btn" id="svNew">${t('Save')}</button>`}`);
   const name = () => (ov.querySelector('#svName').value.trim() || defaultLabel()).slice(0, 60);
   const snap = () => JSON.parse(JSON.stringify(cfg));
-  ov.querySelector('#svUpdate')?.addEventListener('click', () => { favs[favIdx] = { label: name(), cfg: snap() }; persist(); close(); draw(); toast(t('Saved')); });
-  ov.querySelector('#svNew').addEventListener('click', () => { favs.unshift({ label: name(), cfg: snap() }); favs = favs.slice(0, 20); favIdx = 0; persist(); close(); draw(); toast(t('Saved')); });
+  ov.querySelector('#svUpdate')?.addEventListener('click', () => { favs[favIdx] = { label: name(), cfg: snap(), sub: summary() }; persist(); close(); draw(); toast(t('Saved')); });
+  ov.querySelector('#svNew').addEventListener('click', () => { favs.unshift({ label: name(), cfg: snap(), sub: summary() }); favs = favs.slice(0, 20); favIdx = 0; persist(); close(); draw(); toast(t('Saved')); });
   ov.querySelector('#svDel')?.addEventListener('click', () => { favs.splice(favIdx, 1); favIdx = null; persist(); close(); draw(); });
   setTimeout(() => ov.querySelector('#svName').select(), 60);
 }
@@ -1047,6 +1086,22 @@ function suggestedMoves(skip) {
     .map(e => ({ e, sc: e.pat.filter(x => pats.has(x)).length * 2 + e.mus.filter(x => mus.has(x)).length }))
     .filter(x => x.sc > 0).sort((a, b) => b.sc - a.sc || a.e.name.localeCompare(b.e.name)).slice(0, 6).map(x => x.e);
 }
+/* SEE THE MOVE before picking it: the clip (or a YouTube search when there
+   is none yet), the picture, the one cue, and "Use this move" */
+function openMoveDemo(id, onUse) {
+  const ex = EXERCISES[id] || {}, name = exName(id, ex.name), url = videoEmbed(id), img = exerciseImage(id);
+  const cue = VOICE_CUES[id] ? t(VOICE_CUES[id]) : '';
+  const { ov, close } = sheet(`<div class="qt-sheet-h">${esc(name)}</div>
+    ${url ? `<div class="qt-vid"><iframe src="${url}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>`
+      : img ? `<img class="qt-demoimg" src="${img}" alt=""/>` : ''}
+    ${cue ? `<p class="qt-democue">${esc(cue)}</p>` : ''}
+    ${url ? '' : `<a class="btn secondary qt-yt" href="${videoSearch(ex.name || name)}" target="_blank" rel="noopener">▶ ${t('Watch on YouTube')}</a>`}
+    <button class="btn" id="mdUse">${t('Use this move')}</button>
+    <button class="qt-link center" id="mdBack">${t('Back to the list')}</button>`, 'tall');
+  ov.classList.add('qt-sheet-top');
+  ov.querySelector('#mdUse').addEventListener('click', () => { close(); onUse?.(); });
+  ov.querySelector('#mdBack').addEventListener('click', close);
+}
 async function openMovePicker(i) {
   const { ov, close } = sheet(`<div class="qt-sheet-h">${t('Pick a move')}</div>
     <input class="qt-search" id="mvQ" placeholder="${MV()[i]?.name ? t('{x} · search to change', { x: esc(mvName(MV()[i])) }) : t('Search by name, or tap the filters')}" autocomplete="off" value=""/>
@@ -1066,7 +1121,7 @@ async function openMovePicker(i) {
     const exact = qs && LIB().some(e => e.n === qs);
     const favs = new Set(favMoves());
     const row = e => { const img = exerciseImage(e.id);
-      return `<button class="qt-res pic" data-ex="${e.id}"><span class="qt-th">${img ? `<img src="${img}" alt="" loading="lazy" decoding="async"/>` : esc(e.name[0])}</span><span class="qt-rt"><b>${esc(e.name)}</b><small>${esc(e.tag)}</small></span><span class="qt-star ${favs.has(e.id) ? 'on' : ''}" data-fav="${e.id}" role="button" aria-label="${t('Favorite')}">${favs.has(e.id) ? '★' : '☆'}</span></button>`; };
+      return `<button class="qt-res pic" data-ex="${e.id}"><span class="qt-th">${img ? `<img src="${img}" alt="" loading="lazy" decoding="async"/>` : esc(e.name[0])}</span><span class="qt-rt"><b>${esc(e.name)}</b><small>${esc(e.tag)}</small></span><span class="qt-play ${videoEmbed(e.id) ? 'has' : ''}" data-demo="${e.id}" role="button" aria-label="${t('Watch it')}">▶</span><span class="qt-star ${favs.has(e.id) ? 'on' : ''}" data-fav="${e.id}" role="button" aria-label="${t('Favorite')}">${favs.has(e.id) ? '★' : '☆'}</span></button>`; };
     const head = (title, n) => `<div class="qt-count qt-grp">${title}${n != null ? ` <span>${n}</span>` : ''}</div>`;
     let html = '';
     if (qs) {
@@ -1085,6 +1140,7 @@ async function openMovePicker(i) {
         + head(filtered ? t('More moves') : t('All moves'), rest.length) + rest.map(row).join('');
     }
     out.innerHTML = html;
+    out.querySelectorAll('[data-demo]').forEach(pl => pl.addEventListener('click', e => { e.stopPropagation(); openMoveDemo(pl.dataset.demo, () => pick({ exId: pl.dataset.demo, name: EXERCISES[pl.dataset.demo].name })); }));
     out.querySelectorAll('[data-fav]').forEach(st => st.addEventListener('click', e => { e.stopPropagation(); toggleFav(st.dataset.fav); const top = out.scrollTop; list(); out.scrollTop = top; }));
     out.querySelectorAll('[data-ex]').forEach(b => b.addEventListener('click', () => pick({ exId: b.dataset.ex, name: EXERCISES[b.dataset.ex].name })));
     out.querySelector('[data-own]')?.addEventListener('click', () => pick({ exId: null, name: q.value.trim() }));
@@ -1132,6 +1188,7 @@ function wire() {
   host.querySelectorAll('[data-mp]').forEach(b => b.addEventListener('click', () => {
     const m = MV()[+b.dataset.mp]; m.pumps = Math.max(0, Math.min(20, (Number(m.pumps) || 0) + Number(b.dataset.d))); persist(); draw();
   }));
+  host.querySelectorAll('[data-ldmode]').forEach(b => b.addEventListener('click', () => { MV()[+b.dataset.ldmode].ldMode = b.dataset.v; persist(); draw(); }));
   host.querySelectorAll('[data-goalas]').forEach(b => b.addEventListener('click', () => { cfg.goalAs = b.dataset.goalas; persist(); draw(); }));
   host.querySelectorAll('[data-igrest]').forEach(b => b.addEventListener('click', () => { cfg.igRest = b.dataset.igrest; persist(); draw(); }));
   $('#qtGoalOpen')?.addEventListener('click', () => {
@@ -1186,12 +1243,14 @@ function wire() {
     const f = favs[+b.dataset.fav]; if (!f) return;
     cfg = migrate({ ...DEFAULTS, ...JSON.parse(JSON.stringify(f.cfg)), paceV: 2 }); favIdx = +b.dataset.fav; persist(); draw();
   }));
-  host.querySelectorAll('[data-favx]').forEach(b => b.addEventListener('click', () => {
+  host.querySelectorAll('[data-favx]').forEach(b => b.addEventListener('click', e => {
+    e.stopPropagation(); if (!confirm(t('Remove "{x}" from your saved workouts?', { x: favs[+b.dataset.favx]?.label || '' }))) return;
     const i = +b.dataset.favx; favs.splice(i, 1);
     if (favIdx === i) favIdx = null; else if (favIdx > i) favIdx--;
     persist(); draw();
   }));
   $('#qtFav').addEventListener('click', openSave);
+  $('#qtHist').addEventListener('click', openAllHistory);
   $('#qtShare').addEventListener('click', shareTimer);
   $('#qtGo').addEventListener('click', () => { persist(); onStart?.(buildPlan()); });
   host.querySelectorAll('[data-demo]').forEach(b => b.addEventListener('click', () => {
@@ -1222,6 +1281,28 @@ function injectStyle() {
   .qt-fav button { background:none; border:none; color: var(--text); font-size: 13.5px; padding: 8px 4px 8px 13px; cursor:pointer; white-space:nowrap; }
   .qt-fav .qt-favx { color: var(--faint); padding: 8px 11px 8px 6px; font-size: 11px; }
 
+  .qt-ldm { display:flex; gap: 6px; margin: 2px 0 2px 2px; }
+  .qt-ldm button { background: none; border: 1px solid var(--line); color: var(--muted); border-radius: 999px; padding: 3px 11px; font-size: 12.5px; font-weight: 700; cursor: pointer; }
+  .qt-ldm button.on { border-color: var(--wm-accent); color: var(--wm-accent); background: var(--wm-accent-soft, transparent); }
+  .qt-play { flex: none; width: 34px; height: 34px; border-radius: 50%; display:grid; place-items:center; font-size: 12px; color: var(--muted); border: 1.5px solid var(--line); margin-right: 4px; cursor: pointer; }
+  .qt-play.has { color: var(--wm-accent); border-color: var(--wm-accent); }
+  .qt-vid { position: relative; width: 100%; aspect-ratio: 9 / 12; max-height: 52vh; border-radius: 14px; overflow: hidden; background: #000; margin-bottom: 10px; }
+  .qt-vid iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
+  .qt-demoimg { width: 100%; max-height: 40vh; object-fit: contain; border-radius: 14px; background: var(--box); margin-bottom: 10px; }
+  .qt-democue { font-size: 17px; font-weight: 600; text-align: center; margin: 4px 0 14px; }
+  .qt-yt { display:block; text-align:center; text-decoration:none; margin-bottom: 8px; }
+  .qt-sheet-top { z-index: 95; }
+  .qt-pick.mine { position: relative; border-color: var(--wm-accent); }
+  .qt-pick b, .qt-pick small { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+  .qt-pick.mine b { padding-right: 14px; }
+  .qt-pick.mine em { color: var(--wm-accent); }
+  .qt-pickx { position:absolute; top: 6px; right: 8px; font-style: normal; color: var(--muted); font-size: 13px; padding: 4px; }
+  .qt-hweek { display:grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+  .qt-hweek div { background: var(--box); border-radius: 12px; padding: 10px; text-align:center; }
+  .qt-hweek b { display:block; font-family: var(--tnum); font-size: 20px; color: var(--wm-neon); } .qt-hweek small { color: var(--muted); font-size: 12px; }
+  .qt-hnums { display:flex; gap: 10px; flex-wrap: wrap; font-family: var(--tnum); font-size: 15px; margin: 2px 0 4px; }
+  .qt-hacts { display:flex; gap: 8px; margin-top: 8px; }
+  .qt-hacts button { flex: 1; background: none; border: 1px solid var(--line); color: var(--text); border-radius: 10px; padding: 8px; font-weight: 700; font-size: 13.5px; }
   .qt-goalbox { display:flex; flex-direction:column; gap: 6px; margin: 10px 0 4px; padding: 12px 14px; border-radius: 14px; background: var(--box); border: 1px solid var(--wm-neon-line); }
   .qt-goalbox b { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--wm-neon); }
   .qt-goalbox span { font-size: 14.5px; line-height: 1.4; }
