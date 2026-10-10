@@ -24,6 +24,7 @@ import { readHistory, sigOf, showWeight } from './tally.js';
 import { ringHTML, ringBaseCss, ringDesign } from './ring.js';
 import { t, t2, num, exName, exCues, lang, setLang } from '../i18n.js';
 import { PICKS, LEVEL } from './quick-picks.js';
+import { buildFromGoal, burpeeClub } from './rep-goal.js';
 import { isInstalled, isIOS, isIOSSafari, isIOSOtherBrowser, isAndroid, canPromptInstall, promptInstall, onInstallStateChange } from '../install.js';
 
 /* ?demo adds the Work Mode preview: a sample of every program format */
@@ -51,6 +52,10 @@ const FORMATS = [
   { id: 'fortime', name: 'For time', sub: 'Finish fast, beat the clock', moves: true,
     how: ['Race the clock.', 'Do all the work as fast as you can, then tap Done. Your time is your score.',
       'Add a time cap and the clock stops you there if you are not finished.'] },
+  { id: 'goal', name: 'Rep goal', sub: 'Your totals, built into a workout', moves: true,
+    how: ['Set a total for each move, pick how to run it, the timer builds the workout.', 'Example: 200 push-ups, 75 pull-ups, 500 mountain climbers, 300 squats. As an EMOM: 40 minutes, every minute 5 push-ups, 2 pull-ups, 13 mountain climbers, 8 squats.',
+      'Ladder: the reps climb rung by rung and add up to your totals. Sets: your totals cut into short sets, rest as long as each set took. For time: tap your reps in as you go.',
+      'The sizes come from how long each rep takes, so every minute or rung is doable.'] },
   { id: 'vo2', name: 'VO2 max', sub: 'Proven cardio intervals', moves: false,
     how: ['Intervals that raise your VO2 max: the most oxygen your body can use. The best predictor of fitness and long life.',
       'Pick a protocol. Hard means hard: you should not be able to hold a conversation. Easy means moving, slowly.',
@@ -59,6 +64,10 @@ const FORMATS = [
     how: ['A rep ladder, for time.', 'Each move has its own start and its own change per rung. Pull-ups start at 1 and go up by 1, push-ups start at 40 and go down by 2: rung 1 is 1 + 40, rung 2 is 2 + 38…',
       'Shape: one way (up or down), there and back (pyramid 1→10→1, or valley 10→1→10), or wave (1, 10, 2, 9…).',
       'Tap "Rung done" after each rung. Every rung gets its own time. The presets set it all up in 1 tap.'] },
+  { id: 'igyg', name: 'You go, I go', sub: 'Rest as long as your set took', moves: true,
+    how: ['Partner style: one team works, the other rests, then swap. Your rest is as long as your last set took.', 'List your sets in order. Tap "Set done" when you finish: the rest runs, the next set starts on its own.',
+      'Burpees can carry push-ups: 20 burpees with 5 push-ups each = 100 push-ups. The Burpee Club picks build 1,000 push-ups that way.',
+      'Rest can also be fixed (Rest: Fixed).'] },
   { id: 'deathby', name: 'Death By', sub: '+1 rep every minute', moves: true,
     how: ['Death By.', 'Minute 1: 1 rep. Minute 2: 2 reps. Minute 3: 3 reps. Every minute the reps go up.',
       'Keep going until you can\'t finish the reps inside the minute, then tap "I can\'t finish this one". Your score is the last round you completed.',
@@ -86,18 +95,19 @@ const FIELDS = {
   ldRungs:  ['Rungs',             '',      1,  1,  50],
   ldCap:    ['Time cap',          'min',   1,  0,  90],
   ptCap:    ['Time cap',          'min',   1,  0,  10],
+  igRestSec: ['Rest',             'time',  5,  5, 600],
 };
 const isTime = k => FIELDS[k][1] === 'time';
 /* the numbers on the main screen, and the ones under "Customize" */
 const MAIN = {
   emom: ['mins'], amrap: ['cap'], fortime: ['ftRounds', 'ftCap'], tabata: ['rounds'],
   timer: ['work', 'rest', 'rounds'], stopwatch: [], pushup: ['pace'],
-  deathby: ['dbEvery', 'dbMax'], ladder: ['ldRungs', 'ldCap'], vo2: [],
+  deathby: ['dbEvery', 'dbMax'], ladder: ['ldRungs', 'ldCap'], vo2: [], goal: [], igyg: [],
 };
 const MORE = {
   emom: ['every'], amrap: [], fortime: [], tabata: ['work', 'rest'],
   timer: ['sets', 'setRest'], stopwatch: [], pushup: ['ptCap'],
-  deathby: [], ladder: [], vo2: [],
+  deathby: [], ladder: [], vo2: [], goal: [], igyg: [],
 };
 const DEFAULTS = {
   fmt: 'emom', every: 60, mins: 12, cap: 10, ftCap: 0, ftRounds: 1,
@@ -105,7 +115,7 @@ const DEFAULTS = {
   tWork: 120, tRest: 0, tRounds: 1, pace: 20, paceV: 2, ptCap: 0,
   dbEvery: 60, dbMax: 30,
   ldRungs: 10, ldShape: 'one', ldCap: 0,
-  emomStyle: 'turns', ready: 10, vo2: 'n4x4',
+  emomStyle: 'turns', ready: 10, vo2: 'n4x4', goalAs: 'emom', igRest: 'same', igRestSec: 30,
 };
 const TABATA = { work: 20, rest: 10, rounds: 8 };
 const PREF = 'quickTimer';
@@ -268,7 +278,7 @@ function rungOrder() {
 }
 const repsAt = (m, i) => Math.max(0, ldStart(m) + i * ldStep(m));
 /* rungs[k] = one number per move */
-function rungs() { const ms = ladderMoves(); return rungOrder().map(i => ms.map(m => repsAt(m, i))); }
+function rungs() { if (Array.isArray(cfg.ldList)) return cfg.ldList; const ms = ladderMoves(); return rungOrder().map(i => ms.map(m => repsAt(m, i))); }
 function ladderPreview(m) {
   const seq = rungOrder().map(i => repsAt(m, i)); const total = seq.reduce((a, b) => a + b, 0);
   const shown = seq.length > 10 ? `${seq.slice(0, 5).join(', ')} … ${seq.slice(-2).join(', ')}` : seq.join(', ');
@@ -311,6 +321,7 @@ function totalSec() {
     case 'pushup': return cfg.ptCap ? cfg.ptCap * 60 : null;
     case 'deathby': return cfg.dbMax * cfg.dbEvery;
     case 'ladder': return cfg.ldCap ? cfg.ldCap * 60 : null;
+    case 'goal': { const g = goalBuilt(); return g?.cfg.fmt === 'emom' ? g.cfg.mins * 60 : null; }
     case 'vo2': { const p = vo2(); return intervalSec(p.work, p.rest, p.n) + (p.warm || 0) + (p.cool || 0); }
     default: return null;
   }
@@ -328,6 +339,9 @@ const mvName = m => exName(m?.exId, String(m?.name || '').trim());
 function summary() {
   const moves = namedMoves();
   switch (cfg.fmt) {
+    case 'goal': { const g = goalBuilt(); if (!g) return t('Add your moves and their totals');
+      return g.cfg.fmt === 'emom' ? t('EMOM {n} min', { n: g.cfg.mins }) : g.cfg.fmt === 'ladder' ? t2(g.rows, '{n} rung', '{n} rungs') : g.cfg.fmt === 'igyg' ? t2(g.rows, '{n} set', '{n} sets') : t('For time'); }
+    case 'igyg': return igygLine();
     case 'emom': {
       const style = moves.length > 1 ? (cfg.emomStyle === 'all' ? t(' · all {n} moves each round', { n: moves.length }) : t(' · {n} moves take turns', { n: moves.length })) : '';
       return t('{n} rounds, a new one every {every}', { n: emomCount(), every: secs(cfg.every) }) + style;
@@ -367,6 +381,8 @@ function planName() {
   if (f === 'pushup') return `${t('Push-up test')} · ${t('{n} a min', { n: cfg.pace })}`;
   if (f === 'vo2') return `VO2 max · ${t(vo2().name)}`;
   if (f === 'deathby') { const ms = ladderMoves().filter(m => mvName(m)); return `Death By${ms.length ? ' · ' + ms.map(mvName).join(', ') : ''}${cfg.dbEvery !== 60 ? ` ${t('every {t}', { t: fmt(cfg.dbEvery) })}` : ''}`; }
+  if (f === 'goal') return `${t('Rep goal')} · ${namedMoves().map(m => `${m.reps || 0} ${m.name}`).join(', ')}`;
+  if (f === 'igyg') return `${t('You go, I go')} · ${t2(namedMoves().length, '{n} set', '{n} sets')}`;
   if (f === 'ladder') { const ms = ladderMoves(); return `${t('Ladder')} · ${ms.map(m => `${mvName(m) || t('reps')} ${ldStart(m)} ${ldStep(m) >= 0 ? '+' : '−'}${Math.abs(ldStep(m))}`).join(', ')}${cfg.ldShape === 'mirror' ? t(' and back') : cfg.ldShape === 'wave' ? t(' wave') : ''}`; }
   return t('Stopwatch');
 }
@@ -411,6 +427,23 @@ export function buildPlan(c = cfg) {
           /* each move climbs on its own: its start, its jump per round */
           items: ladderMoves().map((m, i) => ({ ...(moves[i] || { name: 'Reps', measure: 'reps' }), dbStart: ldStart(m), dbStep: Math.max(0, ldStep(m)) })) }];
         break;
+      case 'goal': {
+        /* the goal, built into the type picked, then planned as that type */
+        const g = goalBuilt(); if (!g) break;
+        cfg = prev;   // restored below by the recursive call's finally
+        return buildPlan({ ...c, ...g.cfg, movesBy: { ...(c.movesBy || {}), [g.cfg.fmt]: g.moves }, ...(g.list ? { ldList: g.list } : {}) });
+      }
+      case 'igyg': {
+        /* each set is a row; the moves (for the totals) are the rows' moves, once each */
+        const pairs = MV().filter(m => String(m.name || '').trim()).map((m, i) => [m, moves[i]]).filter(([m]) => Number(m.reps) > 0);
+        const keyOf = m => m.exId || mvName(m), uniq = [...new Set(pairs.map(([m]) => keyOf(m)))];
+        const items = uniq.map(k => ({ ...pairs.find(([m]) => keyOf(m) === k)[1], reps: null }));
+        const rows = pairs.map(([m]) => m);
+        blocks = [{ ...base, id: id(1), name, format: 'igyg', label: 'You go, I go', items,
+          sets: rows.map(m => ({ i: uniq.indexOf(keyOf(m)), reps: Number(m.reps), pumps: Number(m.pumps) || 0 })),
+          restMode: cfg.igRest === 'fixed' ? 'fixed' : 'same', rest: cfg.igRestSec, restMin: 10 }];
+        break;
+      }
       case 'ladder':
         blocks = [{ ...base, id: id(1), name, format: 'fortime', label: 'Ladder', minutes: cfg.ldCap, rungs: rungs(),
           ...(moves.length ? {} : { hideList: true, items: [{ name: 'Reps', measure: 'reps' }] }) }];
@@ -528,7 +561,7 @@ const wStep = () => wUnit() === 'kg' ? 2.5 : 5;
 const isWeighted = m => !!(m && m.exId && EXERCISES[m.exId]?.load === 'weighted');
 function moveCard(m, i) {
   const lad = cfg.fmt === 'ladder', db = cfg.fmt === 'deathby';
-  const sec = isHold(m);
+  const sec = isHold(m), goal = cfg.fmt === 'goal';
   /* one slim − value + line; `label` sits small on its left */
   const line = (attr, face, label = '') => `<span class="qt-st">${label ? `<span class="qt-stl">${label}</span>` : ''}<button ${attr} data-d="-1" aria-label="${t('Less')}">−</button><b>${face}</b><button ${attr} data-d="1" aria-label="${t('More')}">+</button></span>`;
   const right = [];
@@ -537,7 +570,8 @@ function moveCard(m, i) {
     right.push(line(`data-lm="${i}" data-lf="ldStart"`, `${ldStart(m)}${sec ? '<small>s</small>' : ''}`, t('start')));
     right.push(line(`data-lm="${i}" data-lf="ldStep"`, `${step > 0 ? '+' : ''}${step}`, db ? t('add') : t('per rung')));
   } else if (cfg.fmt !== 'tabata' && cfg.fmt !== 'timer') {   // time-based: no rep target, you log reps in the workout
-    right.push(line(`data-mr="${i}"`, `<input data-mv="${i}" data-k="reps" type="number" inputmode="numeric" placeholder="–" value="${esc(m.reps)}" onfocus="this.select()"/>${sec ? '<small>s</small>' : ''}`));
+    right.push(line(`data-mr="${i}"`, `<input data-mv="${i}" data-k="reps" type="number" inputmode="numeric" placeholder="–" value="${esc(m.reps)}" onfocus="this.select()"/>${sec ? '<small>s</small>' : ''}`, goal ? t('total') : ''));
+    if (cfg.fmt === 'igyg' && canPump(m)) right.push(line(`data-mp="${i}"`, `${Number(m.pumps) || 0}`, t('push-ups each')));
   }
   /* the weight sits under the reps: always for a loaded move, on request
      (a faint "+ weight") for a bodyweight one */
@@ -620,6 +654,26 @@ function openHistory() {
     <button class="btn" id="qtHistOk">${t('Close')}</button>`, 'tall');
   ov.querySelector('#qtHistOk').addEventListener('click', close);
 }
+/* REP GOAL (rep-goal.js): the totals, built into the type picked */
+const GOAL_AS = [['emom', 'EMOM'], ['ladder', 'Ladder'], ['igyg', 'Sets'], ['fortime', 'For time']];
+function goalBuilt() { return buildFromGoal(MV().map(m => ({ ...m, name: mvName(m) })), cfg.goalAs); }
+function goalPreview() {
+  const g = goalBuilt(); if (!g) return '';
+  const tot = g.goal.map((m, i) => `${g.totals[i]} ${m.name}`).join(', ');
+  switch (g.cfg.fmt) {
+    case 'emom': return t('EMOM {n} min. Every minute: {what}. Total: {tot}', { n: g.cfg.mins, what: g.moves.map(m => `${m.reps} ${m.name}`).join(', '), tot });
+    case 'ladder': return t('{n} rungs, climbing. Rung 1: {a}. Last rung: {b}. Total: {tot}', { n: g.rows, a: g.list[0].map((r, i) => `${r} ${g.goal[i].name}`).join(', '), b: g.list.at(-1).map((r, i) => `${r} ${g.goal[i].name}`).join(', '), tot });
+    case 'igyg': return t('{n} sets of about 40 s, rest as long as each set. Total: {tot}', { n: g.rows, tot });
+    default: return t('All of it, any way you like, as fast as you can: {tot}', { tot });
+  }
+}
+/* You go, I go: sets, and the push-ups the burpees carry */
+function igygLine() {
+  const rows = MV().filter(m => String(m.name || '').trim() && Number(m.reps) > 0);
+  const pu = rows.reduce((a, m) => a + (Number(m.pumps) || 0) * Number(m.reps), 0);
+  return `${t2(rows.length, '{n} set', '{n} sets')}${pu ? ` · ${t('{n} push-ups', { n: pu })}` : ''} · ${cfg.igRest === 'fixed' ? t('rest {t}', { t: fmt(cfg.igRestSec) }) : t('rest = your set')}`;
+}
+const canPump = m => /burpee/i.test(`${m.exId || ''} ${m.name || ''}`);
 /* QUICK PICKS (quick-picks.js): ready-made workouts for this type, easy
    to hard, one tap fills the setup in */
 function picksRow() {
@@ -630,11 +684,12 @@ function picksRow() {
 function applyPick(p) {
   Object.assign(cfg, p.cfg);
   const lad = ['ladder', 'deathby'].includes(cfg.fmt);
-  if (p.m.length) cfg.movesBy[cfg.fmt] = p.m.map(([k, a, b]) => {
+  if (p.gen === 'club') cfg.movesBy[cfg.fmt] = burpeeClub(p.total).map(x => ({ ...x }));
+  else if (p.m.length) cfg.movesBy[cfg.fmt] = p.m.map(([k, a, b, pumps]) => {
     const ex = EXERCISES[k], base = ex ? { exId: k, name: ex.name } : { exId: null, name: t(k) };
-    return lad ? { ...base, reps: '', ldStart: a, ldStep: b } : { ...base, reps: a };
+    return lad ? { ...base, reps: '', ldStart: a, ldStep: b } : { ...base, reps: a, ...(pumps ? { pumps } : {}) };
   });
-  favIdx = null; moreOpen = p.m.length > 0 && !lad;
+  favIdx = null; moreOpen = (p.m.length > 0 || !!p.gen) && !lad;
   persist(); draw(); toast(t('Loaded: {x}', { x: t(p.name) }));
 }
 function draw() {
@@ -642,11 +697,13 @@ function draw() {
   /* the break between repeats only shows once there is more than one */
   const main = MAIN[cfg.fmt], more = (MORE[cfg.fmt] || []).filter(k => k !== 'setRest' || cfg.sets > 1);
   const named = namedMoves().length;
-  const lad = cfg.fmt === 'ladder', db = cfg.fmt === 'deathby';
+  const lad = cfg.fmt === 'ladder' || cfg.fmt === 'goal' || cfg.fmt === 'igyg', db = cfg.fmt === 'deathby';
   /* SETTINGS: the main numbers, and the ladder's shape as one more row */
   const settings = [
     ...main.map(stepRow),
-    ...(lad ? [segRow('Shape', 'violet', LD_SHAPES, cfg.ldShape, 'data-ldshape')] : []),
+    ...(cfg.fmt === 'ladder' ? [segRow('Shape', 'violet', LD_SHAPES, cfg.ldShape, 'data-ldshape')] : []),
+    ...(cfg.fmt === 'goal' ? [segRow('Run it as', 'accent', GOAL_AS, cfg.goalAs, 'data-goalas')] : []),
+    ...(cfg.fmt === 'igyg' ? [segRow('Rest', 'neon', [['same', 'Same as your set'], ['fixed', 'Fixed']], cfg.igRest, 'data-igrest'), ...(cfg.igRest === 'fixed' ? [stepRow('igRestSec')] : [])] : []),
     ...(cfg.fmt === 'vo2' ? [`<div class="qt-srow qt-vo2"><span class="qt-sl" style="color:var(--wm-accent)">${t('Protocol')}</span>
       ${VO2.map(p => `<button class="qt-vo2p ${p.id === vo2().id ? 'on' : ''}" data-vo2="${p.id}"><b>${t(p.name)}</b><small>${t(p.sub)}</small></button>`).join('')}</div>`] : []),
   ];
@@ -678,8 +735,9 @@ function draw() {
     ${lastLine()}
     ${picksRow()}
 
-    ${settings.length ? `${sec('Settings', lad ? `<button class="qt-seclink" id="qtPresets">${t('Presets')}</button>` : '')}<div class="qt-rows">${settings.join('')}</div>` : ''}
-    ${lad || db ? `${sec('Moves')}${movesCard()}` : ''}
+    ${settings.length ? `${sec('Settings', cfg.fmt === 'ladder' ? `<button class="qt-seclink" id="qtPresets">${t('Presets')}</button>` : '')}<div class="qt-rows">${settings.join('')}</div>` : ''}
+    ${lad || db ? `${sec(cfg.fmt === 'goal' ? 'Your totals' : cfg.fmt === 'igyg' ? 'Sets, in order' : 'Moves')}${movesCard()}` : ''}
+    ${cfg.fmt === 'goal' && goalBuilt() ? `<div class="qt-goalbox"><b>${t('The plan')}</b><span>${esc(goalPreview())}</span>${cfg.goalAs !== 'ladder' ? `<button class="qt-link" id="qtGoalOpen">${t('Open it as {x} to adjust', { x: t(GOAL_AS.find(x => x[0] === cfg.goalAs)[1]) })}</button>` : ''}</div>` : ''}
     ${!settings.length && !lad && !db ? `<div class="qt-empty">${t('Nothing to set. Hit start.')}</div>` : ''}
 
     ${custom.length || (def.moves && !lad && !db) ? `<button class="qt-more ${moreOpen ? 'open' : ''}" id="qtMore"><span>${custom.length ? t('Customize') : t('Pick your exercises')}</span><i>›</i>${!moreOpen && named && !lad && !db ? `<em>${t2(named, '{n} move', '{n} moves')}</em>` : ''}</button>` : ''}
@@ -1066,11 +1124,21 @@ function wire() {
   $('#qtPresets')?.addEventListener('click', openPresets);
   host.querySelectorAll('[data-vo2]').forEach(b => b.addEventListener('click', () => { cfg.vo2 = b.dataset.vo2; persist(); draw(); }));
   host.querySelectorAll('[data-mr]').forEach(b => b.addEventListener('click', () => {
-    const m = MV()[+b.dataset.mr], k = isHold(m) ? 5 : 1, v = Number(m.reps) || 0;
+    const m = MV()[+b.dataset.mr], v = Number(m.reps) || 0, k = isHold(m) ? 5 : cfg.fmt === 'goal' ? (v >= 100 ? 25 : v >= 30 ? 10 : 5) : 1;
     /* seconds move 5 at a time, landing on a multiple of 5 (12 → 15, not 17) */
     const nv = Number(b.dataset.d) > 0 ? Math.floor(v / k) * k + k : Math.ceil(v / k) * k - k;
-    m.reps = Math.max(0, Math.min(999, nv)) || ''; persist(); draw();
+    m.reps = Math.max(0, Math.min(cfg.fmt === 'goal' ? 5000 : 999, nv)) || ''; persist(); draw();
   }));
+  host.querySelectorAll('[data-mp]').forEach(b => b.addEventListener('click', () => {
+    const m = MV()[+b.dataset.mp]; m.pumps = Math.max(0, Math.min(20, (Number(m.pumps) || 0) + Number(b.dataset.d))); persist(); draw();
+  }));
+  host.querySelectorAll('[data-goalas]').forEach(b => b.addEventListener('click', () => { cfg.goalAs = b.dataset.goalas; persist(); draw(); }));
+  host.querySelectorAll('[data-igrest]').forEach(b => b.addEventListener('click', () => { cfg.igRest = b.dataset.igrest; persist(); draw(); }));
+  $('#qtGoalOpen')?.addEventListener('click', () => {
+    const g = goalBuilt(); if (!g) return;
+    Object.assign(cfg, g.cfg); cfg.movesBy[g.cfg.fmt] = g.moves.map(m => ({ ...m })); favIdx = null; moreOpen = true;
+    persist(); draw(); toast(t('Loaded: {x}', { x: planName() }));
+  });
   host.querySelectorAll('[data-lm]').forEach(b => b.addEventListener('click', () => {
     const m = MV()[+b.dataset.lm], f = b.dataset.lf, d = +b.dataset.d;
     const k = isHold(m) ? 5 : 1;
@@ -1154,6 +1222,10 @@ function injectStyle() {
   .qt-fav button { background:none; border:none; color: var(--text); font-size: 13.5px; padding: 8px 4px 8px 13px; cursor:pointer; white-space:nowrap; }
   .qt-fav .qt-favx { color: var(--faint); padding: 8px 11px 8px 6px; font-size: 11px; }
 
+  .qt-goalbox { display:flex; flex-direction:column; gap: 6px; margin: 10px 0 4px; padding: 12px 14px; border-radius: 14px; background: var(--box); border: 1px solid var(--wm-neon-line); }
+  .qt-goalbox b { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--wm-neon); }
+  .qt-goalbox span { font-size: 14.5px; line-height: 1.4; }
+  .qt-goalbox .qt-link { align-self: flex-start; padding: 0; }
   .qt-picks { display:flex; gap: 10px; overflow-x: auto; margin: 0 calc(-1 * var(--pad)) 6px; padding: 2px var(--pad) 10px; scroll-snap-type: x mandatory; scroll-padding: 0 var(--pad); scrollbar-width: none; }
   .qt-picks::-webkit-scrollbar { display: none; }
   .qt-pick { flex: 0 0 158px; scroll-snap-align: start; display:flex; flex-direction:column; align-items:flex-start; gap: 4px; text-align:left; padding: 11px 12px 12px;

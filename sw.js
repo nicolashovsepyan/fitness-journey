@@ -15,7 +15,7 @@
    Training data lives in localStorage, not here, so an update never
    touches a logged session.
    ============================================================ */
-const VERSION = '63b93dc370';
+const VERSION = '62025b47d6';
 const CACHE = 'fj-' + VERSION;
 const ASSETS = [
   "./audio/voice-f/c-as-many-rounds-as-possible.mp3",
@@ -442,6 +442,7 @@ const ASSETS = [
   "./js/runner/prefs.js",
   "./js/runner/quick-picks.js",
   "./js/runner/quick.js",
+  "./js/runner/rep-goal.js",
   "./js/runner/ring.js",
   "./js/runner/runstate.js",
   "./js/runner/tally.js",

@@ -50,6 +50,8 @@ const CORE = {
     "This is the push-up test. Start on the double beep. Then one push-up on every beep. I'll count."],
   'c-for-time': ['For time', 'For time.'], 'c-minute': ['Minute', 'minute.'], 'c-second': ['Second', 'second.'],
   'c-flagged': ['Flagged. Skip it if it hurts', 'Flagged. Skip it if it hurts.'], 'c-rung': ['Rung', 'Rung.'],
+  'c-push-ups-each': ['push-ups each', 'push-ups each.'], 'c-push-up-each': ['push-up each', 'push-up each.'], 'c-voice-on': ['Voice on', 'Voice on.'],
+  'c-set-done': ['Set done', 'Set done!'], 'c-your-turn': ['Your turn', 'Your turn!'], 'c-set': ['Set', 'Set.'], 'c-sets': ['Sets', 'sets.'],
 };
 for (const [k, [text, say]] of Object.entries(CORE)) add(k, text, say);
 

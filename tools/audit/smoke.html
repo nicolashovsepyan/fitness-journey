@@ -27,7 +27,9 @@
 <iframe id="stage" title="app"></iframe>
 <script type="module">
 import { MODES } from './timer-audit.js';
-const ALL = { ...MODES, vo2: { cfg: { fmt: 'vo2', vo2: 'z5' } } };
+const ALL = { ...MODES, vo2: { cfg: { fmt: 'vo2', vo2: 'z5' } },
+  goal: { cfg: { fmt: 'goal', goalAs: 'emom', movesBy: { goal: [{ exId: 'pushup', name: 'Push-ups', reps: 50 }, { exId: 'bodyweight_squat', name: 'Bodyweight Squat', reps: 60 }] } } },
+  igyg: { cfg: { fmt: 'igyg', igRest: 'same', movesBy: { igyg: [{ exId: 'burpee', name: 'Burpee', reps: 10, pumps: 2 }, { exId: 'pullup', name: 'Pull-Up', reps: 5 }] } } } };
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const out = document.getElementById('out'), sum = document.getElementById('sum'), stage = document.getElementById('stage');
 const KEEP = ['fj.quickTimer', 'fj.lang', 'fj.workModePrefs'];
@@ -55,7 +57,11 @@ async function check(lang, mode) {
   const { w, d, errs } = await load('../../index.html?quick&nosw');
   for (let i = 0; i < 100 && !d.querySelector('.screen.qt, .screen.run'); i++) await wait(100);   // a cold first load on the live site can take a few seconds
   const R = await w.eval(`import('${new URL('js/runner/runstate.js', w.location.href)}')`).catch(() => null);
-  if (d.querySelector('.screen.run')) { R?.clear(); await R?.flushRunState(); w.location.reload(); await wait(1500); }
+  if (d.querySelector('.screen.run')) {   // a workout left open: close it, start clean
+    R?.clear(); await R?.flushRunState(); w.location.reload(); await wait(800);
+    for (let i = 0; i < 100 && !stage.contentDocument?.querySelector('.screen.qt'); i++) await wait(100);
+    return check(lang, mode);
+  }
   /* SETUP */
   const qt = d.querySelector('.screen.qt');
   if (!qt && mode !== 'stopwatch') return [...res, '✗ setup screen did not draw', ...errs.map(e => '✗ ' + e)];

@@ -63,6 +63,18 @@ export const PICKS = {
     { id: 'dbu', lvl: 2, name: 'Death by Burpees', sub: '+1 burpee every minute', cfg: { dbEvery: 60, dbMax: 30 }, m: [['burpee', 1, 1]] },
     { id: 'dpl', lvl: 3, name: 'Death by Pull-ups', sub: '+1 pull-up every minute', cfg: { dbEvery: 60, dbMax: 30 }, m: [['pullup', 1, 1]] },
   ],
+  goal: [
+    { id: 'g100', lvl: 1, name: '100 Each', sub: '100 push-ups, 100 squats, 100 sit-ups, as an EMOM', cfg: { goalAs: 'emom' }, m: [['pushup', 100], ['bodyweight_squat', 100], ['sit_up', 100]] },
+    { id: 'gpull', lvl: 2, name: '100 Pull-ups', sub: '100 pull-ups, as a climbing ladder', cfg: { goalAs: 'ladder' }, m: [['pullup', 100]] },
+    { id: 'gmurph', lvl: 2, name: 'Murph Reps', sub: '100 pull-ups, 200 push-ups, 300 squats, as an EMOM', cfg: { goalAs: 'emom' }, m: [['pullup', 100], ['pushup', 200], ['bodyweight_squat', 300]] },
+    { id: 'gbig', lvl: 3, name: 'The Big Four', sub: '200 push-ups, 75 pull-ups, 500 mountain climbers, 300 squats', cfg: { goalAs: 'emom' }, m: [['pushup', 200], ['pullup', 75], ['mountain_climber', 500], ['bodyweight_squat', 300]] },
+  ],
+  igyg: [
+    { id: 'bc300', lvl: 1, name: 'Burpee Club 300', sub: '300 push-ups inside burpees, 1 to 4 push-ups each', cfg: { igRest: 'same' }, gen: 'club', total: 300, m: [] },
+    { id: 'ipull', lvl: 2, name: 'Pull-up Partner', sub: '10 sets of 5 pull-ups, rest as long as your set', cfg: { igRest: 'same' }, m: Array.from({ length: 10 }, () => ['pullup', 5]) },
+    { id: 'bc500', lvl: 2, name: 'Burpee Club 500', sub: '500 push-ups inside burpees, 1 to 6 push-ups each', cfg: { igRest: 'same' }, gen: 'club', total: 500, m: [] },
+    { id: 'bc1000', lvl: 3, name: 'Burpee Club 1000', sub: '1,000 push-ups inside burpees, 1 to 10 push-ups each. About 60 min', cfg: { igRest: 'same' }, gen: 'club', total: 1000, m: [] },
+  ],
   pushup: [
     { id: 'pt15', lvl: 1, name: 'Easy Pace', sub: '15 a minute, 1 every 4 seconds', cfg: { pace: 15 }, m: [] },
     { id: 'pt20', lvl: 2, name: 'Standard Test', sub: '20 a minute, 1 every 3 seconds', cfg: { pace: 20 }, m: [] },

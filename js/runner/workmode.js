@@ -27,7 +27,7 @@ const WUNIT = 'lb';                       // weight unit (Nicolas trains in poun
 let S = null, host = null, cb = {}, ticker = null, onStepDone = null, curVal = 0, roundBuf = {};
 let lastSec = null;                       // last whole-second of the active step (for once-per-second beeps)
 let curStepKind = 'rest', saidHalf = false, halfStepKey = null;   // halfway-cue tracking
-let saidLastMin = false, said10 = false;   // "1 minute left" and the 10-second warning, per step
+let saidLastMin = false, said10 = false, saidThird = 0;   // "1 minute left" and the 10-second warning, per step
 /* a voice line that must play once per moment, even across a reopen */
 function sayOnce(key, text) { if (S.said === key) return; S.said = key; R.save(S); say(text, 1400); }
 let countUpStart = null;                  // flexible rest before a reps set: count UP, no forced countdown
@@ -337,6 +337,7 @@ function tick() {
   if (S.stepStartedAt !== halfStepKey) {
     halfStepKey = S.stepStartedAt;
     saidHalf = rem <= Math.round(S.stepDur / 2); saidLastMin = rem <= 60; said10 = rem <= 10;
+    saidThird = rem <= S.stepDur / 3 ? 2 : rem <= S.stepDur * 2 / 3 ? 1 : 0;
   }
   if (rem !== lastSec) {                       // a whole second ticked over
     lastSec = rem;
@@ -346,6 +347,11 @@ function tick() {
        up, and a double beep 10 seconds out on anything of 30 seconds or more. */
     if (curStepKind === 'work' && rem > 0) {
       if (!saidHalf && S.stepDur >= 90 && rem <= Math.round(S.stepDur / 2)) { saidHalf = true; if (rem > 60 || S.stepDur < 180) say(pick('halfway') || t('Halfway.')); }
+      /* a long effort gets a word at a third and two thirds (if recorded, and
+         not on top of the halfway or last-minute calls) */
+      if (S.stepDur >= 90 && saidThird < 2 && rem <= S.stepDur * (2 - saidThird) / 3) {
+        saidThird++; const far = Math.abs(rem - S.stepDur / 2) > 8 && rem > 70; const w = far ? pick('push') : null; if (w) say(w);
+      }
       if (!saidLastMin && S.stepDur >= 180 && rem <= 60) { saidLastMin = true; say(pick('minute') || t('1 minute left.')); }
       if (!said10 && S.stepDur >= 30 && rem <= 10 && rem > 3) { said10 = true; beep('warn'); buzz(30); flash(false); const ten = pick('ten'); if (ten) say(ten); }
     }
@@ -466,6 +472,7 @@ function renderActive() {
   if (f === 'amrap') return renderAmrap();
   if (f === 'tabata' || f === 'emom') return renderInterval();
   if (f === 'fortime') return renderForTime();
+  if (f === 'igyg') return renderIgyg();
   if (f === 'cadence') return renderCadence();
   if (f === 'skill') return renderSkill();
   if (f === 'benchmark' || f === 'max_test') return renderBenchmark();
@@ -478,8 +485,8 @@ function completeBlock() {
   if (b.type === 'Mobility' || b.format === 'jointprep') return sectionNext();
   /* a Quick Timer flows straight on: no confirm screen between sets of
      intervals, and the finish screen already shows the result */
-  if (S.plan.quick && ['tabata', 'emom', 'fortime', 'cadence'].includes(b.format)) return sectionNext();
-  if (['tabata', 'emom', 'fortime', 'cadence'].includes(b.format)) return renderSummary();
+  if (S.plan.quick && ['tabata', 'emom', 'fortime', 'cadence', 'igyg'].includes(b.format)) return sectionNext();
+  if (['tabata', 'emom', 'fortime', 'cadence', 'igyg'].includes(b.format)) return renderSummary();
   return renderLog();          // amrap + sets + circuit → fully editable grouped log
 }
 /* short prescription line for the "up next" card (so you know time / sets before you start) */
@@ -1309,7 +1316,7 @@ function reorderMoves(b, from, to) {
    seconds", "4 minutes" (no "0 minutes") */
 function spokenTime(secs) {
   const m = Math.floor(secs / 60), s = Math.round(secs % 60);
-  return [m ? t('{n} minutes', { n: m }) : '', s || !m ? t('{n} seconds', { n: s }) : ''].filter(Boolean).join(' ');
+  return [m ? t2(m, '{n} minute', '{n} minutes') : '', s || !m ? t2(s, '{n} second', '{n} seconds') : ''].filter(Boolean).join(' ');
 }
 
 /* A ROUND DONE SHOULD FEEL LIKE ONE. A buzz pattern, a victory chime, a
@@ -1762,8 +1769,61 @@ function renderBites() {
     if (after >= total) { celebrate(c, '100%'); draw(); return finish(Math.round(upElapsed())); }
     if (!wasFull && S.bites[i] >= goal[i]) celebrate(c, '✓');
     else if (before < total / 2 && after >= total / 2) say(pick('halfway') || t('Halfway.'));
+    else if (before < total * 0.9 && after >= total * 0.9) { const w = pick('almost'); if (w) say(w); }
     draw();
   });
+}
+/* YOU GO, I GO (Burpee Club): a list of sets; your rest is as long as your
+   set took, the way two teams swap (one works, the other rests), never
+   under b.restMin. Or a fixed rest. A set can carry push-ups per rep
+   ("pumps": 20 burpees with 5 push-ups each = 100 push-ups); then the tank
+   counts push-ups, else reps. Each set: tap Done, rest runs, the next set
+   starts by itself. */
+function renderIgyg() {
+  const b = block(), sets = b.sets || [];
+  if (S.igI == null) { S.igI = 0; S.igPhase = 'work'; S.igLog = []; R.save(S); }
+  const pumpsOn = sets.some(x => (x.pumps || 0) > 0);
+  const val = x => pumpsOn ? x.reps * (x.pumps || 0) : x.reps;
+  const goal = sets.reduce((a, x) => a + val(x), 0);
+  const doneVal = () => sets.slice(0, S.igI).reduce((a, x) => a + val(x), 0);
+  const label = x => `${x.reps} ${b.items[x.i].name}${x.pumps > 1 ? ` · ${t('{n} push-ups each', { n: x.pumps })}` : x.pumps === 1 ? ` · ${t('1 push-up each')}` : ''}`;
+  const spoken = x => `${x.reps} ${b.items[x.i].name}.${x.pumps > 1 ? ' ' + t('{n} push-ups each.', { n: x.pumps }) : ''}`;
+  const cur = sets[S.igI], next = sets[S.igI + 1], rest = S.igPhase === 'rest';
+  const pct = Math.round(doneVal() / goal * 100);
+  S.sub = `ig-${S.igI}-${S.igPhase}`;
+  const unit = pumpsOn ? t('push-ups') : t('reps');
+  shell(`<div class="now-ex"><div class="label">${t('Set {a} of {b}', { a: S.igI + 1, b: sets.length })} · ${rest ? t('rest') : t('your turn')}</div>
+      <div class="name">${rest ? t('Rest') : label(cur)}</div>${rest && cur ? `<div class="side">${t('next: {x}', { x: label(cur) })}</div>` : next ? `<div class="side">${t('next: {x}', { x: label(next) })}</div>` : ''}</div>
+    <div class="timer-wrap bt-sm">${timerSvg(rest ? 'rest' : 'buffer')}</div>
+    <div class="bt-tank"><div class="bt-fill" style="width:${pct}%"></div><span>${pct}%</span></div>
+    <div class="bt-tankn"><span>${doneVal()} / ${goal} ${unit}</span><span>${b.restMode === 'fixed' ? t('rest {t}', { t: fmt(b.rest) }) : t('rest = your set')}</span></div>
+    <div class="mvr-list">${sets.map((x, k) => `<div class="mvr ${k === S.igI ? 'now' : ''} ${k < S.igI ? 'done' : ''}"><span class="mvr-sp">${k < S.igI ? '✓' : ''}</span><span class="mvr-n">${label(x)}</span>${S.igLog[k] != null ? `<b class="mvr-v">${fmt(S.igLog[k])}</b>` : ''}</div>`).join('')}</div>
+    <div class="actionbar">${rest ? `<button class="btn secondary lg" id="igSkip">${t('Skip rest')}</button>` : `<button class="btn lg" id="igDone">${t('Set done ✓')}</button>`}</div>`);
+  const finish = () => {
+    R.clearStep(S); onStepDone = null;
+    const per = b.items.map(() => 0); sets.forEach(x => per[x.i] += x.reps);
+    (S.captured[b.id] || []).forEach((e, i) => { e.sets = [{ value: Math.round(R.sessionElapsed(S)) }]; e.unit = 'sec'; e.rounds = true; e.bites = per[i]; });
+    R.save(S); say(pick('done') || t('Workout complete. Strong work.'), 2500);
+    completeBlock();
+  };
+  const startSet = () => { S.igPhase = 'work'; R.clearStep(S); R.save(S); renderIgyg(); };
+  if (rest) {
+    const worked = S.igLog[S.igI - 1] || 0;
+    const r = b.restMode === 'fixed' ? b.rest : Math.max(b.restMin || 10, Math.round(worked));
+    if (beginStep(r, 'rest', 'step')) say(`${t('Rest. {n} seconds.', { n: r })} ${t('Next.')} ${spoken(cur)}`);
+    onStepDone = startSet;
+    document.getElementById('igSkip').addEventListener('click', () => { buzz(20); startSet(); });
+  } else {
+    if (beginStep(NO_CAP, 'rest', 'fortime')) say(S.igI === 0 ? `${spoken(cur)} ${pick('go') || t('Go.')}` : `${t('Go.')} ${spoken(cur)}`);
+    onStepDone = null;
+    document.getElementById('igDone').addEventListener('click', e => {
+      S.igLog[S.igI] = Math.round(upElapsed()); S.igI++; buzz(30);
+      if (S.igI >= sets.length) { celebrate(e.currentTarget, '100%'); return finish(); }
+      celebrate(e.currentTarget, '✓');
+      if (S.igI === Math.ceil(sets.length / 2)) say(pick('halfway') || t('Halfway.'));
+      S.igPhase = 'rest'; R.clearStep(S); R.save(S); renderIgyg();
+    });
+  }
 }
 function renderForTime() {
   const b = block();
@@ -1966,7 +2026,7 @@ function quickResult(session) {
     const e = b.entries[0]; const v = e?.sets?.[0]?.value;
     if (v == null || b.name.startsWith('Countdown') || /^(Warm-up|Cool-down)/.test(b.name)) return '';   // a VO2 warm-up is not a result
     if (b.format === 'cadence') return `<div class="eff-row"><span>${b.name}</span><span class="pr-flash" style="margin-left:auto;">${t('{n} reps', { n: v })}</span></div>${cadenceRating(v, e.cadence)}`;
-    const val = b.format === 'fortime' ? fmt(v)
+    const val = b.format === 'fortime' || b.format === 'igyg' ? fmt(v)
       : b.format === 'amrap' ? (e.amrap ? `${t('{n} rounds', { n: e.amrap.rounds })}${e.amrap.extra ? ` + ${t('{n} reps', { n: e.amrap.extra })}` : ''}` : `${v} ${t(e.unit || 'rounds')}`)
       : t2(v, '{n} interval', '{n} intervals');
     const word = t(b.label === 'Stopwatch' || b.name.startsWith('Stopwatch') ? 'Lap' : b.rungs || b.name.startsWith('Ladder') ? 'Rung' : 'Round');

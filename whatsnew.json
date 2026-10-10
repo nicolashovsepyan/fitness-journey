@@ -1,6 +1,8 @@
 {
-  "version": "2026-10-10.1",
+  "version": "2026-10-10.2",
   "notes": [
+    "New: Rep goal. Set your totals (200 push-ups, 75 pull-ups…), pick EMOM, Ladder, Sets or For time, and the timer builds the workout",
+    "New: You go, I go. Your rest is as long as your set took. Burpee Club 300, 500 and 1,000 push-ups inside burpees",
     "New coach voices: Coach Kevin, Tess, Dominic and Louise (Timer settings, Coach voice). They know every move by name, with a coaching cue for each",
     "Getting ready for new studio coach voices: more things for the coach to say, and a cue for every move",
     "Quick picks: ready-made workouts for every timer type, easy to hard (Pull-up 150, Cindy, Murph, Chelsea and more)",
@@ -42,6 +44,8 @@
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
   ],
   "notes_fr": [
+    "Nouveau : Objectif reps. Fixe tes totaux (200 pompes, 75 tractions…), choisis EMOM, Échelle, Séries ou For Time, le minuteur construit la séance",
+    "Nouveau : Chacun son tour. Ton repos dure autant que ta série. Burpee Club 300, 500 et 1 000 pompes dans des burpees",
     "Nouvelles voix de coach : Coach Kevin, Tess, Dominic et Louise (Réglages du minuteur, Voix du coach). En anglais, avec le nom et un conseil pour chaque exercice",
     "En préparation : de nouvelles voix de coach studio, plus de phrases variées et un conseil pour chaque exercice",
     "Séances express : des séances prêtes pour chaque type de minuteur, de facile à difficile (Tractions 150, Cindy, Murph, Chelsea et plus)",

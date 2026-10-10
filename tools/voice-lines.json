@@ -790,6 +790,41 @@
   "say": "Rung."
  },
  {
+  "key": "c-push-ups-each",
+  "text": "push-ups each",
+  "say": "push-ups each."
+ },
+ {
+  "key": "c-push-up-each",
+  "text": "push-up each",
+  "say": "push-up each."
+ },
+ {
+  "key": "c-voice-on",
+  "text": "Voice on",
+  "say": "Voice on."
+ },
+ {
+  "key": "c-set-done",
+  "text": "Set done",
+  "say": "Set done!"
+ },
+ {
+  "key": "c-your-turn",
+  "text": "Your turn",
+  "say": "Your turn!"
+ },
+ {
+  "key": "c-set",
+  "text": "Set",
+  "say": "Set."
+ },
+ {
+  "key": "c-sets",
+  "text": "Sets",
+  "say": "sets."
+ },
+ {
   "key": "r-1",
   "text": "Round 1",
   "say": "Round one."
@@ -1438,6 +1473,81 @@
   "key": "s-next-one",
   "text": "Next one",
   "say": "Next one."
+ },
+ {
+  "key": "s-stay-tight",
+  "text": "Stay tight",
+  "say": "Stay tight."
+ },
+ {
+  "key": "s-keep-the-pace",
+  "text": "Keep the pace",
+  "say": "Keep the pace."
+ },
+ {
+  "key": "s-good-pace",
+  "text": "Good pace",
+  "say": "Good pace!"
+ },
+ {
+  "key": "s-dont-drop-the-pace",
+  "text": "Don't drop the pace",
+  "say": "Don't drop the pace."
+ },
+ {
+  "key": "s-keep-pushing",
+  "text": "Keep pushing",
+  "say": "Keep pushing."
+ },
+ {
+  "key": "s-youre-doing-great",
+  "text": "You're doing great",
+  "say": "You're doing great."
+ },
+ {
+  "key": "s-smooth-and-steady",
+  "text": "Smooth and steady",
+  "say": "Smooth and steady."
+ },
+ {
+  "key": "s-keep-that-rhythm",
+  "text": "Keep that rhythm",
+  "say": "Keep that rhythm."
+ },
+ {
+  "key": "s-every-rep-counts",
+  "text": "Every rep counts",
+  "say": "Every rep counts."
+ },
+ {
+  "key": "s-almost-there",
+  "text": "Almost there",
+  "say": "Almost there."
+ },
+ {
+  "key": "s-almost-done",
+  "text": "Almost done",
+  "say": "Almost done."
+ },
+ {
+  "key": "s-finish-it",
+  "text": "Finish it",
+  "say": "Finish it!"
+ },
+ {
+  "key": "s-so-close",
+  "text": "So close",
+  "say": "So close."
+ },
+ {
+  "key": "s-last-push",
+  "text": "Last push",
+  "say": "Last push."
+ },
+ {
+  "key": "s-bring-it-home",
+  "text": "Bring it home",
+  "say": "Bring it home."
  },
  {
   "key": "s-workout-complete",
@@ -3673,11 +3783,6 @@
   "key": "s-walk-the-hands-in",
   "text": "Walk the hands in",
   "say": "Walk the hands in."
- },
- {
-  "key": "s-stay-tight",
-  "text": "Stay tight",
-  "say": "Stay tight."
  },
  {
   "key": "s-elbows-locked",

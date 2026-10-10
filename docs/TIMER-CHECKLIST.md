@@ -9,7 +9,7 @@ Run it before every ship (part 1) and once a week, or after any big change
       `tools/check-timer.mjs`: every js file parses, and no local `t`
       hides the translate function (what emptied the move library on 7 Oct).
 - [ ] Open `tools/audit/smoke.html` (local server, or the live site at
-      `/tools/audit/smoke.html`) and press **Run all checks**. All 20 pass:
+      `/tools/audit/smoke.html`) and press **Run all checks**. All 24 pass:
       every timer type in English and French draws its setup, the Start bar
       sits on the bottom edge, the move library lists 300+ moves and search
       finds some, Start opens the workout, the clock moves, no errors.
