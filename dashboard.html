@@ -2048,6 +2048,46 @@ button.wd:active .b{transform:scale(.94)}
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .go.sm{font-size:12.5px;padding:10px 8px}
 
+
+/* ---- WEEK + GOAL, ONE CARD ----
+   Two cards became one frame with a hairline through it. The children keep
+   their own internals; they just stop owning an edge. */
+.wkgoal{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;
+  background:rgba(255,255,255,.022)}
+.wkgoal > .card.slim{border:none;border-radius:0;background:none;margin:0;
+  padding-bottom:13px}
+.wkgoal > .dayx{border:none;border-radius:0;margin:0;
+  border-top:1px solid var(--line)!important}
+/* the goal's own glow has to stop at the card edge now that it has one */
+.wkgoal{isolation:isolate}
+
+/* ---- THE REWARD POP ----
+   One beat, then gone. It sits over the row it was earned on, lifts a
+   little and fades while the gauge at the top of the page moves. Nothing
+   below it shifts, because it is out of flow: a number that pushes the
+   page around as it appears is a glitch, not a reward. */
+.pop{position:absolute;right:13px;top:50%;z-index:4;pointer-events:none;
+  font-size:15px;font-weight:750;letter-spacing:-.02em;color:var(--accent);
+  text-shadow:0 0 14px rgba(62,203,168,.75),0 0 30px rgba(62,203,168,.35);
+  animation:payPop 1.7s cubic-bezier(.22,1,.36,1) forwards}
+@keyframes payPop{
+    0%{opacity:0;transform:translateY(-50%) scale(.6)}
+   12%{opacity:1;transform:translateY(-62%) scale(1.14)}
+   24%{transform:translateY(-58%) scale(1)}
+   62%{opacity:1;transform:translateY(-72%) scale(1)}
+  100%{opacity:0;transform:translateY(-124%) scale(.94)}}
+@media (prefers-reduced-motion:reduce){
+  .pop{animation:payFade 1.7s ease forwards}
+  @keyframes payFade{0%,70%{opacity:1}100%{opacity:0}}}
+
+/* the rows that carry one have to be able to hold it */
+.hab,.onething{position:relative}
+/* the tick slot keeps its width so a row does not jump when the number goes */
+/* The pill existed to hold a percentage. The percentage is an event now,
+   so a pill with nothing in it reads as a dead button. The markup simply
+   does not emit one unless it has a job; :empty does not help here,
+   because a template literal leaves whitespace inside the tag. */
+
 /* ---------- TAB · WORKOUTS ----------
    One lead card you can hit without reading, then plain rows. Rows, not
    cards: a list of things you might start should look like a list. */
@@ -2263,7 +2303,7 @@ button.wd:active .b{transform:scale(.94)}
    a stranger's dashboard.
    ============================================================ */
 const PROFILE_V = 6;
-const BUILD_STAMP = '13 Sep 2026, 10:12';
+const BUILD_STAMP = '10 Oct 2026, 16:58';
 
 /* A stable id per person. Email is the only thing the survey collects
    that is unique to a human, so it seeds the id; anyone who skipped it
@@ -4017,6 +4057,8 @@ function go(tab, keep){
   layoutRings(view);
   recordDay();
   if(JUST_HABIT) requestAnimationFrame(()=>{ JUST_HABIT = null; });
+  /* one frame later, so the pop paints once and never on a reload */
+  if(JUST_PAID) requestAnimationFrame(()=>{ JUST_PAID = null; });
   requestAnimationFrame(()=>document.querySelectorAll('[data-grow]').forEach(e=>e.style.width=e.dataset.grow));
 }
 
@@ -4461,6 +4503,21 @@ function paneWorkouts(){
     </button>`;
   }).join('')}</div>`;
 
+  /* where the block is going, which is the one thing the day list cannot
+     show. It came off Today with the rest of the program furniture. */
+  h += `<div class="card tap" style="margin-top:11px" data-act="openweek">
+    <div class="prog">
+      <div class="ring">${ring(8,'1')}</div>
+      <div class="tx"><b>${esc(programMeta().name)}</b>
+        <small>${esc(programMeta().sub)}</small></div>
+      ${svg(I.arrow,'arw')}
+    </div>
+    <div class="phases">
+      ${[['Foundation',1],['Build',0],['Peak',0]].map(([n,on])=>
+        `<div class="ph ${on?'on':''}"><div class="bar"><i data-grow="${on?'8%':'0%'}"></i></div><span>${n}</span></div>`).join('')}
+    </div>
+  </div>`;
+
   /* ---- a number to beat ---- */
   h += benchRail();
 
@@ -4565,7 +4622,113 @@ function paneToday(){
     : `${wkA.getDate()} ${MON[wkA.getMonth()]} \u2013 ${wkB.getDate()} ${MON[wkB.getMonth()]}`;
   const canBack = WKOFF > oldestWeekOff();
 
+  /* the week and the goal now sit BELOW today's session — see WEEK + GOAL */
+
+  /* --- the hero --- */
+  h += `<div class="sect" id="sec-session"><b>Today</b>${s&&released(todayId)?`<a data-act="swap">Not feeling it?</a>`:''}</div>`;
+  if(s && !released(todayId)){
+    /* Being told a human is mid-way through your program is a better
+       experience than being shown a program nobody checked. */
+    h += `<div class="hero pending trav" data-act="pending">
+      ${travelSvg('accent')}
+      <div class="veil"></div>
+      <div class="in">
+        <div class="tag"><i></i>In review</div>
+        <h3>Coach Nico is still on this one</h3>
+        <div class="why">Today's session is written and being checked before it reaches you. It
+          unlocks the moment he is happy with it.</div>
+        <div class="chips"><span class="chip">${svg(I.clock)}20 min when it lands</span></div>
+        <button class="go ghost">Tell me when it's ready</button>
+      </div>
+    </div>`;
+  } else if(s){
+    h += `<div class="hero trav ${todayDone() ?'done':''}" data-act="openday" data-day="${todayId}">
+      ${todayDone()?'':travelSvg('accent')}
+      <div class="art" style="background-image:url('${heroArt(s)}')"></div>
+      <div class="veil"></div>
+      <div class="in">
+        <div class="tag"><i></i>${todayDone() ?'Done - nice work':'Day 1 · Week 1'}</div>
+        <h3>${s.name}</h3>
+        <div class="why">${s.why}</div>
+        <div class="chips">
+${todayDone()?`<span class="chip pay-c earned">&check; done</span>`:''}
+          <span class="chip">${svg(I.clock)}${mins} min</span>
+          <span class="chip">${svg(I.layers)}${blocks} blocks</span>
+          <span class="chip">${svg(I.spark)}${s.tag}</span>
+        </div>
+        <button class="go ${todayDone() ?'ghost':''}">${todayDone() ?'Look at it again':'Open the session'}</button>
+      </div>
+    </div>`;
+  } else {
+    const nx = nextDay(), rDone = recoveryDone();
+    if(sportToday() && mySports().length){
+      const sDone = sportDone();
+      h += `<div class="sportcard ${sDone?'done':''}">
+        <div class="rest-hd">
+          <div class="tag"><i></i>Your own sport</div>
+          <h3>${sDone ? sportName() + ' \u2014 logged' : sportName() + ' today'}</h3>
+          <p class="just">You told me this is already in your week, so it is not a rest day and
+            the app is not going to pretend it is. Log it and it counts like a session.</p>
+        </div>
+        ${sDone
+          ? `<button class="undo" data-act="undosport">Logged by mistake? Undo it</button>`
+          : `<button class="go" data-act="dosport">Did it \u2014 log it</button>`}
+      </div>`;
+    }
+    /* This card was a headline, a paragraph, three big drill buttons, a list
+       of your own workouts and two more buttons — the tallest thing on a
+       rest day, about a day with nothing to do. One line, three rows. The
+       paragraph became the line under the title, because that is all it
+       ever said. */
+    h += `<div class="restwrap tight ${rDone?'done':''}">
+      <div class="rest-hd">
+        <div class="tag"><i></i>Rest day</div>
+        <h3>${rDone ? 'Recovery done' : 'Give it five minutes'}</h3>
+        <p>${SESSIONS[nx.id].name} ${nx.when} &middot; today is for the joints</p>
+      </div>
+      ${RECOVERY.map(r=>`<button class="rec" data-recov="${r.id}">
+        <span class="rec-m"><b class="tnum">${r.mins}</b><i>min</i></span>
+        <span class="rec-tx"><b>${r.name}</b><small>${r.why}</small></span>
+        ${svg(I.arrow,'rec-c')}
+      </button>`).join('')}
+
+      <div class="restalt">
+        <button class="go ghost sm" data-act="tab:workouts">All workouts</button>
+        ${rDone ? `<button class="undo" data-act="undorecov">Logged by mistake? Undo it</button>` : ''}
+      </div>
+    </div>`;
+  }
+
+  /* --- readiness ------------------------------------------------------
+     Unanswered it is a card, high up, because on a rest day it is the whole
+     reason to open the app. Answered it stops being a question — it folds
+     into a row the size of a habit, keeps the face he picked as its icon,
+     and drops down next to the other things you log. A question you have
+     already answered should not hold the best real estate on the screen. */
+  /* Asked daily, answered daily. It was stored as a bare value, so an answer
+     given on Tuesday still sat there on Friday claiming to describe how the
+     body felt that morning. Stamped with the day now; anything older simply
+     is not an answer any more. */
+  if(S.readinessAt && S.readinessAt !== dayKey()){ S.readiness = null; S.readinessAt = null; }
+  const readyOn = !!S.readiness;
+  if(!readyOn){
+    h += `<div class="card" id="sec-ready">
+      <div class="q">How do you feel?</div>
+      <div class="qs">Three seconds. It changes what I give you.</div>
+      <div class="faces">
+        ${[['low',I.face1,'Rough'],['ok',I.face2,'Fine'],['good',I.face3,'Good']].map(([v,ic,l])=>
+          `<button class="face" data-ready="${v}">${svg(ic)}<span>${l}</span></button>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  /* ---- WEEK + GOAL, ONE CARD ---------------------------------------
+     They were two cards with a heading each, and they ask the same
+     question at two scales: where am I this week, where am I today. One
+     frame, a hairline between them, and the page loses a heading, a gap
+     and a border. */
   h += `<div class="sect"><b>${wkLabel}</b><a data-act="tab:log">Your log</a></div>
+  <div class="wkgoal">
   <div class="card slim">
     <div class="wkrow">
       <div class="wk-n"><b class="tnum">${shownDone}</b><i class="tnum">/${planned}</i></div>
@@ -4645,105 +4808,7 @@ function paneToday(){
      The single most important control on the screen. It is not a readout,
      it is the thing the day is trying to fill, so it moves on its own and
      it is the only place the arithmetic lives. Tap it for the receipt. */
-  h += dayHero(dayScore());
-
-  /* --- the hero --- */
-  h += `<div class="sect" id="sec-session"><b>Today</b>${s&&released(todayId)?`<a data-act="swap">Not feeling it?</a>`:''}</div>`;
-  if(s && !released(todayId)){
-    /* Being told a human is mid-way through your program is a better
-       experience than being shown a program nobody checked. */
-    h += `<div class="hero pending trav" data-act="pending">
-      ${travelSvg('accent')}
-      <div class="veil"></div>
-      <div class="in">
-        <div class="tag"><i></i>In review</div>
-        <h3>Coach Nico is still on this one</h3>
-        <div class="why">Today's session is written and being checked before it reaches you. It
-          unlocks the moment he is happy with it.</div>
-        <div class="chips"><span class="chip">${svg(I.clock)}20 min when it lands</span></div>
-        <button class="go ghost">Tell me when it's ready</button>
-      </div>
-    </div>`;
-  } else if(s){
-    h += `<div class="hero trav ${todayDone() ?'done':''}" data-act="openday" data-day="${todayId}">
-      ${todayDone()?'':travelSvg('accent')}
-      <div class="art" style="background-image:url('${heroArt(s)}')"></div>
-      <div class="veil"></div>
-      <div class="in">
-        <div class="tag"><i></i>${todayDone() ?'Done - nice work':'Day 1 · Week 1'}</div>
-        <h3>${s.name}</h3>
-        <div class="why">${s.why}</div>
-        <div class="chips">
-          <span class="chip pay-c ${todayDone()?'earned':''}">${todayDone()?`&check; ${payFor('session')}% earned`:`+${payFor('session')}%`}</span>
-          <span class="chip">${svg(I.clock)}${mins} min</span>
-          <span class="chip">${svg(I.layers)}${blocks} blocks</span>
-          <span class="chip">${svg(I.spark)}${s.tag}</span>
-        </div>
-        <button class="go ${todayDone() ?'ghost':''}">${todayDone() ?'Look at it again':'Open the session'}</button>
-      </div>
-    </div>`;
-  } else {
-    const nx = nextDay(), rDone = recoveryDone();
-    if(sportToday() && mySports().length){
-      const sDone = sportDone();
-      h += `<div class="sportcard ${sDone?'done':''}">
-        <div class="rest-hd">
-          <div class="tag"><i></i>Your own sport</div>
-          <h3>${sDone ? sportName() + ' \u2014 logged' : sportName() + ' today'}</h3>
-          <p class="just">You told me this is already in your week, so it is not a rest day and
-            the app is not going to pretend it is. Log it and it counts like a session.</p>
-        </div>
-        ${sDone
-          ? `<button class="undo" data-act="undosport">Logged by mistake? Undo it</button>`
-          : `<button class="go" data-act="dosport">Did it \u2014 log it</button>`}
-      </div>`;
-    }
-    /* This card was a headline, a paragraph, three big drill buttons, a list
-       of your own workouts and two more buttons — the tallest thing on a
-       rest day, about a day with nothing to do. One line, three rows. The
-       paragraph became the line under the title, because that is all it
-       ever said. */
-    h += `<div class="restwrap tight ${rDone?'done':''}">
-      <div class="rest-hd">
-        <div class="tag"><i></i>Rest day</div>
-        <h3>${rDone ? 'Recovery done' : 'Give it five minutes'}</h3>
-        <p>${SESSIONS[nx.id].name} ${nx.when} &middot; today is for the joints</p>
-      </div>
-      ${RECOVERY.map(r=>`<button class="rec" data-recov="${r.id}">
-        <span class="rec-m"><b class="tnum">${r.mins}</b><i>min</i></span>
-        <span class="rec-tx"><b>${r.name}</b><small>${r.why}</small></span>
-        ${svg(I.arrow,'rec-c')}
-      </button>`).join('')}
-
-      <div class="restalt">
-        <button class="go ghost sm" data-act="tab:workouts">All workouts</button>
-        ${rDone ? `<button class="undo" data-act="undorecov">Logged by mistake? Undo it</button>` : ''}
-      </div>
-    </div>`;
-  }
-
-  /* --- readiness ------------------------------------------------------
-     Unanswered it is a card, high up, because on a rest day it is the whole
-     reason to open the app. Answered it stops being a question — it folds
-     into a row the size of a habit, keeps the face he picked as its icon,
-     and drops down next to the other things you log. A question you have
-     already answered should not hold the best real estate on the screen. */
-  /* Asked daily, answered daily. It was stored as a bare value, so an answer
-     given on Tuesday still sat there on Friday claiming to describe how the
-     body felt that morning. Stamped with the day now; anything older simply
-     is not an answer any more. */
-  if(S.readinessAt && S.readinessAt !== dayKey()){ S.readiness = null; S.readinessAt = null; }
-  const readyOn = !!S.readiness;
-  if(!readyOn){
-    h += `<div class="card" id="sec-ready">
-      <div class="q">How do you feel? <span class="pay">+${payFor('ready')}%</span></div>
-      <div class="qs">Three seconds. It changes what I give you.</div>
-      <div class="faces">
-        ${[['low',I.face1,'Rough'],['ok',I.face2,'Fine'],['good',I.face3,'Good']].map(([v,ic,l])=>
-          `<button class="face" data-ready="${v}">${svg(ic)}<span>${l}</span></button>`).join('')}
-      </div>
-    </div>`;
-  }
+  h += dayHero(dayScore()) + `</div>`;
 
   /* ---- ONE THING ---- */
   const td = todayTodo(), tdDone = !!(S.todos||{})[td.id];
@@ -4757,8 +4822,9 @@ function paneToday(){
   <button class="onething ${tdDone?'on':''}" data-todo1="${td.id}"
       ${(!tdDone && td.act)?`data-otact="${td.act}"`:''}>
     <span class="ot-tick">${tdDone?svg(I.check,'tk'):''}</span>
-    <span class="ot-tx"><b>${td.t}</b><small>${tdDone?'Done \u2014 that is +'+tdPts+'%':td.s}</small></span>
-    <span class="ot-pts">${tdDone?'&plus;'+tdPts+'%':(td.cta?td.cta:'&plus;'+tdPts+'%')}</span>
+    <span class="ot-tx"><b>${td.t}</b><small>${tdDone?'Done':td.s}</small></span>
+    ${tdDone?`<span class="ot-pts">${svg(I.check,'tk')}</span>`:(td.cta?`<span class="ot-pts">${td.cta}</span>`:'')}
+    ${paid('todo', tdPts)}
   </button>`;
 
   const hbs = HABITS_FOR(), hbDone = hbs.filter(x=>S.habits[x.id]).length;
@@ -4771,8 +4837,8 @@ function paneToday(){
       return `<button class="hab ${on?'on':''}" data-habit="${x.id}">
         <span class="tick">${on?svg(I.check,'tk'):''}</span>
         <span class="tx"><b>${x.t}</b><small>${x.s}</small></span>
-        <span class="hpts ${just?'just':''}">&plus;${Math.round(payFor('habits')/hbs.length)}%${
-          just?`<i class="pspark"></i><i class="pspark" style="--d:.12s"></i>`:''}</span>
+        ${just?`<span class="hpts just"><i class="pspark"></i><i class="pspark" style="--d:.12s"></i></span>`:''}
+        ${paid(x.id, Math.round(payFor('habits')/hbs.length))}
       </button>`;
     }).join('')}
   </div>
@@ -4795,13 +4861,10 @@ function paneToday(){
     </div>`;
   }
 
-  /* --- quick log --- */
-  h += `<div class="sect" id="sec-note"><b>Log something</b><span class="micro pay-t">a note is +${payFor('note')}%</span></div>
-  <div class="rail">
-    <button class="ql" data-act="log:weight">${svg(I.scale)}<span>Weight</span></button>
-    <button class="ql" data-act="log:note">${svg(I.pen)}<span>Note</span></button>
-    <button class="ql" data-act="log:photo">${svg(I.cam)}<span>Photo</span></button>
-  </div>`;
+  /* --- quick log ---
+     MOVED to the Log tab, which is where a person goes to write something
+     down and where all three of these already live. A section on Today
+     whose only job is to open another tab is a signpost, not a feature. */
 
 
   /* the answered version, down here where it belongs */
@@ -4817,7 +4880,7 @@ function paneToday(){
     </div>`, {icon: ic, steps:1, did:1,
       /* a span, not a <b>: .fold-tx b is display:block, which broke this
          one line into three */
-      sub:`${label} \u00b7 <span class="pts">+${payFor('ready')}%</span> banked`});
+      sub:`${label} \u00b7 banked`});
   }
 
   /* --- messages from a human ---
@@ -4827,33 +4890,14 @@ function paneToday(){
      costing a screen of attention to say nothing.
      Everything it needs is still here: MESSAGES, msgBox, unreadCount. */
 
-  /* --- the program --- */
-  /* The program block keeps its place on Today because the phase bars are
-     the only view of where the block is going. Its job is now progress, not
-     navigation — starting a session happens on the Workouts tab. */
-  h += `<div class="sect"><b>Your program</b><a data-act="tab:workouts">Open workouts</a></div>
-  <div class="card tap" data-act="openweek">
-    <div class="prog">
-      <div class="ring">${ring(8,'1')}</div>
-      <div class="tx"><b>${esc(programMeta().name)}</b>
-        <small>${esc(programMeta().sub)}</small></div>
-      ${svg(I.arrow,'arw')}
-    </div>
-    <div class="phases">
-      ${[['Foundation',1],['Build',0],['Peak',0]].map(([n,on],i)=>
-        `<div class="ph ${on?'on':''}"><div class="bar"><i data-grow="${on?'8%':'0%'}"></i></div><span>${n}</span></div>`).join('')}
-    </div>
-  </div>`;
+  /* --- the program ---
+     MOVED to the Workouts tab, with the phase bars. It was the second
+     place on Today that pointed somewhere else. */
 
-  /* --- learn nudge: the "watch it tonight, do it next session" loop --- */
-  const q = S.queued.filter(k=>EX[k]);
-  h += `<div class="sect"><b>Queued for next session</b><a data-act="tab:learn">Library</a></div>`;
-  if(q.length){
-    h += `<div class="exgrid">${q.slice(0,2).map(k=>exCard(k)).join('')}</div>`;
-  } else {
-    h += `<div class="empty">${svg(I.book)}<b>Nothing queued</b>
-      <p>Find a movement in the library, watch the clip, and it shows up here for next time.</p></div>`;
-  }
+  /* --- learn nudge ---
+     MOVED to the Learn tab. On a good day it showed two cards; on every
+     other day it was a 154px empty state explaining a feature, which is
+     the most page any block here was spending to say nothing. */
 
   return h+`</div>`;
 }
@@ -5443,6 +5487,16 @@ function paneLearn(){
   }
 
   /* ---------- the starter deck ---------- */
+  /* Queued for next session. It used to sit on Today, where on most days
+     it was an empty state explaining a feature. Here it is next to the
+     library that fills it, and it only appears when there is something
+     in it. */
+  const qd = S.queued.filter(k=>EX[k]);
+  if(qd.length){
+    h+=`<div class="sect" style="margin-top:2px"><b>Queued for next session</b><span class="micro">${qd.length}</span></div>
+    <div class="exgrid">${qd.slice(0,4).map(k=>exCard(k)).join('')}</div>`;
+  }
+
   h+=`<div class="sect"><b>Your starter deck</b><span class="micro">${seen}/${withArt.length}</span></div>
   <div class="card tap" data-act="deck">
     <div class="prog">
@@ -5893,6 +5947,24 @@ let PENDING_TODO = null;
 /* Which habit was ticked a moment ago, so its percentage can visibly catch
    light on the way into the total. Cleared as soon as it has been drawn. */
 let JUST_HABIT = null;
+
+/* ---- THE REWARD, INSTEAD OF THE PRICE TAG --------------------------
+   Every scoring row used to wear its own percentage all day: eight of
+   them on one screen, each a fragment of a total the gauge at the top
+   already shows. Read together they are noise, and none of them is the
+   score.
+
+   So the number stops being furniture and becomes an event. It appears
+   only in the second after you earn it, on the row you earned it on,
+   rises and fades while the gauge moves. Same information, paid at the
+   moment it means something.
+
+   JUST_PAID is set by whichever handler scored, read once on the next
+   render, and cleared on the frame after that. */
+let JUST_PAID = null;
+function paid(id, pts){
+  return JUST_PAID === id ? `<span class="pop" aria-hidden="true">&plus;${pts}%</span>` : '';
+}
 /* The last percentage the day gauge drew. A reel that spins on every render
    is a fidget; one that spins only when the number changed is a machine. */
 let DAY_LAST = null, DAY_ROLLED = false;
@@ -6421,14 +6493,23 @@ function sheetTodo(k){
    ============================================================ */
 function wire(){
   view.querySelectorAll('[data-ready]').forEach(b=>b.onclick=()=>{
+    const was = S.readiness;
     S.readiness = S.readiness===b.dataset.ready?null:b.dataset.ready;
     S.readinessAt = S.readiness ? dayKey() : null;
+    if(!was && S.readiness) JUST_PAID = 'ready';
     save(); go('today');
     if(S.readiness) toast('Session adjusted');
   });
   view.querySelectorAll('[data-habit]').forEach(b=>b.onclick=()=>{
     const k=b.dataset.habit; S.habits[k]=!S.habits[k]; save(); go('today');
-    if(S.habits[k]&&HABITS.every(x=>S.habits[x.id])) toast('All three. That is the day won.');
+    /* HABITS_FOR(), not HABITS: the latter is a local inside paneToday, so
+       this line threw a ReferenceError on EVERY habit tap. The tick still
+       landed because the throw came after go(), which is exactly why it
+       went unnoticed - the only visible symptom was a toast that never
+       appeared. */
+    const all = HABITS_FOR();
+    if(S.habits[k] && all.every(x=>S.habits[x.id]))
+      toast(all.length===3 ? 'All three. That is the day won.' : 'Every habit, done.');
   });
   view.querySelectorAll('[data-wday]').forEach(b=>b.onclick=()=>sheetDayMove(+b.dataset.wday));
   view.querySelectorAll('[data-ex]').forEach(b=>b.onclick=()=>sheetExercise(b.dataset.ex));
@@ -6480,7 +6561,7 @@ function wire(){
   view.querySelectorAll('[data-habit]').forEach(b=>b.addEventListener('click', ()=>{
     /* Remembered only long enough to render once. It is a visual beat, not
        state — persisting it would replay the spark on every reload. */
-    if(!S.habits[b.dataset.habit]) JUST_HABIT = b.dataset.habit;
+    if(!S.habits[b.dataset.habit]){ JUST_HABIT = b.dataset.habit; JUST_PAID = b.dataset.habit; }
   }, true));
 
   view.querySelectorAll('[data-recov]').forEach(b=>b.onclick=()=>sheetRecovery(b.dataset.recov));
@@ -6494,7 +6575,7 @@ function wire(){
     }
     S.todos=S.todos||{};
     const id=b.dataset.todo1, was=!!S.todos[id];
-    S.todos[id]=!was; save(); go('today',true);
+    S.todos[id]=!was; if(!was) JUST_PAID='todo'; save(); go('today',true);
     if(!was) toast('Nice - that is the kind of thing that adds up');
   });
   view.querySelectorAll('[data-flip]').forEach(b=>b.onclick=e=>{
