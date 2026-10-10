@@ -15,8 +15,20 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const KEY = process.env.ELEVENLABS_API_KEY;
-if (!KEY) { console.error('Set ELEVENLABS_API_KEY first.'); process.exit(1); }
+/* the key: from ELEVENLABS_API_KEY, or asked for (paste it, press Enter; nothing shows) */
+async function askKey() {
+  process.stdout.write('Paste your ElevenLabs key (it starts with sk_), then press Enter: ');
+  return new Promise(ok => {
+    let k = ''; const i = process.stdin; i.setRawMode?.(true); i.resume(); i.setEncoding('utf8');
+    i.on('data', d => { for (const c of d) {
+      if (c === '\r' || c === '\n') { i.setRawMode?.(false); i.pause(); process.stdout.write('\n'); return ok(k.trim()); }
+      if (c === '\u0003') process.exit(1);
+      if (c === '\u007f') k = k.slice(0, -1); else k += c;
+    } });
+  });
+}
+const KEY = process.env.ELEVENLABS_API_KEY || await askKey();
+if (!KEY.startsWith('sk_')) { console.error('That does not look like the key (it starts with sk_). Run it again.'); process.exit(1); }
 /* the app's voices, in the order they appear in Timer settings */
 const VOICES = [
   { id: 'kevin', find: /^Coach Kevin/, label: 'Coach Kevin', kind: 'm', accent: 'American' },
