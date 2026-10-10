@@ -120,10 +120,22 @@ export function loadVoicePack() {
   if (packLang !== packId()) { packLang = packId(); loading = null; index = null; dict = null; buffers.clear(); }
   if (loading) return loading;
   const at = isStudio(effKind()) ? dirFor(effKind()) : lang() === 'fr' ? 'audio/voice-fr' : 'audio/voice';
+  packState = 'loading';
   loading = fetch(`${at}/index.json`).then(r => r.ok ? r.json() : null)
-    .then(j => { if (j?.pieces) { index = j.pieces; dict = buildDict(index); } })
-    .catch(() => {});
+    .then(j => { if (j?.pieces) { index = j.pieces; dict = buildDict(index); packState = 'ready'; } else throw 0; })
+    .catch(() => { packState = 'failed'; loading = null; });   // a failed load is tried again on the next line, never kept
   return loading;
+}
+let packState = 'none';
+/* for Timer settings: is the coach voice ready? */
+export const voicePackState = () => (packLang === packId() ? packState : 'loading');
+export const voiceIsStudio = () => isStudio(effKind());
+/* the steps for a line, waiting (up to `ms`) for the voice's list when it
+   is still loading: the robot never speaks just because a file was slow */
+export async function planWhenReady(text, ms = 2000) {
+  const p = plan(text); if (p || dict && packLang === packId()) return p;
+  await Promise.race([loadVoicePack(), new Promise(r => setTimeout(r, ms))]);
+  return plan(text);
 }
 export const hasVoicePack = () => !!dict;
 

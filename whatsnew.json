@@ -1,6 +1,8 @@
 {
-  "version": "2026-10-10.3",
+  "version": "2026-10-10.4",
   "notes": [
+    "Fixed: the coach voice could fall back to the robot voice on phones. It now waits for the voice to load, and Timer settings shows when it is ready",
+    "Ladder: each rung's time is listed under the totals",
     "History: the clock button at the top shows every workout with its time and reps. Do it again or save it in 1 tap",
     "Saved workouts now sit first in Quick picks",
     "Ladder: each move can Climb, go as a Pyramid or stay the Same. Rung reps now read on one line",
@@ -48,6 +50,8 @@
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
   ],
   "notes_fr": [
+    "Corrigé : la voix du coach pouvait repasser en voix robot sur téléphone. Elle attend maintenant d’être chargée, et les Réglages indiquent quand elle est prête",
+    "Échelle : le temps de chaque palier s’affiche sous les totaux",
     "Historique : le bouton horloge en haut montre chaque séance avec son temps et ses reps. Refais-la ou enregistre-la en 1 geste",
     "Tes séances enregistrées sont en tête des Séances express",
     "Échelle : chaque exercice peut monter, faire une pyramide ou rester constant. Les reps du palier tiennent sur une ligne",

@@ -219,6 +219,7 @@ function injectStyle() {
   html.wm .wm-rstep b { min-width: 42px; text-align:center; font-family: var(--tnum); font-size: 18px; color: var(--wm-ready); }
   html.wm .wm-seg3 { display:flex; gap: 6px; }
   /* the coach voice: Nico, Nico female, then the studio voices, two a row */
+  html.wm .wm-vstate { font-size: 12.5px; color: var(--muted); margin-top: 8px; } html.wm .wm-vstate.ready { color: var(--wm-neon); } html.wm .wm-vstate.failed { color: #FF3B6B; }
   html.wm .wm-vks { display:grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
   html.wm .wm-vks button { display:flex; flex-direction:column; align-items:flex-start; gap: 2px; text-align:left; background: var(--box); border: 1px solid var(--line); border-radius: 10px; color: var(--text); padding: 9px 12px; cursor:pointer; }
   html.wm .wm-vks button b { font-size: 15px; } html.wm .wm-vks button small { color: var(--muted); font-size: 12px; }

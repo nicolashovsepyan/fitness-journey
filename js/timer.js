@@ -8,7 +8,7 @@
    ============================================================ */
 
 import { storage } from './core/storage.js';
-import { loadVoicePack, warmVoice, plan, playLine, stopVoice } from './voice.js';
+import { loadVoicePack, warmVoice, plan, playLine, stopVoice, planWhenReady, voiceIsStudio, voicePackState } from './voice.js';
 import { lang } from './i18n.js';
 loadVoicePack();
 
@@ -95,6 +95,16 @@ export function say(text, keep = 0) {
      the words not recorded yet */
   try { if (actx && actx.state !== 'running') actx.resume().catch?.(() => {}); } catch (e) {}   // interrupted mid-workout: wake it
   const steps = actx && plan(text);
+  /* the voice's list is still loading (the app just opened, a new voice
+     was picked): wait for it rather than hand the line to the robot */
+  if (actx && !steps && (voiceIsStudio() || voicePackState() !== 'failed')) {
+    const at = Date.now();
+    voiceChain = voiceChain.then(() => planWhenReady(text)).then(p => {
+      if (p) return playLine(actx, p, speakNow, beepUntil);
+      if (!voiceIsStudio() && Date.now() - at < 4000) robot(text, keep);   // Nico's voice with no pack at all: the phone's voice
+    }).catch(() => {});
+    return;
+  }
   if (steps) {
     const now = Date.now() >= keepUntil;
     if (keep) keepUntil = Date.now() + keep;
@@ -102,6 +112,9 @@ export function say(text, keep = 0) {
     else voiceChain = voiceChain.then(() => playLine(actx, steps, speakNow, beepUntil)).catch(() => {});
     return;
   }
+  robot(text, keep);
+}
+function robot(text, keep = 0) {
   try {
     if (!preferredVoice || (lang() === 'fr') !== /^fr/i.test(preferredVoice.lang || '')) preferredVoice = pickVoice();   // the language changed
     const u = new SpeechSynthesisUtterance(text);

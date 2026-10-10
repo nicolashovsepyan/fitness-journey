@@ -1688,6 +1688,7 @@ function renderLadder() {
       <div><small>${t('Last rung')}</small><b>${lastRung != null ? fmt(lastRung) : '–'}</b></div>
     </div>
     <div class="ld-reps">${b.items.map((_, i) => `<div><span>${named[i]}</span><b>${done[i]}</b><small>/ ${all[i]}</small><i style="width:${all[i] ? (100 * done[i] / all[i]).toFixed(1) : 0}%"></i></div>`).join('')}</div>
+    ${lapRows()}   <!-- each rung done, newest first, with its time (as AMRAP shows its rounds) -->
     <div class="actionbar"><div class="btn-row am-bar"><button class="btn ghost" id="ftDone">${t('End')}</button><button class="btn lg" id="ftLap">${t('Rung done ✓')}</button></div></div>`);
   const finish = secs => {
     R.clearStep(S); onStepDone = null;
