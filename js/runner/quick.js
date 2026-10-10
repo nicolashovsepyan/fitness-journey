@@ -879,20 +879,39 @@ function sheet(inner, cls = '') {
   return { ov, close };
 }
 /* the type list */
+/* THE TYPE LIST, in the person's order: simplest first out of the box,
+   A to Z in one tap, or any order by holding and dragging a row. Reset
+   brings the original back. Kept per device (fj.typeOrder). */
+const TYPE_ORDER = 'fj.typeOrder';
+function typeOrder() {
+  let o = []; try { o = JSON.parse(localStorage.getItem(TYPE_ORDER) || '[]'); } catch (e) {}
+  const ids = FORMATS.map(f => f.id);
+  return [...o.filter(id => ids.includes(id)), ...ids.filter(id => !o.includes(id))];
+}
+const saveTypeOrder = o => { try { o ? localStorage.setItem(TYPE_ORDER, JSON.stringify(o)) : localStorage.removeItem(TYPE_ORDER); } catch (e) {} };
 function openTypes() {
   const { ov, close } = sheet(`<div class="qt-sheet-h">${t('Type of timer')}</div>
-    ${FORMATS.map(f => `<div class="qt-optrow"><button class="qt-opt ${f.id === cfg.fmt ? 'on' : ''}" data-pick="${f.id}"><b>${t(f.name)}${f.id === cfg.fmt ? ' <i>✓</i>' : ''}</b><small>${t(f.sub)}</small></button><button class="qt-how" data-how="${f.id}" aria-label="${t('How {x} works', { x: t(f.name) })}">?</button></div>`).join('')}`);
-  ov.querySelectorAll('[data-how]').forEach(b => b.addEventListener('click', () => openHow(b.dataset.how)));
-  ov.querySelectorAll('[data-pick]').forEach(b => b.addEventListener('click', () => {
-    if (cfg.fmt !== b.dataset.pick) {
-      cfg.fmt = b.dataset.pick;
-      if (cfg.fmt === 'tabata') Object.assign(cfg, TABATA, { tbN: null, tbTotal: null });
-      persist(); draw();
-    }
-    close();
-    /* nothing to set: straight in */
-    if (NO_SETUP.has(cfg.fmt)) { persist(); onStart?.(buildPlan()); }
-  }));
+    <div class="qt-typelist" id="qtTypeList"></div>
+    <div class="qt-typefoot"><small>${t('Hold and drag to reorder')}</small><button class="qt-link" id="qtTypeAZ">${t('A to Z')}</button><button class="qt-link" id="qtTypeReset">${t('Reset')}</button></div>`);
+  const list = ov.querySelector('#qtTypeList');
+  const render = () => {
+    list.innerHTML = typeOrder().map(id => FORMATS.find(f => f.id === id)).map(f => `<div class="qt-optrow" data-tid="${f.id}"><button class="qt-opt ${f.id === cfg.fmt ? 'on' : ''}" data-pick="${f.id}"><b>${t(f.name)}${f.id === cfg.fmt ? ' <i>✓</i>' : ''}</b><small>${t(f.sub)}</small></button><button class="qt-how" data-how="${f.id}" aria-label="${t('How {x} works', { x: t(f.name) })}">?</button></div>`).join('');
+    list.querySelectorAll('[data-how]').forEach(b => b.addEventListener('click', () => openHow(b.dataset.how)));
+    list.querySelectorAll('[data-pick]').forEach(b => b.addEventListener('click', () => {
+      if (cfg.fmt !== b.dataset.pick) {
+        cfg.fmt = b.dataset.pick;
+        if (cfg.fmt === 'tabata') Object.assign(cfg, TABATA, { tbN: null, tbTotal: null });
+        persist(); draw();
+      }
+      close();
+      /* nothing to set: straight in */
+      if (NO_SETUP.has(cfg.fmt)) { persist(); onStart?.(buildPlan()); }
+    }));
+  };
+  render();
+  makeSortable(list, '.qt-optrow', (from, to) => { const o = typeOrder(); o.splice(to, 0, o.splice(from, 1)[0]); saveTypeOrder(o); render(); });
+  ov.querySelector('#qtTypeAZ').addEventListener('click', () => { saveTypeOrder([...FORMATS].sort((x, y) => t(x.name).localeCompare(t(y.name))).map(f => f.id)); render(); });
+  ov.querySelector('#qtTypeReset').addEventListener('click', () => { saveTypeOrder(null); render(); });
 }
 /* types with nothing to set open straight into the clock */
 const NO_SETUP = new Set(['stopwatch']);
@@ -1303,6 +1322,9 @@ function injectStyle() {
   .qt-hnums { display:flex; gap: 10px; flex-wrap: wrap; font-family: var(--tnum); font-size: 15px; margin: 2px 0 4px; }
   .qt-hacts { display:flex; gap: 8px; margin-top: 8px; }
   .qt-hacts button { flex: 1; background: none; border: 1px solid var(--line); color: var(--text); border-radius: 10px; padding: 8px; font-weight: 700; font-size: 13.5px; }
+  .qt-typefoot { display:flex; align-items:center; gap: 14px; margin-top: 10px; padding: 0 4px; }
+  .qt-typefoot small { flex: 1; color: var(--muted); font-size: 12.5px; }
+  .qt-typefoot .qt-link { padding: 4px 0; }
   .qt-goalbox { display:flex; flex-direction:column; gap: 6px; margin: 10px 0 4px; padding: 12px 14px; border-radius: 14px; background: var(--box); border: 1px solid var(--wm-neon-line); }
   .qt-goalbox b { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--wm-neon); }
   .qt-goalbox span { font-size: 14.5px; line-height: 1.4; }

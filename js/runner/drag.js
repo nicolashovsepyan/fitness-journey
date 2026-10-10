@@ -10,7 +10,7 @@
    Android honour to stop the page scrolling under the finger.
    ============================================================ */
 const HOLD_MS = 380, SLOP = 9;
-const NOT_A_HANDLE = 'button:not([data-pick-move]), input, .ci-vid, [data-wu], .qt-mx';
+const NOT_A_HANDLE = 'button:not([data-pick-move]):not([data-pick]), input, .ci-vid, [data-wu], .qt-mx';
 let suppressClick = 0;
 document.addEventListener('click', e => { if (Date.now() < suppressClick) { e.stopPropagation(); e.preventDefault(); } }, true);
 

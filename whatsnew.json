@@ -1,6 +1,7 @@
 {
-  "version": "2026-10-10.5",
+  "version": "2026-10-10.6",
   "notes": [
+    "Timer types in your order: hold and drag in the Type list, A to Z in 1 tap, or Reset",
     "Demo videos for 297 moves: tap ▶ when picking a move, or during the workout",
     "Fixed: the coach voice could fall back to the robot voice on phones. It now waits for the voice to load, and Timer settings shows when it is ready",
     "Ladder: each rung's time is listed under the totals",
@@ -51,6 +52,7 @@
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
   ],
   "notes_fr": [
+    "Les types de minuteur dans ton ordre : maintiens et glisse dans la liste, De A à Z en 1 geste, ou Réinitialiser",
     "Vidéos de démonstration pour 297 exercices : touche ▶ en choisissant un exercice, ou pendant la séance",
     "Corrigé : la voix du coach pouvait repasser en voix robot sur téléphone. Elle attend maintenant d’être chargée, et les Réglages indiquent quand elle est prête",
     "Échelle : le temps de chaque palier s’affiche sous les totaux",
