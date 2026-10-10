@@ -4828,13 +4828,11 @@ function paneToday(){
   }
 
   /* --- messages from a human ---
-     One button. The badge only exists when something is actually unread;
-     a permanent counter is wallpaper. */
-  const unread = unreadCount();
-  h += fold('msgs', 'Coach Nico', MESSAGES.map(msgBox).join(''),
-    {icon: I.mail, tone: unread?'live':'',
-     sub: unread?`${unread===1?'A message is':unread+' messages are'} waiting` : 'Read them again, or reply',
-     badge: unread || null, openByDefault: unread > 0});
+     PARKED, not deleted. The thread was the tallest block on Today, 15% of
+     the page, for a feature with no real messages behind it yet. It comes
+     back when there is a coach on the other end of it; until then it was
+     costing a screen of attention to say nothing.
+     Everything it needs is still here: MESSAGES, msgBox, unreadCount. */
 
   /* --- the program --- */
   /* The program block keeps its place on Today because the phase bars are

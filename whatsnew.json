@@ -1,6 +1,7 @@
 {
-  "version": "2026-10-10.4",
+  "version": "2026-10-10.5",
   "notes": [
+    "Demo videos for 297 moves: tap ▶ when picking a move, or during the workout",
     "Fixed: the coach voice could fall back to the robot voice on phones. It now waits for the voice to load, and Timer settings shows when it is ready",
     "Ladder: each rung's time is listed under the totals",
     "History: the clock button at the top shows every workout with its time and reps. Do it again or save it in 1 tap",
@@ -50,6 +51,7 @@
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
   ],
   "notes_fr": [
+    "Vidéos de démonstration pour 297 exercices : touche ▶ en choisissant un exercice, ou pendant la séance",
     "Corrigé : la voix du coach pouvait repasser en voix robot sur téléphone. Elle attend maintenant d’être chargée, et les Réglages indiquent quand elle est prête",
     "Échelle : le temps de chaque palier s’affiche sous les totaux",
     "Historique : le bouton horloge en haut montre chaque séance avec son temps et ses reps. Refais-la ou enregistre-la en 1 geste",
