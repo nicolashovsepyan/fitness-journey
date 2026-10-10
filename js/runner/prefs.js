@@ -26,7 +26,14 @@ export async function loadPrefs() {
 export const pref = k => prefs[k];
 /* the coach voice: the one the person picked, else Coach Kevin (the studio
    voice) once the studio voices are there, else Nico */
-const voiceChoice = () => prefs.voicePicked ? prefs.voiceKind : (studioVoices()[0]?.id || prefs.voiceKind);
+/* Nico's own voice is no longer offered: someone who had it (or its
+   female version) gets the matching studio voice */
+const voiceChoice = () => {
+  const st = studioVoices(); if (!st.length) return prefs.voiceKind;
+  const k = prefs.voicePicked ? prefs.voiceKind : st[0].id;
+  if (st.some(v => v.id === k)) return k;
+  return (k === 'f' ? st.find(v => v.kind === 'f') : st.find(v => v.kind === 'm'))?.id || st[0].id;
+};
 function apply() { setVoice(!!prefs.voice); setBeeps(!!prefs.beeps); setSilentOverride(!!prefs.silent); setVoiceKind(voiceChoice()); loadVoicePack(); }   // the voice loads as the app opens, not on the first line
 studioReady.then(() => { if (prefs) apply(); });
 function set(k, v) {
@@ -141,8 +148,8 @@ export function openPrefs(host) {
         <div class="wm-seg3">${[['en', 'English'], ['fr', 'Français']].map(([v, l]) => `<button class="${lang() === v ? 'on' : ''}" data-lang="${v}">${l}</button>`).join('')}</div></div>
       <div class="wm-vrow wm-readyrow"><div class="wm-vl"><b>${t('Get-ready countdown')}</b><small>${t('Seconds to get in position before every timer starts')}</small></div>
         <div class="wm-rstep"><button data-rd="-1" aria-label="Less">−</button><b>${prefs.ready}s</b><button data-rd="1" aria-label="More">+</button></div></div>
-      <div class="wm-vrow wm-vkrow"><div class="wm-vl"><b>${t('Coach voice')}</b><small>${studioVoices().length ? t('Pick who coaches you. Studio voices speak English; in French the coach is Nico.') : t("Nico's voice, or the same coaching in a female voice")}</small></div>
-        <div class="wm-vks">${[['m', t('Nico'), t('Male')], ['f', t('Nico'), t('Female')], ...studioVoices().map(v => [v.id, v.label, `${t(v.kind === 'f' ? 'Female' : 'Male')} · ${t(v.accent)}`])]
+      <div class="wm-vrow wm-vkrow"><div class="wm-vl"><b>${t('Coach voice')}</b><small>${t('Pick who coaches you. The coaches speak English; in French the phone reads the lines.')}</small></div>
+        <div class="wm-vks">${studioVoices().map(v => [v.id, v.label, `${t(v.kind === 'f' ? 'Female' : 'Male')} · ${t(v.accent)}`])
           .map(([v, l, sub]) => `<button class="${voiceChoice() === v ? 'on' : ''}" data-vk="${v}"><b>${l}</b><small>${sub}</small></button>`).join('')}</div>
         <div class="wm-vstate" id="wmVState"></div></div>
       ${ROWS.map(([k, name, sub]) => `<button class="wm-pref" data-pref="${k}">

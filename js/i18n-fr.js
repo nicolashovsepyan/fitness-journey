@@ -645,6 +645,7 @@ export const FR = {
   'Hide': 'Masquer',
   'Copied': 'Copié',
   'Undo': 'Annuler',
+  'Pick who coaches you. The coaches speak English; in French the phone reads the lines.': 'Choisis ton coach. Les coachs parlent anglais'+'\u00a0'+'; en français, le téléphone lit les phrases.',
   'Hold and drag to reorder': 'Maintiens et glisse pour réordonner',
   'A to Z': 'De A à Z',
   'Reset': 'Réinitialiser',

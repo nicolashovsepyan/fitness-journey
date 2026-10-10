@@ -1,6 +1,7 @@
 {
-  "version": "2026-10-10.8",
+  "version": "2026-10-10.9",
   "notes": [
+    "Coach voice: Coach Kevin, Tess, Dominic or Louise",
     "The coach says more: encouragement during long efforts, \"almost there\" near the end, and the new modes' words, in all 4 voices",
     "Menus close easier: swipe them down, or tap the ✕ at the top right",
     "Timer types in your order: hold and drag in the Type list, A to Z in 1 tap, or Reset",
@@ -54,6 +55,7 @@
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
   ],
   "notes_fr": [
+    "Voix du coach : Coach Kevin, Tess, Dominic ou Louise",
     "Le coach en dit plus : des encouragements pendant les longs efforts, « presque fini » vers la fin, et les mots des nouveaux modes, avec les 4 voix",
     "Les menus se ferment plus facilement : glisse vers le bas, ou touche le ✕ en haut à droite",
     "Les types de minuteur dans ton ordre : maintiens et glisse dans la liste, De A à Z en 1 geste, ou Réinitialiser",
