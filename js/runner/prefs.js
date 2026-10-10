@@ -5,6 +5,7 @@
    ============================================================ */
 import { storage } from '../core/storage.js';
 import { setVoice, setBeeps, say, beep, setSilentOverride } from '../timer.js';
+import { attachSheet } from './sheet-close.js';
 import { setVoiceKind, studioVoices, studioReady, loadVoicePack, voicePackState } from '../voice.js';
 import { t, lang, setLang } from '../i18n.js';
 import { vibeOptions, setVibe } from './theme.js';
@@ -192,6 +193,7 @@ export function openPrefs(host) {
   const close = () => { ov.classList.remove('open'); setTimeout(() => ov.remove(), 180); };
   ov.addEventListener('click', e => { if (e.target === ov) close(); });
   draw();
+  attachSheet(ov, '.wm-sheet-card', close);   // swipe down or ✕ closes it too
   host.appendChild(ov);
   requestAnimationFrame(() => ov.classList.add('open'));
 }

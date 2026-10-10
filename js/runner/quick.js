@@ -20,6 +20,7 @@ import { applyWorkTheme } from './theme.js';
 import { loadPrefs, openPrefs, pref } from './prefs.js';
 import { installHold } from './hold.js';
 import { makeSortable } from './drag.js';
+import { attachSheet } from './sheet-close.js';
 import { readHistory, sigOf, showWeight } from './tally.js';
 import { ringHTML, ringBaseCss, ringDesign } from './ring.js';
 import { t, t2, num, exName, exCues, lang, setLang } from '../i18n.js';
@@ -876,6 +877,7 @@ function sheet(inner, cls = '') {
   requestAnimationFrame(() => ov.classList.add('open'));
   const close = () => { ov.classList.remove('open'); setTimeout(() => ov.remove(), 180); };
   ov.addEventListener('click', e => { if (e.target === ov) close(); });
+  attachSheet(ov, '.qt-sheet-card', close);   // swipe down or ✕ closes it too
   return { ov, close };
 }
 /* the type list */

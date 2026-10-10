@@ -11,6 +11,7 @@
    again: a clip already on disk is skipped. Uses Eleven v4.
    ============================================================ */
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
+import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -21,13 +22,19 @@ async function askKey() {
   return new Promise(ok => {
     let k = ''; const i = process.stdin; i.setRawMode?.(true); i.resume(); i.setEncoding('utf8');
     i.on('data', d => { for (const c of d) {
-      if (c === '\r' || c === '\n') { i.setRawMode?.(false); i.pause(); process.stdout.write('\n'); return ok(k.trim()); }
+      /* Terminal wraps a paste in invisible markers (ESC[200~ … ESC[201~): strip them and any other control characters */
+      if ((c === '\r' || c === '\n') && !k.replace(/\x1b\[20[01]~/g, '').trim()) continue;   // an Enter with nothing typed yet: keep waiting
+      if (c === '\r' || c === '\n') { i.setRawMode?.(false); i.pause(); process.stdout.write('\n'); return ok(k.replace(/\x1b\[20[01]~/g, '').replace(/[\x00-\x1f\x7f]/g, '').trim()); }
       if (c === '\u0003') process.exit(1);
       if (c === '\u007f') k = k.slice(0, -1); else k += c;
     } });
   });
 }
-const KEY = process.env.ELEVENLABS_API_KEY || await askKey();
+/* easiest: the key copied (Cmd+C) before running this; it is read from the clipboard, never typed */
+function clipKey() { try { const v = execSync('pbpaste', { encoding: 'utf8' }).trim(); return /^sk_[A-Za-z0-9]{20,}$/.test(v) ? v : null; } catch (e) { return null; } }
+const fromClip = clipKey();
+if (fromClip) console.log('Using the ElevenLabs key from your clipboard.');
+const KEY = process.env.ELEVENLABS_API_KEY || fromClip || await askKey();
 if (!KEY.startsWith('sk_')) { console.error('That does not look like the key (it starts with sk_). Run it again.'); process.exit(1); }
 /* the app's voices, in the order they appear in Timer settings */
 const VOICES = [
@@ -40,7 +47,12 @@ const want = process.argv.slice(2);
 const lines = JSON.parse(readFileSync(join(root, 'tools/voice-lines.json'), 'utf8'));
 const api = (p, o = {}) => fetch('https://api.elevenlabs.io' + p, { ...o, headers: { 'xi-api-key': KEY, 'content-type': 'application/json', ...(o.headers || {}) } });
 
-const sub = await (await api('/v1/user/subscription')).json();
+const subRes = await api('/v1/user/subscription'), sub = await subRes.json().catch(() => ({}));
+if (!subRes.ok) {
+  console.error(subRes.status === 401 ? 'ElevenLabs did not accept that key. Copy it again (or make a new one) and run this again.'
+    : `ElevenLabs said no (${subRes.status}): ${JSON.stringify(sub).slice(0, 200)}. If the key is restricted, it needs Text to Speech: Access, Voices: Read, User: Read.`);
+  process.exit(1);
+}
 console.log(`Plan ${sub.tier}: ${sub.character_count} of ${sub.character_limit} credits used.`);
 const mine = (await (await api('/v2/voices?page_size=100')).json()).voices || [];
 
