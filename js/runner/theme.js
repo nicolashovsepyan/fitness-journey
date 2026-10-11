@@ -268,6 +268,13 @@ function injectStyle() {
   /* THE MOVE ROW (mvRow), every mode: one slim list, full names, small − + */
   /* For time by bites: a big tank for the total, a bar and quick-add chips per move */
   html.wm .bt-sm { zoom: .68; margin: 6px 0 14px; }
+  /* Test yourself: the race against your best, one line */
+  html.wm .ghost-bar { text-align:center; font-family: var(--tnum); font-size: 15px; font-weight: 700; color: var(--muted); padding: 7px 12px; margin: 2px 0 8px; border-radius: 999px; border: 1px solid var(--line); }
+  html.wm .ghost-bar.ahead { color: var(--wm-neon); border-color: var(--wm-neon-line); box-shadow: 0 0 14px var(--wm-neon-soft); }
+  html.wm .ghost-bar.behind { color: #FF6B8B; border-color: rgba(255,107,139,.45); }
+  html.wm .test-res .test-big { font-family: var(--tnum); font-size: 44px; font-weight: 800; margin: 6px 0 4px; }
+  html.wm .test-res.best { border-color: var(--wm-neon); box-shadow: 0 0 22px var(--wm-neon-soft); }
+  html.wm .test-res.best .test-big { color: var(--wm-neon); text-shadow: 0 0 18px var(--wm-neon-soft); }
   html.wm .bt-tank { position: relative; height: 34px; border-radius: 17px; background: var(--box); border: 1px solid var(--wm-neon-line); overflow: hidden; margin: 4px 0 6px; }
   html.wm .bt-fill { position:absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, var(--wm-neon), var(--wm-accent)); box-shadow: 0 0 18px var(--wm-neon-line); transition: width .35s cubic-bezier(.2,.9,.3,1.2); }
   html.wm .bt-tank span { position: relative; display:grid; place-items:center; height:100%; font-family: var(--tnum); font-weight: 800; font-size: 17px; color:#fff; text-shadow: 0 1px 4px rgba(0,0,0,.6); }

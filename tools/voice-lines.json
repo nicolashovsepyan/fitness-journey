@@ -1550,6 +1550,86 @@
   "say": "Bring it home."
  },
  {
+  "key": "s-youre-ahead-of-your-best",
+  "text": "You're ahead of your best",
+  "say": "You're ahead of your best."
+ },
+ {
+  "key": "s-ahead-of-your-best",
+  "text": "Ahead of your best",
+  "say": "Ahead of your best."
+ },
+ {
+  "key": "s-keep-it",
+  "text": "Keep it",
+  "say": "Keep it."
+ },
+ {
+  "key": "s-beating-your-best",
+  "text": "Beating your best",
+  "say": "Beating your best."
+ },
+ {
+  "key": "s-stay-on-it",
+  "text": "Stay on it",
+  "say": "Stay on it."
+ },
+ {
+  "key": "s-behind-your-best",
+  "text": "Behind your best",
+  "say": "Behind your best."
+ },
+ {
+  "key": "s-your-best-is-right-there",
+  "text": "Your best is right there",
+  "say": "Your best is right there."
+ },
+ {
+  "key": "s-go-get-it",
+  "text": "Go get it",
+  "say": "Go get it!"
+ },
+ {
+  "key": "s-chase-it-down",
+  "text": "Chase it down",
+  "say": "Chase it down."
+ },
+ {
+  "key": "s-pick-it-up",
+  "text": "Pick it up",
+  "say": "Pick it up."
+ },
+ {
+  "key": "s-right-on-your-best",
+  "text": "Right on your best",
+  "say": "Right on your best."
+ },
+ {
+  "key": "s-dead-even-with-your-best",
+  "text": "Dead even with your best",
+  "say": "Dead even with your best."
+ },
+ {
+  "key": "s-find-a-gear",
+  "text": "Find a gear",
+  "say": "Find a gear."
+ },
+ {
+  "key": "s-new-best",
+  "text": "New best!",
+  "say": "New best!"
+ },
+ {
+  "key": "s-thats-a-new-personal-best",
+  "text": "That's a new personal best",
+  "say": "That's a new personal best."
+ },
+ {
+  "key": "s-you-beat-yourself",
+  "text": "You beat yourself",
+  "say": "You beat yourself."
+ },
+ {
   "key": "s-workout-complete",
   "text": "Workout complete",
   "say": "Workout complete."

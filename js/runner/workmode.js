@@ -278,7 +278,7 @@ function localize(plan) {
   return plan;
 }
 export function startWorkout(plan, callbacks = {}) {
-  S = R.start(localize(plan)); cb = callbacks; host = document.getElementById('app');
+  S = R.start(localize(plan)); cb = callbacks; host = document.getElementById('app'); ghostSaid = 0;
   applyWorkTheme(); loadPrefs(); initAudio(); keepAwake(); startTicker();
   enterBlock(0);
 }
@@ -342,6 +342,7 @@ function tick() {
   }
   if (rem !== lastSec) {                       // a whole second ticked over
     lastSec = rem;
+    ghostTick();
     // halfway cue — only for a WORK effort of 1 minute or more
     /* CUES ON A LONG EFFORT. Halfway from 90 seconds up (a 1-minute EMOM
        saying "halfway" every minute was noise), 1 minute left from 3 minutes
@@ -1207,7 +1208,7 @@ function renderAmrap() {
     if (S.amrapReps == null) S.amrapReps = 0;
     curVal = S.amrapReps;
     shell(`<div class="now-ex"><div class="label">${t('Max reps')} · ${mins} min</div><div class="name">${it.name}</div></div>${exActions(it)}
-      <div class="timer-wrap">${timerSvg('buffer')}</div>
+      <div class="timer-wrap">${timerSvg('buffer')}</div>${S.plan.test ? '<div class="ghost-bar" id="ghostBar"></div>' : ''}
       <div class="target">${bigEditable(curVal, `${t(UNIT[it.measure] || 'reps')} · ${t('tap to log your total')}`)}</div>
       <div class="actionbar"><button class="btn lg" id="endAmrap">${t('Done ▸')}</button></div>`);
     wireBig();
@@ -1231,6 +1232,7 @@ function renderAmrap() {
     return S.amrapLog.map((r, k) => ({ r, k, tm: times[k] })).reverse().map(({ r, k, tm }) => `<button class="am-r" data-amr="${k}"><span>${t('Round {n}', { n: k + 1 })}</span><b>${tm != null ? fmt(tm) : ''}</b><small>${showReps ? r.reps.join(' · ') : ''}</small></button>`).join('');
   };
   shell(`<div class="now-ex"><div class="label">AMRAP · ${mins} min</div></div>
+${S.plan.test ? '<div class="ghost-bar" id="ghostBar"></div>' : ''}
     <div class="am-top"><div class="timer-wrap am-ring">${timerSvg('buffer')}</div>
       <div class="am-count"><small>${t('Rounds')}</small><b class="wm-pop" id="amrapN">${S.amrapRounds}</b><span id="amrapLast">${amrapLast()}</span></div></div>
     ${b.hideList ? '' : `<div class="am-moves"><div class="am-h">${t('Round {n}', { n: S.amrapRounds + 1 })}</div>${moveRows()}</div>`}
@@ -1677,6 +1679,7 @@ function renderLadder() {
   const laps = S.laps || [], lastRung = laps.length ? laps.at(-1) - (laps.at(-2) || 0) : null;
   const next = rungs[k + 1];
   shell(`<div class="now-ex"><div class="label">${t('Ladder')} · ${t('rung {a} of {b}', { a: k + 1, b: n })}${cap ? ` · ${t('cap {t}', { t: fmt(cap) })}` : ''}</div></div>
+    ${S.plan.test ? '<div class="ghost-bar" id="ghostBar"></div>' : ''}
     <svg class="ld-bars" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${bars}</svg>
     <button class="ld-card" id="ldCard" aria-label="Rung done">
       <div class="ld-mvs ${b.items.length > 1 ? `rows n${Math.min(b.items.length, 5)}` : ''}">${b.items.map((it, i) => `<div class="ld-mv"><b class="wm-pop">${val(rungs[k], i)}</b><span>${named[i]}</span></div>`).join('')}</div>
@@ -1744,6 +1747,7 @@ function renderBites() {
   };
   shell(`<div class="now-ex"><div class="label">${cap ? t('cap {t}', { t: fmt(cap) }) : t('no cap')}</div><div class="name">${t('For time')}</div></div>
     <div class="timer-wrap bt-sm">${timerSvg('buffer')}</div>
+    ${S.plan.test ? '<div class="ghost-bar" id="ghostBar"></div>' : ''}
     <div class="bt-tank" id="btTank"></div>
     <div class="bt-tankn"><span id="btTankN"></span><button class="bt-undo" id="btUndo" aria-label="${t('Undo')}">↶ ${t('Undo')}</button></div>
     <div class="bt-rows" id="btRows"></div>
@@ -1766,7 +1770,7 @@ function renderBites() {
     const c = e.target.closest('[data-bt]'); if (!c) return;
     const i = +c.dataset.bt, before = done(), wasFull = S.bites[i] >= goal[i];
     const n = Math.min(+c.dataset.n, goal[i] - S.bites[i]); if (n <= 0) return;
-    S.bites[i] += n; S.biteLog.push([i, n]); R.save(S); buzz(20);
+    S.bites[i] += n; S.biteLog.push([i, n, Math.round(upElapsed())]); R.save(S); buzz(20);
     const after = done();
     if (after >= total) { celebrate(c, '100%'); draw(); return finish(Math.round(upElapsed())); }
     if (!wasFull && S.bites[i] >= goal[i]) celebrate(c, '✓');
@@ -1850,7 +1854,7 @@ function renderForTime() {
   const rounds = rungs ? `${t('rung {a}/{b}', { a: k + 1, b: rungs.length })} · ` : b.rounds > 1 ? `${t('{n} rounds', { n: b.rounds })} · ` : '';
   shell(`<div class="now-ex"><div class="label">${rounds}${cap ? t('cap {t}', { t: fmt(cap) }) : b.hideList ? t('tap the ring to pause') : t('no cap')}</div>
       <div class="name">${rungs ? (one ? qty(rungReps(rungs[k], 0)) : t('Rung {n}', { n: k + 1 })) : b.hideList ? t(b.label || 'Go') : t('For time')}</div>${rungs && rungs[k + 1] != null ? `<div class="side">${t('next: {x}', { x: rungLine(rungs[k + 1]) })}</div>` : ''}</div>
-    <div class="timer-wrap">${timerSvg('buffer')}</div>
+    <div class="timer-wrap">${timerSvg('buffer')}</div>${S.plan.test ? '<div class="ghost-bar" id="ghostBar"></div>' : ''}
     ${lapWord ? `<div class="ft-total">${t('Total')} <span id="ftTotal"></span></div>` : ''}
     <div id="lapList">${lapRows()}</div>
     ${list}
@@ -2056,6 +2060,64 @@ function repsOfEntry(e, b, item, partial) {
   if (b.format === 'fortime' && !partial && Number(item?.reps) > 0) return Number(item.reps) * (b.rounds || 1);
   return null;
 }
+/* TEST YOURSELF. The run's timeline, so it can be a ghost next time:
+   reps over time (For time by bites), or the time of each lap (Ladder
+   rungs, AMRAP rounds). */
+function runTrace() {
+  if (Array.isArray(S.biteLog) && S.biteLog.length && S.biteLog[0].length > 2) { let c = 0; return { kind: 'reps', pts: S.biteLog.map(([, n, tm]) => [tm, c += n]) }; }
+  const laps = (S.laps || []).length ? S.laps : (S.amrapSplits || []);
+  return laps.length ? { kind: 'laps', pts: laps.map(Math.round) } : null;
+}
+function testResult(session, partial, tallyRec) {
+  const T = S.plan.test, def = T.def;
+  const first = session.blocks[0]?.entries?.[0]?.sets?.[0]?.value;
+  const rec = { ...(tallyRec || { moves: [], total: 0, loadKg: 0 }), at: new Date().toISOString(), sig: T.sig, title: S.plan.name,
+    seconds: session.seconds, partial: !!partial, cfg: S.plan.quickCfg || null, trace: runTrace() };
+  if (def.metric !== 'reps' && Number(first) > 0) rec.score = Number(first);    // the clock of the effort itself, not the get-ready
+  const score = def.metric === 'reps' ? rec.total : (def.metric === 'time' && partial ? null : rec.score ?? rec.seconds);
+  const best = T.best, newBest = score != null && (best == null || (def.metric === 'time' ? score < best : score > best));
+  const show = v => def.metric === 'reps' ? t('{n} reps', { n: v }) : fmt(v);
+  const gap = best != null && score != null ? Math.abs(score - best) : null;
+  addHistory(rec);
+  const html = `<div class="card test-res ${newBest ? 'best' : ''}"><div class="eyebrow">${t('Test yourself')} · ${t(def.name)}</div>
+    <div class="test-big">${score != null ? show(score) : t('Not finished')}</div>
+    <div class="muted">${newBest ? (best == null ? t('Your first result. Now beat it.') : t('New best! {x} better than before', { x: show(gap) }))
+      : best != null && score != null ? t('{x} off your best ({b})', { x: show(gap), b: show(best) }) : best != null ? t('Your best: {b}', { b: show(best) }) : ''}</div></div>`;
+  if (newBest && best != null) setTimeout(() => celebrate(document.querySelector('.test-res'), t('New best!')), 400);
+  return { html, newBest };
+}
+/* the live race against the best attempt's timeline, every second */
+let ghostSaid = 0;
+function ghostTick() {
+  const T = S?.plan?.test, el = document.getElementById('ghostBar'); if (!T || !el) return;
+  const g = T.ghost, now = upElapsed();
+  let txt = '', d = 0, mile = 0;
+  const show = v => T.def.metric === 'reps' ? t('{n} reps', { n: v }) : fmt(v);
+  if (T.best == null) { el.textContent = t('First try: this sets your best'); return; }
+  /* a hold: the clock counts down to your best, then past it */
+  if (T.def.metric === 'hold') {
+    d = Math.round(now - T.best); txt = d < 0 ? t('{t} to beat your best', { t: fmt(-d) }) : t('New best! +{t}', { t: fmt(d) });
+    el.textContent = txt; el.className = 'ghost-bar ' + (d >= 0 ? 'ahead' : '');
+    if (d >= 0 && !ghostSaid) { ghostSaid = 1; const w = pick('newbest'); if (w) say(w); }
+    return;
+  }
+  if (!g) { el.textContent = t('Your best: {b}', { b: show(T.best) }); return; }
+  if (g.kind === 'reps' && Array.isArray(S.biteLog)) {
+    const mine = S.biteLog.reduce((a, x) => a + x[1], 0);
+    let ghost = 0; for (const [tm, c] of g.pts) { if (tm <= now) ghost = c; else break; }
+    d = mine - ghost; mile = Math.floor(mine / Math.max(1, g.pts.at(-1)[1]) * 4);
+    txt = d > 0 ? t('{n} reps ahead of your best', { n: d }) : d < 0 ? t('{n} reps behind your best', { n: -d }) : t('Even with your best');
+  } else if (g.kind === 'laps') {
+    const mine = (S.laps || []).length ? S.laps : (S.amrapSplits || []), k = mine.length;
+    if (!k) { txt = t('Your best: lap 1 in {t}', { t: fmt(g.pts[0] || 0) }); }
+    else if (g.pts[k - 1] == null) { d = 1; txt = t('Past your best: {n} laps', { n: k }); }
+    else { d = Math.round(g.pts[k - 1] - mine[k - 1]); txt = d > 0 ? t('{n} s ahead of your best', { n: d }) : d < 0 ? t('{n} s behind your best', { n: -d }) : t('Even with your best'); }
+    mile = k;
+  }
+  el.textContent = txt; el.className = 'ghost-bar ' + (d > 0 ? 'ahead' : d < 0 ? 'behind' : '');
+  /* the coach calls the race at each quarter (reps) or each lap, not more */
+  if (mile > ghostSaid) { ghostSaid = mile; const w = pick(d > 0 ? 'ahead' : d < 0 ? 'behind' : 'even'); if (w) say(w); }
+}
 function quickTally(session, partial) {
   const body = bodyWeight();
   const unit = body?.unit === 'kg' ? 'kg' : (S.plan.blocks.flatMap(b => b.items).find(it => it.wUnit)?.wUnit || body?.unit || 'lb');
@@ -2106,10 +2168,10 @@ function quickTally(session, partial) {
         const d = new Date(prev.at), diff = total - prev.total;
         el.innerHTML = `<div class="eff-row"><span class="muted">${t('Last time')} · ${d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span><span style="margin-left:auto;">${t('{n} reps', { n: prev.total })} <b class="${diff > 0 ? 'up' : diff < 0 ? 'down' : ''}">${diff > 0 ? `+${diff}` : diff < 0 ? diff : '='}</b></span></div>`;
       }
-      return addHistory(rec);
+      if (!S.plan.test) return addHistory(rec);   // a test attempt is kept by testResult(), once
     });
   };
-  return { html, wire };
+  return { html, wire, rec };
 }
 
 function finishSession(opts = {}) {
@@ -2147,11 +2209,13 @@ function finishSession(opts = {}) {
   const effs = (partial || S.plan.quick) ? [] : efficiencyCallouts(session);
   const resultHtml = S.plan.quick ? quickResult(session) : '';
   const tally = S.plan.quick && !S.plan.demo ? quickTally(session, partial) : null;
+  const test = S.plan.test ? testResult(session, partial, tally?.rec) : null;
   R.clear();
   const prText = p => p.weight != null
     ? ((p.l != null || p.r != null) ? `${p.weight}lb · L${p.l ?? '–'} · R${p.r ?? '–'}` : `${p.weight}lb × ${p.value}`)
     : `${p.value} ${p.unit}`;
   if (prs.length) say(`${t('New record.')} ${prText(prs[0])}.`);
+  else if (test?.newBest) say(pick('newbest') || t('New record.'));
   else if (partial) say(t('Saved.'));
   else if (effs[0]?.icon === '🏆') say(t('Most efficient session yet. Great work.'));
   else say(pick('done') || t('Workout complete. Strong work.'));
@@ -2161,7 +2225,7 @@ function finishSession(opts = {}) {
     <div class="big-emoji">${prs.length ? '🏆' : '✅'}</div>
     <h1 style="font-size:28px;">${t(prs.length ? 'New records!' : partial ? 'Saved.' : 'Done.')}</h1>
     <p class="muted">${S.plan.name} · ${fmt(elapsed)}${partial ? ` · ${t('ended early')}` : S.plan.quick ? '' : ` · ${t('{n} min plan', { n: S.plan.duration })}`}</p>
-    <div style="height:16px;"></div>${resultHtml}${tally ? tally.html : ''}${prHtml}${effHtml}
+    <div style="height:16px;"></div>${test ? test.html : ''}${resultHtml}${tally ? tally.html : ''}${prHtml}${effHtml}
     <div class="actionbar"><button class="btn lg" id="home">${t(S.plan.finishLabel || 'Back to week')}</button></div></div>`;
   if (tally) tally.wire();
   document.getElementById('home').addEventListener('click', async () => { const leavesPage = !!S?.plan?.returnTo; try { await R.flushRunState(); } catch (e) {} if (!leavesPage) clearWorkTheme(); cb.onFinish?.(); });

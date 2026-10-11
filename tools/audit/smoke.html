@@ -29,6 +29,7 @@
 import { MODES } from './timer-audit.js';
 const ALL = { ...MODES, vo2: { cfg: { fmt: 'vo2', vo2: 'z5' } },
   goal: { cfg: { fmt: 'goal', goalAs: 'emom', movesBy: { goal: [{ exId: 'pushup', name: 'Push-ups', reps: 50 }, { exId: 'bodyweight_squat', name: 'Bodyweight Squat', reps: 60 }] } } },
+  test: { cfg: { fmt: 'test', testId: 'p100' } },
   igyg: { cfg: { fmt: 'igyg', igRest: 'same', movesBy: { igyg: [{ exId: 'burpee', name: 'Burpee', reps: 10, pumps: 2 }, { exId: 'pullup', name: 'Pull-Up', reps: 5 }] } } } };
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const out = document.getElementById('out'), sum = document.getElementById('sum'), stage = document.getElementById('stage');

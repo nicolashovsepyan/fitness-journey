@@ -26,6 +26,7 @@ import { ringHTML, ringBaseCss, ringDesign } from './ring.js';
 import { t, t2, num, exName, exCues, lang, setLang } from '../i18n.js';
 import { PICKS, LEVEL } from './quick-picks.js';
 import { buildFromGoal, burpeeClub } from './rep-goal.js';
+import { TESTS, testSig, bestOf, attempts, scoreOf } from './tests.js';
 import { videoEmbed, videoSearch } from '../data/exercise-videos.js';
 import { VOICE_CUES } from '../data/voice-cues.js';
 import { isInstalled, isIOS, isIOSSafari, isIOSOtherBrowser, isAndroid, canPromptInstall, promptInstall, onInstallStateChange } from '../install.js';
@@ -75,6 +76,9 @@ const FORMATS = [
     how: ['Death By.', 'Minute 1: 1 rep. Minute 2: 2 reps. Minute 3: 3 reps. Every minute the reps go up.',
       'Keep going until you can\'t finish the reps inside the minute, then tap "I can\'t finish this one". Your score is the last round you completed.',
       'Customize changes the start, the jump each round, and the interval.'] },
+  { id: 'test', name: 'Test yourself', sub: 'Race your own best', moves: false,
+    how: ['Benchmarks you race your own best on: 100 push-ups for time, max push-ups in 2 minutes, the longest dead hang…', 'Your first try sets your best. After that, a line under the clock races you against it, live: "12 reps ahead of your best", "6 s behind". The coach calls it too.',
+      'Beat it and it becomes your new best. Every attempt is in History.'] },
   { id: 'pushup', name: 'Push-up test', sub: '1 rep every 3 seconds', moves: false,
     how: ['The push-up beep test.', 'A 10-second countdown, then a DOUBLE beep: that is your start. After it, 1 beep every 3 seconds: on each one, go down and come back up before the next. That is 20 a minute. The coach counts every rep out loud.',
       'Keep the beat as long as you can. The test is over when you can no longer stay in rhythm or your form breaks: tap Stop. Your score is the reps you did on the beat.',
@@ -105,12 +109,12 @@ const isTime = k => FIELDS[k][1] === 'time';
 const MAIN = {
   emom: ['mins'], amrap: ['cap'], fortime: ['ftRounds', 'ftCap'], tabata: ['rounds'],
   timer: ['work', 'rest', 'rounds'], stopwatch: [], pushup: ['pace'],
-  deathby: ['dbEvery', 'dbMax'], ladder: ['ldRungs', 'ldCap'], vo2: [], goal: [], igyg: [],
+  deathby: ['dbEvery', 'dbMax'], ladder: ['ldRungs', 'ldCap'], vo2: [], goal: [], igyg: [], test: [],
 };
 const MORE = {
   emom: ['every'], amrap: [], fortime: [], tabata: ['work', 'rest'],
   timer: ['sets', 'setRest'], stopwatch: [], pushup: ['ptCap'],
-  deathby: [], ladder: [], vo2: [], goal: [], igyg: [],
+  deathby: [], ladder: [], vo2: [], goal: [], igyg: [], test: [],
 };
 const DEFAULTS = {
   fmt: 'emom', every: 60, mins: 12, cap: 10, ftCap: 0, ftRounds: 1,
@@ -118,7 +122,7 @@ const DEFAULTS = {
   tWork: 120, tRest: 0, tRounds: 1, pace: 20, paceV: 2, ptCap: 0,
   dbEvery: 60, dbMax: 30,
   ldRungs: 10, ldShape: 'one', ldCap: 0,
-  emomStyle: 'turns', ready: 10, vo2: 'n4x4', goalAs: 'emom', igRest: 'same', igRestSec: 30,
+  emomStyle: 'turns', ready: 10, vo2: 'n4x4', testId: 'p100', goalAs: 'emom', igRest: 'same', igRestSec: 30,
 };
 const TABATA = { work: 20, rest: 10, rounds: 8 };
 const PREF = 'quickTimer';
@@ -334,6 +338,7 @@ function totalSec() {
     case 'pushup': return cfg.ptCap ? cfg.ptCap * 60 : null;
     case 'deathby': return cfg.dbMax * cfg.dbEvery;
     case 'ladder': return cfg.ldCap ? cfg.ldCap * 60 : null;
+    case 'test': return null;
     case 'goal': { const g = goalBuilt(); return g?.cfg.fmt === 'emom' ? g.cfg.mins * 60 : null; }
     case 'vo2': { const p = vo2(); return intervalSec(p.work, p.rest, p.n) + (p.warm || 0) + (p.cool || 0); }
     default: return null;
@@ -352,6 +357,7 @@ const mvName = m => exName(m?.exId, String(m?.name || '').trim());
 function summary() {
   const moves = namedMoves();
   switch (cfg.fmt) {
+    case 'test': { const d = testDef(), b = bestOf(hist, d); return b ? t('Your best: {b}', { b: testShow(d, scoreOf(b, d)) }) : t('First try sets your best'); }
     case 'goal': { const g = goalBuilt(); if (!g) return t('Add your moves and their totals');
       return g.cfg.fmt === 'emom' ? t('EMOM {n} min', { n: g.cfg.mins }) : g.cfg.fmt === 'ladder' ? t2(g.rows, '{n} rung', '{n} rungs') : g.cfg.fmt === 'igyg' ? t2(g.rows, '{n} set', '{n} sets') : t('For time'); }
     case 'igyg': return igygLine();
@@ -394,6 +400,7 @@ function planName() {
   if (f === 'pushup') return `${t('Push-up test')} · ${t('{n} a min', { n: cfg.pace })}`;
   if (f === 'vo2') return `VO2 max · ${t(vo2().name)}`;
   if (f === 'deathby') { const ms = ladderMoves().filter(m => mvName(m)); return `Death By${ms.length ? ' · ' + ms.map(mvName).join(', ') : ''}${cfg.dbEvery !== 60 ? ` ${t('every {t}', { t: fmt(cfg.dbEvery) })}` : ''}`; }
+  if (f === 'test') return t(testDef().name);
   if (f === 'goal') return `${t('Rep goal')} · ${namedMoves().map(m => `${m.reps || 0} ${m.name}`).join(', ')}`;
   if (f === 'igyg') return `${t('You go, I go')} · ${t2(namedMoves().length, '{n} set', '{n} sets')}`;
   if (f === 'ladder') { const ms = ladderMoves(); return `${t('Ladder')} · ${ms.map(m => `${mvName(m) || t('reps')} ${ldMode(m) === 'flat' ? t('{n} each rung', { n: ldStart(m) }) : `${ldStart(m)} ${ldStep(m) >= 0 ? '+' : '−'}${Math.abs(ldStep(m))}${ldMode(m) === 'pyr' ? ' ' + t('pyramid') : ''}`}`).join(', ')}${cfg.ldShape === 'mirror' ? t(' and back') : cfg.ldShape === 'wave' ? t(' wave') : ''}`; }
@@ -441,6 +448,17 @@ export function buildPlan(c = cfg) {
           /* each move climbs on its own: its start, its jump per round */
           items: ladderMoves().map((m, i) => ({ ...(moves[i] || { name: 'Reps', measure: 'reps' }), dbStart: ldStart(m), dbStep: Math.max(0, ldStep(m)) })) }];
         break;
+      case 'test': {
+        /* the benchmark on its own timer, with the best attempt to race */
+        const def = testDef(), testCfg = JSON.parse(JSON.stringify(cfg)), best = bestOf(hist, def);
+        cfg = prev;
+        const plan = buildPlan({ ...c, ...def.cfg, fmt: def.fmt, movesBy: { ...(c.movesBy || {}), [def.fmt]: testMoves(def) } });
+        if (!plan) return plan;
+        plan.name = t(def.name); plan.quickCfg = testCfg;
+        plan.test = { def, sig: testSig(def.id), best: scoreOf(best, def), ghost: best?.trace || null };
+        if (def.fmt === 'stopwatch') plan.blocks.forEach(b => { b.name = t(def.name); b.label = def.name; });   // a hold: its name on the clock, Done only (no Lap)
+        return plan;
+      }
       case 'goal': {
         /* the goal, built into the type picked, then planned as that type */
         const g = goalBuilt(); if (!g) break;
@@ -691,6 +709,18 @@ function openAllHistory() {
     const r = hist[+b.dataset.hsave]; load(r); favs.unshift({ label: r.title || planName(), cfg: JSON.parse(JSON.stringify(cfg)), sub: summary() }); favs = favs.slice(0, 20); favIdx = 0;
     persist(); close(); draw(); toast(t('Saved')); }));
 }
+/* TEST YOURSELF (tests.js): the benchmark picked, your best and tries */
+const testDef = () => TESTS.find(x => x.id === cfg.testId) || TESTS[0];
+const testShow = (def, v) => v == null ? '' : def.metric === 'reps' ? t('{n} reps', { n: v }) : fmt(v);
+function testsList() {
+  const groups = [...new Set(TESTS.map(x => x.group))];
+  return groups.map(g => `${sec(g)}<div class="qt-tests">${TESTS.filter(x => x.group === g).map(x => {
+    const b = bestOf(hist, x), n = attempts(hist, x).length;
+    return `<button class="qt-test ${x.id === cfg.testId ? 'on' : ''}" data-test="${x.id}"><span><b>${t(x.name)}</b><small>${t(x.sub)}</small></span>
+      <em>${b ? `<i>${t('Best')}</i>${testShow(x, scoreOf(b, x))}` : `<i>${t('New')}</i>`}${n ? `<small>${t2(n, '{n} try', '{n} tries')}</small>` : ''}</em></button>`; }).join('')}</div>`).join('');
+}
+const testMoves = def => def.m.map(([k, a, b]) => { const ex = EXERCISES[k], base = ex ? { exId: k, name: ex.name } : { exId: null, name: t(k) };
+  return ['ladder', 'deathby'].includes(def.fmt) ? { ...base, reps: '', ldStart: a, ldStep: b } : { ...base, reps: a }; });
 /* REP GOAL (rep-goal.js): the totals, built into the type picked */
 const GOAL_AS = [['emom', 'EMOM'], ['ladder', 'Ladder'], ['igyg', 'Sets'], ['fortime', 'For time']];
 function goalBuilt() { return buildFromGoal(MV().map(m => ({ ...m, name: mvName(m) })), cfg.goalAs); }
@@ -776,6 +806,7 @@ function draw() {
     ${picksRow()}
 
     ${settings.length ? `${sec('Settings', cfg.fmt === 'ladder' ? `<button class="qt-seclink" id="qtPresets">${t('Presets')}</button>` : '')}<div class="qt-rows">${settings.join('')}</div>` : ''}
+    ${cfg.fmt === 'test' ? testsList() : ''}
     ${lad || db ? `${sec(cfg.fmt === 'goal' ? 'Your totals' : cfg.fmt === 'igyg' ? 'Sets, in order' : 'Moves')}${movesCard()}` : ''}
     ${cfg.fmt === 'goal' && goalBuilt() ? `<div class="qt-goalbox"><b>${t('The plan')}</b><span>${esc(goalPreview())}</span>${cfg.goalAs !== 'ladder' ? `<button class="qt-link" id="qtGoalOpen">${t('Open it as {x} to adjust', { x: t(GOAL_AS.find(x => x[0] === cfg.goalAs)[1]) })}</button>` : ''}</div>` : ''}
     ${!settings.length && !lad && !db ? `<div class="qt-empty">${t('Nothing to set. Hit start.')}</div>` : ''}
@@ -1210,6 +1241,7 @@ function wire() {
     const m = MV()[+b.dataset.mp]; m.pumps = Math.max(0, Math.min(20, (Number(m.pumps) || 0) + Number(b.dataset.d))); persist(); draw();
   }));
   host.querySelectorAll('[data-ldmode]').forEach(b => b.addEventListener('click', () => { MV()[+b.dataset.ldmode].ldMode = b.dataset.v; persist(); draw(); }));
+  host.querySelectorAll('[data-test]').forEach(b => b.addEventListener('click', () => { cfg.testId = b.dataset.test; persist(); draw(); }));
   host.querySelectorAll('[data-goalas]').forEach(b => b.addEventListener('click', () => { cfg.goalAs = b.dataset.goalas; persist(); draw(); }));
   host.querySelectorAll('[data-igrest]').forEach(b => b.addEventListener('click', () => { cfg.igRest = b.dataset.igrest; persist(); draw(); }));
   $('#qtGoalOpen')?.addEventListener('click', () => {
@@ -1327,6 +1359,13 @@ function injectStyle() {
   .qt-typefoot { display:flex; align-items:center; gap: 14px; margin-top: 10px; padding: 0 4px; }
   .qt-typefoot small { flex: 1; color: var(--muted); font-size: 12.5px; }
   .qt-typefoot .qt-link { padding: 4px 0; }
+  .qt-tests { display:flex; flex-direction:column; gap: 8px; margin-bottom: 8px; }
+  .qt-test { display:flex; align-items:center; gap: 10px; text-align:left; background: var(--box); border: 1px solid var(--line); border-radius: 14px; padding: 11px 14px; color: var(--text); cursor:pointer; }
+  .qt-test > span { flex: 1; display:flex; flex-direction:column; gap: 2px; min-width: 0; }
+  .qt-test b { font-size: 16px; } .qt-test small { color: var(--muted); font-size: 12.5px; }
+  .qt-test em { font-style: normal; display:flex; flex-direction:column; align-items:flex-end; font-family: var(--tnum); font-size: 17px; font-weight: 800; color: var(--wm-neon); }
+  .qt-test em i { font-style: normal; font-family: var(--font); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+  .qt-test.on { border-color: var(--wm-accent); box-shadow: 0 0 0 1px var(--wm-accent) inset; }
   .qt-goalbox { display:flex; flex-direction:column; gap: 6px; margin: 10px 0 4px; padding: 12px 14px; border-radius: 14px; background: var(--box); border: 1px solid var(--wm-neon-line); }
   .qt-goalbox b { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--wm-neon); }
   .qt-goalbox span { font-size: 14.5px; line-height: 1.4; }
