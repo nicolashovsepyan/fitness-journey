@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-17.4",
+  "version": "2026-10-17.5",
   "notes": [
     "Getting the iPhone app ready for its own sound engine: through the silent switch, under your music, back after Siri, and on time with the phone locked",
     "Your music keeps playing again: the timer mixes with it. (Sound on silent stays in Timer settings, but on iPhone it pauses your music)",

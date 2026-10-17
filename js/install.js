@@ -39,7 +39,8 @@ export const isIOSOtherBrowser = () => isIOS() && /CriOS|FxiOS|EdgiOS|OPiOS/i.te
 
 export function isInstalled() {
   return window.matchMedia?.('(display-mode: standalone)')?.matches
-    || window.navigator.standalone === true;    // iOS
+    || window.navigator.standalone === true    // iOS
+    || /FJNative/.test(navigator.userAgent || '');   // the iPhone app itself
 }
 export function canPromptInstall() { return !!deferredPrompt; }
 

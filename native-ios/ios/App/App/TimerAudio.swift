@@ -76,7 +76,8 @@ final class TimerSound {
         guard wanted else { return }
         takeSession(); build()
         if !engine.isRunning { engine.prepare(); try? engine.start() }
-        guard engine.isRunning else { interrupted = true; return }
+        guard engine.isRunning else { interrupted = true; NSLog("[TimerAudio] engine did not start"); return }
+        NSLog("[TimerAudio] running, other audio: %d", AVAudioSession.sharedInstance().isOtherAudioPlaying ? 1 : 0)
         interrupted = false
         for n in beepNodes + [voiceNode, idleNode] where !n.isPlaying { n.play() }
         if !idleLooping, let silence = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: 4410) {
@@ -260,7 +261,7 @@ public class TimerAudioPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "preload", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "status", returnType: CAPPluginReturnPromise),
     ]
-    @objc func start(_ call: CAPPluginCall) { TimerSound.shared.start(); call.resolve() }
+    @objc func start(_ call: CAPPluginCall) { NSLog("[TimerAudio] start"); TimerSound.shared.start(); call.resolve() }
     @objc func stop(_ call: CAPPluginCall) { TimerSound.shared.stop(); call.resolve() }
     /* events: [{ at: epoch ms, kind: 'go'|'count'|…|'line', urls?: [..], stops?: [..], cut?: bool, tag?: '', gain?: 1 }] */
     @objc func play(_ call: CAPPluginCall) {
@@ -271,6 +272,7 @@ public class TimerAudioPlugin: CAPPlugin, CAPBridgedPlugin {
             urls: (o["urls"] as? [String]) ?? [], stops: (o["stops"] as? [Bool]) ?? [],
             cut: (o["cut"] as? Bool) ?? false, tag: (o["tag"] as? String) ?? "",
             gain: Float((o["gain"] as? Double) ?? 1)) }
+        NSLog("[TimerAudio] play %d: %@", evs.count, evs.map { $0.kind }.joined(separator: ","))
         TimerSound.shared.add(evs); call.resolve()
     }
     @objc func cancel(_ call: CAPPluginCall) { TimerSound.shared.cancel(tag: call.getString("tag") ?? ""); call.resolve() }
