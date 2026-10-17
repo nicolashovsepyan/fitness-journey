@@ -213,7 +213,7 @@ export function initAudio() {
      with an "interrupted" context, which then plays nothing */
   setSessionType();
   try {
-    if (!actx) { actx = new (window.AudioContext || window.webkitAudioContext)(); actx.onstatechange = notifyAudio; }
+    if (!actx) { actx = new (window.AudioContext || window.webkitAudioContext)(); actx.onstatechange = () => { alog('state'); notifyAudio(); }; }
     /* "suspended" (no gesture yet) AND "interrupted" (Safari, after a call,
        Siri, another app, a session change): either way, start it again */
     if (actx.state !== 'running') actx.resume().catch?.(() => {});
@@ -273,6 +273,30 @@ export function initAudio() {
    When iOS insists on a tap first, 'fj-audio' tells the screen to ask for
    one, and the first tap anywhere brings it all back (audioTap). */
 let deadSince = 0, lastRebuild = 0, wasOk = true;
+/* THE SOUND LOG (Timer settings → Sound log): what the sound did and when,
+   kept on the phone, so a silent workout can be explained from a screenshot */
+const ALOG = 'fj.audioLog';
+export function alog(msg) {
+  try { const a = JSON.parse(localStorage.getItem(ALOG) || '[]'); a.push(`${new Date().toLocaleTimeString()} ${msg}${actx ? ` [${actx.state} ${actx.currentTime.toFixed(1)}]` : ''}`); localStorage.setItem(ALOG, JSON.stringify(a.slice(-60))); } catch (e) {}
+}
+export const audioLog = () => { try { return JSON.parse(localStorage.getItem(ALOG) || '[]'); } catch (e) { return []; } };
+/* IS IT REALLY PLAYING? A dead context can say "running": its clock does
+   not move. 'ok', 'suspended' (iOS wants a tap) or 'frozen' (only a fresh
+   page brings it back) */
+function probe(ms = 500) {
+  return new Promise(res => {
+    const c = actx; if (!c) return res('none');
+    const t0 = c.currentTime;
+    setTimeout(() => res(c !== actx ? 'replaced' : c.state !== 'running' ? 'suspended' : c.currentTime - t0 < (ms / 1000) * 0.4 ? 'frozen' : 'ok'), ms);
+  });
+}
+/* frozen: the page reloads itself; the workout comes back where it was
+   (runstate), and a fresh page always gets its sound. Once a minute at most */
+function reloadForSound(why) {
+  alog('reload: ' + why);
+  try { const last = Number(sessionStorage.getItem('fj.soundReload') || 0); if (Date.now() - last < 60000) { deadSince = Date.now() - 2000; return notifyAudio(); } sessionStorage.setItem('fj.soundReload', String(Date.now())); } catch (e) {}
+  document.dispatchEvent(new CustomEvent('fj-audio-reload'));
+}
 const healthy = () => !actx || actx.state === 'running';
 export const audioHealthy = healthy;
 function notifyAudio() {
@@ -280,6 +304,7 @@ function notifyAudio() {
   if (ok !== wasOk) { wasOk = ok; try { document.dispatchEvent(new CustomEvent('fj-audio', { detail: { ok } })); } catch (e) {} }
 }
 function rebuild() {
+  alog('rebuild');
   const old = actx; actx = null; lastRebuild = Date.now(); deadSince = 0;
   try { old?.close?.(); } catch (e) {}
   initAudio();
@@ -294,7 +319,11 @@ export function audioWatch(gesture = false) {
   if (gesture || (Date.now() - deadSince > 1500 && Date.now() - lastRebuild > 8000)) rebuild();
   notifyAudio();
 }
-export const audioTap = () => audioWatch(true);
+export function audioTap() {
+  alog('tap');
+  audioWatch(true);
+  probe(600).then(r => { alog('after tap: ' + r); if (r === 'frozen') reloadForSound('frozen after a tap'); });
+}
 /* BACK FROM ANOTHER APP (the music app, a call): iOS can hand the page back
    a context that says "running" and plays nothing, so the watchdog, which
    trusts the state, never sees it. Coming back to the front during a
@@ -305,7 +334,12 @@ export function audioRefresh() {
   const old = actx; actx = null; lastRebuild = Date.now(); deadSince = 0;
   try { old.close?.(); } catch (e) {}
   initAudio();
-  setTimeout(() => { if (actx && actx.state !== 'running') { deadSince = Date.now() - 2000; notifyAudio(); } }, 600);
+  alog('back to the front: new context');
+  probe(600).then(r => {
+    alog('check: ' + r);
+    if (r === 'frozen') reloadForSound('frozen on return');
+    else if (r === 'suspended') { deadSince = Date.now() - 2000; notifyAudio(); }
+  });
 }
 
 /* Stop the silent clip when the workout does. Leaving it running holds an

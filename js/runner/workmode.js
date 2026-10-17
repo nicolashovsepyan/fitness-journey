@@ -20,7 +20,7 @@ import { t, t2, num, exName, exCues } from '../i18n.js';
 import { bodyWeight, setTimerBodyWeight, moveLoadKg, showWeight, needsBody, readHistory, addHistory, sigOf } from './tally.js';
 import { ringHTML, ringBaseCss, RING_R, snapToSegments } from './ring.js';
 import { loadPrefs, pref, openPrefs } from './prefs.js';
-import { say, beep, buzz, fmt, initAudio, stopAudio, keepAwake, releaseAwake, setMuted, audioWatch, audioTap, audioHealthy, nativeAudio, nativeSchedule, nativeCancel, lineEvent, setBackgroundQuiet, audioRefresh } from '../timer.js';
+import { say, beep, buzz, fmt, initAudio, stopAudio, keepAwake, releaseAwake, setMuted, audioWatch, audioTap, audioHealthy, nativeAudio, nativeSchedule, nativeCancel, lineEvent, setBackgroundQuiet, audioRefresh, alog } from '../timer.js';
 
 const UNIT = { reps: 'reps', hold: 'sec', cals: 'cals', rounds: 'rounds' };
 /* "1 rep", "10 reps" */
@@ -103,6 +103,7 @@ if (typeof document !== 'undefined') {
     /* the iPhone app going to the background (or the phone locking): the
        page may be put to sleep, so the app's sound engine is handed what
        comes next, to play on time by itself */
+    if (document.hidden && S && !S.done && ticker) alog('to the background');
     if (document.hidden && nativeAudio() && S && !S.done && ticker) { scheduleBackground(); setBackgroundQuiet(true); return; }
     if (!document.hidden) { if (nativeAudio()) { nativeCancel('bg'); setBackgroundQuiet(false); } if (S && !S.done && ticker) { audioRefresh(); keepAwake(); tick(); } }
   });
@@ -118,6 +119,8 @@ if (typeof document !== 'undefined') {
      is what iOS wants before it gives the sound back */
   ['pointerdown', 'touchend'].forEach(t => document.addEventListener(t, () => { if (!audioHealthy()) { initAudio(); audioTap(); } }, true));
   /* the screen says so while it is down, so a silent timer is never a mystery */
+  /* a dead sound only a fresh page fixes: save the workout, reload, it resumes */
+  document.addEventListener('fj-audio-reload', async () => { if (!S || S.done) return; try { await R.flushRunState(); } catch (e) {} location.reload(); });
   document.addEventListener('fj-audio', e => {
     let el = document.getElementById('wmAudioDown');
     if (e.detail.ok || !S || S.done) { el?.remove(); return; }

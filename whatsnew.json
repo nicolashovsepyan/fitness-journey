@@ -1,6 +1,7 @@
 {
-  "version": "2026-10-17.6",
+  "version": "2026-10-17.7",
   "notes": [
+    "Sound check on every return: if your iPhone left the timer silent, it reloads itself and your workout continues where it was. Timer settings has a Sound log",
     "Fixed: coming back from your music app mid-workout, the timer could stay silent. It now starts its sound fresh every time you come back",
     "Getting the iPhone app ready for its own sound engine: through the silent switch, under your music, back after Siri, and on time with the phone locked",
     "Your music keeps playing again: the timer mixes with it. (Sound on silent stays in Timer settings, but on iPhone it pauses your music)",
@@ -63,6 +64,7 @@
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
   ],
   "notes_fr": [
+    "Vérification du son à chaque retour : si ton iPhone a coupé le minuteur, il se recharge et ta séance continue où elle en était. Les Réglages ont un Journal du son",
     "Corrigé : en revenant de ton app de musique pendant une séance, le minuteur pouvait rester muet. Il relance maintenant son son à chaque retour",
     "L’app iPhone se prépare à son propre moteur de son : même en mode silencieux, sous ta musique, de retour après Siri, et à l’heure même téléphone verrouillé",
     "Ta musique continue : le minuteur se mélange à elle. (Le son en mode silencieux reste dans les Réglages, mais sur iPhone il met ta musique en pause)",

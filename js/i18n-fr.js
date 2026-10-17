@@ -645,6 +645,7 @@ export const FR = {
   'Hide': 'Masquer',
   'Copied': 'Copié',
   'Undo': 'Annuler',
+  'Sound log': 'Journal du son',
   'Sound paused by your iPhone. Tap anywhere to bring it back.': 'Son coupé par ton iPhone. Touche l’écran pour le rétablir.',
   'Boxing 3 Rounds': 'Boxe 3 rounds',
   '3 min shadow boxing, 1 min rest, × 3': '3 min de shadow boxing, 1 min de repos, × 3',

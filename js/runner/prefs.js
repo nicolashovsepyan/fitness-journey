@@ -6,6 +6,7 @@
 import { storage } from '../core/storage.js';
 import { setVoice, setBeeps, say, beep, setSilentOverride } from '../timer.js';
 import { attachSheet } from './sheet-close.js';
+import { audioLog } from '../timer.js';
 import { setVoiceKind, studioVoices, studioReady, loadVoicePack, voicePackState } from '../voice.js';
 import { t, lang, setLang } from '../i18n.js';
 import { vibeOptions, setVibe } from './theme.js';
@@ -164,6 +165,7 @@ export function openPrefs(host) {
       <div class="wm-sheet-sub">${t('App')}</div>
       <div class="wm-vrow wm-ver"><div class="wm-vl"><b>${t('Version')}</b><small id="wmVer">…</small></div>
         <button class="btn secondary" id="wmCheck">${t('Check for updates')}</button></div>
+      <details class="wm-alog"><summary>${t('Sound log')}</summary><pre>${audioLog().slice(-30).reverse().join('\n') || '–'}</pre></details>
       <button class="btn" id="wmPrefDone">${t('Done')}</button>
     </div>`;
     ov.querySelectorAll('[data-pref]').forEach(b => b.addEventListener('click', () => {
