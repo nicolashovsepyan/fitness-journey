@@ -20,7 +20,7 @@ import { t, t2, num, exName, exCues } from '../i18n.js';
 import { bodyWeight, setTimerBodyWeight, moveLoadKg, showWeight, needsBody, readHistory, addHistory, sigOf } from './tally.js';
 import { ringHTML, ringBaseCss, RING_R, snapToSegments } from './ring.js';
 import { loadPrefs, pref, openPrefs } from './prefs.js';
-import { say, beep, buzz, fmt, initAudio, stopAudio, keepAwake, releaseAwake, setMuted } from '../timer.js';
+import { say, beep, buzz, fmt, initAudio, stopAudio, keepAwake, releaseAwake, setMuted, audioWatch, audioTap, audioHealthy } from '../timer.js';
 
 const UNIT = { reps: 'reps', hold: 'sec', cals: 'cals', rounds: 'rounds' };
 /* "1 rep", "10 reps" */
@@ -77,6 +77,16 @@ if (typeof document !== 'undefined') {
      and pointerdown has not reliably been one of them */
   const unlockOnce = () => { initAudio(); ['pointerdown', 'touchend'].forEach(t => document.removeEventListener(t, unlockOnce)); };
   ['pointerdown', 'touchend'].forEach(t => document.addEventListener(t, unlockOnce));
+  /* and EVERY touch while the sound is down (after Siri, a call): that tap
+     is what iOS wants before it gives the sound back */
+  ['pointerdown', 'touchend'].forEach(t => document.addEventListener(t, () => { if (!audioHealthy()) { initAudio(); audioTap(); } }, true));
+  /* the screen says so while it is down, so a silent timer is never a mystery */
+  document.addEventListener('fj-audio', e => {
+    let el = document.getElementById('wmAudioDown');
+    if (e.detail.ok || !S || S.done) { el?.remove(); return; }
+    if (!el) { el = document.createElement('button'); el.id = 'wmAudioDown'; el.className = 'wm-audiodown';
+      el.textContent = t('Sound paused by your iPhone. Tap anywhere to bring it back.'); el.addEventListener('click', () => { initAudio(); audioTap(); }); document.body.appendChild(el); }
+  });
   // tap the timer circle to pause/resume that countdown (not the session clock)
   document.addEventListener('click', e => {
     if (!S || S.done) return;
@@ -344,6 +354,7 @@ function tick() {
   if (rem !== lastSec) {                       // a whole second ticked over
     lastSec = rem;
     ghostTick();
+    audioWatch();   // every second: is the sound still alive?
     // halfway cue — only for a WORK effort of 1 minute or more
     /* CUES ON A LONG EFFORT. Halfway from 90 seconds up (a 1-minute EMOM
        saying "halfway" every minute was noise), 1 minute left from 3 minutes

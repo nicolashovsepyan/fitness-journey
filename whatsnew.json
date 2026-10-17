@@ -1,6 +1,8 @@
 {
-  "version": "2026-10-17.1",
+  "version": "2026-10-17.2",
   "notes": [
+    "Sound comes back after Siri, a call or an alarm: the timer checks every second and restarts it. If your iPhone needs a tap, a red bar asks for it",
+    "The timer now plays through the silent switch by default",
     "Timer types on a wheel: scroll up and down, the one in the middle is it",
     "New moves: shadow boxing, jab-cross, hooks, uppercuts, slips and rolls, speed punches, boxer shuffle, jump rope, double-unders, jumping jacks, high knees. Plus boxing rounds and rope Quick picks",
     "New: Test yourself. 15 benchmarks (100 push-ups, Navy SEAL push-ups, Murph, dead hang…). Your first try sets your best, then you race it live: \"12 reps ahead of your best\"",
@@ -58,6 +60,8 @@
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
   ],
   "notes_fr": [
+    "Le son revient après Siri, un appel ou une alarme : le minuteur vérifie chaque seconde et le relance. Si ton iPhone veut un geste, une barre rouge te le demande",
+    "Le minuteur joue maintenant même en mode silencieux, par défaut",
     "Les types de minuteur sur une roue : fais défiler, celui du milieu est choisi",
     "Nouveaux exercices : shadow boxing, jab-direct, crochets, uppercuts, esquives, coups rapides, pas de boxeur, corde à sauter, double-unders, jumping jacks, montées de genoux. Et des Séances express boxe et corde",
     "Nouveau : Teste-toi. 15 tests (100 pompes, pompes Navy SEAL, Murph, suspension…). Ton premier essai fixe ton record, ensuite tu le bats en direct : « 12 reps d’avance sur ton record »",

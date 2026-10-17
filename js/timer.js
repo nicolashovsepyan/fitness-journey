@@ -93,7 +93,7 @@ export function say(text, keep = 0) {
   if (!voiceOn || muted) return;
   /* NICO'S RECORDED VOICE first (js/voice.js); the phone's voice only for
      the words not recorded yet */
-  try { if (actx && actx.state !== 'running') actx.resume().catch?.(() => {}); } catch (e) {}   // interrupted mid-workout: wake it
+  audioWatch();   // interrupted mid-workout (Siri, a call): wake it, or rebuild it
   const steps = actx && plan(text);
   /* the voice's list is still loading (the app just opened, a new voice
      was picked): wait for it rather than hand the line to the robot */
@@ -178,7 +178,7 @@ export function initAudio() {
      with an "interrupted" context, which then plays nothing */
   setSessionType();
   try {
-    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    if (!actx) { actx = new (window.AudioContext || window.webkitAudioContext)(); actx.onstatechange = notifyAudio; }
     /* "suspended" (no gesture yet) AND "interrupted" (Safari, after a call,
        Siri, another app, a session change): either way, start it again */
     if (actx.state !== 'running') actx.resume().catch?.(() => {});
@@ -228,6 +228,38 @@ export function initAudio() {
 
   try { if (!preferredVoice) preferredVoice = pickVoice(); } catch (e) {}   // warm up the voice list
 }
+
+/* SOUND THAT COMES BACK. Siri, a call, an alarm or another app takes the
+   audio; iOS then leaves the context "interrupted" (or suspended) and on
+   some versions it never resumes on its own, so one try at resuming left a
+   workout silent to the end. audioWatch() runs every second of a workout:
+   resume; still dead after 1.5 s, a brand new context (at most every 8 s,
+   the decoded voice clips carry over); the silent-switch clip restarted.
+   When iOS insists on a tap first, 'fj-audio' tells the screen to ask for
+   one, and the first tap anywhere brings it all back (audioTap). */
+let deadSince = 0, lastRebuild = 0, wasOk = true;
+const healthy = () => !actx || actx.state === 'running';
+export const audioHealthy = healthy;
+function notifyAudio() {
+  const ok = healthy();
+  if (ok !== wasOk) { wasOk = ok; try { document.dispatchEvent(new CustomEvent('fj-audio', { detail: { ok } })); } catch (e) {} }
+}
+function rebuild() {
+  const old = actx; actx = null; lastRebuild = Date.now(); deadSince = 0;
+  try { old?.close?.(); } catch (e) {}
+  initAudio();
+}
+export function audioWatch(gesture = false) {
+  if (!actx) return;
+  if (actx.state === 'closed') return rebuild();
+  if (silentOverride && keepalive?.paused) { try { const p = keepalive.play(); p?.catch?.(() => {}); } catch (e) {} }
+  if (healthy()) { deadSince = 0; return notifyAudio(); }
+  if (!deadSince) deadSince = Date.now();
+  try { actx.resume().catch?.(() => {}); } catch (e) {}
+  if (gesture || (Date.now() - deadSince > 1500 && Date.now() - lastRebuild > 8000)) rebuild();
+  notifyAudio();
+}
+export const audioTap = () => audioWatch(true);
 
 /* Stop the silent clip when the workout does. Leaving it running holds an
    audio session open for no reason, and an app that quietly keeps the
@@ -310,7 +342,7 @@ let beepUntil = 0;
 const BEEP_LEN = { go: 0.3, end: 0.5, count: 0.1, warn: 0.2, round: 0.45, start: 0.33, rep: 0.15, down: 0.12, up: 0.12 };
 export function beep(kind = 'tick', at = 0) {
   if (muted || !beepsOn) return;
-  initAudio();
+  initAudio(); audioWatch();
   const w = Math.max(0, at);
   try { if (kind !== 'count' && kind !== 'rep') beepUntil = Math.max(beepUntil, actx.currentTime + w + (BEEP_LEN[kind] || 0.1) + 0.06); } catch (e) {}
   if (kind === 'go') {                       // start — rising two-tone

@@ -13,13 +13,16 @@ import { checkForUpdate, runningVersion } from '../update-banner.js';
 import { PRESETS, designFor, ringChoice, chooseRing, ringHTML, ringBaseCss, setRingProgress } from './ring.js';
 
 const KEY = 'workModePrefs';
-const DEFAULTS = { voice: true, beeps: true, flash: true, ready: 8, silent: false, voiceKind: 'm', cues: true };
+const DEFAULTS = { voice: true, beeps: true, flash: true, ready: 8, silent: true, voiceKind: 'm', cues: true };
 let prefs = { ...DEFAULTS };
 let loaded = false;
 
 export async function loadPrefs() {
   if (loaded) return prefs;
   try { prefs = { ...DEFAULTS, ...((await storage().getDevicePref(KEY, null)) || {}) }; } catch (e) {}
+  /* 17 Oct 2026: the timer plays through the silent switch by default (Nico
+     trains with it on); everyone, once, including those who had it off */
+  if (!prefs.silentV2) { prefs.silent = true; prefs.silentV2 = true; try { await storage().setDevicePref(KEY, prefs); } catch (e) {} }
   loaded = true; apply();
   return prefs;
 }

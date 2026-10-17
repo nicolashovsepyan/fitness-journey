@@ -269,6 +269,10 @@ function injectStyle() {
   /* For time by bites: a big tank for the total, a bar and quick-add chips per move */
   html.wm .bt-sm { zoom: .68; margin: 6px 0 14px; }
   /* Test yourself: the race against your best, one line */
+  /* the sound is down (Siri, a call): one tap anywhere brings it back */
+  .wm-audiodown { position: fixed; left: 12px; right: 12px; top: calc(10px + env(safe-area-inset-top)); z-index: 120; padding: 14px 16px; border-radius: 16px;
+    background: #FF3B6B; color: #fff; font-weight: 800; font-size: 15.5px; border: 0; box-shadow: 0 8px 30px rgba(255,59,107,.45); animation: wmPulse 1.4s ease-in-out infinite; }
+  @keyframes wmPulse { 50% { box-shadow: 0 8px 40px rgba(255,59,107,.8); } }
   html.wm .ghost-bar { text-align:center; font-family: var(--tnum); font-size: 15px; font-weight: 700; color: var(--muted); padding: 7px 12px; margin: 2px 0 8px; border-radius: 999px; border: 1px solid var(--line); }
   html.wm .ghost-bar.ahead { color: var(--wm-neon); border-color: var(--wm-neon-line); box-shadow: 0 0 14px var(--wm-neon-soft); }
   html.wm .ghost-bar.behind { color: #FF6B8B; border-color: rgba(255,107,139,.45); }
