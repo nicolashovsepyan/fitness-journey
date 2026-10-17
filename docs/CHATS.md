@@ -112,6 +112,10 @@ Neither is urgent; both are here so they stop being rediscovered.
 
 ---
 
+## Request from Work Mode to the exercise database chat (17 Oct 2026)
+
+11 cardio and boxing drills live in `js/data/exercises-cardio.js` (shadow_boxing, jab_cross, boxing_hooks, boxing_uppercuts, slip_and_roll, speed_punches, boxer_shuffle, jump_rope, double_under, jumping_jack, high_knees), with French names. That file adds them to EXERCISES at import and steps aside for any id the library defines itself. Please take them into the workbook (same ids, so history, voice clips and demo videos keep working); once they are in exercises.js and exercises-fr.js, the cardio file can be emptied.
+
 ## The console's client list, and why no chat can see it
 
 Two separate reasons, and the second is a bug.

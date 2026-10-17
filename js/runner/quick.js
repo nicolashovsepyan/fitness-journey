@@ -13,6 +13,7 @@
 import { storage } from '../core/storage.js';
 import { fmt } from '../timer.js';
 import { EXERCISES } from '../data/exercises.js';
+import '../data/exercises-cardio.js';   // the cardio and boxing drills join the library
 import { exerciseImage } from '../data/exercise-images.js';
 import { DEMOS } from './demo.js';
 import { activeUserId } from '../users.js';
@@ -922,29 +923,70 @@ function typeOrder() {
   return [...o.filter(id => ids.includes(id)), ...ids.filter(id => !o.includes(id))];
 }
 const saveTypeOrder = o => { try { o ? localStorage.setItem(TYPE_ORDER, JSON.stringify(o)) : localStorage.removeItem(TYPE_ORDER); } catch (e) {} };
+/* THE TYPE WHEEL: one type at a time in the middle, the others above and
+   below, rolling under the finger like a picker wheel (scroll snap, the
+   rows tilt and fade away from the middle). Tap the middle one or Choose.
+   Edit order shows the list to drag; A to Z and Reset as before. */
+const WH = 54;   // one row of the wheel
 function openTypes() {
   const { ov, close } = sheet(`<div class="qt-sheet-h">${t('Type of timer')}</div>
-    <div class="qt-typelist" id="qtTypeList"></div>
-    <div class="qt-typefoot"><small>${t('Hold and drag to reorder')}</small><button class="qt-link" id="qtTypeAZ">${t('A to Z')}</button><button class="qt-link" id="qtTypeReset">${t('Reset')}</button></div>`);
-  const list = ov.querySelector('#qtTypeList');
-  const render = () => {
-    list.innerHTML = typeOrder().map(id => FORMATS.find(f => f.id === id)).map(f => `<div class="qt-optrow" data-tid="${f.id}"><button class="qt-opt ${f.id === cfg.fmt ? 'on' : ''}" data-pick="${f.id}"><b>${t(f.name)}${f.id === cfg.fmt ? ' <i>✓</i>' : ''}</b><small>${t(f.sub)}</small></button><button class="qt-how" data-how="${f.id}" aria-label="${t('How {x} works', { x: t(f.name) })}">?</button></div>`).join('');
-    list.querySelectorAll('[data-how]').forEach(b => b.addEventListener('click', () => openHow(b.dataset.how)));
-    list.querySelectorAll('[data-pick]').forEach(b => b.addEventListener('click', () => {
-      if (cfg.fmt !== b.dataset.pick) {
-        cfg.fmt = b.dataset.pick;
-        if (cfg.fmt === 'tabata') Object.assign(cfg, TABATA, { tbN: null, tbTotal: null });
-        persist(); draw();
-      }
-      close();
-      /* nothing to set: straight in */
-      if (NO_SETUP.has(cfg.fmt)) { persist(); onStart?.(buildPlan()); }
-    }));
+    <div class="qt-wbox" data-noswipe><div class="qt-wband"></div><div class="qt-wheel" id="qtWheel"></div></div>
+    <div class="qt-wdesc" id="qtWdesc"></div>
+    <button class="btn lg" id="qtWgo">${t('Choose')}</button>
+    <div class="qt-typelist" id="qtTypeList" hidden></div>
+    <div class="qt-typefoot"><button class="qt-link" id="qtTypeEdit">${t('Edit order')}</button><button class="qt-link" id="qtTypeAZ">${t('A to Z')}</button><button class="qt-link" id="qtTypeReset">${t('Reset')}</button></div>`);
+  const wheel = ov.querySelector('#qtWheel'), list = ov.querySelector('#qtTypeList'), desc = ov.querySelector('#qtWdesc');
+  let order = typeOrder(), cur = Math.max(0, order.indexOf(cfg.fmt)), raf = 0;
+  const fmtOf = i => FORMATS.find(f => f.id === order[i]);
+  const choose = id => {
+    if (cfg.fmt !== id) { cfg.fmt = id; if (cfg.fmt === 'tabata') Object.assign(cfg, TABATA, { tbN: null, tbTotal: null }); persist(); draw(); }
+    close();
+    if (NO_SETUP.has(cfg.fmt)) { persist(); onStart?.(buildPlan()); }   // nothing to set: straight in
   };
-  render();
-  makeSortable(list, '.qt-optrow', (from, to) => { const o = typeOrder(); o.splice(to, 0, o.splice(from, 1)[0]); saveTypeOrder(o); render(); });
-  ov.querySelector('#qtTypeAZ').addEventListener('click', () => { saveTypeOrder([...FORMATS].sort((x, y) => t(x.name).localeCompare(t(y.name))).map(f => f.id)); render(); });
-  ov.querySelector('#qtTypeReset').addEventListener('click', () => { saveTypeOrder(null); render(); });
+  const paint = () => {
+    raf = 0;
+    const pos = wheel.scrollTop / WH, i = Math.max(0, Math.min(order.length - 1, Math.round(pos)));
+    wheel.querySelectorAll('.qt-wi').forEach((el, k) => {
+      const d = Math.max(-3, Math.min(3, k - pos)), a = Math.abs(d);
+      el.style.transform = `perspective(500px) rotateX(${(-d * 20).toFixed(1)}deg) scale(${(1 - a * 0.1).toFixed(3)})`;
+      el.style.opacity = Math.max(0.12, 1 - a * 0.32).toFixed(2);
+      el.classList.toggle('mid', k === i);
+    });
+    if (i !== cur || !desc.textContent) {
+      if (i !== cur) { try { navigator.vibrate?.(4); } catch (e) {} }
+      cur = i; const f = fmtOf(i);
+      desc.innerHTML = `<span>${t(f.sub)}</span><button class="qt-how" data-how="${f.id}" aria-label="${t('How {x} works', { x: t(f.name) })}">?</button>`;
+      desc.querySelector('[data-how]').addEventListener('click', () => openHow(f.id));
+    }
+  };
+  const renderWheel = () => {
+    order = typeOrder();
+    wheel.innerHTML = `<div class="qt-wpad"></div>${order.map((id, k) => { const f = FORMATS.find(x => x.id === id); return `<button class="qt-wi ${f.id === cfg.fmt ? 'now' : ''}" data-wi="${k}">${t(f.name)}</button>`; }).join('')}<div class="qt-wpad"></div>`;
+    wheel.querySelectorAll('[data-wi]').forEach(b => b.addEventListener('click', () => {
+      const k = +b.dataset.wi;
+      if (k === cur) return choose(order[k]);
+      wheel.scrollTo({ top: k * WH, behavior: 'smooth' });
+    }));
+    desc.textContent = '';
+    requestAnimationFrame(() => { wheel.scrollTop = cur * WH; paint(); });
+  };
+  wheel.addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(paint); }, { passive: true });
+  ov.querySelector('#qtWgo').addEventListener('click', () => choose(order[cur]));
+  /* the list, to drag into a new order */
+  const renderList = () => {
+    list.innerHTML = typeOrder().map(id => FORMATS.find(f => f.id === id)).map(f => `<div class="qt-optrow" data-tid="${f.id}"><button class="qt-opt" data-pick="${f.id}"><b>${t(f.name)}</b><small>${t(f.sub)}</small></button><span class="qt-grip" aria-hidden="true">≡</span></div>`).join('');
+  };
+  makeSortable(list, '.qt-optrow', (from, to) => { const o = typeOrder(); o.splice(to, 0, o.splice(from, 1)[0]); saveTypeOrder(o); renderList(); renderWheel(); });
+  const editBtn = ov.querySelector('#qtTypeEdit');
+  editBtn.addEventListener('click', () => {
+    const editing = list.hidden; list.hidden = !editing;
+    ov.querySelector('.qt-wbox').hidden = editing; desc.hidden = editing; ov.querySelector('#qtWgo').hidden = editing;
+    editBtn.textContent = editing ? t('Done') : t('Edit order');
+    if (editing) renderList(); else renderWheel();
+  });
+  ov.querySelector('#qtTypeAZ').addEventListener('click', () => { saveTypeOrder([...FORMATS].sort((x, y) => t(x.name).localeCompare(t(y.name))).map(f => f.id)); cur = typeOrder().indexOf(order[cur]); renderList(); renderWheel(); });
+  ov.querySelector('#qtTypeReset').addEventListener('click', () => { saveTypeOrder(null); cur = typeOrder().indexOf(order[cur]); renderList(); renderWheel(); });
+  renderWheel();
 }
 /* types with nothing to set open straight into the clock */
 const NO_SETUP = new Set(['stopwatch']);
@@ -1356,6 +1398,16 @@ function injectStyle() {
   .qt-hnums { display:flex; gap: 10px; flex-wrap: wrap; font-family: var(--tnum); font-size: 15px; margin: 2px 0 4px; }
   .qt-hacts { display:flex; gap: 8px; margin-top: 8px; }
   .qt-hacts button { flex: 1; background: none; border: 1px solid var(--line); color: var(--text); border-radius: 10px; padding: 8px; font-weight: 700; font-size: 13.5px; }
+  .qt-wbox { position: relative; height: ${5 * 54}px; margin: 4px 0 8px; -webkit-mask-image: linear-gradient(180deg, transparent, #000 28%, #000 72%, transparent); mask-image: linear-gradient(180deg, transparent, #000 28%, #000 72%, transparent); }
+  .qt-wband { position: absolute; left: 0; right: 0; top: ${2 * 54}px; height: 54px; border-radius: 14px; border: 1px solid var(--wm-neon-line); background: var(--wm-neon-soft, rgba(255,255,255,.04)); box-shadow: 0 0 18px var(--wm-neon-soft, transparent); pointer-events: none; }
+  .qt-wheel { position: relative; height: 100%; overflow-y: auto; scroll-snap-type: y mandatory; overscroll-behavior: contain; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .qt-wheel::-webkit-scrollbar { display: none; }
+  .qt-wpad { height: ${2 * 54}px; }
+  .qt-wi { display:block; width: 100%; height: 54px; scroll-snap-align: center; background: none; border: 0; color: var(--text); font-size: 21px; font-weight: 700; letter-spacing: -0.01em; cursor: pointer; transform-origin: 50% 50%; will-change: transform, opacity; }
+  .qt-wi.mid { color: #fff; text-shadow: 0 0 14px var(--wm-neon-line); font-size: 24px; }
+  .qt-wi.now::after { content: ' ✓'; color: var(--wm-neon); font-size: .7em; }
+  .qt-wdesc { display:flex; align-items:center; justify-content:center; gap: 10px; min-height: 34px; color: var(--muted); font-size: 14.5px; text-align:center; margin-bottom: 12px; }
+  .qt-grip { color: var(--muted); font-size: 20px; padding: 0 8px; }
   .qt-typefoot { display:flex; align-items:center; gap: 14px; margin-top: 10px; padding: 0 4px; }
   .qt-typefoot small { flex: 1; color: var(--muted); font-size: 12.5px; }
   .qt-typefoot .qt-link { padding: 4px 0; }

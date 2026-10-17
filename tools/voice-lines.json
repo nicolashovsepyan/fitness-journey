@@ -3390,6 +3390,61 @@
   "say": "Side plank."
  },
  {
+  "key": "m-shadow_boxing",
+  "text": "Shadow boxing",
+  "say": "Shadow boxing."
+ },
+ {
+  "key": "m-jab_cross",
+  "text": "Jab cross",
+  "say": "Jab cross."
+ },
+ {
+  "key": "m-boxing_hooks",
+  "text": "Hooks",
+  "say": "Hooks."
+ },
+ {
+  "key": "m-boxing_uppercuts",
+  "text": "Uppercuts",
+  "say": "Uppercuts."
+ },
+ {
+  "key": "m-slip_and_roll",
+  "text": "Slips and rolls",
+  "say": "Slips and rolls."
+ },
+ {
+  "key": "m-speed_punches",
+  "text": "Speed punches",
+  "say": "Speed punches."
+ },
+ {
+  "key": "m-boxer_shuffle",
+  "text": "Boxer shuffle",
+  "say": "Boxer shuffle."
+ },
+ {
+  "key": "m-jump_rope",
+  "text": "Jump rope",
+  "say": "Jump rope."
+ },
+ {
+  "key": "m-double_under",
+  "text": "Double-unders",
+  "say": "Double-unders."
+ },
+ {
+  "key": "m-jumping_jack",
+  "text": "Jumping jacks",
+  "say": "Jumping jacks."
+ },
+ {
+  "key": "m-high_knees",
+  "text": "High knees",
+  "say": "High knees."
+ },
+ {
   "key": "s-sit-back",
   "text": "Sit back",
   "say": "Sit back."
@@ -5008,5 +5063,95 @@
   "key": "s-squeeze-the-knees-in",
   "text": "Squeeze the knees in",
   "say": "Squeeze the knees in."
+ },
+ {
+  "key": "s-hands-up",
+  "text": "Hands up",
+  "say": "Hands up."
+ },
+ {
+  "key": "s-chin-down",
+  "text": "Chin down",
+  "say": "Chin down."
+ },
+ {
+  "key": "s-turn-the-back-hip",
+  "text": "Turn the back hip",
+  "say": "Turn the back hip."
+ },
+ {
+  "key": "s-elbow-up",
+  "text": "Elbow up",
+  "say": "Elbow up."
+ },
+ {
+  "key": "s-pivot-the-foot",
+  "text": "Pivot the foot",
+  "say": "Pivot the foot."
+ },
+ {
+  "key": "s-drive-up-from-the-legs",
+  "text": "Drive up from the legs",
+  "say": "Drive up from the legs."
+ },
+ {
+  "key": "s-bend-the-knees",
+  "text": "Bend the knees",
+  "say": "Bend the knees."
+ },
+ {
+  "key": "s-eyes-forward",
+  "text": "Eyes forward",
+  "say": "Eyes forward."
+ },
+ {
+  "key": "s-fast-hands",
+  "text": "Fast hands",
+  "say": "Fast hands."
+ },
+ {
+  "key": "s-light-feet",
+  "text": "Light feet",
+  "say": "Light feet."
+ },
+ {
+  "key": "s-guard-up",
+  "text": "Guard up",
+  "say": "Guard up."
+ },
+ {
+  "key": "s-small-jumps",
+  "text": "Small jumps",
+  "say": "Small jumps."
+ },
+ {
+  "key": "s-wrists-turn-the-rope",
+  "text": "Wrists turn the rope",
+  "say": "Wrists turn the rope."
+ },
+ {
+  "key": "s-jump-higher",
+  "text": "Jump higher",
+  "say": "Jump higher."
+ },
+ {
+  "key": "s-fast-wrists",
+  "text": "Fast wrists",
+  "say": "Fast wrists."
+ },
+ {
+  "key": "s-arms-all-the-way-up",
+  "text": "Arms all the way up",
+  "say": "Arms all the way up."
+ },
+ {
+  "key": "s-knees-up",
+  "text": "Knees up",
+  "say": "Knees up."
+ },
+ {
+  "key": "s-pump-the-arms",
+  "text": "Pump the arms",
+  "say": "Pump the arms."
  }
 ]

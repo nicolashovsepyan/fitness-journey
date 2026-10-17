@@ -12,6 +12,7 @@
    would take the audio focus and pause it).
    ============================================================ */
 import { EXERCISES } from './data/exercises.js';
+import './data/exercises-cardio.js';   // the cardio and boxing drills join the library
 import { lang } from './i18n.js';
 
 let index = null, loading = null;

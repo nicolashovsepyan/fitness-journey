@@ -10,6 +10,7 @@ import * as R from './runstate.js';
 import { videoEmbed } from '../data/exercise-videos.js';
 import { store } from '../store.js';
 import { EXERCISES } from '../data/exercises.js';
+import '../data/exercises-cardio.js';   // the cardio and boxing drills join the library
 import { alternatives } from '../core/resolve.js';
 import { applyWorkTheme, clearWorkTheme } from './theme.js';
 import { installHold } from './hold.js';

@@ -36,7 +36,7 @@ export function attachSheet(ov, cardSel, close) {
   let y0 = null, dy = 0, t0 = 0, drag = false, c = null;
   ov.addEventListener('touchstart', e => {
     c = card(); if (!c || !c.contains(e.target) || e.touches.length > 1) return;
-    if (e.target.closest('input, textarea, select, [data-sortable], .qt-picks') || scrolled(e.target, c)) return;
+    if (e.target.closest('input, textarea, select, [data-sortable], [data-noswipe], .qt-picks') || scrolled(e.target, c)) return;
     y0 = e.touches[0].clientY; dy = 0; t0 = Date.now(); drag = false;
   }, { passive: true });
   ov.addEventListener('touchmove', e => {

@@ -1,6 +1,8 @@
 {
-  "version": "2026-10-11.1",
+  "version": "2026-10-17.1",
   "notes": [
+    "Timer types on a wheel: scroll up and down, the one in the middle is it",
+    "New moves: shadow boxing, jab-cross, hooks, uppercuts, slips and rolls, speed punches, boxer shuffle, jump rope, double-unders, jumping jacks, high knees. Plus boxing rounds and rope Quick picks",
     "New: Test yourself. 15 benchmarks (100 push-ups, Navy SEAL push-ups, Murph, dead hang…). Your first try sets your best, then you race it live: \"12 reps ahead of your best\"",
     "Coach voice: Coach Kevin, Tess, Dominic or Louise",
     "The coach says more: encouragement during long efforts, \"almost there\" near the end, and the new modes' words, in all 4 voices",
@@ -56,6 +58,8 @@
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
   ],
   "notes_fr": [
+    "Les types de minuteur sur une roue : fais défiler, celui du milieu est choisi",
+    "Nouveaux exercices : shadow boxing, jab-direct, crochets, uppercuts, esquives, coups rapides, pas de boxeur, corde à sauter, double-unders, jumping jacks, montées de genoux. Et des Séances express boxe et corde",
     "Nouveau : Teste-toi. 15 tests (100 pompes, pompes Navy SEAL, Murph, suspension…). Ton premier essai fixe ton record, ensuite tu le bats en direct : « 12 reps d’avance sur ton record »",
     "Voix du coach : Coach Kevin, Tess, Dominic ou Louise",
     "Le coach en dit plus : des encouragements pendant les longs efforts, « presque fini » vers la fin, et les mots des nouveaux modes, avec les 4 voix",

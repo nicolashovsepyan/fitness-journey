@@ -322,5 +322,16 @@ export const VOICE_CUES = {
 "hip_abduction_machine": "Sit tall. Knees out.",
 "hip_adduction_machine": "Sit tall. Squeeze the knees in.",
 "hollow_heels_down": "Lower back to the floor.",
-"incline_side_plank": "Hips up. Straight line."
+"incline_side_plank": "Hips up. Straight line.",
+"shadow_boxing": "Hands up. Chin down.",
+"jab_cross": "Turn the back hip.",
+"boxing_hooks": "Elbow up. Pivot the foot.",
+"boxing_uppercuts": "Drive up from the legs.",
+"slip_and_roll": "Bend the knees. Eyes forward.",
+"speed_punches": "Fast hands. Relax the shoulders.",
+"boxer_shuffle": "Light feet. Guard up.",
+"jump_rope": "Small jumps. Wrists turn the rope.",
+"double_under": "Jump higher. Fast wrists.",
+"jumping_jack": "Arms all the way up.",
+"high_knees": "Knees up. Pump the arms."
 };
