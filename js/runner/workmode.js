@@ -20,7 +20,7 @@ import { t, t2, num, exName, exCues } from '../i18n.js';
 import { bodyWeight, setTimerBodyWeight, moveLoadKg, showWeight, needsBody, readHistory, addHistory, sigOf } from './tally.js';
 import { ringHTML, ringBaseCss, RING_R, snapToSegments } from './ring.js';
 import { loadPrefs, pref, openPrefs } from './prefs.js';
-import { say, beep, buzz, fmt, initAudio, stopAudio, keepAwake, releaseAwake, setMuted, audioWatch, audioTap, audioHealthy, nativeAudio, nativeSchedule, nativeCancel, lineEvent, setBackgroundQuiet } from '../timer.js';
+import { say, beep, buzz, fmt, initAudio, stopAudio, keepAwake, releaseAwake, setMuted, audioWatch, audioTap, audioHealthy, nativeAudio, nativeSchedule, nativeCancel, lineEvent, setBackgroundQuiet, audioRefresh } from '../timer.js';
 
 const UNIT = { reps: 'reps', hold: 'sec', cals: 'cals', rounds: 'rounds' };
 /* "1 rep", "10 reps" */
@@ -104,7 +104,7 @@ if (typeof document !== 'undefined') {
        page may be put to sleep, so the app's sound engine is handed what
        comes next, to play on time by itself */
     if (document.hidden && nativeAudio() && S && !S.done && ticker) { scheduleBackground(); setBackgroundQuiet(true); return; }
-    if (!document.hidden) { if (nativeAudio()) { nativeCancel('bg'); setBackgroundQuiet(false); } if (S && !S.done && ticker) { initAudio(); keepAwake(); tick(); } }
+    if (!document.hidden) { if (nativeAudio()) { nativeCancel('bg'); setBackgroundQuiet(false); } if (S && !S.done && ticker) { audioRefresh(); keepAwake(); tick(); } }
   });
   /* And the first touch anywhere, whatever it lands on. "I'm ready" is the
      expected first tap but it is not the only way into a session - a resumed

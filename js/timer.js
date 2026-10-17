@@ -295,6 +295,18 @@ export function audioWatch(gesture = false) {
   notifyAudio();
 }
 export const audioTap = () => audioWatch(true);
+/* BACK FROM ANOTHER APP (the music app, a call): iOS can hand the page back
+   a context that says "running" and plays nothing, so the watchdog, which
+   trusts the state, never sees it. Coming back to the front during a
+   workout gets a brand new context, every time; the decoded clips carry
+   over. If iOS wants a tap for the new one, the red bar asks for it. */
+export function audioRefresh() {
+  if (NAT() || !actx) return;
+  const old = actx; actx = null; lastRebuild = Date.now(); deadSince = 0;
+  try { old.close?.(); } catch (e) {}
+  initAudio();
+  setTimeout(() => { if (actx && actx.state !== 'running') { deadSince = Date.now() - 2000; notifyAudio(); } }, 600);
+}
 
 /* Stop the silent clip when the workout does. Leaving it running holds an
    audio session open for no reason, and an app that quietly keeps the
