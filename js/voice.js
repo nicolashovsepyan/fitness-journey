@@ -139,6 +139,9 @@ export async function planWhenReady(text, ms = 2000) {
   return plan(text);
 }
 export const hasVoicePack = () => !!dict;
+/* a clip's full address (the iPhone app's native engine downloads it) */
+export const clipUrl = key => new URL(`${dirFor(effKind())}/${key}.mp3`, location.href).href;
+export async function packUrls() { await loadVoicePack(); return index ? Object.keys(index).map(clipUrl) : []; }
 
 async function bufferFor(actx, key, k = effKind()) {
   const id = `${k}:${key}`;

@@ -20,7 +20,7 @@ import { t, t2, num, exName, exCues } from '../i18n.js';
 import { bodyWeight, setTimerBodyWeight, moveLoadKg, showWeight, needsBody, readHistory, addHistory, sigOf } from './tally.js';
 import { ringHTML, ringBaseCss, RING_R, snapToSegments } from './ring.js';
 import { loadPrefs, pref, openPrefs } from './prefs.js';
-import { say, beep, buzz, fmt, initAudio, stopAudio, keepAwake, releaseAwake, setMuted, audioWatch, audioTap, audioHealthy } from '../timer.js';
+import { say, beep, buzz, fmt, initAudio, stopAudio, keepAwake, releaseAwake, setMuted, audioWatch, audioTap, audioHealthy, nativeAudio, nativeSchedule, nativeCancel, lineEvent, setBackgroundQuiet } from '../timer.js';
 
 const UNIT = { reps: 'reps', hold: 'sec', cals: 'cals', rounds: 'rounds' };
 /* "1 rep", "10 reps" */
@@ -57,6 +57,37 @@ function beginStep(sec, kind = 'rest', tag = 'step') {
   chainAt = null;
   return fresh;
 }
+/* WHAT COMES NEXT, FOR THE APP'S SOUND ENGINE (background or locked
+   phone). The step running now: its 10-second warning, 3-2-1 and end.
+   Interval types (Tabata, EMOM, Interval timer, VO2 max) are a fixed
+   sequence, so every step after it too, with each round's call and move,
+   and the finish. Taken back the moment the app is in front again. */
+function scheduleBackground() {
+  const b = block(); if (!b || R.isStepPaused(S)) return;
+  const ends = R.stepEndsAt(S); if (!ends) return;
+  const ev = [];
+  const countdown = (end, dur) => { if (dur >= 4) for (const k of [3, 2, 1]) ev.push({ at: end - k * 1000, kind: 'count' }); ev.push({ at: end, kind: 'end' }); };
+  const warn = (end, dur) => { if (dur >= 30) ev.push({ at: end - 10000, kind: 'warn' }); };
+  const line = (txt, at) => { const e = txt && lineEvent(txt, at); if (e) ev.push(e); };
+  if (curStepKind === 'work') warn(ends, S.stepDur || 0);
+  if (S.stepDur < NO_CAP) countdown(ends, S.stepDur || 0);
+  if (['tabata', 'emom'].includes(b.format) && S.iv != null) {
+    const work = b.work || (b.format === 'emom' ? 60 : 20), rest = b.rest ?? (b.format === 'emom' ? 0 : 10);
+    const total = intervalTotal(b), per = b.items.length || 1, all = !!b.allEach && per > 1, step = all ? 1 : per;
+    let at = ends, iv = S.iv, phase = S.ivPhase;
+    for (let guard = 0; guard < 600; guard++) {
+      const last = iv >= total - 1;
+      if (phase === 'work' && !last && rest > 0) { phase = 'rest'; countdown(at + rest * 1000, rest); at += rest * 1000; continue; }
+      iv += 1; phase = 'work'; if (iv >= total) break;
+      const item = all ? null : b.items[iv % per];
+      const named = item && item.name && !/^(Work|Time|Reps|Rounds)$/.test(item.name);
+      line(`${iv % step === 0 ? roundCall(Math.floor(iv / step) + 1, Math.ceil(total / step)) : ''} ${named ? item.name + '.' : ''}`.trim(), at + 80);
+      warn(at + work * 1000, work); countdown(at + work * 1000, work); at += work * 1000;
+    }
+    line(pick('done') || t('Workout complete. Strong work.'), at + 700);
+  }
+  nativeSchedule(ev.filter(e => e.at > Date.now() + 150), 'bg');
+}
 /* which screen is up, persisted so a reopen lands back on it */
 function onScreen(name) { if (S.screen !== name) { S.screen = name; R.save(S); } }
 
@@ -68,7 +99,13 @@ if (typeof document !== 'undefined') {
   /* only while the clock is running: S stays set after the finish screen,
      so this used to restart the audio loop and the wake lock every time the
      person came back to the app after training */
-  document.addEventListener('visibilitychange', () => { if (!document.hidden && S && !S.done && ticker) { initAudio(); keepAwake(); tick(); } });
+  document.addEventListener('visibilitychange', () => {
+    /* the iPhone app going to the background (or the phone locking): the
+       page may be put to sleep, so the app's sound engine is handed what
+       comes next, to play on time by itself */
+    if (document.hidden && nativeAudio() && S && !S.done && ticker) { scheduleBackground(); setBackgroundQuiet(true); return; }
+    if (!document.hidden) { if (nativeAudio()) { nativeCancel('bg'); setBackgroundQuiet(false); } if (S && !S.done && ticker) { initAudio(); keepAwake(); tick(); } }
+  });
   /* And the first touch anywhere, whatever it lands on. "I'm ready" is the
      expected first tap but it is not the only way into a session - a resumed
      workout goes straight to the active screen and never shows that button.

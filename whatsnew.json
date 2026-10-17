@@ -1,6 +1,7 @@
 {
-  "version": "2026-10-17.3",
+  "version": "2026-10-17.4",
   "notes": [
+    "Getting the iPhone app ready for its own sound engine: through the silent switch, under your music, back after Siri, and on time with the phone locked",
     "Your music keeps playing again: the timer mixes with it. (Sound on silent stays in Timer settings, but on iPhone it pauses your music)",
     "Sound comes back after Siri, a call or an alarm: the timer checks every second and restarts it. If your iPhone needs a tap, a red bar asks for it",
     "The timer now plays through the silent switch by default",
@@ -61,6 +62,7 @@
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
   ],
   "notes_fr": [
+    "L’app iPhone se prépare à son propre moteur de son : même en mode silencieux, sous ta musique, de retour après Siri, et à l’heure même téléphone verrouillé",
     "Ta musique continue : le minuteur se mélange à elle. (Le son en mode silencieux reste dans les Réglages, mais sur iPhone il met ta musique en pause)",
     "Le son revient après Siri, un appel ou une alarme : le minuteur vérifie chaque seconde et le relance. Si ton iPhone veut un geste, une barre rouge te le demande",
     "Le minuteur joue maintenant même en mode silencieux, par défaut",

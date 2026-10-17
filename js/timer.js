@@ -8,7 +8,7 @@
    ============================================================ */
 
 import { storage } from './core/storage.js';
-import { loadVoicePack, warmVoice, plan, playLine, stopVoice, planWhenReady, voiceIsStudio, voicePackState } from './voice.js';
+import { loadVoicePack, warmVoice, plan, playLine, stopVoice, planWhenReady, voiceIsStudio, voicePackState, clipUrl, packUrls } from './voice.js';
 import { lang } from './i18n.js';
 loadVoicePack();
 
@@ -93,6 +93,14 @@ export function say(text, keep = 0) {
   if (!voiceOn || muted) return;
   /* NICO'S RECORDED VOICE first (js/voice.js); the phone's voice only for
      the words not recorded yet */
+  if (NAT()) {
+    if (bgQuiet) return;
+    initAudio();
+    const cut = Date.now() >= keepUntil; if (keep) keepUntil = Date.now() + keep;
+    const send = p => { const st = (p || []).filter(x => x.key); if (st.length) nat('play', { events: [{ at: Date.now(), kind: 'line', urls: st.map(x => clipUrl(x.key)), stops: st.map(x => !!x.stop), cut, gain: 1 }] }); };
+    const p = plan(text); if (p) send(p); else planWhenReady(text).then(send);
+    return;
+  }
   audioWatch();   // interrupted mid-workout (Siri, a call): wake it, or rebuild it
   const steps = actx && plan(text);
   /* the voice's list is still loading (the app just opened, a new voice
@@ -138,6 +146,29 @@ let voiceWarm = false;
    silent switch AND over music. The page must not touch it. */
 const NATIVE = /FJNative/.test(navigator.userAgent || '');
 let sessionType = null;
+/* IN THE iPHONE APP THE PAGE MAKES NO SOUND. Every beep and every coach line
+   goes to the app's own sound engine (native-ios TimerAudio.swift): it
+   plays through the silent switch AND under the person's music, comes back
+   by itself after Siri or a call, and plays cues scheduled ahead while the
+   app is in the background or the phone is locked. No AudioContext is ever
+   made in there, so WebKit never touches the app's audio session. */
+/* only an app build that HAS the engine: an older install keeps the page's own sound */
+const NAT = () => NATIVE && !!window.Capacitor?.isPluginAvailable?.('TimerAudio');
+function nat(method, opts = {}) {
+  try { const P = window.Capacitor.Plugins?.TimerAudio; const r = P?.[method] ? P[method](opts) : window.Capacitor.nativePromise('TimerAudio', method, opts); r?.catch?.(() => {}); return r; } catch (e) {}
+}
+export const nativeAudio = NAT;
+let natStarted = false, bgQuiet = false;
+/* while the app is in the background the engine plays the schedule it was
+   handed; anything the page still says meanwhile would play twice */
+export function setBackgroundQuiet(on) { bgQuiet = !!on; }
+export function nativeSchedule(events, tag) { if (NAT() && events.length) nat('play', { events: events.map(e => ({ gain: 1, ...e, tag })) }); }
+export function nativeCancel(tag) { if (NAT()) nat('cancel', { tag }); }
+/* a coach line as one native event (its recorded pieces), or null */
+export function lineEvent(text, at) {
+  const st = (plan(text) || []).filter(x => x.key); if (!st.length) return null;
+  return { at, kind: 'line', urls: st.map(x => clipUrl(x.key)), stops: st.map(x => !!x.stop), cut: false };
+}
 function setSessionType() {
   if (NATIVE) return;
   const want = silentOverride ? 'playback' : 'ambient';
@@ -173,6 +204,10 @@ let keepalive = null;
    Called on every gesture; everything here is idempotent and cheap after
    the first time. */
 export function initAudio() {
+  if (NAT()) {
+    if (!natStarted) { natStarted = true; nat('start'); packUrls().then(urls => urls.length && nat('preload', { urls })); }
+    return;
+  }
   /* the audio session type is set BEFORE the context exists, and only when
      it changes: changing it under a running context is what Safari answers
      with an "interrupted" context, which then plays nothing */
@@ -250,7 +285,7 @@ function rebuild() {
   initAudio();
 }
 export function audioWatch(gesture = false) {
-  if (!actx) return;
+  if (NAT() || !actx) return;
   if (actx.state === 'closed') return rebuild();
   if (silentOverride && keepalive?.paused) { try { const p = keepalive.play(); p?.catch?.(() => {}); } catch (e) {} }
   if (healthy()) { deadSince = 0; return notifyAudio(); }
@@ -265,6 +300,7 @@ export const audioTap = () => audioWatch(true);
    audio session open for no reason, and an app that quietly keeps the
    speaker awake after you have finished training is its own small bug. */
 export function stopAudio() {
+  if (NAT()) { natStarted = false; nat('stop'); return; }
   try { keepalive?.pause?.(); } catch (e) {}
 }
 
@@ -342,6 +378,7 @@ let beepUntil = 0;
 const BEEP_LEN = { go: 0.3, end: 0.5, count: 0.1, warn: 0.2, round: 0.45, start: 0.33, rep: 0.15, down: 0.12, up: 0.12 };
 export function beep(kind = 'tick', at = 0) {
   if (muted || !beepsOn) return;
+  if (NAT()) { initAudio(); if (!bgQuiet) nat('play', { events: [{ at: Date.now() + Math.max(0, at) * 1000, kind, gain: 1 }] }); return; }
   initAudio(); audioWatch();
   const w = Math.max(0, at);
   try { if (kind !== 'count' && kind !== 'rep') beepUntil = Math.max(beepUntil, actx.currentTime + w + (BEEP_LEN[kind] || 0.1) + 0.06); } catch (e) {}
