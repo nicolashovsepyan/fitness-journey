@@ -944,11 +944,11 @@ function draw() {
     <div class="qt-top">
       ${guest ? '' : `<button class="qt-back" id="qtBack" aria-label="${t('Back')}">‹</button>`}
       <h1>${t('Training Timer')}</h1>
+      ${installCard() ? `<button class="qt-getapp" id="qtIbar" aria-label="${t('Put the timer on your home screen')}">${t('Install')}</button>` : ''}
       <button class="qt-star" id="qtFavs" aria-label="${t('Favorites')}" title="${t('Favorites')}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg></button>
       <button class="qt-star" id="qtHist" aria-label="${t('History')}" title="${t('History')}"><svg width="21" height="21" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11a8 8 0 1 0 2.4-5.7"/><path d="M3 3v4h4"/><path d="M11 7v4l3 2"/></svg></button>
       <button class="qt-star" id="qtPrefs" aria-label="${t('Timer settings')}" title="${t('Timer settings')}">⚙︎</button>
     </div>
-    ${installCard() ? `<div class="qt-ibar" id="qtInstallCard"><button class="qt-ibarb" id="qtIbar">${t('Put the timer on your home screen')} ›</button><button class="qt-ix" id="qtInstallX" aria-label="${t('Hide')}">✕</button></div>` : ''}
     ${heroHtml()}
     <div class="qt-hbody" id="qtBody">${homeBody()}</div>
     ${guest ? `<button class="qt-link center qt-signin" id="qtSignIn">${t('Have a program from Nico? Sign in')}</button>` : ''}
@@ -1585,6 +1585,9 @@ function injectStyle() {
   /* ---- THE HOME: one screen, no scroll ---- */
   .qt-home { min-height: 100vh; min-height: 100dvh; box-sizing: border-box; display:flex; flex-direction:column; padding-bottom: calc(14px + env(safe-area-inset-bottom)); }
   .qt-home .qt-top { margin-bottom: 8px; }
+  .qt-home .qt-top h1 { min-width: 0; font-size: clamp(20px, 6.2vw, 26px); overflow: hidden; text-overflow: ellipsis; }
+  .qt-home .qt-top { gap: 4px; }
+  .qt-getapp { flex: none; height: 32px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--wm-neon-line); background: var(--wm-neon-soft); color: var(--text); font-size: 12.5px; font-weight: 800; cursor: pointer; white-space: nowrap; }
   .qt-ibar { display:flex; align-items:center; gap: 6px; margin: 0 0 8px; border: 1px solid var(--wm-neon-line); border-radius: 12px; padding: 2px 4px 2px 12px; }
   .qt-ibarb { flex: 1; background: none; border: 0; color: var(--text); font-weight: 700; font-size: 14px; text-align: left; padding: 9px 0; cursor: pointer; }
   .qt-hero { position: relative; margin: 0 calc(-1 * var(--pad)); padding: 10px 0 6px; border-radius: 0;

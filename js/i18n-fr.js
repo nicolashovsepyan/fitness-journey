@@ -645,6 +645,7 @@ export const FR = {
   'Hide': 'Masquer',
   'Copied': 'Copié',
   'Undo': 'Annuler',
+  'Get the app': 'Installer l’app',
   '{n} every step · {t} total': '{n} à chaque étape · {t} au total',
   'Add a move and its total first': 'Ajoute d’abord un exercice et son total',
   'Add a set first: a move and its reps': 'Ajoute d’abord une série'+'\u00a0'+': un exercice et ses reps',

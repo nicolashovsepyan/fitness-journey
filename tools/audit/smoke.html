@@ -72,6 +72,7 @@ async function check(lang, mode) {
     const bb = big && Math.round(big.getBoundingClientRect().bottom);
     res.push(big && bb <= w.innerHeight && d.scrollingElement.scrollHeight <= w.innerHeight + 2 ? 'home fits one screen, button visible' : `✗ home does not fit (${d.scrollingElement.scrollHeight} vs ${w.innerHeight})`);
     if (getComputedStyle(qt).transform !== 'none') res.push('✗ setup screen has a transform (fixed bars will drift)');
+    for (let i = 0; i < 30 && [...d.querySelectorAll('.qt-hslide img')].some(im => !im.complete); i++) await wait(100);   // a cold first load: let the icons arrive
     const icon = d.querySelector(`.qt-hslide[data-hs="${mode === 'stopwatch' ? 'stopwatch' : d.querySelector('.qt-hdots i.on')?.dataset.hd}"] img`);
     res.push(icon && icon.complete && icon.naturalWidth ? 'mode icon shows' : '✗ mode icon missing');
     /* STEP 2 (needed, or the optional moves) */
