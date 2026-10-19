@@ -1,6 +1,8 @@
 {
-  "version": "2026-10-19.1",
+  "version": "2026-10-19.2",
   "notes": [
+    "A new, simpler home: swipe to pick your timer, set up to 3 numbers, hit Start. Modes that need moves get one more step",
+    "Ladder: \"rungs\" are now \"steps\", with clearer Start at / Each step choices",
     "Fixed: the red sound bar covered the ✕ and pause buttons, and a tap could reload the page. The bar now sits under them and a tap never reloads",
     "Every timer type has its own neon icon, on the wheel and on the Type card",
     "Sound check on every return: if your iPhone left the timer silent, it reloads itself and your workout continues where it was. Timer settings has a Sound log",
@@ -66,6 +68,8 @@
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
   ],
   "notes_fr": [
+    "Un nouvel accueil, plus simple : fais glisser pour choisir ton minuteur, règle jusqu’à 3 nombres, appuie sur Démarrer. Les modes qui ont besoin d’exercices ont une étape de plus",
+    "Échelle : les paliers deviennent des étapes, avec des choix Départ / À chaque étape plus clairs",
     "Corrigé : la barre rouge du son couvrait les boutons ✕ et pause, et un geste pouvait recharger la page. La barre est maintenant dessous et un geste ne recharge jamais",
     "Chaque type de minuteur a son icône néon, sur la roue et sur la carte Type",
     "Vérification du son à chaque retour : si ton iPhone a coupé le minuteur, il se recharge et ta séance continue où elle en était. Les Réglages ont un Journal du son",

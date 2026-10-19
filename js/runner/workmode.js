@@ -1702,7 +1702,7 @@ const NO_CAP = 99 * 60;
 const upElapsed = () => S.stepStartedAt == null ? 0 : Math.max(0, ((S.stepPausedAt || Date.now()) - S.stepStartedAt) / 1000);
 function lapRows() {
   const laps = S.laps || []; if (!laps.length) return '';
-  const word = t(block().label === 'Stopwatch' ? 'Lap' : block().rungs ? 'Rung' : 'Round');
+  const word = t(block().label === 'Stopwatch' ? 'Lap' : block().rungs ? 'Step' : 'Round');
   const rows = laps.map((t, i) => ({ n: i + 1, split: t - (laps[i - 1] || 0), total: t })).reverse();
   return `<div class="laps">${rows.map(r => `<div class="lap"><span>${word} ${r.n}</span><b>${fmt(r.split)}</b><small>${fmt(r.total)}</small></div>`).join('')}</div>`;
 }
@@ -1730,21 +1730,21 @@ function renderLadder() {
   const all = b.items.map((_, i) => rungs.reduce((a, r) => a + (Number(val(r, i)) || 0), 0));
   const laps = S.laps || [], lastRung = laps.length ? laps.at(-1) - (laps.at(-2) || 0) : null;
   const next = rungs[k + 1];
-  shell(`<div class="now-ex"><div class="label">${t('Ladder')} · ${t('rung {a} of {b}', { a: k + 1, b: n })}${cap ? ` · ${t('cap {t}', { t: fmt(cap) })}` : ''}</div></div>
+  shell(`<div class="now-ex"><div class="label">${t('Ladder')} · ${t('step {a} of {b}', { a: k + 1, b: n })}${cap ? ` · ${t('cap {t}', { t: fmt(cap) })}` : ''}</div></div>
     ${S.plan.test ? '<div class="ghost-bar" id="ghostBar"></div>' : ''}
     <svg class="ld-bars" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${bars}</svg>
-    <button class="ld-card" id="ldCard" aria-label="Rung done">
+    <button class="ld-card" id="ldCard" aria-label="Step done">
       <div class="ld-mvs ${b.items.length > 1 ? `rows n${Math.min(b.items.length, 5)}` : ''}">${b.items.map((it, i) => `<div class="ld-mv"><b class="wm-pop">${val(rungs[k], i)}</b><span>${named[i]}</span></div>`).join('')}</div>
-      <div class="ld-next">${next != null ? `${t('Next:')} ${b.items.map((_, i) => `${val(next, i)} ${named[i]}`).join(' · ')}` : t('Last rung. Finish it!')}</div>
+      <div class="ld-next">${next != null ? `${t('Next:')} ${b.items.map((_, i) => `${val(next, i)} ${named[i]}`).join(' · ')}` : t('Last step. Finish it!')}</div>
     </button>
     <div class="ld-stats">
-      <div><small>${t('This rung')}</small><b id="timerText">0:00</b></div>
+      <div><small>${t('This step')}</small><b id="timerText">0:00</b></div>
       <div><small>${t('Total')}</small><b id="ftTotal">0:00</b></div>
-      <div><small>${t('Last rung')}</small><b>${lastRung != null ? fmt(lastRung) : '–'}</b></div>
+      <div><small>${t('Last step')}</small><b>${lastRung != null ? fmt(lastRung) : '–'}</b></div>
     </div>
     <div class="ld-reps">${b.items.map((_, i) => `<div><span>${named[i]}</span><b>${done[i]}</b><small>/ ${all[i]}</small><i style="width:${all[i] ? (100 * done[i] / all[i]).toFixed(1) : 0}%"></i></div>`).join('')}</div>
     ${lapRows()}   <!-- each rung done, newest first, with its time (as AMRAP shows its rounds) -->
-    <div class="actionbar"><div class="btn-row am-bar"><button class="btn ghost" id="ftDone">${t('End')}</button><button class="btn lg" id="ftLap">${t('Rung done ✓')}</button></div></div>`);
+    <div class="actionbar"><div class="btn-row am-bar"><button class="btn ghost" id="ftDone">${t('End')}</button><button class="btn lg" id="ftLap">${t('Step done ✓')}</button></div></div>`);
   const finish = secs => {
     R.clearStep(S); onStepDone = null;
     const ls = (S.laps || []).map((t, i, a) => Math.round(t - (a[i - 1] || 0)));
@@ -1897,15 +1897,15 @@ function renderForTime() {
      finishes a rung and records its time; the last rung finishes it. */
   const rungs = Array.isArray(b.rungs) && b.rungs.length ? b.rungs : null;
   const k = rungs ? Math.min((S.laps || []).length, rungs.length - 1) : 0;
-  const lapWord = rungs ? t('Rung done ✓') : b.label === 'Stopwatch' ? t('Lap') : (b.rounds > 1 ? t('Round ✓') : '');
+  const lapWord = rungs ? t('Step done ✓') : b.label === 'Stopwatch' ? t('Lap') : (b.rounds > 1 ? t('Round ✓') : '');
   const rungReps = (r, i) => Array.isArray(r) ? r[i] : r;
   const repsOf = (it, i = b.items.indexOf(it)) => rungs ? rungReps(rungs[k], i) : it.reps;
   const one = b.items.length === 1;
   const rungLine = r => b.items.map((it, i) => one ? qty(rungReps(r, i)) : `${rungReps(r, i)} ${it.name}`).join(' · ');
   const list = b.hideList ? '' : `<div class="mvr-list">${b.items.map(it => mvRow(it, { val: repsOf(it) || null, unit: mvUnit(it) })).join('')}</div>`;
-  const rounds = rungs ? `${t('rung {a}/{b}', { a: k + 1, b: rungs.length })} · ` : b.rounds > 1 ? `${t('{n} rounds', { n: b.rounds })} · ` : '';
+  const rounds = rungs ? `${t('step {a}/{b}', { a: k + 1, b: rungs.length })} · ` : b.rounds > 1 ? `${t('{n} rounds', { n: b.rounds })} · ` : '';
   shell(`<div class="now-ex"><div class="label">${rounds}${cap ? t('cap {t}', { t: fmt(cap) }) : b.hideList ? t('tap the ring to pause') : t('no cap')}</div>
-      <div class="name">${rungs ? (one ? qty(rungReps(rungs[k], 0)) : t('Rung {n}', { n: k + 1 })) : b.hideList ? t(b.label || 'Go') : t('For time')}</div>${rungs && rungs[k + 1] != null ? `<div class="side">${t('next: {x}', { x: rungLine(rungs[k + 1]) })}</div>` : ''}</div>
+      <div class="name">${rungs ? (one ? qty(rungReps(rungs[k], 0)) : t('Step {n}', { n: k + 1 })) : b.hideList ? t(b.label || 'Go') : t('For time')}</div>${rungs && rungs[k + 1] != null ? `<div class="side">${t('next: {x}', { x: rungLine(rungs[k + 1]) })}</div>` : ''}</div>
     <div class="timer-wrap">${timerSvg('buffer')}</div>${S.plan.test ? '<div class="ghost-bar" id="ghostBar"></div>' : ''}
     ${lapWord ? `<div class="ft-total">${t('Total')} <span id="ftTotal"></span></div>` : ''}
     <div id="lapList">${lapRows()}</div>
@@ -2087,7 +2087,7 @@ function quickResult(session) {
     const val = b.format === 'fortime' || b.format === 'igyg' ? fmt(v)
       : b.format === 'amrap' ? (e.amrap ? `${t('{n} rounds', { n: e.amrap.rounds })}${e.amrap.extra ? ` + ${t('{n} reps', { n: e.amrap.extra })}` : ''}` : `${v} ${t(e.unit || 'rounds')}`)
       : t2(v, '{n} interval', '{n} intervals');
-    const word = t(b.label === 'Stopwatch' || b.name.startsWith('Stopwatch') ? 'Lap' : b.rungs || b.name.startsWith('Ladder') ? 'Rung' : 'Round');
+    const word = t(b.label === 'Stopwatch' || b.name.startsWith('Stopwatch') ? 'Lap' : b.rungs || b.name.startsWith('Ladder') ? 'Step' : 'Round');
     const splits = e.laps?.length ? e.laps : e.amrap?.splits?.length ? e.amrap.splits : [];
     const laps = splits.map((sp, i) => `<div class="eff-row"><span class="muted">${word} ${e.lapN?.[i] ?? i + 1}</span><span style="margin-left:auto;">${fmt(sp)}</span></div>`).join('');
     if (e.deathBy) return `<div class="eff-row"><span>${b.name}</span><span class="pr-flash" style="margin-left:auto;">${qty(e.deathBy.rounds, 'rounds')}${e.deathBy.partial ? ` + ${qty(e.deathBy.partial)}` : ''}</span></div>`

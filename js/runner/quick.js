@@ -100,7 +100,7 @@ const FIELDS = {
   pace:     ['Pace',              'a min', 1, 10,  40],
   dbEvery:  ['Every',             'time', 15, 15, 300],
   dbMax:    ['Stop after',        'rounds', 1, 1,  60],
-  ldRungs:  ['Rungs',             '',      1,  1,  50],
+  ldRungs:  ['Steps',             '',      1,  1,  50],
   ldCap:    ['Time cap',          'min',   1,  0,  90],
   ptCap:    ['Time cap',          'min',   1,  0,  10],
   igRestSec: ['Rest',             'time',  5,  5, 600],
@@ -146,10 +146,10 @@ const val = k => cfg.fmt === 'tabata' && k === 'rounds' ? tbTotal() : cfg[key(k)
 const setVal = (k, v) => { if (cfg.fmt === 'tabata' && k === 'rounds') { cfg.tbTotal = v; cfg.tbN = perRound(); return; } cfg[key(k)] = v; };
 
 export async function renderQuick(el, opts = {}) {
-  host = el; onStart = opts.onStart; guest = !!opts.guest;
+  host = el; onStart = opts.onStart; guest = !!opts.guest; page = 'home';
   injectStyle(); applyWorkTheme(); loadPrefs(); installHold();
-  onInstallStateChange(() => { if (host && cfg) draw(); });   // Android announces it can install a moment after load
-  if (!window.__qtLang) { window.__qtLang = 1; document.addEventListener('fj-lang', () => { if (host && cfg) draw(); }); }   // a new language: redraw
+  onInstallStateChange(() => { if (host && cfg && page === 'home') { host.innerHTML = ''; draw(); } });   // Android announces it can install a moment after load
+  if (!window.__qtLang) { window.__qtLang = 1; document.addEventListener('fj-lang', () => { if (host && cfg) { host.innerHTML = ''; draw(); } }); }   // a new language: redraw
   readHistory().then(h => { hist = h; if (host && cfg) draw(); });
   /* The address itself names the person, so "Add to Home Screen" from here
      gives a timer icon that opens as THEM (an installed iPhone app cannot
@@ -245,7 +245,7 @@ const perRound = () => Math.max(1, namedMoves().length);
      one     rung 1 … N                  (up, down, or opposite pairs)
      mirror  1 … N … 1                   (pyramid, or valley if it drops)
      wave    1, N, 2, N-1 …              (the waving ladder) */
-const LD_SHAPES = [['one', 'One way'], ['mirror', 'There & back'], ['wave', 'Wave']];
+const LD_SHAPES = [['one', 'One way'], ['mirror', 'Up and back'], ['wave', 'Wave']];
 const LD_PRESETS = [
   { id: 'up',     name: '1 → 10',        n: 10, shape: 'one',    m: [[1, 1]] },
   { id: 'down',   name: '10 → 1',        n: 10, shape: 'one',    m: [[10, -1]] },
@@ -299,6 +299,7 @@ function moveSeq(m) {
 function rungs() { if (Array.isArray(cfg.ldList)) return cfg.ldList; const seqs = ladderMoves().map(moveSeq); return rungOrder().map((_, j) => seqs.map(q => q[j])); }
 function ladderPreview(m) {
   const seq = moveSeq(m); const total = seq.reduce((a, b) => a + b, 0);
+  if (ldMode(m) === 'flat') return t('{n} every step · {t} total', { n: ldStart(m), t: total });
   const shown = seq.length > 10 ? `${seq.slice(0, 5).join(', ')} … ${seq.slice(-2).join(', ')}` : seq.join(', ');
   return `${shown} · ${t('{n} total', { n: total })}`;
 }
@@ -360,7 +361,7 @@ function summary() {
   switch (cfg.fmt) {
     case 'test': { const d = testDef(), b = bestOf(hist, d); return b ? t('Your best: {b}', { b: testShow(d, scoreOf(b, d)) }) : t('First try sets your best'); }
     case 'goal': { const g = goalBuilt(); if (!g) return t('Add your moves and their totals');
-      return g.cfg.fmt === 'emom' ? t('EMOM {n} min', { n: g.cfg.mins }) : g.cfg.fmt === 'ladder' ? t2(g.rows, '{n} rung', '{n} rungs') : g.cfg.fmt === 'igyg' ? t2(g.rows, '{n} set', '{n} sets') : t('For time'); }
+      return g.cfg.fmt === 'emom' ? t('EMOM {n} min', { n: g.cfg.mins }) : g.cfg.fmt === 'ladder' ? t2(g.rows, '{n} step', '{n} steps') : g.cfg.fmt === 'igyg' ? t2(g.rows, '{n} set', '{n} sets') : t('For time'); }
     case 'igyg': return igygLine();
     case 'emom': {
       const style = moves.length > 1 ? (cfg.emomStyle === 'all' ? t(' · all {n} moves each round', { n: moves.length }) : t(' · {n} moves take turns', { n: moves.length })) : '';
@@ -383,7 +384,7 @@ function summary() {
     case 'ladder': {
       const ms = ladderMoves(), r = rungs();
       const tot = ms.map((m, i) => `${r.reduce((a, x) => a + x[i], 0)} ${mvName(m) || t('reps')}`).join(', ');
-      return `${t('{n} rungs', { n: r.length })} · ${tot}${cfg.ldCap ? ` · ${t('{n} min cap', { n: cfg.ldCap })}` : ''}`;
+      return `${t2(r.length, '{n} step', '{n} steps')} · ${tot}${cfg.ldCap ? ` · ${t('{n} min cap', { n: cfg.ldCap })}` : ''}`;
     }
     case 'stopwatch': return t('Tap the ring to pause');
     case 'pushup': { const h = num(Math.round(3000 * 20 / cfg.pace / 2) / 1000, 2); return t('{n} a minute: {h} s down, {h} s up', { n: cfg.pace, h }) + (cfg.pace === 25 ? ' (NHL)' : ''); }
@@ -404,7 +405,7 @@ function planName() {
   if (f === 'test') return t(testDef().name);
   if (f === 'goal') return `${t('Rep goal')} · ${namedMoves().map(m => `${m.reps || 0} ${m.name}`).join(', ')}`;
   if (f === 'igyg') return `${t('You go, I go')} · ${t2(namedMoves().length, '{n} set', '{n} sets')}`;
-  if (f === 'ladder') { const ms = ladderMoves(); return `${t('Ladder')} · ${ms.map(m => `${mvName(m) || t('reps')} ${ldMode(m) === 'flat' ? t('{n} each rung', { n: ldStart(m) }) : `${ldStart(m)} ${ldStep(m) >= 0 ? '+' : '−'}${Math.abs(ldStep(m))}${ldMode(m) === 'pyr' ? ' ' + t('pyramid') : ''}`}`).join(', ')}${cfg.ldShape === 'mirror' ? t(' and back') : cfg.ldShape === 'wave' ? t(' wave') : ''}`; }
+  if (f === 'ladder') { const ms = ladderMoves(); return `${t('Ladder')} · ${ms.map(m => `${mvName(m) || t('reps')} ${ldMode(m) === 'flat' ? t('{n} each step', { n: ldStart(m) }) : `${ldStart(m)} ${ldStep(m) >= 0 ? '+' : '−'}${Math.abs(ldStep(m))}${ldMode(m) === 'pyr' ? ' ' + t('pyramid') : ''}`}`).join(', ')}${cfg.ldShape === 'mirror' ? t(' and back') : cfg.ldShape === 'wave' ? t(' wave') : ''}`; }
   return t('Stopwatch');
 }
 
@@ -550,9 +551,9 @@ function rowShell(k, label, face, foot, minus, plus, extra = '') {
    + and − always move the shown number up or down. */
 function ladderEndRow() {
   const m = ladderMoves()[0], st = ldStep(m), n = rungCount();
-  const label = st > 0 ? 'Up to' : st < 0 ? 'Down to' : 'Rungs';
+  const label = st > 0 ? 'Up to' : st < 0 ? 'Down to' : 'Steps';
   const v = st ? repsAt(m, n - 1) : n;
-  const foot = st ? `${t2(n, '{n} rung', '{n} rungs')}${cfg.ldShape === 'mirror' ? t(' · and back') : ''}` : '';
+  const foot = st ? `${t2(n, '{n} step', '{n} steps')}${cfg.ldShape === 'mirror' ? t(' · and back') : ''}` : '';
   return rowShell('ldRungs', label,
     `<input class="qt-tv" data-ldend="1" type="number" inputmode="numeric" value="${v}" onfocus="this.select()"/>`, foot,
     '<button class="qt-pm" data-ldend-d="-1" aria-label="Lower">−</button>', '<button class="qt-pm" data-ldend-d="1" aria-label="Higher">+</button>');
@@ -602,8 +603,8 @@ function moveCard(m, i) {
   const right = [];
   if (lad || db) {
     const step = ldStep(m);
-    right.push(line(`data-lm="${i}" data-lf="ldStart"`, `${ldStart(m)}${sec ? '<small>s</small>' : ''}`, t('start')));
-    if (!(lad && ldMode(m) === 'flat')) right.push(line(`data-lm="${i}" data-lf="ldStep"`, `${step > 0 ? '+' : ''}${step}`, db ? t('add') : t('per rung')));
+    right.push(line(`data-lm="${i}" data-lf="ldStart"`, `${ldStart(m)}${sec ? '<small>s</small>' : ''}`, t('start at')));
+    if (!(lad && ldMode(m) === 'flat')) right.push(line(`data-lm="${i}" data-lf="ldStep"`, `${step > 0 ? '+' : ''}${step}`, db ? t('add') : t('each step')));
   } else if (cfg.fmt !== 'tabata' && cfg.fmt !== 'timer') {   // time-based: no rep target, you log reps in the workout
     right.push(line(`data-mr="${i}"`, `<input data-mv="${i}" data-k="reps" type="number" inputmode="numeric" placeholder="–" value="${esc(m.reps)}" onfocus="this.select()"/>${sec ? '<small>s</small>' : ''}`, goal ? t('total') : ''));
     if (cfg.fmt === 'igyg' && canPump(m)) right.push(line(`data-mp="${i}"`, `${Number(m.pumps) || 0}`, t('push-ups each')));
@@ -730,7 +731,7 @@ function goalPreview() {
   const tot = g.goal.map((m, i) => `${g.totals[i]} ${m.name}`).join(', ');
   switch (g.cfg.fmt) {
     case 'emom': return t('EMOM {n} min. Every minute: {what}. Total: {tot}', { n: g.cfg.mins, what: g.moves.map(m => `${m.reps} ${m.name}`).join(', '), tot });
-    case 'ladder': return t('{n} rungs, climbing. Rung 1: {a}. Last rung: {b}. Total: {tot}', { n: g.rows, a: g.list[0].map((r, i) => `${r} ${g.goal[i].name}`).join(', '), b: g.list.at(-1).map((r, i) => `${r} ${g.goal[i].name}`).join(', '), tot });
+    case 'ladder': return t('{n} steps, climbing. Step 1: {a}. Last step: {b}. Total: {tot}', { n: g.rows, a: g.list[0].map((r, i) => `${r} ${g.goal[i].name}`).join(', '), b: g.list.at(-1).map((r, i) => `${r} ${g.goal[i].name}`).join(', '), tot });
     case 'igyg': return t('{n} sets of about 40 s, rest as long as each set. Total: {tot}', { n: g.rows, tot });
     default: return t('All of it, any way you like, as fast as you can: {tot}', { tot });
   }
@@ -763,77 +764,234 @@ function applyPick(p) {
   favIdx = null; moreOpen = (p.m.length > 0 || !!p.gen) && !lad;
   persist(); draw(); toast(t('Loaded: {x}', { x: t(p.name) }));
 }
+/* ============================================================
+   THE HOME, ONE SCREEN, NO SCROLL (Nico's pick, 19 Oct 2026, drafts on
+   the "Training Timer Home Drafts" canvas):
+     · the mode, huge, on a carousel you swipe; the neighbours peek in,
+       small and faint, so it is obvious there is more
+     · at most 3 big numbers for that mode (Work / Rest / Rounds…)
+     · one big button: Start (with the total), or "Next: …" when the mode
+       needs moves first
+   STEP 2, only when needed (or asked for): the mode stays on top, then
+   the moves or the list, the mode's ready-mades, and Start.
+   ============================================================ */
+let page = 'home';                       // 'home' | 'step2'
+/* the plain line under each mode's name: what it is, for a beginner */
+const LINE = {
+  stopwatch: 'Counts up from zero. Tap Lap whenever you like.',
+  timer: 'Work, rest, repeat. Set the times and the rounds.',
+  tabata: '20 seconds all out, 10 seconds rest, 8 rounds. 4 minutes.',
+  emom: 'A new round every minute. Whatever is left of the minute is your rest.',
+  amrap: 'As many rounds as you can before the clock runs out.',
+  fortime: 'Get it all done as fast as you can. Your time is your score.',
+  goal: 'Say how many reps you want. The timer builds the workout.',
+  vo2: 'Proven cardio intervals that raise your fitness ceiling.',
+  ladder: 'The reps go up (or down) every step. Tap when a step is done.',
+  igyg: 'Partner style: you rest as long as your set took.',
+  deathby: 'One more rep every minute, until you cannot keep up.',
+  pushup: 'One push-up on every beep. How long can you hold the pace?',
+  test: 'Race your own best, live. Beat it and it becomes your new best.',
+};
+/* modes that cannot start without step 2, and what its button says */
+const NEEDS = { ladder: 'Next: pick moves', deathby: 'Next: pick a move', goal: 'Next: your totals', igyg: 'Next: your sets', test: 'Next: pick a test' };
+const MOVES_OPTIONAL = new Set(['timer', 'tabata', 'emom', 'amrap', 'fortime']);
+/* the numbers on the home, at most 3 */
+const HOME = { timer: ['work', 'rest', 'rounds'], tabata: ['work', 'rest', 'rounds'], emom: ['mins', 'every'], amrap: ['cap'],
+  fortime: ['ftCap', 'ftRounds'], ladder: ['ldRungs'], deathby: ['dbEvery', 'dbMax'], pushup: ['pace'], igyg: [], goal: [], vo2: [], stopwatch: [], test: [] };
+/* what step 2 adds below the moves (the numbers that are not on the home) */
+const STEP2_MORE = { timer: ['sets', 'setRest'], pushup: ['ptCap'], ladder: ['ldCap'] };
+const LABEL = { ldRungs: 'Steps', ftCap: 'Time cap', ftRounds: 'Rounds' };
+
+/* one home row: label, − value + (a time opens the picker, a number types) */
+function homeRow(k) {
+  const label = LABEL[k] || FIELDS[k][0], v = val(k);
+  const none = ((k === 'ftCap' || k === 'ptCap' || k === 'ldCap') && !v) || ((k === 'rest' || k === 'setRest') && !v);
+  const face = isTime(k)
+    ? `<button class="qt-hv" data-qt="${k}">${none ? t('none') : fmt(v)}</button>`
+    : `<input class="qt-hv" data-qf="${k}" type="number" inputmode="numeric" value="${none ? '' : v}" placeholder="${none ? t('none') : ''}" onfocus="this.select()" aria-label="${esc(t(label))}"/>`;
+  const unit = k === 'mins' || k === 'cap' || k === 'ftCap' ? `<small>${t('min')}</small>` : k === 'pace' ? `<small>${t('a min')}</small>` : '';
+  return `<div class="qt-hr tone-${ROW_TONE[k] || 'accent'}"><span class="qt-hl">${t(label)}</span>
+    <button class="qt-hpm" data-q="${k}" data-d="-1" aria-label="${t('Less')}">−</button>
+    <span class="qt-hvw">${face}${unit}</span>
+    <button class="qt-hpm" data-q="${k}" data-d="1" aria-label="${t('More')}">+</button></div>`;
+}
+/* the mode's own choices on the home (no numbers) */
+function homeExtras() {
+  const f = cfg.fmt;
+  if (f === 'ladder') return [segRow('Shape', 'violet', LD_SHAPES, cfg.ldShape, 'data-ldshape')];
+  if (f === 'goal') return [segRow('Run it as', 'accent', GOAL_AS, cfg.goalAs, 'data-goalas')];
+  if (f === 'igyg') return [segRow('Rest', 'neon', [['same', 'Same as your set'], ['fixed', 'Fixed']], cfg.igRest, 'data-igrest'), ...(cfg.igRest === 'fixed' ? [homeRow('igRestSec')] : [])];
+  if (f === 'vo2') return [`<div class="qt-vo2h">${VO2.map(p => `<button class="${p.id === vo2().id ? 'on' : ''}" data-vo2="${p.id}"><b>${t(p.name)}</b><small>${t(p.sub)}</small></button>`).join('')}</div>`];
+  if (f === 'test') {
+    const recs = TESTS.map(x => ({ x, b: bestOf(hist, x) })).filter(r => r.b).slice(0, 2);
+    return recs.length ? [`${sec('Your records')}${recs.map(({ x, b }) => `<div class="qt-rec"><span><b>${t(x.name)}</b><small>${t2(attempts(hist, x).length, '{n} try', '{n} tries')}</small></span><em>${testShow(x, scoreOf(b, x))}</em></div>`).join('')}`]
+      : [`<div class="qt-note">${t('Your first try at any test sets your best. Then you race it.')}</div>`];
+  }
+  return [];
+}
+/* the hero: every mode on a carousel, in the person's order */
+function heroHtml() {
+  const order = typeOrder();
+  return `<div class="qt-hero" id="qtHero" data-order="${order.join(',')}"><div class="qt-hs" id="qtHs">${order.map(id => { const f = FORMATS.find(x => x.id === id);
+    return `<div class="qt-hslide" data-hs="${id}">${modeIcon(id, 'qt-hicon')}<button class="qt-hname" data-hname="1">${t(f.name)}</button><p class="qt-hline">${t(LINE[id] || f.sub)}</p></div>`; }).join('')}</div>
+    <div class="qt-hdots" aria-hidden="true">${order.map(id => `<i class="${id === cfg.fmt ? 'on' : ''}" data-hd="${id}"></i>`).join('')}</div></div>`;
+}
+/* the slides scale and fade with their distance from the middle */
+function paintHero() {
+  const hs = host.querySelector('#qtHs'); if (!hs) return;
+  const mid = hs.scrollLeft + hs.clientWidth / 2;
+  hs.querySelectorAll('.qt-hslide').forEach(el => {
+    const c = el.offsetLeft + el.offsetWidth / 2, d = Math.min(1.6, Math.abs(c - mid) / el.offsetWidth);
+    el.style.setProperty('--d', d.toFixed(3));
+  });
+}
+function centerHero(smooth = false) {
+  const hs = host.querySelector('#qtHs'); if (!hs) return;
+  const el = hs.querySelector(`[data-hs="${cfg.fmt}"]`); if (!el) return;
+  hs.scrollTo({ left: el.offsetLeft - (hs.clientWidth - el.offsetWidth) / 2, behavior: smooth ? 'smooth' : 'instant' });
+  paintHero();
+}
+function wireHero() {
+  const hs = host.querySelector('#qtHs'); if (!hs) return;
+  let raf = 0, settle = 0;
+  hs.addEventListener('scroll', () => {
+    if (!raf) raf = requestAnimationFrame(() => { raf = 0; paintHero(); });
+    clearTimeout(settle);
+    settle = setTimeout(() => {
+      const mid = hs.scrollLeft + hs.clientWidth / 2;
+      let best = null, bd = 1e9;
+      hs.querySelectorAll('.qt-hslide').forEach(el => { const d = Math.abs(el.offsetLeft + el.offsetWidth / 2 - mid); if (d < bd) { bd = d; best = el; } });
+      const id = best?.dataset.hs;
+      if (id && id !== cfg.fmt) {
+        cfg.fmt = id;
+        if (id === 'tabata') Object.assign(cfg, TABATA, { tbN: null, tbTotal: null });
+        try { navigator.vibrate?.(6); } catch (e) {}
+        persist(); drawBody();
+      }
+    }, 120);
+  }, { passive: true });
+  hs.querySelectorAll('.qt-hslide').forEach(el => el.addEventListener('click', e => {
+    if (el.dataset.hs !== cfg.fmt) { cfg.fmt = el.dataset.hs; centerHero(true); return; }   // a neighbour: roll it to the middle
+    if (e.target.closest('[data-hname]')) openTypes();                                        // the name: the full list, to jump
+  }));
+}
+/* the button at the bottom of the home */
+function homeButton() {
+  const need = NEEDS[cfg.fmt];
+  if (need) return `<button class="qt-big" id="qtNext">${t(need)} ›</button>`;
+  const tot = totalSec();
+  return `<button class="qt-big" id="qtGo">${t('Start')}${tot ? ` <span>${fmt(tot)}</span>` : ''}</button>`;
+}
+function homeBody() {
+  const rows = [...(HOME[cfg.fmt] || []).map(homeRow), ...homeExtras()];
+  const names = namedMoves().map(m => m.name);
+  const link = MOVES_OPTIONAL.has(cfg.fmt)
+    ? `<button class="qt-hlink" id="qtStep2">${names.length ? `<span>${t('Moves')}: <b>${esc(names.slice(0, 3).join(', '))}${names.length > 3 ? '…' : ''}</b></span>` : `<span>${t('Add moves')} <small>(${t('optional')})</small></span>`}<i>›</i></button>`
+    : STEP2_MORE[cfg.fmt] && !NEEDS[cfg.fmt] ? `<button class="qt-hlink" id="qtStep2"><span>${t('More options')}</span><i>›</i></button>` : '';
+  return `<div class="qt-hrows">${rows.join('')}${link}</div>
+    <div class="qt-hfill"></div>
+    ${homeButton()}`;
+}
+/* what is still missing before this can start (step 2), or null */
+function missing() {
+  if (cfg.fmt === 'goal' && !goalBuilt()) return t('Add a move and its total first');
+  if (cfg.fmt === 'igyg' && !MV().some(m => String(m.name || '').trim() && Number(m.reps) > 0)) return t('Add a set first: a move and its reps');
+  return null;
+}
+/* step 2: the mode stays on top; then what it needs */
+function step2Body() {
+  const def = fmtDef(), f = cfg.fmt, named = namedMoves().length;
+  const parts = [];
+  if (f === 'goal') parts.push(segRow('Run it as', 'accent', GOAL_AS, cfg.goalAs, 'data-goalas'));
+  if (f === 'igyg') parts.push(segRow('Rest', 'neon', [['same', 'Same as your set'], ['fixed', 'Fixed']], cfg.igRest, 'data-igrest'), ...(cfg.igRest === 'fixed' ? [stepRow('igRestSec')] : []));
+  if (f === 'test') parts.push(testsList());
+  else if (def.moves) parts.push(`${sec(f === 'goal' ? 'Your totals' : f === 'igyg' ? 'Sets, in order' : 'Moves', MOVES_OPTIONAL.has(f) ? `<small>${t('optional')}</small>` : f === 'ladder' ? `<button class="qt-seclink" id="qtPresets">${t('Presets')}</button>` : '')}${movesCard()}`);
+  if (f === 'goal' && goalBuilt()) parts.push(`<div class="qt-goalbox"><b>${t('The plan')}</b><span>${esc(goalPreview())}</span>${cfg.goalAs !== 'ladder' ? `<button class="qt-link" id="qtGoalOpen">${t('Open it as {x} to adjust', { x: t(GOAL_AS.find(x => x[0] === cfg.goalAs)[1]) })}</button>` : ''}</div>`);
+  if (f === 'emom' && named > 1) parts.push(segRow('How the moves run', 'accent', [['turns', 'Take turns'], ['all', 'All every minute']], cfg.emomStyle === 'all' ? 'all' : 'turns', 'data-style',
+    cfg.emomStyle === 'all' ? t('All {n} moves inside each minute', { n: named }) : t('Minute 1 is move 1, minute 2 is move 2')));
+  const more = (STEP2_MORE[f] || []).filter(k => k !== 'setRest' || cfg.sets > 1);
+  if (more.length) parts.push(`${sec('More')}<div class="qt-rows">${more.map(stepRow).join('')}</div>`);
+  if (f === 'tabata' && (cfg.work !== TABATA.work || cfg.rest !== TABATA.rest)) parts.push(`<button class="qt-link" id="qtClassic">${t('Back to classic 20s / 10s')}</button>`);
+  const tot = totalSec();
+  return `<div class="qt-s2top">
+      <button class="qt-back2" id="qtHome" aria-label="${t('Back')}">‹</button>
+      ${modeIcon(f, 'qt-micon s2')}
+      <span class="qt-s2t"><b>${t(def.name)}</b><small>${esc(summary() || '')}</small></span>
+      ${NEEDS[f] ? `<em class="qt-s2step">${t('Step 2 of 2')}</em>` : ''}
+    </div>
+    ${lastLine()}
+    ${parts.join('')}
+    ${picksRow()}
+    <div style="height:150px"></div>
+    <div class="actionbar qt-bar">${missing() ? `<button class="qt-big" disabled>${esc(missing())}</button>` : `<button class="qt-big" id="qtGo">${f === 'test' ? t('Start the race') : t('Start')}${tot && f !== 'test' ? ` <span>${fmt(tot)}</span>` : ''}</button>`}</div>`;
+}
+/* the whole screen; a tap on a number redraws only what changed */
 function draw() {
-  const def = fmtDef();
-  /* the break between repeats only shows once there is more than one */
-  const main = MAIN[cfg.fmt], more = (MORE[cfg.fmt] || []).filter(k => k !== 'setRest' || cfg.sets > 1);
-  const named = namedMoves().length;
-  const lad = cfg.fmt === 'ladder' || cfg.fmt === 'goal' || cfg.fmt === 'igyg', db = cfg.fmt === 'deathby';
-  /* SETTINGS: the main numbers, and the ladder's shape as one more row */
-  const settings = [
-    ...main.map(stepRow),
-    ...(cfg.fmt === 'ladder' ? [segRow('Shape', 'violet', LD_SHAPES, cfg.ldShape, 'data-ldshape')] : []),
-    ...(cfg.fmt === 'goal' ? [segRow('Run it as', 'accent', GOAL_AS, cfg.goalAs, 'data-goalas')] : []),
-    ...(cfg.fmt === 'igyg' ? [segRow('Rest', 'neon', [['same', 'Same as your set'], ['fixed', 'Fixed']], cfg.igRest, 'data-igrest'), ...(cfg.igRest === 'fixed' ? [stepRow('igRestSec')] : [])] : []),
-    ...(cfg.fmt === 'vo2' ? [`<div class="qt-srow qt-vo2"><span class="qt-sl" style="color:var(--wm-accent)">${t('Protocol')}</span>
-      ${VO2.map(p => `<button class="qt-vo2p ${p.id === vo2().id ? 'on' : ''}" data-vo2="${p.id}"><b>${t(p.name)}</b><small>${t(p.sub)}</small></button>`).join('')}</div>`] : []),
-  ];
-  /* CUSTOMIZE: the rest, same rows */
-  const custom = [
-    ...more.map(stepRow),
-    ...(cfg.fmt === 'emom' && named > 1 ? [segRow('How the moves run', 'accent', [['turns', 'Take turns'], ['all', 'All every minute']], cfg.emomStyle === 'all' ? 'all' : 'turns', 'data-style',
-        cfg.emomStyle === 'all' ? t('All {n} moves inside each minute', { n: named }) : t('Minute 1 is move 1, minute 2 is move 2'))] : []),
-  ];
-  /* fades in when it opens, never on the redraw after each tap */
+  if (page === 'home' && host.querySelector('#qtHero') && host.querySelector('#qtHero').dataset.order === typeOrder().join(',')) {
+    drawBody();
+    const on = host.querySelector(`[data-hs="${cfg.fmt}"]`), hs = host.querySelector('#qtHs');
+    if (on && hs && Math.abs(on.offsetLeft + on.offsetWidth / 2 - (hs.scrollLeft + hs.clientWidth / 2)) > 4) centerHero(true);
+    return;
+  }
   const fade = host.querySelector('.screen.qt') ? '' : 'fade-in';
+  if (page === 'step2') {
+    host.innerHTML = `<div class="screen qt qt-s2 ${fade}">${step2Body()}</div>`;
+    wire();
+    return;
+  }
   host.innerHTML = `
-  <div class="screen qt ${fade}">
+  <div class="screen qt qt-home ${fade}">
     <div class="qt-top">
       ${guest ? '' : `<button class="qt-back" id="qtBack" aria-label="${t('Back')}">‹</button>`}
       <h1>${t('Training Timer')}</h1>
+      <button class="qt-star" id="qtFavs" aria-label="${t('Favorites')}" title="${t('Favorites')}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg></button>
       <button class="qt-star" id="qtHist" aria-label="${t('History')}" title="${t('History')}"><svg width="21" height="21" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11a8 8 0 1 0 2.4-5.7"/><path d="M3 3v4h4"/><path d="M11 7v4l3 2"/></svg></button>
       <button class="qt-star" id="qtPrefs" aria-label="${t('Timer settings')}" title="${t('Timer settings')}">⚙︎</button>
-      <button class="qt-star" id="qtShare" aria-label="${t('Share this timer')}" title="${t('Share this timer')}"><svg width="20" height="22" viewBox="0 0 20 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14V2M5 7l5-5 5 5"/><path d="M4 11H2.5v9h15v-9H16"/></svg></button>
-      <button class="qt-star ${favIdx != null ? 'on' : ''}" id="qtFav" aria-label="${t('Save this timer')}" title="${t('Save this timer')}">${favIdx != null ? '★' : '☆'}</button>
     </div>
-
-
-    ${installCard()}
-    <button class="qt-type" id="qtType">
-      ${modeIcon(cfg.fmt, 'qt-micon big')}
-      <span class="qt-type-t"><small>${t('Type')}</small><b>${t(def.name)}</b><em>${t(def.sub)}</em></span>
-      <span class="qt-chev">▾</span>
-    </button>
-    ${lastLine()}
-    ${picksRow()}
-
-    ${settings.length ? `${sec('Settings', cfg.fmt === 'ladder' ? `<button class="qt-seclink" id="qtPresets">${t('Presets')}</button>` : '')}<div class="qt-rows">${settings.join('')}</div>` : ''}
-    ${cfg.fmt === 'test' ? testsList() : ''}
-    ${lad || db ? `${sec(cfg.fmt === 'goal' ? 'Your totals' : cfg.fmt === 'igyg' ? 'Sets, in order' : 'Moves')}${movesCard()}` : ''}
-    ${cfg.fmt === 'goal' && goalBuilt() ? `<div class="qt-goalbox"><b>${t('The plan')}</b><span>${esc(goalPreview())}</span>${cfg.goalAs !== 'ladder' ? `<button class="qt-link" id="qtGoalOpen">${t('Open it as {x} to adjust', { x: t(GOAL_AS.find(x => x[0] === cfg.goalAs)[1]) })}</button>` : ''}</div>` : ''}
-    ${!settings.length && !lad && !db ? `<div class="qt-empty">${t('Nothing to set. Hit start.')}</div>` : ''}
-
-    ${custom.length || (def.moves && !lad && !db) ? `<button class="qt-more ${moreOpen ? 'open' : ''}" id="qtMore"><span>${custom.length ? t('Customize') : t('Pick your exercises')}</span><i>›</i>${!moreOpen && named && !lad && !db ? `<em>${t2(named, '{n} move', '{n} moves')}</em>` : ''}</button>` : ''}
-    ${moreOpen && (custom.length || (def.moves && !lad && !db)) ? `<div class="qt-details">
-      <div class="qt-rows">${custom.join('')}</div>
-      ${def.moves && !lad && !db ? `${sec('Moves', `<small>${t('optional')}</small>`)}${movesCard()}` : ''}
-      ${cfg.fmt === 'tabata' && (cfg.work !== TABATA.work || cfg.rest !== TABATA.rest) ? `<button class="qt-link" id="qtClassic">${t('Back to classic 20s / 10s')}</button>` : ''}
-    </div>` : ''}
-
-    ${showDemo() ? `${sec('Work Mode preview')}
-    <div class="qt-demos">${DEMOS.map(d => `<button class="qt-demo" data-demo="${d.id}"><b>${d.name}</b><small>${d.sub}</small><span>▸</span></button>`).join('')}</div>` : ''}
-
+    ${installCard() ? `<div class="qt-ibar" id="qtInstallCard"><button class="qt-ibarb" id="qtIbar">${t('Put the timer on your home screen')} ›</button><button class="qt-ix" id="qtInstallX" aria-label="${t('Hide')}">✕</button></div>` : ''}
+    ${heroHtml()}
+    <div class="qt-hbody" id="qtBody">${homeBody()}</div>
     ${guest ? `<button class="qt-link center qt-signin" id="qtSignIn">${t('Have a program from Nico? Sign in')}</button>` : ''}
-    <div style="height:200px"></div>
-    <div class="actionbar qt-bar">
-      <div class="qt-sum">${summary()}</div>
-      <div class="qt-go">
-        ${badgeRing()}
-        <button class="btn lg" id="qtGo">${t('Start')}</button>
-      </div>
-    </div>
   </div>`;
+  const $ = s => host.querySelector(s);
+  $('#qtBack')?.addEventListener('click', () => { location.href = 'dashboard.html'; });
+  $('#qtSignIn')?.addEventListener('click', () => { try { localStorage.removeItem('fj.launchTimer'); } catch (e) {} location.href = 'index.html'; });
+  wireInstall($);
+  /* the install steps in a sheet: the home stays one screen */
+  $('#qtIbar')?.addEventListener('click', () => {
+    const { ov } = sheet(installCard().replace(/<button class="qt-ix"[^>]*>✕<\/button>/, ''));
+    wireInstall(sel => ov.querySelector(sel));
+  });
+  $('#qtPrefs').addEventListener('click', () => openPrefs(host));
+  $('#qtHist').addEventListener('click', openAllHistory);
+  $('#qtFavs').addEventListener('click', openFavs);
+  wireHero();
+  centerHero(false);   // right away, then again once the layout has settled (fonts, images)
+  requestAnimationFrame(() => { centerHero(false); requestAnimationFrame(paintHero); });
+  setTimeout(() => centerHero(false), 250);
+  if (!window.__qtHeroResize) { window.__qtHeroResize = 1; addEventListener('resize', () => { if (page === 'home') centerHero(false); }); }
   wire();
+}
+function drawBody() {
+  const b = host.querySelector('#qtBody'); if (!b) return draw();
+  b.innerHTML = homeBody();
+  host.querySelectorAll('.qt-hdots i').forEach(i => i.classList.toggle('on', i.dataset.hd === cfg.fmt));
+  wire(b);
+}
+/* the ★: saved workouts (all modes), save this one, share it */
+function openFavs() {
+  const { ov, close } = sheet(`<div class="qt-sheet-h">${t('Favorites')}</div>
+    ${favs.length ? `<div class="qt-favlist">${favs.map((f, i) => `<button class="qt-favrow" data-fv="${i}">${modeIcon(f.cfg?.fmt || 'timer', 'qt-micon sm')}<span><b>${esc(f.label)}</b><small>${esc(f.sub || '')}</small></span></button>`).join('')}</div>`
+      : `<p class="muted center">${t('Save a timer you like and it lives here, one tap away.')}</p>`}
+    <button class="btn" id="fvSave">★ ${t('Save this timer')}</button>
+    <button class="qt-link center" id="fvShare">${t('Share this timer')}</button>`, 'tall');
+  ov.querySelectorAll('[data-fv]').forEach(b => b.addEventListener('click', () => {
+    const f = favs[+b.dataset.fv]; if (!f) return;
+    cfg = migrate({ ...DEFAULTS, ...JSON.parse(JSON.stringify(f.cfg)), paceV: 2 }); favIdx = +b.dataset.fv; page = 'home';
+    persist(); close(); draw(); toast(t('Loaded: {x}', { x: f.label }));
+  }));
+  ov.querySelector('#fvSave').addEventListener('click', () => { close(); openSave(); });
+  ov.querySelector('#fvShare').addEventListener('click', () => { close(); shareTimer(); });
 }
 /* THE TOTAL, as a small version of the user's own timer ring with the
    time in the middle: what they are about to start, in the look they chose */
@@ -944,8 +1102,7 @@ function openTypes() {
   const fmtOf = i => FORMATS.find(f => f.id === order[i]);
   const choose = id => {
     if (cfg.fmt !== id) { cfg.fmt = id; if (cfg.fmt === 'tabata') Object.assign(cfg, TABATA, { tbN: null, tbTotal: null }); persist(); draw(); }
-    close();
-    if (NO_SETUP.has(cfg.fmt)) { persist(); onStart?.(buildPlan()); }   // nothing to set: straight in
+    close();   // the home shows it, with its own Start (no surprise start)
   };
   const paint = () => {
     raf = 0;
@@ -975,7 +1132,7 @@ function openTypes() {
     requestAnimationFrame(() => { wheel.scrollTop = cur * WH; paint(); });
   };
   wheel.addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(paint); }, { passive: true });
-  ov.querySelector('#qtWgo').addEventListener('click', () => choose(order[cur]));
+  ov.querySelector('#qtWgo').addEventListener('click', () => choose(order[Math.max(0, Math.min(order.length - 1, Math.round(wheel.scrollTop / WH)))]));   // where the wheel IS, not the last painted frame
   /* the list, to drag into a new order */
   const renderList = () => {
     list.innerHTML = typeOrder().map(id => FORMATS.find(f => f.id === id)).map(f => `<div class="qt-optrow" data-tid="${f.id}">${modeIcon(f.id, 'qt-micon sm')}<button class="qt-opt" data-pick="${f.id}"><b>${t(f.name)}</b><small>${t(f.sub)}</small></button><span class="qt-grip" aria-hidden="true">≡</span></div>`).join('');
@@ -1251,15 +1408,15 @@ async function openMovePicker(i) {
   setTimeout(() => { q.focus(); q.select(); }, 60);
 }
 
-function wire() {
+/* the controls of what was just drawn (the home's body, or step 2);
+   the home's top bar and carousel are wired once, in draw() */
+function wire(scope = host) {
+  const host_ = host; { const host = scope;
   const $ = s => host.querySelector(s);
-  $('#qtBack')?.addEventListener('click', () => { location.href = 'dashboard.html'; });
-  $('#qtSignIn')?.addEventListener('click', () => { try { localStorage.removeItem('fj.launchTimer'); } catch (e) {} location.href = 'index.html'; });
-  wireInstall($);
-  $('#qtType').addEventListener('click', openTypes);
   $('#qtLast')?.addEventListener('click', openHistory);
-  $('#qtPrefs').addEventListener('click', () => openPrefs(host));
-  $('#qtMore')?.addEventListener('click', () => { moreOpen = !moreOpen; draw(); });
+  $('#qtStep2')?.addEventListener('click', () => { page = 'step2'; draw(); scrollTo(0, 0); });
+  $('#qtNext')?.addEventListener('click', () => { page = 'step2'; draw(); scrollTo(0, 0); });
+  $('#qtHome')?.addEventListener('click', () => { page = 'home'; draw(); scrollTo(0, 0); });
   host.querySelectorAll('[data-qp]').forEach(b => b.addEventListener('click', () => { const p = PICKS[cfg.fmt]?.find(x => x.id === b.dataset.qp); if (p) applyPick(p); }));
   host.querySelectorAll('[data-q]').forEach(b => b.addEventListener('click', () => { bump(b.dataset.q, Number(b.dataset.d)); persist(); draw(); }));
   host.querySelectorAll('[data-qt]').forEach(b => b.addEventListener('click', () => openTime(b.dataset.qt)));
@@ -1308,6 +1465,7 @@ function wire() {
      does not depend on reps, so nothing on screen goes stale */
   host.querySelectorAll('[data-mv]').forEach(inp => {
     inp.addEventListener('input', () => { MV()[+inp.dataset.mv][inp.dataset.k] = inp.value; persist(); });
+    inp.addEventListener('change', () => { if (page === 'step2') draw(); });   // done typing: the plan, the totals and Start catch up
     inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
   });
   host.querySelectorAll('[data-mw]').forEach(b => b.addEventListener('click', () => {
@@ -1348,13 +1506,11 @@ function wire() {
     if (favIdx === i) favIdx = null; else if (favIdx > i) favIdx--;
     persist(); draw();
   }));
-  $('#qtFav').addEventListener('click', openSave);
-  $('#qtHist').addEventListener('click', openAllHistory);
-  $('#qtShare').addEventListener('click', shareTimer);
-  $('#qtGo').addEventListener('click', () => { persist(); onStart?.(buildPlan()); });
+  $('#qtGo')?.addEventListener('click', () => { persist(); onStart?.(buildPlan()); });
   host.querySelectorAll('[data-demo]').forEach(b => b.addEventListener('click', () => {
     const d = DEMOS.find(x => x.id === b.dataset.demo); if (d) onStart?.(d.plan());
   }));
+  void host_; }
 }
 
 /* ---------------- look ----------------
@@ -1426,6 +1582,80 @@ function injectStyle() {
   .qt-test em { font-style: normal; display:flex; flex-direction:column; align-items:flex-end; font-family: var(--tnum); font-size: 17px; font-weight: 800; color: var(--wm-neon); }
   .qt-test em i { font-style: normal; font-family: var(--font); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
   .qt-test.on { border-color: var(--wm-accent); box-shadow: 0 0 0 1px var(--wm-accent) inset; }
+  /* ---- THE HOME: one screen, no scroll ---- */
+  .qt-home { min-height: 100vh; min-height: 100dvh; box-sizing: border-box; display:flex; flex-direction:column; padding-bottom: calc(14px + env(safe-area-inset-bottom)); }
+  .qt-home .qt-top { margin-bottom: 8px; }
+  .qt-ibar { display:flex; align-items:center; gap: 6px; margin: 0 0 8px; border: 1px solid var(--wm-neon-line); border-radius: 12px; padding: 2px 4px 2px 12px; }
+  .qt-ibarb { flex: 1; background: none; border: 0; color: var(--text); font-weight: 700; font-size: 14px; text-align: left; padding: 9px 0; cursor: pointer; }
+  .qt-hero { position: relative; margin: 0 calc(-1 * var(--pad)); padding: 10px 0 6px; border-radius: 0;
+    background: radial-gradient(90% 75% at 50% 35%, var(--wm-neon-soft), transparent 70%); }
+  .qt-hs { position: relative; display:flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding: 0 calc(50% - 76px); overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
+  .qt-hs::-webkit-scrollbar { display: none; }
+  .qt-hslide { flex: 0 0 152px; min-width: 0; overflow: visible; scroll-snap-align: center; display:flex; flex-direction:column; align-items:center; text-align:center; gap: 4px; cursor: pointer;
+    transform: scale(calc(1 - var(--d, 0) * 0.42)); opacity: calc(1 - var(--d, 0) * 0.62); transition: transform .08s linear; will-change: transform, opacity; }
+  .qt-hicon { width: min(150px, 19vh); height: min(150px, 19vh); object-fit: contain; pointer-events: none; -webkit-user-drag: none; filter: drop-shadow(0 0 18px var(--wm-neon-soft)); }
+  .qt-hname { background: none; border: 0; color: var(--text); font-family: var(--font); font-size: clamp(30px, 5vh, 42px); font-weight: 900; letter-spacing: -0.02em; line-height: 1; padding: 2px 4px; cursor: pointer; white-space: nowrap; flex: none; opacity: calc(1 - var(--d, 0) * 2); }
+  .qt-hline { margin: 2px 0 0; width: 320px; max-width: calc(100vw - 40px); flex: none; color: var(--muted); font-size: 14.5px; line-height: 1.35; opacity: calc(1 - var(--d, 0) * 2.4); min-height: 2.7em; text-wrap: balance; }
+  .qt-hdots { display:flex; justify-content:center; gap: 5px; margin-top: 6px; }
+  .qt-hdots i { width: 5px; height: 5px; border-radius: 3px; background: var(--line); transition: width .2s, background .2s; }
+  .qt-hdots i.on { width: 18px; background: var(--wm-accent); }
+  .qt-hbody { flex: 1; display:flex; flex-direction:column; gap: 10px; margin-top: 8px; }
+  .qt-hrows { display:flex; flex-direction:column; gap: 8px; }
+  .qt-hr { display:flex; align-items:center; gap: 8px; background: var(--box); border: 1px solid var(--line); border-radius: 18px; padding: 6px 7px 6px 16px; }
+  .qt-hl { flex: 1; font-size: 14px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--wm-accent); }
+  .qt-hr.tone-neon .qt-hl { color: var(--wm-neon); } .qt-hr.tone-violet .qt-hl { color: #B57BFF; } .qt-hr.tone-ready .qt-hl { color: var(--wm-ready, #3D6BFF); }
+  .qt-hpm { flex: none; width: 48px; height: 48px; border-radius: 14px; border: 1px solid var(--line); background: var(--bg-2, #15151d); color: var(--text); font-size: 24px; cursor: pointer; }
+  .qt-hpm:active { border-color: var(--wm-accent); }
+  .qt-hvw { width: 104px; display:flex; align-items:baseline; justify-content:center; gap: 3px; }
+  .qt-hvw small { color: var(--muted); font-size: 12px; }
+  .qt-hv { width: 100%; min-width: 0; background: none; border: 0; color: var(--text); font-family: var(--tnum); font-size: 32px; font-weight: 800; text-align: center; padding: 0; cursor: pointer; -moz-appearance: textfield; }
+  .qt-hv::placeholder { color: var(--muted); font-size: 18px; }
+  .qt-hv::-webkit-outer-spin-button, .qt-hv::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .qt-hlink { display:flex; align-items:center; gap: 10px; background: none; border: 1px dashed var(--line); border-radius: 16px; color: var(--text); padding: 13px 16px; font-size: 15px; font-weight: 700; text-align: left; cursor: pointer; }
+  .qt-hlink span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .qt-hlink small, .qt-hlink b { font-weight: 500; color: var(--muted); } .qt-hlink b { color: var(--text); font-weight: 700; }
+  .qt-hlink i { font-style: normal; color: var(--muted); font-size: 18px; }
+  .qt-hfill { flex: 1; min-height: 4px; }
+  .qt-big { width: 100%; height: 66px; border: 0; border-radius: 22px; background: var(--wm-accent, var(--accent)); color: #0B0B10; font-family: var(--font); font-size: 21px; font-weight: 900;
+    display:flex; align-items:center; justify-content:center; gap: 10px; cursor: pointer; box-shadow: 0 10px 30px var(--wm-accent-soft, rgba(0,0,0,.3)); }
+  .qt-big span { font-family: var(--tnum); opacity: .7; }
+  .qt-big:active { transform: scale(.985); }
+  .qt-big:disabled { background: var(--box); color: var(--muted); box-shadow: none; font-size: 15px; font-weight: 700; border: 1px dashed var(--line); }
+  .qt-vo2h { display:grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .qt-vo2h button { text-align: left; background: var(--box); border: 1px solid var(--line); border-radius: 12px; color: var(--text); padding: 8px 10px; display:flex; flex-direction:column; gap: 1px; cursor: pointer; }
+  .qt-vo2h button b { font-size: 13.5px; } .qt-vo2h button small { color: var(--muted); font-size: 11px; line-height: 1.25; }
+  .qt-vo2h button.on { border-color: var(--wm-accent); box-shadow: 0 0 0 1px var(--wm-accent) inset; }
+  .qt-rec { display:flex; align-items:center; gap: 12px; background: var(--box); border: 1px solid var(--line); border-radius: 16px; padding: 10px 14px; }
+  .qt-rec span { flex: 1; display:flex; flex-direction:column; } .qt-rec b { font-size: 15.5px; } .qt-rec small { color: var(--muted); font-size: 12px; }
+  .qt-rec em { font-style: normal; font-family: var(--tnum); font-size: 22px; font-weight: 800; color: var(--wm-neon); }
+  .qt-note { color: var(--muted); font-size: 14px; text-align: center; padding: 8px 12px; }
+  .qt-home .qt-sec { margin-top: 2px; }
+  /* short phones (iPhone SE, mini): the same screen, tighter, Start still in view */
+  @media (max-height: 740px) {
+    .qt-home .qt-top { margin-bottom: 2px; }
+    .qt-hicon { width: min(120px, 16vh); height: min(120px, 16vh); }
+    .qt-hline { font-size: 13.5px; min-height: 0; }
+    .qt-hero { padding: 4px 0 2px; }
+    .qt-hbody { gap: 8px; margin-top: 4px; }
+    .qt-hrows { gap: 6px; }
+    .qt-hr { padding: 4px 6px 4px 14px; border-radius: 16px; }
+    .qt-hpm { width: 42px; height: 42px; border-radius: 12px; }
+    .qt-hv { font-size: 28px; }
+    .qt-hlink { padding: 10px 14px; }
+    .qt-big { height: 58px; font-size: 19px; }
+  }
+  /* ---- STEP 2 ---- */
+  .qt-s2top { display:flex; align-items:center; gap: 10px; margin: 4px 0 14px; }
+  .qt-back2 { width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--box); color: var(--text); font-size: 24px; cursor: pointer; flex: none; }
+  .qt-micon.s2 { width: 52px; height: 52px; }
+  .qt-s2t { flex: 1; min-width: 0; display:flex; flex-direction:column; } .qt-s2t b { font-size: 22px; font-weight: 900; }
+  .qt-s2t small { color: var(--muted); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .qt-s2step { font-style: normal; font-size: 11px; font-weight: 800; letter-spacing: .1em; color: var(--muted); text-transform: uppercase; white-space: nowrap; }
+  .qt-s2 .qt-bar .qt-big { box-shadow: 0 10px 30px var(--wm-accent-soft, rgba(0,0,0,.3)); }
+  /* the ★ sheet */
+  .qt-favlist { display:flex; flex-direction:column; gap: 8px; margin-bottom: 12px; }
+  .qt-favrow { display:flex; align-items:center; gap: 10px; text-align:left; background: var(--box); border: 1px solid var(--line); border-radius: 14px; padding: 8px 12px; color: var(--text); cursor: pointer; }
+  .qt-favrow span { display:flex; flex-direction:column; min-width: 0; } .qt-favrow small { color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .qt-goalbox { display:flex; flex-direction:column; gap: 6px; margin: 10px 0 4px; padding: 12px 14px; border-radius: 14px; background: var(--box); border: 1px solid var(--wm-neon-line); }
   .qt-goalbox b { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--wm-neon); }
   .qt-goalbox span { font-size: 14.5px; line-height: 1.4; }

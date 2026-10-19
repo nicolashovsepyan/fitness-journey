@@ -11,7 +11,7 @@ Run it before every ship (part 1) and once a week, or after any big change
 - [ ] Open `tools/audit/smoke.html` (local server, or the live site at
       `/tools/audit/smoke.html`) and press **Run all checks**. All 26 pass:
       every timer type in English and French draws its setup, the Start bar
-      sits on the bottom edge, the move library lists 300+ moves and search
+      sits on the bottom edge, the home fits one screen with its button and icon, step 2 opens, the move library lists 300+ moves and search
       finds some, Start opens the workout, the clock moves, no errors.
 
 ## 2. Sound (weekly, from the browser pane with the audit harness)
