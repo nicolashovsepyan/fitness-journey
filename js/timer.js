@@ -322,7 +322,7 @@ export function audioWatch(gesture = false) {
 export function audioTap() {
   alog('tap');
   audioWatch(true);
-  probe(600).then(r => { alog('after tap: ' + r); if (r === 'frozen') reloadForSound('frozen after a tap'); });
+  probe(600).then(r => alog('after tap: ' + r));   // logged only: a tap never reloads the page (it is a tap on a button)
 }
 /* BACK FROM ANOTHER APP (the music app, a call): iOS can hand the page back
    a context that says "running" and plays nothing, so the watchdog, which

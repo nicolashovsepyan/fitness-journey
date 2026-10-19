@@ -1,6 +1,7 @@
 {
-  "version": "2026-10-18.1",
+  "version": "2026-10-19.1",
   "notes": [
+    "Fixed: the red sound bar covered the ✕ and pause buttons, and a tap could reload the page. The bar now sits under them and a tap never reloads",
     "Every timer type has its own neon icon, on the wheel and on the Type card",
     "Sound check on every return: if your iPhone left the timer silent, it reloads itself and your workout continues where it was. Timer settings has a Sound log",
     "Fixed: coming back from your music app mid-workout, the timer could stay silent. It now starts its sound fresh every time you come back",
@@ -65,6 +66,7 @@
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
   ],
   "notes_fr": [
+    "Corrigé : la barre rouge du son couvrait les boutons ✕ et pause, et un geste pouvait recharger la page. La barre est maintenant dessous et un geste ne recharge jamais",
     "Chaque type de minuteur a son icône néon, sur la roue et sur la carte Type",
     "Vérification du son à chaque retour : si ton iPhone a coupé le minuteur, il se recharge et ta séance continue où elle en était. Les Réglages ont un Journal du son",
     "Corrigé : en revenant de ton app de musique pendant une séance, le minuteur pouvait rester muet. Il relance maintenant son son à chaque retour",
