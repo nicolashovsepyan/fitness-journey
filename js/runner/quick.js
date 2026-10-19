@@ -800,6 +800,7 @@ function draw() {
 
     ${installCard()}
     <button class="qt-type" id="qtType">
+      ${modeIcon(cfg.fmt, 'qt-micon big')}
       <span class="qt-type-t"><small>${t('Type')}</small><b>${t(def.name)}</b><em>${t(def.sub)}</em></span>
       <span class="qt-chev">▾</span>
     </button>
@@ -927,7 +928,10 @@ const saveTypeOrder = o => { try { o ? localStorage.setItem(TYPE_ORDER, JSON.str
    below, rolling under the finger like a picker wheel (scroll snap, the
    rows tilt and fade away from the middle). Tap the middle one or Choose.
    Edit order shows the list to drag; A to Z and Reset as before. */
-const WH = 54;   // one row of the wheel
+const WH = 66;   // one row of the wheel
+/* each type's neon icon (images/modes/, Nico's approved set, transparent;
+   128 px, 256 px on sharp screens) */
+const modeIcon = (id, cls = 'qt-micon') => `<img class="${cls}" src="images/modes/${id}-128.png" srcset="images/modes/${id}-128.png 1x, images/modes/${id}-256.png 2x" alt="" aria-hidden="true" draggable="false"/>`;
 function openTypes() {
   const { ov, close } = sheet(`<div class="qt-sheet-h">${t('Type of timer')}</div>
     <div class="qt-wbox" data-noswipe><div class="qt-wband"></div><div class="qt-wheel" id="qtWheel"></div></div>
@@ -961,7 +965,7 @@ function openTypes() {
   };
   const renderWheel = () => {
     order = typeOrder();
-    wheel.innerHTML = `<div class="qt-wpad"></div>${order.map((id, k) => { const f = FORMATS.find(x => x.id === id); return `<button class="qt-wi ${f.id === cfg.fmt ? 'now' : ''}" data-wi="${k}">${t(f.name)}</button>`; }).join('')}<div class="qt-wpad"></div>`;
+    wheel.innerHTML = `<div class="qt-wpad"></div>${order.map((id, k) => { const f = FORMATS.find(x => x.id === id); return `<button class="qt-wi ${f.id === cfg.fmt ? 'now' : ''}" data-wi="${k}">${modeIcon(f.id)}<span>${t(f.name)}</span></button>`; }).join('')}<div class="qt-wpad"></div>`;
     wheel.querySelectorAll('[data-wi]').forEach(b => b.addEventListener('click', () => {
       const k = +b.dataset.wi;
       if (k === cur) return choose(order[k]);
@@ -974,7 +978,7 @@ function openTypes() {
   ov.querySelector('#qtWgo').addEventListener('click', () => choose(order[cur]));
   /* the list, to drag into a new order */
   const renderList = () => {
-    list.innerHTML = typeOrder().map(id => FORMATS.find(f => f.id === id)).map(f => `<div class="qt-optrow" data-tid="${f.id}"><button class="qt-opt" data-pick="${f.id}"><b>${t(f.name)}</b><small>${t(f.sub)}</small></button><span class="qt-grip" aria-hidden="true">≡</span></div>`).join('');
+    list.innerHTML = typeOrder().map(id => FORMATS.find(f => f.id === id)).map(f => `<div class="qt-optrow" data-tid="${f.id}">${modeIcon(f.id, 'qt-micon sm')}<button class="qt-opt" data-pick="${f.id}"><b>${t(f.name)}</b><small>${t(f.sub)}</small></button><span class="qt-grip" aria-hidden="true">≡</span></div>`).join('');
   };
   makeSortable(list, '.qt-optrow', (from, to) => { const o = typeOrder(); o.splice(to, 0, o.splice(from, 1)[0]); saveTypeOrder(o); renderList(); renderWheel(); });
   const editBtn = ov.querySelector('#qtTypeEdit');
@@ -1398,14 +1402,18 @@ function injectStyle() {
   .qt-hnums { display:flex; gap: 10px; flex-wrap: wrap; font-family: var(--tnum); font-size: 15px; margin: 2px 0 4px; }
   .qt-hacts { display:flex; gap: 8px; margin-top: 8px; }
   .qt-hacts button { flex: 1; background: none; border: 1px solid var(--line); color: var(--text); border-radius: 10px; padding: 8px; font-weight: 700; font-size: 13.5px; }
-  .qt-wbox { position: relative; height: ${5 * 54}px; margin: 4px 0 8px; -webkit-mask-image: linear-gradient(180deg, transparent, #000 28%, #000 72%, transparent); mask-image: linear-gradient(180deg, transparent, #000 28%, #000 72%, transparent); }
-  .qt-wband { position: absolute; left: 0; right: 0; top: ${2 * 54}px; height: 54px; border-radius: 14px; border: 1px solid var(--wm-neon-line); background: var(--wm-neon-soft, rgba(255,255,255,.04)); box-shadow: 0 0 18px var(--wm-neon-soft, transparent); pointer-events: none; }
+  .qt-wbox { position: relative; height: ${5 * 66}px; margin: 4px 0 8px; -webkit-mask-image: linear-gradient(180deg, transparent, #000 28%, #000 72%, transparent); mask-image: linear-gradient(180deg, transparent, #000 28%, #000 72%, transparent); }
+  .qt-wband { position: absolute; left: 0; right: 0; top: ${2 * 66}px; height: 66px; border-radius: 14px; border: 1px solid var(--wm-neon-line); background: var(--wm-neon-soft, rgba(255,255,255,.04)); box-shadow: 0 0 18px var(--wm-neon-soft, transparent); pointer-events: none; }
   .qt-wheel { position: relative; height: 100%; overflow-y: auto; scroll-snap-type: y mandatory; overscroll-behavior: contain; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
   .qt-wheel::-webkit-scrollbar { display: none; }
-  .qt-wpad { height: ${2 * 54}px; }
-  .qt-wi { display:block; width: 100%; height: 54px; scroll-snap-align: center; background: none; border: 0; color: var(--text); font-size: 21px; font-weight: 700; letter-spacing: -0.01em; cursor: pointer; transform-origin: 50% 50%; will-change: transform, opacity; }
+  .qt-wpad { height: ${2 * 66}px; }
+  .qt-wi { display:flex; align-items:center; justify-content:center; gap: 12px; width: 100%; height: 66px; scroll-snap-align: center; background: none; border: 0; color: var(--text); font-size: 21px; font-weight: 700; letter-spacing: -0.01em; cursor: pointer; transform-origin: 50% 50%; will-change: transform, opacity; }
   .qt-wi.mid { color: #fff; text-shadow: 0 0 14px var(--wm-neon-line); font-size: 24px; }
   .qt-wi.now::after { content: ' ✓'; color: var(--wm-neon); font-size: .7em; }
+  .qt-micon { width: 52px; height: 52px; object-fit: contain; flex: none; pointer-events: none; -webkit-user-drag: none; }
+  .qt-micon.sm { width: 40px; height: 40px; align-self: center; margin-right: 4px; }
+  .qt-micon.big { width: 64px; height: 64px; margin: -6px 2px -6px -6px; }
+  .qt-wi span { min-width: 7.5em; text-align: left; }
   .qt-wdesc { display:flex; align-items:center; justify-content:center; gap: 10px; min-height: 34px; color: var(--muted); font-size: 14.5px; text-align:center; margin-bottom: 12px; }
   .qt-grip { color: var(--muted); font-size: 20px; padding: 0 8px; }
   .qt-typefoot { display:flex; align-items:center; gap: 14px; margin-top: 10px; padding: 0 4px; }

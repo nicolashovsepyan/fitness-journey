@@ -15,7 +15,7 @@
    Training data lives in localStorage, not here, so an update never
    touches a logged session.
    ============================================================ */
-const VERSION = '35de11c334';
+const VERSION = 'e9920039dc';
 const CACHE = 'fj-' + VERSION;
 const ASSETS = [
   "./audio/voice-f/c-as-many-rounds-as-possible.mp3",
@@ -395,6 +395,32 @@ const ASSETS = [
   "./images/logo-mark.svg",
   "./images/logo-onboarding.png",
   "./images/logo.png",
+  "./images/modes/amrap-128.png",
+  "./images/modes/amrap-256.png",
+  "./images/modes/deathby-128.png",
+  "./images/modes/deathby-256.png",
+  "./images/modes/emom-128.png",
+  "./images/modes/emom-256.png",
+  "./images/modes/fortime-128.png",
+  "./images/modes/fortime-256.png",
+  "./images/modes/goal-128.png",
+  "./images/modes/goal-256.png",
+  "./images/modes/igyg-128.png",
+  "./images/modes/igyg-256.png",
+  "./images/modes/ladder-128.png",
+  "./images/modes/ladder-256.png",
+  "./images/modes/pushup-128.png",
+  "./images/modes/pushup-256.png",
+  "./images/modes/stopwatch-128.png",
+  "./images/modes/stopwatch-256.png",
+  "./images/modes/tabata-128.png",
+  "./images/modes/tabata-256.png",
+  "./images/modes/test-128.png",
+  "./images/modes/test-256.png",
+  "./images/modes/timer-128.png",
+  "./images/modes/timer-256.png",
+  "./images/modes/vo2-128.png",
+  "./images/modes/vo2-256.png",
   "./images/stamp-dumbbell.svg",
   "./images/stamp-triangle.svg",
   "./images/timer-icon/timer-180.png",
