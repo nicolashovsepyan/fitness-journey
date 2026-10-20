@@ -595,7 +595,7 @@ function stepRow(k) {
   const none = ((k === 'ftCap' || k === 'ptCap' || k === 'ldCap') && !v) || ((k === 'rest' || k === 'setRest') && !v);
   const face = isTime(k)
     ? `<button class="qt-tv time" data-qt="${k}">${none ? t('none') : fmt(v)}</button>`
-    : `<input class="qt-tv ${none ? 'none' : ''}" data-qf="${k}" type="number" inputmode="numeric" value="${none ? '' : v}" placeholder="${none ? t('none') : ''}" onfocus="this.select()"/>`;
+    : `<button class="qt-tv ${none ? 'none' : ''}" data-qn="${k}">${none ? t('none') : v}</button>`;
   const tbn = cfg.fmt === 'tabata' && k === 'rounds' ? perRound() : 1;
   const foot = none ? '' : isTime(k) ? 'min : sec' : tbn > 1 ? (v % tbn ? t('alternating {n} moves', { n: tbn }) : t('{n} of each, alternating', { n: v / tbn })) : unit;
   const extra = k === 'pace' ? `<div class="qt-presets"><button class="${v === 20 ? 'on' : ''}" data-pace="20">${t('20 standard')}</button><button class="${v === 25 ? 'on' : ''}" data-pace="25">25 NHL</button></div>` : '';
@@ -625,8 +625,6 @@ const isHold = m => !!(m && m.exId && EXERCISES[m.exId]?.measure === 'hold');
 const wUnit = () => cfg.wUnit === 'kg' ? 'kg' : 'lb';
 const wStep = () => wUnit() === 'kg' ? 2.5 : 5;
 const isWeighted = m => !!(m && m.exId && EXERCISES[m.exId]?.load === 'weighted');
-/* a reps box as wide as its number (2 digits at least), so 200 or 1000 stays centred */
-const repW = v => `${Math.max(2, String(v ?? '').length) + 0.3}ch`;
 function moveCard(m, i) {
   const lad = cfg.fmt === 'ladder', db = cfg.fmt === 'deathby';
   const sec = isHold(m), goal = cfg.fmt === 'goal';
@@ -638,7 +636,7 @@ function moveCard(m, i) {
     right.push(line(`data-lm="${i}" data-lf="ldStart"`, `${ldStart(m)}${sec ? '<small>s</small>' : ''}`, t('start at')));
     if (!(lad && ldMode(m) === 'flat')) right.push(line(`data-lm="${i}" data-lf="ldStep"`, `${step > 0 ? '+' : ''}${step}`, db ? t('add') : t('each step')));
   } else if (cfg.fmt !== 'tabata' && cfg.fmt !== 'timer') {   // time-based: no rep target, you log reps in the workout
-    right.push(line(`data-mr="${i}"`, `<input data-mv="${i}" data-k="reps" type="number" inputmode="numeric" placeholder="–" value="${esc(m.reps)}" style="width:${repW(m.reps)}" onfocus="this.select()"/>${sec ? '<small>s</small>' : ''}`, goal ? t('total') : ''));
+    right.push(line(`data-mr="${i}"`, `<span class="qt-repb" data-qr="${i}" role="button">${esc(m.reps) || '–'}</span>${sec ? '<small>s</small>' : ''}`, goal ? t('total') : ''));
     if (cfg.fmt === 'igyg' && canPump(m)) right.push(line(`data-mp="${i}"`, `${Number(m.pumps) || 0}`, t('push-ups each')));
   }
   /* the weight sits under the reps: always for a loaded move, on request
@@ -847,7 +845,7 @@ function homeRow(k) {
   const none = ((k === 'ftCap' || k === 'ptCap' || k === 'ldCap') && !v) || ((k === 'rest' || k === 'setRest') && !v) || (k === 'gReps' && !v);
   const face = isTime(k)
     ? `<button class="qt-hv" data-qt="${k}">${none ? t('none') : fmt(v)}</button>`
-    : `<input class="qt-hv" data-qf="${k}" type="number" inputmode="numeric" value="${none ? '' : v}" placeholder="${none ? t('none') : ''}" onfocus="this.select()" aria-label="${esc(t(label))}"/>`;
+    : `<button class="qt-hv ${none ? 'none' : ''}" data-qn="${k}" aria-label="${esc(t(label))}">${none ? t('none') : v}</button>`;
   return `<div class="qt-hr tone-${ROW_TONE[k] || 'accent'}"><span class="qt-hl">${t(label)}</span>
     <button class="qt-hpm" data-q="${k}" data-d="-1" aria-label="${t('Less')}">−</button>
     <span class="qt-hvw">${face}</span>
@@ -963,7 +961,7 @@ function exerciseRow() {
   const sec = isHold(m);
   return `<div class="qt-hr qt-hex"><button class="qt-hexn" data-pick-move="0"><b>${esc(mvName(m))}</b>${named.length > 1 ? `<small>+${named.length - 1}</small>` : ''}</button>
     <button class="qt-hpm" data-mr="0" data-d="-1" aria-label="${t('Less')}">−</button>
-    <span class="qt-hvw"><input class="qt-hv" data-mv="0" data-k="reps" type="number" inputmode="numeric" placeholder="–" value="${esc(m.reps)}" onfocus="this.select()" aria-label="${t('Reps')}"/>${sec ? '<small>s</small>' : ''}</span>
+    <span class="qt-hvw"><button class="qt-hv" data-qr="0" aria-label="${t('Reps')}">${esc(m.reps) || '–'}</button>${sec ? '<small>s</small>' : ''}</span>
     <button class="qt-hpm" data-mr="0" data-d="1" aria-label="${t('More')}">+</button></div>`;
 }
 const EXERCISE_ROW = new Set(['emom']);
@@ -1288,6 +1286,45 @@ function openTime(k) {
   ov.querySelector('#tpOk').addEventListener('click', () => { setVal(k, v); persist(); close(); draw(); });
   show();
 }
+/* EVERY NUMBER, THE SAME PICKER (Nico, 20 Oct 2026: "the Every bar is much
+   cleaner, I want all of them like this"). A tap on any number opens the
+   time picker's look: the big number between + and −, a few common values
+   one tap away, Done. The big number can still be typed into. */
+const NUM_CHIPS = { mins: [5, 10, 12, 15, 20, 30], cap: [5, 10, 12, 15, 20, 30], rounds: [3, 5, 8, 10, 12], ftRounds: [1, 3, 5, 10],
+  sets: [1, 2, 3, 4], nEx: [1, 2, 3, 4, 5], gReps: [100, 200, 300, 500, 1000], gMins: [10, 15, 20, 30, 45, 60],
+  ldRungs: [5, 8, 10, 12, 15], dbMax: [10, 15, 20, 30], pace: [20, 25], ftCap: [0, 10, 15, 20, 30], ldCap: [0, 10, 15, 20, 30], ptCap: [0, 3, 5, 10] };
+function numSheet({ label, v, lo, hi, next, chips = [], unit = '', none = false, onSet }) {
+  const { ov, close } = sheet(`<div class="qt-sheet-h">${t(label)}</div>
+    <div class="qt-tp"><div><button data-np="1" aria-label="${t('More')}">+</button>
+      <input class="qt-npv" id="npV" type="number" inputmode="numeric" onfocus="this.select()"/>${unit ? `<small>${t(unit)}</small>` : '<small>&nbsp;</small>'}
+      <button data-np="-1" aria-label="${t('Less')}">−</button></div></div>
+    ${chips.length ? `<div class="qt-npc">${chips.map(c => `<button data-nc="${c}">${!c && none ? t('none') : c}</button>`).join('')}</div>` : ''}
+    <button class="btn" id="npOk">${t('Done')}</button>`);
+  const inp = ov.querySelector('#npV');
+  const show = () => { inp.value = !v && none ? '' : v; inp.placeholder = none ? t('none') : '–'; ov.querySelectorAll('[data-nc]').forEach(b => b.classList.toggle('on', +b.dataset.nc === v)); };
+  const lim = x => Math.min(hi, Math.max(lo, Math.round(Number(x) || 0)));
+  ov.querySelectorAll('[data-np]').forEach(b => b.addEventListener('click', () => { v = lim(next(v, +b.dataset.np)); show(); }));
+  ov.querySelectorAll('[data-nc]').forEach(b => b.addEventListener('click', () => { v = lim(+b.dataset.nc); onSet(v); persist(); close(); draw(); }));
+  inp.addEventListener('input', () => { v = lim(inp.value); });
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
+  ov.querySelector('#npOk').addEventListener('click', () => { onSet(v); persist(); close(); draw(); });
+  show();
+}
+function openNum(k) {
+  const [label, unit, step, lo, hi] = FIELDS[k];
+  numSheet({ label: LABEL[k] || label, v: val(k) || 0, lo, hi, unit: unit === 'min' ? 'min' : '',
+    none: ['ftCap', 'ptCap', 'ldCap'].includes(k), chips: NUM_CHIPS[k] || [],
+    next: (v, d) => k === 'gReps' ? (v ? repStep(v, d) : d > 0 ? 100 : 0) : v + d * step,
+    onSet: v => setVal(k, clamp(v, k)) });
+}
+function openReps(i) {
+  const m = MV()[i]; if (!m) return;
+  const goal = cfg.fmt === 'goal', hold = isHold(m);
+  numSheet({ label: mvName(m) || t('Reps'), v: Number(m.reps) || 0, lo: 0, hi: goal ? 5000 : 999, unit: hold ? 'sec' : goal ? 'total' : 'reps',
+    chips: hold ? [20, 30, 45, 60] : goal ? [50, 100, 200, 300, 500] : [5, 8, 10, 12, 15, 20],
+    next: (v, d) => { const k = hold ? 5 : goal ? (v + (d < 0 ? -1 : 0) >= 100 ? 25 : v + (d < 0 ? -1 : 0) >= 30 ? 10 : 5) : 1; return d > 0 ? Math.floor(v / k) * k + k : Math.ceil(v / k) * k - k; },
+    onSet: v => { m.reps = v || ''; } });
+}
 /* ---------------- search ----------------
    Every word a person might use for a move: its name and aliases, the
    muscles it trains (main and secondary), the body part those belong to
@@ -1529,6 +1566,8 @@ function wire(scope = host) {
   host.querySelectorAll('[data-qp]').forEach(b => b.addEventListener('click', () => { const p = PICKS[cfg.fmt]?.find(x => x.id === b.dataset.qp); if (p) applyPick(p); }));
   host.querySelectorAll('[data-q]').forEach(b => b.addEventListener('click', () => { bump(b.dataset.q, Number(b.dataset.d)); persist(); draw(); }));
   host.querySelectorAll('[data-qt]').forEach(b => b.addEventListener('click', () => openTime(b.dataset.qt)));
+  host.querySelectorAll('[data-qn]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); openNum(b.dataset.qn); }));
+  host.querySelectorAll('[data-qr]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); openReps(+b.dataset.qr); }));
   host.querySelectorAll('[data-qf]').forEach(inp => {
     inp.addEventListener('change', () => { setVal(inp.dataset.qf, clamp(inp.value, inp.dataset.qf)); persist(); draw(); });
     inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
@@ -1574,7 +1613,7 @@ function wire(scope = host) {
   /* typing reps must not redraw (the keyboard would drop); the total line
      does not depend on reps, so nothing on screen goes stale */
   host.querySelectorAll('[data-mv]').forEach(inp => {
-    inp.addEventListener('input', () => { MV()[+inp.dataset.mv][inp.dataset.k] = inp.value; if (inp.style.width) inp.style.width = repW(inp.value); persist(); });
+    inp.addEventListener('input', () => { MV()[+inp.dataset.mv][inp.dataset.k] = inp.value; persist(); });
     inp.addEventListener('change', () => draw());   // done typing: the plan, the totals and Start catch up
     inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
   });
@@ -1592,6 +1631,9 @@ function wire(scope = host) {
     cfg.wUnit = toKg ? 'kg' : 'lb'; persist(); draw();
   }));
   requestAnimationFrame(fitMoveNames);
+  /* the home's exercise name: the full name, smaller if it needs it */
+  host.querySelectorAll('.qt-hexn b').forEach(el => { let f = 14; el.style.fontSize = '';
+    while (el.scrollHeight > 2.3 * 1.15 * f && f > 11) { f -= 1; el.style.fontSize = f + 'px'; } });   // 2 lines if it can, 3 for the very long ones
   /* hold a move and drag it to change the order */
   makeSortable(host.querySelector('.qt-mvlist'), '.qt-mvr', (from, to) => {
     const list = MV(); list.splice(to, 0, list.splice(from, 1)[0]); persist(); draw();
@@ -1730,8 +1772,9 @@ function injectStyle() {
   .qt-hlink i { font-style: normal; color: var(--muted); font-size: 18px; }
   .qt-hfill { flex: 1; min-height: 4px; }
   .qt-hex { padding-left: 8px; }
-  .qt-hexn { flex: 1; min-width: 0; display:flex; align-items:baseline; gap: 6px; background: none; border: 0; color: var(--text); text-align: left; padding: 8px; cursor: pointer; }
-  .qt-hexn b { font-size: 17px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .qt-hexn { flex: 1; min-width: 0; display:flex; flex-direction:column; align-items:flex-start; gap: 1px; background: none; border: 0; color: var(--text); text-align: left; padding: 6px 4px 6px 8px; cursor: pointer; }
+  .qt-hexn b { font-size: 14px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--wm-neon); line-height: 1.15;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
   .qt-hexn small { color: var(--muted); font-size: 12.5px; font-weight: 700; }
   .qt-hexadd { width: 100%; justify-content: space-between; color: var(--text); font-size: 15.5px; font-weight: 700; padding: 18px 16px; border-style: dashed; cursor: pointer; }
   .qt-hexadd i { font-style: normal; color: var(--muted); font-size: 18px; }
@@ -1905,6 +1948,14 @@ function injectStyle() {
   .qt-tp small { color: var(--muted); font-size: 12px; margin-bottom: 6px; }
   .qt-tp button { width: 76px; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--box-2); color: var(--text); font-size: 24px; cursor:pointer; }
   .qt-tpc { font-family: var(--tnum); font-size: 48px; color: var(--muted); }
+  .qt-npv { font-family: var(--tnum); font-size: 60px; font-weight: 700; line-height: 1.1; letter-spacing: -0.04em; width: 200px; text-align:center; background:none; border:0; color: var(--text); padding: 0; -moz-appearance: textfield; }
+  .qt-npv::-webkit-outer-spin-button, .qt-npv::-webkit-inner-spin-button { -webkit-appearance:none; }
+  .qt-npv::placeholder { color: var(--muted); font-size: 34px; }
+  .qt-npc { display:flex; flex-wrap:wrap; justify-content:center; gap: 6px; margin: 0 0 14px; }
+  .qt-npc button { min-width: 48px; height: 40px; padding: 0 8px; border-radius: 12px; border: 1px solid var(--line); background: var(--box-2); color: var(--text); font-family: var(--tnum); font-size: 16px; font-weight: 700; cursor: pointer; }
+  .qt-npc button.on { border-color: var(--wm-accent); color: var(--wm-accent); }
+  .qt-repb { cursor: pointer; min-width: 2ch; padding: 0 2px; }
+  .qt-hv.none { color: var(--muted); font-size: 18px; }
   .qt-sheet-card.tall { height: 82vh; display:flex; flex-direction:column; }
   .qt-search { width:100%; background: var(--bg); border: 1px solid var(--wm-neon-line); border-radius: 12px; color: var(--text); font-size: 17px; padding: 13px 14px; }
   .qt-search:focus { outline: none; border-color: var(--wm-accent); }

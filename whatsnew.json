@@ -1,6 +1,8 @@
 {
-  "version": "2026-10-20.2",
+  "version": "2026-10-20.3",
   "notes": [
+    "Every number works like Every now: tap it for a clean picker with + and −, and quick values like 10, 12, 15. No more keyboard popping up",
+    "The exercise on the home shows its full name, in the same style as Minutes and Every",
     "Rep goal: pick how many exercises, your total reps and your minutes on the home. It shows the reps per minute, and warns you when the time is tight",
     "AMRAP, For time and Ladder: choose how many exercises on the home, then Next to pick them. Add or remove as many as you like after",
     "VO2 max: swipe through the workouts, each card shows its hard and easy parts",
@@ -75,6 +77,8 @@
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
   ],
   "notes_fr": [
+    "Chaque nombre fonctionne comme Toutes les : touche-le pour un sélecteur simple avec + et −, et des valeurs rapides comme 10, 12, 15. Plus de clavier qui surgit",
+    "L’exercice sur l’accueil affiche son nom complet, dans le même style que Minutes et Toutes les",
     "Objectif reps : choisis le nombre d’exercices, ton total de reps et tes minutes sur l’accueil. Il affiche les reps par minute et te prévient quand c’est serré",
     "AMRAP, For Time et Échelle : choisis le nombre d’exercices sur l’accueil, puis Ensuite pour les choisir. Ajoute ou enlève-en autant que tu veux après",
     "VO2 max : fais défiler les entraînements, chaque carte montre ses parties intenses et faciles",
