@@ -1,6 +1,11 @@
 {
-  "version": "2026-10-20.3",
+  "version": "2026-10-20.4",
   "notes": [
+    "Step 2 exercises look like the home: the name on the left, − number + on the right, \"reps\" or \"sec\" under the number",
+    "Reps or seconds: tap the number and switch. A plank, a hang or a wall sit can be timed, any move can be counted",
+    "Weight: tap the small tag under the name. Pick lb or kg there, every weight already set converts",
+    "Remove an exercise from its number picker, or from the exercise list",
+    "Fixed: tapping Next right after swiping the modes could open Stopwatch instead",
     "Every number works like Every now: tap it for a clean picker with + and −, and quick values like 10, 12, 15. No more keyboard popping up",
     "The exercise on the home shows its full name, in the same style as Minutes and Every",
     "Rep goal: pick how many exercises, your total reps and your minutes on the home. It shows the reps per minute, and warns you when the time is tight",
@@ -77,6 +82,11 @@
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
   ],
   "notes_fr": [
+    "Les exercices de l’étape 2 ressemblent à l’accueil : le nom à gauche, − nombre + à droite, « reps » ou « s » sous le nombre",
+    "Reps ou secondes : touche le nombre et change. Une planche, une suspension ou une chaise peuvent être chronométrées, tout exercice peut être compté",
+    "Poids : touche la petite étiquette sous le nom. Choisis lb ou kg, tous les poids déjà réglés sont convertis",
+    "Retire un exercice depuis son sélecteur de nombre, ou depuis la liste d’exercices",
+    "Corrigé : toucher Ensuite juste après avoir fait glisser les modes pouvait ouvrir le Chrono",
     "Chaque nombre fonctionne comme Toutes les : touche-le pour un sélecteur simple avec + et −, et des valeurs rapides comme 10, 12, 15. Plus de clavier qui surgit",
     "L’exercice sur l’accueil affiche son nom complet, dans le même style que Minutes et Toutes les",
     "Objectif reps : choisis le nombre d’exercices, ton total de reps et tes minutes sur l’accueil. Il affiche les reps par minute et te prévient quand c’est serré",

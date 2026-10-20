@@ -258,9 +258,10 @@ const namedMoves = () => (FORMATS.find(f => f.id === cfg.fmt)?.moves ? MV() : []
   .map(m => {
     const ex = m.exId && EXERCISES[m.exId];
     const n = Number(m.reps) > 0 && cfg.fmt !== 'tabata' && cfg.fmt !== 'timer' ? Number(m.reps) : null;   // time-based types carry no rep target
+    const hold = isHold(m);   // seconds, from the move or as the person set it
     return ex
-      ? { exId: m.exId, name: exName(m.exId, ex.name), measure: ex.measure || 'reps', load: ex.load, laterality: ex.laterality, cue: exCues(m.exId, ex.cues), reps: n, ...(ex.measure === 'hold' && n ? { hold: n } : {}), ...(Number(m.wt) > 0 ? { weight: Number(m.wt), wUnit: wUnit() } : {}), noPR: true }
-      : { name: String(m.name).trim(), measure: 'reps', reps: n, ...(Number(m.wt) > 0 ? { weight: Number(m.wt), wUnit: wUnit() } : {}), noPR: true };
+      ? { exId: m.exId, name: exName(m.exId, ex.name), measure: hold ? 'hold' : ex.measure === 'hold' ? 'reps' : ex.measure || 'reps', load: ex.load, laterality: ex.laterality, cue: exCues(m.exId, ex.cues), reps: n, ...(hold && n ? { hold: n } : {}), ...(Number(m.wt) > 0 ? { weight: Number(m.wt), wUnit: wUnit() } : {}), noPR: true }
+      : { name: String(m.name).trim(), measure: hold ? 'hold' : 'reps', reps: n, ...(hold && n ? { hold: n } : {}), ...(Number(m.wt) > 0 ? { weight: Number(m.wt), wUnit: wUnit() } : {}), noPR: true };
   });
 
 /* In Tabata and Timer a round is EVERY move once: 8 rounds of 2 moves is
@@ -300,12 +301,6 @@ function maxRungs() {
   }, 50);
 }
 const rungCount = () => Math.max(1, Math.min(cfg.ldRungs, maxRungs()));
-/* typing the top (or bottom) number: the rung count that reaches it */
-function setLadderEnd(v) {
-  const m = ladderMoves()[0], st = ldStep(m);
-  cfg.ldRungs = st ? Math.floor((v - ldStart(m)) / st) + 1 : v;
-  cfg.ldRungs = Math.max(1, Math.min(cfg.ldRungs, maxRungs()));
-}
 function rungOrder() {
   const n = rungCount(), idx = [...Array(n).keys()];
   if (cfg.ldShape === 'mirror') return [...idx, ...idx.slice(0, -1).reverse()];
@@ -568,40 +563,6 @@ const ROW_TONE = {
   ftCap: 'ready', ptCap: 'ready', ldCap: 'ready',
   nEx: 'violet', gReps: 'accent', gMins: 'ready',
 };
-function rowShell(k, label, face, foot, minus, plus, extra = '') {
-  return `<div class="qt-srow tone-${ROW_TONE[k] || 'accent'}">
-    <div class="qt-sl">${t(label)}</div>
-    <div class="qt-sline">${minus}<div class="qt-sval">${face}</div>${plus}</div>
-    ${foot ? `<div class="qt-su">${t(foot)}</div>` : ''}${extra}
-  </div>`;
-}
-/* THE LADDER'S TOP (or bottom), not a rung count. "Up to 10" is how a
-   person says it, and with There and back it reads "1 up to 10 and back".
-   It follows the first move; the rest keep their own start and change.
-   + and − always move the shown number up or down. */
-function ladderEndRow() {
-  const m = ladderMoves()[0], st = ldStep(m), n = rungCount();
-  const label = st > 0 ? 'Up to' : st < 0 ? 'Down to' : 'Steps';
-  const v = st ? repsAt(m, n - 1) : n;
-  const foot = st ? `${t2(n, '{n} step', '{n} steps')}${cfg.ldShape === 'mirror' ? t(' · and back') : ''}` : '';
-  return rowShell('ldRungs', label,
-    `<input class="qt-tv" data-ldend="1" type="number" inputmode="numeric" value="${v}" onfocus="this.select()"/>`, foot,
-    '<button class="qt-pm" data-ldend-d="-1" aria-label="Lower">−</button>', '<button class="qt-pm" data-ldend-d="1" aria-label="Higher">+</button>');
-}
-function stepRow(k) {
-  if (k === 'ldRungs') return ladderEndRow();
-  const [label, unit] = FIELDS[k];
-  const v = val(k);
-  const none = ((k === 'ftCap' || k === 'ptCap' || k === 'ldCap') && !v) || ((k === 'rest' || k === 'setRest') && !v);
-  const face = isTime(k)
-    ? `<button class="qt-tv time" data-qt="${k}">${none ? t('none') : fmt(v)}</button>`
-    : `<button class="qt-tv ${none ? 'none' : ''}" data-qn="${k}">${none ? t('none') : v}</button>`;
-  const tbn = cfg.fmt === 'tabata' && k === 'rounds' ? perRound() : 1;
-  const foot = none ? '' : isTime(k) ? 'min : sec' : tbn > 1 ? (v % tbn ? t('alternating {n} moves', { n: tbn }) : t('{n} of each, alternating', { n: v / tbn })) : unit;
-  const extra = k === 'pace' ? `<div class="qt-presets"><button class="${v === 20 ? 'on' : ''}" data-pace="20">${t('20 standard')}</button><button class="${v === 25 ? 'on' : ''}" data-pace="25">25 NHL</button></div>` : '';
-  return rowShell(k, label, face, foot,
-    `<button class="qt-pm" data-q="${k}" data-d="-1" aria-label="Less">−</button>`, `<button class="qt-pm" data-q="${k}" data-d="1" aria-label="More">+</button>`, extra);
-}
 /* ---------------- the screen's building blocks ----------------
    ONE LOOK FOR EVERYTHING. A section is a header and a card; a card is a
    stack of rows; every row has a small coloured label on top. Numbers are
@@ -615,54 +576,47 @@ function segRow(label, tone, opts, cur, attr, foot = '') {
     ${foot ? `<div class="qt-su">${t(foot)}</div>` : ''}</div>`;
 }
 /* a timed move (plank, hang, wall sit): its numbers are seconds */
-const isHold = m => !!(m && m.exId && EXERCISES[m.exId]?.measure === 'hold');
-/* ONE MOVE, the same slim row as in the workout (workmode.js mvRow): the
-   full name on one line (tap it to change the move), a small − value +,
-   and ✕. A second slim line holds what else the move needs: Ladder /
-   Death By's start and change, and the weight when there is one. */
-/* weights in lb or kg: one choice for the whole timer, switched by tapping
-   the unit itself (no extra button); a switch converts what is set */
+/* (or any move set to seconds: `unit`, picked in its number picker) */
+const isHold = m => !!m && (m.unit ? m.unit === 'sec' : !!(m.exId && EXERCISES[m.exId]?.measure === 'hold'));
+/* weights in lb or kg: one choice for the whole timer, switched in the
+   weight picker; a switch converts every weight already set */
 const wUnit = () => cfg.wUnit === 'kg' ? 'kg' : 'lb';
 const wStep = () => wUnit() === 'kg' ? 2.5 : 5;
 const isWeighted = m => !!(m && m.exId && EXERCISES[m.exId]?.load === 'weighted');
+/* ONE EXERCISE, STEP 2: the home's row look (Nico, 20 Oct 2026). The name
+   as a label on the left (tap: change it), the weight as a small tag under
+   it (tap: the weight picker, lb or kg), − number + on the right with
+   "reps" or "sec" under the number (tap the number: its picker, where reps
+   or seconds is chosen, and Remove). Ladder / Death By add their own rows
+   (Start at, Each step) in the same look. */
+const stepper = (attr, face, unit = '', tap = '') => `<button class="qt-hpm" ${attr} data-d="-1" aria-label="${t('Less')}">−</button>
+  <span class="qt-hvw col"><button class="qt-hv" ${tap}>${face}</button>${unit ? `<small>${unit}</small>` : ''}</span>
+  <button class="qt-hpm" ${attr} data-d="1" aria-label="${t('More')}">+</button>`;
 function moveCard(m, i) {
-  const lad = cfg.fmt === 'ladder', db = cfg.fmt === 'deathby';
-  const sec = isHold(m), goal = cfg.fmt === 'goal';
-  /* one slim − value + line; `label` sits small on its left */
-  const line = (attr, face, label = '') => `<span class="qt-st">${label ? `<span class="qt-stl">${label}</span>` : ''}<button ${attr} data-d="-1" aria-label="${t('Less')}">−</button><b>${face}</b><button ${attr} data-d="1" aria-label="${t('More')}">+</button></span>`;
-  const right = [];
+  const lad = cfg.fmt === 'ladder', db = cfg.fmt === 'deathby', sec = isHold(m), goal = cfg.fmt === 'goal';
+  const wt = Number(m.wt) > 0;
+  const tag = m.name ? `<button class="qt-mtag ${wt ? 'on' : ''}" data-wt="${i}">${wt ? `${num(m.wt, 1)} ${wUnit()}` : isWeighted(m) ? `${t('Weight')} · ${wUnit()}` : t('+ weight')}</button>` : '';
+  const left = `<div class="qt-mcl"><button class="qt-mcn ${m.name ? '' : 'empty'}" data-pick-move="${i}"><b>${m.name ? esc(mvName(m)) : t('Choose exercise {n}', { n: i + 1 })}</b></button>${tag}</div>`;
+  const unit = sec ? t('sec') : goal ? t('total') : t('reps');
+  const reps = !lad && !db && cfg.fmt !== 'tabata' && cfg.fmt !== 'timer';   // time-based: no rep target, you log reps in the workout
+  const sub = [];
   if (lad || db) {
     const step = ldStep(m);
-    right.push(line(`data-lm="${i}" data-lf="ldStart"`, `${ldStart(m)}${sec ? '<small>s</small>' : ''}`, t('start at')));
-    if (!(lad && ldMode(m) === 'flat')) right.push(line(`data-lm="${i}" data-lf="ldStep"`, `${step > 0 ? '+' : ''}${step}`, db ? t('add') : t('each step')));
-  } else if (cfg.fmt !== 'tabata' && cfg.fmt !== 'timer') {   // time-based: no rep target, you log reps in the workout
-    right.push(line(`data-mr="${i}"`, `<span class="qt-repb" data-qr="${i}" role="button">${esc(m.reps) || '–'}</span>${sec ? '<small>s</small>' : ''}`, goal ? t('total') : ''));
-    if (cfg.fmt === 'igyg' && canPump(m)) right.push(line(`data-mp="${i}"`, `${Number(m.pumps) || 0}`, t('push-ups each')));
+    sub.push(`<div class="qt-mcr"><span class="qt-hl">${t('Start at')}</span>${stepper(`data-lm="${i}" data-lf="ldStart"`, ldStart(m), sec ? t('sec') : '')}</div>`);
+    if (!(lad && ldMode(m) === 'flat')) sub.push(`<div class="qt-mcr"><span class="qt-hl">${db ? t('Add') : t('Each step')}</span>${stepper(`data-lm="${i}" data-lf="ldStep"`, `${step > 0 ? '+' : ''}${step}`)}</div>`);
   }
-  /* the weight sits under the reps: always for a loaded move, on request
-     (a faint "+ weight") for a bodyweight one */
-  const hasWt = m.name && (isWeighted(m) || Number(m.wt) > 0);
-  if (hasWt) right.push(line(`data-mw="${i}"`, `${Number(m.wt) > 0 ? m.wt : '–'}<span class="qt-wu" data-wu="1" role="button" aria-label="${t('Switch kg / lb')}">${wUnit()}</span>`));
-  else if (m.name) right.push(`<button class="qt-addwt" data-mw="${i}" data-d="1">${t('+ weight')}</button>`);
+  if (cfg.fmt === 'igyg' && canPump(m)) sub.push(`<div class="qt-mcr"><span class="qt-hl">${t('Push-ups each')}</span>${stepper(`data-mp="${i}"`, Number(m.pumps) || 0)}</div>`);
   const note = lad ? ladderPreview(m) : db ? deathPreview(m) : '';
-  return `<div class="qt-mvr">
-    <div class="qt-mvr-top"><button class="qt-mvr-n ${m.name ? '' : 'empty'}" data-pick-move="${i}">${m.name ? esc(mvName(m)) : t('Choose move {n}', { n: i + 1 })}</button>
-      <div class="qt-mvr-r">${right.join('')}</div>
-      ${MV().length > 1 || m.name ? `<button class="qt-mx" data-mvx="${i}" aria-label="${t('Remove')}">✕</button>` : ''}</div>
+  return `<div class="qt-mc">
+    <div class="qt-mch">${left}${reps ? stepper(`data-mr="${i}"`, esc(m.reps) || '–', unit, `data-qr="${i}"`) : ''}</div>
+    ${sub.join('')}
     ${lad && m.name ? `<div class="qt-ldm">${LD_MODES.map(([v, l]) => `<button class="${ldMode(m) === v ? 'on' : ''}" data-ldmode="${i}" data-v="${v}">${t(l)}</button>`).join('')}</div>` : ''}
     ${note ? `<div class="qt-mnote">${note}</div>` : ''}
   </div>`;
 }
 function movesCard() {
-  return `<div class="qt-mvlist">${MV().map(moveCard).join('')}
-    <button class="qt-addrow2" id="qtAdd">${t('+ Add an exercise')}</button></div>`;
-}
-/* full names on one line: a list's names at the size its longest needs */
-function fitMoveNames() {
-  const els = [...host.querySelectorAll('.qt-mvr-n')]; let f = 99;
-  els.forEach(el => { el.style.fontSize = ''; let s = parseFloat(getComputedStyle(el).fontSize) || 16;
-    while (el.scrollWidth > el.clientWidth + 1 && s > 11) { s -= 0.5; el.style.fontSize = s + 'px'; } f = Math.min(f, s); });
-  els.forEach(el => { el.style.fontSize = f + 'px'; });
+  return `<div class="qt-mvlist">${MV().map(moveCard).join('')}</div>
+    <button class="qt-hr qt-hexadd" id="qtAdd"><span>${t('+ Add an exercise')}</span><i>›</i></button>`;
 }
 
 /* GET IT ON THE HOME SCREEN. iPhones never offer it for a website (only
@@ -880,6 +834,7 @@ function wireVo2(scope) {
   tr.addEventListener('scroll', () => {
     clearTimeout(settle);
     settle = setTimeout(() => {
+      if (!tr.isConnected) return;
       const mid = tr.scrollLeft + tr.clientWidth / 2; let best = null, bd = 1e9;
       tr.querySelectorAll('.qt-vo2k').forEach(el => { const d = Math.abs(el.offsetLeft + el.offsetWidth / 2 - mid); if (d < bd) { bd = d; best = el; } });
       const id = best?.dataset.vo2;
@@ -929,6 +884,7 @@ function wireHero() {
     if (!raf) raf = requestAnimationFrame(() => { raf = 0; paintHero(); });
     clearTimeout(settle);
     settle = setTimeout(() => {
+      if (!hs.isConnected || page !== 'home') return;   // left the home (Next, step 2) before it settled: a detached carousel reads as the first mode
       const mid = hs.scrollLeft + hs.clientWidth / 2;
       let best = null, bd = 1e9;
       hs.querySelectorAll('.qt-hslide').forEach(el => { const d = Math.abs(el.offsetLeft + el.offsetWidth / 2 - mid); if (d < bd) { bd = d; best = el; } });
@@ -1011,14 +967,14 @@ function step2Body() {
   const def = fmtDef(), f = cfg.fmt, named = namedMoves().length;
   const parts = [];
   if (f === 'goal') parts.push(segRow('Run it as', 'accent', GOAL_AS, cfg.goalAs, 'data-goalas'));
-  if (f === 'igyg') parts.push(segRow('Rest', 'neon', [['same', 'Same as your set'], ['fixed', 'Fixed']], cfg.igRest, 'data-igrest'), ...(cfg.igRest === 'fixed' ? [stepRow('igRestSec')] : []));
+  if (f === 'igyg') parts.push(segRow('Rest', 'neon', [['same', 'Same as your set'], ['fixed', 'Fixed']], cfg.igRest, 'data-igrest'), ...(cfg.igRest === 'fixed' ? [homeRow('igRestSec')] : []));
   if (f === 'test') parts.push(testsList());
   else if (def.moves) parts.push(`${sec(f === 'goal' ? 'Your totals' : f === 'igyg' ? 'Sets, in order' : 'Exercises', MOVES_OPTIONAL.has(f) ? `<small>${t('optional')}</small>` : f === 'ladder' ? `<button class="qt-seclink" id="qtPresets">${t('Presets')}</button>` : '')}${movesCard()}`);
   if (f === 'goal' && goalBuilt()) parts.push(`<div class="qt-goalbox ${goalTight(goalBuilt()) ? 'warn' : ''}"><b>${t('The plan')}</b><strong>${goalTotals()}</strong><span>${esc(goalPreview())}</span>${goalTight(goalBuilt()) ? `<em>${t('Tight: about {n} min of pure work. Give yourself more time or fewer reps.', { n: Math.ceil(goalBuilt().work) })}</em>` : ''}${cfg.goalAs !== 'ladder' ? `<button class="qt-link" id="qtGoalOpen">${t('Open it as {x} to adjust', { x: t(GOAL_AS.find(x => x[0] === cfg.goalAs)[1]) })}</button>` : ''}</div>`);
   if (f === 'emom' && named > 1) parts.push(segRow('How the moves run', 'accent', [['turns', 'Take turns'], ['all', 'All every minute']], cfg.emomStyle === 'all' ? 'all' : 'turns', 'data-style',
     cfg.emomStyle === 'all' ? t('All {n} moves inside each minute', { n: named }) : t('Minute 1 is move 1, minute 2 is move 2')));
   const more = (STEP2_MORE[f] || []).filter(k => k !== 'setRest' || cfg.sets > 1);
-  if (more.length) parts.push(`${sec('More')}<div class="qt-rows">${more.map(stepRow).join('')}</div>`);
+  if (more.length) parts.push(`${sec('More')}<div class="qt-hrows">${more.map(homeRow).join('')}</div>`);
   if (f === 'tabata' && (cfg.work !== TABATA.work || cfg.rest !== TABATA.rest)) parts.push(`<button class="qt-link" id="qtClassic">${t('Back to classic 20s / 10s')}</button>`);
   const tot = totalSec();
   return `<div class="qt-s2top">
@@ -1293,37 +1249,74 @@ function openTime(k) {
 const NUM_CHIPS = { mins: [5, 10, 12, 15, 20, 30], cap: [5, 10, 12, 15, 20, 30], rounds: [3, 5, 8, 10, 12], ftRounds: [1, 3, 5, 10],
   sets: [1, 2, 3, 4], nEx: [1, 2, 3, 4, 5], gReps: [100, 200, 300, 500, 1000], gMins: [10, 15, 20, 30, 45, 60],
   ldRungs: [5, 8, 10, 12, 15], dbMax: [10, 15, 20, 30], pace: [20, 25], ftCap: [0, 10, 15, 20, 30], ldCap: [0, 10, 15, 20, 30], ptCap: [0, 3, 5, 10] };
-function numSheet({ label, v, lo, hi, next, chips = [], unit = '', none = false, onSet }) {
-  const { ov, close } = sheet(`<div class="qt-sheet-h">${t(label)}</div>
-    <div class="qt-tp"><div><button data-np="1" aria-label="${t('More')}">+</button>
-      <input class="qt-npv" id="npV" type="number" inputmode="numeric" onfocus="this.select()"/>${unit ? `<small>${t(unit)}</small>` : '<small>&nbsp;</small>'}
-      <button data-np="-1" aria-label="${t('Less')}">−</button></div></div>
-    ${chips.length ? `<div class="qt-npc">${chips.map(c => `<button data-nc="${c}">${!c && none ? t('none') : c}</button>`).join('')}</div>` : ''}
-    <button class="btn" id="npOk">${t('Done')}</button>`);
-  const inp = ov.querySelector('#npV');
-  const show = () => { inp.value = !v && none ? '' : v; inp.placeholder = none ? t('none') : '–'; ov.querySelectorAll('[data-nc]').forEach(b => b.classList.toggle('on', +b.dataset.nc === v)); };
-  const lim = x => Math.min(hi, Math.max(lo, Math.round(Number(x) || 0)));
-  ov.querySelectorAll('[data-np]').forEach(b => b.addEventListener('click', () => { v = lim(next(v, +b.dataset.np)); show(); }));
-  ov.querySelectorAll('[data-nc]').forEach(b => b.addEventListener('click', () => { v = lim(+b.dataset.nc); onSet(v); persist(); close(); draw(); }));
-  inp.addEventListener('input', () => { v = lim(inp.value); });
-  inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
-  ov.querySelector('#npOk').addEventListener('click', () => { onSet(v); persist(); close(); draw(); });
-  show();
+/* `get()` says what to show (it is asked again after a Reps / Seconds or
+   lb / kg switch); `onSet` keeps the number on Done or a quick value */
+function numSheet(get, onSet) {
+  let o = get(), v = o.v;
+  const { ov, close } = sheet('<div class="qt-npw"></div>');
+  const box = ov.querySelector('.qt-npw');
+  const lim = x => { const n = Number(x) || 0; return Math.min(o.hi, Math.max(o.lo, o.dec ? Math.round(n * 10) / 10 : Math.round(n))); };
+  const finish = () => { onSet(v); persist(); close(); draw(); };
+  const render = () => {
+    box.innerHTML = `<div class="qt-sheet-h">${esc(o.label)}</div>
+      ${o.seg ? `<div class="qt-npseg">${o.seg.opts.map(([id, l]) => `<button class="${id === o.seg.cur ? 'on' : ''}" data-ns="${id}">${t(l)}</button>`).join('')}</div>` : ''}
+      <div class="qt-tp"><div><button data-np="1" aria-label="${t('More')}">+</button>
+        <input class="qt-npv" id="npV" type="number" inputmode="${o.dec ? 'decimal' : 'numeric'}" onfocus="this.select()"/><small>${o.unit ? t(o.unit) : '&nbsp;'}</small>
+        <button data-np="-1" aria-label="${t('Less')}">−</button></div></div>
+      ${o.chips?.length ? `<div class="qt-npc">${o.chips.map(c => `<button data-nc="${c}">${!c && o.none ? t('none') : num(c, 1)}</button>`).join('')}</div>` : ''}
+      <button class="btn" id="npOk">${t('Done')}</button>
+      ${o.foot ? `<button class="qt-npfoot" id="npFoot">${t(o.foot.label)}</button>` : ''}`;
+    const inp = box.querySelector('#npV');
+    const show = () => { inp.value = !v && o.none ? '' : v; inp.placeholder = o.none ? t('none') : '–'; box.querySelectorAll('[data-nc]').forEach(b => b.classList.toggle('on', +b.dataset.nc === v)); };
+    box.querySelectorAll('[data-np]').forEach(b => b.addEventListener('click', () => { v = lim(o.next(v, +b.dataset.np)); show(); }));
+    box.querySelectorAll('[data-nc]').forEach(b => b.addEventListener('click', () => { v = lim(+b.dataset.nc); finish(); }));
+    box.querySelectorAll('[data-ns]').forEach(b => b.addEventListener('click', () => { const r = o.seg.onPick(b.dataset.ns, v); o = get(); v = lim(r ?? v); render(); }));
+    box.querySelector('#npFoot')?.addEventListener('click', () => { o.foot.run(); persist(); close(); draw(); });
+    inp.addEventListener('input', () => { v = lim(inp.value); });
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
+    box.querySelector('#npOk').addEventListener('click', finish);
+    show();
+  };
+  render();
 }
 function openNum(k) {
   const [label, unit, step, lo, hi] = FIELDS[k];
-  numSheet({ label: LABEL[k] || label, v: val(k) || 0, lo, hi, unit: unit === 'min' ? 'min' : '',
+  numSheet(() => ({ label: t(LABEL[k] || label), v: val(k) || 0, lo, hi, unit: unit === 'min' ? 'min' : '',
     none: ['ftCap', 'ptCap', 'ldCap'].includes(k), chips: NUM_CHIPS[k] || [],
-    next: (v, d) => k === 'gReps' ? (v ? repStep(v, d) : d > 0 ? 100 : 0) : v + d * step,
-    onSet: v => setVal(k, clamp(v, k)) });
+    next: (v, d) => k === 'gReps' ? (v ? repStep(v, d) : d > 0 ? 100 : 0) : v + d * step }),
+    v => setVal(k, clamp(v, k)));
 }
+const removeMove = i => { MV().splice(i, 1); if (!MV().length) MV().push(newMove()); };
+/* a move's number: reps or seconds (switched here, per move), and Remove */
 function openReps(i) {
   const m = MV()[i]; if (!m) return;
-  const goal = cfg.fmt === 'goal', hold = isHold(m);
-  numSheet({ label: mvName(m) || t('Reps'), v: Number(m.reps) || 0, lo: 0, hi: goal ? 5000 : 999, unit: hold ? 'sec' : goal ? 'total' : 'reps',
-    chips: hold ? [20, 30, 45, 60] : goal ? [50, 100, 200, 300, 500] : [5, 8, 10, 12, 15, 20],
-    next: (v, d) => { const k = hold ? 5 : goal ? (v + (d < 0 ? -1 : 0) >= 100 ? 25 : v + (d < 0 ? -1 : 0) >= 30 ? 10 : 5) : 1; return d > 0 ? Math.floor(v / k) * k + k : Math.ceil(v / k) * k - k; },
-    onSet: v => { m.reps = v || ''; } });
+  const goal = cfg.fmt === 'goal';
+  numSheet(() => { const hold = isHold(m);
+    return { label: mvName(m) || t('Reps'), v: Number(m.reps) || 0, lo: 0, hi: goal ? 5000 : 999, unit: hold ? 'sec' : goal ? 'total' : 'reps',
+      chips: hold ? [20, 30, 45, 60, 90] : goal ? [50, 100, 200, 300, 500] : [5, 8, 10, 12, 15, 20],
+      seg: { opts: [['reps', 'Reps'], ['sec', 'Seconds']], cur: hold ? 'sec' : 'reps',
+        onPick: (u, v) => { const was = isHold(m); m.unit = u; return u === 'sec' && !was && v < 15 ? 30 : u === 'reps' && was && !goal && v >= 30 ? 10 : v; } },
+      foot: MV().length > 1 || m.name ? { label: 'Remove this exercise', run: () => removeMove(i) } : null,
+      next: (v, d) => { const p = v + (d < 0 ? -1 : 0), k = hold ? 5 : goal ? (p >= 100 ? 25 : p >= 30 ? 10 : 5) : 1; return d > 0 ? Math.floor(v / k) * k + k : Math.ceil(v / k) * k - k; } }; },
+    v => { m.reps = v || ''; });
+}
+/* lb or kg, for the whole timer: every weight already set is converted */
+function setWUnit(u) {
+  if (u === wUnit()) return;
+  const toKg = u === 'kg';
+  Object.values(cfg.movesBy || {}).forEach(list => (list || []).forEach(m => { const v = Number(m.wt) || 0; if (!v) return;
+    m.wt = toKg ? Math.max(2.5, Math.round(v / 2.20462 / 2.5) * 2.5) : Math.max(5, Math.round(v * 2.20462 / 5) * 5); }));
+  cfg.wUnit = u;
+}
+function openWeight(i) {
+  const m = MV()[i]; if (!m) return;
+  numSheet(() => ({ label: `${mvName(m)} · ${t('weight')}`, v: Number(m.wt) || 0, lo: 0, hi: 1000, dec: true, unit: wUnit(),
+    chips: wUnit() === 'kg' ? [5, 8, 12, 16, 20, 24] : [10, 15, 25, 35, 45, 53],
+    seg: { opts: [['lb', 'lb'], ['kg', 'kg']], cur: wUnit(), onPick: (u, v) => { if (u === wUnit()) return v; setWUnit(u);
+      return v ? (u === 'kg' ? Math.max(2.5, Math.round(v / 2.20462 / 2.5) * 2.5) : Math.max(5, Math.round(v * 2.20462 / 5) * 5)) : 0; } },
+    foot: Number(m.wt) > 0 ? { label: 'No weight', run: () => { m.wt = ''; } } : null,
+    next: (v, d) => { const k = wStep(); return d > 0 ? Math.floor(v / k + 1e-9) * k + k : Math.max(0, Math.ceil(v / k - 1e-9) * k - k); } }),
+    v => { m.wt = v || ''; });
 }
 /* ---------------- search ----------------
    Every word a person might use for a move: its name and aliases, the
@@ -1504,10 +1497,12 @@ function openMoveDemo(id, onUse) {
 }
 async function openMovePicker(i) {
   const { ov, close } = sheet(`<div class="qt-sheet-h">${t('Pick a move')}</div>
+    ${MV()[i]?.name ? `<button class="qt-link center qt-mvdel" id="mvDel">${t('Remove this exercise')}</button>` : ''}
     <input class="qt-search" id="mvQ" placeholder="${MV()[i]?.name ? t('{x} · search to change', { x: esc(mvName(MV()[i])) }) : t('Search by name, or tap the filters')}" autocomplete="off" value=""/>
     <div class="qt-filters" id="mvF"></div>
     <div class="qt-results" id="mvR"></div>`, 'tall');
   const q = ov.querySelector('#mvQ'), out = ov.querySelector('#mvR');
+  ov.querySelector('#mvDel')?.addEventListener('click', () => { removeMove(i); persist(); close(); draw(); });
   const pick = m => { rememberPick(m.exId); MV()[i] = { ...MV()[i], ...m }; persist(); close(); draw(); };
   const chipRow = (opts, key) => `<div class="qt-frow">${opts.map(([v, l]) => `<button class="${moveFilter[key] === v ? 'on' : ''}" data-f="${key}" data-v="${v}">${t(l)}</button>`).join('')}</div>`;
   const filters = () => {
@@ -1573,12 +1568,6 @@ function wire(scope = host) {
     inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
   });
   host.querySelectorAll('[data-pace]').forEach(b => b.addEventListener('click', () => { cfg.pace = +b.dataset.pace; persist(); draw(); }));
-  host.querySelectorAll('[data-ldend-d]').forEach(b => b.addEventListener('click', () => {
-    const st = ldStep(ladderMoves()[0]), d = +b.dataset.ldendD;
-    cfg.ldRungs = Math.min(maxRungs(), Math.max(1, rungCount() + (st < 0 ? -d : d)));   // the shown number moves the way the button says
-    persist(); draw();
-  }));
-  host.querySelector('[data-ldend]')?.addEventListener('change', e => { setLadderEnd(+e.target.value || 0); persist(); draw(); });
   host.querySelectorAll('[data-ldshape]').forEach(b => b.addEventListener('click', () => { cfg.ldShape = b.dataset.ldshape; persist(); draw(); }));
   $('#qtPresets')?.addEventListener('click', openPresets);
   host.querySelectorAll('[data-vo2]').forEach(b => b.addEventListener('click', () => { if (cfg.vo2 === b.dataset.vo2) return; cfg.vo2 = b.dataset.vo2; persist(); draw(); }));
@@ -1617,32 +1606,16 @@ function wire(scope = host) {
     inp.addEventListener('change', () => draw());   // done typing: the plan, the totals and Start catch up
     inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
   });
-  host.querySelectorAll('[data-mw]').forEach(b => b.addEventListener('click', () => {
-    const m = MV()[+b.dataset.mw], v = Number(m.wt) || 0, d = Number(b.dataset.d), k = wStep();
-    const nv = d > 0 ? Math.floor(v / k + 1e-9) * k + k : Math.ceil(v / k - 1e-9) * k - k;
-    m.wt = Math.max(0, Math.min(1000, Math.round(nv * 10) / 10)) || ''; persist(); draw();
-  }));
-  host.querySelectorAll('[data-wu]').forEach(b => b.addEventListener('click', e => {
-    e.stopPropagation();
-    const toKg = wUnit() === 'lb';
-    /* convert every weight already set, to that unit's step (2.5 kg / 5 lb) */
-    Object.values(cfg.movesBy || {}).forEach(list => (list || []).forEach(m => { const v = Number(m.wt) || 0; if (!v) return;
-      m.wt = toKg ? Math.max(2.5, Math.round(v / 2.20462 / 2.5) * 2.5) : Math.max(5, Math.round(v * 2.20462 / 5) * 5); }));
-    cfg.wUnit = toKg ? 'kg' : 'lb'; persist(); draw();
-  }));
-  requestAnimationFrame(fitMoveNames);
-  /* the home's exercise name: the full name, smaller if it needs it */
-  host.querySelectorAll('.qt-hexn b').forEach(el => { let f = 14; el.style.fontSize = '';
-    while (el.scrollHeight > 2.3 * 1.15 * f && f > 11) { f -= 1; el.style.fontSize = f + 'px'; } });   // 2 lines if it can, 3 for the very long ones
+  host.querySelectorAll('[data-wt]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); openWeight(+b.dataset.wt); }));
+  /* an exercise name (home and step 2): the full name, smaller if it needs it */
+  host.querySelectorAll('.qt-hexn b, .qt-mcn b').forEach(el => { let f = 14; el.style.fontSize = '';
+    while ((el.scrollHeight > 2.3 * 1.15 * f || el.scrollWidth > el.clientWidth + 1) && f > 10) { f -= 1; el.style.fontSize = f + 'px'; }
+    el.style.overflowWrap = el.scrollWidth > el.clientWidth + 1 ? 'anywhere' : ''; });   // a word still too long: break it as a last resort   // 2 lines if it can, 3 for the very long ones
   /* hold a move and drag it to change the order */
-  makeSortable(host.querySelector('.qt-mvlist'), '.qt-mvr', (from, to) => {
+  makeSortable(host.querySelector('.qt-mvlist'), '.qt-mc', (from, to) => {
     const list = MV(); list.splice(to, 0, list.splice(from, 1)[0]); persist(); draw();
   });
-  host.querySelectorAll('[data-mvx]').forEach(b => b.addEventListener('click', () => {
-    MV().splice(+b.dataset.mvx, 1);
-    if (!MV().length) MV().push(newMove());
-    persist(); draw();
-  }));
+
   $('#qtAdd')?.addEventListener('click', () => {
     MV().push(newMove()); persist(); draw();
     openMovePicker(MV().length - 1);
@@ -1774,7 +1747,7 @@ function injectStyle() {
   .qt-hex { padding-left: 8px; }
   .qt-hexn { flex: 1; min-width: 0; display:flex; flex-direction:column; align-items:flex-start; gap: 1px; background: none; border: 0; color: var(--text); text-align: left; padding: 6px 4px 6px 8px; cursor: pointer; }
   .qt-hexn b { font-size: 14px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--wm-neon); line-height: 1.15;
-    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: normal; }
   .qt-hexn small { color: var(--muted); font-size: 12.5px; font-weight: 700; }
   .qt-hexadd { width: 100%; justify-content: space-between; color: var(--text); font-size: 15.5px; font-weight: 700; padding: 18px 16px; border-style: dashed; cursor: pointer; }
   .qt-hexadd i { font-style: normal; color: var(--muted); font-size: 18px; }
@@ -2042,28 +2015,30 @@ function injectStyle() {
   .qt-srow.tone-ready .qt-seg2 button.on { color: #7D9BFF; border-color: var(--wm-ready, #3D6BFF); background: rgba(61,107,255,.14); }
   .qt-srow .qt-su { margin-top: 6px; }
   .qt-move2 { text-align:left; }
-  /* THE MOVE ROW, setup side: the workout's slim row (workmode mvRow) */
-  .qt-mvlist { background: var(--box); border-radius: 16px; padding: 2px 12px; }
-  .qt-mvr { border-top: 1px solid var(--line); padding: 4px 0; }
-  .qt-mvr:first-child { border-top: none; }
-  .qt-mvr-top { display:flex; align-items:center; gap: 4px; min-height: 44px; }
-  .qt-mvr-top .qt-mx { width: 24px; flex: 0 0 24px; padding: 0; align-self: center; }
-  .qt-mvr-n { flex:1; min-width:0; text-align:left; background:none; border:none; color: var(--text); font-size: 16px; font-weight: 600; white-space: nowrap; overflow:hidden; padding: 0; cursor:pointer; font-family: inherit; align-self: stretch; display:flex; align-items:center; }
-  .qt-mvr-n.empty { color: var(--wm-accent); }
-  /* the numbers, stacked on the right: reps, then the weight under it */
-  .qt-mvr-r { flex: 0 0 auto; display:flex; flex-direction:column; align-items:flex-end; }
-  .qt-st { display:flex; align-items:center; height: 34px; }
-  .qt-st button { width: 28px; height: 34px; background:none; border:none; color: var(--wm-accent); font-size: 20px; line-height:1; cursor:pointer; padding:0; touch-action: manipulation; }
-  .qt-st button:active { transform: scale(.85); }
-  .qt-st b { min-width: 30px; text-align:center; font-family: var(--tnum); font-size: 18px; font-weight: 700; display:flex; align-items:baseline; justify-content:center; }
-  .qt-st b small { font-size: 12px; color: var(--muted); margin-left: 1px; }
-  .qt-st input { width: 2.3ch; min-width: 2.3ch; background:none; border:none; text-align:center; color: var(--text); font: inherit; padding:0; -moz-appearance: textfield; }
-  .qt-st input::-webkit-outer-spin-button, .qt-st input::-webkit-inner-spin-button { -webkit-appearance:none; }
-  .qt-stl { color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; margin-right: 2px; }
-  /* the unit IS the kg / lb switch: small, quiet, dotted underline */
-  .qt-wu { font-size: 12px; color: var(--muted); padding-left: 2px; text-decoration: underline dotted; text-underline-offset: 3px; cursor: pointer; }
-  .qt-addwt { background:none; border:none; color: var(--wm-accent); opacity: .75; font-size: 12.5px; font-weight: 600; padding: 0 30px 6px 0; cursor:pointer; }
-  .qt-addrow2 { width:100%; background:none; border:none; border-top: 1px solid var(--line); color: var(--wm-accent); font-size: 15px; font-weight: 700; padding: 13px 0; cursor:pointer; }
+  /* THE EXERCISE CARD, step 2: the home's row look */
+  .qt-mvlist { display:flex; flex-direction:column; gap: 8px; }
+  .qt-mc { background: var(--box); border: 1px solid var(--line); border-radius: 18px; padding: 6px 7px 6px 8px; display:flex; flex-direction:column; gap: 4px; }
+  .qt-mch, .qt-mcr { display:flex; align-items:center; gap: 8px; min-height: 58px; }
+  .qt-mcr { min-height: 50px; padding-left: 8px; border-top: 1px solid var(--line); }
+  .qt-mcr .qt-hpm { width: 40px; height: 40px; }
+  .qt-mcl { flex: 1; min-width: 0; display:flex; flex-direction:column; align-items:flex-start; gap: 3px; }
+  .qt-mcn { max-width: 100%; background:none; border:0; padding: 4px 8px 0; text-align:left; cursor:pointer; }
+  .qt-mcn b { font-size: 14px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--wm-neon); line-height: 1.15;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: normal; }
+  .qt-mcn.empty b { color: var(--wm-accent); text-transform: none; letter-spacing: 0; font-size: 15px; }
+  .qt-mtag { margin-left: 8px; height: 24px; padding: 0 9px; border-radius: 999px; border: 1px dashed var(--line); background: none; color: var(--muted); font-size: 12px; font-weight: 700; cursor:pointer; }
+  .qt-mtag.on { border-style: solid; border-color: var(--wm-accent); color: var(--wm-accent); font-family: var(--tnum); }
+  .qt-hvw.col { flex-direction: column; align-items:center; gap: 0; }
+  .qt-hvw.col .qt-hv { line-height: 1.05; }
+  .qt-hvw.col small { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; margin-top: -1px; }
+  .qt-mc .qt-ldm { padding: 2px 6px 4px; }
+  .qt-mc .qt-mnote { padding: 0 8px 6px; }
+  #qtAdd.qt-hexadd { margin-top: 8px; }
+  .qt-npseg { display:flex; gap: 6px; justify-content:center; margin: 0 0 6px; }
+  .qt-npseg button { min-width: 92px; height: 38px; border-radius: 999px; border: 1px solid var(--line); background: var(--box-2); color: var(--text); font-size: 14.5px; font-weight: 700; cursor:pointer; }
+  .qt-npseg button.on { border-color: var(--wm-accent); color: var(--wm-accent); background: var(--wm-accent-soft, transparent); }
+  .qt-mvdel { color: var(--wm-neon); margin: -4px 0 8px; }
+  .qt-npfoot { display:block; width:100%; margin-top: 10px; padding: 10px; background:none; border:0; color: var(--wm-neon); font-size: 15px; font-weight: 700; text-align:center; cursor:pointer; }
   .qt-mvlist .qt-mnote { margin: 0 0 6px; }
   .qt-install { position: relative; background: linear-gradient(135deg, var(--wm-accent-soft), transparent 70%), var(--box); border: 1.5px solid var(--wm-accent); border-radius: 18px; padding: 14px 40px 14px 16px; margin-bottom: 12px; display:flex; flex-direction:column; gap: 6px; box-shadow: 0 0 18px var(--wm-accent-soft); }
   .qt-install b { font-size: 16px; } .qt-install small { color: var(--muted); font-size: 13px; }
