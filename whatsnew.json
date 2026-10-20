@@ -1,6 +1,11 @@
 {
-  "version": "2026-10-20.1",
+  "version": "2026-10-20.2",
   "notes": [
+    "Rep goal: pick how many exercises, your total reps and your minutes on the home. It shows the reps per minute, and warns you when the time is tight",
+    "AMRAP, For time and Ladder: choose how many exercises on the home, then Next to pick them. Add or remove as many as you like after",
+    "VO2 max: swipe through the workouts, each card shows its hard and easy parts",
+    "New checkmarks when you finish, in your own colors. A shield when you set a new best",
+    "Numbers sit centered everywhere, even 200 or 1000. The small banner above Start now says Customize",
     "EMOM, AMRAP and For time show your exercise right on the home: tap it to change, − + for the reps",
     "Exercises and Favorites sit together just above Start",
     "A new, simpler home: swipe to pick your timer, set up to 3 numbers, hit Start. Modes that need moves get one more step",
@@ -70,6 +75,11 @@
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
   ],
   "notes_fr": [
+    "Objectif reps : choisis le nombre d’exercices, ton total de reps et tes minutes sur l’accueil. Il affiche les reps par minute et te prévient quand c’est serré",
+    "AMRAP, For Time et Échelle : choisis le nombre d’exercices sur l’accueil, puis Ensuite pour les choisir. Ajoute ou enlève-en autant que tu veux après",
+    "VO2 max : fais défiler les entraînements, chaque carte montre ses parties intenses et faciles",
+    "Nouvelles coches quand tu termines, à tes couleurs. Un bouclier quand tu bats ton record",
+    "Les nombres sont centrés partout, même 200 ou 1000. La petite bannière au-dessus de Démarrer dit maintenant Personnaliser",
     "EMOM, AMRAP et For Time affichent ton exercice directement sur l’accueil : touche-le pour le changer, − + pour les reps",
     "Exercices et Favoris sont côte à côte juste au-dessus de Démarrer",
     "Un nouvel accueil, plus simple : fais glisser pour choisir ton minuteur, règle jusqu’à 3 nombres, appuie sur Démarrer. Les modes qui ont besoin d’exercices ont une étape de plus",

@@ -26,8 +26,11 @@ const goalMoves = moves => moves.filter(m => String(m.name || '').trim() && Numb
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 
 /* EMOM: all moves every minute, about 40 s of work in each */
-function emom(ms) {
+function emom(ms, mins0) {
   const work = ms.reduce((a, m) => a + m.reps * secPerRep(m), 0);
+  /* the time you gave yourself: that many minutes, the reps split over them */
+  if (mins0 > 0) { const mins = Math.min(90, mins0), per = ms.map(m => Math.ceil(m.reps / mins));
+    return { cfg: { fmt: 'emom', mins, every: 60, emomStyle: 'all' }, moves: ms.map((m, i) => ({ ...m, reps: per[i] })), totals: per.map(r => r * mins), rows: mins }; }
   const base = clamp(Math.ceil(work / 40), 5, 60);
   /* of the minute counts that keep a minute under ~48 s, the one whose
      rounded-up reps land closest to the goals */
@@ -47,7 +50,7 @@ function emom(ms) {
 /* LADDER, climbing: each move's total spread over the rungs in proportion
    1 : 2 : 3 …, rounded so it adds up exactly; as many rungs as keep the
    top rung near 2 minutes of work. Explicit reps per rung (`list`). */
-function ladder(ms) {
+function ladder(ms, mins) {
   const work = ms.reduce((a, m) => a + m.reps * secPerRep(m), 0);
   const n = clamp(Math.ceil(2 * work / 150) - 1, 3, 30);
   const tri = n * (n + 1) / 2;
@@ -55,7 +58,7 @@ function ladder(ms) {
   const share = ms.map(m => { const base = m.reps >= n ? 1 : 0, extra = m.reps - base * n; let prev = 0;
     return Array.from({ length: n }, (_, k) => { const c = Math.round(extra * (k + 1) * (k + 2) / 2 / tri); const r = c - prev; prev = c; return base + r; }); });
   const list = Array.from({ length: n }, (_, k) => ms.map((_, i) => share[i][k]));
-  return { cfg: { fmt: 'ladder', ldRungs: n, ldShape: 'one', ldCap: 0 }, list,
+  return { cfg: { fmt: 'ladder', ldRungs: n, ldShape: 'one', ldCap: mins || 0 }, list,
     moves: ms.map(m => ({ ...m, reps: '' })), totals: ms.map(m => m.reps), rows: n };
 }
 /* SETS, You go, I go: each total cut into sets of about 40 s, the moves
@@ -66,14 +69,17 @@ function sets(ms) {
   while (left.some(x => x > 0)) ms.forEach((m, i) => { if (left[i] > 0) { const r = Math.min(size[i], left[i]); out.push({ ...m, reps: r }); left[i] -= r; } });
   return { cfg: { fmt: 'igyg', igRest: 'same' }, moves: out, totals: ms.map(m => m.reps), rows: out.length };
 }
-function fortime(ms) {
-  return { cfg: { fmt: 'fortime', ftRounds: 1, ftCap: 0 }, moves: ms, totals: ms.map(m => m.reps), rows: 1 };
+function fortime(ms, mins) {
+  return { cfg: { fmt: 'fortime', ftRounds: 1, ftCap: mins || 0 }, moves: ms, totals: ms.map(m => m.reps), rows: 1 };
 }
 export const GOAL_AS = { emom, ladder, igyg: sets, fortime };
-export function buildFromGoal(moves, as = 'emom') {
+/* `mins`: the time you give yourself (0: sized for you). `work`: about how
+   many minutes of pure work the reps are, to warn when the time is tight */
+export function buildFromGoal(moves, as = 'emom', mins = 0) {
   const ms = goalMoves(moves).map(m => ({ ...m, reps: Number(m.reps) }));
   if (!ms.length) return null;
-  return { ...(GOAL_AS[as] || emom)(ms), goal: ms };
+  const work = ms.reduce((a, m) => a + m.reps * secPerRep(m), 0) / 60;
+  return { ...(GOAL_AS[as] || emom)(ms, mins), goal: ms, work };
 }
 
 /* BURPEE CLUB: a push-up total out of burpees with 1, 2, 3 … 10 push-ups

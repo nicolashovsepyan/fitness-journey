@@ -388,6 +388,9 @@ function injectStyle() {
   html.wm .tally-last b.up { color: var(--wm-accent); } html.wm .tally-last b.down { color: #ff8a8a; }
   html.wm .mvr-n .mvr-wt { color: var(--wm-accent); font-weight: 700; font-family: var(--tnum); }
   /* the round-done burst (workmode.js celebrate) */
+  .wm-ach { display:block; width: 132px; height: 132px; object-fit: contain; margin: 4px auto 2px; }
+  .wm-ach.fin { animation: wmAchIn .7s cubic-bezier(.2,1.4,.4,1) both; }
+  @keyframes wmAchIn { from { opacity: 0; transform: scale(.4) rotate(-12deg); } to { opacity: 1; transform: none; } }
   .wm-burst { position: fixed; z-index: 150; width: 0; height: 0; pointer-events: none; }
   .wm-burst i { position: absolute; width: 8px; height: 8px; margin: -4px; border-radius: 50%; background: var(--c); box-shadow: 0 0 10px var(--c);
     animation: wmSpark .8s cubic-bezier(.15,.7,.3,1) forwards; }

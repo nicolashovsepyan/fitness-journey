@@ -104,6 +104,9 @@ const FIELDS = {
   ldCap:    ['Time cap',          'min',   1,  0,  90],
   ptCap:    ['Time cap',          'min',   1,  0,  10],
   igRestSec: ['Rest',             'time',  5,  5, 600],
+  nEx:      ['Exercises',         '',      1,  1,  10],   // how many moves: the rows of the list
+  gReps:    ['Total reps',        '',     10,  0, 5000],  // Rep goal: the sum of the moves' totals
+  gMins:    ['Minutes',           'min',   1,  1, 120],   // Rep goal: the time you give yourself
 };
 const isTime = k => FIELDS[k][1] === 'time';
 /* the numbers on the main screen, and the ones under "Customize" */
@@ -123,7 +126,7 @@ const DEFAULTS = {
   tWork: 120, tRest: 0, tRounds: 1, pace: 20, paceV: 2, ptCap: 0,
   dbEvery: 60, dbMax: 30,
   ldRungs: 10, ldShape: 'one', ldCap: 0,
-  emomStyle: 'turns', ready: 10, vo2: 'n4x4', testId: 'p100', goalAs: 'emom', igRest: 'same', igRestSec: 30,
+  emomStyle: 'turns', ready: 10, vo2: 'n4x4', testId: 'p100', goalAs: 'emom', igRest: 'same', igRestSec: 30, gMins: 20,
 };
 const TABATA = { work: 20, rest: 10, rounds: 8 };
 const PREF = 'quickTimer';
@@ -142,8 +145,31 @@ const key = k => (cfg.fmt === 'timer' && TIMER_KEYS[k]) || k;
    alternating), set the moment the second move is added; lower it (or
    raise it) and that number holds until the number of moves changes. */
 const tbTotal = () => { const n = perRound(); return cfg.tbN === n && cfg.tbTotal ? cfg.tbTotal : cfg.rounds * n; };
-const val = k => cfg.fmt === 'tabata' && k === 'rounds' ? tbTotal() : cfg[key(k)];
-const setVal = (k, v) => { if (cfg.fmt === 'tabata' && k === 'rounds') { cfg.tbTotal = v; cfg.tbN = perRound(); return; } cfg[key(k)] = v; };
+const val = k => k === 'nEx' ? MV().length : k === 'gReps' ? goalSum() : cfg.fmt === 'tabata' && k === 'rounds' ? tbTotal() : cfg[key(k)];
+const setVal = (k, v) => {
+  if (k === 'nEx') return setExCount(v);
+  if (k === 'gReps') return spreadReps(v);
+  if (cfg.fmt === 'tabata' && k === 'rounds') { cfg.tbTotal = v; cfg.tbN = perRound(); return; }
+  cfg[key(k)] = v;
+};
+/* HOW MANY EXERCISES, on the home: rows added empty (picked on step 2) or
+   taken off the end. Rep goal keeps its total and shares it again. */
+function setExCount(n) {
+  const list = MV(), tot = goalSum();
+  while (list.length < n) list.push(newMove());
+  if (list.length > n) list.splice(n);
+  if (cfg.fmt === 'goal' && tot) spreadReps(tot, true);
+}
+/* REP GOAL'S TOTAL: the moves' totals added up. A new total is shared in
+   the same proportions (evenly when asked, or when nothing is set yet). */
+const goalSum = () => MV().reduce((a, m) => a + (Number(m.reps) || 0), 0);
+function spreadReps(total, even = false) {
+  const list = MV(), cur = goalSum(), w = list.map(m => !even && cur ? (Number(m.reps) || 0) / cur : 1 / list.length);
+  const raw = w.map(x => x * total), out = raw.map(Math.floor);
+  let left = total - out.reduce((a, b) => a + b, 0);
+  raw.map((x, i) => [x - out[i], i]).sort((a, b) => b[0] - a[0]).forEach(([, i]) => { if (left > 0) { out[i]++; left--; } });
+  list.forEach((m, i) => { m.reps = out[i] || ''; });
+}
 
 export async function renderQuick(el, opts = {}) {
   host = el; onStart = opts.onStart; guest = !!opts.guest; page = 'home';
@@ -214,7 +240,9 @@ function stepTime(v, dir) {
   const st = probe < 60 ? 5 : probe < 300 ? 15 : 30;
   return dir > 0 ? Math.floor(v / st) * st + st : Math.ceil(v / st) * st - st;
 }
-const bump = (k, dir) => { setVal(k, clamp(isTime(k) ? stepTime(val(k), dir) : val(k) + dir * FIELDS[k][2], k)); };
+/* a rep total moves by what makes sense at its size: 10, 25, then 50 */
+const repStep = (v, dir) => { const p = dir > 0 ? v : v - 1, st = p < 100 ? 10 : p < 500 ? 25 : 50; return dir > 0 ? Math.floor(v / st) * st + st : Math.ceil(v / st) * st - st; };
+const bump = (k, dir) => { setVal(k, clamp(isTime(k) ? stepTime(val(k), dir) : k === 'gReps' ? (val(k) ? repStep(val(k), dir) : dir > 0 ? 100 : 0) : val(k) + dir * FIELDS[k][2], k)); };
 
 /* the moves, as plan items. A move picked from the library carries its id,
    so the demo video, the cue and the swap all work on it. */
@@ -341,7 +369,7 @@ function totalSec() {
     case 'deathby': return cfg.dbMax * cfg.dbEvery;
     case 'ladder': return cfg.ldCap ? cfg.ldCap * 60 : null;
     case 'test': return null;
-    case 'goal': { const g = goalBuilt(); return g?.cfg.fmt === 'emom' ? g.cfg.mins * 60 : null; }
+    case 'goal': return (cfg.goalAs === 'igyg' ? 0 : cfg.gMins * 60) || null;
     case 'vo2': { const p = vo2(); return intervalSec(p.work, p.rest, p.n) + (p.warm || 0) + (p.cool || 0); }
     default: return null;
   }
@@ -361,7 +389,8 @@ function summary() {
   switch (cfg.fmt) {
     case 'test': { const d = testDef(), b = bestOf(hist, d); return b ? t('Your best: {b}', { b: testShow(d, scoreOf(b, d)) }) : t('First try sets your best'); }
     case 'goal': { const g = goalBuilt(); if (!g) return t('Add your moves and their totals');
-      return g.cfg.fmt === 'emom' ? t('EMOM {n} min', { n: g.cfg.mins }) : g.cfg.fmt === 'ladder' ? t2(g.rows, '{n} step', '{n} steps') : g.cfg.fmt === 'igyg' ? t2(g.rows, '{n} set', '{n} sets') : t('For time'); }
+      const how = g.cfg.fmt === 'emom' ? 'EMOM' : g.cfg.fmt === 'ladder' ? t2(g.rows, '{n} step', '{n} steps') : g.cfg.fmt === 'igyg' ? t2(g.rows, '{n} set', '{n} sets') : t('For time');
+      return `${goalTotals()} · ${how}`; }
     case 'igyg': return igygLine();
     case 'emom': {
       const style = moves.length > 1 ? (cfg.emomStyle === 'all' ? t(' · all {n} moves each round', { n: moves.length }) : t(' · {n} moves take turns', { n: moves.length })) : '';
@@ -537,6 +566,7 @@ const ROW_TONE = {
   rest: 'neon', setRest: 'neon',
   rounds: 'violet', ftRounds: 'violet', sets: 'violet', dbMax: 'violet', ldRungs: 'violet',
   ftCap: 'ready', ptCap: 'ready', ldCap: 'ready',
+  nEx: 'violet', gReps: 'accent', gMins: 'ready',
 };
 function rowShell(k, label, face, foot, minus, plus, extra = '') {
   return `<div class="qt-srow tone-${ROW_TONE[k] || 'accent'}">
@@ -595,6 +625,8 @@ const isHold = m => !!(m && m.exId && EXERCISES[m.exId]?.measure === 'hold');
 const wUnit = () => cfg.wUnit === 'kg' ? 'kg' : 'lb';
 const wStep = () => wUnit() === 'kg' ? 2.5 : 5;
 const isWeighted = m => !!(m && m.exId && EXERCISES[m.exId]?.load === 'weighted');
+/* a reps box as wide as its number (2 digits at least), so 200 or 1000 stays centred */
+const repW = v => `${Math.max(2, String(v ?? '').length) + 0.3}ch`;
 function moveCard(m, i) {
   const lad = cfg.fmt === 'ladder', db = cfg.fmt === 'deathby';
   const sec = isHold(m), goal = cfg.fmt === 'goal';
@@ -606,7 +638,7 @@ function moveCard(m, i) {
     right.push(line(`data-lm="${i}" data-lf="ldStart"`, `${ldStart(m)}${sec ? '<small>s</small>' : ''}`, t('start at')));
     if (!(lad && ldMode(m) === 'flat')) right.push(line(`data-lm="${i}" data-lf="ldStep"`, `${step > 0 ? '+' : ''}${step}`, db ? t('add') : t('each step')));
   } else if (cfg.fmt !== 'tabata' && cfg.fmt !== 'timer') {   // time-based: no rep target, you log reps in the workout
-    right.push(line(`data-mr="${i}"`, `<input data-mv="${i}" data-k="reps" type="number" inputmode="numeric" placeholder="–" value="${esc(m.reps)}" onfocus="this.select()"/>${sec ? '<small>s</small>' : ''}`, goal ? t('total') : ''));
+    right.push(line(`data-mr="${i}"`, `<input data-mv="${i}" data-k="reps" type="number" inputmode="numeric" placeholder="–" value="${esc(m.reps)}" style="width:${repW(m.reps)}" onfocus="this.select()"/>${sec ? '<small>s</small>' : ''}`, goal ? t('total') : ''));
     if (cfg.fmt === 'igyg' && canPump(m)) right.push(line(`data-mp="${i}"`, `${Number(m.pumps) || 0}`, t('push-ups each')));
   }
   /* the weight sits under the reps: always for a loaded move, on request
@@ -625,7 +657,7 @@ function moveCard(m, i) {
 }
 function movesCard() {
   return `<div class="qt-mvlist">${MV().map(moveCard).join('')}
-    <button class="qt-addrow2" id="qtAdd">${t('+ Add a move')}</button></div>`;
+    <button class="qt-addrow2" id="qtAdd">${t('+ Add an exercise')}</button></div>`;
 }
 /* full names on one line: a list's names at the size its longest needs */
 function fitMoveNames() {
@@ -725,7 +757,14 @@ const testMoves = def => def.m.map(([k, a, b]) => { const ex = EXERCISES[k], bas
   return ['ladder', 'deathby'].includes(def.fmt) ? { ...base, reps: '', ldStart: a, ldStep: b } : { ...base, reps: a }; });
 /* REP GOAL (rep-goal.js): the totals, built into the type picked */
 const GOAL_AS = [['emom', 'EMOM'], ['ladder', 'Ladder'], ['igyg', 'Sets'], ['fortime', 'For time']];
-function goalBuilt() { return buildFromGoal(MV().map(m => ({ ...m, name: mvName(m) })), cfg.goalAs); }
+function goalBuilt() { return buildFromGoal(MV().map(m => ({ ...m, name: mvName(m) })), cfg.goalAs, cfg.gMins || 0); }
+/* the line that says it all: total reps, the time, and the pace it takes */
+function goalTotals() {
+  const r = goalSum(), m = cfg.gMins;
+  return cfg.goalAs === 'igyg' ? t('{r} reps', { r }) : t('{r} reps in {m} min', { r, m });
+}
+/* the time is tight when the reps alone take more than about 80% of it */
+const goalTight = g => g && cfg.goalAs !== 'igyg' && g.work > cfg.gMins * 0.8;
 function goalPreview() {
   const g = goalBuilt(); if (!g) return '';
   const tot = g.goal.map((m, i) => `${g.totals[i]} ${m.name}`).join(', ');
@@ -793,35 +832,69 @@ const LINE = {
   test: 'Race your own best, live. Beat it and it becomes your new best.',
 };
 /* modes that cannot start without step 2, and what its button says */
-const NEEDS = { ladder: 'Next: pick moves', deathby: 'Next: pick a move', goal: 'Next: your totals', igyg: 'Next: your sets', test: 'Next: pick a test' };
+const NEEDS = { amrap: 'Next: pick exercises', fortime: 'Next: pick exercises', ladder: 'Next: pick exercises', deathby: 'Next: pick a move', goal: 'Next: pick exercises', igyg: 'Next: your sets', test: 'Next: pick a test' };
 const MOVES_OPTIONAL = new Set(['timer', 'tabata', 'emom', 'amrap', 'fortime']);
 /* the numbers on the home, at most 3 */
-const HOME = { timer: ['work', 'rest', 'rounds'], tabata: ['work', 'rest', 'rounds'], emom: ['mins', 'every'], amrap: ['cap'],
-  fortime: ['ftCap', 'ftRounds'], ladder: ['ldRungs'], deathby: ['dbEvery', 'dbMax'], pushup: ['pace'], igyg: [], goal: [], vo2: [], stopwatch: [], test: [] };
+const HOME = { timer: ['work', 'rest', 'rounds'], tabata: ['work', 'rest', 'rounds'], emom: ['mins', 'every'], amrap: ['cap', 'nEx'],
+  fortime: ['ftRounds', 'nEx'], ladder: ['ldRungs', 'nEx'], deathby: ['dbEvery', 'dbMax'], pushup: ['pace'], igyg: [], goal: ['nEx', 'gReps', 'gMins'], vo2: [], stopwatch: [], test: [] };
 /* what step 2 adds below the moves (the numbers that are not on the home) */
-const STEP2_MORE = { timer: ['sets', 'setRest'], pushup: ['ptCap'], ladder: ['ldCap'] };
-const LABEL = { ldRungs: 'Steps', ftCap: 'Time cap', ftRounds: 'Rounds' };
+const STEP2_MORE = { timer: ['sets', 'setRest'], pushup: ['ptCap'], ladder: ['ldCap'], fortime: ['ftCap'], goal: ['gMins'] };
+const LABEL = { ldRungs: 'Steps', ftCap: 'Time cap', ftRounds: 'Rounds', gReps: 'Reps', gMins: 'Minutes', pace: 'Per minute' };
 
 /* one home row: label, − value + (a time opens the picker, a number types) */
 function homeRow(k) {
   const label = LABEL[k] || FIELDS[k][0], v = val(k);
-  const none = ((k === 'ftCap' || k === 'ptCap' || k === 'ldCap') && !v) || ((k === 'rest' || k === 'setRest') && !v);
+  const none = ((k === 'ftCap' || k === 'ptCap' || k === 'ldCap') && !v) || ((k === 'rest' || k === 'setRest') && !v) || (k === 'gReps' && !v);
   const face = isTime(k)
     ? `<button class="qt-hv" data-qt="${k}">${none ? t('none') : fmt(v)}</button>`
     : `<input class="qt-hv" data-qf="${k}" type="number" inputmode="numeric" value="${none ? '' : v}" placeholder="${none ? t('none') : ''}" onfocus="this.select()" aria-label="${esc(t(label))}"/>`;
-  const unit = k === 'pace' ? `<small>${t('a min')}</small>` : '';
   return `<div class="qt-hr tone-${ROW_TONE[k] || 'accent'}"><span class="qt-hl">${t(label)}</span>
     <button class="qt-hpm" data-q="${k}" data-d="-1" aria-label="${t('Less')}">−</button>
-    <span class="qt-hvw">${face}${unit}</span>
+    <span class="qt-hvw">${face}</span>
     <button class="qt-hpm" data-q="${k}" data-d="1" aria-label="${t('More')}">+</button></div>`;
+}
+/* VO2 MAX ON THE HOME: the protocols on a carousel you swipe, like the
+   modes above. Each card draws its own shape: a bar for every hard effort,
+   as wide as it lasts, the gaps as long as the rest. */
+function vo2Shape(p) {
+  /* hard efforts tall, the easy parts (rest, warm-up, cool-down) low */
+  const parts = [];
+  if (p.warm) parts.push([p.warm, 0]);
+  for (let i = 0; i < p.n; i++) { parts.push([p.work, 1]); if (i < p.n - 1) parts.push([p.rest, 0]); }
+  if (p.cool) parts.push([p.cool, 0]);
+  const total = parts.reduce((a, x) => a + x[0], 0), W = 200, H = 56, u = W / total;
+  let x = 0, out = '';
+  parts.forEach(([d, hard]) => { const w = Math.max(2, d * u - 1.5), h = hard ? H - 2 : 14;
+    out += `<rect class="${hard ? 'h' : 'e'}" x="${(x * u).toFixed(1)}" y="${H - h}" width="${w.toFixed(1)}" height="${h}" rx="3"/>`; x += d; });
+  return `<svg class="qt-vo2s" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">${out}</svg>`;
+}
+function vo2Carousel() {
+  const cur = vo2().id;
+  return `<div class="qt-vo2c" id="qtVo2"><div class="qt-vo2t" id="qtVo2T">${VO2.map(p => { const mins = Math.round((intervalSec(p.work, p.rest, p.n) + (p.warm || 0) + (p.cool || 0)) / 60);
+    return `<button class="qt-vo2k ${p.id === cur ? 'on' : ''}" data-vo2="${p.id}"><span class="qt-vo2h1"><b>${t(p.name)}</b><em>${t('{n} min', { n: mins })}</em></span>${vo2Shape(p)}<small>${t(p.sub)}</small></button>`; }).join('')}</div>
+    <div class="qt-hdots sm" aria-hidden="true">${VO2.map(p => `<i class="${p.id === cur ? 'on' : ''}"></i>`).join('')}</div></div>`;
+}
+function wireVo2(scope) {
+  const tr = scope.querySelector('#qtVo2T'); if (!tr) return;
+  const center = smooth => { const el = tr.querySelector('.qt-vo2k.on'); if (el) tr.scrollTo({ left: el.offsetLeft - (tr.clientWidth - el.offsetWidth) / 2, behavior: smooth ? 'smooth' : 'instant' }); };
+  center(false); requestAnimationFrame(() => center(false));
+  let settle = 0;
+  tr.addEventListener('scroll', () => {
+    clearTimeout(settle);
+    settle = setTimeout(() => {
+      const mid = tr.scrollLeft + tr.clientWidth / 2; let best = null, bd = 1e9;
+      tr.querySelectorAll('.qt-vo2k').forEach(el => { const d = Math.abs(el.offsetLeft + el.offsetWidth / 2 - mid); if (d < bd) { bd = d; best = el; } });
+      const id = best?.dataset.vo2;
+      if (id && id !== cfg.vo2) { cfg.vo2 = id; try { navigator.vibrate?.(6); } catch (e) {} persist(); drawBody(); }
+    }, 140);
+  }, { passive: true });
 }
 /* the mode's own choices on the home (no numbers) */
 function homeExtras() {
   const f = cfg.fmt;
   if (f === 'ladder') return [segRow('Shape', 'violet', LD_SHAPES, cfg.ldShape, 'data-ldshape')];
-  if (f === 'goal') return [segRow('Run it as', 'accent', GOAL_AS, cfg.goalAs, 'data-goalas')];
   if (f === 'igyg') return [segRow('Rest', 'neon', [['same', 'Same as your set'], ['fixed', 'Fixed']], cfg.igRest, 'data-igrest'), ...(cfg.igRest === 'fixed' ? [homeRow('igRestSec')] : [])];
-  if (f === 'vo2') return [`<div class="qt-vo2h">${VO2.map(p => `<button class="${p.id === vo2().id ? 'on' : ''}" data-vo2="${p.id}"><b>${t(p.name)}</b><small>${t(p.sub)}</small></button>`).join('')}</div>`];
+  if (f === 'vo2') return [vo2Carousel()];
   if (f === 'test') {
     const recs = TESTS.map(x => ({ x, b: bestOf(hist, x) })).filter(r => r.b).slice(0, 2);
     return recs.length ? [`${sec('Your records')}${recs.map(({ x, b }) => `<div class="qt-rec"><span><b>${t(x.name)}</b><small>${t2(attempts(hist, x).length, '{n} try', '{n} tries')}</small></span><em>${testShow(x, scoreOf(b, x))}</em></div>`).join('')}`]
@@ -893,15 +966,17 @@ function exerciseRow() {
     <span class="qt-hvw"><input class="qt-hv" data-mv="0" data-k="reps" type="number" inputmode="numeric" placeholder="–" value="${esc(m.reps)}" onfocus="this.select()" aria-label="${t('Reps')}"/>${sec ? '<small>s</small>' : ''}</span>
     <button class="qt-hpm" data-mr="0" data-d="1" aria-label="${t('More')}">+</button></div>`;
 }
-const EXERCISE_ROW = new Set(['emom', 'amrap', 'fortime']);
+const EXERCISE_ROW = new Set(['emom']);
 function homeBody() {
   const rows = [...(HOME[cfg.fmt] || []).map(homeRow), ...homeExtras()];
   if (EXERCISE_ROW.has(cfg.fmt) && rows.length < 3) rows.push(exerciseRow());
-  const named = namedMoves().length;
-  /* the slim split banner above Start: exercises / options on the left, favorites on the right */
-  const left = MOVES_OPTIONAL.has(cfg.fmt)
-    ? `<button class="qt-hsb" id="qtStep2"><span>${named ? t2(named, '{n} exercise', '{n} exercises') : t('Add exercises')}</span><i>›</i></button>`
-    : STEP2_MORE[cfg.fmt] && !NEEDS[cfg.fmt] ? `<button class="qt-hsb" id="qtStep2"><span>${t('More options')}</span><i>›</i></button>` : '';
+  /* the slim split banner above Start: Customize on the left (when Start
+     is the big button, so step 2 is otherwise out of reach), favorites on the right */
+  const left = !NEEDS[cfg.fmt] && (MOVES_OPTIONAL.has(cfg.fmt) || STEP2_MORE[cfg.fmt])
+    ? `<button class="qt-hsb" id="qtStep2"><span>${t('Customize')}</span><i>›</i></button>` : '';
+  /* Rep goal: the totals in one line, and a warning when the time is tight */
+  if (cfg.fmt === 'goal') { const g = goalBuilt(), tight = goalTight(g);
+    rows.push(`<div class="qt-hnote ${tight ? 'warn' : ''}">${goalSum() ? `<b>${goalTotals()}</b>${tight ? `<span>${t('Tight: {n} min of work', { n: Math.ceil(g.work) })}</span>` : cfg.goalAs === 'igyg' ? '' : `<span>${t('{n} a minute', { n: Math.round(goalSum() / Math.max(1, cfg.gMins)) })}</span>`}` : `<span>${t('Set your total reps, then pick the exercises')}</span>`}</div>`); }
   return `<div class="qt-hrows">${rows.join('')}</div>
     <div class="qt-hfill"></div>
     <div class="qt-hsplit">${left}<button class="qt-hsb fav" id="qtModeFavs"><span>★ ${t('Favorites')}</span></button></div>
@@ -940,8 +1015,8 @@ function step2Body() {
   if (f === 'goal') parts.push(segRow('Run it as', 'accent', GOAL_AS, cfg.goalAs, 'data-goalas'));
   if (f === 'igyg') parts.push(segRow('Rest', 'neon', [['same', 'Same as your set'], ['fixed', 'Fixed']], cfg.igRest, 'data-igrest'), ...(cfg.igRest === 'fixed' ? [stepRow('igRestSec')] : []));
   if (f === 'test') parts.push(testsList());
-  else if (def.moves) parts.push(`${sec(f === 'goal' ? 'Your totals' : f === 'igyg' ? 'Sets, in order' : 'Moves', MOVES_OPTIONAL.has(f) ? `<small>${t('optional')}</small>` : f === 'ladder' ? `<button class="qt-seclink" id="qtPresets">${t('Presets')}</button>` : '')}${movesCard()}`);
-  if (f === 'goal' && goalBuilt()) parts.push(`<div class="qt-goalbox"><b>${t('The plan')}</b><span>${esc(goalPreview())}</span>${cfg.goalAs !== 'ladder' ? `<button class="qt-link" id="qtGoalOpen">${t('Open it as {x} to adjust', { x: t(GOAL_AS.find(x => x[0] === cfg.goalAs)[1]) })}</button>` : ''}</div>`);
+  else if (def.moves) parts.push(`${sec(f === 'goal' ? 'Your totals' : f === 'igyg' ? 'Sets, in order' : 'Exercises', MOVES_OPTIONAL.has(f) ? `<small>${t('optional')}</small>` : f === 'ladder' ? `<button class="qt-seclink" id="qtPresets">${t('Presets')}</button>` : '')}${movesCard()}`);
+  if (f === 'goal' && goalBuilt()) parts.push(`<div class="qt-goalbox ${goalTight(goalBuilt()) ? 'warn' : ''}"><b>${t('The plan')}</b><strong>${goalTotals()}</strong><span>${esc(goalPreview())}</span>${goalTight(goalBuilt()) ? `<em>${t('Tight: about {n} min of pure work. Give yourself more time or fewer reps.', { n: Math.ceil(goalBuilt().work) })}</em>` : ''}${cfg.goalAs !== 'ladder' ? `<button class="qt-link" id="qtGoalOpen">${t('Open it as {x} to adjust', { x: t(GOAL_AS.find(x => x[0] === cfg.goalAs)[1]) })}</button>` : ''}</div>`);
   if (f === 'emom' && named > 1) parts.push(segRow('How the moves run', 'accent', [['turns', 'Take turns'], ['all', 'All every minute']], cfg.emomStyle === 'all' ? 'all' : 'turns', 'data-style',
     cfg.emomStyle === 'all' ? t('All {n} moves inside each minute', { n: named }) : t('Minute 1 is move 1, minute 2 is move 2')));
   const more = (STEP2_MORE[f] || []).filter(k => k !== 'setRest' || cfg.sets > 1);
@@ -1008,7 +1083,7 @@ function draw() {
 function drawBody() {
   const b = host.querySelector('#qtBody'); if (!b) return draw();
   b.innerHTML = homeBody();
-  host.querySelectorAll('.qt-hdots i').forEach(i => i.classList.toggle('on', i.dataset.hd === cfg.fmt));
+  host.querySelectorAll('#qtHero .qt-hdots i').forEach(i => i.classList.toggle('on', i.dataset.hd === cfg.fmt));
   wire(b);
 }
 /* the ★: saved workouts (all modes), save this one, share it */
@@ -1467,7 +1542,8 @@ function wire(scope = host) {
   host.querySelector('[data-ldend]')?.addEventListener('change', e => { setLadderEnd(+e.target.value || 0); persist(); draw(); });
   host.querySelectorAll('[data-ldshape]').forEach(b => b.addEventListener('click', () => { cfg.ldShape = b.dataset.ldshape; persist(); draw(); }));
   $('#qtPresets')?.addEventListener('click', openPresets);
-  host.querySelectorAll('[data-vo2]').forEach(b => b.addEventListener('click', () => { cfg.vo2 = b.dataset.vo2; persist(); draw(); }));
+  host.querySelectorAll('[data-vo2]').forEach(b => b.addEventListener('click', () => { if (cfg.vo2 === b.dataset.vo2) return; cfg.vo2 = b.dataset.vo2; persist(); draw(); }));
+  wireVo2(host);
   host.querySelectorAll('[data-mr]').forEach(b => b.addEventListener('click', () => {
     const m = MV()[+b.dataset.mr], v = Number(m.reps) || 0, k = isHold(m) ? 5 : cfg.fmt === 'goal' ? (v >= 100 ? 25 : v >= 30 ? 10 : 5) : 1;
     /* seconds move 5 at a time, landing on a multiple of 5 (12 → 15, not 17) */
@@ -1498,7 +1574,7 @@ function wire(scope = host) {
   /* typing reps must not redraw (the keyboard would drop); the total line
      does not depend on reps, so nothing on screen goes stale */
   host.querySelectorAll('[data-mv]').forEach(inp => {
-    inp.addEventListener('input', () => { MV()[+inp.dataset.mv][inp.dataset.k] = inp.value; persist(); });
+    inp.addEventListener('input', () => { MV()[+inp.dataset.mv][inp.dataset.k] = inp.value; if (inp.style.width) inp.style.width = repW(inp.value); persist(); });
     inp.addEventListener('change', () => draw());   // done typing: the plan, the totals and Start catch up
     inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
   });
@@ -1671,10 +1747,24 @@ function injectStyle() {
   .qt-big span { font-family: var(--tnum); opacity: .7; }
   .qt-big:active { transform: scale(.985); }
   .qt-big:disabled { background: var(--box); color: var(--muted); box-shadow: none; font-size: 15px; font-weight: 700; border: 1px dashed var(--line); }
-  .qt-vo2h { display:grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-  .qt-vo2h button { text-align: left; background: var(--box); border: 1px solid var(--line); border-radius: 12px; color: var(--text); padding: 8px 10px; display:flex; flex-direction:column; gap: 1px; cursor: pointer; }
-  .qt-vo2h button b { font-size: 13.5px; } .qt-vo2h button small { color: var(--muted); font-size: 11px; line-height: 1.25; }
-  .qt-vo2h button.on { border-color: var(--wm-accent); box-shadow: 0 0 0 1px var(--wm-accent) inset; }
+  .qt-vo2c { margin: 0 -16px; }
+  .qt-vo2t { position: relative; display:flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 4px calc(50% - 115px) 2px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .qt-vo2t::-webkit-scrollbar { display:none; }
+  .qt-vo2k { flex: 0 0 230px; scroll-snap-align: center; display:flex; flex-direction:column; gap: 8px; text-align:left; background: var(--box); border: 1px solid var(--line); border-radius: 20px; padding: 14px 16px; color: var(--text); cursor:pointer; opacity: .55; transform: scale(.94); transition: opacity .2s, transform .2s, border-color .2s, box-shadow .2s; }
+  .qt-vo2k.on { opacity: 1; transform: none; border-color: var(--wm-accent); box-shadow: 0 0 0 1px var(--wm-accent) inset, 0 8px 28px color-mix(in srgb, var(--wm-accent) 22%, transparent); }
+  .qt-vo2h1 { display:flex; align-items:baseline; gap: 8px; }
+  .qt-vo2h1 b { flex:1; font-size: 18px; font-weight: 900; line-height: 1.15; }
+  .qt-vo2h1 em { font-style: normal; font-family: var(--tnum); font-size: 14px; font-weight: 800; color: var(--wm-accent); white-space: nowrap; }
+  .qt-vo2s { width: 100%; height: 64px; display:block; }
+  .qt-vo2s rect.h { fill: var(--wm-accent); } .qt-vo2s rect.e { fill: var(--wm-neon); opacity: .45; }
+  .qt-vo2k:not(.on) .qt-vo2s rect { fill: var(--muted); }
+  @media (max-height: 740px) { .qt-vo2s { height: 44px; } .qt-vo2k { padding: 10px 14px; gap: 6px; } }
+  .qt-vo2k small { color: var(--muted); font-size: 13px; line-height: 1.3; }
+  .qt-hdots.sm { margin-top: 8px; } .qt-hdots.sm i.on { width: 12px; }
+  .qt-hnote { display:flex; flex-wrap: wrap; justify-content:center; align-items:baseline; column-gap: 8px; padding: 2px 8px 0; text-align:center; }
+  .qt-hnote b { font-family: var(--tnum); font-size: 15px; font-weight: 800; }
+  .qt-hnote span { color: var(--muted); font-size: 13.5px; }
+  .qt-hnote.warn span { color: var(--wm-warn, #FFB020); }
   .qt-rec { display:flex; align-items:center; gap: 12px; background: var(--box); border: 1px solid var(--line); border-radius: 16px; padding: 10px 14px; }
   .qt-rec span { flex: 1; display:flex; flex-direction:column; } .qt-rec b { font-size: 15.5px; } .qt-rec small { color: var(--muted); font-size: 12px; }
   .qt-rec em { font-style: normal; font-family: var(--tnum); font-size: 22px; font-weight: 800; color: var(--wm-neon); }
@@ -1711,6 +1801,9 @@ function injectStyle() {
   .qt-goalbox { display:flex; flex-direction:column; gap: 6px; margin: 10px 0 4px; padding: 12px 14px; border-radius: 14px; background: var(--box); border: 1px solid var(--wm-neon-line); }
   .qt-goalbox b { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--wm-neon); }
   .qt-goalbox span { font-size: 14.5px; line-height: 1.4; }
+  .qt-goalbox strong { font-family: var(--tnum); font-size: 20px; font-weight: 800; }
+  .qt-goalbox em { font-style: normal; font-size: 13.5px; color: var(--wm-warn, #FFB020); }
+  .qt-goalbox.warn { border-color: var(--wm-warn, #FFB020); }
   .qt-goalbox .qt-link { align-self: flex-start; padding: 0; }
   .qt-picks { display:flex; gap: 10px; overflow-x: auto; margin: 0 calc(-1 * var(--pad)) 6px; padding: 2px var(--pad) 10px; scroll-snap-type: x mandatory; scroll-padding: 0 var(--pad); scrollbar-width: none; }
   .qt-picks::-webkit-scrollbar { display: none; }
@@ -1913,7 +2006,7 @@ function injectStyle() {
   .qt-st button:active { transform: scale(.85); }
   .qt-st b { min-width: 30px; text-align:center; font-family: var(--tnum); font-size: 18px; font-weight: 700; display:flex; align-items:baseline; justify-content:center; }
   .qt-st b small { font-size: 12px; color: var(--muted); margin-left: 1px; }
-  .qt-st input { width: 2.3ch; background:none; border:none; text-align:center; color: var(--text); font: inherit; padding:0; -moz-appearance: textfield; }
+  .qt-st input { width: 2.3ch; min-width: 2.3ch; background:none; border:none; text-align:center; color: var(--text); font: inherit; padding:0; -moz-appearance: textfield; }
   .qt-st input::-webkit-outer-spin-button, .qt-st input::-webkit-inner-spin-button { -webkit-appearance:none; }
   .qt-stl { color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; margin-right: 2px; }
   /* the unit IS the kg / lb switch: small, quiet, dotted underline */

@@ -14,6 +14,7 @@ import '../data/exercises-cardio.js';   // the cardio and boxing drills join the
 import { alternatives } from '../core/resolve.js';
 import { applyWorkTheme, clearWorkTheme } from './theme.js';
 import { installHold } from './hold.js';
+import { achieveImg, paintAchievements } from './achieve.js';
 import { makeSortable, orderAfter } from './drag.js';
 import { roundCall, cueFor, pick } from './coach-lines.js';
 import { t, t2, num, exName, exCues } from '../i18n.js';
@@ -2274,11 +2275,12 @@ function finishSession(opts = {}) {
   const prHtml = prs.length ? `<div class="card"><div class="eyebrow">${t('New PRs')}</div>${prs.map(p => `<div class="row" style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);"><span>${p.name}</span><span class="pr-flash">${prText(p)}</span></div>`).join('')}</div>` : '';
   const effHtml = effs.length ? `<div class="card"><div class="eyebrow">${t('Pace')}</div>${effs.map(e => `<div class="eff-row"><span class="eff-ico">${e.icon}</span><span>${e.text}</span></div>`).join('')}</div>` : '';
   host.innerHTML = `<div class="screen fade-in center ${S.plan.coachMode ? 'bgn' : ''}">
-    <div class="big-emoji">${prs.length ? '🏆' : '✅'}</div>
+    ${achieveImg(prs.length || test?.newBest ? 'best' : 'done', 'fin')}
     <h1 style="font-size:28px;">${t(prs.length ? 'New records!' : partial ? 'Saved.' : 'Done.')}</h1>
     <p class="muted">${S.plan.name} · ${fmt(elapsed)}${partial ? ` · ${t('ended early')}` : S.plan.quick ? '' : ` · ${t('{n} min plan', { n: S.plan.duration })}`}</p>
     <div style="height:16px;"></div>${test ? test.html : ''}${resultHtml}${tally ? tally.html : ''}${prHtml}${effHtml}
     <div class="actionbar"><button class="btn lg" id="home">${t(S.plan.finishLabel || 'Back to week')}</button></div></div>`;
   if (tally) tally.wire();
+  paintAchievements(host);
   document.getElementById('home').addEventListener('click', async () => { const leavesPage = !!S?.plan?.returnTo; try { await R.flushRunState(); } catch (e) {} if (!leavesPage) clearWorkTheme(); cb.onFinish?.(); });
 }
