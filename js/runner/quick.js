@@ -809,7 +809,7 @@ function homeRow(k) {
   const face = isTime(k)
     ? `<button class="qt-hv" data-qt="${k}">${none ? t('none') : fmt(v)}</button>`
     : `<input class="qt-hv" data-qf="${k}" type="number" inputmode="numeric" value="${none ? '' : v}" placeholder="${none ? t('none') : ''}" onfocus="this.select()" aria-label="${esc(t(label))}"/>`;
-  const unit = k === 'mins' || k === 'cap' || k === 'ftCap' ? `<small>${t('min')}</small>` : k === 'pace' ? `<small>${t('a min')}</small>` : '';
+  const unit = k === 'pace' ? `<small>${t('a min')}</small>` : '';
   return `<div class="qt-hr tone-${ROW_TONE[k] || 'accent'}"><span class="qt-hl">${t(label)}</span>
     <button class="qt-hpm" data-q="${k}" data-d="-1" aria-label="${t('Less')}">−</button>
     <span class="qt-hvw">${face}${unit}</span>
@@ -882,15 +882,50 @@ function homeButton() {
   const tot = totalSec();
   return `<button class="qt-big" id="qtGo">${t('Start')}${tot ? ` <span>${fmt(tot)}</span>` : ''}</button>`;
 }
+/* THE EXERCISE ROW (EMOM, AMRAP, For time, while there is room for a third
+   row): the move, tap to change it, and its reps with − + */
+function exerciseRow() {
+  const list = MV(), m = list[0], named = list.filter(x => String(x.name || '').trim());
+  if (!String(m?.name || '').trim()) return `<button class="qt-hr qt-hexadd" data-pick-move="0"><span>+ ${t('Add an exercise')}</span><i>›</i></button>`;
+  const sec = isHold(m);
+  return `<div class="qt-hr qt-hex"><button class="qt-hexn" data-pick-move="0"><b>${esc(mvName(m))}</b>${named.length > 1 ? `<small>+${named.length - 1}</small>` : ''}</button>
+    <button class="qt-hpm" data-mr="0" data-d="-1" aria-label="${t('Less')}">−</button>
+    <span class="qt-hvw"><input class="qt-hv" data-mv="0" data-k="reps" type="number" inputmode="numeric" placeholder="–" value="${esc(m.reps)}" onfocus="this.select()" aria-label="${t('Reps')}"/>${sec ? '<small>s</small>' : ''}</span>
+    <button class="qt-hpm" data-mr="0" data-d="1" aria-label="${t('More')}">+</button></div>`;
+}
+const EXERCISE_ROW = new Set(['emom', 'amrap', 'fortime']);
 function homeBody() {
   const rows = [...(HOME[cfg.fmt] || []).map(homeRow), ...homeExtras()];
-  const names = namedMoves().map(m => m.name);
-  const link = MOVES_OPTIONAL.has(cfg.fmt)
-    ? `<button class="qt-hlink" id="qtStep2">${names.length ? `<span>${t('Moves')}: <b>${esc(names.slice(0, 3).join(', '))}${names.length > 3 ? '…' : ''}</b></span>` : `<span>${t('Add moves')} <small>(${t('optional')})</small></span>`}<i>›</i></button>`
-    : STEP2_MORE[cfg.fmt] && !NEEDS[cfg.fmt] ? `<button class="qt-hlink" id="qtStep2"><span>${t('More options')}</span><i>›</i></button>` : '';
-  return `<div class="qt-hrows">${rows.join('')}${link}</div>
+  if (EXERCISE_ROW.has(cfg.fmt) && rows.length < 3) rows.push(exerciseRow());
+  const named = namedMoves().length;
+  /* the slim split banner above Start: exercises / options on the left, favorites on the right */
+  const left = MOVES_OPTIONAL.has(cfg.fmt)
+    ? `<button class="qt-hsb" id="qtStep2"><span>${named ? t2(named, '{n} exercise', '{n} exercises') : t('Add exercises')}</span><i>›</i></button>`
+    : STEP2_MORE[cfg.fmt] && !NEEDS[cfg.fmt] ? `<button class="qt-hsb" id="qtStep2"><span>${t('More options')}</span><i>›</i></button>` : '';
+  return `<div class="qt-hrows">${rows.join('')}</div>
     <div class="qt-hfill"></div>
+    <div class="qt-hsplit">${left}<button class="qt-hsb fav" id="qtModeFavs"><span>★ ${t('Favorites')}</span></button></div>
     ${homeButton()}`;
+}
+/* Favorites for this mode: what you saved, its ready-mades, save this one */
+function openModeFavs() {
+  const mine = favs.map((f, i) => [f, i]).filter(([f]) => f.cfg?.fmt === cfg.fmt), others = favs.length - mine.length;
+  const picks = PICKS[cfg.fmt] || [];
+  const { ov, close } = sheet(`<div class="qt-sheet-h">${t(fmtDef().name)} · ${t('Favorites')}</div>
+    ${mine.length ? `${sec('Saved')}<div class="qt-favlist">${mine.map(([f, i]) => `<button class="qt-favrow" data-fv="${i}"><span><b>${esc(f.label)}</b><small>${esc(f.sub || '')}</small></span></button>`).join('')}</div>` : ''}
+    ${picks.length ? `${sec('Quick picks')}<div class="qt-favlist">${picks.map(p => `<button class="qt-favrow" data-qpk="${p.id}"><em class="qt-lvl l${p.lvl}">${t(LEVEL[p.lvl])}</em><span><b>${t(p.name)}</b><small>${t(p.sub)}</small></span></button>`).join('')}</div>` : ''}
+    <button class="btn" id="fvSave">★ ${t('Save this timer')}</button>
+    ${others ? `<button class="qt-link center" id="fvAll">${t('All saved workouts ({n})', { n: favs.length })}</button>` : ''}
+    <button class="qt-link center" id="fvShare">${t('Share this timer')}</button>`, 'tall');
+  ov.querySelectorAll('[data-fv]').forEach(b => b.addEventListener('click', () => {
+    const f = favs[+b.dataset.fv]; if (!f) return;
+    cfg = migrate({ ...DEFAULTS, ...JSON.parse(JSON.stringify(f.cfg)), paceV: 2 }); favIdx = +b.dataset.fv;
+    persist(); close(); draw(); toast(t('Loaded: {x}', { x: f.label }));
+  }));
+  ov.querySelectorAll('[data-qpk]').forEach(b => b.addEventListener('click', () => { const p = picks.find(x => x.id === b.dataset.qpk); if (p) { close(); applyPick(p); } }));
+  ov.querySelector('#fvSave').addEventListener('click', () => { close(); openSave(); });
+  ov.querySelector('#fvAll')?.addEventListener('click', () => { close(); openFavs(); });
+  ov.querySelector('#fvShare').addEventListener('click', () => { close(); shareTimer(); });
 }
 /* what is still missing before this can start (step 2), or null */
 function missing() {
@@ -945,7 +980,6 @@ function draw() {
       ${guest ? '' : `<button class="qt-back" id="qtBack" aria-label="${t('Back')}">‹</button>`}
       <h1>${t('Training Timer')}</h1>
       ${installCard() ? `<button class="qt-getapp" id="qtIbar" aria-label="${t('Put the timer on your home screen')}">${t('Install')}</button>` : ''}
-      <button class="qt-star" id="qtFavs" aria-label="${t('Favorites')}" title="${t('Favorites')}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg></button>
       <button class="qt-star" id="qtHist" aria-label="${t('History')}" title="${t('History')}"><svg width="21" height="21" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11a8 8 0 1 0 2.4-5.7"/><path d="M3 3v4h4"/><path d="M11 7v4l3 2"/></svg></button>
       <button class="qt-star" id="qtPrefs" aria-label="${t('Timer settings')}" title="${t('Timer settings')}">⚙︎</button>
     </div>
@@ -964,7 +998,6 @@ function draw() {
   });
   $('#qtPrefs').addEventListener('click', () => openPrefs(host));
   $('#qtHist').addEventListener('click', openAllHistory);
-  $('#qtFavs').addEventListener('click', openFavs);
   wireHero();
   centerHero(false);   // right away, then again once the layout has settled (fonts, images)
   requestAnimationFrame(() => { centerHero(false); requestAnimationFrame(paintHero); });
@@ -1417,6 +1450,7 @@ function wire(scope = host) {
   $('#qtStep2')?.addEventListener('click', () => { page = 'step2'; draw(); scrollTo(0, 0); });
   $('#qtNext')?.addEventListener('click', () => { page = 'step2'; draw(); scrollTo(0, 0); });
   $('#qtHome')?.addEventListener('click', () => { page = 'home'; draw(); scrollTo(0, 0); });
+  $('#qtModeFavs')?.addEventListener('click', openModeFavs);
   host.querySelectorAll('[data-qp]').forEach(b => b.addEventListener('click', () => { const p = PICKS[cfg.fmt]?.find(x => x.id === b.dataset.qp); if (p) applyPick(p); }));
   host.querySelectorAll('[data-q]').forEach(b => b.addEventListener('click', () => { bump(b.dataset.q, Number(b.dataset.d)); persist(); draw(); }));
   host.querySelectorAll('[data-qt]').forEach(b => b.addEventListener('click', () => openTime(b.dataset.qt)));
@@ -1465,7 +1499,7 @@ function wire(scope = host) {
      does not depend on reps, so nothing on screen goes stale */
   host.querySelectorAll('[data-mv]').forEach(inp => {
     inp.addEventListener('input', () => { MV()[+inp.dataset.mv][inp.dataset.k] = inp.value; persist(); });
-    inp.addEventListener('change', () => { if (page === 'step2') draw(); });   // done typing: the plan, the totals and Start catch up
+    inp.addEventListener('change', () => draw());   // done typing: the plan, the totals and Start catch up
     inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
   });
   host.querySelectorAll('[data-mw]').forEach(b => b.addEventListener('click', () => {
@@ -1619,6 +1653,19 @@ function injectStyle() {
   .qt-hlink small, .qt-hlink b { font-weight: 500; color: var(--muted); } .qt-hlink b { color: var(--text); font-weight: 700; }
   .qt-hlink i { font-style: normal; color: var(--muted); font-size: 18px; }
   .qt-hfill { flex: 1; min-height: 4px; }
+  .qt-hex { padding-left: 8px; }
+  .qt-hexn { flex: 1; min-width: 0; display:flex; align-items:baseline; gap: 6px; background: none; border: 0; color: var(--text); text-align: left; padding: 8px; cursor: pointer; }
+  .qt-hexn b { font-size: 17px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .qt-hexn small { color: var(--muted); font-size: 12.5px; font-weight: 700; }
+  .qt-hexadd { width: 100%; justify-content: space-between; color: var(--text); font-size: 15.5px; font-weight: 700; padding: 18px 16px; border-style: dashed; cursor: pointer; }
+  .qt-hexadd i { font-style: normal; color: var(--muted); font-size: 18px; }
+  .qt-hsplit { display:flex; gap: 8px; }
+  .qt-hsb { flex: 1; min-width: 0; height: 46px; display:flex; align-items:center; justify-content:space-between; gap: 6px; background: var(--box); border: 1px solid var(--line); border-radius: 14px; color: var(--text); padding: 0 14px; font-size: 14.5px; font-weight: 700; cursor: pointer; }
+  .qt-hsb span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .qt-hsb i { font-style: normal; color: var(--muted); }
+  .qt-hsb.fav { justify-content: center; color: var(--wm-neon); border-color: var(--wm-neon-line); }
+  .qt-lvl { flex: none; font-style: normal; font-size: 10.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; border: 1px solid currentColor; }
+  .qt-lvl.l1 { color: var(--wm-neon); } .qt-lvl.l2 { color: var(--wm-accent); } .qt-lvl.l3 { color: #FF3B6B; }
   .qt-big { width: 100%; height: 66px; border: 0; border-radius: 22px; background: var(--wm-accent, var(--accent)); color: #0B0B10; font-family: var(--font); font-size: 21px; font-weight: 900;
     display:flex; align-items:center; justify-content:center; gap: 10px; cursor: pointer; box-shadow: 0 10px 30px var(--wm-accent-soft, rgba(0,0,0,.3)); }
   .qt-big span { font-family: var(--tnum); opacity: .7; }
@@ -1646,6 +1693,8 @@ function injectStyle() {
     .qt-hv { font-size: 28px; }
     .qt-hlink { padding: 10px 14px; }
     .qt-big { height: 58px; font-size: 19px; }
+    .qt-hsb { height: 40px; }
+    .qt-hexadd { padding: 13px 14px; }
   }
   /* ---- STEP 2 ---- */
   .qt-s2top { display:flex; align-items:center; gap: 10px; margin: 4px 0 14px; }
