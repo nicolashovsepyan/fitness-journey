@@ -1,6 +1,8 @@
 {
-  "version": "2026-10-20.4",
+  "version": "2026-10-20.5",
   "notes": [
+    "Step 2 exercises: the photo on the left (tap it for the demo), the name in the middle, the number on the right. Tap the top of the number for +1, the bottom for −1, the number itself to pick",
+    "The weight tag looks the same with or without a weight: \"+ lb\" until you set one, then \"35 lb\"",
     "Step 2 exercises look like the home: the name on the left, − number + on the right, \"reps\" or \"sec\" under the number",
     "Reps or seconds: tap the number and switch. A plank, a hang or a wall sit can be timed, any move can be counted",
     "Weight: tap the small tag under the name. Pick lb or kg there, every weight already set converts",
@@ -82,6 +84,8 @@
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
   ],
   "notes_fr": [
+    "Exercices de l’étape 2 : la photo à gauche (touche-la pour la démo), le nom au milieu, le nombre à droite. Touche le haut du nombre pour +1, le bas pour −1, le nombre lui-même pour choisir",
+    "L’étiquette de poids a le même look avec ou sans poids : « + lb » tant qu’il n’y en a pas, puis « 35 lb »",
     "Les exercices de l’étape 2 ressemblent à l’accueil : le nom à gauche, − nombre + à droite, « reps » ou « s » sous le nombre",
     "Reps ou secondes : touche le nombre et change. Une planche, une suspension ou une chaise peuvent être chronométrées, tout exercice peut être compté",
     "Poids : touche la petite étiquette sous le nom. Choisis lb ou kg, tous les poids déjà réglés sont convertis",

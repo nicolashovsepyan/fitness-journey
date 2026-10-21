@@ -583,20 +583,31 @@ const isHold = m => !!m && (m.unit ? m.unit === 'sec' : !!(m.exId && EXERCISES[m
 const wUnit = () => cfg.wUnit === 'kg' ? 'kg' : 'lb';
 const wStep = () => wUnit() === 'kg' ? 2.5 : 5;
 const isWeighted = m => !!(m && m.exId && EXERCISES[m.exId]?.load === 'weighted');
-/* ONE EXERCISE, STEP 2: the home's row look (Nico, 20 Oct 2026). The name
-   as a label on the left (tap: change it), the weight as a small tag under
-   it (tap: the weight picker, lb or kg), − number + on the right with
-   "reps" or "sec" under the number (tap the number: its picker, where reps
-   or seconds is chosen, and Remove). Ladder / Death By add their own rows
-   (Start at, Each step) in the same look. */
+/* ONE EXERCISE, STEP 2 (Nico's layout, 20 Oct 2026): the photo on the left
+   (tap: the demo), the name in the middle with the weight tag under it
+   (tap: the weight picker, lb or kg), and the number on the right in one
+   box: tap its top for +, its bottom for −, the number itself for the
+   picker (where reps or seconds is chosen, and Remove). A move with no
+   approved photo shows its first letter. Ladder / Death By / You go I go
+   add their own rows (Start at, Each step) in the home row look. */
 const stepper = (attr, face, unit = '', tap = '') => `<button class="qt-hpm" ${attr} data-d="-1" aria-label="${t('Less')}">−</button>
   <span class="qt-hvw col"><button class="qt-hv" ${tap}>${face}</button>${unit ? `<small>${unit}</small>` : ''}</span>
   <button class="qt-hpm" ${attr} data-d="1" aria-label="${t('More')}">+</button>`;
+const numBox = (i, face, unit) => `<div class="qt-nb">
+  <button class="qt-nbu" data-mr="${i}" data-d="1" aria-label="${t('More')}">▲</button>
+  <button class="qt-nbv" data-qr="${i}"><b>${face}</b><small>${unit}</small></button>
+  <button class="qt-nbd" data-mr="${i}" data-d="-1" aria-label="${t('Less')}">▼</button></div>`;
+function movePic(m, i) {
+  if (!m.name) return `<button class="qt-pic add" data-pick-move="${i}" aria-label="${t('Choose exercise {n}', { n: i + 1 })}">+</button>`;
+  const img = m.exId && exerciseImage(m.exId);
+  return img ? `<button class="qt-pic" data-mdemo="${i}" aria-label="${t('Watch it')}"><img src="${img}" alt="" loading="lazy" decoding="async"/></button>`
+    : `<button class="qt-pic none" data-mdemo="${i}" aria-label="${t('Watch it')}">${esc(mvName(m).charAt(0).toUpperCase())}</button>`;
+}
 function moveCard(m, i) {
   const lad = cfg.fmt === 'ladder', db = cfg.fmt === 'deathby', sec = isHold(m), goal = cfg.fmt === 'goal';
   const wt = Number(m.wt) > 0;
-  const tag = m.name ? `<button class="qt-mtag ${wt ? 'on' : ''}" data-wt="${i}">${wt ? `${num(m.wt, 1)} ${wUnit()}` : isWeighted(m) ? `${t('Weight')} · ${wUnit()}` : t('+ weight')}</button>` : '';
-  const left = `<div class="qt-mcl"><button class="qt-mcn ${m.name ? '' : 'empty'}" data-pick-move="${i}"><b>${m.name ? esc(mvName(m)) : t('Choose exercise {n}', { n: i + 1 })}</b></button>${tag}</div>`;
+  const tag = m.name ? `<button class="qt-mtag ${wt ? 'on' : ''}" data-wt="${i}">${wt ? `${num(m.wt, 1)} ${wUnit()}` : `+ ${wUnit()}`}</button>` : '';
+  const mid = `<div class="qt-mcl"><button class="qt-mcn ${m.name ? '' : 'empty'}" data-pick-move="${i}"><b>${m.name ? esc(mvName(m)) : t('Choose exercise {n}', { n: i + 1 })}</b></button>${tag}</div>`;
   const unit = sec ? t('sec') : goal ? t('total') : t('reps');
   const reps = !lad && !db && cfg.fmt !== 'tabata' && cfg.fmt !== 'timer';   // time-based: no rep target, you log reps in the workout
   const sub = [];
@@ -608,7 +619,7 @@ function moveCard(m, i) {
   if (cfg.fmt === 'igyg' && canPump(m)) sub.push(`<div class="qt-mcr"><span class="qt-hl">${t('Push-ups each')}</span>${stepper(`data-mp="${i}"`, Number(m.pumps) || 0)}</div>`);
   const note = lad ? ladderPreview(m) : db ? deathPreview(m) : '';
   return `<div class="qt-mc">
-    <div class="qt-mch">${left}${reps ? stepper(`data-mr="${i}"`, esc(m.reps) || '–', unit, `data-qr="${i}"`) : ''}</div>
+    <div class="qt-mch">${movePic(m, i)}${mid}${reps ? numBox(i, esc(m.reps) || '–', unit) : ''}</div>
     ${sub.join('')}
     ${lad && m.name ? `<div class="qt-ldm">${LD_MODES.map(([v, l]) => `<button class="${ldMode(m) === v ? 'on' : ''}" data-ldmode="${i}" data-v="${v}">${t(l)}</button>`).join('')}</div>` : ''}
     ${note ? `<div class="qt-mnote">${note}</div>` : ''}
@@ -1489,10 +1500,10 @@ function openMoveDemo(id, onUse) {
       : img ? `<img class="qt-demoimg" src="${img}" alt=""/>` : ''}
     ${cue ? `<p class="qt-democue">${esc(cue)}</p>` : ''}
     ${url ? '' : `<a class="btn secondary qt-yt" href="${videoSearch(ex.name || name)}" target="_blank" rel="noopener">▶ ${t('Watch on YouTube')}</a>`}
-    <button class="btn" id="mdUse">${t('Use this move')}</button>
-    <button class="qt-link center" id="mdBack">${t('Back to the list')}</button>`, 'tall');
+    ${onUse ? `<button class="btn" id="mdUse">${t('Use this move')}</button>
+    <button class="qt-link center" id="mdBack">${t('Back to the list')}</button>` : `<button class="btn" id="mdBack">${t('Close')}</button>`}`, 'tall');
   ov.classList.add('qt-sheet-top');
-  ov.querySelector('#mdUse').addEventListener('click', () => { close(); onUse?.(); });
+  ov.querySelector('#mdUse')?.addEventListener('click', () => { close(); onUse?.(); });
   ov.querySelector('#mdBack').addEventListener('click', close);
 }
 async function openMovePicker(i) {
@@ -1607,6 +1618,8 @@ function wire(scope = host) {
     inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
   });
   host.querySelectorAll('[data-wt]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); openWeight(+b.dataset.wt); }));
+  host.querySelectorAll('[data-mdemo]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); const m = MV()[+b.dataset.mdemo];
+    if (m?.exId) openMoveDemo(m.exId); else openMovePicker(+b.dataset.mdemo); }));
   /* an exercise name (home and step 2): the full name, smaller if it needs it */
   host.querySelectorAll('.qt-hexn b, .qt-mcn b').forEach(el => { let f = 14; el.style.fontSize = '';
     while ((el.scrollHeight > 2.3 * 1.15 * f || el.scrollWidth > el.clientWidth + 1) && f > 10) { f -= 1; el.style.fontSize = f + 'px'; }
@@ -2017,25 +2030,38 @@ function injectStyle() {
   .qt-move2 { text-align:left; }
   /* THE EXERCISE CARD, step 2: the home's row look */
   .qt-mvlist { display:flex; flex-direction:column; gap: 8px; }
-  .qt-mc { background: var(--box); border: 1px solid var(--line); border-radius: 18px; padding: 6px 7px 6px 8px; display:flex; flex-direction:column; gap: 4px; }
+  .qt-mc { background: var(--box); border: 1px solid var(--line); border-radius: 18px; padding: 8px; display:flex; flex-direction:column; gap: 4px; }
   .qt-mch, .qt-mcr { display:flex; align-items:center; gap: 8px; min-height: 58px; }
+  .qt-mch { gap: 10px; min-height: 80px; }
+  .qt-pic { flex: 0 0 64px; width: 64px; height: 64px; border-radius: 14px; background: #fff; border: 0; padding: 0; overflow: hidden; display:grid; place-items:center; cursor:pointer; }
+  .qt-pic img { width: 100%; height: 100%; object-fit: contain; }
+  .qt-pic.none { background: var(--box-2); color: var(--muted); font-size: 26px; font-weight: 800; }
+  .qt-pic.add { background: none; border: 1.5px dashed var(--line); color: var(--wm-accent); font-size: 28px; }
+  .qt-nb { flex: 0 0 76px; align-self: stretch; min-height: 78px; display:grid; grid-template-rows: 1fr auto 1fr; border-radius: 14px; background: var(--box-2); border: 1px solid var(--line); overflow: hidden; }
+  .qt-nbu, .qt-nbd { background:none; border:0; color: var(--wm-accent); font-size: 12px; line-height: 1; padding: 0; min-height: 22px; cursor:pointer; touch-action: manipulation; }
+  .qt-nbu { display:flex; align-items:flex-end; justify-content:center; padding-bottom: 1px; }
+  .qt-nbd { display:flex; align-items:flex-start; justify-content:center; padding-top: 1px; }
+  .qt-nbu:active, .qt-nbd:active { background: var(--wm-accent-soft, rgba(255,255,255,.06)); }
+  .qt-nbv { background:none; border:0; padding: 0; color: var(--text); display:flex; flex-direction:column; align-items:center; cursor:pointer; }
+  .qt-nbv b { font-family: var(--tnum); font-size: 28px; font-weight: 800; line-height: 1.05; }
+  .qt-nbv small { font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
   .qt-mcr { min-height: 50px; padding-left: 8px; border-top: 1px solid var(--line); }
   .qt-mcr .qt-hpm { width: 40px; height: 40px; }
   .qt-mcl { flex: 1; min-width: 0; display:flex; flex-direction:column; align-items:flex-start; gap: 3px; }
-  .qt-mcn { max-width: 100%; background:none; border:0; padding: 4px 8px 0; text-align:left; cursor:pointer; }
+  .qt-mcn { max-width: 100%; background:none; border:0; padding: 2px 0 0; text-align:left; cursor:pointer; }
   .qt-mcn b { font-size: 14px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--wm-neon); line-height: 1.15;
     display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: normal; }
   .qt-mcn.empty b { color: var(--wm-accent); text-transform: none; letter-spacing: 0; font-size: 15px; }
-  .qt-mtag { margin-left: 8px; height: 24px; padding: 0 9px; border-radius: 999px; border: 1px dashed var(--line); background: none; color: var(--muted); font-size: 12px; font-weight: 700; cursor:pointer; }
-  .qt-mtag.on { border-style: solid; border-color: var(--wm-accent); color: var(--wm-accent); font-family: var(--tnum); }
+  .qt-mtag { height: 24px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--wm-accent); background: none; color: var(--wm-accent); font-family: var(--tnum); font-size: 12.5px; font-weight: 700; cursor:pointer; opacity: .45; }
+  .qt-mtag.on { opacity: 1; }
   .qt-hvw.col { flex-direction: column; align-items:center; gap: 0; }
   .qt-hvw.col .qt-hv { line-height: 1.05; }
   .qt-hvw.col small { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; margin-top: -1px; }
   .qt-mc .qt-ldm { padding: 2px 6px 4px; }
   .qt-mc .qt-mnote { padding: 0 8px 6px; }
   #qtAdd.qt-hexadd { margin-top: 8px; }
-  .qt-npseg { display:flex; gap: 6px; justify-content:center; margin: 0 0 6px; }
-  .qt-npseg button { min-width: 92px; height: 38px; border-radius: 999px; border: 1px solid var(--line); background: var(--box-2); color: var(--text); font-size: 14.5px; font-weight: 700; cursor:pointer; }
+  .qt-npseg { display:flex; gap: 6px; justify-content:center; margin: 2px 0 10px; }
+  .qt-npseg button { min-width: 110px; height: 42px; border-radius: 999px; border: 1px solid var(--line); background: var(--box-2); color: var(--text); font-size: 14.5px; font-weight: 700; cursor:pointer; }
   .qt-npseg button.on { border-color: var(--wm-accent); color: var(--wm-accent); background: var(--wm-accent-soft, transparent); }
   .qt-mvdel { color: var(--wm-neon); margin: -4px 0 8px; }
   .qt-npfoot { display:block; width:100%; margin-top: 10px; padding: 10px; background:none; border:0; color: var(--wm-neon); font-size: 15px; font-weight: 700; text-align:center; cursor:pointer; }
