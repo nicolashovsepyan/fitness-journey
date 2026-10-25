@@ -1833,7 +1833,7 @@ function renderBites() {
     const i = +c.dataset.bt, before = done(), wasFull = S.bites[i] >= goal[i];
     const n = Math.min(+c.dataset.n, goal[i] - S.bites[i]); if (n <= 0) return;
     S.bites[i] += n; S.biteLog.push([i, n, Math.round(upElapsed())]); R.save(S); buzz(20);
-    beep('add');   // every add gets its little win
+    setTimeout(() => beep('add'), 0);   // every add gets its little win; after the screen, never in its way
     const after = done();
     if (after >= total) { celebrate(c, '100%'); draw(); return finish(Math.round(upElapsed())); }
     if (!wasFull && S.bites[i] >= goal[i]) celebrate(c, '✓');

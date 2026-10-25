@@ -89,7 +89,13 @@ function speakNow(text) {
   });
 }
 let voiceChain = Promise.resolve();
-export function say(text, keep = 0) {
+/* A SOUND CAN NEVER BREAK A BUTTON. Back from another app, iOS can refuse
+   a new audio context (or hand back a closed one) and the sound code
+   throws; inside a tap handler that stopped the tap itself: reps no longer
+   added, buttons dead, mid-workout (Nico, 25 Oct 2026). Every say() and
+   beep() is now caught: no sound at worst, the button always works. */
+export function say(text, keep = 0) { try { sayRaw(text, keep); } catch (e) { alog('say failed: ' + (e?.message || e)); } }
+function sayRaw(text, keep = 0) {
   if (!voiceOn || muted) return;
   /* NICO'S RECORDED VOICE first (js/voice.js); the phone's voice only for
      the words not recorded yet */
@@ -203,7 +209,8 @@ let keepalive = null;
 
    Called on every gesture; everything here is idempotent and cheap after
    the first time. */
-export function initAudio() {
+export function initAudio() { try { initAudioRaw(); } catch (e) { alog('init failed: ' + (e?.message || e)); } }
+function initAudioRaw() {
   if (NAT()) {
     if (!natStarted) { natStarted = true; nat('start'); packUrls().then(urls => urls.length && nat('preload', { urls })); }
     return;
@@ -316,7 +323,8 @@ export function audioWatch(gesture = false) {
   if (healthy()) { deadSince = 0; return notifyAudio(); }
   if (!deadSince) deadSince = Date.now();
   try { actx.resume().catch?.(() => {}); } catch (e) {}
-  if (gesture || (Date.now() - deadSince > 1500 && Date.now() - lastRebuild > 8000)) rebuild();
+  /* a tap may rebuild, but not on every tap: iOS caps how many contexts a page may make, and past it a new one throws */
+  if ((gesture && Date.now() - lastRebuild > 3000) || (Date.now() - deadSince > 1500 && Date.now() - lastRebuild > 8000)) rebuild();
   notifyAudio();
 }
 export function audioTap() {
@@ -422,7 +430,8 @@ const VOL_END = 1.0;
    instead of talking over the end-of-step chime */
 let beepUntil = 0;
 const BEEP_LEN = { go: 0.3, end: 0.5, count: 0.1, warn: 0.2, round: 0.45, start: 0.33, rep: 0.15, add: 0.25, down: 0.12, up: 0.12 };
-export function beep(kind = 'tick', at = 0) {
+export function beep(kind = 'tick', at = 0) { try { beepRaw(kind, at); } catch (e) { alog('beep failed: ' + (e?.message || e)); } }
+function beepRaw(kind = 'tick', at = 0) {
   if (muted || !beepsOn) return;
   if (NAT()) { initAudio(); if (!bgQuiet) nat('play', { events: [{ at: Date.now() + Math.max(0, at) * 1000, kind: kind === 'add' ? 'rep' : kind, gain: 1 }] }); return; }   // the app's engine has no 'add' yet
   initAudio(); audioWatch();
