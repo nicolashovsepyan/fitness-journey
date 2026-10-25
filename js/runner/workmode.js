@@ -427,7 +427,7 @@ function runOut() {
   /* the push-up test's first rep beep IS the start; an end chime on top of
      it would blur the one sound that has to be clean */
   const intoCadence = curPhase === 'ready' && block()?.format === 'cadence';
-  if (late) setMuted(true); else if (!intoCadence) { beep('end'); buzz(60); flash(); }
+  if (late) setMuted(true); else if (!intoCadence) { beep(curPhase === 'ready' ? 'go' : 'end'); buzz(60); flash(); }
   let guard = 0;
   try {
     do {
@@ -508,6 +508,7 @@ function renderGetReady() {
        for the whole session, silently.
        This is that gesture. */
     initAudio();
+    beep('go'); buzz(40);   // the start has a sound, tapped or counted down
     begin();
   });
 }
@@ -1773,7 +1774,9 @@ function renderLadder() {
    whatever pieces you can, tapped in as you go: +5, +10, +20. Each move
    fills its own bar, the total fills the big one, and it finishes itself
    at 100%. A move with no rep count (a run) is one tap: done. */
-const biteSteps = n => n <= 1 ? [1] : n <= 20 ? [1, 2, 5] : n <= 60 ? [1, 5, 10] : n <= 200 ? [5, 10, 20] : [10, 20, 50];
+/* the quick adds, small ones always there (some sets are 2 or 3 reps), and "+…" for any number */
+const biteSteps = n => n <= 1 ? [1] : n <= 20 ? [1, 2, 3, 5] : n <= 60 ? [1, 2, 3, 5, 10] : n <= 200 ? [1, 3, 5, 10, 20] : [1, 5, 10, 20, 50];
+let biteOwn = null;   // the row whose own-number stepper is open: { i, n }
 function renderBites() {
   const b = block();
   const cap = (Number(b.minutes) || 0) * 60, dur = cap || NO_CAP;
@@ -1785,7 +1788,9 @@ function renderBites() {
   const row = (it, i) => {
     const g = goal[i], d = Math.min(S.bites[i], g), full = d >= g, pct = Math.round(d / g * 100);
     const chips = full ? `<span class="bt-ok">✓</span>`
-      : (Number(it.reps) > 0 ? biteSteps(g) : [1]).map(n => `<button class="bt-c" data-bt="${i}" data-n="${n}">${Number(it.reps) > 0 ? '+' + n : t('Done ✓')}</button>`).join('');
+      : biteOwn?.i === i ? `<button class="bt-c" data-own-d="-1">−</button><b class="bt-own">${biteOwn.n}</b><button class="bt-c" data-own-d="1">+</button><button class="bt-c add" data-bt="${i}" data-n="${biteOwn.n}">${t('Add')}</button>`
+      : (Number(it.reps) > 0 ? [...biteSteps(g).filter(n => n <= g), 0] : [1]).map(n => n === 0 ? `<button class="bt-c own" data-own="${i}">+…</button>`
+        : `<button class="bt-c" data-bt="${i}" data-n="${n}">${Number(it.reps) > 0 ? '+' + n : t('Done ✓')}</button>`).join('');
     return `<div class="bt-row ${full ? 'full' : ''} ${i === now() ? 'now' : ''}">
       <div class="bt-top"><span class="mvr-n">${it.name}</span><b class="bt-v">${Number(it.reps) > 0 ? `${d}<small>/${g}</small>` : ''}</b></div>
       <div class="bt-bar"><i style="width:${pct}%"></i></div>
@@ -1819,11 +1824,16 @@ function renderBites() {
     const last = S.biteLog.pop(); if (!last) return;
     S.bites[last[0]] = Math.max(0, S.bites[last[0]] - last[1]); R.save(S); buzz(15); draw();
   });
+  biteOwn = null;
   document.getElementById('btRows').addEventListener('click', e => {
+    const o = e.target.closest('[data-own]'); if (o) { biteOwn = { i: +o.dataset.own, n: 3 }; buzz(10); return draw(); }
+    const od = e.target.closest('[data-own-d]'); if (od) { biteOwn.n = Math.max(1, Math.min(999, biteOwn.n + Number(od.dataset.ownD))); beep('tick'); return draw(); }
     const c = e.target.closest('[data-bt]'); if (!c) return;
+    biteOwn = null;
     const i = +c.dataset.bt, before = done(), wasFull = S.bites[i] >= goal[i];
     const n = Math.min(+c.dataset.n, goal[i] - S.bites[i]); if (n <= 0) return;
     S.bites[i] += n; S.biteLog.push([i, n, Math.round(upElapsed())]); R.save(S); buzz(20);
+    beep('add');   // every add gets its little win
     const after = done();
     if (after >= total) { celebrate(c, '100%'); draw(); return finish(Math.round(upElapsed())); }
     if (!wasFull && S.bites[i] >= goal[i]) celebrate(c, '✓');

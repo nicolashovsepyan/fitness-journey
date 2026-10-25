@@ -300,6 +300,9 @@ function injectStyle() {
   html.wm .bt-cs { display:flex; gap: 8px; }
   html.wm .bt-c { flex: 1; height: 40px; border-radius: 12px; background: transparent; border: 1.5px solid var(--wm-neon-line); color: #fff; font-family: var(--tnum); font-size: 17px; font-weight: 800; }
   html.wm .bt-c:active { background: var(--wm-neon-soft); border-color: var(--wm-neon); }
+  html.wm .bt-c.own { flex: 0 0 52px; color: var(--wm-neon); }
+  html.wm .bt-c.add { flex: 1.4; background: var(--wm-accent); border-color: var(--wm-accent); color: #0B0B10; font-family: inherit; }
+  html.wm .bt-own { flex: 1; display:grid; place-items:center; font-family: var(--tnum); font-size: 24px; font-weight: 800; color: #fff; }
   html.wm .bt-ok { color: var(--wm-neon); font-weight: 800; font-size: 18px; }
   html.wm .mvr-list { background: var(--box); border-radius: 16px; padding: 2px 10px; }
   html.wm .mvr { display:flex; align-items:center; gap: 8px; min-height: 44px; padding: 3px 0; border-top: 1px solid var(--line); }

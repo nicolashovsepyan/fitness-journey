@@ -421,13 +421,13 @@ const VOL_END = 1.0;
 /* when the last beep finishes, on the audio clock: the voice waits for it
    instead of talking over the end-of-step chime */
 let beepUntil = 0;
-const BEEP_LEN = { go: 0.3, end: 0.5, count: 0.1, warn: 0.2, round: 0.45, start: 0.33, rep: 0.15, down: 0.12, up: 0.12 };
+const BEEP_LEN = { go: 0.3, end: 0.5, count: 0.1, warn: 0.2, round: 0.45, start: 0.33, rep: 0.15, add: 0.25, down: 0.12, up: 0.12 };
 export function beep(kind = 'tick', at = 0) {
   if (muted || !beepsOn) return;
-  if (NAT()) { initAudio(); if (!bgQuiet) nat('play', { events: [{ at: Date.now() + Math.max(0, at) * 1000, kind, gain: 1 }] }); return; }
+  if (NAT()) { initAudio(); if (!bgQuiet) nat('play', { events: [{ at: Date.now() + Math.max(0, at) * 1000, kind: kind === 'add' ? 'rep' : kind, gain: 1 }] }); return; }   // the app's engine has no 'add' yet
   initAudio(); audioWatch();
   const w = Math.max(0, at);
-  try { if (kind !== 'count' && kind !== 'rep') beepUntil = Math.max(beepUntil, actx.currentTime + w + (BEEP_LEN[kind] || 0.1) + 0.06); } catch (e) {}
+  try { if (kind !== 'count' && kind !== 'rep' && kind !== 'add') beepUntil = Math.max(beepUntil, actx.currentTime + w + (BEEP_LEN[kind] || 0.1) + 0.06); } catch (e) {}
   if (kind === 'go') {                       // start — rising two-tone
     tone(1046, 110, w,        0.85, 'square');
     tone(1568, 190, w + 0.09, VOL,  'square');
@@ -448,6 +448,10 @@ export function beep(kind = 'tick', at = 0) {
   } else if (kind === 'start') {             // push-up test, first rep: a double beep = "go now"
     tone(1568, 110, w,        VOL, 'square');
     tone(1568, 160, w + 0.16, VOL, 'square');
+  } else if (kind === 'add') {               // reps added (For time): a quick bright up-chirp, a small win
+    tone(1318, 60, w,        VOL, 'square');
+    tone(1760, 60, w + 0.06, VOL, 'square');
+    tone(2349, 120, w + 0.12, VOL, 'square');
   } else if (kind === 'rep') {               // push-up test: one clear beep per rep
     tone(1318, 150, w, VOL, 'square');
   } else if (kind === 'down') {              // push-up test: go down — low
