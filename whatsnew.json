@@ -1,6 +1,9 @@
 {
-  "version": "2026-10-25.2",
+  "version": "2026-10-25.3",
   "notes": [
+    "For time: when the time cap hits, pick +5 min, Keep going (until your reps are done) or Finish",
+    "For time: the app tracks your sets and rounds as you enter reps. At the end: rounds, sets, average and best set per exercise, and the time of each round",
+    "For time: before saving, a last check to add reps or one more round",
     "Fixed: leaving the app mid-workout (to change a song) could stop the rep buttons and the sound when you came back. Buttons now always work, and the sound comes back on your next tap",
     "The start has a sound again: tap I'm ready, or let the countdown run out, and you hear the go beep",
     "For time: every rep you add plays a quick win sound",
@@ -88,6 +91,9 @@
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
   ],
   "notes_fr": [
+    "For Time : quand le temps limite arrive, choisis +5 min, Continuer (jusqu’à tes reps) ou Terminer",
+    "For Time : l’app suit tes séries et tes tours pendant que tu entres les reps. À la fin : tours, séries, moyenne et meilleure série par exercice, et le temps de chaque tour",
+    "For Time : avant d’enregistrer, une dernière vérification pour ajouter des reps ou un tour de plus",
     "Corrigé : quitter l’app en pleine séance (pour changer de chanson) pouvait bloquer les boutons de reps et le son au retour. Les boutons marchent toujours, et le son revient à ta prochaine touche",
     "Le départ a de nouveau un son : touche Je suis prêt, ou laisse le compte à rebours finir, et tu entends le bip de départ",
     "For Time : chaque rep ajoutée joue un petit son de victoire",

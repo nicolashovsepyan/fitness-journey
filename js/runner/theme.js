@@ -300,6 +300,18 @@ function injectStyle() {
   html.wm .bt-cs { display:flex; gap: 8px; }
   html.wm .bt-c { flex: 1; height: 40px; border-radius: 12px; background: transparent; border: 1.5px solid var(--wm-neon-line); color: #fff; font-family: var(--tnum); font-size: 17px; font-weight: 800; }
   html.wm .bt-c:active { background: var(--wm-neon-soft); border-color: var(--wm-neon); }
+  html.wm .bt-capbar .btn { flex: 1; min-width: 0; padding: 0 8px; }
+  .bt-check { position: fixed; inset: 0; z-index: 140; background: rgba(0,0,0,.6); display:flex; align-items:flex-end; }
+  .bt-checkc { width: 100%; background: var(--box, #1B1C22); border-radius: 22px 22px 0 0; padding: 18px 16px calc(18px + env(safe-area-inset-bottom)); display:flex; flex-direction:column; gap: 10px; }
+  .bt-ckr { display:flex; align-items:center; gap: 8px; } .bt-ckr span { flex: 1; font-weight: 700; font-size: 16px; }
+  .bt-ckr .bt-c { flex: 0 0 48px; } .bt-ckr b { width: 52px; text-align:center; font-family: var(--tnum); font-size: 22px; }
+  .bt-ckback { background:none; border:0; color: var(--muted); font-size: 15px; padding: 6px; }
+  .bs-top { display:flex; gap: 10px; margin: 6px 0 10px; } .bs-top div { flex: 1; text-align:center; background: var(--bg, #111); border-radius: 12px; padding: 8px; }
+  .bs-top b { display:block; font-family: var(--tnum); font-size: 28px; } .bs-top small { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+  .bs-row { display:flex; align-items:baseline; gap: 8px; padding: 7px 0; border-top: 1px solid var(--line); text-align:left; }
+  .bs-row span { font-weight: 700; } .bs-row small { flex: 1; color: var(--muted); font-size: 12.5px; } .bs-row b { font-family: var(--tnum); font-size: 18px; }
+  .bs-rh { margin-top: 10px; color: var(--muted); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; text-align:left; }
+  .bs-rts { display:flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; } .bs-rt { background: var(--bg, #111); border-radius: 10px; padding: 5px 9px; font-family: var(--tnum); font-size: 14px; } .bs-rt i { font-style: normal; color: var(--muted); margin-right: 6px; font-size: 11px; }
   html.wm .bt-c.own { flex: 0 0 52px; color: var(--wm-neon); }
   html.wm .bt-c.add { flex: 1.4; background: var(--wm-accent); border-color: var(--wm-accent); color: #0B0B10; font-family: inherit; }
   html.wm .bt-own { flex: 1; display:grid; place-items:center; font-family: var(--tnum); font-size: 24px; font-weight: 800; color: #fff; }
