@@ -1,6 +1,7 @@
 {
-  "version": "2026-10-26.1",
+  "version": "2026-10-26.2",
   "notes": [
+    "Every mode's second screen has the ⚙︎ too: change your setup, voice or countdown from anywhere",
     "New: set up your timer once. Pounds or kilos, your body weight, age, male or female, and language",
     "Every weight in every mode now shows in your unit, from setup to the end of the workout. No more switching lb and kg on each exercise",
     "Change any of it anytime: ⚙︎ Timer settings, You. Switching lb and kg converts every weight you already set",
@@ -94,6 +95,7 @@
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
   ],
   "notes_fr": [
+    "Le deuxième écran de chaque mode a aussi le ⚙︎ : change tes réglages, la voix ou le compte à rebours de partout",
     "Nouveau : règle ton minuteur une seule fois. Livres ou kilos, ton poids de corps, ton âge, homme ou femme, et la langue",
     "Chaque poids, dans chaque mode, s’affiche dans ton unité, du réglage à la fin de la séance. Plus besoin de changer lb et kg sur chaque exercice",
     "Change tout ça à tout moment : ⚙︎ Réglages du minuteur, Toi. Passer de lb à kg convertit tous les poids déjà réglés",

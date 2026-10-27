@@ -1009,6 +1009,7 @@ function step2Body() {
       ${modeIcon(f, 'qt-micon s2')}
       <span class="qt-s2t"><b>${t(def.name)}</b><small>${esc(summary() || '')}</small></span>
       ${NEEDS[f] ? `<em class="qt-s2step">${t('Step 2 of 2')}</em>` : ''}
+      <button class="qt-star qt-s2gear" id="qtS2Prefs" aria-label="${t('Timer settings')}">⚙︎</button>
     </div>
     ${lastLine()}
     ${parts.join('')}
@@ -1581,6 +1582,7 @@ function wire(scope = host) {
   $('#qtStep2')?.addEventListener('click', () => { page = 'step2'; draw(); scrollTo(0, 0); });
   $('#qtNext')?.addEventListener('click', () => { page = 'step2'; draw(); scrollTo(0, 0); });
   $('#qtHome')?.addEventListener('click', () => { page = 'home'; draw(); scrollTo(0, 0); });
+  $('#qtS2Prefs')?.addEventListener('click', () => openPrefs(document.body));   // the same settings as the home's gear, from every mode's step 2
   $('#qtModeFavs')?.addEventListener('click', openModeFavs);
   host.querySelectorAll('[data-qp]').forEach(b => b.addEventListener('click', () => { const p = PICKS[cfg.fmt]?.find(x => x.id === b.dataset.qp); if (p) applyPick(p); }));
   host.querySelectorAll('[data-q]').forEach(b => b.addEventListener('click', () => { bump(b.dataset.q, Number(b.dataset.d)); persist(); draw(); }));
@@ -1834,6 +1836,9 @@ function injectStyle() {
   .qt-micon.s2 { width: 52px; height: 52px; }
   .qt-s2t { flex: 1; min-width: 0; display:flex; flex-direction:column; } .qt-s2t b { font-size: 22px; font-weight: 900; }
   .qt-s2t small { color: var(--muted); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .qt-s2gear { flex: none; }
+  .qt-s2top .qt-s2t b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  @media (max-width: 420px) { .qt-s2step { display: none; } }   /* a phone: the name and the gear need the room more than the step count */
   .qt-s2step { font-style: normal; font-size: 11px; font-weight: 800; letter-spacing: .1em; color: var(--muted); text-transform: uppercase; white-space: nowrap; }
   .qt-s2 .qt-bar .qt-big { box-shadow: 0 10px 30px var(--wm-accent-soft, rgba(0,0,0,.3)); }
   /* the ★ sheet */
