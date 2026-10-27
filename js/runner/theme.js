@@ -218,6 +218,16 @@ function injectStyle() {
   html.wm .wm-rstep button { width: 42px; height: 42px; background:none; border:none; color: var(--text); font-size: 22px; cursor:pointer; }
   html.wm .wm-rstep b { min-width: 42px; text-align:center; font-family: var(--tnum); font-size: 18px; color: var(--wm-ready); }
   html.wm .wm-seg3 { display:flex; gap: 6px; }
+  html.wm .me-intro { color: var(--muted); font-size: 14px; line-height: 1.4; text-align:center; margin: 0 4px 6px; }
+  html.wm .me-nums { display:flex; gap: 12px; }
+  html.wm .me-nums label { flex: 1; min-width: 0; display:flex; flex-direction:column; gap: 6px; }
+  html.wm .me-nums label + label { flex: 0 0 34%; }
+  html.wm .me-nums b { font-size: 16px; } html.wm .me-nums small { color: var(--muted); font-size: 12px; }
+  html.wm .me-in { display:flex; align-items:center; gap: 6px; background: var(--box); border: 1px solid var(--line); border-radius: 12px; padding: 0 12px; height: 52px; }
+  html.wm .me-in input { flex: 1; min-width: 0; width: 100%; background: none; border: 0; color: var(--text); font-family: var(--tnum); font-size: 24px; font-weight: 800; padding: 0; -moz-appearance: textfield; }
+  html.wm .me-in input::-webkit-outer-spin-button, html.wm .me-in input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  html.wm .me-in i { font-style: normal; color: var(--muted); font-weight: 700; }
+  html.wm .me-where { color: var(--muted); font-size: 13px; text-align:center; margin: 12px 0 0; }
   /* the coach voice: Nico, Nico female, then the studio voices, two a row */
   html.wm .wm-vstate { font-size: 12.5px; color: var(--muted); margin-top: 8px; } html.wm .wm-vstate.ready { color: var(--wm-neon); } html.wm .wm-vstate.failed { color: #FF3B6B; }
   html.wm .wm-vks { display:grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }

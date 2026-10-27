@@ -1,6 +1,9 @@
 {
-  "version": "2026-10-25.3",
+  "version": "2026-10-26.1",
   "notes": [
+    "New: set up your timer once. Pounds or kilos, your body weight, age, male or female, and language",
+    "Every weight in every mode now shows in your unit, from setup to the end of the workout. No more switching lb and kg on each exercise",
+    "Change any of it anytime: ⚙︎ Timer settings, You. Switching lb and kg converts every weight you already set",
     "For time: when the time cap hits, pick +5 min, Keep going (until your reps are done) or Finish",
     "For time: the app tracks your sets and rounds as you enter reps. At the end: rounds, sets, average and best set per exercise, and the time of each round",
     "For time: before saving, a last check to add reps or one more round",
@@ -91,6 +94,9 @@
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
   ],
   "notes_fr": [
+    "Nouveau : règle ton minuteur une seule fois. Livres ou kilos, ton poids de corps, ton âge, homme ou femme, et la langue",
+    "Chaque poids, dans chaque mode, s’affiche dans ton unité, du réglage à la fin de la séance. Plus besoin de changer lb et kg sur chaque exercice",
+    "Change tout ça à tout moment : ⚙︎ Réglages du minuteur, Toi. Passer de lb à kg convertit tous les poids déjà réglés",
     "For Time : quand le temps limite arrive, choisis +5 min, Continuer (jusqu’à tes reps) ou Terminer",
     "For Time : l’app suit tes séries et tes tours pendant que tu entres les reps. À la fin : tours, séries, moyenne et meilleure série par exercice, et le temps de chaque tour",
     "For Time : avant d’enregistrer, une dernière vérification pour ajouter des reps ou un tour de plus",

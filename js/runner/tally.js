@@ -7,30 +7,18 @@
    ============================================================ */
 import { storage } from '../core/storage.js';
 import { activeUserId } from '../users.js';
+import { getMe, setMe } from '../me.js';
 import { EXERCISES } from '../data/exercises.js';
 
 const LB = 2.20462;
 
-/* BODY WEIGHT: the dashboard's latest weigh-in, else the onboarding
-   weight, else what a guest typed on the result screen */
+/* BODY WEIGHT: the person's (js/me.js: the dashboard's latest weigh-in,
+   else the profile, else what was typed in the timer) */
 export function bodyWeight() {
-  const uid = activeUserId();
-  try {
-    const dash = JSON.parse(localStorage.getItem(`fj.v1.${uid}.dash`) || 'null');
-    const last = dash?.weights?.length ? Number(dash.weights[dash.weights.length - 1][1]) : null;
-    if (last > 0) return { kg: last, unit: dash.unit || profileUnit(uid) || 'lb', from: 'dashboard' };
-  } catch (e) {}
-  try {
-    const p = JSON.parse(localStorage.getItem(`fj.v1.profile.${uid}`) || 'null');
-    if (Number(p?.a?.weightKg) > 0) return { kg: Number(p.a.weightKg), unit: p.a.unit || 'lb', from: 'profile' };
-  } catch (e) {}
-  try { const g = JSON.parse(localStorage.getItem('fj.timerBody') || 'null'); if (g?.kg > 0) return { ...g, from: 'timer' }; } catch (e) {}
-  return null;
+  const me = getMe();
+  return me.weightKg > 0 ? { kg: me.weightKg, unit: me.unit, from: 'me' } : null;
 }
-function profileUnit(uid) { try { return JSON.parse(localStorage.getItem(`fj.v1.profile.${uid}`) || 'null')?.a?.unit; } catch (e) { return null; } }
-export function setTimerBodyWeight(value, unit) {
-  try { localStorage.setItem('fj.timerBody', JSON.stringify({ kg: unit === 'kg' ? value : value / LB, unit })); } catch (e) {}
-}
+export function setTimerBodyWeight(value, unit) { setMe({ weightKg: unit === 'kg' ? value : value / LB }); }
 
 /* the share of body weight a bodyweight move lifts (rough, published
    figures); 0 for holds and moves where it means little */

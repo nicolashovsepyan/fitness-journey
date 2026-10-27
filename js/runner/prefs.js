@@ -8,7 +8,8 @@ import { setVoice, setBeeps, say, beep, setSilentOverride } from '../timer.js';
 import { attachSheet } from './sheet-close.js';
 import { audioLog } from '../timer.js';
 import { setVoiceKind, studioVoices, studioReady, loadVoicePack, voicePackState } from '../voice.js';
-import { t, lang, setLang } from '../i18n.js';
+import { t } from '../i18n.js';
+import { openMeSheet, meLine } from './me-sheet.js';
 import { vibeOptions, setVibe } from './theme.js';
 import { checkForUpdate, runningVersion } from '../update-banner.js';
 import { PRESETS, designFor, ringChoice, chooseRing, ringHTML, ringBaseCss, setRingProgress } from './ring.js';
@@ -151,8 +152,8 @@ export function openPrefs(host) {
   const draw = () => {
     ov.innerHTML = `<div class="wm-sheet-card">
       <div class="wm-sheet-h">${t('Timer settings')}</div>
-      <div class="wm-vrow"><div class="wm-vl"><b>${t('Language')}</b><small>${t('The whole app, and the coach voice')}</small></div>
-        <div class="wm-seg3">${[['en', 'English'], ['fr', 'Français']].map(([v, l]) => `<button class="${lang() === v ? 'on' : ''}" data-lang="${v}">${l}</button>`).join('')}</div></div>
+      <button class="wm-lookrow" id="wmMe"><span><b>${t('You')}</b><small>${meLine()}</small></span><i>›</i></button>
+      <div class="wm-note">${t('Weights in lb or kg, body weight, age, male or female, language')}</div>
       <div class="wm-vrow wm-readyrow"><div class="wm-vl"><b>${t('Get-ready countdown')}</b><small>${t('Seconds to get in position before every timer starts')}</small></div>
         <div class="wm-rstep"><button data-rd="-1" aria-label="Less">−</button><b>${prefs.ready}s</b><button data-rd="1" aria-label="More">+</button></div></div>
       <div class="wm-vrow wm-vkrow"><div class="wm-vl"><b>${t('Coach voice')}</b><small>${t('Pick who coaches you. The coaches speak English; in French the phone reads the lines.')}</small></div>
@@ -175,8 +176,7 @@ export function openPrefs(host) {
       draw();
     }));
     ov.querySelector('#wmPrefDone').addEventListener('click', close);
-    /* a new language: everything on screen redraws in it */
-    ov.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => { setLang(b.dataset.lang); draw(); }));
+    ov.querySelector('#wmMe').addEventListener('click', () => openMeSheet(document.body, { onDone: draw }));
     ov.querySelectorAll('[data-vk]').forEach(b => b.addEventListener('click', () => { set('voicePicked', true); set('voiceKind', b.dataset.vk); say('Get ready.'); draw(); }));
     ov.querySelectorAll('[data-rd]').forEach(b => b.addEventListener('click', () => { set('ready', Math.max(0, Math.min(30, (prefs.ready ?? 8) + Number(b.dataset.rd)))); draw(); }));
     if (!draw.studio) { draw.studio = 1; studioReady.then(() => { if (ov.isConnected) draw(); }); }

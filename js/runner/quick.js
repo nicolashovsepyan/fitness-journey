@@ -23,6 +23,8 @@ import { installHold } from './hold.js';
 import { makeSortable } from './drag.js';
 import { attachSheet } from './sheet-close.js';
 import { readHistory, sigOf, showWeight } from './tally.js';
+import { unit as meUnit, meAsked, setMe, convertWeight } from '../me.js';
+import { openMeSheet } from './me-sheet.js';
 import { ringHTML, ringBaseCss, ringDesign } from './ring.js';
 import { t, t2, num, exName, exCues, lang, setLang } from '../i18n.js';
 import { PICKS, LEVEL } from './quick-picks.js';
@@ -186,6 +188,8 @@ export async function renderQuick(el, opts = {}) {
   } catch (e) {}
   let saved = null;
   try { saved = await storage().getDevicePref(PREF, null); } catch (e) {}
+  /* someone who already picked kg in the timer keeps it as their unit */
+  if (!meAsked() && saved?.last?.wUnit === 'kg' && !localStorage.getItem('fj.me')) setMe({ unit: 'kg' });
   cfg = migrate({ ...DEFAULTS, ...(saved?.last || {}) });
   /* the push-up test first shipped at 25 a minute; the standard is 20 */
   if (saved?.last && saved.last.paceV !== 2) { cfg.pace = 20; cfg.paceV = 2; }
@@ -204,9 +208,18 @@ export async function renderQuick(el, opts = {}) {
   } catch (e) {}
   draw();
   if (shared) toast(t('Timer loaded: {x}', { x: planName() }));
+  /* THE ONE-TIME SETUP: lb or kg, body weight, age, male or female, language */
+  if (!meAsked()) setTimeout(() => { if (host?.isConnected) openMeSheet(document.body, { first: true, onDone: () => { host.innerHTML = ''; draw(); } }); }, 400);
+  /* lb ⇄ kg from Timer settings: every weight set converts, the screen follows */
+  if (!window.__qtUnit) { window.__qtUnit = 1; document.addEventListener('fj-unit', e => { if (!cfg) return; convertAll(cfg.wUnit || 'lb', e.detail); persist(); if (host?.isConnected) draw(); }); }
 }
 /* setups saved before Intervals and Countdown became Timer */
 function migrate(c) {
+  /* weights were saved in the timer's own lb / kg (lb before it existed): now in the person's unit */
+  const wu = meUnit();
+  if ((c.wUnit || 'lb') !== wu) Object.values(c.movesBy || {}).forEach(list => (list || []).forEach(m => { if (Number(m.wt) > 0) m.wt = convertWeight(Number(m.wt), c.wUnit || 'lb', wu); }));
+  if (Array.isArray(c.moves) && (c.wUnit || 'lb') !== wu) c.moves.forEach(m => { if (Number(m.wt) > 0) m.wt = convertWeight(Number(m.wt), c.wUnit || 'lb', wu); });
+  c.wUnit = wu;
   if (c.fmt === 'intervals') Object.assign(c, { fmt: 'timer', tWork: c.work, tRest: c.rest, tRounds: c.rounds });
   if (c.fmt === 'countdown') Object.assign(c, { fmt: 'timer', tWork: Math.max(5, (c.cdMin || 0) * 60 + (c.cdSec || 0)), tRest: 0, tRounds: 1, sets: 1 });
   if (!FORMATS.some(f => f.id === c.fmt)) c.fmt = 'emom';
@@ -578,9 +591,12 @@ function segRow(label, tone, opts, cur, attr, foot = '') {
 /* a timed move (plank, hang, wall sit): its numbers are seconds */
 /* (or any move set to seconds: `unit`, picked in its number picker) */
 const isHold = m => !!m && (m.unit ? m.unit === 'sec' : !!(m.exId && EXERCISES[m.exId]?.measure === 'hold'));
-/* weights in lb or kg: one choice for the whole timer, switched in the
-   weight picker; a switch converts every weight already set */
-const wUnit = () => cfg.wUnit === 'kg' ? 'kg' : 'lb';
+/* weights in lb or kg: the person's choice (js/me.js, asked once, changed
+   in Timer settings → You), the same everywhere; a change converts every
+   weight already set (fj-unit) */
+const wUnit = () => meUnit();
+/* a saved weight (history), shown in today's unit */
+const showW = (v, from) => `${num(convertWeight(Number(v), from || 'lb', wUnit()), 1)} ${wUnit()}`;
 const wStep = () => wUnit() === 'kg' ? 2.5 : 5;
 const isWeighted = m => !!(m && m.exId && EXERCISES[m.exId]?.load === 'weighted');
 /* ONE EXERCISE, STEP 2 (Nico's layout, 20 Oct 2026): the photo on the left
@@ -682,7 +698,7 @@ function openHistory() {
   const runs = pastRuns();
   const { ov, close } = sheet(`<div class="qt-sheet-h">${t(fmtDef().name)} · ${t('history')}</div>
     <div class="qt-hist">${runs.map(r => `<div class="qt-hrow"><div class="qt-hh"><b>${shortDate(r.at)}</b><span>${t('{n} reps', { n: r.total })}${r.loadKg ? ` · ${showWeight(r.loadKg, wUnit())}` : ''}${r.seconds ? ` · ${fmt(r.seconds)}` : ''}${r.partial ? ` · ${t('ended early')}` : ''}</span></div>
-      <small>${r.moves.map(m => `${esc(m.name)} ${m.reps}${m.weight ? ` @ ${m.weight} ${m.wUnit || 'lb'}` : ''}`).join(' · ')}</small></div>`).join('')}</div>
+      <small>${r.moves.map(m => `${esc(m.name)} ${m.reps}${m.weight ? ` @ ${showW(m.weight, m.wUnit)}` : ''}`).join(' · ')}</small></div>`).join('')}</div>
     <button class="btn" id="qtHistOk">${t('Close')}</button>`, 'tall');
   ov.querySelector('#qtHistOk').addEventListener('click', close);
 }
@@ -696,7 +712,7 @@ function openAllHistory() {
     ${hist.length ? `<div class="qt-hweek"><div><b>${week.length}</b><small>${t('workouts this week')}</small></div><div><b>${num(sum(week, 'total'))}</b><small>${t('reps')}</small></div><div><b>${fmt(sum(week, 'seconds'))}</b><small>${t('time')}</small></div></div>` : `<p class="muted center">${t('Your workouts show up here when you finish them.')}</p>`}
     <div class="qt-hist">${hist.map((r, i) => `<div class="qt-hrow"><div class="qt-hh"><b>${shortDate(r.at)} · ${esc(r.title || '')}</b></div>
       <div class="qt-hnums">${r.seconds ? `<span>${fmt(r.seconds)}</span>` : ''}<span>${t('{n} reps', { n: r.total })}</span>${r.loadKg ? `<span>${showWeight(r.loadKg, wUnit())}</span>` : ''}${r.partial ? `<span>${t('ended early')}</span>` : ''}</div>
-      <small>${r.moves.map(m => `${esc(m.name)} ${m.reps}${m.weight ? ` @ ${m.weight} ${m.wUnit || 'lb'}` : ''}`).join(' · ')}</small>
+      <small>${r.moves.map(m => `${esc(m.name)} ${m.reps}${m.weight ? ` @ ${showW(m.weight, m.wUnit)}` : ''}`).join(' · ')}</small>
       ${r.cfg ? `<div class="qt-hacts"><button data-hagain="${i}">${t('Do it again')}</button><button data-hsave="${i}">★ ${t('Save')}</button></div>` : ''}</div>`).join('')}</div>
     <button class="btn" id="qtAllHistOk">${t('Close')}</button>`, 'tall');
   ov.querySelector('#qtAllHistOk').addEventListener('click', close);
@@ -1036,7 +1052,7 @@ function draw() {
     const { ov } = sheet(installCard().replace(/<button class="qt-ix"[^>]*>✕<\/button>/, ''));
     wireInstall(sel => ov.querySelector(sel));
   });
-  $('#qtPrefs').addEventListener('click', () => openPrefs(host));
+  $('#qtPrefs').addEventListener('click', () => openPrefs(document.body));   // on the page, not the timer's screen: a redraw (new unit, new language) keeps it open
   $('#qtHist').addEventListener('click', openAllHistory);
   wireHero();
   centerHero(false);   // right away, then again once the layout has settled (fonts, images)
@@ -1093,6 +1109,7 @@ function pack() {
   if (cfg.fmt === 'ladder') keep.push('ldShape');
   if (cfg.fmt === 'timer') keep.push('sets', 'setRest');
   if (cfg.fmt === 'vo2') keep.push('vo2');
+  keep.push('wUnit');   // the weights' unit, so the link opens them right in the other person's unit
   const o = {}; keep.forEach(k => { if (cfg[k] != null) o[k] = cfg[k]; });
   const mv = MV().filter(m => String(m.name || '').trim()).map(m => ({ name: m.name, reps: m.reps || '', ...(m.exId ? { exId: m.exId } : {}), ...(cfg.fmt === 'ladder' || cfg.fmt === 'deathby' ? { ldStart: ldStart(m), ldStep: ldStep(m) } : {}), ...(Number(m.wt) > 0 ? { wt: Number(m.wt) } : {}) }));
   if (mv.length && fmtDef().moves) o.moves = mv;
@@ -1311,20 +1328,16 @@ function openReps(i) {
       next: (v, d) => { const p = v + (d < 0 ? -1 : 0), k = hold ? 5 : goal ? (p >= 100 ? 25 : p >= 30 ? 10 : 5) : 1; return d > 0 ? Math.floor(v / k) * k + k : Math.ceil(v / k) * k - k; } }; },
     v => { m.reps = v || ''; });
 }
-/* lb or kg, for the whole timer: every weight already set is converted */
-function setWUnit(u) {
-  if (u === wUnit()) return;
-  const toKg = u === 'kg';
-  Object.values(cfg.movesBy || {}).forEach(list => (list || []).forEach(m => { const v = Number(m.wt) || 0; if (!v) return;
-    m.wt = toKg ? Math.max(2.5, Math.round(v / 2.20462 / 2.5) * 2.5) : Math.max(5, Math.round(v * 2.20462 / 5) * 5); }));
-  cfg.wUnit = u;
+/* every weight set in the timer (all types, and the saved timers), from one unit to the other */
+function convertAll(from, to) {
+  const conv = c => Object.values(c?.movesBy || {}).forEach(list => (list || []).forEach(m => { if (Number(m.wt) > 0) m.wt = convertWeight(Number(m.wt), from, to); }));
+  conv(cfg); favs.forEach(f => { if ((f.cfg?.wUnit || from) !== to) { conv(f.cfg); if (f.cfg) f.cfg.wUnit = to; } });
+  cfg.wUnit = to;
 }
 function openWeight(i) {
   const m = MV()[i]; if (!m) return;
   numSheet(() => ({ label: `${mvName(m)} · ${t('weight')}`, v: Number(m.wt) || 0, lo: 0, hi: 1000, dec: true, unit: wUnit(),
     chips: wUnit() === 'kg' ? [5, 8, 12, 16, 20, 24] : [10, 15, 25, 35, 45, 53],
-    seg: { opts: [['lb', 'lb'], ['kg', 'kg']], cur: wUnit(), onPick: (u, v) => { if (u === wUnit()) return v; setWUnit(u);
-      return v ? (u === 'kg' ? Math.max(2.5, Math.round(v / 2.20462 / 2.5) * 2.5) : Math.max(5, Math.round(v * 2.20462 / 5) * 5)) : 0; } },
     foot: Number(m.wt) > 0 ? { label: 'No weight', run: () => { m.wt = ''; } } : null,
     next: (v, d) => { const k = wStep(); return d > 0 ? Math.floor(v / k + 1e-9) * k + k : Math.max(0, Math.ceil(v / k - 1e-9) * k - k); } }),
     v => { m.wt = v || ''; });

@@ -15,10 +15,11 @@ import { alternatives } from '../core/resolve.js';
 import { applyWorkTheme, clearWorkTheme } from './theme.js';
 import { installHold } from './hold.js';
 import { achieveImg, paintAchievements } from './achieve.js';
+import { unit as meUnit, setMe, convertWeight } from '../me.js';
 import { makeSortable, orderAfter } from './drag.js';
 import { roundCall, cueFor, pick } from './coach-lines.js';
 import { t, t2, num, exName, exCues } from '../i18n.js';
-import { bodyWeight, setTimerBodyWeight, moveLoadKg, showWeight, needsBody, readHistory, addHistory, sigOf } from './tally.js';
+import { bodyWeight, moveLoadKg, showWeight, needsBody, readHistory, addHistory, sigOf } from './tally.js';
 import { ringHTML, ringBaseCss, RING_R, snapToSegments } from './ring.js';
 import { loadPrefs, pref, openPrefs } from './prefs.js';
 import { say, beep, buzz, fmt, initAudio, stopAudio, keepAwake, releaseAwake, setMuted, audioWatch, audioTap, audioHealthy, nativeAudio, nativeSchedule, nativeCancel, lineEvent, setBackgroundQuiet, audioRefresh, alog } from '../timer.js';
@@ -26,7 +27,10 @@ import { say, beep, buzz, fmt, initAudio, stopAudio, keepAwake, releaseAwake, se
 const UNIT = { reps: 'reps', hold: 'sec', cals: 'cals', rounds: 'rounds' };
 /* "1 rep", "10 reps" */
 const qty = (n, unit = 'reps') => `${n} ${t(Number(n) === 1 && /s$/.test(unit) && unit !== 'sec' ? unit.slice(0, -1) : unit)}`;
-const WUNIT = 'lb';                       // weight unit (Nicolas trains in pounds)
+/* the weight unit: the person's (js/me.js; asked once, changed in Timer settings → You) */
+const wu = () => meUnit();
+/* a move's weight in today's unit, whatever it was set in */
+const wIn = it => convertWeight(Number(it.weight), it.wUnit || 'lb', wu());
 let S = null, host = null, cb = {}, ticker = null, onStepDone = null, curVal = 0, roundBuf = {};
 let lastSec = null;                       // last whole-second of the active step (for once-per-second beeps)
 let curStepKind = 'rest', saidHalf = false, halfStepKey = null;   // halfway-cue tracking
@@ -245,7 +249,7 @@ function mvRow(it, { val = null, unit = '', step = '', wIdx = null } = {}) {
   const right = step
     ? `<span class="mvr-st"><button ${step} data-d="-1" aria-label="${t('Less')}">−</button><b>${v || 0}</b><button ${step} data-d="1" aria-label="${t('More')}">+</button></span>`
     : v ? `<b class="mvr-v">${v}</b>` : '';
-  const wt = Number(it.weight) > 0 ? ` <small class="mvr-wt">${it.weight} ${it.wUnit || 'lb'}</small>` : '';
+  const wt = Number(it.weight) > 0 ? ` <small class="mvr-wt">${num(wIn(it), 1)} ${wu()}</small>` : '';
   return `<div class="mvr">${rowVid(it) || '<span class="mvr-sp"></span>'}<span class="mvr-n"${wIdx != null ? ` data-mvw="${wIdx}" role="button"` : ''}>${it.name}${wt}</span>${right}</div>`;
 }
 const mvUnit = it => UNIT[it.measure] === 'sec' ? 'sec' : '';
@@ -920,7 +924,7 @@ function renderSets() {
     const lastW = (step && step.weight != null) ? step.weight
                 : (item.exId ? (store.getLast(item.exId)?.weight ?? '') : '') || (item.weight ?? '');
     const wField = weighted
-      ? `<div class="wfield"><input id="wMain" type="number" inputmode="decimal" placeholder="${t('weight')}" value="${lastW}" onfocus="this.select()"/><span class="u">${WUNIT}</span></div>` : '';
+      ? `<div class="wfield"><input id="wMain" type="number" inputmode="decimal" placeholder="${t('weight')}" value="${lastW}" onfocus="this.select()"/><span class="u">${wu()}</span></div>` : '';
     const inputArea = uni
       ? `<div class="sides">
            <div class="side-col"><div class="lbl">${t('Left')}</div><input class="big-input" id="valL" type="number" inputmode="numeric" value="${base}" onfocus="this.select()"/></div>
@@ -1096,7 +1100,7 @@ function renderSuperset() {
      starting weight when there is none */
   const lastW = (item.exId ? (store.getLast(item.exId)?.weight ?? '') : '') || (item.weight ?? '');
   const wField = weighted
-    ? `<div class="wfield"><input id="wMain" type="number" inputmode="decimal" placeholder="${t('weight')}" value="${lastW}" onfocus="this.select()"/><span class="u">${WUNIT}</span></div>` : '';
+    ? `<div class="wfield"><input id="wMain" type="number" inputmode="decimal" placeholder="${t('weight')}" value="${lastW}" onfocus="this.select()"/><span class="u">${wu()}</span></div>` : '';
   const unitLbl = `${t(UNIT[item.measure])}${item.repsText ? ` · ${t('aim {x}', { x: item.repsText })}` : ''}`;
   shell(`<div class="rounds">${dots}</div>
     <div class="now-ex"><div class="label">${label}</div><div class="name">${item.name}</div></div>${exActions(item)}
@@ -1137,7 +1141,7 @@ function renderSupersetRest() {
   const justDid = b.items.map((it, i) => {
     const last = S.captured[b.id][i].sets.at(-1);
     const v = it.measure === 'hold' ? `${last?.value ?? '–'} s` : t('{n} reps', { n: last?.value ?? '–' });
-    return `<div class="ci"><span class="nm">${it.pair ? it.pair + ' · ' : ''}${it.name}</span><span class="tg">${v}${last?.weight != null ? ` @ ${last.weight} ${WUNIT}` : ''}</span></div>`;
+    return `<div class="ci"><span class="nm">${it.pair ? it.pair + ' · ' : ''}${it.name}</span><span class="tg">${v}${last?.weight != null ? ` @ ${last.weight} ${wu()}` : ''}</span></div>`;
   }).join('');
   shell(`<div class="center"><div class="eyebrow">${t('Round {a} of {b} done · rest', { a: S.round, b: rounds })}</div></div>
     <div class="rounds">${dots}</div>
@@ -1330,23 +1334,21 @@ function editAmrapRound(k, done) {
   draw(); host.appendChild(ov); requestAnimationFrame(fitNames);
 }
 
-/* A MOVE'S WEIGHT, MID-WORKOUT: tap its name. 5 lb / 2.5 kg steps, the
-   unit switches by tapping it, 0 takes the weight off. */
+/* A MOVE'S WEIGHT, MID-WORKOUT: tap its name. 5 lb / 2.5 kg steps in the
+   person's unit, 0 takes the weight off. */
 function editMoveWeight(b, i, done) {
   const it = b.items[i]; if (!it) return;
   const ov = document.createElement('div'); ov.className = 'overlay';
-  let unit = it.wUnit || 'lb', v = Number(it.weight) || 0;
+  const unit = wu(); let v = Number(it.weight) > 0 ? wIn(it) : 0;
   const draw = () => {
     ov.innerHTML = `<div class="overlay-card"><div class="eyebrow">${t('Weight')}</div>
       <h2 style="margin:6px 0 14px;">${it.name}</h2>
       <div class="mvr-list"><div class="mvr"><span class="mvr-sp"></span><span class="mvr-n">${v > 0 ? t('Added weight') : t('Bodyweight')}</span>
-        <span class="mvr-st"><button data-w="-1" aria-label="Less">−</button><b>${v || 0}<small class="wm-wu" data-wu="1" role="button">${unit}</small></b><button data-w="1" aria-label="More">+</button></span></div></div>
+        <span class="mvr-st"><button data-w="-1" aria-label="Less">−</button><b>${num(v || 0, 1)}<small class="wm-wu">${unit}</small></b><button data-w="1" aria-label="More">+</button></span></div></div>
       <button class="btn" id="mwDone" style="margin-top:14px;">${t('Done')}</button></div>`;
     const k = unit === 'kg' ? 2.5 : 5;
     ov.querySelectorAll('[data-w]').forEach(btn => btn.addEventListener('click', () => {
       const d = Number(btn.dataset.w); v = Math.max(0, Math.round((d > 0 ? Math.floor(v / k + 1e-9) * k + k : Math.ceil(v / k - 1e-9) * k - k) * 10) / 10); buzz(10); draw(); }));
-    ov.querySelector('[data-wu]').addEventListener('click', () => {
-      v = unit === 'lb' ? Math.round(v / 2.20462 / 2.5) * 2.5 : Math.round(v * 2.20462 / 5) * 5; unit = unit === 'lb' ? 'kg' : 'lb'; draw(); });
     ov.querySelector('#mwDone').addEventListener('click', () => {
       if (v > 0) { it.weight = v; it.wUnit = unit; } else { delete it.weight; delete it.wUnit; }
       R.save(S); ov.remove(); done();
@@ -2060,7 +2062,7 @@ function renderSummary() {
 function cellInputs(meta, key, value, weight, exId) {
   const unit = UNIT[meta.measure]; const step = meta.measure === 'hold' ? 5 : 1;
   const wField = meta.load === 'weighted'
-    ? `<div class="weight-field ${weight == null ? 'empty' : ''}"><input id="w_${key}" type="number" inputmode="decimal" placeholder="–" onfocus="this.select()" value="${weight ?? (exId ? (store.getLast(exId)?.weight ?? '') : '')}"/><span class="u">${WUNIT}</span></div>` : '';
+    ? `<div class="weight-field ${weight == null ? 'empty' : ''}"><input id="w_${key}" type="number" inputmode="decimal" placeholder="–" onfocus="this.select()" value="${weight ?? (exId ? (store.getLast(exId)?.weight ?? '') : '')}"/><span class="u">${wu()}</span></div>` : '';
   const val = value == null || value === 'MAX' ? '' : value;
   return `${wField}<div class="stepper"><button data-step="-${step}" data-k="${key}">−</button>
       <input id="i_${key}" type="number" inputmode="numeric" value="${val}" placeholder="${value === 'MAX' ? 'max' : '0'}" onfocus="this.select()"/>
@@ -2247,7 +2249,7 @@ function ghostTick() {
 }
 function quickTally(session, partial) {
   const body = bodyWeight();
-  const unit = body?.unit === 'kg' ? 'kg' : (S.plan.blocks.flatMap(b => b.items).find(it => it.wUnit)?.wUnit || body?.unit || 'lb');
+  const unit = wu();
   const moves = new Map();                                 // by name: reps, an item to price it with
   session.blocks.forEach(sb => {
     const pb = S.plan.blocks.find(x => x.id === sb.id); if (!pb) return;
@@ -2272,7 +2274,7 @@ function quickTally(session, partial) {
   const row = (l, r, cls = '') => `<div class="eff-row ${cls}"><span>${l}</span><span style="margin-left:auto;" class="tnum">${r}</span></div>`;
   const loadRow = () => { const kg = loadKg(bodyWeight()); return kg > 0 ? row(`${t('Total load')} <small class="muted">${t('est.')}</small>`, showWeight(kg, unit)) : ''; };
   const html = `<div class="card tally"><div class="eyebrow">${t('Totals')}</div>
-    ${list.map(m => row(`${m.name}${Number(m.item.weight) > 0 ? ` <small class="muted">@ ${m.item.weight} ${m.item.wUnit || 'lb'}</small>` : ''}`, `${m.reps} ${t(mvUnit(m.item) ? 'sec' : 'reps')}`)).join('')}
+    ${list.map(m => row(`${m.name}${Number(m.item.weight) > 0 ? ` <small class="muted">@ ${num(wIn(m.item), 1)} ${unit}</small>` : ''}`, `${m.reps} ${t(mvUnit(m.item) ? 'sec' : 'reps')}`)).join('')}
     ${row(`<b>${t('Total reps')}</b>`, `<b>${total}</b>`, 'tally-sum')}
     ${held ? row(t('Total time held'), fmt(held)) : ''}
     <div id="tallyLoad">${loadRow()}</div>
@@ -2284,7 +2286,7 @@ function quickTally(session, partial) {
   const wire = () => {
     document.getElementById('tbSave')?.addEventListener('click', () => {
       const v = Number(document.getElementById('tbW')?.value); if (!(v > 0)) return;
-      setTimerBodyWeight(v, unit); document.getElementById('tallyBody')?.remove();
+      setMe({ weightKg: Math.round((unit === 'kg' ? v : v / 2.20462) * 10) / 10 }); document.getElementById('tallyBody')?.remove();
       document.getElementById('tallyLoad').innerHTML = loadRow();
     });
     /* last time, for this same timer; then this one joins the history */
