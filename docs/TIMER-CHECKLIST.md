@@ -17,7 +17,7 @@ Run it before every ship (part 1) and once a week, or after any big change
 ## 2. Sound (weekly, from the browser pane with the audit harness)
 
 `const A = await import('/tools/audit/timer-audit.js')`, then for each of
-tabata, emom, timer, amrap, fortime, deathby, ladder, stopwatch, pushup:
+tabata, emom, timer, amrap, goalfree, deathby, ladder, stopwatch, pushup:
 `A.setup(mode)`, reload, `A.arm()`, a real click on Start, `A.run(mode)`,
 `A.report()`.
 

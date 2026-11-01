@@ -76,8 +76,9 @@ export const GOAL_AS = { emom, ladder, igyg: sets, fortime };
 /* `mins`: the time you give yourself (0: sized for you). `work`: about how
    many minutes of pure work the reps are, to warn when the time is tight */
 export function buildFromGoal(moves, as = 'emom', mins = 0) {
-  const ms = goalMoves(moves).map(m => ({ ...m, reps: Number(m.reps) }));
-  if (!ms.length) return null;
+  /* Free (the old For time) also takes a move with no number: a run, done once, tapped Done */
+  const ms = (as === 'fortime' ? moves.filter(m => String(m.name || '').trim()) : goalMoves(moves)).map(m => ({ ...m, reps: Number(m.reps) || 0 }));
+  if (!ms.length || !ms.some(m => m.reps > 0)) return null;
   const work = ms.reduce((a, m) => a + m.reps * secPerRep(m), 0) / 60;
   return { ...(GOAL_AS[as] || emom)(ms, mins), goal: ms, work };
 }

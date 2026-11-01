@@ -53,15 +53,18 @@ const FORMATS = [
     how: ['Every minute on the minute.', 'When the minute starts, do your reps. Whatever is left of the minute is your rest. Then the next minute starts.',
       'With 2 or more moves, choose in Customize: take turns (minute 1 burpees, minute 2 squats) or all of them every minute.',
       'Example: 10 minutes, 10 burpees = 10 rounds, 1 every minute.'] },
-  { id: 'amrap', name: 'AMRAP', sub: 'As many rounds as possible', moves: true,
-    how: ['As many rounds as possible.', 'Set the time, then go through your moves again and again until the clock runs out. Tap + each time you finish a round.',
-      'Example: 10 minutes of 5 pull-ups, 10 push-ups, 15 squats.'] },
-  { id: 'fortime', name: 'For time', sub: 'Finish fast, beat the clock', moves: true,
+  { id: 'amrap', name: 'AMRAP', sub: 'As many reps as possible', moves: true,
+    how: ['As many reps as possible, before the clock runs out.', 'Set the minutes and your exercises. Go, and tap your reps in as you do them: +1, +2, +5, any number. Give an exercise its reps and one tap adds a whole round.',
+      'At the end: your reps per exercise, your sets, your average set and your rounds.',
+      'Example: 10 minutes of pull-ups, dips and push-ups. As many as you can.'] },
+  /* FOR TIME is not on the carousel any more (Nico, 1 Nov 2026): a set amount, as fast as you can,
+     is Rep goal → Free. It stays here for what runs it: Rep goal Free, Test yourself */
+  { id: 'fortime', name: 'For time', sub: 'Finish fast, beat the clock', moves: true, hidden: true,
     how: ['Race the clock.', 'Do all the work as fast as you can, then tap Done. Your time is your score.',
       'Add a time cap and the clock stops you there if you are not finished.'] },
   { id: 'goal', name: 'Rep goal', sub: 'Your totals, built into a workout', moves: true,
     how: ['Set a total for each move, pick how to run it, the timer builds the workout.', 'Example: 200 push-ups, 75 pull-ups, 500 mountain climbers, 300 squats. As an EMOM: 40 minutes, every minute 5 push-ups, 2 pull-ups, 13 mountain climbers, 8 squats.',
-      'Ladder: the reps climb rung by rung and add up to your totals. Sets: your totals cut into short sets, rest as long as each set took. For time: tap your reps in as you go.',
+      'Free: any order, as fast as you can, tap your reps in as you go; your time is your score. Ladder: the reps climb step by step and add up to your totals. Sets: your totals cut into short sets, rest as long as each set took.',
       'The sizes come from how long each rep takes, so every minute or rung is doable.'] },
   { id: 'vo2', name: 'VO2 max', sub: 'Proven cardio intervals', moves: false,
     how: ['Intervals that raise your VO2 max: the most oxygen your body can use. The best predictor of fitness and long life.',
@@ -190,7 +193,7 @@ export async function renderQuick(el, opts = {}) {
   try { saved = await storage().getDevicePref(PREF, null); } catch (e) {}
   /* someone who already picked kg in the timer keeps it as their unit */
   if (!meAsked() && saved?.last?.wUnit === 'kg' && !localStorage.getItem('fj.me')) setMe({ unit: 'kg' });
-  cfg = migrate({ ...DEFAULTS, ...(saved?.last || {}) });
+  cfg = openCfg({ ...DEFAULTS, ...(saved?.last || {}) });
   /* the push-up test first shipped at 25 a minute; the standard is 20 */
   if (saved?.last && saved.last.paceV !== 2) { cfg.pace = 20; cfg.paceV = 2; }
   favs = Array.isArray(saved?.favs) ? saved.favs : [];
@@ -202,7 +205,7 @@ export async function renderQuick(el, opts = {}) {
       const got = unpack(p.get('t'));
       /* a shared timer's moves belong to its type, whatever that type is */
       if (got && Array.isArray(got.moves)) { got.movesBy = { [got.fmt]: got.moves }; delete got.moves; }
-      if (got) { cfg = migrate({ ...DEFAULTS, ...got, paceV: 2 }); favIdx = null; persist(); shared = true; }
+      if (got) { cfg = openCfg({ ...DEFAULTS, ...got, paceV: 2 }); favIdx = null; persist(); shared = true; }
       p.delete('t'); history.replaceState(null, '', `${location.pathname}?${p.toString().replace(/=(&|$)/g, '$1')}`);
     }
   } catch (e) {}
@@ -214,6 +217,18 @@ export async function renderQuick(el, opts = {}) {
   if (!window.__qtUnit) { window.__qtUnit = 1; document.addEventListener('fj-unit', e => { if (!cfg) return; convertAll(cfg.wUnit || 'lb', e.detail); persist(); if (host?.isConnected) draw(); }); }
 }
 /* setups saved before Intervals and Countdown became Timer */
+/* A FOR TIME SAVED BEFORE 1 NOV 2026 (the last setup, a saved timer, a
+   shared link, history) opens as Rep goal → Free: its moves with their
+   totals (reps × rounds), its cap as the minutes */
+function fromForTime(c) {
+  if (c?.fmt !== 'fortime') return c;
+  const r = Math.max(1, Number(c.ftRounds) || 1), list = c.movesBy?.fortime || c.moves || [];
+  const moves = list.map(m => ({ ...m, reps: Number(m.reps) > 0 ? Number(m.reps) * r : m.reps }));
+  return { ...c, fmt: 'goal', goalAs: 'fortime', gMins: Number(c.ftCap) || c.gMins || 20,
+    movesBy: { ...(c.movesBy || {}), ...(moves.length ? { goal: moves } : {}) }, moves: undefined };
+}
+/* a setup the person opens (not one the timer builds inside a plan) */
+const openCfg = c => migrate(fromForTime(c));
 function migrate(c) {
   /* weights were saved in the timer's own lb / kg (lb before it existed): now in the person's unit */
   const wu = meUnit();
@@ -404,7 +419,7 @@ function summary() {
       const style = moves.length > 1 ? (cfg.emomStyle === 'all' ? t(' · all {n} moves each round', { n: moves.length }) : t(' · {n} moves take turns', { n: moves.length })) : '';
       return t('{n} rounds, a new one every {every}', { n: emomCount(), every: secs(cfg.every) }) + style;
     }
-    case 'amrap': return moves.length ? t2(moves.length, '{n} move per round', '{n} moves per round') : t('Tap + for every round you finish');
+    case 'amrap': return moves.length ? t('{m} min · max reps on {n}', { m: cfg.cap, n: t2(moves.length, '{n} exercise', '{n} exercises') }) : t('Tap + for every round you finish');
     case 'fortime': return `${t2(cfg.ftRounds, '{n} round', '{n} rounds')}, ${cfg.ftCap ? t('{n} min cap', { n: cfg.ftCap }) : t('no cap')}`;
     case 'tabata': {
       const n = perRound();
@@ -464,8 +479,9 @@ export function buildPlan(c = cfg) {
           items: moves.length ? moves : work }];
         break;
       case 'amrap':
+        /* with exercises: max reps, tapped in per exercise as you go (Nico, 1 Nov 2026); none: count rounds */
         blocks = [{ ...base, id: id(1), name, format: 'amrap', minutes: cfg.cap,
-          ...(moves.length ? {} : { countRounds: true, hideList: true, items: [{ name: 'Rounds', measure: 'rounds' }] }) }];
+          ...(moves.length ? { bites: 'max' } : { countRounds: true, hideList: true, items: [{ name: 'Rounds', measure: 'rounds' }] }) }];
         break;
       case 'fortime':
         blocks = [{ ...base, id: id(1), name, format: 'fortime', minutes: cfg.ftCap, rounds: cfg.ftRounds, label: 'For time',
@@ -503,7 +519,9 @@ export function buildPlan(c = cfg) {
         const g = goalBuilt(); if (!g) break;
         const goalCfg = JSON.parse(JSON.stringify(cfg));
         cfg = prev;   // restored below by the recursive call's finally
-        return withCfg(goalCfg, buildPlan({ ...c, ...g.cfg, movesBy: { ...(c.movesBy || {}), [g.cfg.fmt]: g.moves }, ...(g.list ? { ldList: g.list } : {}) }));
+        const gp = withCfg(goalCfg, buildPlan({ ...c, ...g.cfg, movesBy: { ...(c.movesBy || {}), [g.cfg.fmt]: g.moves }, ...(g.list ? { ldList: g.list } : {}) }));
+        if (gp && g.cfg.fmt === 'fortime') gp.name = name;   // Free: it is the Rep goal, not a For time
+        return gp;
       }
       case 'igyg': {
         /* each set is a row; the moves (for the totals) are the rows' moves, once each */
@@ -716,7 +734,7 @@ function openAllHistory() {
       ${r.cfg ? `<div class="qt-hacts"><button data-hagain="${i}">${t('Do it again')}</button><button data-hsave="${i}">★ ${t('Save')}</button></div>` : ''}</div>`).join('')}</div>
     <button class="btn" id="qtAllHistOk">${t('Close')}</button>`, 'tall');
   ov.querySelector('#qtAllHistOk').addEventListener('click', close);
-  const load = r => { cfg = migrate({ ...DEFAULTS, ...JSON.parse(JSON.stringify(r.cfg)), paceV: 2 }); favIdx = null; moreOpen = false; persist(); };
+  const load = r => { cfg = openCfg({ ...DEFAULTS, ...JSON.parse(JSON.stringify(r.cfg)), paceV: 2 }); favIdx = null; moreOpen = false; persist(); };
   ov.querySelectorAll('[data-hagain]').forEach(b => b.addEventListener('click', () => { load(hist[+b.dataset.hagain]); close(); draw(); scrollTo(0, 0); }));
   ov.querySelectorAll('[data-hsave]').forEach(b => b.addEventListener('click', () => {
     const r = hist[+b.dataset.hsave]; load(r); favs.unshift({ label: r.title || planName(), cfg: JSON.parse(JSON.stringify(cfg)), sub: summary() }); favs = favs.slice(0, 20); favIdx = 0;
@@ -735,7 +753,7 @@ function testsList() {
 const testMoves = def => def.m.map(([k, a, b]) => { const ex = EXERCISES[k], base = ex ? { exId: k, name: ex.name } : { exId: null, name: t(k) };
   return ['ladder', 'deathby'].includes(def.fmt) ? { ...base, reps: '', ldStart: a, ldStep: b } : { ...base, reps: a }; });
 /* REP GOAL (rep-goal.js): the totals, built into the type picked */
-const GOAL_AS = [['emom', 'EMOM'], ['ladder', 'Ladder'], ['igyg', 'Sets'], ['fortime', 'For time']];
+const GOAL_AS = [['fortime', 'Free'], ['emom', 'EMOM'], ['ladder', 'Ladder'], ['igyg', 'Sets']];   // 'fortime' = Free: the old For time mode
 function goalBuilt() { return buildFromGoal(MV().map(m => ({ ...m, name: mvName(m) })), cfg.goalAs, cfg.gMins || 0); }
 /* the line that says it all: total reps, the time, and the pace it takes */
 function goalTotals() {
@@ -800,9 +818,8 @@ const LINE = {
   timer: 'Work, rest, repeat. Set the times and the rounds.',
   tabata: '20 seconds all out, 10 seconds rest, 8 rounds. 4 minutes.',
   emom: 'A new round every minute. Whatever is left of the minute is your rest.',
-  amrap: 'As many rounds as you can before the clock runs out.',
-  fortime: 'Get it all done as fast as you can. Your time is your score.',
-  goal: 'Say how many reps you want. The timer builds the workout.',
+  amrap: 'As many reps as you can before the clock runs out. Tap them in as you go.',
+  goal: 'Set your reps. Do them your way, or let the timer plan them.',
   vo2: 'Proven cardio intervals that raise your fitness ceiling.',
   ladder: 'The reps go up (or down) every step. Tap when a step is done.',
   igyg: 'Partner style: you rest as long as your set took.',
@@ -811,13 +828,13 @@ const LINE = {
   test: 'Race your own best, live. Beat it and it becomes your new best.',
 };
 /* modes that cannot start without step 2, and what its button says */
-const NEEDS = { amrap: 'Next: pick exercises', fortime: 'Next: pick exercises', ladder: 'Next: pick exercises', deathby: 'Next: pick a move', goal: 'Next: pick exercises', igyg: 'Next: your sets', test: 'Next: pick a test' };
-const MOVES_OPTIONAL = new Set(['timer', 'tabata', 'emom', 'amrap', 'fortime']);
+const NEEDS = { amrap: 'Next: pick exercises', ladder: 'Next: pick exercises', deathby: 'Next: pick a move', goal: 'Next: pick exercises', igyg: 'Next: your sets', test: 'Next: pick a test' };
+const MOVES_OPTIONAL = new Set(['timer', 'tabata', 'emom', 'amrap']);
 /* the numbers on the home, at most 3 */
 const HOME = { timer: ['work', 'rest', 'rounds'], tabata: ['work', 'rest', 'rounds'], emom: ['mins', 'every'], amrap: ['cap', 'nEx'],
-  fortime: ['ftRounds', 'nEx'], ladder: ['ldRungs', 'nEx'], deathby: ['dbEvery', 'dbMax'], pushup: ['pace'], igyg: [], goal: ['nEx', 'gReps', 'gMins'], vo2: [], stopwatch: [], test: [] };
+  ladder: ['ldRungs', 'nEx'], deathby: ['dbEvery', 'dbMax'], pushup: ['pace'], igyg: [], goal: ['nEx', 'gReps', 'gMins'], vo2: [], stopwatch: [], test: [] };
 /* what step 2 adds below the moves (the numbers that are not on the home) */
-const STEP2_MORE = { timer: ['sets', 'setRest'], pushup: ['ptCap'], ladder: ['ldCap'], fortime: ['ftCap'], goal: ['gMins'] };
+const STEP2_MORE = { timer: ['sets', 'setRest'], pushup: ['ptCap'], ladder: ['ldCap'], goal: ['gMins'] };
 const LABEL = { ldRungs: 'Steps', ftCap: 'Time cap', ftRounds: 'Rounds', gReps: 'Reps', gMins: 'Minutes', pace: 'Per minute' };
 
 /* one home row: label, − value + (a time opens the picker, a number types) */
@@ -975,7 +992,7 @@ function openModeFavs() {
     <button class="qt-link center" id="fvShare">${t('Share this timer')}</button>`, 'tall');
   ov.querySelectorAll('[data-fv]').forEach(b => b.addEventListener('click', () => {
     const f = favs[+b.dataset.fv]; if (!f) return;
-    cfg = migrate({ ...DEFAULTS, ...JSON.parse(JSON.stringify(f.cfg)), paceV: 2 }); favIdx = +b.dataset.fv;
+    cfg = openCfg({ ...DEFAULTS, ...JSON.parse(JSON.stringify(f.cfg)), paceV: 2 }); favIdx = +b.dataset.fv;
     persist(); close(); draw(); toast(t('Loaded: {x}', { x: f.label }));
   }));
   ov.querySelectorAll('[data-qpk]').forEach(b => b.addEventListener('click', () => { const p = picks.find(x => x.id === b.dataset.qpk); if (p) { close(); applyPick(p); } }));
@@ -1077,7 +1094,7 @@ function openFavs() {
     <button class="qt-link center" id="fvShare">${t('Share this timer')}</button>`, 'tall');
   ov.querySelectorAll('[data-fv]').forEach(b => b.addEventListener('click', () => {
     const f = favs[+b.dataset.fv]; if (!f) return;
-    cfg = migrate({ ...DEFAULTS, ...JSON.parse(JSON.stringify(f.cfg)), paceV: 2 }); favIdx = +b.dataset.fv; page = 'home';
+    cfg = openCfg({ ...DEFAULTS, ...JSON.parse(JSON.stringify(f.cfg)), paceV: 2 }); favIdx = +b.dataset.fv; page = 'home';
     persist(); close(); draw(); toast(t('Loaded: {x}', { x: f.label }));
   }));
   ov.querySelector('#fvSave').addEventListener('click', () => { close(); openSave(); });
@@ -1169,7 +1186,7 @@ function sheet(inner, cls = '') {
 const TYPE_ORDER = 'fj.typeOrder';
 function typeOrder() {
   let o = []; try { o = JSON.parse(localStorage.getItem(TYPE_ORDER) || '[]'); } catch (e) {}
-  const ids = FORMATS.map(f => f.id);
+  const ids = FORMATS.filter(f => !f.hidden).map(f => f.id);
   return [...o.filter(id => ids.includes(id)), ...ids.filter(id => !o.includes(id))];
 }
 const saveTypeOrder = o => { try { o ? localStorage.setItem(TYPE_ORDER, JSON.stringify(o)) : localStorage.removeItem(TYPE_ORDER); } catch (e) {} };
@@ -1651,7 +1668,7 @@ function wire(scope = host) {
   $('#qtClassic')?.addEventListener('click', () => { Object.assign(cfg, TABATA, { tbN: null, tbTotal: null }); persist(); draw(); });
   host.querySelectorAll('[data-fav]').forEach(b => b.addEventListener('click', () => {
     const f = favs[+b.dataset.fav]; if (!f) return;
-    cfg = migrate({ ...DEFAULTS, ...JSON.parse(JSON.stringify(f.cfg)), paceV: 2 }); favIdx = +b.dataset.fav; persist(); draw();
+    cfg = openCfg({ ...DEFAULTS, ...JSON.parse(JSON.stringify(f.cfg)), paceV: 2 }); favIdx = +b.dataset.fav; persist(); draw();
   }));
   host.querySelectorAll('[data-favx]').forEach(b => b.addEventListener('click', e => {
     e.stopPropagation(); if (!confirm(t('Remove "{x}" from your saved workouts?', { x: favs[+b.dataset.favx]?.label || '' }))) return;

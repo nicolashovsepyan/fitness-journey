@@ -1,6 +1,9 @@
 {
-  "version": "2026-10-26.2",
+  "version": "2026-11-01.1",
   "notes": [
+    "AMRAP is now max reps: set the minutes and your exercises, then tap your reps in as you go. Give an exercise its reps and +1 round adds a whole round. At the end: reps, sets, average and rounds",
+    "For time is now part of Rep goal: pick Free to do your totals in any order, as fast as you can. Your saved For time workouts open there, and Murph, Angie and the others moved with them",
+    "12 modes instead of 13: one for \"I have reps to get\" (Rep goal), one for \"I have time to fill\" (AMRAP)",
     "Every mode's second screen has the ⚙︎ too: change your setup, voice or countdown from anywhere",
     "New: set up your timer once. Pounds or kilos, your body weight, age, male or female, and language",
     "Every weight in every mode now shows in your unit, from setup to the end of the workout. No more switching lb and kg on each exercise",
@@ -95,6 +98,9 @@
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
   ],
   "notes_fr": [
+    "L’AMRAP devient le max de reps : règle les minutes et tes exercices, puis entre tes reps au fur et à mesure. Donne ses reps à un exercice et +1 tour ajoute un tour entier. À la fin : reps, séries, moyenne et tours",
+    "For Time fait maintenant partie d’Objectif reps : choisis Libre pour faire tes totaux dans n’importe quel ordre, le plus vite possible. Tes For Time enregistrés s’ouvrent là, et Murph, Angie et les autres ont suivi",
+    "12 modes au lieu de 13 : un pour « j’ai des reps à faire » (Objectif reps), un pour « j’ai du temps à remplir » (AMRAP)",
     "Le deuxième écran de chaque mode a aussi le ⚙︎ : change tes réglages, la voix ou le compte à rebours de partout",
     "Nouveau : règle ton minuteur une seule fois. Livres ou kilos, ton poids de corps, ton âge, homme ou femme, et la langue",
     "Chaque poids, dans chaque mode, s’affiche dans ton unité, du réglage à la fin de la séance. Plus besoin de changer lb et kg sur chaque exercice",

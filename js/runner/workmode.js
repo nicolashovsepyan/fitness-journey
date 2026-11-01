@@ -524,13 +524,14 @@ function buildEntries(b) {
   }));
   R.save(S);
 }
+const b0 = () => block();
 function renderActive() {
   countUpStart = null;
   onScreen('active');
   const f = block().format;
   if (f === 'superset') return renderSuperset();
   if (f === 'circuit') return renderCircuit();
-  if (f === 'amrap') return renderAmrap();
+  if (f === 'amrap') return b0().bites ? renderBites() : renderAmrap();
   if (f === 'tabata' || f === 'emom') return renderInterval();
   if (f === 'fortime') return renderForTime();
   if (f === 'igyg') return renderIgyg();
@@ -546,7 +547,7 @@ function completeBlock() {
   if (b.type === 'Mobility' || b.format === 'jointprep') return sectionNext();
   /* a Quick Timer flows straight on: no confirm screen between sets of
      intervals, and the finish screen already shows the result */
-  if (S.plan.quick && ['tabata', 'emom', 'fortime', 'cadence', 'igyg'].includes(b.format)) return sectionNext();
+  if (S.plan.quick && (['tabata', 'emom', 'fortime', 'cadence', 'igyg'].includes(b.format) || b.bites)) return sectionNext();   // max reps (AMRAP) too: its reps were tapped in, the last check was the confirm
   if (['tabata', 'emom', 'fortime', 'cadence', 'igyg'].includes(b.format)) return renderSummary();
   return renderLog();          // amrap + sets + circuit → fully editable grouped log
 }
@@ -1807,35 +1808,50 @@ function biteStatsHtml(st) {
     ${st.per.filter(m => m.sets).map(m => `<div class="bs-row"><span>${m.name}</span><small>${t2(m.sets, '{n} set', '{n} sets')} · ${t('{n} a set', { n: num(m.avg, 1) })} · ${t('best {n}', { n: m.best })}</small><b>${m.reps}</b></div>`).join('')}
     ${st.rounds.length > 1 ? `<div class="bs-rh">${t('Each round, rest included')}</div><div class="bs-rts">${rt}</div>` : ''}</div>`;
 }
+/* TAPPING REPS IN AS YOU GO, two ways:
+   · a set amount (Rep goal → Free, Test yourself): each move fills to its
+     total, the clock counts up, your time is the score;
+   · MAX REPS (AMRAP with exercises, b.bites === 'max'): no target, the
+     clock counts down, every tap adds; an exercise with its reps set gets
+     a "+1 round" that adds a whole round of all of them. */
 function renderBites() {
-  const b = block();
+  const b = block(), max = b.bites === 'max';
   const cap = (Number(b.minutes) || 0) * 60;
   /* the cap can grow (+5 min, Keep going) once it is reached */
-  const dur = S.btCap || cap || NO_CAP;
-  const goal = b.items.map(it => Math.max(1, (Number(it.reps) || 0) * (b.rounds || 1)));
+  const dur = max ? (cap || 600) : S.btCap || cap || NO_CAP;
+  const goal = b.items.map(it => max ? Infinity : Math.max(1, (Number(it.reps) || 0) * (b.rounds || 1)));
   if (!Array.isArray(S.bites) || S.bites.length !== b.items.length) { S.bites = b.items.map(() => 0); S.biteLog = []; R.save(S); }
-  const total = goal.reduce((a, x) => a + x, 0);
+  const total = max ? 0 : goal.reduce((a, x) => a + x, 0);
   const done = () => S.bites.reduce((a, x, i) => a + Math.min(x, goal[i]), 0);
-  const now = () => S.bites.findIndex((x, i) => x < goal[i]);
+  const now = () => max ? -1 : S.bites.findIndex((x, i) => x < goal[i]);
+  const roundable = max && b.items.length > 1 && b.items.every(it => Number(it.reps) > 0);   // a round = every move's reps
+  const steps = (it, g) => max ? [...new Set([Number(it.reps) || 0, 1, 2, 3, 5, 10].filter(n => n > 0))].sort((x, y) => x - y).slice(0, 5)
+    : Number(it.reps) > 0 ? biteSteps(g).filter(n => n <= g) : [];
   const row = (it, i) => {
-    const g = goal[i], d = Math.min(S.bites[i], g), full = d >= g, pct = Math.round(d / g * 100);
+    const g = goal[i], d = Math.min(S.bites[i], g), full = !max && d >= g, pct = max ? 0 : Math.round(d / g * 100);
     const chips = full ? `<span class="bt-ok">✓</span>`
       : biteOwn?.i === i ? `<button class="bt-c" data-own-d="-1">−</button><b class="bt-own">${biteOwn.n}</b><button class="bt-c" data-own-d="1">+</button><button class="bt-c add" data-bt="${i}" data-n="${biteOwn.n}">${t('Add')}</button>`
-      : (Number(it.reps) > 0 ? [...biteSteps(g).filter(n => n <= g), 0] : [1]).map(n => n === 0 ? `<button class="bt-c own" data-own="${i}">+…</button>`
-        : `<button class="bt-c" data-bt="${i}" data-n="${n}">${Number(it.reps) > 0 ? '+' + n : t('Done ✓')}</button>`).join('');
+      : (max || Number(it.reps) > 0 ? [...steps(it, g), 0] : [1]).map(n => n === 0 ? `<button class="bt-c own" data-own="${i}">+…</button>`
+        : `<button class="bt-c" data-bt="${i}" data-n="${n}">${max || Number(it.reps) > 0 ? '+' + n : t('Done ✓')}</button>`).join('');
     return `<div class="bt-row ${full ? 'full' : ''} ${i === now() ? 'now' : ''}">
-      <div class="bt-top"><span class="mvr-n">${it.name}</span><b class="bt-v">${Number(it.reps) > 0 ? `${d}<small>/${g}</small>` : ''}</b></div>
-      <div class="bt-bar"><i style="width:${pct}%"></i></div>
+      <div class="bt-top"><span class="mvr-n">${it.name}</span><b class="bt-v">${max ? d : Number(it.reps) > 0 ? `${d}<small>/${g}</small>` : ''}</b></div>
+      ${max ? '' : `<div class="bt-bar"><i style="width:${pct}%"></i></div>`}
       <div class="bt-cs">${chips}</div></div>`;
   };
   const draw = () => {
-    const pct = Math.round(done() / total * 100);
-    document.getElementById('btTank').innerHTML = `<div class="bt-fill" style="width:${pct}%"></div><span>${pct}%</span>`;
-    document.getElementById('btTankN').textContent = b.items.length > 1 || Number(b.items[0].reps) > 0 ? `${done()} / ${total}` : '';
+    if (max) {
+      const st = biteStats(S.biteLog, b.items.map(it => it.name));
+      document.getElementById('btTank').innerHTML = `<span class="bt-max">${done()} <small>${t('reps')}</small></span>`;
+      document.getElementById('btTankN').innerHTML = `${st.sets ? `${t2(st.rounds.length, '{n} round', '{n} rounds')} · ${t2(st.sets, '{n} set', '{n} sets')}` : ''}${roundable ? ` <button class="bt-c bt-rnd" data-round="1">${t('+1 round')}</button>` : ''}`;
+    } else {
+      const pct = Math.round(done() / total * 100);
+      document.getElementById('btTank').innerHTML = `<div class="bt-fill" style="width:${pct}%"></div><span>${pct}%</span>`;
+      document.getElementById('btTankN').textContent = b.items.length > 1 || Number(b.items[0].reps) > 0 ? `${done()} / ${total}` : '';
+    }
     document.getElementById('btRows').innerHTML = b.items.map(row).join('');
     document.getElementById('btUndo').disabled = !S.biteLog.length;
   };
-  shell(`<div class="now-ex"><div class="label">${dur < NO_CAP ? t('cap {t}', { t: fmt(dur) }) : t('no cap')}</div><div class="name">${t('For time')}</div></div>
+  shell(`<div class="now-ex"><div class="label">${max ? t('{n} min, max reps', { n: Math.round(dur / 60) }) : dur < NO_CAP ? t('cap {t}', { t: fmt(dur) }) : t('no cap')}</div><div class="name">${max ? 'AMRAP' : t(S.plan.quickCfg?.fmt === 'goal' ? 'Rep goal' : 'For time')}</div></div>
     <div class="timer-wrap bt-sm">${timerSvg('buffer')}</div>
     ${S.plan.test ? '<div class="ghost-bar" id="ghostBar"></div>' : ''}
     <div class="bt-tank" id="btTank"></div>
@@ -1848,7 +1864,7 @@ function renderBites() {
     R.clearStep(S); onStepDone = null;
     S.btSummary = biteStats(S.biteLog, b.items.map(it => it.name));
     (S.captured[b.id] || []).forEach((e, i) => { e.sets = [{ value: secs }]; e.unit = 'sec'; e.rounds = true; e.bites = S.bites[i] || 0; });
-    R.save(S); say(`Done. ${spokenTime(secs)}.`);
+    R.save(S); say(max ? t('Time. {n} reps.', { n: done() }) : `Done. ${spokenTime(secs)}.`);
     completeBlock();
   };
   const bar = document.querySelector('.actionbar');
@@ -1866,7 +1882,7 @@ function renderBites() {
   };
   /* BEFORE IT IS SAVED: anything else? One more round, or a few reps */
   const lastCheck = () => {
-    const secs = Math.round(el());
+    const secs = max && S.stepStartedAt == null ? dur : Math.round(el());   // max reps: the clock ran out, the time is the time set
     const st = biteStats(S.biteLog, b.items.map(it => it.name)), lastRound = st.rounds.at(-1);
     const ov = document.createElement('div'); ov.className = 'bt-check';
     const paint = () => { ov.innerHTML = `<div class="bt-checkc"><div class="eyebrow">${t('Anything else?')}</div>
@@ -1884,23 +1900,32 @@ function renderBites() {
     });
   };
   draw();
-  if (S.btAtCap) capHit();
+  if (max) { if (beginStep(dur, 'work', 'maxreps')) say(pick('go') || 'Go.'); onStepDone = () => lastCheck(); doneBar(); }   // counts down; time up: the last check
+  else if (S.btAtCap) capHit();
   else { if (beginStep(dur, cap ? 'work' : 'rest', S.btCap ? 'fortime+' + S.btCap : 'fortime')) { if (!S.btCap) say(pick('go') || 'Go.'); } onStepDone = capHit; doneBar(); }
   document.getElementById('btUndo').addEventListener('click', () => {
     const last = S.biteLog.pop(); if (!last) return;
     S.bites[last[0]] = Math.max(0, S.bites[last[0]] - last[1]); R.save(S); buzz(15); draw();
   });
   biteOwn = null;
+  /* max reps: a whole round of every move, in one tap */
+  document.getElementById('btTankN').addEventListener('click', e => {
+    if (!e.target.closest('[data-round]')) return;
+    const at = Math.round(upElapsed());
+    b.items.forEach((it, i) => { const n = Number(it.reps) || 0; if (n > 0) { S.bites[i] += n; S.biteLog.push([i, n, at]); } });
+    R.save(S); celebrate(e.target, '+1'); draw();   // celebrate() has the chime
+  });
   document.getElementById('btRows').addEventListener('click', e => {
     const o = e.target.closest('[data-own]'); if (o) { biteOwn = { i: +o.dataset.own, n: 3 }; buzz(10); return draw(); }
     const od = e.target.closest('[data-own-d]'); if (od) { biteOwn.n = Math.max(1, Math.min(999, biteOwn.n + Number(od.dataset.ownD))); beep('tick'); return draw(); }
     const c = e.target.closest('[data-bt]'); if (!c) return;
     biteOwn = null;
     const i = +c.dataset.bt, before = done(), wasFull = S.bites[i] >= goal[i];
-    const n = Math.min(+c.dataset.n, goal[i] - S.bites[i]); if (n <= 0) return;
+    const n = max ? +c.dataset.n : Math.min(+c.dataset.n, goal[i] - S.bites[i]); if (n <= 0) return;
     S.bites[i] += n; S.biteLog.push([i, n, Math.round(upElapsed())]); R.save(S); buzz(20);
     setTimeout(() => beep('add'), 0);   // every add gets its little win; after the screen, never in its way
     const after = done();
+    if (max) return draw();
     if (after >= total && before < total) { celebrate(c, '100%'); draw(); return lastCheck(); }   // the goal: a last check, then saved
     if (!wasFull && S.bites[i] >= goal[i]) celebrate(c, '✓');
     else if (before < total / 2 && after >= total / 2) say(pick('halfway') || t('Halfway.'));
@@ -2161,6 +2186,8 @@ function quickResult(session) {
     const e = b.entries[0]; const v = e?.sets?.[0]?.value;
     if (v == null || b.name.startsWith('Countdown') || /^(Warm-up|Cool-down)/.test(b.name)) return '';   // a VO2 warm-up is not a result
     if (b.format === 'cadence') return `<div class="eff-row"><span>${b.name}</span><span class="pr-flash" style="margin-left:auto;">${t('{n} reps', { n: v })}</span></div>${cadenceRating(v, e.cadence)}`;
+    /* max reps (AMRAP tapped in): the score is the reps */
+    if (b.format === 'amrap' && b.entries.some(x => x.bites != null)) return `<div class="eff-row"><span>${b.name}</span><span class="pr-flash" style="margin-left:auto;">${t('{n} reps', { n: b.entries.reduce((a, x) => a + (x.bites || 0), 0) })}</span></div>`;
     const val = b.format === 'fortime' || b.format === 'igyg' ? fmt(v)
       : b.format === 'amrap' ? (e.amrap ? `${t('{n} rounds', { n: e.amrap.rounds })}${e.amrap.extra ? ` + ${t('{n} reps', { n: e.amrap.extra })}` : ''}` : `${v} ${t(e.unit || 'rounds')}`)
       : t2(v, '{n} interval', '{n} intervals');

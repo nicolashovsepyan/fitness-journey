@@ -29,14 +29,6 @@ export const PICKS = {
     { id: 'cin', lvl: 2, name: 'Cindy', sub: '20 min · 5 pull-ups, 10 push-ups, 15 squats · CrossFit', cfg: { cap: 20 }, m: [['pullup', 5], ['pushup', 10], ['bodyweight_squat', 15]] },
     { id: 'bcin', lvl: 3, name: 'Burpee Cindy', sub: '20 min · 5 pull-ups, 10 burpees, 15 jump squats', cfg: { cap: 20 }, m: [['pullup', 5], ['burpee', 10], ['jump_squat', 15]] },
   ],
-  fortime: [
-    { id: 'p100', lvl: 1, name: '100 Push-ups', sub: 'Any way you can, as fast as you can', cfg: { ftRounds: 1, ftCap: 0 }, m: [['pushup', 100]] },
-    { id: 's100', lvl: 1, name: '100 Squats', sub: 'Any way you can, as fast as you can', cfg: { ftRounds: 1, ftCap: 0 }, m: [['bodyweight_squat', 100]] },
-    { id: 'opm', lvl: 2, name: 'One Punch Man', sub: '100 push-ups, 100 sit-ups, 100 squats', cfg: { ftRounds: 1, ftCap: 0 }, m: [['pushup', 100], ['sit_up', 100], ['bodyweight_squat', 100]] },
-    { id: 'hmurph', lvl: 2, name: 'Half Murph', sub: '800 m run, 50 pull-ups, 100 push-ups, 150 squats, 800 m run', cfg: { ftRounds: 1, ftCap: 0 }, m: [['Run 800 m', ''], ['pullup', 50], ['pushup', 100], ['bodyweight_squat', 150], ['Run 800 m', '']] },
-    { id: 'angie', lvl: 3, name: 'Angie', sub: '100 pull-ups, 100 push-ups, 100 sit-ups, 100 squats · CrossFit', cfg: { ftRounds: 1, ftCap: 0 }, m: [['pullup', 100], ['pushup', 100], ['sit_up', 100], ['bodyweight_squat', 100]] },
-    { id: 'murph', lvl: 3, name: 'Murph', sub: '1 mile run, 100 pull-ups, 200 push-ups, 300 squats, 1 mile run · CrossFit', cfg: { ftRounds: 1, ftCap: 0 }, m: [['Run 1 mile', ''], ['pullup', 100], ['pushup', 200], ['bodyweight_squat', 300], ['Run 1 mile', '']] },
-  ],
   tabata: [
     { id: 'tsq', lvl: 1, name: 'Squat Tabata', sub: '8 rounds · 20 s on, 10 s off', cfg: { work: 20, rest: 10, rounds: 8, tbN: null, tbTotal: null }, m: [['bodyweight_squat', '']] },
     { id: 'tcore', lvl: 1, name: 'Core Tabata', sub: 'Mountain climbers and hollow hold, 8 each', cfg: { work: 20, rest: 10, rounds: 8, tbN: null, tbTotal: null }, m: [['mountain_climber', ''], ['hollow_hold', '']] },
@@ -70,6 +62,12 @@ export const PICKS = {
     { id: 'dpl', lvl: 3, name: 'Death by Pull-ups', sub: '+1 pull-up every minute', cfg: { dbEvery: 60, dbMax: 30 }, m: [['pullup', 1, 1]] },
   ],
   goal: [
+    { id: 'p100', lvl: 1, name: '100 Push-ups', sub: 'Any way you can, as fast as you can', cfg: { goalAs: 'fortime', gMins: 10 }, m: [['pushup', 100]] },
+    { id: 's100', lvl: 1, name: '100 Squats', sub: 'Any way you can, as fast as you can', cfg: { goalAs: 'fortime', gMins: 10 }, m: [['bodyweight_squat', 100]] },
+    { id: 'opm', lvl: 2, name: 'One Punch Man', sub: '100 push-ups, 100 sit-ups, 100 squats', cfg: { goalAs: 'fortime', gMins: 20 }, m: [['pushup', 100], ['sit_up', 100], ['bodyweight_squat', 100]] },
+    { id: 'hmurph', lvl: 2, name: 'Half Murph', sub: '800 m run, 50 pull-ups, 100 push-ups, 150 squats, 800 m run', cfg: { goalAs: 'fortime', gMins: 40 }, m: [['Run 800 m', ''], ['pullup', 50], ['pushup', 100], ['bodyweight_squat', 150], ['Run 800 m', '']] },
+    { id: 'angie', lvl: 3, name: 'Angie', sub: '100 pull-ups, 100 push-ups, 100 sit-ups, 100 squats · CrossFit', cfg: { goalAs: 'fortime', gMins: 30 }, m: [['pullup', 100], ['pushup', 100], ['sit_up', 100], ['bodyweight_squat', 100]] },
+    { id: 'murph', lvl: 3, name: 'Murph', sub: '1 mile run, 100 pull-ups, 200 push-ups, 300 squats, 1 mile run · CrossFit', cfg: { goalAs: 'fortime', gMins: 75 }, m: [['Run 1 mile', ''], ['pullup', 100], ['pushup', 200], ['bodyweight_squat', 300], ['Run 1 mile', '']] },
     { id: 'g100', lvl: 1, name: '100 Each', sub: '100 push-ups, 100 squats, 100 sit-ups, as an EMOM', cfg: { goalAs: 'emom' }, m: [['pushup', 100], ['bodyweight_squat', 100], ['sit_up', 100]] },
     { id: 'gpull', lvl: 2, name: '100 Pull-ups', sub: '100 pull-ups, as a climbing ladder', cfg: { goalAs: 'ladder' }, m: [['pullup', 100]] },
     { id: 'gmurph', lvl: 2, name: 'Murph Reps', sub: '100 pull-ups, 200 push-ups, 300 squats, as an EMOM', cfg: { goalAs: 'emom' }, m: [['pullup', 100], ['pushup', 200], ['bodyweight_squat', 300]] },

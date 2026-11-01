@@ -310,6 +310,10 @@ function injectStyle() {
   html.wm .bt-cs { display:flex; gap: 8px; }
   html.wm .bt-c { flex: 1; height: 40px; border-radius: 12px; background: transparent; border: 1.5px solid var(--wm-neon-line); color: #fff; font-family: var(--tnum); font-size: 17px; font-weight: 800; }
   html.wm .bt-c:active { background: var(--wm-neon-soft); border-color: var(--wm-neon); }
+  html.wm .bt-tank:has(.bt-max) { height: 52px; border-radius: 18px; }
+  html.wm .bt-tank span.bt-max { display:flex; align-items:baseline; justify-content:center; gap: 6px; padding-top: 6px; font-size: 32px; white-space: nowrap; }
+  html.wm .bt-max small { font-size: 14px; color: var(--muted); }
+  html.wm .bt-rnd { flex: none; height: 34px; padding: 0 14px; margin-left: 8px; font-family: inherit; font-size: 14px; border-color: var(--wm-accent); color: var(--wm-accent); }
   html.wm .bt-capbar .btn { flex: 1; min-width: 0; padding: 0 8px; }
   .bt-check { position: fixed; inset: 0; z-index: 140; background: rgba(0,0,0,.6); display:flex; align-items:flex-end; }
   .bt-checkc { width: 100%; background: var(--box, #1B1C22); border-radius: 22px 22px 0 0; padding: 18px 16px calc(18px + env(safe-area-inset-bottom)); display:flex; flex-direction:column; gap: 10px; }
