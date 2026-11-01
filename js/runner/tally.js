@@ -55,4 +55,14 @@ export async function addHistory(rec) {
   h.unshift(rec);
   try { await storage().setDevicePref(KEY(), h.slice(0, 80)); } catch (e) {}
 }
+/* one saved workout, found by when it was done: changed (a hold's seconds
+   fixed) or taken out (a try that should not count) */
+export async function updateHistory(at, patch) {
+  const h = await readHistory(); const r = h.find(x => x.at === at); if (!r) return;
+  Object.assign(r, patch); try { await storage().setDevicePref(KEY(), h); } catch (e) {}
+}
+export async function removeHistory(at) {
+  const h = (await readHistory()).filter(x => x.at !== at);
+  try { await storage().setDevicePref(KEY(), h); } catch (e) {}
+}
 export const sigOf = (fmt, names) => `${fmt}|${names.map(n => String(n || '').toLowerCase().trim()).filter(Boolean).join('+')}`;

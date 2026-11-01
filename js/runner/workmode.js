@@ -19,7 +19,7 @@ import { unit as meUnit, setMe, convertWeight } from '../me.js';
 import { makeSortable, orderAfter } from './drag.js';
 import { roundCall, cueFor, pick } from './coach-lines.js';
 import { t, t2, num, exName, exCues } from '../i18n.js';
-import { bodyWeight, moveLoadKg, showWeight, needsBody, readHistory, addHistory, sigOf } from './tally.js';
+import { bodyWeight, moveLoadKg, showWeight, needsBody, readHistory, addHistory, updateHistory, removeHistory, sigOf } from './tally.js';
 import { ringHTML, ringBaseCss, RING_R, snapToSegments } from './ring.js';
 import { loadPrefs, pref, openPrefs } from './prefs.js';
 import { say, beep, buzz, fmt, initAudio, stopAudio, keepAwake, releaseAwake, setMuted, audioWatch, audioTap, audioHealthy, nativeAudio, nativeSchedule, nativeCancel, lineEvent, setBackgroundQuiet, audioRefresh, alog } from '../timer.js';
@@ -1069,6 +1069,7 @@ function renderSuperset() {
   const item = b.items[S.ci];
   if (!item) return completeBlock();
   if (S.sub === 'rest') return renderSupersetRest();
+  if (S.sub === 'buffer') return renderBuffer();
 
   const rounds = supersetRounds(b);
   if (rounds > 1 && S.round === rounds && S.ci === 0) sayOnce(`last|${S.bi}`, t('Last round.'));
@@ -1119,7 +1120,15 @@ function renderSuperset() {
 }
 function afterSupersetItem() {
   const b = block();
-  if (S.ci < b.items.length - 1) { S.ci += 1; S.sub = 'work'; R.save(S); return renderSuperset(); }
+  if (S.ci < b.items.length - 1) {
+    S.ci += 1;
+    // A pair still means moving to the second machine. transition>0 gives a
+    // short set-up countdown (skippable with "Go now") so the screen names the
+    // next move instead of jumping straight into it. It is a set-up, not a rest.
+    const useBuffer = Number(b.transition) > 0;
+    S.sub = useBuffer ? 'buffer' : 'work'; R.save(S);
+    return useBuffer ? renderBuffer() : renderSuperset();
+  }
   endSupersetRound();
 }
 function endSupersetRound() {
@@ -1198,13 +1207,16 @@ function renderCircuit() {
 }
 function renderBuffer() {
   const b = block(); const next = b.items[S.ci];
+  // resume into whichever renderer owns this block — a superset uses the
+  // buffer too, so this can no longer assume a circuit
+  const resume = () => (block().format === 'superset' ? renderSuperset() : renderCircuit());
   shell(`<div class="now-ex"><div class="label">${t('Get ready')}</div><div class="name">${next.name}</div></div>
     <div class="timer-wrap">${timerSvg('buffer')}</div>
     <div class="actionbar"><button class="btn" id="go">${t('Go now ▸')}</button></div>`);
   const secsBefore = Number(b.transition) > 0 ? Number(b.transition) : 8;   // 8s default set-up before a hold
   if (beginStep(secsBefore, 'rest', 'buffer')) say(t('Next. {x}.', { x: next.name }));
-  onStepDone = () => { S.sub = 'work'; R.save(S); renderCircuit(); };
-  document.getElementById('go').addEventListener('click', () => { R.clearStep(S); onStepDone = null; S.sub = 'work'; R.save(S); renderCircuit(); });
+  onStepDone = () => { S.sub = 'work'; R.save(S); resume(); };
+  document.getElementById('go').addEventListener('click', () => { R.clearStep(S); onStepDone = null; S.sub = 'work'; R.save(S); resume(); });
 }
 function afterCircuitItem() {
   const b = block();
@@ -1499,7 +1511,9 @@ function renderInterval() {
   /* time-based: in the rest after it, the move you just did stays up so you
      can put in your reps */
   const moveLines = phaseWork || (timeBased && hasReps) ? moves.map((i, j) => { const it = b.items[i];
-    return mvRow(it, hasReps ? { val: S.ivCur[j], unit: mvUnit(it), step: `data-ivr="${j}"`, wIdx: i } : { wIdx: i }); }).join('') : '';
+    /* a timed move, in the work: ▶ runs its countdown (get-ready, then its seconds) and logs them */
+    const tmr = phaseWork && it.measure === 'hold' ? `<button class="bt-c add bt-tmr iv-tmr" data-ivt="${j}">▶ ${fmt(Number(it.hold) || Number(it.reps) || 30)}</button>` : '';
+    return mvRow(it, hasReps ? { val: S.ivCur[j], unit: mvUnit(it), step: `data-ivr="${j}"`, wIdx: i } : { wIdx: i }) + tmr; }).join('') : '';
   const nextItem = !all && S.iv + 1 < totalIv ? b.items[(S.iv + 1) % per] : null;
   /* only the numbers that say something: no "total reps" on a bare clock */
   const stats = [`<div><small>${t('Rounds')}</small><b class="wm-pop">${doneCount}${lad ? '' : `<i>/${totalIv}</i>`}</b></div>`,
@@ -1544,6 +1558,10 @@ function renderInterval() {
   } else if (isNew && dur >= 20) {
     const r = pick('rest'); if (r) say(r);                    // a longer rest: a word, if recorded
   }
+  host.querySelectorAll('[data-ivt]').forEach(btn => btn.addEventListener('click', () => {
+    const j = +btn.dataset.ivt, it = b.items[moves[j]];
+    runTimedSet(it, Number(it.hold) || Number(it.reps) || 30, done => { S.ivCur[j] = done; S.ivTouched = S.iv; if (S.ivLog[S.iv]) S.ivLog[S.iv].reps = [...S.ivCur]; R.save(S); renderInterval(); }, { askReps: false });
+  }));
   host.querySelectorAll('[data-ivr]').forEach(btn => btn.addEventListener('click', () => {
     const j = +btn.dataset.ivr; S.ivCur[j] = nudge(b.items[moves[j]], S.ivCur[j], Number(btn.dataset.d)); S.ivTouched = S.iv;
     if (S.ivLog[S.iv]) { S.ivLog[S.iv].reps = [...S.ivCur]; R.save(S); buzz(10); return renderInterval(); }   // already logged: the log and totals move with it
@@ -1786,7 +1804,7 @@ let biteOwn = null;   // the row whose own-number stepper is open: { i, n }
    time of each"). Adds to the same move within 25 s are one set; a set of a
    move already done in this round starts the next round. Times are when
    the reps were entered (the end of each set). */
-function biteStats(log, names) {
+function biteStats(log, names, timed = []) {
   const sets = [];
   (log || []).forEach(([i, n, at]) => {
     const last = sets[sets.length - 1];
@@ -1797,7 +1815,7 @@ function biteStats(log, names) {
   /* a round's time: from the end of the one before (the start, for the first) to its own end, rest included */
   rounds.forEach((r, k) => { r.end = r.sets[r.sets.length - 1].at; r.time = r.end - (rounds[k - 1]?.end ?? 0); });
   const per = names.map((name, i) => { const mine = sets.filter(x => x.i === i), reps = mine.reduce((a, x) => a + x.n, 0);
-    return { name, sets: mine.length, reps, avg: mine.length ? Math.round(reps / mine.length * 10) / 10 : 0, best: Math.max(0, ...mine.map(x => x.n)) }; });
+    return { name, timed: !!timed[i], sets: mine.length, reps, avg: mine.length ? Math.round(reps / mine.length * 10) / 10 : 0, best: Math.max(0, ...mine.map(x => x.n)) }; });
   return { sets: sets.length, rounds, per };
 }
 function biteStatsHtml(st) {
@@ -1805,8 +1823,74 @@ function biteStatsHtml(st) {
   const rt = st.rounds.map((r, k) => `<span class="bs-rt"><i>${k + 1}</i>${fmt(Math.max(0, Math.round(r.time)))}</span>`).join('');
   return `<div class="card bs"><div class="eyebrow">${t('Your sets')}</div>
     <div class="bs-top"><div><b>${st.rounds.length}</b><small>${t2(st.rounds.length, 'round', 'rounds')}</small></div><div><b>${st.sets}</b><small>${t2(st.sets, 'set', 'sets')}</small></div></div>
-    ${st.per.filter(m => m.sets).map(m => `<div class="bs-row"><span>${m.name}</span><small>${t2(m.sets, '{n} set', '{n} sets')} · ${t('{n} a set', { n: num(m.avg, 1) })} · ${t('best {n}', { n: m.best })}</small><b>${m.reps}</b></div>`).join('')}
+    ${st.per.filter(m => m.sets).map(m => { const v = x => m.timed ? fmt(Math.round(x)) : num(x, 1);
+      return `<div class="bs-row"><span>${m.name}</span><small>${t2(m.sets, '{n} set', '{n} sets')} · ${t('{n} a set', { n: v(m.avg) })} · ${t('best {n}', { n: v(m.best) })}</small><b>${v(m.reps)}</b></div>`; }).join('')}
     ${st.rounds.length > 1 ? `<div class="bs-rh">${t('Each round, rest included')}</div><div class="bs-rts">${rt}</div>` : ''}</div>`;
+}
+/* A TIMED SET, inside a workout where the rest is tapped in (Nico, 1 Nov
+   2026: "30 s per exercise… it only shows the 30 s, it doesn't help me";
+   "3 min straight squats" next to rep moves). A get-ready countdown (the
+   Timer settings one, 8 s), then the set counts down with its 3-2-1 and end
+   beeps, and its seconds are logged. A rep move done on time (squats for
+   3 min) can then take the reps it got, or skip. Stop ends it early and
+   logs what was done. The workout's own clock keeps running underneath. */
+function runTimedSet(it, secs, onDone, opts = {}) {
+  const ready = Math.max(0, Number(pref('ready') ?? 8));
+  const askReps = opts.askReps ?? !(it.exId && EXERCISES[it.exId]?.measure === 'hold');   // a hold is only seconds; squats on time also have reps
+  const ov = document.createElement('div'); ov.className = 'overlay tm-ov';
+  let phase = ready > 0 ? 'ready' : 'work', endAt = Date.now() + (phase === 'ready' ? ready : secs) * 1000, startedWork = phase === 'work' ? Date.now() : 0, last = null, iv = 0;
+  const paint = rem => {
+    ov.innerHTML = `<div class="overlay-card tm-card ${phase}"><div class="eyebrow">${phase === 'ready' ? t('Get ready') : t('Go')}</div>
+      <h2 class="tm-name">${it.name}</h2><div class="tm-big">${fmt(Math.max(0, rem))}</div>
+      <div class="tm-bar"><i style="width:${Math.max(0, Math.min(100, 100 - rem / (phase === 'ready' ? ready : secs) * 100))}%"></i></div>
+      <button class="btn secondary" id="tmStop">${phase === 'ready' ? t('Cancel') : t('Stop, log what I did')}</button></div>`;
+    ov.querySelector('#tmStop').addEventListener('click', () => phase === 'ready' ? end(0) : end(Math.round((Date.now() - startedWork) / 1000)));
+  };
+  const askFor = done => {
+    let n = 10;
+    const draw = () => { ov.innerHTML = `<div class="overlay-card tm-card"><div class="eyebrow">${t('{n} s done', { n: done })}</div><h2 class="tm-name">${it.name}</h2>
+      <p class="muted">${t('How many reps did you get? (optional)')}</p>
+      <div class="bt-ckr"><button class="bt-c" data-tr="-1">−</button><b>${n}</b><button class="bt-c" data-tr="1">+</button><button class="bt-c" data-tr="5">+5</button></div>
+      <button class="btn lg" id="tmSave">${t('Save')}</button><button class="bt-ckback" id="tmSkip">${t('Skip')}</button></div>`;
+      ov.querySelectorAll('[data-tr]').forEach(b => b.addEventListener('click', () => { n = Math.max(0, n + Number(b.dataset.tr)); buzz(10); draw(); }));
+      ov.querySelector('#tmSave').addEventListener('click', () => { ov.remove(); onDone(done, n); });
+      ov.querySelector('#tmSkip').addEventListener('click', () => { ov.remove(); onDone(done, null); }); };
+    draw();
+  };
+  const end = done => { clearInterval(iv); if (!done) { ov.remove(); return; } if (askReps) return askFor(done); ov.remove(); onDone(done, null); };
+  const step = () => {
+    const rem = Math.ceil((endAt - Date.now()) / 1000);
+    if (rem !== last) {
+      last = rem;
+      if (rem <= 3 && rem > 0) { beep('count'); buzz(20); }
+      if (rem <= 0) {
+        if (phase === 'ready') { phase = 'work'; startedWork = Date.now(); endAt = startedWork + secs * 1000; last = null; beep('go'); buzz(40); say(t('Go.')); return paint(secs); }
+        beep('end'); buzz(60); return end(secs);
+      }
+      paint(rem);
+    }
+  };
+  document.body.appendChild(ov); paint(phase === 'ready' ? ready : secs);
+  if (phase === 'ready') say(t('Get ready.')); else beep('go');
+  iv = setInterval(step, 200);
+}
+/* REST BETWEEN SETS of a set-amount race (the Calisthenics tests: 2 sets,
+   2 min rest): the race clock keeps running (the rest is part of the
+   score); this counts the rest down, 3-2-1, and says go. Skip ends it. */
+function runSetRest(secs, setNo, sets) {
+  const ov = document.createElement('div'); ov.className = 'overlay tm-ov';
+  const end = Date.now() + secs * 1000; let last = null;
+  const iv = setInterval(() => {
+    const rem = Math.ceil((end - Date.now()) / 1000);
+    if (rem === last) return; last = rem;
+    if (rem <= 3 && rem > 0) { beep('count'); buzz(20); }
+    if (rem <= 0) { clearInterval(iv); beep('go'); buzz(40); say(t('Go.')); ov.remove(); return; }
+    ov.innerHTML = `<div class="overlay-card tm-card ready"><div class="eyebrow">${t('Rest')} · ${t('set {a} of {b} next', { a: setNo, b: sets })}</div>
+      <div class="tm-big">${fmt(rem)}</div><div class="tm-bar"><i style="width:${100 - rem / secs * 100}%"></i></div>
+      <button class="btn secondary" id="tmSkip">${t('Skip rest')}</button></div>`;
+    ov.querySelector('#tmSkip').addEventListener('click', () => { clearInterval(iv); beep('go'); ov.remove(); });
+  }, 200);
+  document.body.appendChild(ov); say(t('Rest.'));
 }
 /* TAPPING REPS IN AS YOU GO, two ways:
    · a set amount (Rep goal → Free, Test yourself): each move fills to its
@@ -1822,25 +1906,30 @@ function renderBites() {
   const goal = b.items.map(it => max ? Infinity : Math.max(1, (Number(it.reps) || 0) * (b.rounds || 1)));
   if (!Array.isArray(S.bites) || S.bites.length !== b.items.length) { S.bites = b.items.map(() => 0); S.biteLog = []; R.save(S); }
   const total = max ? 0 : goal.reduce((a, x) => a + x, 0);
-  const done = () => S.bites.reduce((a, x, i) => a + Math.min(x, goal[i]), 0);
+  const done = () => S.bites.reduce((a, x, i) => a + (max && b.items[i].measure === 'hold' ? Number(S.biteReps?.[i]) || 0 : Math.min(x, goal[i])), 0);   // max reps: the total is reps (a timed move counts the reps it got, not its seconds)
+  const done_ = done;
   const now = () => max ? -1 : S.bites.findIndex((x, i) => x < goal[i]);
   const roundable = max && b.items.length > 1 && b.items.every(it => Number(it.reps) > 0);   // a round = every move's reps
   const steps = (it, g) => max ? [...new Set([Number(it.reps) || 0, 1, 2, 3, 5, 10].filter(n => n > 0))].sort((x, y) => x - y).slice(0, 5)
     : Number(it.reps) > 0 ? biteSteps(g).filter(n => n <= g) : [];
   const row = (it, i) => {
     const g = goal[i], d = Math.min(S.bites[i], g), full = !max && d >= g, pct = max ? 0 : Math.round(d / g * 100);
+    const timed = it.measure === 'hold', secs = S.tmrSec?.[i] || Number(it.hold) || Number(it.reps) || 30;
     const chips = full ? `<span class="bt-ok">✓</span>`
+      : timed ? (biteOwn?.i === i
+        ? `<button class="bt-c" data-own-d="-5">−</button><b class="bt-own">${fmt(biteOwn.n)}</b><button class="bt-c" data-own-d="5">+</button><button class="bt-c add" data-tsec="${i}" data-n="${biteOwn.n}">${t('Set')}</button>`
+        : `<button class="bt-c add bt-tmr" data-tmr="${i}">▶ ${fmt(secs)}</button><button class="bt-c own" data-own="${i}" aria-label="${t('Change the time')}">⏱</button>`)
       : biteOwn?.i === i ? `<button class="bt-c" data-own-d="-1">−</button><b class="bt-own">${biteOwn.n}</b><button class="bt-c" data-own-d="1">+</button><button class="bt-c add" data-bt="${i}" data-n="${biteOwn.n}">${t('Add')}</button>`
       : (max || Number(it.reps) > 0 ? [...steps(it, g), 0] : [1]).map(n => n === 0 ? `<button class="bt-c own" data-own="${i}">+…</button>`
         : `<button class="bt-c" data-bt="${i}" data-n="${n}">${max || Number(it.reps) > 0 ? '+' + n : t('Done ✓')}</button>`).join('');
     return `<div class="bt-row ${full ? 'full' : ''} ${i === now() ? 'now' : ''}">
-      <div class="bt-top"><span class="mvr-n">${it.name}</span><b class="bt-v">${max ? d : Number(it.reps) > 0 ? `${d}<small>/${g}</small>` : ''}</b></div>
+      <div class="bt-top"><span class="mvr-n">${it.name}</span><b class="bt-v">${timed ? `${max ? fmt(d) : `${fmt(d)}<small>/${fmt(g)}</small>`}${S.biteReps?.[i] ? ` <small>· ${t('{n} reps', { n: S.biteReps[i] })}</small>` : ''}` : max ? d : Number(it.reps) > 0 ? `${d}<small>/${g}</small>` : ''}</b></div>
       ${max ? '' : `<div class="bt-bar"><i style="width:${pct}%"></i></div>`}
       <div class="bt-cs">${chips}</div></div>`;
   };
   const draw = () => {
     if (max) {
-      const st = biteStats(S.biteLog, b.items.map(it => it.name));
+      const st = biteStats(S.biteLog, b.items.map(it => it.name), b.items.map(it => it.measure === 'hold'));
       document.getElementById('btTank').innerHTML = `<span class="bt-max">${done()} <small>${t('reps')}</small></span>`;
       document.getElementById('btTankN').innerHTML = `${st.sets ? `${t2(st.rounds.length, '{n} round', '{n} rounds')} · ${t2(st.sets, '{n} set', '{n} sets')}` : ''}${roundable ? ` <button class="bt-c bt-rnd" data-round="1">${t('+1 round')}</button>` : ''}`;
     } else {
@@ -1862,8 +1951,8 @@ function renderBites() {
   const el = () => S.stepStartedAt != null ? upElapsed() : S.btStart ? (Date.now() - S.btStart) / 1000 : 0;
   const finish = secs => {
     R.clearStep(S); onStepDone = null;
-    S.btSummary = biteStats(S.biteLog, b.items.map(it => it.name));
-    (S.captured[b.id] || []).forEach((e, i) => { e.sets = [{ value: secs }]; e.unit = 'sec'; e.rounds = true; e.bites = S.bites[i] || 0; });
+    S.btSummary = biteStats(S.biteLog, b.items.map(it => it.name), b.items.map(it => it.measure === 'hold'));
+    (S.captured[b.id] || []).forEach((e, i) => { e.sets = [{ value: secs }]; e.unit = 'sec'; e.rounds = true; e.bites = S.bites[i] || 0; if (S.biteReps?.[i]) e.timedReps = S.biteReps[i]; });
     R.save(S); say(max ? t('Time. {n} reps.', { n: done() }) : `Done. ${spokenTime(secs)}.`);
     completeBlock();
   };
@@ -1883,7 +1972,7 @@ function renderBites() {
   /* BEFORE IT IS SAVED: anything else? One more round, or a few reps */
   const lastCheck = () => {
     const secs = max && S.stepStartedAt == null ? dur : Math.round(el());   // max reps: the clock ran out, the time is the time set
-    const st = biteStats(S.biteLog, b.items.map(it => it.name)), lastRound = st.rounds.at(-1);
+    const st = biteStats(S.biteLog, b.items.map(it => it.name), b.items.map(it => it.measure === 'hold')), lastRound = st.rounds.at(-1);
     const ov = document.createElement('div'); ov.className = 'bt-check';
     const paint = () => { ov.innerHTML = `<div class="bt-checkc"><div class="eyebrow">${t('Anything else?')}</div>
       ${b.items.map((it, i) => `<div class="bt-ckr"><span>${it.name}</span><button class="bt-c" data-ck="${i}" data-d="-1">−</button><b>${S.bites[i]}</b><button class="bt-c" data-ck="${i}" data-d="1">+</button></div>`).join('')}
@@ -1916,13 +2005,32 @@ function renderBites() {
     R.save(S); celebrate(e.target, '+1'); draw();   // celebrate() has the chime
   });
   document.getElementById('btRows').addEventListener('click', e => {
-    const o = e.target.closest('[data-own]'); if (o) { biteOwn = { i: +o.dataset.own, n: 3 }; buzz(10); return draw(); }
-    const od = e.target.closest('[data-own-d]'); if (od) { biteOwn.n = Math.max(1, Math.min(999, biteOwn.n + Number(od.dataset.ownD))); beep('tick'); return draw(); }
+    const o = e.target.closest('[data-own]');
+    if (o) { const k = +o.dataset.own, tm = b.items[k].measure === 'hold'; biteOwn = { i: k, n: tm ? (S.tmrSec?.[k] || Number(b.items[k].hold) || Number(b.items[k].reps) || 30) : 3 }; buzz(10); return draw(); }
+    const od = e.target.closest('[data-own-d]'); if (od) { biteOwn.n = Math.max(1, Math.min(3600, biteOwn.n + Number(od.dataset.ownD))); beep('tick'); return draw(); }
+    const ts = e.target.closest('[data-tsec]'); if (ts) { S.tmrSec = S.tmrSec || {}; S.tmrSec[+ts.dataset.tsec] = +ts.dataset.n; biteOwn = null; R.save(S); return draw(); }
+    const tm = e.target.closest('[data-tmr]');
+    if (tm) {
+      const i = +tm.dataset.tmr, it = b.items[i], secs = S.tmrSec?.[i] || Number(it.hold) || Number(it.reps) || 30;
+      return runTimedSet(it, secs, (done, reps) => {
+        const before = done_(), wasFull = S.bites[i] >= goal[i];
+        S.bites[i] += done; S.biteLog.push([i, done, Math.round(upElapsed())]);
+        if (reps != null) { S.biteReps = S.biteReps || {}; S.biteReps[i] = (S.biteReps[i] || 0) + reps; }
+        R.save(S); setTimeout(() => beep('add'), 0); draw();
+        if (!max && done_() >= total && before < total) { celebrate(tm, '100%'); return lastCheck(); }
+        if (!max && !wasFull && S.bites[i] >= goal[i]) celebrate(document.querySelector('.bt-rows'), '✓');
+      });
+    }
     const c = e.target.closest('[data-bt]'); if (!c) return;
     biteOwn = null;
     const i = +c.dataset.bt, before = done(), wasFull = S.bites[i] >= goal[i];
     const n = max ? +c.dataset.n : Math.min(+c.dataset.n, goal[i] - S.bites[i]); if (n <= 0) return;
     S.bites[i] += n; S.biteLog.push([i, n, Math.round(upElapsed())]); R.save(S); buzz(20);
+    /* a set finished (every move at its reps × sets so far): its rest, before the next */
+    if (!max && b.roundRest > 0 && (b.rounds || 1) > 1) {
+      const setsDone = Math.min(...b.items.map((it, k) => Math.floor(S.bites[k] / Math.max(1, Number(it.reps) || 1))));
+      if (setsDone > (S.btSetsDone || 0) && setsDone < b.rounds) { S.btSetsDone = setsDone; R.save(S); runSetRest(b.roundRest, setsDone + 1, b.rounds); }
+    }
     setTimeout(() => beep('add'), 0);   // every add gets its little win; after the screen, never in its way
     const after = done();
     if (max) return draw();
@@ -2235,12 +2343,35 @@ function testResult(session, partial, tallyRec) {
   const show = v => def.metric === 'reps' ? t('{n} reps', { n: v }) : fmt(v);
   const gap = best != null && score != null ? Math.abs(score - best) : null;
   addHistory(rec);
-  const html = `<div class="card test-res ${newBest ? 'best' : ''}"><div class="eyebrow">${t('Test yourself')} · ${t(def.name)}</div>
-    <div class="test-big">${score != null ? show(score) : t('Not finished')}</div>
-    <div class="muted">${newBest ? (best == null ? t('Your first result. Now beat it.') : t('New best! {x} better than before', { x: show(gap) }))
-      : best != null && score != null ? t('{x} off your best ({b})', { x: show(gap), b: show(best) }) : best != null ? t('Your best: {b}', { b: show(best) }) : ''}</div></div>`;
-  if (newBest && best != null) setTimeout(() => celebrate(document.querySelector('.test-res'), t('New best!')), 400);
-  return { html, newBest };
+  /* FIX IT BEFORE IT COUNTS (Nico: a pyramid entered by mistake became a
+     3-second best; a dead hang ran on while he let go and reached for the
+     phone). Seconds or reps up and down, or don't count this try at all. */
+  let cur = score, dropped = false;
+  const short = def.metric === 'time' && score != null && score < 20;
+  const inner = () => {
+    if (dropped) return `<div class="eyebrow">${t('Test yourself')} · ${t(def.name)}</div><div class="muted">${t('Not counted. Your best stays as it was.')}</div>`;
+    const nb = cur != null && (best == null || (def.metric === 'time' ? cur < best : cur > best)), g = best != null && cur != null ? Math.abs(cur - best) : null;
+    const steps = def.metric === 'reps' ? [[-5, '−5'], [-1, '−1'], [1, '+1'], [5, '+5']] : [[-5, '−5 s'], [-1, '−1 s'], [1, '+1 s'], [5, '+5 s']];
+    return `<div class="eyebrow">${t('Test yourself')} · ${t(def.name)}</div>
+      <div class="test-big">${cur != null ? show(cur) : t('Not finished')}</div>
+      <div class="muted">${nb ? (best == null ? t('Your first result. Now beat it.') : t('New best! {x} better than before', { x: show(g) }))
+        : best != null && cur != null ? t('{x} off your best ({b})', { x: show(g), b: show(best) }) : best != null ? t('Your best: {b}', { b: show(best) }) : ''}</div>
+      ${short ? `<div class="tr-warn">${t('Very short. If it was a mistake, don\'t count it.')}</div>` : ''}
+      ${cur != null ? `<div class="tr-adj"><span>${t('Fix it')}</span>${steps.map(([d, l]) => `<button class="bt-c" data-tadj="${d}">${l}</button>`).join('')}</div>` : ''}
+      <button class="bt-ckback" id="trDrop">${t("Don't count this try")}</button>`;
+  };
+  const html = `<div class="card test-res ${newBest ? 'best' : ''}" id="testRes">${inner()}</div>`;
+  const wire = () => {
+    const el = document.getElementById('testRes'); if (!el) return;
+    el.addEventListener('click', e => {
+      const a = e.target.closest('[data-tadj]');
+      if (a) { cur = Math.max(def.metric === 'reps' ? 0 : 1, cur + Number(a.dataset.tadj)); buzz(10);
+        updateHistory(rec.at, def.metric === 'reps' ? { total: cur } : { score: cur }); el.innerHTML = inner(); return; }
+      if (e.target.closest('#trDrop')) { dropped = true; removeHistory(rec.at); buzz(20); el.classList.remove('best'); el.innerHTML = inner(); }
+    });
+  };
+  if (newBest && best != null && !short) setTimeout(() => celebrate(document.querySelector('.test-res'), t('New best!')), 400);
+  return { html, newBest, wire };
 }
 /* the live race against the best attempt's timeline, every second */
 let ghostSaid = 0;
@@ -2283,16 +2414,16 @@ function quickTally(session, partial) {
     sb.entries.forEach((e, i) => {
       const it = pb.items[i] || {}; const r = repsOfEntry(e, pb, it, partial);
       if (r == null || !it.name || /^(Work|Time|Reps|Rounds)$/.test(it.name)) return;
-      const m = moves.get(it.name) || { name: it.name, reps: 0, item: it };
-      m.reps += r; moves.set(it.name, m);
+      const m = moves.get(it.name) || { name: it.name, reps: 0, item: it, timedReps: 0 };
+      m.reps += r; m.timedReps += Number(e.timedReps) || 0; moves.set(it.name, m);   // timedReps: the reps a move done on time got
     });
   });
   const list = [...moves.values()].filter(m => m.reps > 0);
   if (!list.length) return null;
   /* reps and held seconds are different things: holds get their own line */
-  const total = list.filter(m => !mvUnit(m.item)).reduce((a, m) => a + m.reps, 0);
+  const total = list.reduce((a, m) => a + (mvUnit(m.item) ? m.timedReps : m.reps), 0);
   const held = list.filter(m => mvUnit(m.item)).reduce((a, m) => a + m.reps, 0);
-  const loadKg = b => list.reduce((a, m) => a + moveLoadKg(m.item, m.reps, b), 0);
+  const loadKg = b => list.reduce((a, m) => a + moveLoadKg(mvUnit(m.item) && m.timedReps ? { ...m.item, measure: 'reps' } : m.item, mvUnit(m.item) ? m.timedReps : m.reps, b), 0);
   const askBody = !body && needsBody(list.map(m => m.item));
   const fmtName = S.plan.blocks[0]?.label || S.plan.blocks[0]?.format || '';
   /* the timer is its type and ALL its moves (a move left at 0 reps today is still part of it) */
@@ -2301,7 +2432,7 @@ function quickTally(session, partial) {
   const row = (l, r, cls = '') => `<div class="eff-row ${cls}"><span>${l}</span><span style="margin-left:auto;" class="tnum">${r}</span></div>`;
   const loadRow = () => { const kg = loadKg(bodyWeight()); return kg > 0 ? row(`${t('Total load')} <small class="muted">${t('est.')}</small>`, showWeight(kg, unit)) : ''; };
   const html = `<div class="card tally"><div class="eyebrow">${t('Totals')}</div>
-    ${list.map(m => row(`${m.name}${Number(m.item.weight) > 0 ? ` <small class="muted">@ ${num(wIn(m.item), 1)} ${unit}</small>` : ''}`, `${m.reps} ${t(mvUnit(m.item) ? 'sec' : 'reps')}`)).join('')}
+    ${list.map(m => row(`${m.name}${Number(m.item.weight) > 0 ? ` <small class="muted">@ ${num(wIn(m.item), 1)} ${unit}</small>` : ''}`, `${mvUnit(m.item) ? fmt(m.reps) : m.reps} ${mvUnit(m.item) ? '' : t('reps')}${m.timedReps ? ` · ${t('{n} reps', { n: m.timedReps })}` : ''}`)).join('')}
     ${row(`<b>${t('Total reps')}</b>`, `<b>${total}</b>`, 'tally-sum')}
     ${held ? row(t('Total time held'), fmt(held)) : ''}
     <div id="tallyLoad">${loadRow()}</div>
@@ -2384,6 +2515,7 @@ function finishSession(opts = {}) {
     <div style="height:16px;"></div>${test ? test.html : ''}${resultHtml}${S.btSummary ? biteStatsHtml(S.btSummary) : ''}${tally ? tally.html : ''}${prHtml}${effHtml}
     <div class="actionbar"><button class="btn lg" id="home">${t(S.plan.finishLabel || 'Back to week')}</button></div></div>`;
   if (tally) tally.wire();
+  test?.wire?.();
   paintAchievements(host);
   document.getElementById('home').addEventListener('click', async () => { const leavesPage = !!S?.plan?.returnTo; try { await R.flushRunState(); } catch (e) {} if (!leavesPage) clearWorkTheme(); cb.onFinish?.(); });
 }

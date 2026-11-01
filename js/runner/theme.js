@@ -314,6 +314,19 @@ function injectStyle() {
   html.wm .bt-tank span.bt-max { display:flex; align-items:baseline; justify-content:center; gap: 6px; padding-top: 6px; font-size: 32px; white-space: nowrap; }
   html.wm .bt-max small { font-size: 14px; color: var(--muted); }
   html.wm .bt-rnd { flex: none; height: 34px; padding: 0 14px; margin-left: 8px; font-family: inherit; font-size: 14px; border-color: var(--wm-accent); color: var(--wm-accent); }
+  html.wm .tm-ov { z-index: 145; }
+  html.wm .tr-adj { display:flex; align-items:center; gap: 6px; margin-top: 12px; } html.wm .tr-adj span { flex: 1; text-align:left; color: var(--muted); font-size: 13px; }
+  html.wm .tr-adj .bt-c { flex: 0 0 auto; min-width: 48px; height: 36px; font-size: 14px; padding: 0 8px; }
+  html.wm .tr-warn { margin-top: 8px; color: var(--wm-warn, #FFB020); font-size: 13.5px; }
+  html.wm .tm-card { text-align:center; display:flex; flex-direction:column; gap: 10px; }
+  html.wm .tm-name { margin: 0; font-size: 22px; }
+  html.wm .tm-big { font-family: var(--tnum); font-size: 88px; font-weight: 800; line-height: 1; color: var(--wm-accent); }
+  html.wm .tm-card.ready .tm-big { color: var(--wm-ready, #3D6BFF); }
+  html.wm .tm-bar { height: 8px; border-radius: 4px; background: var(--box-2); overflow: hidden; } html.wm .tm-bar i { display:block; height: 100%; background: var(--wm-accent); transition: width .2s linear; }
+  html.wm .tm-card.ready .tm-bar i { background: var(--wm-ready, #3D6BFF); }
+  html.wm .bt-tmr { flex: 1; font-family: var(--tnum); }
+  html.wm .iv-tmr { display:block; width: 100%; height: 44px; margin: 4px 0 8px; }
+  html.wm .tm-card .bt-ckr { justify-content: center; } html.wm .tm-card .bt-ckr b { font-size: 30px; width: 70px; }
   html.wm .bt-capbar .btn { flex: 1; min-width: 0; padding: 0 8px; }
   .bt-check { position: fixed; inset: 0; z-index: 140; background: rgba(0,0,0,.6); display:flex; align-items:flex-end; }
   .bt-checkc { width: 100%; background: var(--box, #1B1C22); border-radius: 22px 22px 0 0; padding: 18px 16px calc(18px + env(safe-area-inset-bottom)); display:flex; flex-direction:column; gap: 10px; }

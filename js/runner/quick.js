@@ -22,7 +22,7 @@ import { loadPrefs, openPrefs, pref } from './prefs.js';
 import { installHold } from './hold.js';
 import { makeSortable } from './drag.js';
 import { attachSheet } from './sheet-close.js';
-import { readHistory, sigOf, showWeight } from './tally.js';
+import { readHistory, addHistory, removeHistory, sigOf, showWeight } from './tally.js';
 import { unit as meUnit, meAsked, setMe, convertWeight } from '../me.js';
 import { openMeSheet } from './me-sheet.js';
 import { ringHTML, ringBaseCss, ringDesign } from './ring.js';
@@ -85,7 +85,7 @@ const FORMATS = [
   { id: 'test', name: 'Test yourself', sub: 'Race your own best', moves: false,
     how: ['Benchmarks you race your own best on: 100 push-ups for time, max push-ups in 2 minutes, the longest dead hang…', 'Your first try sets your best. After that, a line under the clock races you against it, live: "12 reps ahead of your best", "6 s behind". The coach calls it too.',
       'Beat it and it becomes your new best. Every attempt is in History.'] },
-  { id: 'pushup', name: 'Push-up test', sub: '1 rep every 3 seconds', moves: false,
+  { id: 'pushup', name: 'Push-up test', sub: '1 rep every 3 seconds', hidden: true, moves: false,
     how: ['The push-up beep test.', 'A 10-second countdown, then a DOUBLE beep: that is your start. After it, 1 beep every 3 seconds: on each one, go down and come back up before the next. That is 20 a minute. The coach counts every rep out loud.',
       'Keep the beat as long as you can. The test is over when you can no longer stay in rhythm or your form breaks: tap Stop. Your score is the reps you did on the beat.',
       'Want it harder? 25 a minute is the NHL version.'] },
@@ -228,7 +228,9 @@ function fromForTime(c) {
     movesBy: { ...(c.movesBy || {}), ...(moves.length ? { goal: moves } : {}) }, moves: undefined };
 }
 /* a setup the person opens (not one the timer builds inside a plan) */
-const openCfg = c => migrate(fromForTime(c));
+/* the push-up test left the carousel (1 Nov 2026): it is a test in Test yourself */
+const fromPushup = c => c?.fmt === 'pushup' ? { ...c, fmt: 'test', testId: 'cadence' } : c;
+const openCfg = c => migrate(fromPushup(fromForTime(c)));
 function migrate(c) {
   /* weights were saved in the timer's own lb / kg (lb before it existed): now in the person's unit */
   const wu = meUnit();
@@ -412,7 +414,7 @@ function summary() {
   switch (cfg.fmt) {
     case 'test': { const d = testDef(), b = bestOf(hist, d); return b ? t('Your best: {b}', { b: testShow(d, scoreOf(b, d)) }) : t('First try sets your best'); }
     case 'goal': { const g = goalBuilt(); if (!g) return t('Add your moves and their totals');
-      const how = g.cfg.fmt === 'emom' ? 'EMOM' : g.cfg.fmt === 'ladder' ? t2(g.rows, '{n} step', '{n} steps') : g.cfg.fmt === 'igyg' ? t2(g.rows, '{n} set', '{n} sets') : t('For time');
+      const how = g.cfg.fmt === 'emom' ? 'EMOM' : g.cfg.fmt === 'ladder' ? t2(g.rows, '{n} step', '{n} steps') : g.cfg.fmt === 'igyg' ? t2(g.rows, '{n} set', '{n} sets') : t('Free');
       return `${goalTotals()} · ${how}`; }
     case 'igyg': return igygLine();
     case 'emom': {
@@ -484,7 +486,7 @@ export function buildPlan(c = cfg) {
           ...(moves.length ? { bites: 'max' } : { countRounds: true, hideList: true, items: [{ name: 'Rounds', measure: 'rounds' }] }) }];
         break;
       case 'fortime':
-        blocks = [{ ...base, id: id(1), name, format: 'fortime', minutes: cfg.ftCap, rounds: cfg.ftRounds, label: 'For time',
+        blocks = [{ ...base, id: id(1), name, format: 'fortime', minutes: cfg.ftCap, rounds: cfg.ftRounds, label: 'For time', roundRest: Number(cfg.ftRest) || 0,
           ...(moves.length ? { bites: true } : { hideList: true, items: [{ name: 'Time', measure: 'hold' }] }) }];   // moves: tap reps in as you go
         break;
       case 'stopwatch':
@@ -507,7 +509,7 @@ export function buildPlan(c = cfg) {
         /* the benchmark on its own timer, with the best attempt to race */
         const def = testDef(), testCfg = JSON.parse(JSON.stringify(cfg)), best = bestOf(hist, def);
         cfg = prev;
-        const plan = buildPlan({ ...c, ...def.cfg, fmt: def.fmt, movesBy: { ...(c.movesBy || {}), [def.fmt]: testMoves(def) } });
+        const plan = buildPlan(def.custom ? { ...c, ...def.cfg } : { ...c, ...def.cfg, fmt: def.fmt, movesBy: { ...(c.movesBy || {}), [def.fmt]: testMoves(def) } });   // your own test: its whole setup
         if (!plan) return plan;
         plan.name = t(def.name); plan.quickCfg = testCfg;
         plan.test = { def, sig: testSig(def.id), best: scoreOf(best, def), ghost: best?.trace || null };
@@ -741,17 +743,96 @@ function openAllHistory() {
     persist(); close(); draw(); toast(t('Saved')); }));
 }
 /* TEST YOURSELF (tests.js): the benchmark picked, your best and tries */
-const testDef = () => TESTS.find(x => x.id === cfg.testId) || TESTS[0];
+/* YOUR OWN TESTS (Nico, 1 Nov 2026): made from any setup (a Rep goal Free
+   race, an AMRAP for max reps) or a hold by name; kept on the device */
+const MY_TESTS = 'fj.myTests';
+const myTests = () => { try { return JSON.parse(localStorage.getItem(MY_TESTS) || '[]'); } catch (e) { return []; } };
+const saveMyTests = l => { try { localStorage.setItem(MY_TESTS, JSON.stringify(l)); } catch (e) {} };
+const allTests = () => [...TESTS, ...myTests()];
+const testDef = () => allTests().find(x => x.id === cfg.testId) || TESTS[0];
 const testShow = (def, v) => v == null ? '' : def.metric === 'reps' ? t('{n} reps', { n: v }) : fmt(v);
 function testsList() {
-  const groups = [...new Set(TESTS.map(x => x.group))];
-  return groups.map(g => `${sec(g)}<div class="qt-tests">${TESTS.filter(x => x.group === g).map(x => {
+  const list = allTests(), groups = [...new Set(list.map(x => x.group))];
+  return groups.map(g => `${sec(g)}<div class="qt-tests">${list.filter(x => x.group === g).map(x => {
     const b = bestOf(hist, x), n = attempts(hist, x).length;
     return `<button class="qt-test ${x.id === cfg.testId ? 'on' : ''}" data-test="${x.id}"><span><b>${t(x.name)}</b><small>${t(x.sub)}</small></span>
       <em>${b ? `<i>${t('Best')}</i>${testShow(x, scoreOf(b, x))}` : `<i>${t('New')}</i>`}${n ? `<small>${t2(n, '{n} try', '{n} tries')}</small>` : ''}</em></button>`; }).join('')}</div>`).join('');
 }
 const testMoves = def => def.m.map(([k, a, b]) => { const ex = EXERCISES[k], base = ex ? { exId: k, name: ex.name } : { exId: null, name: t(k) };
   return ['ladder', 'deathby'].includes(def.fmt) ? { ...base, reps: '', ldStart: a, ldStep: b } : { ...base, reps: a }; });
+/* A TEST'S TRIES: each one with its date and score; take one out (a
+   mistake), or add a result done before the app knew about it */
+function openTries() {
+  const d = testDef();
+  const { ov, close: shut } = sheet('<div class="qt-tries"></div>', 'tall');
+  const box = ov.querySelector('.qt-tries');
+  let changed = false;
+  const close = () => { shut(); if (changed) setTimeout(draw, 200); };   // the screen catches up once the sheet is gone (a redraw would take it away)
+  ov.addEventListener('click', e => { if (e.target === ov && changed) setTimeout(draw, 250); });
+  const paint = () => {
+    const tries = attempts(hist, d), b = bestOf(hist, d);
+    const isTime = d.metric !== 'reps';
+    box.innerHTML = `<div class="qt-sheet-h">${t(d.name)}</div>
+      ${tries.length ? `<div class="qt-favlist">${tries.map(r => { const sc = scoreOf(r, d);
+        return `<div class="qt-tryrow ${r === b ? 'best' : ''}"><span><b>${sc != null ? testShow(d, sc) : t('Not finished')}</b><small>${shortDate(r.at)}${r === b ? ` · ${t('Best')}` : ''}${r.manual ? ` · ${t('added by hand')}` : ''}</small></span>
+          <button class="qt-mx" data-trx="${esc(r.at)}" aria-label="${t('Remove')}">✕</button></div>`; }).join('')}</div>` : `<p class="muted center">${t('No tries yet.')}</p>`}
+      ${sec('Add a past result')}
+      <div class="qt-tryadd">${isTime ? `<input id="trM" type="number" inputmode="numeric" placeholder="${t('min')}"/><b>:</b><input id="trS" type="number" inputmode="numeric" placeholder="${t('sec')}"/>`
+        : `<input id="trR" type="number" inputmode="numeric" placeholder="${t('reps')}"/>`}<button class="btn" id="trAdd">${t('Add')}</button></div>
+      ${d.custom ? `<button class="qt-link center qt-mvdel" id="trDelTest">${t('Delete this test')}</button>` : ''}
+      <button class="qt-link center" id="trClose">${t('Close')}</button>`;
+    box.querySelector('#trDelTest')?.addEventListener('click', () => {
+      if (!confirm(t('Delete this test? Its tries stay in your history.'))) return;
+      saveMyTests(myTests().filter(x => x.id !== d.id)); cfg.testId = TESTS[0].id; persist(); close(); draw();
+    });
+    box.querySelectorAll('[data-trx]').forEach(x => x.addEventListener('click', async () => {
+      if (!confirm(t('Remove this try?'))) return;
+      await removeHistory(x.dataset.trx); hist = await readHistory(); changed = true; paint();
+    }));
+    box.querySelector('#trAdd').addEventListener('click', async () => {
+      const v = isTime ? (Number(box.querySelector('#trM').value) || 0) * 60 + (Number(box.querySelector('#trS').value) || 0) : Number(box.querySelector('#trR').value) || 0;
+      if (!(v > 0)) return;
+      await addHistory({ at: new Date().toISOString(), sig: testSig(d.id), title: t(d.name), manual: true, partial: false, moves: [], cfg: null,
+        ...(isTime ? { score: v, seconds: v, total: 0 } : { total: v, seconds: 0 }) });
+      hist = await readHistory(); changed = true; toast(t('Added: {x}', { x: testShow(d, v) })); paint();
+    });
+    box.querySelector('#trClose').addEventListener('click', close);
+  };
+  paint();
+}
+/* MAKE YOUR OWN TEST: a race or max reps is set up in its own mode, then
+   saved as a test; a hold is just its name */
+function openMakeTest() {
+  const { ov, close } = sheet(`<div class="qt-sheet-h">${t('Create your own test')}</div>
+    <button class="qt-opt" data-mk="time"><b>${t('A race')}</b><small>${t('Your exercises and reps, as fast as you can. Scored on time.')}</small></button>
+    <button class="qt-opt" data-mk="reps"><b>${t('Max reps')}</b><small>${t('As many reps as you can in the minutes you set.')}</small></button>
+    <button class="qt-opt" data-mk="hold"><b>${t('Max hold')}</b><small>${t('A hold, as long as you can. Scored on time held.')}</small></button>`);
+  ov.querySelectorAll('[data-mk]').forEach(b => b.addEventListener('click', () => {
+    const k = b.dataset.mk; close();
+    if (k === 'hold') return nameTest(name => ({ metric: 'hold', fmt: 'stopwatch', cfg: { fmt: 'stopwatch' }, sub: t('Max hold') }));
+    cfg.makeTest = k; cfg.fmt = k === 'time' ? 'goal' : 'amrap'; if (k === 'time') cfg.goalAs = 'fortime';
+    page = 'step2'; persist(); draw(); scrollTo(0, 0);
+  }));
+}
+/* the name, then the test is saved and picked */
+function nameTest(make) {
+  const { ov, close } = sheet(`<div class="qt-sheet-h">${t('Name your test')}</div>
+    <input class="qt-search" id="mtName" placeholder="${t('Give it a name')}" autocomplete="off"/>
+    <button class="btn" id="mtSave">${t('Save as a test')}</button>`);
+  setTimeout(() => ov.querySelector('#mtName').focus(), 60);
+  ov.querySelector('#mtSave').addEventListener('click', () => {
+    const name = ov.querySelector('#mtName').value.trim().slice(0, 40); if (!name) return ov.querySelector('#mtName').focus();
+    const def = { id: 'my' + Date.now().toString(36), group: 'Yours', lvl: 2, custom: true, name, m: [], ...make(name) };
+    saveMyTests([...myTests(), def]);
+    delete cfg.makeTest; cfg.fmt = 'test'; cfg.testId = def.id; page = 'step2';
+    persist(); close(); draw(); scrollTo(0, 0); toast(t('Test saved: {x}', { x: name }));
+  });
+}
+function saveAsTest() {
+  const snap = JSON.parse(JSON.stringify(cfg)); delete snap.makeTest;
+  const time = cfg.makeTest === 'time';
+  nameTest(() => ({ metric: time ? 'time' : 'reps', fmt: snap.fmt, cfg: snap, sub: summary() }));
+}
 /* REP GOAL (rep-goal.js): the totals, built into the type picked */
 const GOAL_AS = [['fortime', 'Free'], ['emom', 'EMOM'], ['ladder', 'Ladder'], ['igyg', 'Sets']];   // 'fortime' = Free: the old For time mode
 function goalBuilt() { return buildFromGoal(MV().map(m => ({ ...m, name: mvName(m) })), cfg.goalAs, cfg.gMins || 0); }
@@ -893,7 +974,7 @@ function homeExtras() {
   if (f === 'igyg') return [segRow('Rest', 'neon', [['same', 'Same as your set'], ['fixed', 'Fixed']], cfg.igRest, 'data-igrest'), ...(cfg.igRest === 'fixed' ? [homeRow('igRestSec')] : [])];
   if (f === 'vo2') return [vo2Carousel()];
   if (f === 'test') {
-    const recs = TESTS.map(x => ({ x, b: bestOf(hist, x) })).filter(r => r.b).slice(0, 2);
+    const recs = allTests().map(x => ({ x, b: bestOf(hist, x) })).filter(r => r.b).slice(0, 2);
     return recs.length ? [`${sec('Your records')}${recs.map(({ x, b }) => `<div class="qt-rec"><span><b>${t(x.name)}</b><small>${t2(attempts(hist, x).length, '{n} try', '{n} tries')}</small></span><em>${testShow(x, scoreOf(b, x))}</em></div>`).join('')}`]
       : [`<div class="qt-note">${t('Your first try at any test sets your best. Then you race it.')}</div>`];
   }
@@ -1012,7 +1093,10 @@ function step2Body() {
   const parts = [];
   if (f === 'goal') parts.push(segRow('Run it as', 'accent', GOAL_AS, cfg.goalAs, 'data-goalas'));
   if (f === 'igyg') parts.push(segRow('Rest', 'neon', [['same', 'Same as your set'], ['fixed', 'Fixed']], cfg.igRest, 'data-igrest'), ...(cfg.igRest === 'fixed' ? [homeRow('igRestSec')] : []));
-  if (f === 'test') parts.push(testsList());
+  if (f === 'test') { const d = testDef(), n = attempts(hist, d).length;
+    parts.push(`<button class="qt-last" id="qtTries"><span>${t(d.name)} · ${t('your tries')}</span><b>${n ? t2(n, '{n} try', '{n} tries') : t('none yet')}</b><i>›</i></button>`, testsList(),
+      `<button class="qt-hr qt-hexadd" id="qtMyTest"><span>+ ${t('Create your own test')}</span><i>›</i></button>`); }
+  if (cfg.makeTest && f !== 'test') parts.unshift(`<div class="qt-mkt"><span>${t('Building your test: set it up, then Save as a test.')}</span><button id="qtMkX" aria-label="${t('Cancel')}">✕</button></div>`);
   else if (def.moves) parts.push(`${sec(f === 'goal' ? 'Your totals' : f === 'igyg' ? 'Sets, in order' : 'Exercises', MOVES_OPTIONAL.has(f) ? `<small>${t('optional')}</small>` : f === 'ladder' ? `<button class="qt-seclink" id="qtPresets">${t('Presets')}</button>` : '')}${movesCard()}`);
   if (f === 'goal' && goalBuilt()) parts.push(`<div class="qt-goalbox ${goalTight(goalBuilt()) ? 'warn' : ''}"><b>${t('The plan')}</b><strong>${goalTotals()}</strong><span>${esc(goalPreview())}</span>${goalTight(goalBuilt()) ? `<em>${t('Tight: about {n} min of pure work. Give yourself more time or fewer reps.', { n: Math.ceil(goalBuilt().work) })}</em>` : ''}${cfg.goalAs !== 'ladder' ? `<button class="qt-link" id="qtGoalOpen">${t('Open it as {x} to adjust', { x: t(GOAL_AS.find(x => x[0] === cfg.goalAs)[1]) })}</button>` : ''}</div>`);
   if (f === 'emom' && named > 1) parts.push(segRow('How the moves run', 'accent', [['turns', 'Take turns'], ['all', 'All every minute']], cfg.emomStyle === 'all' ? 'all' : 'turns', 'data-style',
@@ -1032,7 +1116,7 @@ function step2Body() {
     ${parts.join('')}
     ${picksRow()}
     <div style="height:150px"></div>
-    <div class="actionbar qt-bar">${missing() ? `<button class="qt-big" disabled>${esc(missing())}</button>` : `<button class="qt-big" id="qtGo">${f === 'test' ? t('Start the race') : t('Start')}${tot && f !== 'test' ? ` <span>${fmt(tot)}</span>` : ''}</button>`}</div>`;
+    <div class="actionbar qt-bar">${cfg.makeTest && f !== 'test' && !missing() ? `<button class="qt-big qt-mksave" id="qtMkSave">${t('Save as a test')}</button>` : ''}${missing() ? `<button class="qt-big" disabled>${esc(missing())}</button>` : `<button class="qt-big" id="qtGo">${f === 'test' ? t('Start the race') : t('Start')}${tot && f !== 'test' ? ` <span>${fmt(tot)}</span>` : ''}</button>`}</div>`;
 }
 /* the whole screen; a tap on a number redraws only what changed */
 function draw() {
@@ -1601,6 +1685,10 @@ function wire(scope = host) {
   $('#qtHome')?.addEventListener('click', () => { page = 'home'; draw(); scrollTo(0, 0); });
   $('#qtS2Prefs')?.addEventListener('click', () => openPrefs(document.body));   // the same settings as the home's gear, from every mode's step 2
   $('#qtModeFavs')?.addEventListener('click', openModeFavs);
+  $('#qtTries')?.addEventListener('click', openTries);
+  $('#qtMyTest')?.addEventListener('click', openMakeTest);
+  $('#qtMkSave')?.addEventListener('click', saveAsTest);
+  $('#qtMkX')?.addEventListener('click', () => { delete cfg.makeTest; persist(); draw(); });
   host.querySelectorAll('[data-qp]').forEach(b => b.addEventListener('click', () => { const p = PICKS[cfg.fmt]?.find(x => x.id === b.dataset.qp); if (p) applyPick(p); }));
   host.querySelectorAll('[data-q]').forEach(b => b.addEventListener('click', () => { bump(b.dataset.q, Number(b.dataset.d)); persist(); draw(); }));
   host.querySelectorAll('[data-qt]').forEach(b => b.addEventListener('click', () => openTime(b.dataset.qt)));
@@ -1854,6 +1942,16 @@ function injectStyle() {
   .qt-s2t { flex: 1; min-width: 0; display:flex; flex-direction:column; } .qt-s2t b { font-size: 22px; font-weight: 900; }
   .qt-s2t small { color: var(--muted); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .qt-s2gear { flex: none; }
+  .qt-tryrow { display:flex; align-items:center; gap: 10px; background: var(--box); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; }
+  .qt-tryrow span { flex: 1; display:flex; flex-direction:column; } .qt-tryrow b { font-family: var(--tnum); font-size: 18px; } .qt-tryrow small { color: var(--muted); font-size: 12.5px; }
+  .qt-tryrow.best { border-color: var(--wm-accent); } .qt-tryrow.best b { color: var(--wm-accent); }
+  .qt-tries .qt-link { display:block; width:100%; text-align:center; }
+  .qt-tryadd { display:flex; align-items:center; gap: 8px; margin-bottom: 12px; }
+  .qt-tryadd input { flex: 1; min-width: 0; height: 48px; border-radius: 12px; border: 1px solid var(--line); background: var(--box); color: var(--text); font-family: var(--tnum); font-size: 20px; text-align:center; }
+  .qt-tryadd .btn { flex: 0 0 auto; width: auto; margin: 0; padding: 0 18px; height: 48px; }
+  .qt-mkt { display:flex; align-items:center; gap: 10px; background: var(--wm-accent-soft, rgba(255,255,255,.05)); border: 1px solid var(--wm-accent); border-radius: 14px; padding: 10px 12px; margin-bottom: 10px; font-size: 14px; font-weight: 700; }
+  .qt-mkt span { flex: 1; } .qt-mkt button { background: none; border: 0; color: var(--muted); font-size: 16px; }
+  .qt-big.qt-mksave { background: transparent; color: var(--wm-accent); border: 2px solid var(--wm-accent); box-shadow: none; height: 54px; margin-bottom: 8px; font-size: 18px; }
   .qt-s2top .qt-s2t b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   @media (max-width: 420px) { .qt-s2step { display: none; } }   /* a phone: the name and the gear need the room more than the step count */
   .qt-s2step { font-style: normal; font-size: 11px; font-weight: 800; letter-spacing: .1em; color: var(--muted); text-transform: uppercase; white-space: nowrap; }

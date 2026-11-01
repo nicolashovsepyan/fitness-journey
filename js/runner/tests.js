@@ -11,23 +11,45 @@
    [exId, start, step]).
    ============================================================ */
 export const TESTS = [
+  /* FOR TIME: a set amount, as fast as you can */
   { id: 'p100', group: 'For time', lvl: 1, name: '100 Push-ups', sub: 'As fast as you can, any way you like', metric: 'time', fmt: 'fortime', cfg: { ftRounds: 1, ftCap: 0 }, m: [['pushup', 100]] },
+  { id: 'sq100', group: 'For time', lvl: 1, name: '100 Squats', sub: 'As fast as you can', metric: 'time', fmt: 'fortime', cfg: { ftRounds: 1, ftCap: 0 }, m: [['bodyweight_squat', 100]] },
+  { id: 'sq200', group: 'For time', lvl: 2, name: '200 Squats', sub: 'As fast as you can', metric: 'time', fmt: 'fortime', cfg: { ftRounds: 1, ftCap: 0 }, m: [['bodyweight_squat', 200]] },
+  { id: 'sq300', group: 'For time', lvl: 3, name: '300 Squats', sub: 'As fast as you can', metric: 'time', fmt: 'fortime', cfg: { ftRounds: 1, ftCap: 0 }, m: [['bodyweight_squat', 300]] },
+  { id: 'js100', group: 'For time', lvl: 2, name: '100 Jump Squats', sub: 'As fast as you can', metric: 'time', fmt: 'fortime', cfg: { ftRounds: 1, ftCap: 0 }, m: [['jump_squat', 100]] },
+  { id: 'js200', group: 'For time', lvl: 3, name: '200 Jump Squats', sub: 'As fast as you can', metric: 'time', fmt: 'fortime', cfg: { ftRounds: 1, ftCap: 0 }, m: [['jump_squat', 200]] },
+  { id: 'js300', group: 'For time', lvl: 3, name: '300 Jump Squats', sub: 'As fast as you can', metric: 'time', fmt: 'fortime', cfg: { ftRounds: 1, ftCap: 0 }, m: [['jump_squat', 300]] },
   { id: 'b100', group: 'For time', lvl: 2, name: '100 Burpees', sub: 'As fast as you can', metric: 'time', fmt: 'fortime', cfg: { ftRounds: 1, ftCap: 0 }, m: [['burpee', 100]] },
   { id: 'opm', group: 'For time', lvl: 2, name: 'One Punch Man', sub: '100 push-ups, 100 sit-ups, 100 squats', metric: 'time', fmt: 'fortime', cfg: { ftRounds: 1, ftCap: 0 }, m: [['pushup', 100], ['sit_up', 100], ['bodyweight_squat', 100]] },
   { id: 'angie', group: 'For time', lvl: 3, name: 'Angie', sub: '100 pull-ups, 100 push-ups, 100 sit-ups, 100 squats', metric: 'time', fmt: 'fortime', cfg: { ftRounds: 1, ftCap: 0 }, m: [['pullup', 100], ['pushup', 100], ['sit_up', 100], ['bodyweight_squat', 100]] },
-  { id: 'murph', group: 'For time', lvl: 3, name: 'Murph', sub: '1 mile, 100 pull-ups, 200 push-ups, 300 squats, 1 mile', metric: 'time', fmt: 'fortime', cfg: { ftRounds: 1, ftCap: 0 }, m: [['Run 1 mile', ''], ['pullup', 100], ['pushup', 200], ['bodyweight_squat', 300], ['Run 1 mile', '']] },
-  { id: 'pp5', group: 'Ladder', lvl: 2, name: 'Pull-up Pyramid', sub: '1 → 5 → 1 pull-ups, for time', metric: 'time', fmt: 'ladder', cfg: { ldRungs: 5, ldShape: 'mirror', ldCap: 0 }, m: [['pullup', 1, 1]] },
-  { id: 'b21', group: 'Ladder', lvl: 2, name: '21-15-9 Burpees', sub: '45 burpees, for time', metric: 'time', fmt: 'ladder', cfg: { ldRungs: 3, ldShape: 'one', ldCap: 0 }, m: [['burpee', 21, -6]] },
+  /* CALISTHENICS: Nico's level tests, sets with a rest, for time (the rest counts) */
+  { id: 'caliI', group: 'Calisthenics', lvl: 2, name: 'Calisthenics Test: Intermediate', sub: '12 pull-ups, 20 dips, 40 push-ups. 2 sets, 2 min rest', metric: 'time', fmt: 'fortime', cfg: { ftRounds: 2, ftCap: 0, ftRest: 120 }, m: [['pullup', 12], ['dip', 20], ['pushup', 40]] },
+  { id: 'caliE', group: 'Calisthenics', lvl: 3, name: 'Calisthenics Test: Expert', sub: '15 pull-ups, 20 dips, 40 push-ups. 3 sets, 2 min rest', metric: 'time', fmt: 'fortime', cfg: { ftRounds: 3, ftCap: 0, ftRest: 120 }, m: [['pullup', 15], ['dip', 20], ['pushup', 40]] },
+  /* MAX REPS: the fundamentals, one set as many as you can (tap Done when you stop), and the classics */
+  { id: 'mxpull', group: 'Max reps', lvl: 2, name: 'Max Pull-ups', sub: 'One set, as many as you can', metric: 'reps', fmt: 'amrap', cfg: { cap: 5 }, m: [['pullup', '']] },
+  { id: 'mxdip', group: 'Max reps', lvl: 2, name: 'Max Dips', sub: 'One set, as many as you can', metric: 'reps', fmt: 'amrap', cfg: { cap: 5 }, m: [['dip', '']] },
+  { id: 'mxpush', group: 'Max reps', lvl: 1, name: 'Max Push-ups', sub: 'One set, as many as you can', metric: 'reps', fmt: 'amrap', cfg: { cap: 5 }, m: [['pushup', '']] },
+  { id: 'mxpike', group: 'Max reps', lvl: 2, name: 'Max Pike Push-ups', sub: 'One set, as many as you can', metric: 'reps', fmt: 'amrap', cfg: { cap: 5 }, m: [['pike_push_up', '']] },
+  { id: 'mxrow', group: 'Max reps', lvl: 1, name: 'Max Inverted Rows', sub: 'One set, as many as you can', metric: 'reps', fmt: 'amrap', cfg: { cap: 5 }, m: [['wide_inverted_row', '']] },
+  { id: 'mxsq', group: 'Max reps', lvl: 1, name: 'Max Squats', sub: 'One set, no stopping', metric: 'reps', fmt: 'amrap', cfg: { cap: 10 }, m: [['bodyweight_squat', '']] },
+  { id: 'mxhlr', group: 'Max reps', lvl: 2, name: 'Max Hanging Leg Raises', sub: 'One set, as many as you can', metric: 'reps', fmt: 'amrap', cfg: { cap: 5 }, m: [['hanging_leg_raise', '']] },
   { id: 'seal', group: 'Max reps', lvl: 2, name: 'Navy SEAL Push-ups', sub: 'Max push-ups in 2 minutes', metric: 'reps', fmt: 'amrap', cfg: { cap: 2 }, m: [['pushup', '']] },
   { id: 'bur5', group: 'Max reps', lvl: 2, name: '5-Minute Burpees', sub: 'Max burpees in 5 minutes', metric: 'reps', fmt: 'amrap', cfg: { cap: 5 }, m: [['burpee', '']] },
   { id: 'cindy', group: 'Max reps', lvl: 3, name: 'Cindy', sub: '20 min: 5 pull-ups, 10 push-ups, 15 squats. Max rounds', metric: 'reps', fmt: 'amrap', cfg: { cap: 20 }, m: [['pullup', 5], ['pushup', 10], ['bodyweight_squat', 15]] },
   { id: 'cadence', group: 'Max reps', lvl: 1, name: 'Push-up Test', sub: '1 push-up every 3 seconds, as long as you can', metric: 'reps', fmt: 'pushup', cfg: { pace: 20, ptCap: 0 }, m: [] },
   { id: 'dbb', group: 'Max reps', lvl: 2, name: 'Death by Burpees', sub: '+1 burpee every minute until you can\'t', metric: 'reps', fmt: 'deathby', cfg: { dbEvery: 60, dbMax: 30 }, m: [['burpee', 1, 1]] },
+  /* MAX HOLD: the static fundamentals */
   { id: 'hang', group: 'Max hold', lvl: 1, name: 'Dead Hang', sub: 'Hang as long as you can. The longevity target is 2:00', metric: 'hold', fmt: 'stopwatch', cfg: {}, m: [] },
   { id: 'plank', group: 'Max hold', lvl: 1, name: 'Plank', sub: 'Hold as long as you can, good form only', metric: 'hold', fmt: 'stopwatch', cfg: {}, m: [] },
   { id: 'wallsit', group: 'Max hold', lvl: 1, name: 'Wall Sit', sub: 'Thighs flat, as long as you can', metric: 'hold', fmt: 'stopwatch', cfg: {}, m: [] },
-];
-export const testSig = id => 'test|' + id;
+  { id: 'hollow', group: 'Max hold', lvl: 2, name: 'Hollow Hold', sub: 'Lower back down, as long as you can', metric: 'hold', fmt: 'stopwatch', cfg: {}, m: [] },
+  { id: 'lsit', group: 'Max hold', lvl: 3, name: 'L-Sit', sub: 'Legs straight and level, as long as you can', metric: 'hold', fmt: 'stopwatch', cfg: {}, m: [] },
+  { id: 'sideplank', group: 'Max hold', lvl: 1, name: 'Side Plank', sub: 'Each side; log your weaker one', metric: 'hold', fmt: 'stopwatch', cfg: {}, m: [] },
+  { id: 'hstand', group: 'Max hold', lvl: 3, name: 'Wall Handstand', sub: 'Chest to the wall, as long as you can', metric: 'hold', fmt: 'stopwatch', cfg: {}, m: [] },
+  /* AEROBIC: anything with running */
+  { id: 'mile', group: 'Aerobic', lvl: 1, name: '1 Mile Run', sub: 'As fast as you can. Tap Done at the line', metric: 'time', fmt: 'stopwatch', cfg: {}, m: [] },
+  { id: 'murph', group: 'Aerobic', lvl: 3, name: 'Murph', sub: '1 mile, 100 pull-ups, 200 push-ups, 300 squats, 1 mile', metric: 'time', fmt: 'fortime', cfg: { ftRounds: 1, ftCap: 0 }, m: [['Run 1 mile', ''], ['pullup', 100], ['pushup', 200], ['bodyweight_squat', 300], ['Run 1 mile', '']] },
+];export const testSig = id => 'test|' + id;
 /* the number an attempt scored */
 export function scoreOf(rec, def) {
   if (!rec) return null;
