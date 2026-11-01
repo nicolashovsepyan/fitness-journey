@@ -75,5 +75,38 @@ t('the key came back', back.stepKey === 'hold|x', back.stepKey);
 t('so asking for it again keeps it', R.beginStep(back, 30, 'hold|x') === false);
 t('the round buffer is part of the saved run', 'roundBuf' in back);
 
+group('a short reload resumes, an old run waits to be asked');
+R.clearStep(back);
+now += 90_000;                                   // the sound watchdog reloads 90 s later
+await R.flushRunState(); await R.loadRunState('test');
+t('a reload seconds old is still active', R.isActive() === true);
+t('and nothing is held', R.heldRun() === null);
+R.save(R.load());                                // a tap: the last activity
+const before = R.sessionElapsed(R.load());
+now += 36 * 3600_000;                            // a day and a half later
+await R.loadRunState('test');
+t('an old run is not active (no auto-resume)', R.isActive() === false);
+t('but it is kept, held', !!R.heldRun());
+R.unhold();
+t('Resume makes it active', R.isActive() === true);
+t('and the hours away are not on the clock', R.sessionElapsed(R.load()) === before, [before, R.sessionElapsed(R.load())]);
+now += 36 * 3600_000;
+await R.flushRunState(); await R.loadRunState('test');
+R.clear(); await R.flushRunState(); await R.loadRunState('test');
+t('Discard leaves nothing to resume', R.load() === null && !R.isActive() && !R.heldRun());
+group('a run on screen stays fresh: the runner touches it');
+const L = R.start({ name: 'L', blocks: [] });
+R.beginStep(L, 99 * 60, 'stopwatch');            // a count-up with a 99 minute cap
+for (let i = 0; i < 4 * 60; i++) { now += 60_000; R.touch(); }   // 4 hours on screen, no taps
+await R.flushRunState(); await R.loadRunState('test');
+t('still live after 4 hours on screen: resumes', R.isActive() === true);
+R.beginStep(R.load(), 99 * 60, 'stopwatch2'); now += 10_000; R.save(R.load());   // 10 s into a fresh count-up
+const el0 = R.stepRemaining(R.load()); await R.flushRunState();
+now += 36 * 3600_000;
+await R.loadRunState('test');
+t('a count-up cap is not activity: 36 hours later it waits', !!R.heldRun());
+R.unhold();
+t('Resume puts the step back where it was', R.stepRemaining(R.load()) === el0, [el0, R.stepRemaining(R.load())]);
+
 console.log(failed ? `\n${failed} FAILED` : '\nall passed');
 process.exit(failed ? 1 : 0);

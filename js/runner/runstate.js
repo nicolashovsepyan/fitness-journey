@@ -29,6 +29,20 @@ let uid = null;
 let st = null;          // the live run, or null
 let writer = null;
 let ready = false;
+let held = false;       // a stale run found at boot: kept, but not resumed until asked
+
+/* NOT FOREVER. A run left unfinished came back a day and a half later
+   with the clock at 2161 minutes. A reload mid-workout (the sound
+   watchdog reloads the page, js/timer.js reloadForSound) is seconds old
+   and still resumes on its own; a run quiet for longer than this waits
+   on the home screen for Resume or Discard instead. */
+export const STALE_MS = 3 * 60 * 60 * 1000;
+/* the last moment the run was alive: every save stamps it, and the
+   runner stamps it once a minute while it is on screen (touch). Read
+   from that stamp only: a running step's end says nothing, a count-up
+   carries a 99 minute cap as its "end". */
+export function lastActiveAt(s) { return s ? (s.at || s.startedAt || 0) : 0; }
+export function isStale(s, now = Date.now()) { return !!(s && !s.done && now - lastActiveAt(s) > STALE_MS); }
 
 /* Boot step, awaited by app.js before it asks whether a run is active.
    Getting this wrong means the app decides "no workout in progress" for
@@ -37,6 +51,7 @@ let ready = false;
 export async function loadRunState(userId) {
   uid = userId;
   st = await storage().getRunState(userId);
+  held = isStale(st);
   writer = createWriter(v => v === null
     ? storage().clearRunState(uid)
     : storage().saveRunState(uid, v));
@@ -46,10 +61,11 @@ export async function loadRunState(userId) {
 export function runStateLoaded() { return ready; }
 export async function flushRunState() { if (writer) await writer.flush(); }
 
-function persist() { if (writer) writer.put(st); }
+function persist() { if (st) st.at = Date.now(); if (writer) writer.put(st); }
 
 /* begin a new run from a resolved RunPlan */
 export function start(plan) {
+  held = false;
   st = {
     plan, startedAt: Date.now(),
     bi: 0, ii: 0, si: 0, ci: 0, round: 1, sub: 'work',   // block / item / set / circuit / round / phase cursor
@@ -72,8 +88,29 @@ export function load() {
   return st;
 }
 export function save(next) { st = next; persist(); return st; }
-export function clear() { st = null; persist(); }
-export function isActive() { return !!(st && !st.done); }
+/* the heartbeat: the runner calls this every tick, it writes once a
+   minute; and right away (now) when the page goes to the background */
+export function touch(now = false) { if (st && !st.done && !held && (now || Date.now() - (st.at || 0) >= 60000)) persist(); }
+export function clear() { held = false; st = null; persist(); }
+/* a held run is not active: nothing jumps back into it on its own */
+export function isActive() { return !held && !!(st && !st.done); }
+export function heldRun() { return held && st && !st.done ? st : null; }
+/* Resume on a held run: the hours away count as paused, so the clock
+   picks up where it stopped instead of at 2161 minutes */
+export function unhold() {
+  if (!held) return st;
+  held = false;
+  if (st && !st.pausedAt) {
+    const gap = Math.max(0, Date.now() - lastActiveAt(st));
+    st.pausedAccum = (st.pausedAccum || 0) + gap;
+    /* every wall-clock anchor a screen counts from moves with it */
+    if (st.stepStartedAt != null && !st.stepPausedAt) st.stepStartedAt += gap;
+    if (st.blockStart) st.blockStart += gap;
+    if (st.btStart) st.btStart += gap;
+  }
+  persist();
+  return st;
+}
 
 /* ---- timestamp-based clocks (correct even after the tab was frozen) ---- */
 

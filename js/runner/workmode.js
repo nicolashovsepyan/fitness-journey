@@ -109,7 +109,7 @@ if (typeof document !== 'undefined') {
     /* the iPhone app going to the background (or the phone locking): the
        page may be put to sleep, so the app's sound engine is handed what
        comes next, to play on time by itself */
-    if (document.hidden && S && !S.done && ticker) alog('to the background');
+    if (document.hidden && S && !S.done && ticker) { alog('to the background'); R.touch(true); }
     if (document.hidden && nativeAudio() && S && !S.done && ticker) { scheduleBackground(); setBackgroundQuiet(true); return; }
     if (!document.hidden) { if (nativeAudio()) { nativeCancel('bg'); setBackgroundQuiet(false); } if (S && !S.done && ticker) { audioRefresh(); keepAwake(); tick(); } }
   });
@@ -335,6 +335,7 @@ function localize(plan) {
   return plan;
 }
 export function startWorkout(plan, callbacks = {}) {
+  document.getElementById('staleRun')?.remove();   // a new workout replaces an old unfinished one
   S = R.start(localize(plan)); cb = callbacks; host = document.getElementById('app'); ghostSaid = 0;
   applyWorkTheme(); loadPrefs(); initAudio(); keepAwake(); startTicker();
   enterBlock(0);
@@ -379,7 +380,7 @@ function flash(strong = true) {
   setTimeout(() => el.classList.remove('wm-flash', 'wm-flash-soft'), 500);
 }
 function tick() {
-  paintPhase();
+  paintPhase(); R.touch();
   const sc = document.getElementById('sessClock'); if (sc) sc.textContent = fmt(R.sessionElapsed(S));
   if (countUpStart != null) { const el = document.getElementById('countUp'); if (el) el.textContent = fmt(Math.floor((Date.now() - countUpStart) / 1000)); }
   const rem = R.stepRemaining(S);

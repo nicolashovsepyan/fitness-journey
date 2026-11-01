@@ -1,6 +1,7 @@
 {
-  "version": "2026-11-01.2",
+  "version": "2026-11-01.3",
   "notes": [
+    "Fixed: an unfinished workout no longer comes back days later with the clock still running. After 3 hours away the timer asks first: Resume (the clock picks up where you stopped) or Discard",
     "Timed exercises really run now: in AMRAP, Rep goal Free and EMOM, tap ▶ on a move set in seconds. You get the 8 s get-ready, then its countdown with beeps. Squats on time ask how many reps you got",
     "Test yourself: 100, 200 and 300 squats and jump squats, max pull-ups, dips, push-ups, pike push-ups, rows, squats and leg raises, and holds (hollow, L-sit, side plank, handstand)",
     "New Calisthenics tests: Intermediate (12 pull-ups, 20 dips, 40 push-ups, 2 sets) and Expert (15, 20, 40, 3 sets), with the 2 min rest counted down",
@@ -105,6 +106,7 @@
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
   ],
   "notes_fr": [
+    "Corrigé : une séance inachevée ne revient plus des jours plus tard avec le chrono qui tourne encore. Après 3 heures d’absence, le timer te demande d’abord : Reprendre (le chrono repart là où tu t’étais arrêté) ou Supprimer",
     "Les exercices en secondes tournent vraiment : en AMRAP, Objectif reps Libre et EMOM, touche ▶ sur un exercice en secondes. Tu as les 8 s de préparation, puis son compte à rebours avec les bips. Les squats en temps te demandent combien de reps tu as faites",
     "Teste-toi : 100, 200 et 300 squats et squats sautés, max de tractions, dips, pompes, pompes piquées, tirages, squats et relevés de jambes, et des maintiens (hollow, L-sit, gainage latéral, poirier)",
     "Nouveaux tests de callisthénie : Intermédiaire (12 tractions, 20 dips, 40 pompes, 2 séries) et Expert (15, 20, 40, 3 séries), avec les 2 min de repos décomptées",

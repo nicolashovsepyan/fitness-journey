@@ -16,6 +16,7 @@ import { startWorkout, resumeWorkout } from './runner/workmode.js';
 import { renderQuick } from './runner/quick.js';
 import { updateReady, announceUpdate, watchForUpdates } from './update-banner.js';
 import * as R from './runner/runstate.js';
+import { t, lang } from './i18n.js';
 import { isBeginner, isClaimed, activeUserId, loadUsers } from './users.js';
 import { setAdapter } from './core/storage.js';
 import { LocalAdapter } from './adapters/local.js';
@@ -135,7 +136,9 @@ function render() {
   /* the Quick Timer: a standalone timer, no program and no identity needed
      (js/runner/quick.js) — so it comes before the claim screen */
   if (new URLSearchParams(location.search).has('quick')) {
-    return renderQuick(app, { guest: !isClaimed(), onStart: plan => { rememberReturn(plan); startWorkout(plan, runCb); } });
+    const shown = renderQuick(app, { guest: !isClaimed(), onStart: plan => { rememberReturn(plan); startWorkout(plan, runCb); } });
+    offerStaleRun();
+    return shown;
   }
   // Never guess whose phone this is — ask once if we were never told.
   if (!isClaimed()) return renderClaim(app, { onDone: () => { applyUserManifest(); render(); } });
@@ -194,6 +197,7 @@ function renderBeginner() {
     onOpenHistory: () => go('history'),
   });
   if (R.isActive()) injectResume();
+  offerStaleRun();
 }
 
 function renderPro() {
@@ -201,6 +205,41 @@ function renderPro() {
   if (view.name === 'history') return renderHistory(app, { onBack: () => go('home') });
   renderWeek(app, { onOpenDay: (id) => go('day', id), onOpenHistory: () => go('history') });
   if (R.isActive()) injectResume();    // a workout was left in progress
+  offerStaleRun();
+}
+
+/* AN OLD UNFINISHED RUN (quiet for over 3 hours, js/runner/runstate.js
+   STALE_MS) does not take over the screen: it asks, once, on top of home.
+   Resume goes back in with the hours away left off the clock; Discard
+   throws it away. Fixed on the page, so the timer home redrawing under
+   it does not wipe it. */
+function offerStaleRun() {
+  const st = R.heldRun();
+  document.getElementById('staleRun')?.remove();
+  if (!st) return;
+  const when = new Date(R.lastActiveAt(st));
+  const sameDay = when.toDateString() === new Date().toDateString();
+  const loc = lang() === 'fr' ? 'fr-FR' : 'en-US';
+  const time = sameDay
+    ? when.toLocaleTimeString(loc, { hour: 'numeric', minute: '2-digit' })
+    : when.toLocaleString(loc, { weekday: 'short', hour: 'numeric', minute: '2-digit' });
+  const el = document.createElement('div');
+  el.id = 'staleRun'; el.className = 'stale-run'; el.setAttribute('role', 'dialog');
+  el.innerHTML = `<div class="sr-txt">${t('Unfinished workout from {x}', { x: time })}${st.plan?.name ? `<b>${st.plan.name}</b>` : ''}</div>
+    <div class="sr-btns"><button type="button" class="sr-no">${t('Discard')}</button><button type="button" class="sr-yes">${t('Resume')}</button></div>`;
+  el.querySelector('.sr-yes').addEventListener('click', () => { el.remove(); R.unhold(); rememberReturn(R.load()?.plan); resumeWorkout(runCb); });
+  el.querySelector('.sr-no').addEventListener('click', async () => { el.remove(); R.clear(); try { await R.flushRunState(); } catch (e) {} });
+  if (!document.getElementById('staleRunCss')) {
+    const css = document.createElement('style'); css.id = 'staleRunCss';
+    css.textContent = `.stale-run { position: fixed; left: 12px; right: 12px; bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 70; max-width: 460px; margin: 0 auto;
+      padding: 12px 14px; border-radius: 14px; background: #1b1530; color: #fff; border: 1px solid rgba(255,255,255,.18); box-shadow: 0 10px 30px rgba(0,0,0,.45); font-size: 15px; }
+      .stale-run .sr-txt b { display: block; font-weight: 800; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .stale-run .sr-btns { display: flex; gap: 8px; margin-top: 10px; }
+      .stale-run button { flex: 1; min-height: 44px; border-radius: 10px; font: inherit; font-weight: 800; cursor: pointer; border: 1px solid rgba(255,255,255,.25); background: transparent; color: #fff; }
+      .stale-run .sr-yes { background: #fff; color: #1b1530; border-color: #fff; }`;
+    document.head.appendChild(css);
+  }
+  document.body.appendChild(el);
 }
 
 function injectResume() {
