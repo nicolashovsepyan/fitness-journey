@@ -16,7 +16,7 @@ import { applyWorkTheme, clearWorkTheme } from './theme.js';
 import { installHold } from './hold.js';
 import { achieveImg, paintAchievements } from './achieve.js';
 import { unit as meUnit, setMe, convertWeight } from '../me.js';
-import { makeSortable, orderAfter } from './drag.js';
+import { makeSortable, makeSwipeable, orderAfter } from './drag.js';
 import { roundCall, cueFor, pick } from './coach-lines.js';
 import { t, t2, num, exName, exCues } from '../i18n.js';
 import { bodyWeight, moveLoadKg, showWeight, needsBody, readHistory, addHistory, updateHistory, removeHistory, sigOf } from './tally.js';
@@ -277,8 +277,8 @@ function curIdx() {
   if (b.format === 'amrap') return 0;
   return S.ii || 0;
 }
-function openWorkoutSwap() {
-  const b = block(); const item = b.items[curIdx()]; if (!item) return;
+function openWorkoutSwap(at = null, after = null) {
+  const b = block(), idx = at ?? curIdx(); const item = b.items[idx]; if (!item) return;
   const from = item.swappedFrom || item.exId;
   const used = b.items.map(i => i.exId).filter(x => x !== item.exId);
   /* the program's OWN prescribed substitutions come first — these are the
@@ -298,29 +298,29 @@ function openWorkoutSwap() {
   const ov = document.createElement('div'); ov.className = 'overlay';
   ov.innerHTML = `
     <div class="overlay-card scroll">
-      <div class="eyebrow">${t('Swap exercise · saved for next week too')}</div>
+      <div class="eyebrow">${S.plan.quick ? t('Swap exercise') : t('Swap exercise · saved for next week too')}</div>
       <h2 style="margin:6px 0 12px;">${item.name}</h2>
       ${subRows}
       ${alts.length ? rows : (subs.length ? '' : `<div class="muted" style="padding:8px 0;">${t('No alternatives.')}</div>`)}
       ${item.exId !== from ? `<div class="swap-opt revert" data-id="__revert"><span>↩ ${t('Back to {x}', { x: EXERCISES[from]?.name || from })}</span></div>` : ''}
       <button class="btn ghost" id="wswapCancel" style="margin-top:12px;">${t('Cancel')}</button>
     </div>`;
-  host.appendChild(ov);
+  document.body.appendChild(ov);   // above the screen: a new round redrawing it must not close the list
   ov.querySelector('#wswapCancel').addEventListener('click', () => ov.remove());
   ov.querySelectorAll('.swap-opt[data-id]').forEach(el => el.addEventListener('click', () => {
-    swapCurrentExercise(el.dataset.id === '__revert' ? from : el.dataset.id, from);
+    swapCurrentExercise(el.dataset.id === '__revert' ? from : el.dataset.id, from, idx, after);
     ov.remove();
   }));
 }
-function swapCurrentExercise(newId, from) {
-  const b = block(); const i = curIdx(); const item = b.items[i]; if (!item || !EXERCISES[newId]) return;
+function swapCurrentExercise(newId, from, at = null, after = null) {
+  const b = block(); const i = at ?? curIdx(); const item = b.items[i]; if (!item || !EXERCISES[newId]) return;
   const m = EXERCISES[newId];
   Object.assign(item, { exId: newId, name: m.name, measure: m.measure, load: m.load, laterality: m.laterality, swappedFrom: newId === from ? null : from });
   const cap = S.captured[b.id]?.[i];
   if (cap) { cap.exId = newId; cap.name = m.name; cap.measure = m.measure; cap.unit = UNIT[m.measure]; cap.load = m.load; }
   try { if (S.plan.sessionId) store.setSwap(S.plan.sessionId, from, newId === from ? null : newId); } catch (e) {}
   R.save(S); buzz(30); say(m.name);
-  renderActive();
+  (after || renderActive)();
 }
 
 /* ---------------- lifecycle ---------------- */
@@ -1318,6 +1318,7 @@ ${S.plan.test ? '<div class="ghost-bar" id="ghostBar"></div>' : ''}
   }));
   host.querySelectorAll('[data-amr]').forEach(btn => btn.addEventListener('click', () => editAmrapRound(+btn.dataset.amr, redraw)));
   makeSortable(host.querySelector('.am-moves'), '.mvr', (from, to) => { reorderMoves(b, from, to); redraw(); });
+  swipeMoves(host.querySelector('.am-moves'), '.mvr', b, redraw);
   host.querySelectorAll('[data-mvw]').forEach(el => el.addEventListener('click', () => editMoveWeight(b, +el.dataset.mvw, redraw)));
   document.getElementById('rdPlus').addEventListener('click', e => {
     S.amrapRounds++; S.amrapSplits = [...(S.amrapSplits || []), upElapsed()];
@@ -1374,6 +1375,25 @@ function editMoveWeight(b, i, done) {
 /* REORDER A BLOCK'S MOVES MID-WORKOUT (hold and drag). Everything indexed
    by move follows it: the logged entries, the AMRAP reps, the rounds each
    interval logged. Returns new index by old index. */
+/* TAKE A MOVE OUT, MID-WORKOUT (swipe left): everything indexed by move
+   follows (the logged entries, the reps so far, each round's log) */
+function removeBlockMove(b, i) {
+  if (!b.items[i] || b.items.length <= 1) { buzz([20, 40, 20]); return false; }
+  if (!confirm(t('Take {x} out of this workout?', { x: b.items[i].name }))) return false;
+  const cut = a => { if (Array.isArray(a) && a.length > i) a.splice(i, 1); };
+  const shiftObj = o => o && Object.fromEntries(Object.entries(o).filter(([k]) => +k !== i).map(([k, v]) => [+k > i ? +k - 1 : +k, v]));
+  b.items.splice(i, 1); cut(S.captured[b.id]); cut(S.amrapCur); (S.amrapLog || []).forEach(r => cut(r.reps));
+  if (Array.isArray(S.bites)) { cut(S.bites); S.biteLog = (S.biteLog || []).filter(x => x[0] !== i).map(x => x[0] > i ? [x[0] - 1, x[1], x[2]] : x); S.biteReps = shiftObj(S.biteReps); S.tmrSec = shiftObj(S.tmrSec); }
+  (S.ivLog || []).forEach(L => { if (!L) return; const keep = L.m.map((m, j) => [m, j]).filter(([m]) => m !== i); L.reps = keep.map(([, j]) => L.reps[j]); L.m = keep.map(([m]) => m > i ? m - 1 : m); });
+  S.ivCurAt = null;
+  R.save(S); buzz(30); return true;
+}
+/* swipe on a workout's move list: left takes it out, right swaps it */
+function swipeMoves(list, rowSel, b, redraw) {
+  makeSwipeable(list, rowSel, { leftLabel: t('Delete'), rightLabel: t('Swap'),
+    onLeft: i => { if (removeBlockMove(b, i)) redraw(); },
+    onRight: i => openWorkoutSwap(i, redraw) });
+}
 function reorderMoves(b, from, to) {
   const order = orderAfter(b.items.length, from, to), at = [];
   order.forEach((old, i) => { at[old] = i; });
@@ -1579,6 +1599,7 @@ function renderInterval() {
     else if (!all && !S.ivLog?.[S.iv] && at[S.iv % per] !== S.iv % per) S.ivCurAt = null;
     R.save(S); renderInterval();
   });
+  swipeMoves(host.querySelector('.iv-track'), ':scope > div', b, renderInterval);
   host.querySelectorAll('[data-mvw]').forEach(el => el.addEventListener('click', () => editMoveWeight(b, +el.dataset.mvw, renderInterval)));
   host.querySelectorAll('[data-ivl]').forEach(r => r.addEventListener('click', () => { const k = +r.dataset.ivl; if (S.ivLog[k]) editIvRound(k, renderInterval); }));
   document.getElementById('ivDone')?.addEventListener('click', e => {
@@ -1998,6 +2019,7 @@ function renderBites() {
     S.bites[last[0]] = Math.max(0, S.bites[last[0]] - last[1]); R.save(S); buzz(15); draw();
   });
   biteOwn = null;
+  swipeMoves(document.getElementById('btRows'), '.bt-row', b, renderBites);
   /* max reps: a whole round of every move, in one tap */
   document.getElementById('btTankN').addEventListener('click', e => {
     if (!e.target.closest('[data-round]')) return;

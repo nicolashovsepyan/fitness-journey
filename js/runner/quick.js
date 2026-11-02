@@ -20,7 +20,7 @@ import { activeUserId } from '../users.js';
 import { applyWorkTheme } from './theme.js';
 import { loadPrefs, openPrefs, pref } from './prefs.js';
 import { installHold } from './hold.js';
-import { makeSortable } from './drag.js';
+import { makeSortable, makeSwipeable } from './drag.js';
 import { attachSheet } from './sheet-close.js';
 import { readHistory, addHistory, removeHistory, sigOf, showWeight } from './tally.js';
 import { unit as meUnit, meAsked, setMe, convertWeight } from '../me.js';
@@ -1748,6 +1748,9 @@ function wire(scope = host) {
   makeSortable(host.querySelector('.qt-mvlist'), '.qt-mc', (from, to) => {
     const list = MV(); list.splice(to, 0, list.splice(from, 1)[0]); persist(); draw();
   });
+  /* swipe a card: left takes it out, right picks another exercise */
+  makeSwipeable(host.querySelector('.qt-mvlist'), '.qt-mc', { leftLabel: t('Delete'), rightLabel: t('Swap'),
+    onLeft: i => { removeMove(i); persist(); draw(); }, onRight: i => openMovePicker(i) });
 
   $('#qtAdd')?.addEventListener('click', () => {
     MV().push(newMove()); persist(); draw();

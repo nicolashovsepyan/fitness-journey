@@ -1,6 +1,8 @@
 {
-  "version": "2026-11-01.3",
+  "version": "2026-11-02.1",
   "notes": [
+    "Swipe an exercise during a workout: left to delete it, right to swap it for another. Hold and drag still moves it. Works in Death By, EMOM, AMRAP and Rep goal",
+    "The same swipe on the exercise cards before you start",
     "Fixed: an unfinished workout no longer comes back days later with the clock still running. After 3 hours away the timer asks first: Resume (the clock picks up where you stopped) or Discard",
     "Timed exercises really run now: in AMRAP, Rep goal Free and EMOM, tap ▶ on a move set in seconds. You get the 8 s get-ready, then its countdown with beeps. Squats on time ask how many reps you got",
     "Test yourself: 100, 200 and 300 squats and jump squats, max pull-ups, dips, push-ups, pike push-ups, rows, squats and leg raises, and holds (hollow, L-sit, side plank, handstand)",
@@ -106,6 +108,8 @@
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
   ],
   "notes_fr": [
+    "Fais glisser un exercice pendant la séance : à gauche pour le supprimer, à droite pour le changer. Maintenir et glisser le déplace toujours. Marche en Death By, EMOM, AMRAP et Objectif reps",
+    "Le même glissement sur les cartes d’exercices avant de commencer",
     "Corrigé : une séance inachevée ne revient plus des jours plus tard avec le chrono qui tourne encore. Après 3 heures d’absence, le timer te demande d’abord : Reprendre (le chrono repart là où tu t’étais arrêté) ou Supprimer",
     "Les exercices en secondes tournent vraiment : en AMRAP, Objectif reps Libre et EMOM, touche ▶ sur un exercice en secondes. Tu as les 8 s de préparation, puis son compte à rebours avec les bips. Les squats en temps te demandent combien de reps tu as faites",
     "Teste-toi : 100, 200 et 300 squats et squats sautés, max de tractions, dips, pompes, pompes piquées, tirages, squats et relevés de jambes, et des maintiens (hollow, L-sit, gainage latéral, poirier)",

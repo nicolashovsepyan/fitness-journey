@@ -18,10 +18,10 @@ export function makeSortable(list, rowSel, onMove) {
   if (!list || list.dataset.sortable) return;
   list.dataset.sortable = '1';
   if (!document.getElementById('fj-sort-css')) { const st = document.createElement('style'); st.id = 'fj-sort-css'; st.textContent = SORT_CSS; document.head.appendChild(st); }
-  const rows = () => [...list.querySelectorAll(rowSel)];
+  const rows = () => [...list.querySelectorAll(rowSel)].filter(r => !r.classList.contains('swipe-under'));
 
-  const begin = (row, y0, isTouch) => {
-    let timer = 0, active = false, from = -1, to = -1, heights = [], tops = [], startY = y0;
+  const begin = (row, y0, isTouch, x0 = 0) => {
+    let timer = 0, active = false, from = -1, to = -1, heights = [], tops = [], startY = y0, startX = x0;
     const cleanup = () => {
       clearTimeout(timer);
       if (isTouch) { list.removeEventListener('touchmove', move); window.removeEventListener('touchend', end); window.removeEventListener('touchcancel', end); }
@@ -36,8 +36,8 @@ export function makeSortable(list, rowSel, onMove) {
       try { navigator.vibrate?.(15); } catch (e) {}
     };
     const move = e => {
-      const y = isTouch ? e.touches[0].clientY : e.clientY;
-      if (!active) { if (Math.abs(y - startY) > SLOP) cleanup(); return; }   // a scroll, not a hold
+      const y = isTouch ? e.touches[0].clientY : e.clientY, x = isTouch ? e.touches[0].clientX : e.clientX;
+      if (!active) { if (Math.abs(y - startY) > SLOP || Math.abs(x - startX) > SLOP) cleanup(); return; }   // a scroll (or a swipe), not a hold
       e.preventDefault();
       const dy = y - startY, rs = rows();
       row.style.transform = `translateY(${dy}px)`;
@@ -66,14 +66,67 @@ export function makeSortable(list, rowSel, onMove) {
 
   list.addEventListener('touchstart', e => {
     const row = rows().find(r => r.contains(e.target)); if (!row || e.target.closest(NOT_A_HANDLE) || rows().length < 2) return;
-    begin(row, e.touches[0].clientY, true);
+    begin(row, e.touches[0].clientY, true, e.touches[0].clientX);
   }, { passive: true });
   list.addEventListener('mousedown', e => {
     if (e.button) return;
     const row = rows().find(r => r.contains(e.target)); if (!row || e.target.closest(NOT_A_HANDLE) || rows().length < 2) return;
-    begin(row, e.clientY, false);
+    begin(row, e.clientY, false, e.clientX);
   });
 }
+
+/* ============================================================
+   SWIPE A MOVE (Nico, 2 Nov 2026): left takes it out, right swaps it for
+   another. The row follows the finger over what it will do (red Delete on
+   the right, Swap on the left); past a third of its width it happens, else
+   it springs back. Mostly sideways only: a vertical move is the page
+   scrolling, and a hold is the drag above.
+   ============================================================ */
+export function makeSwipeable(list, rowSel, { onLeft, onRight, leftLabel = 'Delete', rightLabel = 'Swap' }) {
+  if (!list || list.dataset.swipeable) return;
+  list.dataset.swipeable = '1';
+  if (!document.getElementById('fj-swipe-css')) { const st = document.createElement('style'); st.id = 'fj-swipe-css'; st.textContent = SWIPE_CSS; document.head.appendChild(st); }
+  const rows = () => [...list.querySelectorAll(rowSel)].filter(r => !r.classList.contains('swipe-under'));
+  list.addEventListener('touchstart', e => {
+    const row = rows().find(r => r.contains(e.target)); if (!row || e.target.closest('input')) return;
+    const i = rows().indexOf(row);   // now, before the layer under it joins the list
+    const x0 = e.touches[0].clientX, y0 = e.touches[0].clientY; let dx = 0, mode = null, under = null;
+    const move = ev => {
+      const x = ev.touches[0].clientX, y = ev.touches[0].clientY;
+      if (!mode) { if (Math.abs(y - y0) > 10) return done(); if (Math.abs(x - x0) > 12) mode = 'swipe'; else return; }
+      ev.preventDefault();
+      dx = x - x0;
+      if (!under) {
+        under = document.createElement('div'); under.className = 'swipe-under';
+        under.innerHTML = `<span class="sw-r">⇄ ${rightLabel}</span><span class="sw-l">${leftLabel} 🗑</span>`;
+        row.classList.add('swiping'); if (getComputedStyle(row.parentElement).position === 'static') row.parentElement.style.position = 'relative';
+        row.parentElement.insertBefore(under, row);
+        Object.assign(under.style, { top: row.offsetTop + 'px', height: row.offsetHeight + 'px', left: row.offsetLeft + 'px', width: row.offsetWidth + 'px' });
+      }
+      under.classList.toggle('left', dx < 0); under.classList.toggle('arm', Math.abs(dx) > row.offsetWidth / 3);
+      row.style.transform = `translateX(${dx}px)`;
+    };
+    const done = () => {
+      list.removeEventListener('touchmove', move); window.removeEventListener('touchend', done); window.removeEventListener('touchcancel', done);
+      if (mode !== 'swipe') return;
+      suppressClick = Date.now() + 350;
+      const go = Math.abs(dx) > row.offsetWidth / 3;
+      row.style.transition = 'transform .18s ease'; row.style.transform = '';
+      setTimeout(() => { row.style.transition = ''; row.classList.remove('swiping'); under?.remove(); }, 190);
+      if (go) { try { navigator.vibrate?.(20); } catch (e) {} (dx < 0 ? onLeft : onRight)?.(i); }
+    };
+    list.addEventListener('touchmove', move, { passive: false }); window.addEventListener('touchend', done); window.addEventListener('touchcancel', done);
+  }, { passive: true });
+}
+const SWIPE_CSS = `
+  .swiping { position: relative; z-index: 2; background: var(--box, #1d2027); border-radius: 12px; }
+  .swipe-under { position: absolute; z-index: 1; display:flex; align-items:center; justify-content:space-between; padding: 0 16px; border-radius: 12px;
+    background: var(--wm-accent-soft, rgba(80,200,160,.18)); color: var(--wm-accent, #3ECBA8); font-weight: 800; font-size: 15px; pointer-events: none; }
+  .swipe-under.left { background: rgba(255,70,90,.18); color: #FF5A6E; }
+  .swipe-under .sw-l { opacity: 0; } .swipe-under.left .sw-l { opacity: 1; } .swipe-under.left .sw-r { opacity: 0; }
+  .swipe-under.arm { filter: brightness(1.4); }
+  .swipe-under.arm.left { background: rgba(255,70,90,.32); }
+`;
 
 /* the order after moving `from` to `to`, as old indexes: [old index at 0, at 1, …] */
 export const orderAfter = (n, from, to) => { const o = [...Array(n).keys()]; o.splice(to, 0, o.splice(from, 1)[0]); return o; };
