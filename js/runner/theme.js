@@ -315,6 +315,16 @@ function injectStyle() {
   html.wm .bt-max small { font-size: 14px; color: var(--muted); }
   html.wm .bt-rnd { flex: none; height: 34px; padding: 0 14px; margin-left: 8px; font-family: inherit; font-size: 14px; border-color: var(--wm-accent); color: var(--wm-accent); }
   html.wm .tm-ov { z-index: 145; }
+  html.wm .st-rest { flex-direction: column; }
+  html.wm .st-restc { display:flex; flex-direction:column; align-items:center; gap: 10px; width: 100%; max-width: 360px; }
+  html.wm .st-next { color: var(--muted); font-size: 15px; font-weight: 700; }
+  html.wm .st-ring { width: 260px; height: 260px; } html.wm .st-ring .timer { width: 260px !important; height: 260px !important; }
+  html.wm .st-restc .btn { width: 100%; }
+  html.wm .st-row .mvr-n { display:flex; flex-direction:column; } html.wm .st-row .mvr-n small { color: var(--muted); font-size: 12px; font-weight: 600; }
+  html.wm .st-row .mvr-st b { min-width: 48px; font-size: 26px; }
+  html.wm .st-done, html.wm .st-det { display:flex; flex-direction:column; gap: 6px; margin: 10px 0; }
+  html.wm .st-done > div, html.wm .st-det > div { display:flex; align-items:baseline; gap: 8px; background: var(--box); border-radius: 12px; padding: 8px 12px; text-align:left; }
+  html.wm .st-done span, html.wm .st-det span { font-weight: 800; } html.wm .st-done small, html.wm .st-det small { flex: 1; color: var(--muted); font-size: 13px; } html.wm .st-done b, html.wm .st-det b { font-family: var(--tnum); }
   html.wm .tr-adj { display:flex; align-items:center; gap: 6px; margin-top: 12px; } html.wm .tr-adj span { flex: 1; text-align:left; color: var(--muted); font-size: 13px; }
   html.wm .tr-adj .bt-c { flex: 0 0 auto; min-width: 48px; height: 36px; font-size: 14px; padding: 0 8px; }
   html.wm .tr-warn { margin-top: 8px; color: var(--wm-warn, #FFB020); font-size: 13.5px; }

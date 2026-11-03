@@ -754,9 +754,12 @@ const testShow = (def, v) => v == null ? '' : def.metric === 'reps' ? t('{n} rep
 function testsList() {
   const list = allTests(), groups = [...new Set(list.map(x => x.group))];
   return groups.map(g => `${sec(g)}<div class="qt-tests">${list.filter(x => x.group === g).map(x => {
-    const b = bestOf(hist, x), n = attempts(hist, x).length;
+    const b = bestOf(hist, x), n = attempts(hist, x).length, last = attempts(hist, x)[0];
+    /* a set-by-set test: what was done, not only the time (Nico, 3 Nov 2026), in a drop-down */
+    const det = last?.detail ? `<details class="qt-tdet"><summary>${t('Last')} · ${shortDate(last.at)} · ${t2(last.detail.sets.length, '{n} set', '{n} sets')} · ${testShow(x, scoreOf(last, x)) || t('Not finished')}</summary>
+      ${last.detail.sets.map((reps, k) => `<div><span>${t('Set {n}', { n: k + 1 })}</span><small>${reps.map((r, i) => `${r} ${esc(last.detail.names[i] || '')}`).join(' · ')}</small>${last.detail.times?.[k] ? `<b>${fmt(last.detail.times[k])}</b>` : ''}</div>`).join('')}</details>` : '';
     return `<button class="qt-test ${x.id === cfg.testId ? 'on' : ''}" data-test="${x.id}"><span><b>${t(x.name)}</b><small>${t(x.sub)}</small></span>
-      <em>${b ? `<i>${t('Best')}</i>${testShow(x, scoreOf(b, x))}` : `<i>${t('New')}</i>`}${n ? `<small>${t2(n, '{n} try', '{n} tries')}</small>` : ''}</em></button>`; }).join('')}</div>`).join('');
+      <em>${b ? `<i>${t('Best')}</i>${testShow(x, scoreOf(b, x))}` : `<i>${t('New')}</i>`}${n ? `<small>${t2(n, '{n} try', '{n} tries')}</small>` : ''}</em></button>${det}`; }).join('')}</div>`).join('');
 }
 const testMoves = def => def.m.map(([k, a, b]) => { const ex = EXERCISES[k], base = ex ? { exId: k, name: ex.name } : { exId: null, name: t(k) };
   return ['ladder', 'deathby'].includes(def.fmt) ? { ...base, reps: '', ldStart: a, ldStep: b } : { ...base, reps: a }; });
@@ -774,7 +777,7 @@ function openTries() {
     const isTime = d.metric !== 'reps';
     box.innerHTML = `<div class="qt-sheet-h">${t(d.name)}</div>
       ${tries.length ? `<div class="qt-favlist">${tries.map(r => { const sc = scoreOf(r, d);
-        return `<div class="qt-tryrow ${r === b ? 'best' : ''}"><span><b>${sc != null ? testShow(d, sc) : t('Not finished')}</b><small>${shortDate(r.at)}${r === b ? ` · ${t('Best')}` : ''}${r.manual ? ` · ${t('added by hand')}` : ''}</small></span>
+        return `<div class="qt-tryrow ${r === b ? 'best' : ''}"><span><b>${sc != null ? testShow(d, sc) : t('Not finished')}</b><small>${shortDate(r.at)}${r === b ? ` · ${t('Best')}` : ''}${r.manual ? ` · ${t('added by hand')}` : ''}</small>${r.detail ? `<small>${r.detail.sets.map(x => x.join('-')).join(' · ')}</small>` : ''}</span>
           <button class="qt-mx" data-trx="${esc(r.at)}" aria-label="${t('Remove')}">✕</button></div>`; }).join('')}</div>` : `<p class="muted center">${t('No tries yet.')}</p>`}
       ${sec('Add a past result')}
       <div class="qt-tryadd">${isTime ? `<input id="trM" type="number" inputmode="numeric" placeholder="${t('min')}"/><b>:</b><input id="trS" type="number" inputmode="numeric" placeholder="${t('sec')}"/>`
@@ -975,7 +978,11 @@ function homeExtras() {
   if (f === 'vo2') return [vo2Carousel()];
   if (f === 'test') {
     const recs = allTests().map(x => ({ x, b: bestOf(hist, x) })).filter(r => r.b).slice(0, 2);
-    return recs.length ? [`${sec('Your records')}${recs.map(({ x, b }) => `<div class="qt-rec"><span><b>${t(x.name)}</b><small>${t2(attempts(hist, x).length, '{n} try', '{n} tries')}</small></span><em>${testShow(x, scoreOf(b, x))}</em></div>`).join('')}`]
+    /* a set-by-set record says what was done (3 sets · 12-20-40 …), the sets in a drop-down */
+    const recRow = (x, b) => `<span><b>${t(x.name)}</b><small>${t2(attempts(hist, x).length, '{n} try', '{n} tries')}${b.detail ? ` · ${t2(b.detail.sets.length, '{n} set', '{n} sets')} ▾` : ''}</small></span><em>${testShow(x, scoreOf(b, x))}</em>`;
+    return recs.length ? [`${sec('Your records')}${recs.map(({ x, b }) => b.detail
+      ? `<details class="qt-rec qt-recd"><summary>${recRow(x, b)}</summary><div class="qt-recsets">${b.detail.sets.map((reps, k) => `<div><span>${t('Set {n}', { n: k + 1 })}</span><small>${reps.map((r, i) => `${r} ${esc(b.detail.names[i] || '')}`).join(' · ')}</small>${b.detail.times?.[k] ? `<b>${fmt(b.detail.times[k])}</b>` : ''}</div>`).join('')}</div></details>`
+      : `<div class="qt-rec">${recRow(x, b)}</div>`).join('')}`]
       : [`<div class="qt-note">${t('Your first try at any test sets your best. Then you race it.')}</div>`];
   }
   return [];
@@ -1920,6 +1927,9 @@ function injectStyle() {
   .qt-rec { display:flex; align-items:center; gap: 12px; background: var(--box); border: 1px solid var(--line); border-radius: 16px; padding: 10px 14px; }
   .qt-rec span { flex: 1; display:flex; flex-direction:column; } .qt-rec b { font-size: 15.5px; } .qt-rec small { color: var(--muted); font-size: 12px; }
   .qt-rec em { font-style: normal; font-family: var(--tnum); font-size: 22px; font-weight: 800; color: var(--wm-neon); }
+  .qt-recd { display:block; } .qt-recd summary { display:flex; align-items:center; gap: 12px; list-style: none; cursor: pointer; } .qt-recd summary::-webkit-details-marker { display:none; }
+  .qt-recsets { display:flex; flex-direction:column; gap: 4px; margin-top: 8px; }
+  .qt-recsets > div { display:flex; align-items:baseline; gap: 8px; font-size: 13px; } .qt-recsets span { font-weight: 800; } .qt-recsets small { flex: 1; color: var(--muted); } .qt-recsets b { font-family: var(--tnum); }
   .qt-note { color: var(--muted); font-size: 14px; text-align: center; padding: 8px 12px; }
   .qt-home .qt-sec { margin-top: 2px; }
   /* short phones (iPhone SE, mini): the same screen, tighter, Start still in view */
@@ -1949,6 +1959,10 @@ function injectStyle() {
   .qt-tryrow span { flex: 1; display:flex; flex-direction:column; } .qt-tryrow b { font-family: var(--tnum); font-size: 18px; } .qt-tryrow small { color: var(--muted); font-size: 12.5px; }
   .qt-tryrow.best { border-color: var(--wm-accent); } .qt-tryrow.best b { color: var(--wm-accent); }
   .qt-tries .qt-link { display:block; width:100%; text-align:center; }
+  .qt-tdet { margin: -4px 4px 4px; background: var(--box); border: 1px solid var(--line); border-top: 0; border-radius: 0 0 14px 14px; padding: 8px 12px; }
+  .qt-tdet summary { cursor: pointer; color: var(--wm-accent); font-size: 13px; font-weight: 700; }
+  .qt-tdet > div { display:flex; align-items:baseline; gap: 8px; padding: 6px 0 0; font-size: 13px; }
+  .qt-tdet span { font-weight: 800; } .qt-tdet small { flex: 1; color: var(--muted); } .qt-tdet b { font-family: var(--tnum); }
   .qt-tryadd { display:flex; align-items:center; gap: 8px; margin-bottom: 12px; }
   .qt-tryadd input { flex: 1; min-width: 0; height: 48px; border-radius: 12px; border: 1px solid var(--line); background: var(--box); color: var(--text); font-family: var(--tnum); font-size: 20px; text-align:center; }
   .qt-tryadd .btn { flex: 0 0 auto; width: auto; margin: 0; padding: 0 18px; height: 48px; }

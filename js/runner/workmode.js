@@ -20,7 +20,7 @@ import { makeSortable, makeSwipeable, orderAfter } from './drag.js';
 import { roundCall, cueFor, pick } from './coach-lines.js';
 import { t, t2, num, exName, exCues } from '../i18n.js';
 import { bodyWeight, moveLoadKg, showWeight, needsBody, readHistory, addHistory, updateHistory, removeHistory, sigOf } from './tally.js';
-import { ringHTML, ringBaseCss, RING_R, snapToSegments } from './ring.js';
+import { ringHTML, ringBaseCss, RING_R, snapToSegments, setRingProgress, designFor, ringChoice } from './ring.js';
 import { loadPrefs, pref, openPrefs } from './prefs.js';
 import { say, beep, buzz, fmt, initAudio, stopAudio, keepAwake, releaseAwake, setMuted, audioWatch, audioTap, audioHealthy, nativeAudio, nativeSchedule, nativeCancel, lineEvent, setBackgroundQuiet, audioRefresh, alog } from '../timer.js';
 
@@ -1896,23 +1896,75 @@ function runTimedSet(it, secs, onDone, opts = {}) {
   if (phase === 'ready') say(t('Get ready.')); else beep('go');
   iv = setInterval(step, 200);
 }
-/* REST BETWEEN SETS of a set-amount race (the Calisthenics tests: 2 sets,
-   2 min rest): the race clock keeps running (the rest is part of the
-   score); this counts the rest down, 3-2-1, and says go. Skip ends it. */
-function runSetRest(secs, setNo, sets) {
-  const ov = document.createElement('div'); ov.className = 'overlay tm-ov';
-  const end = Date.now() + secs * 1000; let last = null;
-  const iv = setInterval(() => {
-    const rem = Math.ceil((end - Date.now()) / 1000);
+/* REST BETWEEN SETS: a chrono of its own, in another of the timer's ring
+   designs than the person's (so it reads "rest", inside the same look).
+   The race clock keeps running under it; 3-2-1, go; Skip ends it. */
+function runSetRest(secs, label, onDone) {
+  ringBaseCss();
+  const mine = ringChoice(), id = ['led', 'laser', 'chrono'].find(x => x !== mine);
+  const ov = document.createElement('div'); ov.className = 'overlay tm-ov st-rest';
+  ov.innerHTML = `<div class="st-restc"><div class="eyebrow">${t('Rest')}</div><div class="st-next">${label}</div>
+    <div class="timer-wrap st-ring">${ringHTML('rest', designFor(id), '-rest')}</div>
+    <button class="btn secondary" id="stSkip">${t('Skip rest')}</button></div>`;
+  const ring = ov.querySelector('.timer'), txt = ov.querySelector('.read .t');
+  const end = Date.now() + secs * 1000; let last = null, iv = 0;
+  const finish = () => { clearInterval(iv); ov.remove(); onDone?.(); };
+  const tick = () => {
+    const ms = end - Date.now(), rem = Math.ceil(ms / 1000);
+    setRingProgress(ring, Math.max(0, ms / (secs * 1000)));
     if (rem === last) return; last = rem;
+    if (txt) txt.textContent = fmt(Math.max(0, rem));
     if (rem <= 3 && rem > 0) { beep('count'); buzz(20); }
-    if (rem <= 0) { clearInterval(iv); beep('go'); buzz(40); say(t('Go.')); ov.remove(); return; }
-    ov.innerHTML = `<div class="overlay-card tm-card ready"><div class="eyebrow">${t('Rest')} · ${t('set {a} of {b} next', { a: setNo, b: sets })}</div>
-      <div class="tm-big">${fmt(rem)}</div><div class="tm-bar"><i style="width:${100 - rem / secs * 100}%"></i></div>
-      <button class="btn secondary" id="tmSkip">${t('Skip rest')}</button></div>`;
-    ov.querySelector('#tmSkip').addEventListener('click', () => { clearInterval(iv); beep('go'); ov.remove(); });
-  }, 200);
+    if (rem <= 0) { beep('go'); buzz(40); say(t('Go.')); finish(); }
+  };
+  ov.querySelector('#stSkip').addEventListener('click', () => { beep('go'); finish(); });
   document.body.appendChild(ov); say(t('Rest.'));
+  tick(); iv = setInterval(tick, 100);
+}
+/* SETS WITH A REST, ONE SET AT A TIME (the Calisthenics tests; Nico, 3 Nov
+   2026: "12 pull-ups, 20 dips, 40 push-ups: show those three, I adjust
+   what I did, then my rest"). Each move starts at its target; − + to what
+   was done; Set done → the rest → the next set. After the last planned set:
+   one more set, or finish. The clock runs from the start (rest included). */
+function renderSetTest() {
+  const b = block(), planned = b.rounds || 1, target = b.items.map(it => Number(it.reps) || 0);
+  if (!Array.isArray(S.stLog)) { S.stLog = []; S.stCur = [...target]; S.stFrom = 0; R.save(S); }
+  const total = Math.max(planned, S.stTotal || planned), setNo = S.stLog.length + 1;
+  shell(`<div class="now-ex"><div class="label">${t('Set {a} of {b}', { a: setNo, b: total })}</div><div class="name">${t(S.plan.name)}</div></div>
+    <div class="timer-wrap bt-sm">${timerSvg('buffer')}</div>
+    <div class="mvr-list st-list">${b.items.map((it, i) => `<div class="mvr st-row"><span class="mvr-n">${it.name}<small>${t('target {n}', { n: target[i] })}</small></span>
+      <span class="mvr-st"><button data-st="${i}" data-d="-1" aria-label="${t('Less')}">−</button><b>${S.stCur[i]}</b><button data-st="${i}" data-d="1" aria-label="${t('More')}">+</button></span></div>`).join('')}</div>
+    ${S.stLog.length ? `<div class="st-done">${S.stLog.map((l, k) => `<div><span>${t('Set {n}', { n: k + 1 })}</span><small>${l.reps.join(' · ')}</small><b>${fmt(l.t)}</b></div>`).join('')}</div>` : ''}
+    <div class="actionbar"><button class="btn lg" id="stDone">${t('Set done ✓')}</button></div>`);
+  if (beginStep(NO_CAP, 'rest', 'fortime')) say(pick('go') || t('Go.'));
+  onStepDone = null;
+  host.querySelectorAll('[data-st]').forEach(btn => btn.addEventListener('click', () => {
+    const i = +btn.dataset.st; S.stCur[i] = Math.max(0, S.stCur[i] + Number(btn.dataset.d)); R.save(S); buzz(10);
+    btn.parentElement.querySelector('b').textContent = S.stCur[i];
+  }));
+  const next = () => { S.stFrom = Math.round(upElapsed()); S.stCur = [...target]; R.save(S); renderSetTest(); };
+  const finish = () => {
+    const secs = Math.round(upElapsed());
+    R.clearStep(S); onStepDone = null;
+    const per = b.items.map((_, i) => S.stLog.reduce((a, l) => a + (l.reps[i] || 0), 0));
+    (S.captured[b.id] || []).forEach((e, i) => { e.sets = [{ value: secs }]; e.unit = 'sec'; e.rounds = true; e.bites = per[i]; });
+    S.stDetail = { names: b.items.map(it => it.name), sets: S.stLog.map(l => l.reps), times: S.stLog.map(l => l.t) };
+    R.save(S); say(`Done. ${spokenTime(secs)}.`); completeBlock();
+  };
+  document.getElementById('stDone').addEventListener('click', e => {
+    const now = Math.round(upElapsed());
+    S.stLog.push({ reps: [...S.stCur], t: Math.max(1, now - (S.stFrom || 0)) }); R.save(S);
+    celebrate(e.currentTarget, t('Set {n}', { n: S.stLog.length }));
+    if (S.stLog.length < total) return runSetRest(b.roundRest, t('Set {a} of {b} next', { a: S.stLog.length + 1, b: total }), next);
+    /* the planned sets are done: one more, or finish */
+    const ov = document.createElement('div'); ov.className = 'bt-check';
+    ov.innerHTML = `<div class="bt-checkc"><div class="eyebrow">${t('{n} sets done', { n: S.stLog.length })}</div>
+      <button class="btn secondary" id="stMore">${t('+ One more set')}</button>
+      <button class="btn lg" id="stFin">${t('Finish')}</button></div>`;
+    document.body.appendChild(ov);
+    ov.querySelector('#stMore').addEventListener('click', () => { ov.remove(); S.stTotal = total + 1; R.save(S); runSetRest(b.roundRest, t('Set {a} of {b} next', { a: S.stLog.length + 1, b: S.stTotal }), next); });
+    ov.querySelector('#stFin').addEventListener('click', () => { ov.remove(); finish(); });
+  });
 }
 /* TAPPING REPS IN AS YOU GO, two ways:
    · a set amount (Rep goal → Free, Test yourself): each move fills to its
@@ -2049,11 +2101,6 @@ function renderBites() {
     const i = +c.dataset.bt, before = done(), wasFull = S.bites[i] >= goal[i];
     const n = max ? +c.dataset.n : Math.min(+c.dataset.n, goal[i] - S.bites[i]); if (n <= 0) return;
     S.bites[i] += n; S.biteLog.push([i, n, Math.round(upElapsed())]); R.save(S); buzz(20);
-    /* a set finished (every move at its reps × sets so far): its rest, before the next */
-    if (!max && b.roundRest > 0 && (b.rounds || 1) > 1) {
-      const setsDone = Math.min(...b.items.map((it, k) => Math.floor(S.bites[k] / Math.max(1, Number(it.reps) || 1))));
-      if (setsDone > (S.btSetsDone || 0) && setsDone < b.rounds) { S.btSetsDone = setsDone; R.save(S); runSetRest(b.roundRest, setsDone + 1, b.rounds); }
-    }
     setTimeout(() => beep('add'), 0);   // every add gets its little win; after the screen, never in its way
     const after = done();
     if (max) return draw();
@@ -2119,6 +2166,7 @@ function renderIgyg() {
 function renderForTime() {
   const b = block();
   if (Array.isArray(b.rungs) && b.rungs.length) return renderLadder();
+  if (b.bites && b.roundRest > 0 && (b.rounds || 1) > 1) return renderSetTest();   // sets with a rest (the Calisthenics tests)
   if (b.bites) return renderBites();
   const cap = (Number(b.minutes) || 0) * 60;
   const dur = cap || NO_CAP;
@@ -2355,11 +2403,15 @@ function runTrace() {
   const laps = (S.laps || []).length ? S.laps : (S.amrapSplits || []);
   return laps.length ? { kind: 'laps', pts: laps.map(Math.round) } : null;
 }
+/* a set-by-set result: each set's reps per move, and its time */
+function setsDetailHtml(d) {
+  return `<div class="st-det">${d.sets.map((reps, k) => `<div><span>${t('Set {n}', { n: k + 1 })}</span><small>${reps.map((r, i) => `${r} ${d.names[i]}`).join(' · ')}</small>${d.times?.[k] ? `<b>${fmt(d.times[k])}</b>` : ''}</div>`).join('')}</div>`;
+}
 function testResult(session, partial, tallyRec) {
   const T = S.plan.test, def = T.def;
   const first = session.blocks[0]?.entries?.[0]?.sets?.[0]?.value;
   const rec = { ...(tallyRec || { moves: [], total: 0, loadKg: 0 }), at: new Date().toISOString(), sig: T.sig, title: S.plan.name,
-    seconds: session.seconds, partial: !!partial, cfg: S.plan.quickCfg || null, trace: runTrace() };
+    seconds: session.seconds, partial: !!partial, cfg: S.plan.quickCfg || null, trace: runTrace(), ...(S.stDetail ? { detail: S.stDetail } : {}) };
   if (def.metric !== 'reps' && Number(first) > 0) rec.score = Number(first);    // the clock of the effort itself, not the get-ready
   const score = def.metric === 'reps' ? rec.total : (def.metric === 'time' && partial ? null : rec.score ?? rec.seconds);
   const best = T.best, newBest = score != null && (best == null || (def.metric === 'time' ? score < best : score > best));
@@ -2377,6 +2429,7 @@ function testResult(session, partial, tallyRec) {
     const steps = def.metric === 'reps' ? [[-5, '−5'], [-1, '−1'], [1, '+1'], [5, '+5']] : [[-5, '−5 s'], [-1, '−1 s'], [1, '+1 s'], [5, '+5 s']];
     return `<div class="eyebrow">${t('Test yourself')} · ${t(def.name)}</div>
       <div class="test-big">${cur != null ? show(cur) : t('Not finished')}</div>
+      ${rec.detail ? setsDetailHtml(rec.detail) : ''}
       <div class="muted">${nb ? (best == null ? t('Your first result. Now beat it.') : t('New best! {x} better than before', { x: show(g) }))
         : best != null && cur != null ? t('{x} off your best ({b})', { x: show(g), b: show(best) }) : best != null ? t('Your best: {b}', { b: show(best) }) : ''}</div>
       ${short ? `<div class="tr-warn">${t('Very short. If it was a mistake, don\'t count it.')}</div>` : ''}

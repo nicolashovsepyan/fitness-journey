@@ -15,7 +15,7 @@
    Training data lives in localStorage, not here, so an update never
    touches a logged session.
    ============================================================ */
-const VERSION = '9c07d24c1e';
+const VERSION = 'f1ecffe71d';
 const CACHE = 'fj-' + VERSION;
 const ASSETS = [
   "./audio/voice-f/c-as-many-rounds-as-possible.mp3",
@@ -379,16 +379,12 @@ const ASSETS = [
   "./dashboard.html",
   "./icon-180.png",
   "./icon-192.png",
-  "./icon-512-maskable.png",
-  "./icon-512.png",
   "./icon-maskable.svg",
   "./icon.svg",
   "./icons/rounded-180.png",
   "./icons/rounded-192.png",
-  "./icons/rounded-512.png",
   "./icons/the-original-180.png",
   "./icons/the-original-192.png",
-  "./icons/the-original-512.png",
   "./images/achievements/done.png",
   "./images/app-icons/Rounded.svg",
   "./images/app-icons/The Original.svg",
@@ -537,8 +533,6 @@ const ASSETS = [
   "./styles.css",
   "./timer/index.html",
   "./voice-lab.html",
-  "./whatsnew.json",
-  "./whatsnew.json",
   "./whatsnew.json"
 ];
 
