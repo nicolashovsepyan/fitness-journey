@@ -750,14 +750,17 @@ const myTests = () => { try { return JSON.parse(localStorage.getItem(MY_TESTS) |
 const saveMyTests = l => { try { localStorage.setItem(MY_TESTS, JSON.stringify(l)); } catch (e) {} };
 const allTests = () => [...TESTS, ...myTests()];
 const testDef = () => allTests().find(x => x.id === cfg.testId) || TESTS[0];
+/* a set test's verdict and its sets, with where it broke */
+const passTag = d => d?.passed == null ? '' : d.passed ? ` · ✓ ${t('Passed')}` : ` · ${t('Not yet')}`;
+const setLine = (d, k) => d.sets[k].map((r, i) => `${r} ${esc(d.names[i] || '')}${d.brk?.[k]?.[i] != null ? ` (${t('broke at {n}', { n: d.brk[k][i] })})` : ''}`).join(' · ');
 const testShow = (def, v) => v == null ? '' : def.metric === 'reps' ? t('{n} reps', { n: v }) : fmt(v);
 function testsList() {
   const list = allTests(), groups = [...new Set(list.map(x => x.group))];
   return groups.map(g => `${sec(g)}<div class="qt-tests">${list.filter(x => x.group === g).map(x => {
     const b = bestOf(hist, x), n = attempts(hist, x).length, last = attempts(hist, x)[0];
     /* a set-by-set test: what was done, not only the time (Nico, 3 Nov 2026), in a drop-down */
-    const det = last?.detail ? `<details class="qt-tdet"><summary>${t('Last')} · ${shortDate(last.at)} · ${t2(last.detail.sets.length, '{n} set', '{n} sets')} · ${testShow(x, scoreOf(last, x)) || t('Not finished')}</summary>
-      ${last.detail.sets.map((reps, k) => `<div><span>${t('Set {n}', { n: k + 1 })}</span><small>${reps.map((r, i) => `${r} ${esc(last.detail.names[i] || '')}`).join(' · ')}</small>${last.detail.times?.[k] ? `<b>${fmt(last.detail.times[k])}</b>` : ''}</div>`).join('')}</details>` : '';
+    const det = last?.detail ? `<details class="qt-tdet"><summary>${t('Last')} · ${shortDate(last.at)} · ${t2(last.detail.sets.length, '{n} set', '{n} sets')} · ${testShow(x, scoreOf(last, x)) || t('Not finished')}${passTag(last.detail)}</summary>
+      ${last.detail.sets.map((reps, k) => `<div><span>${t('Set {n}', { n: k + 1 })}</span><small>${setLine(last.detail, k)}</small>${last.detail.times?.[k] ? `<b>${fmt(last.detail.times[k])}</b>` : ''}</div>`).join('')}</details>` : '';
     return `<button class="qt-test ${x.id === cfg.testId ? 'on' : ''}" data-test="${x.id}"><span><b>${t(x.name)}</b><small>${t(x.sub)}</small></span>
       <em>${b ? `<i>${t('Best')}</i>${testShow(x, scoreOf(b, x))}` : `<i>${t('New')}</i>`}${n ? `<small>${t2(n, '{n} try', '{n} tries')}</small>` : ''}</em></button>${det}`; }).join('')}</div>`).join('');
 }
@@ -777,7 +780,7 @@ function openTries() {
     const isTime = d.metric !== 'reps';
     box.innerHTML = `<div class="qt-sheet-h">${t(d.name)}</div>
       ${tries.length ? `<div class="qt-favlist">${tries.map(r => { const sc = scoreOf(r, d);
-        return `<div class="qt-tryrow ${r === b ? 'best' : ''}"><span><b>${sc != null ? testShow(d, sc) : t('Not finished')}</b><small>${shortDate(r.at)}${r === b ? ` · ${t('Best')}` : ''}${r.manual ? ` · ${t('added by hand')}` : ''}</small>${r.detail ? `<small>${r.detail.sets.map(x => x.join('-')).join(' · ')}</small>` : ''}</span>
+        return `<div class="qt-tryrow ${r === b ? 'best' : ''}"><span><b>${sc != null ? testShow(d, sc) : t('Not finished')}</b><small>${shortDate(r.at)}${r === b ? ` · ${t('Best')}` : ''}${r.manual ? ` · ${t('added by hand')}` : ''}</small>${r.detail ? `<small>${r.detail.sets.map((x, k) => x.map((v, i) => r.detail.brk?.[k]?.[i] != null ? `${v}✂` : v).join('-')).join(' · ')}${passTag(r.detail)}</small>` : ''}</span>
           <button class="qt-mx" data-trx="${esc(r.at)}" aria-label="${t('Remove')}">✕</button></div>`; }).join('')}</div>` : `<p class="muted center">${t('No tries yet.')}</p>`}
       ${sec('Add a past result')}
       <div class="qt-tryadd">${isTime ? `<input id="trM" type="number" inputmode="numeric" placeholder="${t('min')}"/><b>:</b><input id="trS" type="number" inputmode="numeric" placeholder="${t('sec')}"/>`
@@ -979,9 +982,9 @@ function homeExtras() {
   if (f === 'test') {
     const recs = allTests().map(x => ({ x, b: bestOf(hist, x) })).filter(r => r.b).slice(0, 2);
     /* a set-by-set record says what was done (3 sets · 12-20-40 …), the sets in a drop-down */
-    const recRow = (x, b) => `<span><b>${t(x.name)}</b><small>${t2(attempts(hist, x).length, '{n} try', '{n} tries')}${b.detail ? ` · ${t2(b.detail.sets.length, '{n} set', '{n} sets')} ▾` : ''}</small></span><em>${testShow(x, scoreOf(b, x))}</em>`;
+    const recRow = (x, b) => `<span><b>${t(x.name)}</b><small>${t2(attempts(hist, x).length, '{n} try', '{n} tries')}${b.detail ? ` · ${t2(b.detail.sets.length, '{n} set', '{n} sets')}${passTag(b.detail)} ▾` : ''}</small></span><em>${testShow(x, scoreOf(b, x))}</em>`;
     return recs.length ? [`${sec('Your records')}${recs.map(({ x, b }) => b.detail
-      ? `<details class="qt-rec qt-recd"><summary>${recRow(x, b)}</summary><div class="qt-recsets">${b.detail.sets.map((reps, k) => `<div><span>${t('Set {n}', { n: k + 1 })}</span><small>${reps.map((r, i) => `${r} ${esc(b.detail.names[i] || '')}`).join(' · ')}</small>${b.detail.times?.[k] ? `<b>${fmt(b.detail.times[k])}</b>` : ''}</div>`).join('')}</div></details>`
+      ? `<details class="qt-rec qt-recd"><summary>${recRow(x, b)}</summary><div class="qt-recsets">${b.detail.sets.map((reps, k) => `<div><span>${t('Set {n}', { n: k + 1 })}</span><small>${setLine(b.detail, k)}</small>${b.detail.times?.[k] ? `<b>${fmt(b.detail.times[k])}</b>` : ''}</div>`).join('')}</div></details>`
       : `<div class="qt-rec">${recRow(x, b)}</div>`).join('')}`]
       : [`<div class="qt-note">${t('Your first try at any test sets your best. Then you race it.')}</div>`];
   }

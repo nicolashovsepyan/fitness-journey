@@ -1,6 +1,9 @@
 {
-  "version": "2026-11-03.1",
+  "version": "2026-11-03.2",
   "notes": [
+    "Set tests track unbroken sets: every exercise is Unbroken unless you tap it and set where you broke (\"Broke at 8\")",
+    "Passed only when every set is done unbroken: you get the badge. Otherwise it says Not yet, and where you broke",
+    "Rest: −10 s and +10 s to change it as it runs",
     "Calisthenics tests go one set at a time: each exercise starts at its target, adjust what you did, then Set done. Your rest runs on its own chrono",
     "After the last set: one more set (with its rest) or finish. Adding a set no longer just adds reps at the end",
     "Your test results show each set: what you did on every exercise, and its time. Tap the record to open it",
@@ -111,6 +114,9 @@
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
   ],
   "notes_fr": [
+    "Les tests en séries suivent les séries sans pause : chaque exercice est Sans pause, sauf si tu le touches et indiques où tu as cassé (« Cassé à 8 »)",
+    "Réussi seulement quand toutes les séries sont faites sans pause : tu gagnes le badge. Sinon c’est Pas encore, avec l’endroit où tu as cassé",
+    "Repos : −10 s et +10 s pour l’ajuster pendant qu’il tourne",
     "Les tests de callisthénie se font série par série : chaque exercice commence à son objectif, ajuste ce que tu as fait, puis Série faite. Ton repos tourne sur son propre chrono",
     "Après la dernière série : une série de plus (avec son repos) ou terminer. Ajouter une série n’ajoute plus seulement des reps à la fin",
     "Tes résultats de test montrent chaque série : ce que tu as fait sur chaque exercice, et son temps. Touche le record pour l’ouvrir",

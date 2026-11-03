@@ -1905,13 +1905,18 @@ function runSetRest(secs, label, onDone) {
   const ov = document.createElement('div'); ov.className = 'overlay tm-ov st-rest';
   ov.innerHTML = `<div class="st-restc"><div class="eyebrow">${t('Rest')}</div><div class="st-next">${label}</div>
     <div class="timer-wrap st-ring">${ringHTML('rest', designFor(id), '-rest')}</div>
+    <div class="st-adj"><button class="btn secondary" data-radj="-10">−10 s</button><button class="btn secondary" data-radj="10">+10 s</button></div>
     <button class="btn secondary" id="stSkip">${t('Skip rest')}</button></div>`;
   const ring = ov.querySelector('.timer'), txt = ov.querySelector('.read .t');
-  const end = Date.now() + secs * 1000; let last = null, iv = 0;
+  let end = Date.now() + secs * 1000, last = null, iv = 0;
+  /* more or less rest, 10 s at a time (Nico); the ring re-scales to the new length */
+  ov.querySelectorAll('[data-radj]').forEach(b => b.addEventListener('click', () => {
+    const d = Number(b.dataset.radj) * 1000; end = Math.max(Date.now() + 1000, end + d); secs = Math.max(1, secs + d / 1000); last = null; buzz(10); tick();
+  }));
   const finish = () => { clearInterval(iv); ov.remove(); onDone?.(); };
   const tick = () => {
     const ms = end - Date.now(), rem = Math.ceil(ms / 1000);
-    setRingProgress(ring, Math.max(0, ms / (secs * 1000)));
+    setRingProgress(ring, Math.max(0, Math.min(1, ms / (secs * 1000))));
     if (rem === last) return; last = rem;
     if (txt) txt.textContent = fmt(Math.max(0, rem));
     if (rem <= 3 && rem > 0) { beep('count'); buzz(20); }
@@ -1928,13 +1933,16 @@ function runSetRest(secs, label, onDone) {
    one more set, or finish. The clock runs from the start (rest included). */
 function renderSetTest() {
   const b = block(), planned = b.rounds || 1, target = b.items.map(it => Number(it.reps) || 0);
-  if (!Array.isArray(S.stLog)) { S.stLog = []; S.stCur = [...target]; S.stFrom = 0; R.save(S); }
+  if (!Array.isArray(S.stLog)) { S.stLog = []; S.stCur = [...target]; S.stBrk = target.map(() => null); S.stFrom = 0; R.save(S); }
+  if (!Array.isArray(S.stBrk)) S.stBrk = target.map(() => null);
   const total = Math.max(planned, S.stTotal || planned), setNo = S.stLog.length + 1;
   shell(`<div class="now-ex"><div class="label">${t('Set {a} of {b}', { a: setNo, b: total })}</div><div class="name">${t(S.plan.name)}</div></div>
     <div class="timer-wrap bt-sm">${timerSvg('buffer')}</div>
-    <div class="mvr-list st-list">${b.items.map((it, i) => `<div class="mvr st-row"><span class="mvr-n">${it.name}<small>${t('target {n}', { n: target[i] })}</small></span>
+    <div class="mvr-list st-list">${b.items.map((it, i) => `<div class="mvr st-row"><span class="mvr-n">${it.name}<small>${t('target {n}', { n: target[i] })}</small>
+        ${S.stBrk[i] == null ? `<button class="st-brk ok" data-brk="${i}">✓ ${t('Unbroken')}</button>`
+          : `<span class="st-brk no"><button data-brkd="${i}" data-d="-1">−</button>${t('Broke at {n}', { n: S.stBrk[i] })}<button data-brkd="${i}" data-d="1">+</button><button data-brkx="${i}" aria-label="${t('Unbroken')}">✕</button></span>`}</span>
       <span class="mvr-st"><button data-st="${i}" data-d="-1" aria-label="${t('Less')}">−</button><b>${S.stCur[i]}</b><button data-st="${i}" data-d="1" aria-label="${t('More')}">+</button></span></div>`).join('')}</div>
-    ${S.stLog.length ? `<div class="st-done">${S.stLog.map((l, k) => `<div><span>${t('Set {n}', { n: k + 1 })}</span><small>${l.reps.join(' · ')}</small><b>${fmt(l.t)}</b></div>`).join('')}</div>` : ''}
+    ${S.stLog.length ? `<div class="st-done">${S.stLog.map((l, k) => `<div><span>${t('Set {n}', { n: k + 1 })}</span><small>${l.reps.map((r, i) => l.brk?.[i] != null ? `${r} (✂ ${l.brk[i]})` : r).join(' · ')}</small><b>${fmt(l.t)}</b></div>`).join('')}</div>` : ''}
     <div class="actionbar"><button class="btn lg" id="stDone">${t('Set done ✓')}</button></div>`);
   if (beginStep(NO_CAP, 'rest', 'fortime')) say(pick('go') || t('Go.'));
   onStepDone = null;
@@ -1942,18 +1950,25 @@ function renderSetTest() {
     const i = +btn.dataset.st; S.stCur[i] = Math.max(0, S.stCur[i] + Number(btn.dataset.d)); R.save(S); buzz(10);
     btn.parentElement.querySelector('b').textContent = S.stCur[i];
   }));
-  const next = () => { S.stFrom = Math.round(upElapsed()); S.stCur = [...target]; R.save(S); renderSetTest(); };
+  /* UNBROKEN, OR WHERE IT BROKE (Nico: "I did the 12 but broke at 8: I need to know, no badge until it is unbroken") */
+  host.querySelectorAll('[data-brk]').forEach(btn => btn.addEventListener('click', () => { const i = +btn.dataset.brk; S.stBrk[i] = Math.max(1, Math.min(S.stCur[i] - 1, Math.round(S.stCur[i] * 0.66)) || 1); R.save(S); buzz(15); renderSetTest(); }));
+  host.querySelectorAll('[data-brkd]').forEach(btn => btn.addEventListener('click', () => { const i = +btn.dataset.brkd; S.stBrk[i] = Math.max(1, Math.min(Math.max(1, S.stCur[i] - 1), S.stBrk[i] + Number(btn.dataset.d))); R.save(S); buzz(10); renderSetTest(); }));
+  host.querySelectorAll('[data-brkx]').forEach(btn => btn.addEventListener('click', () => { S.stBrk[+btn.dataset.brkx] = null; R.save(S); buzz(10); renderSetTest(); }));
+  const next = () => { S.stFrom = Math.round(upElapsed()); S.stCur = [...target]; S.stBrk = target.map(() => null); R.save(S); renderSetTest(); };
   const finish = () => {
     const secs = Math.round(upElapsed());
     R.clearStep(S); onStepDone = null;
     const per = b.items.map((_, i) => S.stLog.reduce((a, l) => a + (l.reps[i] || 0), 0));
     (S.captured[b.id] || []).forEach((e, i) => { e.sets = [{ value: secs }]; e.unit = 'sec'; e.rounds = true; e.bites = per[i]; });
-    S.stDetail = { names: b.items.map(it => it.name), sets: S.stLog.map(l => l.reps), times: S.stLog.map(l => l.t) };
+    /* PASSED: every planned set, every move at its target, nothing broken */
+    const brk = S.stLog.map(l => l.brk || []);
+    const passed = S.stLog.length >= planned && S.stLog.slice(0, planned).every(l => l.reps.every((r, i) => r >= target[i] && (l.brk?.[i] == null)));
+    S.stDetail = { names: b.items.map(it => it.name), targets: target, sets: S.stLog.map(l => l.reps), brk, times: S.stLog.map(l => l.t), planned, passed };
     R.save(S); say(`Done. ${spokenTime(secs)}.`); completeBlock();
   };
   document.getElementById('stDone').addEventListener('click', e => {
     const now = Math.round(upElapsed());
-    S.stLog.push({ reps: [...S.stCur], t: Math.max(1, now - (S.stFrom || 0)) }); R.save(S);
+    S.stLog.push({ reps: [...S.stCur], brk: S.stCur.map((r, i) => S.stBrk[i] != null && S.stBrk[i] < r ? S.stBrk[i] : null), t: Math.max(1, now - (S.stFrom || 0)) }); R.save(S);
     celebrate(e.currentTarget, t('Set {n}', { n: S.stLog.length }));
     if (S.stLog.length < total) return runSetRest(b.roundRest, t('Set {a} of {b} next', { a: S.stLog.length + 1, b: total }), next);
     /* the planned sets are done: one more, or finish */
@@ -2405,7 +2420,12 @@ function runTrace() {
 }
 /* a set-by-set result: each set's reps per move, and its time */
 function setsDetailHtml(d) {
-  return `<div class="st-det">${d.sets.map((reps, k) => `<div><span>${t('Set {n}', { n: k + 1 })}</span><small>${reps.map((r, i) => `${r} ${d.names[i]}`).join(' · ')}</small>${d.times?.[k] ? `<b>${fmt(d.times[k])}</b>` : ''}</div>`).join('')}</div>`;
+  const brokeAt = [];
+  d.sets.forEach((reps, k) => reps.forEach((r, i) => { if (d.brk?.[k]?.[i] != null) brokeAt.push(t('{x}, set {n}, at {r}', { x: d.names[i], n: k + 1, r: d.brk[k][i] })); }));
+  const verdict = d.passed == null ? '' : d.passed
+    ? `<div class="st-pass">${achieveImg('best', 'mini')}<span><b>${t('Passed. Unbroken.')}</b><small>${t('This level is yours.')}</small></span></div>`
+    : `<div class="st-pass no"><span><b>${t('Not yet')}</b><small>${brokeAt.length ? t('Broke: {x}', { x: brokeAt.join(' · ') }) : d.sets.length < (d.planned || 0) ? t('Not every set was done') : t('Not every rep was done')}</small></span></div>`;
+  return `${verdict}<div class="st-det">${d.sets.map((reps, k) => `<div><span>${t('Set {n}', { n: k + 1 })}</span><small>${reps.map((r, i) => `${r} ${d.names[i]}${d.brk?.[k]?.[i] != null ? ` (${t('broke at {n}', { n: d.brk[k][i] })})` : ''}`).join(' · ')}</small>${d.times?.[k] ? `<b>${fmt(d.times[k])}</b>` : ''}</div>`).join('')}</div>`;
 }
 function testResult(session, partial, tallyRec) {
   const T = S.plan.test, def = T.def;
@@ -2592,6 +2612,6 @@ function finishSession(opts = {}) {
     <div class="actionbar"><button class="btn lg" id="home">${t(S.plan.finishLabel || 'Back to week')}</button></div></div>`;
   if (tally) tally.wire();
   test?.wire?.();
-  paintAchievements(host);
+  paintAchievements(document.body);
   document.getElementById('home').addEventListener('click', async () => { const leavesPage = !!S?.plan?.returnTo; try { await R.flushRunState(); } catch (e) {} if (!leavesPage) clearWorkTheme(); cb.onFinish?.(); });
 }

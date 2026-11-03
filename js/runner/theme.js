@@ -316,10 +316,19 @@ function injectStyle() {
   html.wm .bt-rnd { flex: none; height: 34px; padding: 0 14px; margin-left: 8px; font-family: inherit; font-size: 14px; border-color: var(--wm-accent); color: var(--wm-accent); }
   html.wm .tm-ov { z-index: 145; }
   html.wm .st-rest { flex-direction: column; }
+  html.wm .st-brk { align-self:flex-start; margin-top: 4px; display:inline-flex; align-items:center; gap: 4px; height: 26px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: 800; background: none; cursor: pointer; }
+  html.wm .st-brk.ok { border: 1px solid var(--wm-accent); color: var(--wm-accent); }
+  html.wm .st-brk.no { border: 1px solid var(--wm-warn, #FFB020); color: var(--wm-warn, #FFB020); padding: 0 4px; }
+  html.wm .st-brk.no button { background: none; border: 0; color: inherit; font-size: 15px; font-weight: 800; width: 24px; height: 24px; cursor: pointer; }
+  html.wm .st-pass { display:flex; align-items:center; gap: 10px; margin: 10px 0 4px; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--wm-accent); background: var(--wm-accent-soft, transparent); text-align:left; }
+  html.wm .st-pass.no { border-color: var(--wm-warn, #FFB020); background: rgba(255,176,32,.08); }
+  html.wm .st-pass span { display:flex; flex-direction:column; } html.wm .st-pass b { font-size: 16px; } html.wm .st-pass small { color: var(--muted); font-size: 13px; }
+  html.wm .wm-ach.mini { width: 54px; height: 54px; margin: 0; }
   html.wm .st-restc { display:flex; flex-direction:column; align-items:center; gap: 10px; width: 100%; max-width: 360px; }
   html.wm .st-next { color: var(--muted); font-size: 15px; font-weight: 700; }
   html.wm .st-ring { width: 260px; height: 260px; } html.wm .st-ring .timer { width: 260px !important; height: 260px !important; }
   html.wm .st-restc .btn { width: 100%; }
+  html.wm .st-adj { display:flex; gap: 10px; width: 100%; } html.wm .st-adj .btn { flex: 1; margin: 0; font-family: var(--tnum); }
   html.wm .st-row .mvr-n { display:flex; flex-direction:column; } html.wm .st-row .mvr-n small { color: var(--muted); font-size: 12px; font-weight: 600; }
   html.wm .st-row .mvr-st b { min-width: 48px; font-size: 26px; }
   html.wm .st-done, html.wm .st-det { display:flex; flex-direction:column; gap: 6px; margin: 10px 0; }
