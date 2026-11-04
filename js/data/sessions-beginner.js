@@ -81,7 +81,7 @@ export const BEGINNER_SESSIONS = {
       {
         role: 'Work', format: 'superset', name: 'A · Push-Ups + Lat Pulldown',
         note: 'A1 straight into A2 with no rest, then rest 75 sec, then go again.',
-        rounds: 3, rest: 75, anchor: true, optional: true,
+        rounds: 3, rest: 75, transition: 5, anchor: true, optional: true,
         items: [
           { ex: 'straight_bar_push_up', pair: 'A1', reps: 12, repsText: '10-15', name: 'Straight Bar Push-Up', load: 'bw',
             note: 'Bar in the squat rack. Lower the bar one notch when 15 gets easy.',
@@ -93,7 +93,7 @@ export const BEGINNER_SESSIONS = {
       {
         role: 'Work', format: 'superset', name: 'B · Assisted Dip + Cable Row',
         note: 'B1 straight into B2 with no rest, then rest 75 sec.',
-        rounds: 3, rest: 75, anchor: true, optional: true,
+        rounds: 3, rest: 75, transition: 5, anchor: true, optional: true,
         items: [
           { ex: 'assisted_dip', pair: 'B1', reps: 8, note: 'Take one plate off the assist when 8 feels easy.' },
           { ex: 'seated_cable_row', pair: 'B2', reps: 10 },
@@ -102,7 +102,7 @@ export const BEGINNER_SESSIONS = {
       {
         role: 'Work', format: 'superset', name: 'C · Lateral Raise + Pushdown',
         note: 'C1 into C2, no rest, then 75 sec.', optional: true, extra: true,
-        rounds: 3, rest: 75,
+        rounds: 3, rest: 75, transition: 5,
         items: [
           { ex: 'lateral_raise', pair: 'C1', reps: 12 },
           { ex: 'triceps_pushdown', pair: 'C2', reps: 12 },
@@ -111,7 +111,7 @@ export const BEGINNER_SESSIONS = {
       {
         role: 'Work', format: 'superset', name: 'D · Reverse Fly + Curl',
         note: 'D1 into D2, no rest, then 75 sec. Reverse fly is never heavy — light and slow.', optional: true, extra: true,
-        rounds: 2, rest: 75,
+        rounds: 2, rest: 75, transition: 5,
         items: [
           { ex: 'reverse_fly', pair: 'D1', reps: 12, repsText: '12-15',
             cue: 'Chest flat on an incline bench, light dumbbells hanging. Arms almost straight — raise them out wide to the sides, squeeze the back of your shoulders, lower slowly. Light weight, always.',
@@ -137,7 +137,7 @@ export const BEGINNER_SESSIONS = {
       {
         role: 'Work', format: 'superset', name: 'A · Chest Press + Row',
         note: 'A1 into A2, no rest, then rest 75 sec.',
-        rounds: 3, rest: 75, anchor: true, optional: true,
+        rounds: 3, rest: 75, transition: 5, anchor: true, optional: true,
         items: [
           { ex: 'chest_press_machine', pair: 'A1', reps: 10 },
           { ex: 'chest_supported_row', pair: 'A2', reps: 12 },
@@ -146,7 +146,7 @@ export const BEGINNER_SESSIONS = {
       {
         role: 'Work', format: 'superset', name: 'B · Shoulder Press + Pullover',
         note: 'B1 into B2, no rest, then rest 75 sec.',
-        rounds: 3, rest: 75, anchor: true, optional: true,
+        rounds: 3, rest: 75, transition: 5, anchor: true, optional: true,
         items: [
           { ex: 'shoulder_press_machine', pair: 'B1', reps: 10 },
           { ex: 'db_pullover', pair: 'B2', reps: 12,
@@ -156,7 +156,7 @@ export const BEGINNER_SESSIONS = {
       {
         role: 'Work', format: 'superset', name: 'C · Back Extension + Dip Hold',
         note: 'C1 into C2, no rest, then rest 75 sec.', optional: true, extra: true,
-        rounds: 3, rest: 75,
+        rounds: 3, rest: 75, transition: 5,
         items: [
           { ex: 'back_extension_45', pair: 'C1', reps: 12 },
           { ex: 'dip_support_hold', pair: 'C2', hold: 20, cue: 'Hold yourself up on the dip bars with your arms locked straight. Shoulders pushed down, chest tall. Just hold — no bending.' },
@@ -183,7 +183,7 @@ export const BEGINNER_SESSIONS = {
       {
         role: 'Work', format: 'circuit', name: 'Full Body Circuit',
         note: 'Straight through, 3-5 rounds. Rest 90 sec between rounds ONLY — no rest between exercises. One pair of dumbbells: start 25-30 lb per hand (the shoulder press is the limiter). The RDL and row will feel light on purpose for now — that is fine for the first month.',
-        rounds: 4, transition: 0, roundRest: 90, anchor: true, optional: true,
+        rounds: 4, transition: 8, roundRest: 90, anchor: true, optional: true,
         items: [
           { ex: 'db_rdl', reps: 8, name: 'DB Romanian Deadlift',
             cue: 'Push your hips back, slide the dumbbells down the front of your legs, knees almost straight. Feel the stretch behind your thighs, then stand tall.' },
