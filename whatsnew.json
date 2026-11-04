@@ -1,6 +1,9 @@
 {
-  "version": "2026-11-03.2",
+  "version": "2026-11-03.3",
   "notes": [
+    "Your records: up to 3, each a slim line with a drop-down for the details. A set test that was not passed shows Not yet in red, a passed one ✓ Passed",
+    "Your 55 push-ups are on the Push-up Test",
+    "Your records say what you did, not only the time: \"2 sets of 12 pull-ups · 20 dips · 40 push-ups\", the date, and for new tries each set and Passed or Not yet",
     "Set tests track unbroken sets: every exercise is Unbroken unless you tap it and set where you broke (\"Broke at 8\")",
     "Passed only when every set is done unbroken: you get the badge. Otherwise it says Not yet, and where you broke",
     "Rest: −10 s and +10 s to change it as it runs",
@@ -114,6 +117,9 @@
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
   ],
   "notes_fr": [
+    "Tes records : jusqu’à 3, chacun sur une ligne fine avec un menu déroulant pour les détails. Un test en séries non réussi affiche Pas encore en rouge, un test réussi ✓ Réussi",
+    "Tes 55 pompes sont sur le Test de pompes",
+    "Tes records disent ce que tu as fait, pas seulement le temps : « 2 séries de 12 tractions · 20 dips · 40 pompes », la date, et pour les nouveaux essais chaque série et Réussi ou Pas encore",
     "Les tests en séries suivent les séries sans pause : chaque exercice est Sans pause, sauf si tu le touches et indiques où tu as cassé (« Cassé à 8 »)",
     "Réussi seulement quand toutes les séries sont faites sans pause : tu gagnes le badge. Sinon c’est Pas encore, avec l’endroit où tu as cassé",
     "Repos : −10 s et +10 s pour l’ajuster pendant qu’il tourne",

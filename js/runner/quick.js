@@ -181,7 +181,19 @@ export async function renderQuick(el, opts = {}) {
   injectStyle(); applyWorkTheme(); loadPrefs(); installHold();
   onInstallStateChange(() => { if (host && cfg && page === 'home') { host.innerHTML = ''; draw(); } });   // Android announces it can install a moment after load
   if (!window.__qtLang) { window.__qtLang = 1; document.addEventListener('fj-lang', () => { if (host && cfg) { host.innerHTML = ''; draw(); } }); }   // a new language: redraw
-  readHistory().then(h => { hist = h; if (host && cfg) draw(); });
+  readHistory().then(async h => {
+    hist = h;
+    /* ONCE, ON NICO'S PHONE (3 Nov 2026: "I did 55 on the push-up test, add it"): his history lives on his
+       phone; it is the one with his 15:57 Calisthenics try. Added by hand, removable from the tries sheet */
+    try {
+      if (!localStorage.getItem('fj.seed.pushup55') && h.some(r => r.sig === 'test|caliI' && Math.round(r.seconds) === 957) && !h.some(r => r.sig === 'test|cadence')) {
+        localStorage.setItem('fj.seed.pushup55', '1');
+        await addHistory({ at: '2026-10-25T12:00:00.000Z', sig: 'test|cadence', title: 'Push-up Test', manual: true, partial: false, total: 55, seconds: 0, moves: [], cfg: null });
+        hist = await readHistory();
+      }
+    } catch (e) {}
+    if (host && cfg) draw();
+  });
   /* The address itself names the person, so "Add to Home Screen" from here
      gives a timer icon that opens as THEM (an installed iPhone app cannot
      see Safari's storage). */
@@ -980,12 +992,28 @@ function homeExtras() {
   if (f === 'igyg') return [segRow('Rest', 'neon', [['same', 'Same as your set'], ['fixed', 'Fixed']], cfg.igRest, 'data-igrest'), ...(cfg.igRest === 'fixed' ? [homeRow('igRestSec')] : [])];
   if (f === 'vo2') return [vo2Carousel()];
   if (f === 'test') {
-    const recs = allTests().map(x => ({ x, b: bestOf(hist, x) })).filter(r => r.b).slice(0, 2);
-    /* a set-by-set record says what was done (3 sets · 12-20-40 …), the sets in a drop-down */
-    const recRow = (x, b) => `<span><b>${t(x.name)}</b><small>${t2(attempts(hist, x).length, '{n} try', '{n} tries')}${b.detail ? ` · ${t2(b.detail.sets.length, '{n} set', '{n} sets')}${passTag(b.detail)} ▾` : ''}</small></span><em>${testShow(x, scoreOf(b, x))}</em>`;
-    return recs.length ? [`${sec('Your records')}${recs.map(({ x, b }) => b.detail
-      ? `<details class="qt-rec qt-recd"><summary>${recRow(x, b)}</summary><div class="qt-recsets">${b.detail.sets.map((reps, k) => `<div><span>${t('Set {n}', { n: k + 1 })}</span><small>${setLine(b.detail, k)}</small>${b.detail.times?.[k] ? `<b>${fmt(b.detail.times[k])}</b>` : ''}</div>`).join('')}</div></details>`
-      : `<div class="qt-rec">${recRow(x, b)}</div>`).join('')}`]
+    /* YOUR RECORDS: a slim ribbon each (name, a pass mark for a set test, the score), the rest in its drop-down
+       (Nico, 3 Nov 2026: "very slim, with a drop-down"; "say if I passed, red-ish when not").
+       A set test shows its best PASSED try if there is one, else its latest. */
+    const pick = x => { const all = attempts(hist, x); if (!all.length) return null;
+      if (!x.cfg?.ftRest) return bestOf(hist, x);
+      const ok = all.filter(r => r.detail?.passed);
+      return ok.length ? ok.reduce((a, r) => (scoreOf(r, x) ?? 1e9) < (scoreOf(a, x) ?? 1e9) ? r : a) : all[0]; };
+    const recs = allTests().map(x => ({ x, b: pick(x) })).filter(r => r.b).sort((a, b) => String(b.b.at).localeCompare(String(a.b.at))).slice(0, 3);
+    const what = (x, b) => {
+      const mv = (b.moves || []).filter(m => m.reps > 0), sets = Number(x.cfg?.ftRounds) || 1;
+      if (b.detail) return '';   // its sets are listed below
+      if (sets > 1 && mv.length && mv.every(m => m.reps % sets === 0)) return t('{n} sets of {x}', { n: sets, x: mv.map(m => `${m.reps / sets} ${esc(m.name)}`).join(' · ') });
+      return mv.length > 1 || sets > 1 ? `${mv.map(m => `${m.reps} ${esc(m.name)}`).join(' · ')}${sets > 1 ? `, ${t2(sets, '{n} set', '{n} sets')}` : ''}` : '';
+    };
+    return recs.length ? [`${sec('Your records')}${recs.map(({ x, b }) => {
+      const pass = b.detail?.passed, w = what(x, b);
+      const mark = pass == null ? '' : pass ? `<i class="qt-pass ok">✓ ${t('Passed')}</i>` : `<i class="qt-pass no">${t('Not yet')}</i>`;
+      return `<details class="qt-rec qt-recd ${pass === false ? 'fail' : pass ? 'win' : ''}"><summary><b>${t(x.name)}</b>${mark}<em>${testShow(x, scoreOf(b, x)) || '–'}</em><span class="qt-chev">▾</span></summary>
+        <div class="qt-recsets">${w ? `<div><small>${w}</small></div>` : ''}
+          ${b.detail ? b.detail.sets.map((reps, k) => `<div><span>${t('Set {n}', { n: k + 1 })}</span><small>${setLine(b.detail, k)}</small>${b.detail.times?.[k] ? `<b>${fmt(b.detail.times[k])}</b>` : ''}</div>`).join('') : ''}
+          ${x.cfg?.ftRest && !b.detail ? `<div><small class="qt-recmeta">${t('Done before breaks were tracked: no pass or fail. Your next try says.')}</small></div>` : ''}
+          <div><small class="qt-recmeta">${t2(attempts(hist, x).length, '{n} try', '{n} tries')} · ${shortDate(b.at)}${b.manual ? ` · ${t('added by hand')}` : ''}</small></div></div></details>`; }).join('')}`]
       : [`<div class="qt-note">${t('Your first try at any test sets your best. Then you race it.')}</div>`];
   }
   return [];
@@ -1930,7 +1958,14 @@ function injectStyle() {
   .qt-rec { display:flex; align-items:center; gap: 12px; background: var(--box); border: 1px solid var(--line); border-radius: 16px; padding: 10px 14px; }
   .qt-rec span { flex: 1; display:flex; flex-direction:column; } .qt-rec b { font-size: 15.5px; } .qt-rec small { color: var(--muted); font-size: 12px; }
   .qt-rec em { font-style: normal; font-family: var(--tnum); font-size: 22px; font-weight: 800; color: var(--wm-neon); }
-  .qt-recd { display:block; } .qt-recd summary { display:flex; align-items:center; gap: 12px; list-style: none; cursor: pointer; } .qt-recd summary::-webkit-details-marker { display:none; }
+  .qt-recd { display:block; padding: 8px 12px; border-radius: 14px; } .qt-recd summary { display:flex; align-items:center; gap: 8px; list-style: none; cursor: pointer; min-height: 30px; } .qt-recd summary::-webkit-details-marker { display:none; }
+  .qt-recd summary b { flex: 1; min-width: 0; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .qt-recd summary em { font-size: 20px; } .qt-chev { flex: none !important; color: var(--muted); font-size: 12px; transition: transform .2s; } .qt-recd[open] .qt-chev { transform: rotate(180deg); }
+  .qt-pass { font-style: normal; font-size: 11.5px; font-weight: 800; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  .qt-pass.ok { color: var(--wm-accent); border: 1px solid var(--wm-accent); } .qt-pass.no { color: #FF5A6E; border: 1px solid #FF5A6E; background: rgba(255,90,110,.1); }
+  .qt-recd.fail { border-color: rgba(255,90,110,.55); background: linear-gradient(90deg, rgba(255,90,110,.10), transparent 60%), var(--box); } .qt-recd.fail summary em { color: #FF5A6E; }
+  .qt-recd.win { border-color: var(--wm-accent); }
+  .qt-recmeta { color: var(--muted); }
   .qt-recsets { display:flex; flex-direction:column; gap: 4px; margin-top: 8px; }
   .qt-recsets > div { display:flex; align-items:baseline; gap: 8px; font-size: 13px; } .qt-recsets span { font-weight: 800; } .qt-recsets small { flex: 1; color: var(--muted); } .qt-recsets b { font-family: var(--tnum); }
   .qt-note { color: var(--muted); font-size: 14px; text-align: center; padding: 8px 12px; }

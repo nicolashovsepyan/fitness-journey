@@ -688,6 +688,8 @@ export const FR = {
   'Next: pick exercises': 'Ensuite\xa0: les exercices',
   '+ Add an exercise': '+ Ajouter un exercice',
   'Exercises': 'Exercices',
+  'Done before breaks were tracked: no pass or fail. Your next try says.': 'Fait avant le suivi des pauses : ni réussi ni raté. Ton prochain essai le dira.',
+  '{n} sets of {x}': '{n} séries de {x}',
   'Unbroken': 'Sans pause',
   'Broke at {n}': 'Cassé à {n}',
   'broke at {n}': 'cassé à {n}',
