@@ -1,9 +1,9 @@
 {
   "id": "five_and_soccer",
-  "version": 2,
+  "version": 3,
   "name": "Five and Soccer",
   "who": "Nicolas",
-  "source": "written 8 Nov 2026 from his own brief, revised the same day: the big upper day moved off the morning after soccer, which is now a short day and stretching.",
+  "source": "written 8 Nov 2026 from his own brief, revised the same day: the big upper day moved off the morning after soccer, and core became two blocks of its own rather than a hold tacked onto the end.",
   "duration": 45,
   "fixed": false,
   "trainDays": [
@@ -36,6 +36,7 @@
     "Legs twice a week, once heavy and once for volume",
     "One upper day that earns its 45 minutes: load first, volume after, and far from the match",
     "Two short days that are a push, and one that is recovery with a push attached",
+    "Core twice a week as its own block, and a third time inside the upper day",
     "Fundamentals only, so every session is a movement worth owning"
   ],
   "habits": [],
@@ -144,19 +145,29 @@
         },
         {
           "role": "Finish",
-          "name": "Suitcase Carry",
-          "note": "3 rounds, 40s per side, 45s between. The cheapest lower-back insurance there is.",
-          "mins": 6,
+          "name": "Core · Carry and brace",
+          "note": "2 rounds, 45s between. Anti-rotation, anti-extension, anti-side-bend - the three jobs the core actually has.",
+          "mins": 8,
           "type": "Circuit",
           "cfg": {
-            "rounds": 3,
+            "rounds": 2,
             "rest": 45
           },
           "items": [
             {
               "ex": "suitcase_carry",
               "pres": "40s each side",
-              "note": "One bell. Do not let the ribs tip."
+              "note": "One bell. Do not let the ribs tip - that is the whole exercise."
+            },
+            {
+              "ex": "hollow_hold",
+              "pres": "30s",
+              "note": "Lower back flat on the floor. The moment it lifts, the set is over."
+            },
+            {
+              "ex": "side_plank",
+              "pres": "30s each side",
+              "note": "Hips stacked and high."
             }
           ]
         }
@@ -382,6 +393,34 @@
               "ex": "wall_sit",
               "pres": "45s",
               "note": "Thighs wherever the knee is happy."
+            }
+          ]
+        },
+        {
+          "role": "Finish",
+          "name": "Core · Hang and hold",
+          "note": "2 rounds, 45s between. The hanging work first, while the grip is still there.",
+          "mins": 8,
+          "type": "Circuit",
+          "cfg": {
+            "rounds": 2,
+            "rest": 45
+          },
+          "items": [
+            {
+              "ex": "hanging_leg_raise",
+              "pres": "10",
+              "note": "Straight legs, no swing. Knees instead of straight legs is the honest version if the swing starts."
+            },
+            {
+              "ex": "dead_bug",
+              "pres": "10 each side",
+              "note": "Slow. Back stays flat, ribs stay down."
+            },
+            {
+              "ex": "copenhagen_plank",
+              "pres": "20s each side",
+              "note": "Adductors, which is what pulls on a soccer player. Knee on the bench if the full version is too much."
             }
           ]
         }

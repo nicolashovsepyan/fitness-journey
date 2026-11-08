@@ -1,6 +1,13 @@
 {
-  "version": "2026-11-08.8",
+  "version": "2026-11-08.9",
   "notes": [
+    "Coach console: every number is entered the same way now, and it is the work timer way. Tap the value, get plus above and minus below a big figure with the common values as chips, press Done. Sets, rounds, reps, seconds, rest, minutes, caps and weight all go through it.",
+    "Coach console: every movement in the picker and in the progressions shows its drawing and a play button for its clip, so you can check it is the one you mean before you take it.",
+    "Coach console: dragging shows where it lands. The gap opens under the pointer with a line in it, above or below depending on which half of the row you are over.",
+    "Coach console: + Add a movement works. It used to close the block and show nothing.",
+    "Coach console: Prime, Work and Finish wear the same three colors in the block popup that they wear on the day.",
+    "Coach console: Balance, patterns and rules moved below the program, where it reads what you wrote rather than sitting in front of it.",
+    "Five and Soccer: core is two blocks of its own now. Monday finishes with the carry, the hollow hold and the side plank; Friday gains hanging leg raises, dead bugs and Copenhagen planks.",
     "Coach console: the A B C on a block is where it sits, so moving it relabels it. Drag C to the front and it is A. Blocks you never lettered stay unlettered.",
     "Coach console: Change movement works. It used to close the popup and do nothing; the search opens inside the row now, with the fundamentals filter, the body areas and the progressions for that movement.",
     "Coach console: in a straight block the sets sit on a bar above the group, not on each movement. Write 4 there and all of them are 4, and a joined pair reads \"3 rounds of the pair\". The rest is taken after the group, where it is actually taken.",
