@@ -5137,6 +5137,7 @@ function nbDelBlock(bi){
   PROG.days[PDAY].blocks.splice(bi, 1);
   if(nbSel === bi) nbSel = null; else if(nbSel > bi) nbSel--;
   nbOpen = null; nbSwap = null; nbPeek = new Set();
+  nbReletter();
   nbSave();
 }
 
@@ -5554,6 +5555,32 @@ function nbTrashDrop(e){
   nbBlockEnd();
   nbDelBlock(bi);
 }
+/* THE LETTER IS WHERE THE BLOCK IS, NOT WHICH BLOCK IT IS.
+
+   "A \u00B7 Back Squat", "B \u00B7 Romanian Deadlift", "C \u00B7 Bulgarian Split
+   Squat" - and dragging C to the front gave you C, A, B. The letter was
+   stored inside the name, so it travelled with the block it was written
+   on, which is the one thing a position label must never do. A day whose
+   letters run C A B is worse than a day with no letters at all, because
+   you read the letters first and they are lying to you.
+
+   Only blocks that already carry a letter are relettered, and they are
+   lettered in the order they now appear. A warm-up called "Knee armour"
+   stays "Knee armour" - having no letter is a decision somebody made,
+   and this is not the place to overturn it. */
+const NB_LET = /^([A-Z])(\s*[\u00B7\-]\s*)/;
+function nbReletter(){
+  const blocks = (PROG.days[PDAY] || {}).blocks || [];
+  let n = 0;
+  for(const b of blocks){
+    const m = NB_LET.exec(String(b.name || ''));
+    if(!m) continue;
+    const want = n < 26 ? String.fromCharCode(65 + n) : m[1];
+    n++;
+    if(m[1] !== want) b.name = want + m[2] + b.name.slice(m[0].length);
+  }
+}
+
 function nbBlockDrop(bi){
   const from = nbDragBlock, blocks = PROG.days[PDAY].blocks;
   nbBlockEnd();
@@ -5562,6 +5589,7 @@ function nbBlockDrop(bi){
   /* dropping below where it came from: the splice already closed the gap */
   blocks.splice(from < bi ? bi - 1 : bi, 0, moved);
   nbSel = null; nbOpen = null; nbSwap = null; nbPeek = new Set();
+  nbReletter();
   nbSave();
 }
 
@@ -5581,6 +5609,7 @@ function nbMoveBlock(bi, dir){
   /* the selection and any open panels follow the block, not the index */
   if(nbSel === bi) nbSel = j; else if(nbSel === j) nbSel = bi;
   nbOpen = null; nbSwap = null;
+  nbReletter();
   nbAt(j); nbSave();
 }
 

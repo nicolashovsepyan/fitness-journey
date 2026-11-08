@@ -1,6 +1,7 @@
 {
-  "version": "2026-11-08.7",
+  "version": "2026-11-08.8",
   "notes": [
+    "Coach console: the A B C on a block is where it sits, so moving it relabels it. Drag C to the front and it is A. Blocks you never lettered stay unlettered.",
     "Coach console: Change movement works. It used to close the popup and do nothing; the search opens inside the row now, with the fundamentals filter, the body areas and the progressions for that movement.",
     "Coach console: in a straight block the sets sit on a bar above the group, not on each movement. Write 4 there and all of them are 4, and a joined pair reads \"3 rounds of the pair\". The rest is taken after the group, where it is actually taken.",
     "Coach console: dates read 02-Sep-26 instead of Sep 2, so the year is there and they line up.",
