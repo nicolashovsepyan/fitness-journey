@@ -7218,9 +7218,57 @@ loadTheme().then(()=>go(S.tab||'today'));   /* then again from the spine, if rea
         });
       }
       localStorage.setItem(stamp, String(p.updatedAt));
+      /* A PROGRAM ARRIVED AND NOTHING SAID SO.
+
+         This wrote the program, then reloaded. From the sofa that is a
+         flicker: the app blinks and the content is different, with no
+         word about what happened or who sent it. A coach releasing work
+         has no way to know it landed, and the person it landed on has no
+         reason to look. The reload still happens, because every screen
+         has to re-read the program, and the news survives it in a flag
+         that the bar below picks up on the way back. */
+      try {
+        localStorage.setItem('fj.cloud.arrived', JSON.stringify({
+          name: raw.name || p.name || 'Your program',
+          days: Object.keys(raw.days).length,
+          at: Date.now(),
+        }));
+      } catch (e) {}
       location.reload();
     } catch (e) { console.warn('[cloud] could not read the released program', e); }
   }
+
+  /* THE BAR THAT SAYS IT LANDED. Its own styles, like the update bar, so
+     it cannot depend on a stylesheet this page may not have reached yet.
+     Shown once: read it and it is cleared, because a program is news the
+     first time and furniture after that. */
+  function announceProgram() {
+    let news = null;
+    try { news = JSON.parse(localStorage.getItem('fj.cloud.arrived') || 'null'); } catch (e) {}
+    if (!news) return;
+    localStorage.removeItem('fj.cloud.arrived');
+    const bar = document.createElement('div');
+    bar.setAttribute('role', 'status');
+    bar.style.cssText = 'position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));'
+      + 'z-index:9999;display:flex;align-items:center;gap:12px;padding:13px 15px;border-radius:14px;'
+      + 'background:#15202B;color:#EAF2F8;border:1px solid #3ECBA8;'
+      + 'box-shadow:0 10px 30px rgba(0,0,0,.45);font:500 14px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif';
+    bar.innerHTML = '<span style="font-size:19px;line-height:1">✓</span>'
+      + '<span style="flex:1;min-width:0"><b style="display:block;font-weight:650">Your program is here</b>'
+      + '<span style="color:#9FB3C8;font-size:12.5px">'
+      + (news.name ? String(news.name).replace(/[<>&]/g, '') : 'Your program')
+      + (news.days ? ' · ' + news.days + ' day' + (news.days === 1 ? '' : 's') : '')
+      + ' from your coach</span></span>'
+      + '<button style="flex:none;border:0;border-radius:9px;padding:8px 13px;cursor:pointer;'
+      + 'background:#3ECBA8;color:#0F1417;font:650 13px inherit">Got it</button>';
+    bar.querySelector('button').onclick = () => bar.remove();
+    document.body.appendChild(bar);
+    /* Left up until it is answered: the whole point is that it is not a
+       flicker. Ten seconds is plenty for a glance, not for a decision. */
+    setTimeout(() => { if (bar.isConnected) bar.style.opacity = '.92'; }, 10000);
+  }
+  announceProgram();
+
   takeCloudProgram();
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') takeCloudProgram();

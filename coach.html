@@ -588,6 +588,17 @@ select.pin{appearance:none;cursor:pointer}
 
 /* THE DIALS, ON TOP. Three cells side by side on a wide window, and
    they stack before they get cramped rather than after. */
+/* linked or not, said before you try rather than after you fail */
+.nbsend{ border:1px solid var(--line); border-left:3px solid var(--ink4);
+  border-radius:10px; padding:11px 13px; margin-bottom:12px; background:var(--card) }
+.nbsend.on{ border-left-color:var(--accent) }
+.nbsend.off{ border-left-color:var(--gold) }
+.nbsend b{ display:block; font-size:13px; margin-bottom:4px }
+.nbsend.on b{ color:var(--accent) }
+.nbsend.off b{ color:var(--gold) }
+.nbsend small{ display:block; color:var(--ink3); font-size:12px; line-height:1.55 }
+.nbsend .btn{ margin-top:10px }
+
 .nbtoppanel{ margin-top:10px; }
 /* folded readouts: a summary you can read without opening it */
 .nbtoppanel > summary{ cursor:pointer; list-style:none; padding:11px 14px;
@@ -6223,7 +6234,31 @@ function drawRelease2(){
   const link = base + 'dashboard.html#' + b64urlEncode(payload);
   const days = Object.keys((PROG&&PROG.days)||{}).length;
   const live = Object.keys(S.released||{}).filter(k=>S.released[k] && k!=='shape').length;
+  /* IS THIS PERSON REACHABLE AT ALL, AND DOES IT SAY SO BEFORE YOU TRY?
+
+     Releasing publishes to the database, and the phone picks it up on its
+     next open. That only works when the console's client IS the person the
+     phone signed in as, which happens exactly one way: they completed the
+     survey ON that phone. A client typed in here by hand, or pasted from a
+     link, has a local id - cnicolas, ozzy - and publishProgram refuses it,
+     correctly, because there is no such person in the database.
+
+     Until now that refusal arrived as a toast at the moment of release,
+     after the work, phrased as a failure. The state is knowable before you
+     start, so it is stated before you start. */
+  const linked = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(CLIENT_ID);
+  const sentAt = (S.sentAt && new Date(S.sentAt)) || null;
   host.innerHTML = `
+    <div class="nbsend ${linked?'on':'off'}">
+      <b>${linked ? 'Their app is linked' : 'Their app is not linked'}</b>
+      <small>${linked
+        ? `Releasing a day sends it straight to ${esc(A.name||'them')}. Their app takes it on the next open.${
+            sentAt ? ` Last sent ${esc(sentAt.toLocaleString())}.` : ' Nothing sent yet.'}`
+        : `${esc(A.name||CLIENT_ID)} has a local record, not a database one, so nothing here can reach a
+           phone by itself. That happens when the survey was filled in anywhere other than on their own
+           phone. Either have them fill it there, or use the link below, which works regardless.`}</small>
+      ${linked ? `<button class="btn" id="relPush">Send the program now</button>` : ''}
+    </div>
     <p style="margin:0 0 10px">Sending <b>${days} day${days===1?'':'s'}</b> to <b>${esc(A.name||CLIENT_ID)}</b>,
       <b>${live}</b> of them released. Opening this on their phone sets them to <b>active</b> and their
       dashboard opens on this program.</p>
@@ -6236,6 +6271,28 @@ function drawRelease2(){
     </div>
     <p class="micro" style="margin-top:9px">Message or AirDrop it to yourself. It carries the program,
       so it is long - that is the trade for not having a server yet.</p>`;
+  /* A DELIVERY YOU CAN ASK FOR, rather than only a side effect of
+     flicking a release switch. Reports what happened either way, and
+     records when, so the panel can say it afterwards. */
+  const push = document.getElementById('relPush');
+  if(push) push.onclick = async () => {
+    if(!days) return toast('There is no program to send yet');
+    if(typeof window.fjPublishProgram !== 'function')
+      return toast('No connection to the app right now. Use the link below.');
+    push.disabled = true; push.textContent = 'Sending…';
+    const r = await window.fjPublishProgram({ clientId: CLIENT_ID, program: PROG,
+      released: S.released || null, clientName: A.name || null });
+    push.disabled = false; push.textContent = 'Send the program now';
+    if(r && r.ok){
+      S.sentAt = new Date().toISOString(); save(1);
+      if(typeof tellThem === 'function') tellThem('program');
+      toast(`Sent. ${esc(A.name||'They')} will see it the next time the app opens.`);
+      drawRelease2();
+    } else {
+      toast('It did not reach the app: ' + ((r && r.reason) || 'unknown error'));
+    }
+  };
+
   document.getElementById('relCopy').onclick = async () => {
     try { await navigator.clipboard.writeText(link); toast('Link copied'); }
     catch(e){ const t=document.getElementById('relLink'); t.select(); toast('Selected - press Cmd+C'); }

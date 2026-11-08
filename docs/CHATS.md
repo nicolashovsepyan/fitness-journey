@@ -89,7 +89,7 @@ when the area goes quiet — a stale row is worse than no row.
 | Area | Files | State |
 |---|---|---|
 | **Coach console** | `coach.html` | Idle since 12 Sep. Last: the builder went full width, dials on top, movement picker opens in the block that wants one. |
-| **Dashboard** | `dashboard.html`, `js/` (except the Work Mode files) | Active 13 Sep. Last: week navigation backwards, undo a mis-tap. |
+| **Dashboard** | `dashboard.html`, `js/` (except the Work Mode files) | Active 13 Sep. Last: week navigation backwards, undo a mis-tap. **8 Nov, coach-console chat:** added the arrival bar to `takeCloudProgram` (a released program used to land and reload with no word). Nothing else in this file touched. |
 | **Work Mode** | `js/runner/` (incl. `quick.js`, the Quick Timer), `js/timer.js`, `js/data/formats.js`, the "Quick timer" row in `dashboard.html`, `manifest-timer.webmanifest`, `images/timer-icon/` (J5 Sunray from the logo chat's dial set; rebuild with `tools/build-timer-icon.mjs`) | **Own chat since 27 Sep.** Audit, plan and changelog: `docs/WORK-MODE.md`. Other chats read it, never edit these files. |
 | **Lab** | `lab/`, `dashboard-lab.html`, `tools/build-lab.mjs` | Active 13 Sep. Experiments kept away from clients. |
 | **Logo / icons** | `logo/`, `icon*`, `images/logo-mark.svg`, `styles.css` | **IN FLIGHT, UNCOMMITTED.** Leave alone. Untracked: `logo/fj/`, `images/fj-signature.png`. |
@@ -144,3 +144,31 @@ is exported and would fix it by making the identity portable, but nothing in
 `coach.html` calls it and there is no UI for it.
 
 So the sync is real, and it currently has an audience of one browser.
+
+---
+
+## Why a released program reaches one phone and not another (8 Nov 2026)
+
+Verified end to end: `publishProgram` then `fetchMyProgram` round-trips a
+program, its days and its release flags correctly. The plumbing is not the
+problem. **Identity is.**
+
+`publishProgram` writes `assignedTo: <the console's client id>`.
+`fetchMyProgram` reads the program assigned to `<the phone's own Supabase
+id>`. Those are the same value in exactly one case: **the client completed
+the survey on that phone.** The survey signs the device in and publishes
+the intake as that identity, so the phone and the console's client are one
+person. Fill the survey anywhere else and the phone is a different
+anonymous identity that no program is addressed to.
+
+`publishProgram` also refuses any client id that is not a uuid, which is
+correct: a hand-added or link-pasted client (`ozzy`, `cnicolas`) has no row
+in the database, so there is nothing to assign to. The console now says
+which of the two states a client is in, in the Send it panel, before you
+build rather than after you release.
+
+**Still open:** a device cannot claim an identity it does not already have.
+`cloudAttachEmail` and `cloudSendLink` exist and the console has UI for the
+coach's own identity; the client app has none, so a person who fills the
+survey on a laptop can never link their phone except by the handoff link.
+That is the remaining gap and it belongs to whoever owns the app shell.

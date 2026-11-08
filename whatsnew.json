@@ -1,6 +1,7 @@
 {
-  "version": "2026-11-03.3",
+  "version": "2026-11-08.1",
   "notes": [
+    "When your coach sends a program, the app now says so: \"Your program is here\", with its name and how many days.",
     "Your records: up to 3, each a slim line with a drop-down for the details. A set test that was not passed shows Not yet in red, a passed one ✓ Passed",
     "Your 55 push-ups are on the Push-up Test",
     "Your records say what you did, not only the time: \"2 sets of 12 pull-ups · 20 dips · 40 push-ups\", the date, and for new tries each set and Passed or Not yet",
@@ -117,6 +118,7 @@
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
   ],
   "notes_fr": [
+    "Quand ton coach t'envoie un programme, l'app te le dit : « Ton programme est arrivé », avec son nom et le nombre de jours.",
     "Tes records : jusqu’à 3, chacun sur une ligne fine avec un menu déroulant pour les détails. Un test en séries non réussi affiche Pas encore en rouge, un test réussi ✓ Réussi",
     "Tes 55 pompes sont sur le Test de pompes",
     "Tes records disent ce que tu as fait, pas seulement le temps : « 2 séries de 12 tractions · 20 dips · 40 pompes », la date, et pour les nouveaux essais chaque série et Réussi ou Pas encore",
