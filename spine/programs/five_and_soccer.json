@@ -1,0 +1,260 @@
+{
+  "id": "five_and_soccer",
+  "version": 1,
+  "name": "Five and Soccer",
+  "who": "Nicolas",
+  "source": "written 8 Nov 2026 from his own brief: legs twice, one real upper day, short push days on the rest, soccer Wednesday, one day off.",
+  "duration": 45,
+  "fixed": false,
+  "trainDays": [1, 2, 4, 5, 6],
+  "units": "lb",
+  "equipment": ["bw", "db", "kb", "bb", "pullupbar", "bench", "rack", "rings", "dipbars", "parallettes"],
+  "constraints": {
+    "soccer": "Wednesday, and it is a leg session whether or not it is written down. Nothing heavy on Tuesday, nothing heavy on Thursday.",
+    "lowerback": "hinge is loaded but never rounded - the set ends the rep the back changes shape, not the rep after",
+    "knee": "the knee circuit runs before both leg days, and no jumping on the day after soccer",
+    "shortdays": "10 to 15 minutes means one movement and a clock. A short day that grows into a session is a short day nobody does."
+  },
+  "goals": [
+    "Legs twice a week, once heavy and once for volume",
+    "One upper day that earns its 45 minutes: load first, volume after",
+    "Three short days that are a push, not a workout",
+    "Fundamentals only, so every session is a movement worth owning"
+  ],
+  "habits": [],
+  "days": {
+    "d1": {
+      "name": "Legs · Load",
+      "tag": "lower · heavy",
+      "why": "Monday, two days clear of Wednesday's match, which is the only slot in the week where heavy legs do not borrow from something else. Low reps, long rests, and the set ends when the shape does.",
+      "blocks": [
+        {
+          "role": "Prime",
+          "name": "Knee armour",
+          "note": "2 rounds, controlled. This is the reason both leg days are repeatable.",
+          "mins": 6,
+          "type": "Circuit",
+          "cfg": { "rounds": 2, "rest": 0 },
+          "items": [
+            { "ex": "leg_swings", "pres": "10 each way", "note": "" },
+            { "ex": "ankle_mobility", "pres": "8 each side", "note": "Ankles first. A stiff ankle is a knee problem." },
+            { "ex": "deep_squat_rock", "pres": "10", "note": "" },
+            { "ex": "touchdown_squat", "pres": "15 each side", "note": "" },
+            { "ex": "tibialis_raise", "pres": "25", "note": "" },
+            { "ex": "kot_calf", "pres": "25", "note": "" }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "A · Back Squat",
+          "note": "4 × 5, rest 150s. The heaviest thing in the week. Ramp to it, do not start there.",
+          "mins": 13,
+          "type": "Straight",
+          "cfg": { "rounds": 4, "rest": 150 },
+          "items": [{ "ex": "back_squat", "pres": "4 × 5", "note": "Stop 1 short. Depth you can repeat beats depth you can reach once." }]
+        },
+        {
+          "role": "Work",
+          "name": "B · Romanian Deadlift",
+          "note": "3 × 6, rest 120s. Load the hinge while the back is fresh.",
+          "mins": 10,
+          "type": "Straight",
+          "cfg": { "rounds": 3, "rest": 120 },
+          "items": [{ "ex": "romanian_deadlift", "pres": "3 × 6", "note": "Hips back, bar on the legs. The set ends the rep the back rounds." }]
+        },
+        {
+          "role": "Work",
+          "name": "C · Bulgarian Split Squat",
+          "note": "3 × 8 each side, rest 90s. One leg at a time, which is how you actually play.",
+          "mins": 10,
+          "type": "Straight",
+          "cfg": { "rounds": 3, "rest": 90 },
+          "items": [{ "ex": "bulgarian_split", "pres": "3 × 8 each side", "note": "Start at 40 lb, the number from your survey." }]
+        },
+        {
+          "role": "Finish",
+          "name": "Suitcase Carry",
+          "note": "3 rounds, 40s per side, 45s between. The cheapest lower-back insurance there is.",
+          "mins": 6,
+          "type": "Circuit",
+          "cfg": { "rounds": 3, "rest": 45 },
+          "items": [{ "ex": "suitcase_carry", "pres": "40s each side", "note": "One bell. Do not let the ribs tip." }]
+        }
+      ]
+    },
+    "d2": {
+      "name": "Short · The Burpee Hundred",
+      "tag": "short · test",
+      "why": "Tuesday, the day after heavy legs and the day before the match, so this is deliberately not a leg session. One movement, a clock, and a number to beat. Your 8:34 is the thing to chase.",
+      "blocks": [
+        {
+          "role": "Prime",
+          "name": "Loosen",
+          "note": "Straight through, once. Two minutes, not five.",
+          "mins": 2,
+          "type": "Circuit",
+          "cfg": { "rounds": 1, "rest": 0 },
+          "items": [
+            { "ex": "arm_circles", "pres": "15", "note": "" },
+            { "ex": "cat_cow", "pres": "8", "note": "" },
+            { "ex": "mountain_climber", "pres": "20", "note": "" }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "100 Burpees for time",
+          "note": "100 reps, broken however you like, clock running from the first one. Write the time down. Best so far: 8:34.",
+          "mins": 11,
+          "type": "Straight",
+          "cfg": { "rounds": 1, "rest": 0 },
+          "items": [{ "ex": "burpee", "pres": "100", "note": "Sets of 10 held together beat sets of 20 that fall apart. Step back if the knee says so." }]
+        }
+      ]
+    },
+    "d3": {
+      "name": "Upper · Load then volume",
+      "tag": "upper · the one real session",
+      "why": "Thursday. The only full upper session in the week, so it does both jobs in the order that works: the heaviest pull and press first while you are fresh, then the same patterns again for reps once the strength work is banked.",
+      "blocks": [
+        {
+          "role": "Prime",
+          "name": "Shoulders, wrists and grip",
+          "note": "Straight through. The wrists matter because dips load them cold.",
+          "mins": 6,
+          "type": "Circuit",
+          "cfg": { "rounds": 2, "rest": 0 },
+          "items": [
+            { "ex": "arm_circles", "pres": "20", "note": "" },
+            { "ex": "thoracic_rotation", "pres": "8 each side", "note": "" },
+            { "ex": "wrist_prep", "pres": "30s", "note": "" },
+            { "ex": "scap_pullup", "pres": "10", "note": "" },
+            { "ex": "dead_hang", "pres": "30s", "note": "" }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "A · Weighted Chin-Up",
+          "note": "4 × 5, rest 150s. Heaviest pull of the week, done first.",
+          "mins": 11,
+          "type": "Straight",
+          "cfg": { "rounds": 4, "rest": 150 },
+          "items": [{ "ex": "weighted_chinup", "pres": "4 × 5", "note": "A dumbbell between the feet. Full hang at the bottom, every rep." }]
+        },
+        {
+          "role": "Work",
+          "name": "B · Bench Press",
+          "note": "4 × 6, rest 150s. Heaviest press, same deal.",
+          "mins": 11,
+          "type": "Straight",
+          "cfg": { "rounds": 4, "rest": 150 },
+          "items": [{ "ex": "bench_press", "pres": "4 × 6", "note": "Stop 1 short. Elbows where the shoulder likes them." }]
+        },
+        {
+          "role": "Work",
+          "name": "C · Dip + Single-Arm Row",
+          "note": "C1 into C2, no rest, then 75s. The volume half: same patterns, lighter, more reps.",
+          "mins": 10,
+          "type": "Superset",
+          "cfg": { "rounds": 3, "rest": 75 },
+          "items": [
+            { "ex": "dip", "pres": "10-12", "note": "superset C1" },
+            { "ex": "single_arm_row", "pres": "12 each side", "note": "superset C2 · chest on the bench" }
+          ]
+        },
+        {
+          "role": "Finish",
+          "name": "Push-ups and hanging knees",
+          "note": "2 rounds, 60s between.",
+          "mins": 7,
+          "type": "Circuit",
+          "cfg": { "rounds": 2, "rest": 60 },
+          "items": [
+            { "ex": "pushup", "pres": "20", "note": "" },
+            { "ex": "hanging_leg_raise", "pres": "12", "note": "Straight legs, no swing." }
+          ]
+        }
+      ]
+    },
+    "d4": {
+      "name": "Legs · Reps",
+      "tag": "lower · volume",
+      "why": "Friday, two days after the match and two days before the next one. Nothing on this day is heavy. Long sets, short rests, and the legs get the volume that the Monday session cannot afford to give them.",
+      "blocks": [
+        {
+          "role": "Prime",
+          "name": "Knee armour",
+          "note": "2 rounds. The same circuit as Monday, and just as non-optional.",
+          "mins": 6,
+          "type": "Circuit",
+          "cfg": { "rounds": 2, "rest": 0 },
+          "items": [
+            { "ex": "leg_swings", "pres": "10 each way", "note": "" },
+            { "ex": "ankle_mobility", "pres": "8 each side", "note": "" },
+            { "ex": "touchdown_squat", "pres": "15 each side", "note": "" },
+            { "ex": "single_leg_bridge", "pres": "12 each side", "note": "" },
+            { "ex": "kot_calf", "pres": "25", "note": "" }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "A · Goblet Squat",
+          "note": "4 × 15, rest 60s. Light enough that the fifteenth rep looks like the first.",
+          "mins": 10,
+          "type": "Straight",
+          "cfg": { "rounds": 4, "rest": 60 },
+          "items": [{ "ex": "goblet_squat", "pres": "4 × 15", "note": "Pause at the bottom. This is where the range is bought." }]
+        },
+        {
+          "role": "Work",
+          "name": "B · Single-Leg RDL",
+          "note": "3 × 12 each side, rest 60s. Alternating sides is the rest.",
+          "mins": 9,
+          "type": "Straight",
+          "cfg": { "rounds": 3, "rest": 60 },
+          "items": [{ "ex": "single_leg_rdl", "pres": "3 × 12 each side", "note": "Slow down, hips square." }]
+        },
+        {
+          "role": "Finish",
+          "name": "Swings and a wall sit",
+          "note": "3 rounds, 45s between rounds.",
+          "mins": 10,
+          "type": "Circuit",
+          "cfg": { "rounds": 3, "rest": 45 },
+          "items": [
+            { "ex": "kb_swing", "pres": "20", "note": "Hips, not arms." },
+            { "ex": "wall_sit", "pres": "45s", "note": "Thighs wherever the knee is happy." }
+          ]
+        }
+      ]
+    },
+    "d5": {
+      "name": "Short · Pull-up ladder",
+      "tag": "short · test",
+      "why": "Saturday. The second short day, and a pull because the week is light on them once the Thursday session is done. Fifteen is your number from the survey; this is how it becomes twenty.",
+      "blocks": [
+        {
+          "role": "Prime",
+          "name": "Hang and open",
+          "note": "Once through.",
+          "mins": 3,
+          "type": "Circuit",
+          "cfg": { "rounds": 1, "rest": 0 },
+          "items": [
+            { "ex": "arm_circles", "pres": "15", "note": "" },
+            { "ex": "scap_pullup", "pres": "10", "note": "" },
+            { "ex": "dead_hang", "pres": "30s", "note": "" }
+          ]
+        },
+        {
+          "role": "Work",
+          "name": "Pull-ups, every minute",
+          "note": "10 minutes. Minute 1 is 1 rep, minute 2 is 2, and so on until a minute you cannot finish. Write the number down. Alternate weeks with a push-up version.",
+          "mins": 10,
+          "type": "EMOM",
+          "cfg": { "mins": 10, "interval": 60 },
+          "items": [{ "ex": "pullup", "pres": "the minute's number", "note": "Stop the week you miss a minute. That number is the score." }]
+        }
+      ]
+    }
+  }
+}
