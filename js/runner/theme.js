@@ -332,6 +332,24 @@ function injectStyle() {
   html.wm .st-row .mvr-n { display:flex; flex-direction:column; } html.wm .st-row .mvr-n small { color: var(--muted); font-size: 12px; font-weight: 600; }
   html.wm .st-row .mvr-st b { min-width: 48px; font-size: 26px; }
   html.wm .st-done, html.wm .st-det { display:flex; flex-direction:column; gap: 6px; margin: 10px 0; }
+  html.wm .st-edit, html.wm .st-ask { z-index: 160; }
+  html.wm .tm-sides { display:flex; justify-content:center; gap: 10px; margin: 6px 0 10px; } html.wm .tm-sides span { padding: 4px 12px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); font-size: 13px; font-weight: 800; font-family: var(--tnum); } html.wm .tm-sides span.on { border-color: var(--wm-neon); color: var(--wm-neon); } html.wm .tm-sides span.done { text-decoration: line-through; }
+  html.wm .st-row .bt-tmr { margin-right: 6px; }
+  html.wm .day-bar { display:flex; flex-direction:column; gap: 8px; }
+  html.wm .day-card .eff-row span { min-width: 0; }
+  html.wm .st-done > button { display:flex; align-items:baseline; gap: 8px; width: 100%; background: var(--box); border: 1px solid var(--line); border-radius: 12px; padding: 9px 12px; text-align:left; color: var(--text); font: inherit; cursor: pointer; }
+  html.wm .st-done > button i { font-style: normal; color: var(--wm-accent); font-size: 13px; }
+  html.wm .st-chk { max-height: 42vh; overflow-y: auto; width: 100%; }
+  html.wm .st-wt { align-self:flex-start; margin-top: 4px; height: 24px; padding: 0 10px; border-radius: 999px; border: 1px dashed var(--line); background: none; color: var(--muted); font-size: 12px; font-weight: 700; cursor: pointer; }
+  html.wm .st-wt.on { border: 1px solid var(--wm-accent); color: var(--wm-accent); font-family: var(--tnum); }
+  html.wm .st-wst { display:inline-flex; align-items:center; gap: 6px; margin-top: 4px; font-size: 12.5px; color: var(--wm-accent); }
+  html.wm .st-wst em { font-style: normal; font-family: var(--tnum); min-width: 56px; text-align:center; }
+  html.wm .st-wst button { width: 26px; height: 26px; border-radius: 8px; border: 1px solid var(--line); background: var(--box); color: var(--text); font-weight: 800; cursor: pointer; }
+  html.wm .st-fix { display:flex; align-items:center; gap: 10px; width: 100%; max-width: 360px; margin: 6px auto 4px; background: var(--box); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; color: var(--text); text-align:left; cursor: pointer; }
+  html.wm .st-fix small { flex: 1; font-size: 13px; color: var(--muted); }
+  html.wm .st-fix i { font-style: normal; font-weight: 800; color: var(--wm-accent); font-size: 13px; white-space: nowrap; }
+  html.wm .st-askin { width: 100%; font-size: 44px; font-weight: 800; text-align:center; font-family: var(--tnum); background: var(--box); color: var(--text); border: 1px solid var(--line); border-radius: 14px; padding: 10px; margin-top: 10px; }
+  html.wm .st-row .mvr-st b[role=button] { cursor: pointer; }
   html.wm .st-done > div, html.wm .st-det > div { display:flex; align-items:baseline; gap: 8px; background: var(--box); border-radius: 12px; padding: 8px 12px; text-align:left; }
   html.wm .st-done span, html.wm .st-det span { font-weight: 800; } html.wm .st-done small, html.wm .st-det small { flex: 1; color: var(--muted); font-size: 13px; } html.wm .st-done b, html.wm .st-det b { font-family: var(--tnum); }
   html.wm .tr-adj { display:flex; align-items:center; gap: 6px; margin-top: 12px; } html.wm .tr-adj span { flex: 1; text-align:left; color: var(--muted); font-size: 13px; }

@@ -1,6 +1,11 @@
 {
-  "version": "2026-11-08.11",
+  "version": "2026-11-08.12",
   "notes": [
+    "New timer: Sets. Pick your exercises, how many sets and the rest. Each set shows your reps and weight to adjust, Set done starts the rest, and the clock only measures how long it took.",
+    "Sets: fix any set during the rest (tap it on the rest screen) or at the end, reps and weight.",
+    "Keep going: after any timer, add another block. Every block you do joins one workout day until you tap Done for today.",
+    "Test yourself is grouped: Push-ups, Squats, Pull-ups and dips, Calisthenics, Burpees, Holds, Classics, Running. Tap a group to see its tests. New: 200 and 300 push-ups.",
+    "One-sided moves (side plank, touchdown squat) show per side: Right 30 s | Left 30 s. The timer runs the right side, gives you 5 seconds to switch, then runs the left. In Interval and Tabata each side gets its own interval.",
     "Coach console: ROUNDS and REST are a labeled pair sitting between the part of the session and the movements they govern, instead of being written into a sentence.",
     "Coach console: every movement carries REPS, WEIGHT and TEMPO labeled down its right-hand side, so you can read a block without opening anything.",
     "Coach console: a weight says what it is held in. The sheet offers barbell, dumbbells, kettlebell, vest and band, drawn with the same icons the onboarding uses.",
@@ -146,6 +151,11 @@
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
   ],
   "notes_fr": [
+    "Nouveau timer : Séries. Choisis tes exercices, le nombre de séries et le repos. Chaque série affiche tes reps et ta charge à ajuster, Série faite lance le repos, et le chrono mesure juste le temps que ça t’a pris.",
+    "Séries : corrige n’importe quelle série pendant le repos (touche-la sur l’écran de repos) ou à la fin, reps et charge.",
+    "Continuer : après n’importe quel timer, ajoute un autre bloc. Chaque bloc rejoint une seule séance du jour jusqu’à ce que tu touches Fini pour aujourd’hui.",
+    "Teste-toi est regroupé : Pompes, Squats, Tractions et dips, Calisthenics, Burpees, Gainage, Classiques, Course. Touche un groupe pour voir ses tests. Nouveau : 200 et 300 pompes.",
+    "Les exercices d’un seul côté (planche latérale, touchdown squat) s’affichent par côté : Droite 30 s | Gauche 30 s. Le timer fait le côté droit, te laisse 5 secondes pour changer, puis le gauche. En Intervalles et Tabata, chaque côté a son intervalle.",
     "Ton app prévient ton coach quand un programme t'est bien arrivé.",
     "Quand ton coach t'envoie un programme, l'app te le dit : « Ton programme est arrivé », avec son nom et le nombre de jours.",
     "Tes records : jusqu’à 3, chacun sur une ligne fine avec un menu déroulant pour les détails. Un test en séries non réussi affiche Pas encore en rouge, un test réussi ✓ Réussi",

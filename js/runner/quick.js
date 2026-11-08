@@ -29,7 +29,8 @@ import { ringHTML, ringBaseCss, ringDesign } from './ring.js';
 import { t, t2, num, exName, exCues, lang, setLang } from '../i18n.js';
 import { PICKS, LEVEL } from './quick-picks.js';
 import { buildFromGoal, burpeeClub } from './rep-goal.js';
-import { TESTS, testSig, bestOf, attempts, scoreOf } from './tests.js';
+import { getDay, endDay } from './day.js';
+import { TESTS, FAMILIES, MAIN_TEST, testSig, bestOf, attempts, scoreOf } from './tests.js';
 import { videoEmbed, videoSearch } from '../data/exercise-videos.js';
 import { VOICE_CUES } from '../data/voice-cues.js';
 import { isInstalled, isIOS, isIOSSafari, isIOSOtherBrowser, isAndroid, canPromptInstall, promptInstall, onInstallStateChange } from '../install.js';
@@ -47,6 +48,13 @@ const FORMATS = [
     how: ['Work, rest, repeat.', 'Set how long to work. Add rest and more rounds to repeat it.',
       'Examples: a 2:00 plank (1 round, no rest). Or 5:00 work, 2:00 rest, 3 rounds.',
       'Customize can repeat the whole thing, with a longer break in between: 3 times 4 rounds, 2:00 off between them.'] },
+  /* SETS (Nico, 8 Nov 2026: "5 sets, 2 exercises, 2 min rest, add my reps and
+     weights… let the minutes be the time it takes me"): classic sets, at
+     your pace. The clock only measures. */
+  { id: 'sets', name: 'Sets', sub: 'Sets, exercises, rest', moves: true,
+    how: ['Classic sets, at your pace.', 'Pick your exercises, how many sets and the rest in between. Each set shows your reps and weight, ready to adjust. Tap Set done: the rest runs, then the next set.',
+      'Fix any set during the rest or at the end. The clock only tells you how long it took.',
+      'Example: 5 sets of pull-ups and dips, 2 min rest.'] },
   { id: 'tabata', name: 'Tabata', sub: '20s on, 10s off', moves: true,
     how: ['20 seconds all out, 10 seconds rest, 8 rounds. 4 minutes.', 'With 2 moves it becomes 16 rounds, 8 of each, alternating: move 1, move 2, move 1… Lower the rounds if you want it shorter.', 'Change the times in Customize if you want a different mix.'] },
   { id: 'emom', name: 'EMOM', sub: 'Every minute on the minute', moves: true,
@@ -109,6 +117,8 @@ const FIELDS = {
   ldCap:    ['Time cap',          'min',   1,  0,  90],
   ptCap:    ['Time cap',          'min',   1,  0,  10],
   igRestSec: ['Rest',             'time',  5,  5, 600],
+  sNum:     ['Sets',              '',      1,  1,  20],   // Sets: how many
+  sRest:    ['Rest',              'time', 15,  0, 600],   // Sets: the rest between them
   nEx:      ['Exercises',         '',      1,  1,  10],   // how many moves: the rows of the list
   gReps:    ['Total reps',        '',     10,  0, 5000],  // Rep goal: the sum of the moves' totals
   gMins:    ['Minutes',           'min',   1,  1, 120],   // Rep goal: the time you give yourself
@@ -118,12 +128,12 @@ const isTime = k => FIELDS[k][1] === 'time';
 const MAIN = {
   emom: ['mins'], amrap: ['cap'], fortime: ['ftRounds', 'ftCap'], tabata: ['rounds'],
   timer: ['work', 'rest', 'rounds'], stopwatch: [], pushup: ['pace'],
-  deathby: ['dbEvery', 'dbMax'], ladder: ['ldRungs', 'ldCap'], vo2: [], goal: [], igyg: [], test: [],
+  deathby: ['dbEvery', 'dbMax'], ladder: ['ldRungs', 'ldCap'], vo2: [], goal: [], igyg: [], test: [], sets: [],
 };
 const MORE = {
   emom: ['every'], amrap: [], fortime: [], tabata: ['work', 'rest'],
   timer: ['sets', 'setRest'], stopwatch: [], pushup: ['ptCap'],
-  deathby: [], ladder: [], vo2: [], goal: [], igyg: [], test: [],
+  deathby: [], ladder: [], vo2: [], goal: [], igyg: [], test: [], sets: [],
 };
 const DEFAULTS = {
   fmt: 'emom', every: 60, mins: 12, cap: 10, ftCap: 0, ftRounds: 1,
@@ -131,7 +141,7 @@ const DEFAULTS = {
   tWork: 120, tRest: 0, tRounds: 1, pace: 20, paceV: 2, ptCap: 0,
   dbEvery: 60, dbMax: 30,
   ldRungs: 10, ldShape: 'one', ldCap: 0,
-  emomStyle: 'turns', ready: 10, vo2: 'n4x4', testId: 'p100', goalAs: 'emom', igRest: 'same', igRestSec: 30, gMins: 20,
+  emomStyle: 'turns', ready: 10, vo2: 'n4x4', testId: 'p100', goalAs: 'emom', igRest: 'same', igRestSec: 30, gMins: 20, sNum: 5, sRest: 120,
 };
 const TABATA = { work: 20, rest: 10, rounds: 8 };
 const PREF = 'quickTimer';
@@ -306,9 +316,15 @@ const namedMoves = () => (FORMATS.find(f => f.id === cfg.fmt)?.moves ? MV() : []
       : { name: String(m.name).trim(), measure: hold ? 'hold' : 'reps', reps: n, ...(hold && n ? { hold: n } : {}), ...(Number(m.wt) > 0 ? { weight: Number(m.wt), wUnit: wUnit() } : {}), noPR: true };
   });
 
+/* ONE SIDE AT A TIME (Nico, 8 Nov 2026: "side plank 30 s is per side: Right
+   30 s | Left 30 s, 1 min of work, and the timer runs it twice"). A move the
+   library marks one-sided is done on the right, then on the left. */
+export const oneSide = m => !!(m && !m.side && (m.laterality === 'unilateral' || (m.exId && EXERCISES[m.exId]?.laterality === 'unilateral')));
+/* Tabata and Timer: a one-sided move takes two intervals, right then left */
+const sided = list => list.flatMap(m => oneSide(m) ? [{ ...m, side: 'R', name: `${m.name} · ${t('right')}` }, { ...m, side: 'L', name: `${m.name} · ${t('left')}` }] : [m]);
 /* In Tabata and Timer a round is EVERY move once: 8 rounds of 2 moves is
    16 intervals, not 8 shared between them. */
-const perRound = () => Math.max(1, namedMoves().length);
+const perRound = () => Math.max(1, sided(namedMoves()).length);
 /* ---------------- ladder ----------------
    Every move carries its own start and its own change per rung (ldStart,
    ldStep on the move), so one can climb while another drops. The shape
@@ -406,6 +422,7 @@ function totalSec() {
     case 'deathby': return cfg.dbMax * cfg.dbEvery;
     case 'ladder': return cfg.ldCap ? cfg.ldCap * 60 : null;
     case 'test': return null;
+    case 'sets': return null;
     case 'goal': return (cfg.goalAs === 'igyg' ? 0 : cfg.gMins * 60) || null;
     case 'vo2': { const p = vo2(); return intervalSec(p.work, p.rest, p.n) + (p.warm || 0) + (p.cool || 0); }
     default: return null;
@@ -469,6 +486,7 @@ function planName() {
   if (f === 'vo2') return `VO2 max · ${t(vo2().name)}`;
   if (f === 'deathby') { const ms = ladderMoves().filter(m => mvName(m)); return `Death By${ms.length ? ' · ' + ms.map(mvName).join(', ') : ''}${cfg.dbEvery !== 60 ? ` ${t('every {t}', { t: fmt(cfg.dbEvery) })}` : ''}`; }
   if (f === 'test') return t(testDef().name);
+  if (f === 'sets') { const ms = namedMoves(); return `${t2(cfg.sNum, '{n} set', '{n} sets')}${ms.length ? ' · ' + ms.map(m => m.name).join(', ') : ''}`; }
   if (f === 'goal') return `${t('Rep goal')} · ${namedMoves().map(m => `${m.reps || 0} ${m.name}`).join(', ')}`;
   if (f === 'igyg') return `${t('You go, I go')} · ${t2(namedMoves().length, '{n} set', '{n} sets')}`;
   if (f === 'ladder') { const ms = ladderMoves(); return `${t('Ladder')} · ${ms.map(m => `${mvName(m) || t('reps')} ${ldMode(m) === 'flat' ? t('{n} each step', { n: ldStart(m) }) : `${ldStart(m)} ${ldStep(m) >= 0 ? '+' : '−'}${Math.abs(ldStep(m))}${ldMode(m) === 'pyr' ? ' ' + t('pyramid') : ''}`}`).join(', ')}${cfg.ldShape === 'mirror' ? t(' and back') : cfg.ldShape === 'wave' ? t(' wave') : ''}`; }
@@ -548,6 +566,11 @@ export function buildPlan(c = cfg) {
           restMode: cfg.igRest === 'fixed' ? 'fixed' : 'same', rest: cfg.igRestSec, restMin: 10 }];
         break;
       }
+      case 'sets':
+        /* one set at a time: reps and weight per exercise, Set done, the rest, the next */
+        blocks = [{ ...base, id: id(1), name, format: 'fortime', label: 'Sets', setMode: true, bites: true, minutes: 0,
+          rounds: cfg.sNum, roundRest: Number(cfg.sRest) || 0, items: moves.map(m => ({ ...m, noPR: false })) }];
+        break;
       case 'ladder':
         blocks = [{ ...base, id: id(1), name, format: 'fortime', label: 'Ladder', minutes: cfg.ldCap, rungs: rungs(),
           ...(moves.length ? {} : { hideList: true, items: [{ name: 'Reps', measure: 'reps' }] }) }];
@@ -555,7 +578,7 @@ export function buildPlan(c = cfg) {
       case 'tabata':
         blocks = [{ ...base, id: id(1), name, format: 'tabata', label: 'Tabata',
           work: cfg.work, rest: cfg.rest, rounds: tbTotal(), perRound: 1, intervals: tbTotal(),
-          items: moves.length ? moves : work }];
+          items: moves.length ? sided(moves) : work }];
         break;
       case 'vo2': {
         /* the protocol on the interval engine (round calls, halfway, one
@@ -571,7 +594,7 @@ export function buildPlan(c = cfg) {
           blocks.push({ ...base, id: id(i + 1), format: 'tabata', label: 'Intervals',
             name: cfg.sets > 1 ? `${i + 1} of ${cfg.sets}` : name,
             work: cfg.tWork, rest: cfg.tRest, rounds: cfg.tRounds, perRound: perRound(), intervals: cfg.tRounds * perRound(), restAfter: cfg.setRest,
-            items: moves.length ? moves : work });
+            items: moves.length ? sided(moves) : work });
         }
         break;
     }
@@ -606,7 +629,7 @@ const ROW_TONE = {
   rest: 'neon', setRest: 'neon',
   rounds: 'violet', ftRounds: 'violet', sets: 'violet', dbMax: 'violet', ldRungs: 'violet',
   ftCap: 'ready', ptCap: 'ready', ldCap: 'ready',
-  nEx: 'violet', gReps: 'accent', gMins: 'ready',
+  nEx: 'violet', gReps: 'accent', gMins: 'ready', sNum: 'violet', sRest: 'neon',
 };
 /* ---------------- the screen's building blocks ----------------
    ONE LOOK FOR EVERYTHING. A section is a header and a card; a card is a
@@ -665,9 +688,12 @@ function moveCard(m, i) {
     if (!(lad && ldMode(m) === 'flat')) sub.push(`<div class="qt-mcr"><span class="qt-hl">${db ? t('Add') : t('Each step')}</span>${stepper(`data-lm="${i}" data-lf="ldStep"`, `${step > 0 ? '+' : ''}${step}`)}</div>`);
   }
   if (cfg.fmt === 'igyg' && canPump(m)) sub.push(`<div class="qt-mcr"><span class="qt-hl">${t('Push-ups each')}</span>${stepper(`data-mp="${i}"`, Number(m.pumps) || 0)}</div>`);
-  const note = lad ? ladderPreview(m) : db ? deathPreview(m) : '';
+  const one = m.name && oneSide(m), tb = cfg.fmt === 'tabata' || cfg.fmt === 'timer';
+  const sideLine = !one ? '' : tb ? t('One side per interval: right, then left')
+    : Number(m.reps) > 0 ? (sec ? t('Right {a} | Left {a} · {b} of work', { a: secs(Number(m.reps)), b: secs(Number(m.reps) * 2) }) : t('Right {a} | Left {a} · {b} reps in all', { a: m.reps, b: Number(m.reps) * 2 })) : t('Per side: right, then left');
+  const note = lad ? ladderPreview(m) : db ? deathPreview(m) : sideLine;
   return `<div class="qt-mc">
-    <div class="qt-mch">${movePic(m, i)}${mid}${reps ? numBox(i, esc(m.reps) || '–', unit) : ''}</div>
+    <div class="qt-mch">${movePic(m, i)}${mid}${reps ? numBox(i, esc(m.reps) || '–', one ? `${unit}/${t('side')}` : unit) : ''}</div>
     ${sub.join('')}
     ${lad && m.name ? `<div class="qt-ldm">${LD_MODES.map(([v, l]) => `<button class="${ldMode(m) === v ? 'on' : ''}" data-ldmode="${i}" data-v="${v}">${t(l)}</button>`).join('')}</div>` : ''}
     ${note ? `<div class="qt-mnote">${note}</div>` : ''}
@@ -767,14 +793,26 @@ const passTag = d => d?.passed == null ? '' : d.passed ? ` · ✓ ${t('Passed')}
 const setLine = (d, k) => d.sets[k].map((r, i) => `${r} ${esc(d.names[i] || '')}${d.brk?.[k]?.[i] != null ? ` (${t('broke at {n}', { n: d.brk[k][i] })})` : ''}`).join(' · ');
 const testShow = (def, v) => v == null ? '' : def.metric === 'reps' ? t('{n} reps', { n: v }) : fmt(v);
 function testsList() {
-  const list = allTests(), groups = [...new Set(list.map(x => x.group))];
-  return groups.map(g => `${sec(g)}<div class="qt-tests">${list.filter(x => x.group === g).map(x => {
+  const list = allTests();
+  /* ONE ROW PER FAMILY (Nico, 8 Nov 2026): Push-ups, Squats… Tap it and its
+     tests open under it; the family of the test you picked stays open. */
+  const famOf = x => x.custom ? 'Your tests' : x.fam || x.group;
+  const fams = [...FAMILIES, 'Your tests'].filter(f => list.some(x => famOf(x) === f));
+  list.forEach(x => { if (!fams.includes(famOf(x))) fams.push(famOf(x)); });
+  const row = x => {
     const b = bestOf(hist, x), n = attempts(hist, x).length, last = attempts(hist, x)[0];
     /* a set-by-set test: what was done, not only the time (Nico, 3 Nov 2026), in a drop-down */
-    const det = last?.detail ? `<details class="qt-tdet"><summary>${t('Last')} · ${shortDate(last.at)} · ${t2(last.detail.sets.length, '{n} set', '{n} sets')} · ${testShow(x, scoreOf(last, x)) || t('Not finished')}${passTag(last.detail)}</summary>
+    const det = last?.detail && x.id === cfg.testId ? `<details class="qt-tdet"><summary>${t('Last')} · ${shortDate(last.at)} · ${t2(last.detail.sets.length, '{n} set', '{n} sets')} · ${testShow(x, scoreOf(last, x)) || t('Not finished')}${passTag(last.detail)}</summary>
       ${last.detail.sets.map((reps, k) => `<div><span>${t('Set {n}', { n: k + 1 })}</span><small>${setLine(last.detail, k)}</small>${last.detail.times?.[k] ? `<b>${fmt(last.detail.times[k])}</b>` : ''}</div>`).join('')}</details>` : '';
     return `<button class="qt-test ${x.id === cfg.testId ? 'on' : ''}" data-test="${x.id}"><span><b>${t(x.name)}</b><small>${t(x.sub)}</small></span>
-      <em>${b ? `<i>${t('Best')}</i>${testShow(x, scoreOf(b, x))}` : `<i>${t('New')}</i>`}${n ? `<small>${t2(n, '{n} try', '{n} tries')}</small>` : ''}</em></button>${det}`; }).join('')}</div>`).join('');
+      <em>${b ? `<i>${t('Best')}</i>${testShow(x, scoreOf(b, x))}` : `<i>${t('New')}</i>`}${n ? `<small>${t2(n, '{n} try', '{n} tries')}</small>` : ''}</em></button>${det}`;
+  };
+  return `<div class="qt-tfams">${fams.map(f => {
+    const xs = list.filter(x => famOf(x) === f).sort((a, b) => (b.id === MAIN_TEST[f]) - (a.id === MAIN_TEST[f])), on = xs.some(x => x.id === cfg.testId);   // the main test first
+    const done = xs.filter(x => attempts(hist, x).length).length;
+    return `<details class="qt-tfam ${on ? 'has' : ''}" name="qtfam" ${on ? 'open' : ''}><summary><b>${t(f)}</b><small>${t2(xs.length, '{n} test', '{n} tests')}${done ? ` · ${t('{n} tried', { n: done })}` : ''}</small><span class="qt-chev">▾</span></summary>
+      <div class="qt-tests">${xs.map(row).join('')}</div></details>`;
+  }).join('')}</div>`;
 }
 const testMoves = def => def.m.map(([k, a, b]) => { const ex = EXERCISES[k], base = ex ? { exId: k, name: ex.name } : { exId: null, name: t(k) };
   return ['ladder', 'deathby'].includes(def.fmt) ? { ...base, reps: '', ldStart: a, ldStep: b } : { ...base, reps: a }; });
@@ -925,21 +963,22 @@ const LINE = {
   deathby: 'One more rep every minute, until you cannot keep up.',
   pushup: 'One push-up on every beep. How long can you hold the pace?',
   test: 'Race your own best, live. Beat it and it becomes your new best.',
+  sets: 'Your sets, reps and weights, with a rest in between. At your pace.',
 };
 /* modes that cannot start without step 2, and what its button says */
-const NEEDS = { amrap: 'Next: pick exercises', ladder: 'Next: pick exercises', deathby: 'Next: pick a move', goal: 'Next: pick exercises', igyg: 'Next: your sets', test: 'Next: pick a test' };
+const NEEDS = { sets: 'Next: your exercises', amrap: 'Next: pick exercises', ladder: 'Next: pick exercises', deathby: 'Next: pick a move', goal: 'Next: pick exercises', igyg: 'Next: your sets', test: 'Next: pick a test' };
 const MOVES_OPTIONAL = new Set(['timer', 'tabata', 'emom', 'amrap']);
 /* the numbers on the home, at most 3 */
 const HOME = { timer: ['work', 'rest', 'rounds'], tabata: ['work', 'rest', 'rounds'], emom: ['mins', 'every'], amrap: ['cap', 'nEx'],
-  ladder: ['ldRungs', 'nEx'], deathby: ['dbEvery', 'dbMax'], pushup: ['pace'], igyg: [], goal: ['nEx', 'gReps', 'gMins'], vo2: [], stopwatch: [], test: [] };
+  ladder: ['ldRungs', 'nEx'], deathby: ['dbEvery', 'dbMax'], pushup: ['pace'], igyg: [], goal: ['nEx', 'gReps', 'gMins'], vo2: [], stopwatch: [], test: [], sets: ['sNum', 'nEx', 'sRest'] };
 /* what step 2 adds below the moves (the numbers that are not on the home) */
 const STEP2_MORE = { timer: ['sets', 'setRest'], pushup: ['ptCap'], ladder: ['ldCap'], goal: ['gMins'] };
-const LABEL = { ldRungs: 'Steps', ftCap: 'Time cap', ftRounds: 'Rounds', gReps: 'Reps', gMins: 'Minutes', pace: 'Per minute' };
+const LABEL = { sNum: 'Sets', sRest: 'Rest', ldRungs: 'Steps', ftCap: 'Time cap', ftRounds: 'Rounds', gReps: 'Reps', gMins: 'Minutes', pace: 'Per minute' };
 
 /* one home row: label, − value + (a time opens the picker, a number types) */
 function homeRow(k) {
   const label = LABEL[k] || FIELDS[k][0], v = val(k);
-  const none = ((k === 'ftCap' || k === 'ptCap' || k === 'ldCap') && !v) || ((k === 'rest' || k === 'setRest') && !v) || (k === 'gReps' && !v);
+  const none = ((k === 'ftCap' || k === 'ptCap' || k === 'ldCap') && !v) || ((k === 'rest' || k === 'setRest' || k === 'sRest') && !v) || (k === 'gReps' && !v);
   const face = isTime(k)
     ? `<button class="qt-hv" data-qt="${k}">${none ? t('none') : fmt(v)}</button>`
     : `<button class="qt-hv ${none ? 'none' : ''}" data-qn="${k}" aria-label="${esc(t(label))}">${none ? t('none') : v}</button>`;
@@ -1122,6 +1161,7 @@ function openModeFavs() {
 /* what is still missing before this can start (step 2), or null */
 function missing() {
   if (cfg.fmt === 'goal' && !goalBuilt()) return t('Add a move and its total first');
+  if (cfg.fmt === 'sets' && !namedMoves().length) return t('Add an exercise first');
   if (cfg.fmt === 'igyg' && !MV().some(m => String(m.name || '').trim() && Number(m.reps) > 0)) return t('Add a set first: a move and its reps');
   return null;
 }
@@ -1179,6 +1219,7 @@ function draw() {
       <button class="qt-star" id="qtHist" aria-label="${t('History')}" title="${t('History')}"><svg width="21" height="21" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11a8 8 0 1 0 2.4-5.7"/><path d="M3 3v4h4"/><path d="M11 7v4l3 2"/></svg></button>
       <button class="qt-star" id="qtPrefs" aria-label="${t('Timer settings')}" title="${t('Timer settings')}">⚙︎</button>
     </div>
+    ${dayBanner()}
     ${heroHtml()}
     <div class="qt-hbody" id="qtBody">${homeBody()}</div>
     ${guest ? `<button class="qt-link center qt-signin" id="qtSignIn">${t('Have a program from Nico? Sign in')}</button>` : ''}
@@ -1194,12 +1235,20 @@ function draw() {
   });
   $('#qtPrefs').addEventListener('click', () => openPrefs(document.body));   // on the page, not the timer's screen: a redraw (new unit, new language) keeps it open
   $('#qtHist').addEventListener('click', openAllHistory);
+  $('#qtDayEnd')?.addEventListener('click', () => { endDay(); toast(t('Saved. One workout day.')); draw(); });
   wireHero();
   centerHero(false);   // right away, then again once the layout has settled (fonts, images)
   requestAnimationFrame(() => { centerHero(false); requestAnimationFrame(paintHero); });
   setTimeout(() => centerHero(false), 250);
   if (!window.__qtHeroResize) { window.__qtHeroResize = 1; addEventListener('resize', () => { if (page === 'home') centerHero(false); }); }
   wire();
+}
+/* A WORKOUT DAY IS OPEN (Keep going, js/runner/day.js): one slim line on
+   top, what is done so far, and the way to close it */
+function dayBanner() {
+  const d = getDay(); if (!d?.open || !d.blocks?.length) return '';
+  const secs = d.blocks.reduce((a, x) => a + (x.seconds || 0), 0);
+  return `<div class="qt-day"><span><b>${t('Workout day')}</b><small>${t2(d.blocks.length, '{n} block done', '{n} blocks done')} · ${fmt(secs)}. ${t('Pick the next one.')}</small></span><button id="qtDayEnd">${t('Done for today')}</button></div>`;
 }
 function drawBody() {
   const b = host.querySelector('#qtBody'); if (!b) return draw();
@@ -1309,7 +1358,9 @@ const TYPE_ORDER = 'fj.typeOrder';
 function typeOrder() {
   let o = []; try { o = JSON.parse(localStorage.getItem(TYPE_ORDER) || '[]'); } catch (e) {}
   const ids = FORMATS.filter(f => !f.hidden).map(f => f.id);
-  return [...o.filter(id => ids.includes(id)), ...ids.filter(id => !o.includes(id))];
+  const out = o.filter(id => ids.includes(id));
+  ids.forEach((id, i) => { if (out.includes(id)) return; const before = ids.slice(0, i).reverse().find(x => out.includes(x)); out.splice(before ? out.indexOf(before) + 1 : 0, 0, id); });   // a new mode lands where it sits in the list, not at the end
+  return out;
 }
 const saveTypeOrder = o => { try { o ? localStorage.setItem(TYPE_ORDER, JSON.stringify(o)) : localStorage.removeItem(TYPE_ORDER); } catch (e) {} };
 /* THE TYPE WHEEL: one type at a time in the middle, the others above and
@@ -1415,7 +1466,7 @@ function openTime(k) {
    time picker's look: the big number between + and −, a few common values
    one tap away, Done. The big number can still be typed into. */
 const NUM_CHIPS = { mins: [5, 10, 12, 15, 20, 30], cap: [5, 10, 12, 15, 20, 30], rounds: [3, 5, 8, 10, 12], ftRounds: [1, 3, 5, 10],
-  sets: [1, 2, 3, 4], nEx: [1, 2, 3, 4, 5], gReps: [100, 200, 300, 500, 1000], gMins: [10, 15, 20, 30, 45, 60],
+  sNum: [3, 4, 5, 6, 8, 10], sets: [1, 2, 3, 4], nEx: [1, 2, 3, 4, 5], gReps: [100, 200, 300, 500, 1000], gMins: [10, 15, 20, 30, 45, 60],
   ldRungs: [5, 8, 10, 12, 15], dbMax: [10, 15, 20, 30], pace: [20, 25], ftCap: [0, 10, 15, 20, 30], ldCap: [0, 10, 15, 20, 30], ptCap: [0, 3, 5, 10] };
 /* `get()` says what to show (it is asked again after a Reps / Seconds or
    lb / kg switch); `onSet` keeps the number on Done or a quick value */
@@ -1874,6 +1925,21 @@ function injectStyle() {
   .qt-typefoot { display:flex; align-items:center; gap: 14px; margin-top: 10px; padding: 0 4px; }
   .qt-typefoot small { flex: 1; color: var(--muted); font-size: 12.5px; }
   .qt-typefoot .qt-link { padding: 4px 0; }
+  .qt-day { display:flex; align-items:center; gap: 10px; margin: 0 0 6px; padding: 8px 10px 8px 14px; border-radius: 14px; background: color-mix(in srgb, var(--wm-neon) 12%, var(--box)); border: 1px solid color-mix(in srgb, var(--wm-neon) 45%, var(--line)); }
+  .qt-day span { flex: 1; min-width: 0; display:flex; flex-direction:column; } .qt-day b { font-size: 14px; color: var(--wm-neon); } .qt-day small { font-size: 12px; color: var(--muted); }
+  .qt-day button { flex: none; height: 34px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--wm-neon); background: none; color: var(--wm-neon); font-weight: 800; font-size: 13px; cursor: pointer; }
+  .qt-tfams { display:flex; flex-direction:column; gap: 8px; margin-bottom: 10px; }
+  .qt-tfam { background: var(--box); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+  .qt-tfam.has { border-color: color-mix(in srgb, var(--wm-accent) 55%, var(--line)); }
+  .qt-tfam > summary { list-style: none; display:flex; align-items:center; gap: 10px; padding: 14px 16px; cursor: pointer; }
+  .qt-tfam > summary::-webkit-details-marker { display:none; }
+  .qt-tfam > summary b { font-size: 17px; font-weight: 800; }
+  .qt-tfam > summary small { color: var(--muted); font-size: 12.5px; margin-left: auto; }
+  .qt-tfam > summary .qt-chev { flex: none; color: var(--muted); transition: transform .2s; }
+  .qt-tfam[open] > summary .qt-chev { transform: rotate(180deg); }
+  .qt-tfam .qt-tests { padding: 0 10px 10px; margin: 0; }
+  .qt-tfam .qt-test { background: var(--box2, rgba(255,255,255,.04)); padding: 9px 12px; }
+  .qt-tfam .qt-test b { font-size: 15px; }
   .qt-tests { display:flex; flex-direction:column; gap: 8px; margin-bottom: 8px; }
   .qt-test { display:flex; align-items:center; gap: 10px; text-align:left; background: var(--box); border: 1px solid var(--line); border-radius: 14px; padding: 11px 14px; color: var(--text); cursor:pointer; }
   .qt-test > span { flex: 1; display:flex; flex-direction:column; gap: 2px; min-width: 0; }

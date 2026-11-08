@@ -301,7 +301,17 @@ export const store = {
       }
     }
 
-    s.sessions.push(session);
+    /* A WORKOUT DAY built as you go (js/runner/day.js): a block saved under
+       the day of an earlier one joins that session, so the day counts once */
+    const same = session.dayId ? s.sessions.findIndex(x => x.dayId === session.dayId) : -1;
+    if (same >= 0) {
+      const d = s.sessions[same];
+      d.blocks = [...(d.blocks || []), ...(session.blocks || [])];
+      d.seconds = (Number(d.seconds) || 0) + (Number(session.seconds) || 0);
+      d.duration = Math.round(d.seconds / 60);
+      d.parts = [...(d.parts || [d.name]), session.name];
+      d.name = session.dayName || d.parts.join(' + ');
+    } else s.sessions.push(session);
     write(s);
     return { prs: newPRs };
   },

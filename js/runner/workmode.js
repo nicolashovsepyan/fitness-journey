@@ -15,6 +15,7 @@ import { alternatives } from '../core/resolve.js';
 import { applyWorkTheme, clearWorkTheme } from './theme.js';
 import { installHold } from './hold.js';
 import { achieveImg, paintAchievements } from './achieve.js';
+import { getDay, dayIdFor, addToDay, keepDay, endDay } from './day.js';
 import { unit as meUnit, setMe, convertWeight } from '../me.js';
 import { makeSortable, makeSwipeable, orderAfter } from './drag.js';
 import { roundCall, cueFor, pick } from './coach-lines.js';
@@ -245,7 +246,7 @@ function rowVid(it) {
    then either − value + or just the value. Slim: a list, not a stack of
    buttons. `step`: the data attribute the − + carry, e.g. 'data-am="2"'. */
 function mvRow(it, { val = null, unit = '', step = '', wIdx = null } = {}) {
-  const v = val == null || val === '' ? '' : `${val}${unit === 'sec' ? '<small>s</small>' : ''}`;
+  const v = val == null || val === '' ? '' : `${val}${unit === 'sec' ? '<small>s</small>' : ''}${perSideTag(it)}`;
   const right = step
     ? `<span class="mvr-st"><button ${step} data-d="-1" aria-label="${t('Less')}">−</button><b>${v || 0}</b><button ${step} data-d="1" aria-label="${t('More')}">+</button></span>`
     : v ? `<b class="mvr-v">${v}</b>` : '';
@@ -253,6 +254,10 @@ function mvRow(it, { val = null, unit = '', step = '', wIdx = null } = {}) {
   return `<div class="mvr">${rowVid(it) || '<span class="mvr-sp"></span>'}<span class="mvr-n"${wIdx != null ? ` data-mvw="${wIdx}" role="button"` : ''}>${it.name}${wt}</span>${right}</div>`;
 }
 const mvUnit = it => UNIT[it.measure] === 'sec' ? 'sec' : '';
+/* a one-sided move (side plank, touchdown squat): its number is per side,
+   done right then left (Nico, 8 Nov 2026) */
+const oneSide = it => !!(it && !it.side && (it.laterality === 'unilateral' || it.perSide || (it.exId && EXERCISES[it.exId]?.laterality === 'unilateral')));
+const perSideTag = it => oneSide(it) ? `<small>/${t('side')}</small>` : '';
 /* − + on a timed move moves 5 seconds, landing on a multiple of 5 */
 const nudge = (it, v, d) => { const k = mvUnit(it || {}) ? 5 : 1; v = Number(v) || 0;
   return Math.max(0, d > 0 ? Math.floor(v / k) * k + k : Math.ceil(v / k) * k - k); };
@@ -1382,7 +1387,7 @@ function removeBlockMove(b, i) {
   if (!confirm(t('Take {x} out of this workout?', { x: b.items[i].name }))) return false;
   const cut = a => { if (Array.isArray(a) && a.length > i) a.splice(i, 1); };
   const shiftObj = o => o && Object.fromEntries(Object.entries(o).filter(([k]) => +k !== i).map(([k, v]) => [+k > i ? +k - 1 : +k, v]));
-  b.items.splice(i, 1); cut(S.captured[b.id]); cut(S.amrapCur); (S.amrapLog || []).forEach(r => cut(r.reps));
+  b.items.splice(i, 1); cut(S.captured[b.id]); cut(S.amrapCur); cut(S.stBrk); (S.stLog || []).forEach(l => { cut(l.reps); cut(l.w); cut(l.brk); }); (S.amrapLog || []).forEach(r => cut(r.reps));
   if (Array.isArray(S.bites)) { cut(S.bites); S.biteLog = (S.biteLog || []).filter(x => x[0] !== i).map(x => x[0] > i ? [x[0] - 1, x[1], x[2]] : x); S.biteReps = shiftObj(S.biteReps); S.tmrSec = shiftObj(S.tmrSec); }
   (S.ivLog || []).forEach(L => { if (!L) return; const keep = L.m.map((m, j) => [m, j]).filter(([m]) => m !== i); L.reps = keep.map(([, j]) => L.reps[j]); L.m = keep.map(([m]) => m > i ? m - 1 : m); });
   S.ivCurAt = null;
@@ -1860,13 +1865,19 @@ function runTimedSet(it, secs, onDone, opts = {}) {
   const ready = Math.max(0, Number(pref('ready') ?? 8));
   const askReps = opts.askReps ?? !(it.exId && EXERCISES[it.exId]?.measure === 'hold');   // a hold is only seconds; squats on time also have reps
   const ov = document.createElement('div'); ov.className = 'overlay tm-ov';
+  /* ONE SIDE AT A TIME: right for its seconds, 5 s to switch, then left; both sides are logged */
+  const sides = oneSide(it), SWITCH = 5;
+  let side = 'R', firstSide = 0;
   let phase = ready > 0 ? 'ready' : 'work', endAt = Date.now() + (phase === 'ready' ? ready : secs) * 1000, startedWork = phase === 'work' ? Date.now() : 0, last = null, iv = 0;
   const paint = rem => {
-    ov.innerHTML = `<div class="overlay-card tm-card ${phase}"><div class="eyebrow">${phase === 'ready' ? t('Get ready') : t('Go')}</div>
+    const sideWord = sides ? ` · ${side === 'R' ? t('Right side') : t('Left side')}` : '';
+    const len = phase === 'ready' ? ready : phase === 'switch' ? SWITCH : secs;
+    ov.innerHTML = `<div class="overlay-card tm-card ${phase}"><div class="eyebrow">${phase === 'ready' ? t('Get ready') : phase === 'switch' ? t('Switch sides') : t('Go')}${sideWord}</div>
       <h2 class="tm-name">${it.name}</h2><div class="tm-big">${fmt(Math.max(0, rem))}</div>
-      <div class="tm-bar"><i style="width:${Math.max(0, Math.min(100, 100 - rem / (phase === 'ready' ? ready : secs) * 100))}%"></i></div>
+      ${sides ? `<div class="tm-sides"><span class="${side === 'R' ? 'on' : 'done'}">${t('Right')} ${fmt(secs)}</span><span class="${side === 'L' ? 'on' : ''}">${t('Left')} ${fmt(secs)}</span></div>` : ''}
+      <div class="tm-bar"><i style="width:${Math.max(0, Math.min(100, 100 - rem / len * 100))}%"></i></div>
       <button class="btn secondary" id="tmStop">${phase === 'ready' ? t('Cancel') : t('Stop, log what I did')}</button></div>`;
-    ov.querySelector('#tmStop').addEventListener('click', () => phase === 'ready' ? end(0) : end(Math.round((Date.now() - startedWork) / 1000)));
+    ov.querySelector('#tmStop').addEventListener('click', () => phase === 'ready' ? end(firstSide) : phase === 'switch' ? end(firstSide) : end(firstSide + Math.round((Date.now() - startedWork) / 1000)));
   };
   const askFor = done => {
     let n = 10;
@@ -1886,8 +1897,9 @@ function runTimedSet(it, secs, onDone, opts = {}) {
       last = rem;
       if (rem <= 3 && rem > 0) { beep('count'); buzz(20); }
       if (rem <= 0) {
-        if (phase === 'ready') { phase = 'work'; startedWork = Date.now(); endAt = startedWork + secs * 1000; last = null; beep('go'); buzz(40); say(t('Go.')); return paint(secs); }
-        beep('end'); buzz(60); return end(secs);
+        if (phase === 'ready' || phase === 'switch') { phase = 'work'; startedWork = Date.now(); endAt = startedWork + secs * 1000; last = null; beep('go'); buzz(40); say(sides ? (side === 'R' ? t('Right side. Go.') : t('Left side. Go.')) : t('Go.')); return paint(secs); }
+        if (sides && side === 'R') { firstSide = secs; side = 'L'; phase = 'switch'; endAt = Date.now() + SWITCH * 1000; last = null; beep('end'); buzz(60); say(t('Switch sides.')); return paint(SWITCH); }
+        beep('end'); buzz(60); return end(firstSide + secs);
       }
       paint(rem);
     }
@@ -1899,11 +1911,13 @@ function runTimedSet(it, secs, onDone, opts = {}) {
 /* REST BETWEEN SETS: a chrono of its own, in another of the timer's ring
    designs than the person's (so it reads "rest", inside the same look).
    The race clock keeps running under it; 3-2-1, go; Skip ends it. */
-function runSetRest(secs, label, onDone) {
+function runSetRest(secs, label, onDone, opts = {}) {
   ringBaseCss();
   const mine = ringChoice(), id = ['led', 'laser', 'chrono'].find(x => x !== mine);
   const ov = document.createElement('div'); ov.className = 'overlay tm-ov st-rest';
+  /* the set just done, on the rest: tap it to fix its numbers (Nico: "adjust my reps during my break") */
   ov.innerHTML = `<div class="st-restc"><div class="eyebrow">${t('Rest')}</div><div class="st-next">${label}</div>
+    ${opts.fix ? `<button class="st-fix" id="stFix"><small>${opts.line()}</small><i>✎ ${t('Fix')}</i></button>` : ''}
     <div class="timer-wrap st-ring">${ringHTML('rest', designFor(id), '-rest')}</div>
     <div class="st-adj"><button class="btn secondary" data-radj="-10">−10 s</button><button class="btn secondary" data-radj="10">+10 s</button></div>
     <button class="btn secondary" id="stSkip">${t('Skip rest')}</button></div>`;
@@ -1923,62 +1937,131 @@ function runSetRest(secs, label, onDone) {
     if (rem <= 0) { beep('go'); buzz(40); say(t('Go.')); finish(); }
   };
   ov.querySelector('#stSkip').addEventListener('click', () => { beep('go'); finish(); });
+  ov.querySelector('#stFix')?.addEventListener('click', () => { opts.fix(); const ed = document.body.lastElementChild; const mo = new MutationObserver(() => { if (!ed.isConnected) { mo.disconnect(); const f = ov.querySelector('#stFix small'); if (f) f.innerHTML = opts.line(); } }); mo.observe(document.body, { childList: true }); });
   document.body.appendChild(ov); say(t('Rest.'));
   tick(); iv = setInterval(tick, 100);
 }
-/* SETS WITH A REST, ONE SET AT A TIME (the Calisthenics tests; Nico, 3 Nov
-   2026: "12 pull-ups, 20 dips, 40 push-ups: show those three, I adjust
-   what I did, then my rest"). Each move starts at its target; − + to what
-   was done; Set done → the rest → the next set. After the last planned set:
-   one more set, or finish. The clock runs from the start (rest included). */
+/* SETS WITH A REST, ONE SET AT A TIME. Two uses:
+   · the Calisthenics tests (Nico, 3 Nov 2026: "12 pull-ups, 20 dips, 40
+     push-ups: show those three, I adjust what I did, then my rest"), with
+     Unbroken / Broke at and a pass;
+   · the SETS mode (b.setMode; Nico, 8 Nov 2026: "5 sets, 2 exercises, 2 min
+     rest, add reps, weights… and fix them in my break or at the end"): each
+     exercise its reps and its weight, the next set starts from what you did.
+   Set done → the rest → the next set. Any set done can be fixed: tap it
+   (in the list, during the rest, or on the last check). After the last
+   planned set: one more set, or finish. The clock runs from the start. */
+const stWeights = b => b.items.map(it => Number(it.weight) > 0 ? num(wIn(it), 1) : 0);
+const stVal = (it, v) => `${v}${mvUnit(it) ? '<small>s</small>' : ''}${perSideTag(it)}`;
+/* one set's line: "10 Pull-up · 12 Dip @ 20 lb" */
+function stLine(b, l) {
+  return l.reps.map((r, i) => { const it = b.items[i] || {}; const w = Number(l.w?.[i]) > 0 ? ` @ ${l.w[i]} ${l.wu || wu()}` : '';
+    return `${mvUnit(it) ? fmt(r) : r}${oneSide(it) ? `/${t('side')}` : ''} ${String(it.name || '').replace(/\s*\(.*?\)/g, '')}${w}${l.brk?.[i] != null ? ` (✂ ${l.brk[i]})` : ''}`; }).join(' · ');
+}
+/* a number typed in (a tap on the big number): the keyboard, Done */
+function askNumber(title, v, onSet) {
+  const ov = document.createElement('div'); ov.className = 'overlay st-ask';
+  ov.innerHTML = `<div class="overlay-card"><div class="eyebrow">${title}</div>
+    <input class="st-askin" type="number" inputmode="numeric" value="${Number(v) || ''}" placeholder="0"/>
+    <button class="btn" id="askOk" style="margin-top:14px;">${t('Done')}</button></div>`;
+  const inp = ov.querySelector('input');
+  const ok = () => { const n = Math.max(0, Math.round(Number(inp.value) || 0)); ov.remove(); onSet(n); };
+  ov.querySelector('#askOk').addEventListener('click', ok);
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') ok(); });
+  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+  document.body.appendChild(ov); setTimeout(() => { inp.focus(); inp.select(); }, 60);
+}
+/* FIX A SET THAT IS DONE: its reps (and its weight) per exercise */
+function editSet(k, done) {
+  const b = block(), l = S.stLog?.[k]; if (!l) return;
+  if (!Array.isArray(l.w)) l.w = b.items.map(() => 0);
+  const ov = document.createElement('div'); ov.className = 'overlay st-edit';
+  const unit = l.wu || wu(), wk = unit === 'kg' ? 2.5 : 5;
+  const draw = () => {
+    ov.innerHTML = `<div class="overlay-card"><div class="eyebrow">${t('Set {n}', { n: k + 1 })}${l.t ? ` · ${fmt(l.t)}` : ''}</div>
+      <h2 style="margin:6px 0 12px;">${t('What you did')}</h2>
+      <div class="mvr-list">${b.items.map((it, i) => `<div class="mvr st-row"><span class="mvr-n">${it.name}${b.setMode ? `<span class="st-wst"><button data-ew="${i}" data-d="-1">−</button><em>${Number(l.w[i]) > 0 ? `${l.w[i]} ${unit}` : t('no weight')}</em><button data-ew="${i}" data-d="1">+</button></span>` : ''}</span>
+        <span class="mvr-st"><button data-er="${i}" data-d="-1" aria-label="${t('Less')}">−</button><b>${stVal(it, l.reps[i] || 0)}</b><button data-er="${i}" data-d="1" aria-label="${t('More')}">+</button></span></div>`).join('')}</div>
+      <button class="btn" id="seDone" style="margin-top:14px;">${t('Done')}</button></div>`;
+    ov.querySelectorAll('[data-er]').forEach(btn => btn.addEventListener('click', () => { const i = +btn.dataset.er; l.reps[i] = nudge(b.items[i], l.reps[i], Number(btn.dataset.d)); R.save(S); buzz(10); draw(); }));
+    ov.querySelectorAll('[data-ew]').forEach(btn => btn.addEventListener('click', () => { const i = +btn.dataset.ew, v = Number(l.w[i]) || 0, d = Number(btn.dataset.d);
+      l.w[i] = Math.max(0, Math.round((d > 0 ? Math.floor(v / wk + 1e-9) * wk + wk : Math.ceil(v / wk - 1e-9) * wk - wk) * 10) / 10); l.wu = unit; R.save(S); buzz(10); draw(); }));
+    ov.querySelector('#seDone').addEventListener('click', () => { ov.remove(); done?.(); });
+  };
+  draw(); document.body.appendChild(ov);
+}
 function renderSetTest() {
-  const b = block(), planned = b.rounds || 1, target = b.items.map(it => Number(it.reps) || 0);
-  if (!Array.isArray(S.stLog)) { S.stLog = []; S.stCur = [...target]; S.stBrk = target.map(() => null); S.stFrom = 0; R.save(S); }
+  const b = block(), planned = b.rounds || 1, target = b.items.map(it => Number(it.reps) || 0), setMode = !!b.setMode;
+  /* the next set starts at its target; with none (Sets mode), at what the last set did */
+  const startOf = () => b.items.map((it, i) => target[i] || (S.stLog?.length ? Number(S.stLog.at(-1).reps[i]) || 0 : 0));
+  if (!Array.isArray(S.stLog)) { S.stLog = []; S.stCur = startOf(); S.stBrk = target.map(() => null); S.stFrom = 0; R.save(S); }
   if (!Array.isArray(S.stBrk)) S.stBrk = target.map(() => null);
+  if (!Array.isArray(S.stCur) || S.stCur.length !== b.items.length) { S.stCur = startOf(); R.save(S); }
   const total = Math.max(planned, S.stTotal || planned), setNo = S.stLog.length + 1;
+  const wTag = (it, i) => `<button class="st-wt ${Number(it.weight) > 0 ? 'on' : ''}" data-stw="${i}">${Number(it.weight) > 0 ? `${num(wIn(it), 1)} ${wu()}` : t('+ weight')}</button>`;
+  const sub = (it, i) => setMode ? wTag(it, i) : `<small>${t('target {n}', { n: target[i] })}</small>`;
   shell(`<div class="now-ex"><div class="label">${t('Set {a} of {b}', { a: setNo, b: total })}</div><div class="name">${t(S.plan.name)}</div></div>
     <div class="timer-wrap bt-sm">${timerSvg('buffer')}</div>
-    <div class="mvr-list st-list">${b.items.map((it, i) => `<div class="mvr st-row"><span class="mvr-n">${it.name}<small>${t('target {n}', { n: target[i] })}</small>
-        ${S.stBrk[i] == null ? `<button class="st-brk ok" data-brk="${i}">✓ ${t('Unbroken')}</button>`
+    <div class="mvr-list st-list">${b.items.map((it, i) => `<div class="mvr st-row">${setMode ? rowVid(it) || '<span class="mvr-sp"></span>' : ''}<span class="mvr-n">${it.name}${sub(it, i)}
+        ${setMode ? '' : S.stBrk[i] == null ? `<button class="st-brk ok" data-brk="${i}">✓ ${t('Unbroken')}</button>`
           : `<span class="st-brk no"><button data-brkd="${i}" data-d="-1">−</button>${t('Broke at {n}', { n: S.stBrk[i] })}<button data-brkd="${i}" data-d="1">+</button><button data-brkx="${i}" aria-label="${t('Unbroken')}">✕</button></span>`}</span>
-      <span class="mvr-st"><button data-st="${i}" data-d="-1" aria-label="${t('Less')}">−</button><b>${S.stCur[i]}</b><button data-st="${i}" data-d="1" aria-label="${t('More')}">+</button></span></div>`).join('')}</div>
-    ${S.stLog.length ? `<div class="st-done">${S.stLog.map((l, k) => `<div><span>${t('Set {n}', { n: k + 1 })}</span><small>${l.reps.map((r, i) => l.brk?.[i] != null ? `${r} (✂ ${l.brk[i]})` : r).join(' · ')}</small><b>${fmt(l.t)}</b></div>`).join('')}</div>` : ''}
-    <div class="actionbar"><button class="btn lg" id="stDone">${t('Set done ✓')}</button></div>`);
+      ${setMode && mvUnit(it) ? `<button class="bt-c add bt-tmr iv-tmr" data-stt="${i}">▶</button>` : ''}<span class="mvr-st"><button data-st="${i}" data-d="-1" aria-label="${t('Less')}">−</button><b data-stn="${i}" role="button">${stVal(it, S.stCur[i])}</b><button data-st="${i}" data-d="1" aria-label="${t('More')}">+</button></span></div>`).join('')}</div>
+    ${S.stLog.length ? `<div class="st-done">${S.stLog.map((l, k) => `<button data-stl="${k}"><span>${t('Set {n}', { n: k + 1 })}</span><small>${stLine(b, l)}</small><b>${fmt(l.t)}</b><i>✎</i></button>`).join('')}</div>` : ''}
+    <div class="actionbar"><div class="btn-row am-bar">${setMode && S.stLog.length ? `<button class="btn ghost" id="stEnd">${t('Finish')}</button>` : ''}<button class="btn lg" id="stDone">${t('Set done ✓')}</button></div></div>`);
   if (beginStep(NO_CAP, 'rest', 'fortime')) say(pick('go') || t('Go.'));
   onStepDone = null;
-  host.querySelectorAll('[data-st]').forEach(btn => btn.addEventListener('click', () => {
-    const i = +btn.dataset.st; S.stCur[i] = Math.max(0, S.stCur[i] + Number(btn.dataset.d)); R.save(S); buzz(10);
-    btn.parentElement.querySelector('b').textContent = S.stCur[i];
-  }));
+  const setCur = (i, v) => { S.stCur[i] = Math.max(0, v); R.save(S); const el = host.querySelector(`[data-stn="${i}"]`); if (el) el.innerHTML = stVal(b.items[i], S.stCur[i]); };
+  host.querySelectorAll('[data-st]').forEach(btn => btn.addEventListener('click', () => { const i = +btn.dataset.st; setCur(i, nudge(b.items[i], S.stCur[i], Number(btn.dataset.d))); buzz(10); }));
+  host.querySelectorAll('[data-stn]').forEach(el => el.addEventListener('click', () => { const i = +el.dataset.stn; askNumber(b.items[i].name, S.stCur[i], v => setCur(i, v)); }));
+  host.querySelectorAll('[data-stt]').forEach(el => el.addEventListener('click', () => { const i = +el.dataset.stt, it = b.items[i];
+    runTimedSet(it, Number(S.stCur[i]) || Number(it.hold) || 30, done => setCur(i, oneSide(it) ? Math.round(done / 2) : done), { askReps: false }); }));
+  host.querySelectorAll('[data-stw]').forEach(el => el.addEventListener('click', () => editMoveWeight(b, +el.dataset.stw, renderSetTest)));
+  host.querySelectorAll('[data-stl]').forEach(el => el.addEventListener('click', () => editSet(+el.dataset.stl, renderSetTest)));
+  if (setMode) swipeMoves(host.querySelector('.st-list'), ':scope > .mvr', b, () => { S.stCur = null; renderSetTest(); });
   /* UNBROKEN, OR WHERE IT BROKE (Nico: "I did the 12 but broke at 8: I need to know, no badge until it is unbroken") */
   host.querySelectorAll('[data-brk]').forEach(btn => btn.addEventListener('click', () => { const i = +btn.dataset.brk; S.stBrk[i] = Math.max(1, Math.min(S.stCur[i] - 1, Math.round(S.stCur[i] * 0.66)) || 1); R.save(S); buzz(15); renderSetTest(); }));
   host.querySelectorAll('[data-brkd]').forEach(btn => btn.addEventListener('click', () => { const i = +btn.dataset.brkd; S.stBrk[i] = Math.max(1, Math.min(Math.max(1, S.stCur[i] - 1), S.stBrk[i] + Number(btn.dataset.d))); R.save(S); buzz(10); renderSetTest(); }));
   host.querySelectorAll('[data-brkx]').forEach(btn => btn.addEventListener('click', () => { S.stBrk[+btn.dataset.brkx] = null; R.save(S); buzz(10); renderSetTest(); }));
-  const next = () => { S.stFrom = Math.round(upElapsed()); S.stCur = [...target]; S.stBrk = target.map(() => null); R.save(S); renderSetTest(); };
+  const next = () => { S.stFrom = Math.round(upElapsed()); S.stCur = startOf(); S.stBrk = target.map(() => null); R.save(S); renderSetTest(); };
+  const rest = (label) => b.roundRest > 0 ? runSetRest(b.roundRest, label, next, { fix: () => editSet(S.stLog.length - 1), line: () => `${t('Set {n}', { n: S.stLog.length })}: ${stLine(b, S.stLog.at(-1))}` }) : next();
   const finish = () => {
     const secs = Math.round(upElapsed());
     R.clearStep(S); onStepDone = null;
-    const per = b.items.map((_, i) => S.stLog.reduce((a, l) => a + (l.reps[i] || 0), 0));
-    (S.captured[b.id] || []).forEach((e, i) => { e.sets = [{ value: secs }]; e.unit = 'sec'; e.rounds = true; e.bites = per[i]; });
-    /* PASSED: every planned set, every move at its target, nothing broken */
+    const per = b.items.map((it, i) => S.stLog.reduce((a, l) => a + (l.reps[i] || 0), 0) * (oneSide(it) ? 2 : 1));   // per side: both sides count
+    (S.captured[b.id] || []).forEach((e, i) => {
+      e.bites = per[i];
+      if (setMode) { e.sets = S.stLog.map(l => ({ value: l.reps[i] || 0, ...(Number(l.w?.[i]) > 0 ? { weight: Number(l.w[i]) } : {}) })).filter(x => x.value > 0); }   // real sets: the history, the records
+      else { e.sets = [{ value: secs }]; e.unit = 'sec'; e.rounds = true; }
+    });
+    /* PASSED (a test): every planned set, every move at its target, nothing broken */
     const brk = S.stLog.map(l => l.brk || []);
-    const passed = S.stLog.length >= planned && S.stLog.slice(0, planned).every(l => l.reps.every((r, i) => r >= target[i] && (l.brk?.[i] == null)));
-    S.stDetail = { names: b.items.map(it => it.name), targets: target, sets: S.stLog.map(l => l.reps), brk, times: S.stLog.map(l => l.t), planned, passed };
+    const passed = setMode ? null : S.stLog.length >= planned && S.stLog.slice(0, planned).every(l => l.reps.every((r, i) => r >= target[i] && (l.brk?.[i] == null)));
+    S.stDetail = { names: b.items.map(it => it.name), targets: target, sets: S.stLog.map(l => l.reps), brk, times: S.stLog.map(l => l.t), planned, passed,
+      ...(setMode ? { w: S.stLog.map(l => l.w || []), wu: wu() } : {}) };
     R.save(S); say(`Done. ${spokenTime(secs)}.`); completeBlock();
   };
+  /* THE LAST CHECK: every set, tap one to fix it; one more, or finish */
+  const lastCheck = () => {
+    const ov = document.createElement('div'); ov.className = 'bt-check';
+    const draw = () => {
+      ov.innerHTML = `<div class="bt-checkc"><div class="eyebrow">${t('{n} sets done', { n: S.stLog.length })}</div>
+        <div class="st-done st-chk">${S.stLog.map((l, k) => `<button data-ckl="${k}"><span>${t('Set {n}', { n: k + 1 })}</span><small>${stLine(b, l)}</small><i>✎</i></button>`).join('')}</div>
+        <small class="muted">${t('Tap a set to fix it.')}</small>
+        <button class="btn secondary" id="stMore">${t('+ One more set')}</button>
+        <button class="btn lg" id="stFin">${t('Finish')}</button></div>`;
+      ov.querySelectorAll('[data-ckl]').forEach(el => el.addEventListener('click', () => editSet(+el.dataset.ckl, draw)));
+      ov.querySelector('#stMore').addEventListener('click', () => { ov.remove(); S.stTotal = Math.max(total, S.stLog.length) + 1; R.save(S); rest(t('Set {a} of {b} next', { a: S.stLog.length + 1, b: S.stTotal })); });
+      ov.querySelector('#stFin').addEventListener('click', () => { ov.remove(); finish(); });
+    };
+    draw(); document.body.appendChild(ov);
+  };
+  document.getElementById('stEnd')?.addEventListener('click', lastCheck);
   document.getElementById('stDone').addEventListener('click', e => {
     const now = Math.round(upElapsed());
-    S.stLog.push({ reps: [...S.stCur], brk: S.stCur.map((r, i) => S.stBrk[i] != null && S.stBrk[i] < r ? S.stBrk[i] : null), t: Math.max(1, now - (S.stFrom || 0)) }); R.save(S);
+    S.stLog.push({ reps: [...S.stCur], w: stWeights(b), wu: wu(), brk: S.stCur.map((r, i) => S.stBrk[i] != null && S.stBrk[i] < r ? S.stBrk[i] : null), t: Math.max(1, now - (S.stFrom || 0)) }); R.save(S);
     celebrate(e.currentTarget, t('Set {n}', { n: S.stLog.length }));
-    if (S.stLog.length < total) return runSetRest(b.roundRest, t('Set {a} of {b} next', { a: S.stLog.length + 1, b: total }), next);
-    /* the planned sets are done: one more, or finish */
-    const ov = document.createElement('div'); ov.className = 'bt-check';
-    ov.innerHTML = `<div class="bt-checkc"><div class="eyebrow">${t('{n} sets done', { n: S.stLog.length })}</div>
-      <button class="btn secondary" id="stMore">${t('+ One more set')}</button>
-      <button class="btn lg" id="stFin">${t('Finish')}</button></div>`;
-    document.body.appendChild(ov);
-    ov.querySelector('#stMore').addEventListener('click', () => { ov.remove(); S.stTotal = total + 1; R.save(S); runSetRest(b.roundRest, t('Set {a} of {b} next', { a: S.stLog.length + 1, b: S.stTotal }), next); });
-    ov.querySelector('#stFin').addEventListener('click', () => { ov.remove(); finish(); });
+    if (S.stLog.length < total) return rest(t('Set {a} of {b} next', { a: S.stLog.length + 1, b: total }));
+    lastCheck();
   });
 }
 /* TAPPING REPS IN AS YOU GO, two ways:
@@ -2181,7 +2264,7 @@ function renderIgyg() {
 function renderForTime() {
   const b = block();
   if (Array.isArray(b.rungs) && b.rungs.length) return renderLadder();
-  if (b.bites && b.roundRest > 0 && (b.rounds || 1) > 1) return renderSetTest();   // sets with a rest (the Calisthenics tests)
+  if (b.setMode || (b.bites && b.roundRest > 0 && (b.rounds || 1) > 1)) return renderSetTest();   // sets with a rest (the Sets mode, the Calisthenics tests)
   if (b.bites) return renderBites();
   const cap = (Number(b.minutes) || 0) * 60;
   const dur = cap || NO_CAP;
@@ -2379,6 +2462,8 @@ function quickResult(session) {
   const rows = session.blocks.map(b => {
     const e = b.entries[0]; const v = e?.sets?.[0]?.value;
     if (v == null || b.name.startsWith('Countdown') || /^(Warm-up|Cool-down)/.test(b.name)) return '';   // a VO2 warm-up is not a result
+    /* Sets: how long it took; the sets themselves are listed under it */
+    if (S.plan.blocks.find(x => x.id === b.id)?.setMode) return `<div class="eff-row"><span>${b.name}</span><span class="pr-flash" style="margin-left:auto;">${fmt(b.seconds || session.seconds)}</span></div>${S.stDetail ? setsDetailHtml(S.stDetail) : ''}`;
     if (b.format === 'cadence') return `<div class="eff-row"><span>${b.name}</span><span class="pr-flash" style="margin-left:auto;">${t('{n} reps', { n: v })}</span></div>${cadenceRating(v, e.cadence)}`;
     /* max reps (AMRAP tapped in): the score is the reps */
     if (b.format === 'amrap' && b.entries.some(x => x.bites != null)) return `<div class="eff-row"><span>${b.name}</span><span class="pr-flash" style="margin-left:auto;">${t('{n} reps', { n: b.entries.reduce((a, x) => a + (x.bites || 0), 0) })}</span></div>`;
@@ -2425,7 +2510,7 @@ function setsDetailHtml(d) {
   const verdict = d.passed == null ? '' : d.passed
     ? `<div class="st-pass">${achieveImg('best', 'mini')}<span><b>${t('Passed. Unbroken.')}</b><small>${t('This level is yours.')}</small></span></div>`
     : `<div class="st-pass no"><span><b>${t('Not yet')}</b><small>${brokeAt.length ? t('Broke: {x}', { x: brokeAt.join(' · ') }) : d.sets.length < (d.planned || 0) ? t('Not every set was done') : t('Not every rep was done')}</small></span></div>`;
-  return `${verdict}<div class="st-det">${d.sets.map((reps, k) => `<div><span>${t('Set {n}', { n: k + 1 })}</span><small>${reps.map((r, i) => `${r} ${d.names[i]}${d.brk?.[k]?.[i] != null ? ` (${t('broke at {n}', { n: d.brk[k][i] })})` : ''}`).join(' · ')}</small>${d.times?.[k] ? `<b>${fmt(d.times[k])}</b>` : ''}</div>`).join('')}</div>`;
+  return `${verdict}<div class="st-det">${d.sets.map((reps, k) => `<div><span>${t('Set {n}', { n: k + 1 })}</span><small>${reps.map((r, i) => `${r} ${d.names[i]}${Number(d.w?.[k]?.[i]) > 0 ? ` @ ${d.w[k][i]} ${d.wu || ''}` : ''}${d.brk?.[k]?.[i] != null ? ` (${t('broke at {n}', { n: d.brk[k][i] })})` : ''}`).join(' · ')}</small>${d.times?.[k] ? `<b>${fmt(d.times[k])}</b>` : ''}</div>`).join('')}</div>`;
 }
 function testResult(session, partial, tallyRec) {
   const T = S.plan.test, def = T.def;
@@ -2536,7 +2621,8 @@ function quickTally(session, partial) {
       <span class="mvr-st"><input id="tbW" type="number" inputmode="decimal" placeholder="–"/><small>${unit}</small><button class="btn secondary" id="tbSave">${t('Save')}</button></span></div>` : ''}
     <div id="tallyLast" class="tally-last"></div></div>`;
   const rec = { at: new Date().toISOString(), sig, title: S.plan.name, seconds: session.seconds, partial: !!partial, cfg: S.plan.quickCfg || null,
-    moves: list.map(m => ({ name: m.name, reps: m.reps, weight: m.item.weight || null, wUnit: m.item.wUnit || null })), total, loadKg: Math.round(loadKg(body)) };
+    moves: list.map(m => ({ name: m.name, reps: m.reps, weight: m.item.weight || null, wUnit: m.item.wUnit || null })), total, loadKg: Math.round(loadKg(body)),
+    ...(S.stDetail && !S.plan.test ? { detail: S.stDetail } : {}) };
   const wire = () => {
     document.getElementById('tbSave')?.addEventListener('click', () => {
       const v = Number(document.getElementById('tbW')?.value); if (!(v > 0)) return;
@@ -2587,6 +2673,9 @@ function finishSession(opts = {}) {
     blocks: S.plan.blocks.map(b => ({ id: b.id, type: b.role, name: b.name, format: b.format, seconds: S.blockTimes[b.id] || 0, entries: entriesOf(b) }))
       .filter(b => !partial || b.entries.length),
   };
+  /* a timer joins the workout day that is open, if any (js/runner/day.js) */
+  const dayOn = S.plan.quick && !S.plan.demo, dayId = dayOn ? dayIdFor() : null;
+  if (dayId) session.dayId = dayId;
   /* a Work Mode preview run (js/runner/demo.js) is a look, not training */
   const { prs } = S.plan.demo ? { prs: [] } : store.saveSession(session);
   const effs = (partial || S.plan.quick) ? [] : efficiencyCallouts(session);
@@ -2594,8 +2683,14 @@ function finishSession(opts = {}) {
   const tally = S.plan.quick && !S.plan.demo ? quickTally(session, partial) : null;
   const test = S.plan.test ? testResult(session, partial, tally?.rec) : null;
   R.clear();
+  /* THE DAY SO FAR: the blocks done before this one, and this one */
+  const blk = dayOn ? { key: session.date, name: S.plan.name, seconds: elapsed, reps: tally?.rec?.total || 0 } : null;
+  const day = dayOn && getDay()?.open ? addToDay(dayId, blk) : null;
+  const dayHtml = day && day.blocks.length > 1 ? `<div class="card day-card"><div class="eyebrow">${t('Today')} · ${t2(day.blocks.length, '{n} block', '{n} blocks')}</div>
+    ${day.blocks.map((x, i) => `<div class="eff-row"><span>${i + 1}. ${x.name}</span><span style="margin-left:auto;" class="tnum">${x.reps ? `${t('{n} reps', { n: x.reps })} · ` : ''}${fmt(x.seconds)}</span></div>`).join('')}
+    <div class="eff-row tally-sum"><span><b>${t('Total')}</b></span><span style="margin-left:auto;" class="tnum"><b>${fmt(day.blocks.reduce((a, x) => a + (x.seconds || 0), 0))}</b></span></div></div>` : '';
   const prText = p => p.weight != null
-    ? ((p.l != null || p.r != null) ? `${p.weight}lb · L${p.l ?? '–'} · R${p.r ?? '–'}` : `${p.weight}lb × ${p.value}`)
+    ? ((p.l != null || p.r != null) ? `${p.weight} ${S.plan.quick ? wu() : 'lb'} · L${p.l ?? '–'} · R${p.r ?? '–'}` : `${p.weight} ${S.plan.quick ? wu() : 'lb'} × ${p.value}`)
     : `${p.value} ${p.unit}`;
   if (prs.length) say(`${t('New record.')} ${prText(prs[0])}.`);
   else if (test?.newBest) say(pick('newbest') || t('New record.'));
@@ -2608,10 +2703,14 @@ function finishSession(opts = {}) {
     ${achieveImg(prs.length || test?.newBest ? 'best' : 'done', 'fin')}
     <h1 style="font-size:28px;">${t(prs.length ? 'New records!' : partial ? 'Saved.' : 'Done.')}</h1>
     <p class="muted">${S.plan.name} · ${fmt(elapsed)}${partial ? ` · ${t('ended early')}` : S.plan.quick ? '' : ` · ${t('{n} min plan', { n: S.plan.duration })}`}</p>
-    <div style="height:16px;"></div>${test ? test.html : ''}${resultHtml}${S.btSummary ? biteStatsHtml(S.btSummary) : ''}${tally ? tally.html : ''}${prHtml}${effHtml}
-    <div class="actionbar"><button class="btn lg" id="home">${t(S.plan.finishLabel || 'Back to week')}</button></div></div>`;
+    <div style="height:16px;"></div>${test ? test.html : ''}${resultHtml}${S.btSummary ? biteStatsHtml(S.btSummary) : ''}${tally ? tally.html : ''}${prHtml}${effHtml}${dayHtml}${dayOn ? '<div style="height:70px"></div>' : ''}
+    <div class="actionbar day-bar">${dayOn ? `<button class="btn secondary" id="dayMore">+ ${t('Keep going: add a block')}</button>` : ''}<button class="btn lg" id="home">${day ? t('Done for today') : t(S.plan.finishLabel || 'Back to week')}</button></div></div>`;
   if (tally) tally.wire();
   test?.wire?.();
   paintAchievements(document.body);
+  /* KEEP GOING: the day stays open, back to the timers for the next block */
+  const leave = async () => { const leavesPage = !!S?.plan?.returnTo; try { await R.flushRunState(); } catch (e) {} if (!leavesPage) clearWorkTheme(); cb.onFinish?.(); };
+  document.getElementById('dayMore')?.addEventListener('click', () => { keepDay(dayId, blk); leave(); });
+  if (day) document.getElementById('home').addEventListener('click', () => endDay(), { capture: true });
   document.getElementById('home').addEventListener('click', async () => { const leavesPage = !!S?.plan?.returnTo; try { await R.flushRunState(); } catch (e) {} if (!leavesPage) clearWorkTheme(); cb.onFinish?.(); });
 }
