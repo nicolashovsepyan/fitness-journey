@@ -245,6 +245,7 @@ header:after{
   .mast .meter .big{ font-size:19px }
   .mast .meter .big i{ font-size:12px }
   .mast .meter .lbl{ font-size:8.5px; letter-spacing:.1em; margin-top:2px }
+  .mast .metersub{ font-size:8.5px }
   /* The dock is 168px tall once its buttons wrap, against 120px of padding
      reserved for it - so it sat on top of the last thing on the page. */
   body{ padding-bottom:190px }
@@ -524,6 +525,9 @@ select.pin{appearance:none;cursor:pointer}
 #jump a.hot{color:var(--bg);background:var(--ok,var(--accent));border-color:transparent}
 #jump a.on{color:var(--ink);border-color:var(--line2)}
 /* anything jumped to must clear the sticky bar */
+.meter .metersub{ display:block; margin-top:4px; font:600 9.5px ui-monospace,monospace;
+  letter-spacing:.06em; text-transform:uppercase; color:var(--ink4); text-decoration:none }
+.meter .metersub:hover{ color:var(--accent) }
 #top,#prog,#releasePanel,#layers{scroll-margin-top:64px}
 
 /* THE REASONING, FOLDED.
@@ -1114,18 +1118,33 @@ button.nbnum.jump:hover{ opacity:1; border-color:var(--accent); color:var(--acce
   text-transform:uppercase; color:var(--ink3); display:flex; align-items:baseline; gap:8px }
 .nbsec h4 small{ font:600 11px/1 ui-monospace,monospace; letter-spacing:0;
   text-transform:none; color:var(--ink4) }
+/* A NUMBER WRITTEN INTO A SENTENCE. Underlined where it sits, so it
+   reads as part of the line and still looks like something you can type
+   in. No minus, no plus, no chips - a chip row is a worse number field
+   than a number field, because it offers five answers and hides ninety. */
+.nbinl{ font:650 13px/1.2 ui-monospace,monospace; color:var(--accent); text-align:center;
+  background:none; border:none; border-bottom:1.5px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  padding:1px 2px; margin:0 1px; border-radius:3px 3px 0 0 }
+.nbinl:focus{ outline:none; background:color-mix(in srgb, var(--accent) 12%, transparent);
+  border-bottom-color:var(--accent) }
+.nbinl::-webkit-outer-spin-button,.nbinl::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0 }
+.nbinl[type=text]{ text-align:left }
+.nbinu{ font:600 11px ui-monospace,monospace; color:var(--ink3); margin:0 1px 0 2px }
+button.nbinu.lnkish{ background:none; border:none; cursor:pointer; padding:0 1px;
+  text-decoration:underline dotted; text-underline-offset:2px }
+button.nbinu.lnkish:hover{ color:var(--accent) }
+.nbrq{ font-size:11.5px; color:var(--ink3); margin:0 3px 0 7px }
+.nbsay{ margin:9px 0 13px; font-size:12.5px; color:var(--ink2); line-height:2 }
+
+.nbsheetrole{ flex:none; font:600 11px inherit; color:var(--ink2); cursor:pointer;
+  background:var(--sunk); border:1px solid var(--line); border-radius:7px; padding:4px 6px }
+.nbftmin{ font:600 11px ui-monospace,monospace; color:var(--ink3); margin-right:10px }
+
 .nbmoderow{ display:flex; flex-wrap:wrap; gap:4px }
 .nbmoderow button{ flex:1 1 auto; cursor:pointer; font:650 12px inherit; padding:7px 9px;
   border:1px solid var(--line); background:var(--sunk); color:var(--ink2); border-radius:9px }
 .nbmoderow button:hover{ border-color:var(--accent); color:var(--accent) }
 .nbmoderow button.on{ background:var(--accent); border-color:var(--accent); color:var(--accent-on) }
-.nbmodewhy{ margin:7px 0 0; font-size:11.5px; color:var(--ink3) }
-.nbbigs{ display:flex; flex-wrap:wrap; gap:14px }
-.nbbigs > .nbbig{ flex:1 1 140px; min-width:0; border-bottom:0; padding:10px 0 0 }
-.nbbigs .nbbigrow input,.nbmbody .nbbigrow input{ font-size:21px }
-.nbbigs .nbbigrow button,.nbmbody .nbbigrow button{ width:32px; height:32px; font-size:15px }
-.nbbigs .nbbigchips,.nbmbody .nbbigchips{ margin-top:6px; gap:4px }
-.nbbigs .nbbigchips button,.nbmbody .nbbigchips button{ padding:2px 8px; font-size:10.5px }
 .nbnotein{ width:100%; font:inherit; font-size:13px; color:var(--ink); resize:vertical;
   background:var(--tint); border:1px solid var(--line); border-radius:8px; padding:8px 10px }
 
@@ -1133,7 +1152,10 @@ button.nbnum.jump:hover{ opacity:1; border-color:var(--accent); color:var(--acce
    reads as two unrelated lines is the thing he could not see. */
 .nbtieall{ margin:0 0 9px; font-size:12px; color:var(--ink3);
   background:var(--tint); border-radius:8px; padding:7px 10px }
-.nbmoves{ display:flex; flex-direction:column; gap:4px }
+.nbmoves{ display:flex; flex-direction:column; gap:13px }
+/* the bracket bridges the gap between two tied rows, so a superset reads
+   as one thing and not two with a join badge between them */
+.nbmrow.tied:not(.tlast) > .nbmtie{ bottom:-13px }
 .nbmrow{ position:relative; border:1px solid var(--line); border-radius:9px;
   background:var(--card,var(--tint)); padding-left:11px }
 .nbmrow.on{ border-color:var(--accent) }
@@ -1141,28 +1163,33 @@ button.nbnum.jump:hover{ opacity:1; border-color:var(--accent); color:var(--acce
 .nbmrow.tied > .nbmtie{ background:var(--accent) }
 .nbmrow.tied.tfirst > .nbmtie{ top:9px }
 .nbmrow.tied.tlast  > .nbmtie{ bottom:9px }
-.nbmhead{ display:flex; align-items:center; gap:9px; width:100%; text-align:left;
-  background:none; border:none; cursor:pointer; padding:9px 10px 9px 4px; color:inherit }
-.nbmhead:hover{ background:color-mix(in srgb, var(--accent) 7%, transparent) }
-.nbmlt{ font:700 11px/1 ui-monospace,monospace; color:var(--ink4); width:13px; flex:none }
-.nbmnm{ flex:1; min-width:0; display:flex; flex-direction:column; gap:2px }
-.nbmnm b{ font-weight:600; font-size:13px; color:var(--ink) }
-.nbmnm em{ font-style:normal; font:600 11px ui-monospace,monospace; color:var(--ink3) }
-.nbmchev{ font-size:9px; color:var(--ink4); flex:none }
-.nbmbody{ padding:2px 11px 11px; display:flex; flex-wrap:wrap; gap:14px }
-.nbmbody > .nbbig{ flex:1 1 140px; min-width:0; border-bottom:0; padding:4px 0 0 }
-.nbmacts{ flex:1 1 100%; display:flex; flex-wrap:wrap; gap:14px; padding-top:4px;
-  border-top:1px solid var(--line) }
-.nbmacts .nblnk:disabled{ opacity:.3; cursor:default }
+/* ONE LINE PER MOVEMENT: the name, then its numbers, then the way in to
+   the two things that are not always the point. */
+.nbmline{ display:flex; align-items:center; gap:8px; padding:8px 8px 8px 4px; cursor:pointer }
+.nbmline:hover{ background:color-mix(in srgb, var(--accent) 6%, transparent) }
+.nbmnm{ flex:1; min-width:0; font-weight:600; font-size:13px; color:var(--ink);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.nbmnm .fundtag{ margin-left:5px }
+.nbmfields{ flex:none; display:flex; align-items:center; cursor:default }
+.nbmmore{ flex:none; border:none; background:none; cursor:pointer; color:var(--ink4);
+  font-size:13px; line-height:1; padding:2px 4px; border-radius:5px }
+.nbmmore:hover{ color:var(--accent); background:color-mix(in srgb, var(--accent) 12%, transparent) }
+.nbmbody{ display:flex; flex-wrap:wrap; align-items:center; gap:7px 14px;
+  padding:7px 11px 9px 11px; border-top:1px solid var(--line) }
+.nbmf{ display:flex; align-items:center; gap:5px }
+.nbmf label{ font:600 9.5px ui-monospace,monospace; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--ink4) }
+.nbmbody .sp{ flex:1 }
+.nbmbody .nblnk:disabled{ opacity:.3; cursor:default; text-decoration:none }
 .nblnk.warn{ color:var(--bad,#c0392b) }
 .btn.warn{ color:var(--bad,#c0392b); border-color:color-mix(in srgb, var(--bad,#c0392b) 40%, transparent) }
-.nbjoin{ display:block; width:calc(100% - 22px); margin:0 11px 8px; padding:4px 9px;
-  font:600 11px/1.3 inherit; text-align:left; cursor:pointer; border-radius:0 0 7px 7px;
-  color:var(--ink4); background:none; border:1px dashed var(--line); border-top:none }
+/* The join sits in the gap between two rows, where the thing it makes is. */
+.nbjoin{ position:absolute; left:50%; bottom:-9px; transform:translateX(-50%); z-index:2;
+  padding:1px 9px; font:600 10px/1.5 ui-monospace,monospace; letter-spacing:.04em;
+  cursor:pointer; border-radius:9px; color:var(--ink4);
+  background:var(--card,var(--tint)); border:1px solid var(--line) }
 .nbjoin:hover{ color:var(--accent); border-color:var(--accent) }
-.nbjoin.on{ color:var(--accent); border-style:solid;
-  border-color:color-mix(in srgb, var(--accent) 45%, transparent);
-  background:color-mix(in srgb, var(--accent) 9%, transparent) }
+.nbjoin.on{ color:var(--accent-on); background:var(--accent); border-color:var(--accent) }
 
 /* DRAG A BLOCK OUT TO DELETE IT. Nothing to see until a block is in the
    air, and then it is the only thing at the bottom of the day. */
@@ -1333,9 +1360,22 @@ body.nbdragblock .nbtrash.over{ border-style:solid;
       <path d="M52.4 47.5 V82.5" stroke-width="7.13"/><path d="M207.6 47.5 V82.5" stroke-width="7.13"/>
     </svg>
     <div class="grow"><h1>Building <span id="mastWho">Ozzy</span>'s program</h1></div>
+    <!-- WHAT THE BIGGEST NUMBER ON THE PAGE IS FOR.
+
+         It was "0/10 LAYERS AGREED", set at 34px above everything else.
+         The ten layers are the reasoning - a record of what was decided
+         and why, and the brief that gets handed over - and nothing in
+         them is read by the program builder. So the number that led the
+         page measured the paperwork, and read as a progress bar on a
+         task nobody had been set.
+
+         The headline is the program now: how many days are written and
+         what the week costs in minutes. The layer count is still here,
+         small, and it takes you to them. -->
     <div class="meter">
-      <div class="big tnum"><span id="mOk">0</span><i>/10</i></div>
-      <div class="lbl">Layers agreed</div>
+      <div class="big tnum"><span id="mDays">0</span><i> days</i></div>
+      <div class="lbl"><span id="mMins">nothing written yet</span></div>
+      <a class="metersub" href="#layers"><span id="mOk">0</span> of 10 layers agreed</a>
     </div>
   </div>
 </header>
@@ -3966,6 +4006,15 @@ function nbNormalise(days){
     for(const b of (d.blocks || [])){
       if(!b.type) b.type = 'Straight';
       if(!b.cfg)  b.cfg  = {};
+      /* A STRAIGHT BLOCK'S REST BELONGS ON ITS ROWS, and several written
+         programs put it in b.cfg.rest instead - where, for a Straight
+         block, nothing reads it. nbRestOf asks the row and the row only,
+         so "rest 150s" sat in the file and the row showed nothing. Moved
+         onto the rows at open, which is also what makes it editable. */
+      if(b.type === 'Straight' && b.cfg.rest != null){
+        for(const it of (b.items || [])) if(it.rest == null) it.rest = b.cfg.rest;
+        delete b.cfg.rest; delete b.cfg.rounds;
+      }
       for(const it of (b.items || []))
         if(it.rest == null){ const r = nbRestFromNote(it); if(r != null) it.rest = r; }
     }
@@ -4632,6 +4681,31 @@ function nbSetType(bi,t){ nbAt(bi); const b=PROG.days[PDAY].blocks[bi]; b.type=t
   const cfg = {};
   for(const k of keep) cfg[k] = (b.cfg && b.cfg[k] != null) ? b.cfg[k] : NB_DEF[k];
   b.cfg = cfg;
+  /* AND THE MOVEMENTS FOLLOW IT.
+
+     The cfg was cleaned and the rows were left alone, so a block moved
+     from Straight to Circuit kept "4 x 8" on every row - a set count in
+     a block whose rounds live on the block, printed nowhere, saved into
+     the program, and read by the clock as four times the work. The same
+     in reverse: a circuit turned into straight sets had rows that said
+     "8" and no number of sets at all.
+
+     What a row is allowed to carry is NB_SPEC[t].item, so that is what
+     it carries. Sets appear with a sensible 3 when the mode starts
+     owning them and are dropped when it stops; a rest written on a row
+     is dropped when the block takes the rest over, because two rests
+     that disagree is worse than one in the wrong place. */
+  const owns = NB_SPEC[t].item;
+  for(const it of (b.items || [])){
+    const pr = nbParse(it.pres);
+    if(pr.val != null){
+      if(owns.indexOf('sets') >= 0){ if(!pr.told){ pr.sets = 3; pr.told = true; } }
+      else { pr.sets = 1; pr.told = false; }
+      it.pres = nbFmt(pr);
+    }
+    if(owns.indexOf('rest') < 0 && it.rest != null) delete it.rest;
+    if(owns.indexOf('sets') < 0 && it.plan) delete it.plan;
+  }
   nbSel=bi; nbSave(); }
 function nbDel(bi,ii){ nbAt(bi); const b=PROG.days[PDAY].blocks[bi];
   b.items.splice(ii,1); if(!b.items.length) PROG.days[PDAY].blocks.splice(bi,1);
@@ -5118,25 +5192,43 @@ function nbOpenMoveSheet(bi,ii){ nbSheet = {bi,ii}; drawProgram(); }
 function nbOpenBlockSheet(bi){ nbSheet = {bi,ii:null}; drawProgram(); }
 function nbCloseSheet(){ nbSheet = null; drawProgram(); }
 
-/* ONE POPUP, THE WHOLE BLOCK.
+/* A SENTENCE, NOT A CONTROL PANEL.
 
-   The first version had two sheets: one for a movement and one for the
-   block it sits in. Tapping a dip opened the dip, and the dip on its own
-   is not the thing you are writing. You are writing "three rounds of a
-   dip into a row, 75 seconds between" - and the sheet showed you a dip,
-   with a line of small print saying the rounds were somewhere else.
+   The first unified sheet put every number on a pad of its own: a label,
+   a minus, a plus, a 26px figure and a row of chips offering 2 3 4 5 6.
+   Six of those stacked is a settings screen, and he was not coming here
+   to visit a settings screen - he was coming to say "three rounds,
+   seventy-five seconds" and leave.
 
-   So there is one sheet now, and it is the block. How it runs is at the
-   top with its rounds and its rest. Every movement in it is listed under
-   that, in order, with the joins drawn between them, so a superset looks
-   like a superset. Tapping a movement opens its numbers in place and
-   leaves the rest of the block on screen around it. You can join, break,
-   reorder, swap, add and remove without closing anything, and the block
-   is finished when you say Done.
+   So the block says what it does in one line of English with its numbers
+   written into it, and you type over a number to change it. The chips are
+   gone: a chip row is a worse number field than a number field, because
+   it offers five answers and hides the other ninety-five.
 
-   Opening it from a movement focuses that movement. Opening it from the
-   gear focuses nothing, which is the right start when what you came to
-   change is the mode. */
+   WHAT THE BLOCK OWNS AND WHAT THE MOVEMENT OWNS CHANGES WITH THE MODE,
+   and that is the whole reason the two could not stay in separate sheets.
+   Straight sets: the movement carries its own sets, reps and rest and the
+   block carries nothing. A superset or a circuit: the block carries the
+   rounds and the rest, and the movement carries reps only. EMOM: the
+   block carries the clock. Tabata: the block carries everything and the
+   movement is just a name. Each row below prints exactly the fields its
+   mode gives it, so there is never a box on screen that nothing reads. */
+const NB_SAY = {
+  Straight: () => 'Every movement below carries its own sets, reps and rest.',
+  Superset: g => g('rounds') + ' rounds. Straight through the pair, then ' + g('rest') + ' rest.',
+  Circuit:  g => g('rounds') + ' rounds. Every movement, then ' + g('rest') + ' rest.',
+  EMOM:     g => g('mins') + ' long, one movement on the top of every ' + g('interval') + '.',
+  AMRAP:    g => 'As many rounds as possible inside ' + g('cap') + '.',
+  Tabata:   g => g('rounds') + ' rounds of ' + g('work') + ' on, ' + g('off') + ' off.',
+};
+/* A number you type over, written into the line it belongs to. */
+function nbIn(val, def, on, unit, w){
+  return `<input class="nbinl" type="number" inputmode="numeric" style="width:${w||38}px"
+    value="${val==null?'':val}" placeholder="${def==null?'':def}"
+    onclick="event.stopPropagation()" onchange="${on}(this.value)">${
+    unit ? `<span class="nbinu">${unit}</span>` : ''}`;
+}
+
 function nbSheetHTML(){
   if(!nbSheet) return '';
   const day = PROG.days[PDAY]; if(!day) return '';
@@ -5149,6 +5241,13 @@ function nbSheetHTML(){
      together by definition, and a "join" inside a circuit is a promise
      the engine cannot keep. */
   const canJoin = type === 'Straight';
+
+  /* The block's own numbers, written into its sentence. */
+  const cfgIn = k => {
+    const f = NB_FIELD[k], v = b.cfg && b.cfg[k] != null ? b.cfg[k] : null;
+    return nbIn(v, NB_DEF[k], `nbSheetCfg.bind(null,'${k}')`, f[1] || '', k==='rest'?44:38);
+  };
+  const say = (NB_SAY[type] || NB_SAY.Straight)(cfgIn);
 
   /* The run of movements this one belongs to, so the bracket knows where
      it starts and ends. */
@@ -5165,65 +5264,53 @@ function nbSheetHTML(){
     const m = MV(it.ex), pr = nbParse(it.pres), on = nbSheet.ii === ii;
     const r = canJoin ? runOf(ii) : { first:ii===0, last:ii===items.length-1, n:items.length };
     const tied = canJoin ? (it.sg != null && r.n > 1) : items.length > 1;
-    const letter = canJoin && tied
-      ? String.fromCharCode(65+ii) : (type==='Straight' ? String.fromCharCode(65+ii) : ii+1);
     const unit = pr.mins ? 'min' : pr.hold ? 'sec' : 'reps';
-    const summary = [
-      it.pres || '',
-      spec.item.indexOf('rest') >= 0 && nbRestOf(it,b) != null ? nbRestOf(it,b)+'s rest' : '',
-      it.weight != null ? it.weight+' lb' : '',
-      it.tempo ? 'tempo '+it.tempo : '',
-    ].filter(Boolean).join(' \u00B7 ');
+    const owns = spec.item;
+
+    /* The movement's own numbers, and only the ones its mode gives it. */
+    let line = '';
+    if(!owns.length){
+      line = `<span class="nbrq">the clock decides</span>`;
+    } else {
+      if(owns.indexOf('sets') >= 0)
+        line += nbIn(pr.told?pr.sets:null, 3, `nbSheetNum.bind(null,'sets',${ii})`, '×', 34);
+      if(owns.indexOf('val') >= 0)
+        line += nbIn(pr.val, 10, `nbSheetNum.bind(null,'val',${ii})`, '', 42) +
+          `<button class="nbinu lnkish" title="Count this in ${pr.hold?'reps':'seconds'} instead"
+            onclick="event.stopPropagation();nbSheetUnit(${ii})">${unit}${pr.side?'/side':''}</button>`;
+      if(owns.indexOf('rest') >= 0)
+        line += `<span class="nbrq">rest</span>` +
+          nbIn(nbRestOf(it,b), 90, `nbSheetNum.bind(null,'rest',${ii})`, 's', 44);
+    }
 
     return `<div class="nbmrow ${on?'on':''} ${tied?'tied':''} ${tied&&r.first?'tfirst':''} ${
                  tied&&r.last?'tlast':''}">
       <span class="nbmtie" aria-hidden="true"></span>
-      <button class="nbmhead" onclick="nbSheetFocus(${on?'null':ii})">
-        <span class="nbmlt">${letter}</span>
+      <div class="nbmline" onclick="nbSheetFocus(${on?'null':ii})">
         <span class="dot" style="--c:${NBC(m.g)}"></span>
-        <span class="nbmnm"><b>${esc(m.n)}${m.f?'<u class="fundtag">Fundamental</u>':''}</b>
-          <em>${esc(summary) || 'nothing set yet'}</em></span>
-        <span class="nbmchev">${on?'\u25B4':'\u25BE'}</span>
-      </button>
+        <b class="nbmnm">${esc(m.n)}${m.f?'<u class="fundtag">F</u>':''}</b>
+        <span class="nbmfields" onclick="event.stopPropagation()">${line}</span>
+        <button class="nbmmore" title="Weight, tempo, swap, remove"
+                onclick="event.stopPropagation();nbSheetFocus(${on?'null':ii})">${on?'▴':'⋯'}</button>
+      </div>
       ${on ? `<div class="nbmbody">
-        ${spec.item.indexOf('sets') >= 0
-          ? nbBig({ label:'Sets', val:pr.told?pr.sets:null, def:3, unit:'\u00D7',
-                    chips:NB_CHIPS.sets, on:'nbSheetNum.bind(null,\'sets\')' })
-          : `<p class="nbbignote">The rounds belong to the block - they are at the top of this sheet.</p>`}
-        ${spec.item.indexOf('val') >= 0
-          ? nbBig({ label: pr.hold ? 'Hold' : 'Reps', val:pr.val, def:10, unit,
-                    step: pr.hold ? 5 : 1,
-                    chips: pr.hold ? NB_CHIPS.sec : NB_CHIPS.reps,
-                    on:'nbSheetNum.bind(null,\'val\')',
-                    note:`<button class="nblnk" onclick="nbSheetUnit()">Count this in ${
-                      pr.hold ? 'reps' : 'seconds'} instead</button>` })
-          : `<p class="nbbignote">The clock decides this one.</p>`}
-        ${spec.item.indexOf('rest') >= 0
-          ? nbBig({ label:'Rest after the set', val:nbRestOf(it,b), def:90, unit:'sec', step:15,
-                    chips:NB_CHIPS.rest, on:'nbSheetNum.bind(null,\'rest\')' })
-          : ''}
-        ${nbBig({ label:'Starting weight', val:it.weight, def:0, unit:'lb', step:5,
-                  on:'nbSheetNum.bind(null,\'weight\')',
-                  note:'Left empty it follows whatever they last logged.' })}
-        <div class="nbbig">
-          <label>Tempo</label>
-          <input class="nbtempoin" type="text" placeholder="3-1-1" value="${esc(it.tempo||'')}"
-                 onchange="nbSheetTempo(this.value)">
-          <p class="nbbignote">Seconds down, pause, up.</p>
-        </div>
-        <div class="nbmacts">
-          <button class="nblnk" onclick="nbSheetMove(${ii},-1)" ${ii===0?'disabled':''}>Move up</button>
-          <button class="nblnk" onclick="nbSheetMove(${ii},1)" ${ii===items.length-1?'disabled':''}>Move down</button>
-          <button class="nblnk" onclick="nbSheetSwap(${ii})">Change movement</button>
-          <button class="nblnk warn" onclick="nbSheetDelete(${ii})">Remove</button>
-        </div>
+        <span class="nbmf"><label>Weight</label>${
+          nbIn(it.weight, 0, `nbSheetNum.bind(null,'weight',${ii})`, 'lb', 46)}</span>
+        <span class="nbmf"><label>Tempo</label><input class="nbinl" type="text" style="width:56px"
+          placeholder="3-1-1" value="${esc(it.tempo||'')}" onchange="nbSheetTempo(this.value)"></span>
+        <span class="sp"></span>
+        <button class="nblnk" onclick="nbSheetMove(${ii},-1)" ${ii===0?'disabled':''}>Up</button>
+        <button class="nblnk" onclick="nbSheetMove(${ii},1)" ${ii===items.length-1?'disabled':''}>Down</button>
+        <button class="nblnk" onclick="nbSheetSwap(${ii})">Swap</button>
+        <button class="nblnk warn" onclick="nbSheetDelete(${ii})">Remove</button>
       </div>` : ''}
       ${canJoin && ii < items.length-1 ? `<button class="nbjoin ${
           items[ii].sg != null && items[ii+1].sg === items[ii].sg ? 'on' : ''}"
+          title="${items[ii].sg != null && items[ii+1].sg === items[ii].sg
+            ? 'Break them apart' : 'Run these two back to back with no rest between'}"
           onclick="nbSheetJoin(${ii})">${
           items[ii].sg != null && items[ii+1].sg === items[ii].sg
-            ? 'joined \u2014 back to back, no rest between. Tap to break'
-            : 'join to the next one \u2014 make it a superset'}</button>` : ''}
+            ? '— joined —' : '+ join'}</button>` : ''}
     </div>`;
   }).join('');
 
@@ -5233,53 +5320,27 @@ function nbSheetHTML(){
       <div class="nbsheethd">
         <input class="nbsheetnm" type="text" value="${esc(b.name||'')}" placeholder="Name this block"
                onchange="nbSetBlock(${bi},'name',this.value)">
+        <select class="nbsheetrole" onchange="nbSetBlock(${bi},'role',this.value);nbSheetRedraw()">
+          ${['Prime','Work','Finish'].map(r =>
+            `<option ${b.role===r?'selected':''}>${r}</option>`).join('')}</select>
         <button class="nbpickx" title="Done (Esc)" onclick="nbCloseSheet()">&times;</button>
       </div>
       <div class="nbsheetbody">
+        <div class="nbmoderow">${NB_TYPES.map(t =>
+          `<button class="${type===t?'on':''}" title="${esc(NB_SPEC[t].blurb)}"
+            onclick="nbSheetType('${t}')">${t}</button>`).join('')}</div>
+        <p class="nbsay">${say}</p>
 
-        <section class="nbsec">
-          <h4>How this block runs</h4>
-          <div class="nbmoderow">${NB_TYPES.map(t =>
-            `<button class="${type===t?'on':''}" title="${esc(NB_SPEC[t].blurb)}"
-              onclick="nbSheetType('${t}')">${t}</button>`).join('')}</div>
-          <p class="nbmodewhy">${esc(spec.blurb)}</p>
-          ${spec.block.length ? `<div class="nbbigs">${spec.block.map(k => {
-            const f = NB_FIELD[k];
-            return nbBig({ label:f[0][0].toUpperCase()+f[0].slice(1),
-              val: b.cfg && b.cfg[k] != null ? b.cfg[k] : null, def: NB_DEF[k],
-              unit: f[1] || '', step: k==='rest' ? 15 : 1,
-              chips: k==='rounds' ? NB_CHIPS.rounds : k==='rest' ? NB_CHIPS.rest : null,
-              on:`nbSheetCfg.bind(null,'${k}')` });
-          }).join('')}</div>` : `<p class="nbbignote">Straight sets: each movement carries its own
-             sets, reps and rest, below.</p>`}
-          <div class="nbbig">
-            <label>Part of the session</label>
-            <div class="nbseg wide">${['Prime','Work','Finish'].map(r =>
-              `<button class="${b.role===r?'on':''}"
-                onclick="nbSetBlock(${bi},'role','${r}');nbSheetRedraw()">${r}</button>`).join('')}</div>
-          </div>
-        </section>
+        <div class="nbmoves">${rows || '<p class="nbbignote">Nothing in this block yet.</p>'}</div>
+        <button class="nbaddit" onclick="nbSheetAdd()">+ Add a movement</button>
 
-        <section class="nbsec">
-          <h4>The movements ${items.length ? `<small>${nbMins(b)} min${
-            nbShape(b) ? ' \u00B7 ' + nbShape(b) : ''}</small>` : ''}</h4>
-          ${!canJoin && items.length > 1 ? `<p class="nbtieall">All ${items.length} run together
-            as one ${type.toLowerCase()}. ${
-            type==='Superset'||type==='Circuit' ? 'The rest above is taken after the last one, not between them.'
-            : 'The clock decides the order.'}</p>` : ''}
-          <div class="nbmoves">${rows || '<p class="nbbignote">Nothing in this block yet.</p>'}</div>
-          <button class="nbaddit" onclick="nbSheetAdd()">+ Add a movement</button>
-        </section>
-
-        <section class="nbsec">
-          <h4>Coach's note</h4>
-          <textarea class="nbnotein" rows="2" placeholder="What you want them to know about this block"
-            onchange="nbSetBlock(${bi},'note',this.value);nbSheetRedraw()">${esc(b.note||'')}</textarea>
-        </section>
+        <textarea class="nbnotein" rows="2" placeholder="A note for them about this block"
+          onchange="nbSetBlock(${bi},'note',this.value);nbSheetRedraw()">${esc(b.note||'')}</textarea>
       </div>
       <div class="nbsheetft">
         <button class="btn warn" onclick="nbSheetDelBlock()">Delete this block</button>
         <span class="sp"></span>
+        <span class="nbftmin">${nbMins(b)} min</span>
         <button class="btn primary" onclick="nbCloseSheet()">Done</button>
       </div>
     </div></div>`;
@@ -5290,10 +5351,13 @@ function nbSheetHTML(){
    sheet back afterwards, because every setter ends at drawProgram(). */
 function nbSheetRedraw(){ const k = nbSheet; nbSheet = k; drawProgram(); }
 function nbSheetFocus(ii){ if(!nbSheet) return; nbSheet = { bi:nbSheet.bi, ii }; drawProgram(); }
-function nbSheetNum(f, v){
-  if(!nbSheet || nbSheet.ii == null) return;
-  const keep = nbSheet;
-  nbSetNum(keep.bi, keep.ii, f, v === '' ? '' : String(Math.max(0, +v || 0)));
+/* A field on a row edits THAT row, whether or not it is the open one -
+   the numbers are on every line now, not only the focused one. */
+function nbSheetNum(f, ii, v){
+  if(!nbSheet) return;
+  const keep = nbSheet, at = ii != null ? ii : keep.ii;
+  if(at == null) return;
+  nbSetNum(keep.bi, at, f, v === '' ? '' : String(Math.max(0, +v || 0)));
   nbSheet = keep; drawProgram();
 }
 function nbSheetCfg(k, v){
@@ -5305,8 +5369,9 @@ function nbSheetType(t){ if(!nbSheet) return; const k = nbSheet;
   nbSetType(k.bi, t); nbSheet = k; nbSel = null; drawProgram(); }
 function nbSheetTempo(v){ if(!nbSheet || nbSheet.ii == null) return; const k = nbSheet;
   nbSetTempo(k.bi, k.ii, v); nbSheet = k; drawProgram(); }
-function nbSheetUnit(){ if(!nbSheet || nbSheet.ii == null) return; const k = nbSheet;
-  nbToggleUnit(k.bi, k.ii); nbSheet = k; drawProgram(); }
+function nbSheetUnit(ii){ if(!nbSheet) return; const k = nbSheet;
+  const at = ii != null ? ii : k.ii; if(at == null) return;
+  nbToggleUnit(k.bi, at); nbSheet = k; drawProgram(); }
 function nbSheetJoin(ii){ if(!nbSheet) return; const k = nbSheet;
   nbToggleJoin(k.bi, ii); nbSheet = k; drawProgram(); }
 function nbSheetMove(ii, dir){
@@ -5315,7 +5380,7 @@ function nbSheetMove(ii, dir){
   if(j < 0 || j >= its.length) return;
   nbAt(bi);
   [its[ii], its[j]] = [its[j], its[ii]];
-  nbSheet = { bi, ii:j }; nbSave(); nbSheet = { bi, ii:j }; drawProgram();
+  nbSave(); nbSheet = { bi, ii:j }; drawProgram();
 }
 /* REMOVING THE LAST MOVEMENT REMOVES THE BLOCK. nbDel has always done
    that, and a sheet pointing at a block that no longer exists renders
@@ -6314,6 +6379,9 @@ function drawProgram(){
   const st = nbCapture();
   drawProgramBody();
   nbRestore(st);
+  /* The masthead counts the program now, so it has to be told when the
+     program changes - which is here, and only here. */
+  if(typeof drawDock === 'function') drawDock();
 }
 
 function drawProgramBody(){
@@ -6489,6 +6557,15 @@ function drawDock(){
   const notes=Object.values(S.notes).filter(n=>n&&n.trim()).length;
   const rel=RELEASE.filter(r=>S.released[r[0]]).length;
   document.getElementById('mOk').textContent=ok;
+  /* the headline: what is actually written */
+  {
+    const days = Object.values((PROG && PROG.days) || {});
+    const mins = days.reduce((t,d) =>
+      t + (d.blocks || []).reduce((u,b) => u + (nbMins(b) || 0), 0), 0);
+    document.getElementById('mDays').textContent = days.length;
+    document.getElementById('mMins').textContent =
+      days.length ? mins + ' min a week' : 'nothing written yet';
+  }
   document.getElementById('dockSt').innerHTML =
     `<b>${ok}</b> agreed &middot; <b>${work}</b> need work &middot; <b>${parked}</b> parked &middot; ` +
     (HAS_CLIENT
