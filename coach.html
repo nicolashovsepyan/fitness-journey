@@ -1066,6 +1066,68 @@ button.nbnum.jump:hover{ opacity:1; border-color:var(--accent); color:var(--acce
 .nbpickx{ flex:none; border:0; background:none; cursor:pointer; color:var(--ink3);
   font-size:17px; line-height:1; padding:0 2px }
 .nbpickx:hover{ color:var(--ink) }
+/* ---- the block banner, now the only block view ---- */
+.nbfold{ cursor:grab }
+.nbgear{ border:none; background:none; cursor:pointer; color:var(--ink4); font-size:13px;
+  line-height:1; padding:2px 4px; flex:none }
+.nbgear:hover{ color:var(--accent) }
+.nbfoldlist li.nbfi{ cursor:pointer; gap:9px; padding:6px 10px; border-radius:7px }
+.nbfoldlist li.nbfi:hover{ background:color-mix(in srgb, var(--rc) 12%, transparent) }
+.nbfoldlist li.nbfi .dot{ width:7px; height:7px; border-radius:2px; background:var(--c); flex:none }
+.nbfoldlist li.nbfi em{ font-style:normal; font:600 11px ui-monospace,monospace; color:var(--ink3);
+  margin-left:auto; text-align:right; white-space:nowrap }
+
+/* ---- the sheets: one picker for every number, as in the timer ---- */
+.nbsheetwrap{ position:fixed; inset:0; z-index:200; background:rgba(0,0,0,.45);
+  display:flex; align-items:center; justify-content:center; padding:20px }
+.nbsheet{ width:min(460px,100%); max-height:86vh; display:flex; flex-direction:column;
+  background:var(--card); border:1px solid var(--line); border-radius:16px;
+  box-shadow:0 24px 60px rgba(0,0,0,.5); overflow:hidden }
+.nbsheethd{ display:flex; align-items:center; gap:10px; padding:14px 15px 10px;
+  border-bottom:1px solid var(--line) }
+.nbsheethd span{ flex:1; min-width:0 }
+.nbsheethd b{ display:block; font-size:15px; font-weight:650 }
+.nbsheethd small{ display:block; font-size:11px; color:var(--ink3); text-transform:capitalize }
+.nbsheetbody{ overflow-y:auto; padding:4px 15px 10px }
+.nbsheetft{ display:flex; align-items:center; gap:10px; padding:11px 15px;
+  border-top:1px solid var(--line) }
+.nbsheetft .sp{ flex:1 }
+.nbbig{ padding:12px 0; border-bottom:1px solid var(--line) }
+.nbbig:last-child{ border-bottom:0 }
+.nbbig > label{ display:block; font:600 9.5px ui-monospace,monospace; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--ink4); margin-bottom:7px }
+.nbbigrow{ display:flex; align-items:center; gap:8px }
+.nbbigrow button{ width:38px; height:38px; flex:none; border:1px solid var(--line);
+  background:var(--sunk); color:var(--ink); border-radius:10px; cursor:pointer;
+  font:600 17px ui-monospace,monospace; line-height:1 }
+.nbbigrow button:hover{ border-color:var(--accent); color:var(--accent) }
+.nbbigrow input{ flex:1; min-width:0; background:none; border:0; color:var(--ink);
+  font:650 26px/1 ui-monospace,monospace; text-align:center; padding:4px 0 }
+.nbbigrow input::-webkit-outer-spin-button,.nbbigrow input::-webkit-inner-spin-button{
+  -webkit-appearance:none; margin:0 }
+.nbbigrow .u{ font:600 11px ui-monospace,monospace; color:var(--ink3); flex:none; min-width:26px }
+.nbbigchips{ display:flex; flex-wrap:wrap; gap:5px; margin-top:8px }
+.nbbigchips button{ font:600 11px ui-monospace,monospace; cursor:pointer; color:var(--ink2);
+  background:var(--sunk); border:1px solid var(--line); border-radius:16px; padding:3px 10px }
+.nbbigchips button:hover{ border-color:var(--accent) }
+.nbbigchips button.on{ background:var(--accent); border-color:var(--accent); color:var(--accent-on) }
+.nbbignote{ margin:7px 0 0; font-size:11.5px; color:var(--ink3); line-height:1.5 }
+.nblnk{ border:0; background:none; padding:0; cursor:pointer; color:var(--accent);
+  font:inherit; font-size:11.5px; text-decoration:underline }
+.nbtempoin{ width:100%; background:var(--sunk); border:1px solid var(--line); border-radius:9px;
+  color:var(--ink); font:inherit; font-size:14px; padding:9px 11px }
+.nbseg.wide{ display:flex; gap:5px }
+.nbseg.wide button{ flex:1; font:600 12px inherit; cursor:pointer; padding:8px 0;
+  border:1px solid var(--line); background:var(--sunk); color:var(--ink2); border-radius:9px }
+.nbseg.wide button.on{ background:var(--accent); border-color:var(--accent); color:var(--accent-on) }
+.nbmodes{ display:grid; grid-template-columns:1fr 1fr; gap:6px }
+.nbmode{ text-align:left; cursor:pointer; padding:8px 10px; border-radius:10px;
+  border:1px solid var(--line); background:var(--sunk); font:inherit }
+.nbmode b{ display:block; font-size:12.5px; font-weight:650; color:var(--ink) }
+.nbmode small{ display:block; font-size:10.5px; color:var(--ink3); line-height:1.4; margin-top:2px }
+.nbmode.on{ border-color:var(--accent); background:var(--accent-soft) }
+.nbmode.on b{ color:var(--accent) }
+
 /* the ways in: a body area, or only the movements the method is built on */
 .nbchips{ display:flex; flex-wrap:wrap; gap:5px; margin-top:9px }
 .nbchip{ font:600 10.5px inherit; text-transform:capitalize; cursor:pointer;
@@ -4833,6 +4895,163 @@ let nbDragBlock = null;
 /* DRAGGING IS NOT THE ONLY HAND. Taking the arrows away took the only
    way to reorder without a mouse with them, so the same move lives on
    Alt with the arrow keys, from the header that does the dragging. */
+/* ============================================================
+   THE TWO SHEETS
+
+   Built on the Training Timer's shape, which he picked and approved
+   there: one picker for every number - the big number between minus and
+   plus, the common values one tap away - and the mode on top with its
+   own settings under it. A coach who has learned the timer has already
+   learned this.
+
+   A sheet, not a popover, because these carry several numbers and a
+   decision, not a single pick. It closes on Done, on Escape, and on the
+   backdrop.
+   ============================================================ */
+let nbSheet = null;                       // {kind:'move'|'block', bi, ii}
+
+const NB_CHIPS = {
+  reps: [5,6,8,10,12,15,20],
+  sec:  [15,20,30,40,45,60,90],
+  rest: [30,45,60,75,90,120,150,180],
+  sets: [2,3,4,5],
+  rounds: [2,3,4,5,6],
+};
+
+/* The timer's numBox: a value you nudge, type, or take from a chip. */
+function nbBig(o){
+  return `<div class="nbbig">
+    <label>${esc(o.label)}</label>
+    <div class="nbbigrow">
+      <button onclick="${o.on}(${o.val==null?o.def:o.val}-${o.step||1})">&minus;</button>
+      <input type="number" value="${o.val==null?'':o.val}" placeholder="${o.def==null?'':o.def}"
+             inputmode="numeric" onchange="${o.on}(this.value)">
+      <span class="u">${esc(o.unit||'')}</span>
+      <button onclick="${o.on}(${o.val==null?o.def:o.val}+${o.step||1})">+</button>
+    </div>
+    <div class="nbbigchips">${(o.chips||[]).map(c =>
+      `<button class="${String(c)===String(o.val)?'on':''}" onclick="${o.on}(${c})">${c}</button>`).join('')}</div>
+    ${o.note ? `<p class="nbbignote">${o.note}</p>` : ''}
+  </div>`;
+}
+
+addEventListener('keydown', e => {
+  if(e.key === 'Escape' && nbSheet){ e.preventDefault(); nbCloseSheet(); }
+});
+
+function nbOpenMoveSheet(bi,ii){ nbSheet = {kind:'move',bi,ii}; drawProgram(); }
+function nbOpenBlockSheet(bi){ nbSheet = {kind:'block',bi}; drawProgram(); }
+function nbCloseSheet(){ nbSheet = null; drawProgram(); }
+
+function nbSheetHTML(){
+  if(!nbSheet) return '';
+  const day = PROG.days[PDAY]; if(!day) return '';
+  const b = (day.blocks||[])[nbSheet.bi]; if(!b) return '';
+  const spec = NB_SPEC[b.type || 'Straight'] || NB_SPEC.Straight;
+  let body = '', title = '', sub = '';
+
+  if(nbSheet.kind === 'move'){
+    const it = (b.items||[])[nbSheet.ii]; if(!it) return '';
+    const m = MV(it.ex), pr = nbParse(it.pres);
+    title = m.n; sub = [m.g,(m.p||[])[0]].filter(Boolean).join(' · ');
+    const unit = pr.mins ? 'min' : pr.hold ? 'sec' : 'reps';
+    body = `
+      ${spec.item.indexOf('sets') >= 0
+        ? nbBig({ label:'Sets', val:pr.told?pr.sets:null, def:3, unit:'×',
+                  chips:NB_CHIPS.sets, on:'nbSheetNum.bind(null,\'sets\')' })
+        : `<p class="nbbignote">The rounds are on the block. Open its settings to change them.</p>`}
+      ${spec.item.indexOf('val') >= 0
+        ? nbBig({ label: pr.hold ? 'Hold' : 'Reps', val:pr.val, def:10, unit,
+                  step: pr.hold ? 5 : 1,
+                  chips: pr.hold ? NB_CHIPS.sec : NB_CHIPS.reps,
+                  on:'nbSheetNum.bind(null,\'val\')',
+                  note:`<button class="nblnk" onclick="nbSheetUnit()">Count this in ${
+                    pr.hold ? 'reps' : 'seconds'} instead</button>` })
+        : `<p class="nbbignote">The clock decides this one. Open the block's settings.</p>`}
+      ${spec.item.indexOf('rest') >= 0
+        ? nbBig({ label:'Rest between sets', val:nbRestOf(it,b), def:90, unit:'sec', step:15,
+                  chips:NB_CHIPS.rest, on:'nbSheetNum.bind(null,\'rest\')' })
+        : `<p class="nbbignote">The rest is on the block.</p>`}
+      ${nbBig({ label:'Starting weight', val:it.weight, def:0, unit:'lb', step:5,
+                on:'nbSheetNum.bind(null,\'weight\')',
+                note:'Left empty it follows whatever they last logged.' })}
+      <div class="nbbig">
+        <label>Tempo</label>
+        <input class="nbtempoin" type="text" placeholder="3-1-1" value="${esc(it.tempo||'')}"
+               onchange="nbSheetTempo(this.value)">
+        <p class="nbbignote">Seconds down, pause, up.</p>
+      </div>`;
+  } else {
+    title = b.name || 'Block';
+    sub = 'How this block runs';
+    body = `
+      <div class="nbbig">
+        <label>Name</label>
+        <input class="nbtempoin" type="text" value="${esc(b.name||'')}" placeholder="Name this block"
+               onchange="nbSetBlock(${nbSheet.bi},'name',this.value)">
+      </div>
+      <div class="nbbig">
+        <label>Part of the session</label>
+        <div class="nbseg wide">${['Prime','Work','Finish'].map(r=>
+          `<button class="${b.role===r?'on':''}"
+            onclick="nbSetBlock(${nbSheet.bi},'role','${r}')">${r}</button>`).join('')}</div>
+      </div>
+      <div class="nbbig">
+        <label>How it runs</label>
+        <div class="nbmodes">${NB_TYPES.map(t=>
+          `<button class="nbmode ${(b.type||'Straight')===t?'on':''}"
+            onclick="nbSetType(${nbSheet.bi},'${t}')">
+            <b>${t}</b><small>${esc(NB_SPEC[t].blurb)}</small></button>`).join('')}</div>
+      </div>
+      ${spec.block.map(k => { const f = NB_FIELD[k];
+        return nbBig({ label:f[0][0].toUpperCase()+f[0].slice(1),
+          val: b.cfg && b.cfg[k] != null ? b.cfg[k] : null, def: NB_DEF[k],
+          unit: f[1] || '', step: k==='rest' ? 15 : 1,
+          chips: k==='rounds' ? NB_CHIPS.rounds : k==='rest' ? NB_CHIPS.rest : null,
+          on:`nbSheetCfg.bind(null,'${k}')` });
+      }).join('')}`;
+  }
+
+  return `<div class="nbsheetwrap" onclick="nbCloseSheet()">
+    <div class="nbsheet" role="dialog" aria-label="${esc(title)}" onclick="event.stopPropagation()">
+      <div class="nbsheethd">
+        <span><b>${esc(title)}</b><small>${esc(sub)}</small></span>
+        ${nbSheet.kind === 'move'
+          ? `<button class="nblnk" onclick="nbSheetSwap()">Change movement</button>` : ''}
+        <button class="nbpickx" title="Done (Esc)" onclick="nbCloseSheet()">&times;</button>
+      </div>
+      <div class="nbsheetbody">${body}</div>
+      <div class="nbsheetft">
+        ${nbSheet.kind === 'move'
+          ? `<button class="btn" onclick="nbSheetDelete()">Remove from the block</button>` : ''}
+        <span class="sp"></span>
+        <button class="btn primary" onclick="nbCloseSheet()">Done</button>
+      </div>
+    </div></div>`;
+}
+
+/* The sheet edits through the same setters the rows always used, so
+   nothing here is a second way to write a program. */
+function nbSheetNum(f, v){
+  if(!nbSheet) return;
+  const keep = nbSheet;
+  nbSetNum(keep.bi, keep.ii, f, v === '' ? '' : String(Math.max(0, +v || 0)));
+  nbSheet = keep; drawProgram();
+}
+function nbSheetCfg(k, v){
+  if(!nbSheet) return; const keep = nbSheet;
+  nbSetCfg(keep.bi, k, String(Math.max(0, +v || 0)));
+  nbSheet = keep; drawProgram();
+}
+function nbSheetTempo(v){ if(!nbSheet) return; const k = nbSheet;
+  nbSetTempo(k.bi, k.ii, v); nbSheet = k; drawProgram(); }
+function nbSheetUnit(){ if(!nbSheet) return; const k = nbSheet;
+  nbToggleUnit(k.bi, k.ii); nbSheet = k; drawProgram(); }
+function nbSheetDelete(){ if(!nbSheet) return; const k = nbSheet;
+  nbDel(k.bi, k.ii); nbSheet = null; drawProgram(); }
+function nbSheetSwap(){ if(!nbSheet) return; const k = nbSheet;
+  nbSheet = null; nbPickReset(); nbSwap = k.bi + ':' + k.ii; drawProgram(); }
+
 function nbBlockKey(e, bi){
   if(!e.altKey) return;
   if(e.key === 'ArrowUp'){ e.preventDefault(); nbMoveBlock(bi, -1); }
@@ -5435,27 +5654,51 @@ function nbMiddle(){
        working on. The chevron opens a plain list of what is in it, which
        is the question you actually ask of a finished block; the full
        editor stays behind the lock, where you put it. */
-    if(b.locked){
-      const peek = nbPeek.has(bi);
+    /* THE FOLDED VIEW IS THE ONLY VIEW NOW.
+
+       Nicolas: "I like the view of the blocks when they are locked. I do
+       not like the view when I am entering the details." Two renderers
+       for one block was always the problem - a banner you could read and
+       an editor you could not, and a padlock deciding which. So the
+       banner stays, its movement list is always open, and the details it
+       used to hide now open where they are needed: tap a movement for its
+       numbers, tap the block's settings for its shape.
+
+       Same shape as the Training Timer, which he has already approved:
+       the type up top, the big numbers, the rest out of the way until
+       asked for. */
+    {
+      const peek = true;
       h += `<div class="nbblock locked fold ${peek?'peek':''}" data-bi="${bi}" style="--rc:${RC}"
         ondragover="nbDragOver(event)" ondrop="nbDrop(event,${bi},null)">
-        <button class="nbfold" draggable="true" onclick="nbTogglePeek(${bi})"
+        <div class="nbfold" draggable="true"
           title="Drag to reorder. Alt with the arrow keys does the same."
           ondragstart="nbBlockDrag(event,${bi})" ondragend="nbBlockEnd()"
-          onkeydown="nbBlockKey(event,${bi})">
+          onkeydown="nbBlockKey(event,${bi})" tabindex="0">
           ${stamp}
           <span class="nbnw"><b class="nbfn">${esc(b.name||'Block')}</b>${
             nbShape(b) ? `<small class="nbshape">${nbShape(b)}</small>` : ''}</span>
           ${meter}
           <span class="nbmin"><b>${nbMins(b)}</b><em>min</em></span>
-          <i class="nbchev">${peek?'\u25B2':'\u25BC'}</i>
-        </button>
-        <button class="nblock on inlock" title="Unlock and edit"
-                onclick="event.stopPropagation();nbToggleLock(${bi})">&#128274;</button>
-        ${peek ? `<ol class="nbfoldlist">${(b.items||[]).map(it=>{
+          <button class="nbgear" title="How this block runs"
+                  onclick="event.stopPropagation();nbOpenBlockSheet(${bi})">&#9881;</button>
+          <button class="nbord nbdel" title="Delete this block"
+                  onclick="event.stopPropagation();nbDelBlock(${bi})">&#215;</button>
+        </div>
+        <ol class="nbfoldlist">${(b.items||[]).map((it,ii)=>{
             const m = MV(it.ex);
-            return `<li><span style="--c:${NBC(m.g)}"></span><b>${esc(m.n)}</b><em>${esc(it.pres||'')}</em></li>`;
-          }).join('')}</ol>` : ''}
+            return `<li class="nbfi" draggable="true"
+                ondragstart="nbDragStart(event,${bi},${ii})" ondragend="nbDragEnd()"
+                ondragover="nbDragOver(event)" ondrop="nbDrop(event,${bi},${ii})"
+                onclick="event.stopPropagation();nbOpenMoveSheet(${bi},${ii})">
+              <span class="dot" style="--c:${NBC(m.g)}"></span>
+              <b>${esc(m.n)}${m.f?'<u class="fundtag">Fundamental</u>':''}</b>
+              <em>${esc(it.pres||'')}${it.rest!=null?` · ${it.rest}s rest`:''}${
+                   it.weight!=null?` · ${it.weight} lb`:''}</em>
+            </li>`;
+          }).join('')}</ol>
+        <button class="nbaddit" onclick="event.stopPropagation();nbPickInto(${bi})">+ Add a movement</button>
+        ${b.note ? `<div class="nbbnote">${esc(b.note)}</div>` : ''}
       </div>`;
       return;
     }
@@ -5809,11 +6052,12 @@ function drawProgramBody(){
          <div class="pad" id="nbtop"></div></details>`
     + `<div class="nbcols one">
       <div class="nbcol mid"  id="nbmid"></div>
-    </div><div class="pwarn" id="pwarn"></div>`;
+    </div><div class="pwarn" id="pwarn"></div><div id="nbsheethost"></div>`;
   document.getElementById('nbtop').innerHTML    = nbTop();
   document.getElementById('nbmid').innerHTML   = nbMiddle();
   document.getElementById('nbmix').innerHTML   = nbMixHTML();
   document.getElementById('nbcov').innerHTML   = nbCovHTML();
+  document.getElementById('nbsheethost').innerHTML = nbSheetHTML();
 
   libWire();
   /* The picker opens with the cursor already in the search box, because
