@@ -598,6 +598,16 @@ select.pin{appearance:none;cursor:pointer}
 .nbsend.off b{ color:var(--gold) }
 .nbsend small{ display:block; color:var(--ink3); font-size:12px; line-height:1.55 }
 .nbsend .btn{ margin-top:10px }
+/* sent and received are two facts and get two lines */
+.nbsendstate{ display:flex; gap:18px; flex-wrap:wrap; margin-top:11px }
+.nbsendstate .s{ display:flex; align-items:baseline; gap:7px; font-size:12px; color:var(--ink4) }
+.nbsendstate .s i{ font-style:normal; font-size:13px }
+.nbsendstate .s b{ color:var(--ink3); font-weight:650 }
+.nbsendstate .s em{ font-style:normal; color:var(--ink4) }
+.nbsendstate .s.on{ color:var(--accent) }
+.nbsendstate .s.on i, .nbsendstate .s.on b{ color:var(--accent) }
+.nbsendstate .s.on em{ color:var(--ink2) }
+.btn.big{ font-size:14px; padding:11px 18px; width:100% }
 
 .nbtoppanel{ margin-top:10px; }
 /* folded readouts: a summary you can read without opening it */
@@ -6758,16 +6768,29 @@ function drawRelease2(){
      start, so it is stated before you start. */
   const linked = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(CLIENT_ID);
   const sentAt = (S.sentAt && new Date(S.sentAt)) || null;
+  /* RECEIVED IS NOT THE SAME FACT AS SENT. One is about this computer,
+     the other is about them, and only the second one means the work
+     arrived. The phone stamps the id of the program it took onto its own
+     users row; this compares it with the id we published. */
+  const got = S.sentId && NB_SEEN[CLIENT_ID] === S.sentId;
   host.innerHTML = `
     <div class="nbsend ${linked?'on':'off'}">
       <b>${linked ? 'Their app is linked' : 'Their app is not linked'}</b>
       <small>${linked
-        ? `Releasing a day sends it straight to ${esc(A.name||'them')}. Their app takes it on the next open.${
-            sentAt ? ` Last sent ${esc(sentAt.toLocaleString())}.` : ' Nothing sent yet.'}`
+        ? `Releasing a day sends it straight to ${esc(A.name||'them')}. Their app takes it on the next open.`
         : `${esc(A.name||CLIENT_ID)} has a local record, not a database one, so nothing here can reach a
            phone by itself. That happens when the survey was filled in anywhere other than on their own
            phone. Either have them fill it there, or use the link below, which works regardless.`}</small>
-      ${linked ? `<button class="btn" id="relPush">Send the program now</button>` : ''}
+      ${linked ? `
+        <div class="nbsendstate">
+          <span class="s ${sentAt?'on':''}"><i>${sentAt?'\u2713':'\u25CB'}</i>
+            <b>Sent</b><em>${sentAt ? esc(sentAt.toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'}))
+              + ', ' + esc(sentAt.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})) : 'not yet'}</em></span>
+          <span class="s ${got?'on':''}"><i>${got?'\u2713':'\u25CB'}</i>
+            <b>Received</b><em>${got ? 'open on their phone'
+              : sentAt ? 'waiting for them to open the app' : '\u2014'}</em></span>
+        </div>
+        <button class="btn primary big" id="relPush">${sentAt ? 'Send again' : 'Save and send to '+esc(A.name||'them')}</button>` : ''}
     </div>
     <p style="margin:0 0 10px">Sending <b>${days} day${days===1?'':'s'}</b> to <b>${esc(A.name||CLIENT_ID)}</b>,
       <b>${live}</b> of them released. Opening this on their phone sets them to <b>active</b> and their
@@ -6794,7 +6817,7 @@ function drawRelease2(){
       released: S.released || null, clientName: A.name || null });
     push.disabled = false; push.textContent = 'Send the program now';
     if(r && r.ok){
-      S.sentAt = new Date().toISOString(); save(1);
+      S.sentAt = new Date().toISOString(); S.sentId = r.id || null; save(1);
       if(typeof tellThem === 'function') tellThem('program');
       toast(`Sent. ${esc(A.name||'They')} will see it the next time the app opens.`);
       drawRelease2();
@@ -6885,6 +6908,8 @@ loadProgram().then(() => { drawClients(); drawAddClient(); drawRelease2(); });
    answer: the console carries on with what this browser already knows,
    because a coach who cannot reach the internet still has to be able
    to write a program. */
+const NB_SEEN = {};
+
 function pullFromCloud(announce){
   if(typeof window.fjPullClients !== 'function') return Promise.resolve();
   return window.fjPullClients().then(function(r){
@@ -6892,6 +6917,9 @@ function pullFromCloud(announce){
       if(announce && r && r.reason) toast(r.reason);
       return;
     }
+    /* Every client's users row carries the id of the program their phone
+       last took. Kept here so the Send it panel can say "received". */
+    r.clients.forEach(c => { if(c.user && c.user.programId) NB_SEEN[c.user.id] = c.user.programId; });
     const known = new Set(lsGet(INTAKES_LS).map(i => i.userId));
     const hidden = hiddenClients();
     let fresh = 0;
@@ -7059,6 +7087,16 @@ addEventListener('visibilitychange', function(){
      device that has never been this coach */
   window.fjCloudSendLink = cloudSendLink;
   window.fjNotify = notify;
+
+  /* THE SAME UPDATE BAR THE APP AND THE TIMER SHOW. The console is a page
+     served through the offline cache like every other, so it can sit on
+     an old build for days with nothing saying so - and a coach wondering
+     whether a fix has landed has no way to tell. "Update ready · Refresh"
+     when the site is newer, "Updated" with the line from whatsnew.json
+     once after refreshing. */
+  import('./js/update-banner.js')
+    .then(m => { m.announceUpdate(); m.watchForUpdates(); })
+    .catch(() => {});
 
   /* The console is already drawn by now — see the note beside
      fjOnCloudReady. This is the handshake back. */

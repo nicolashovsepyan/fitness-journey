@@ -7174,7 +7174,7 @@ loadTheme().then(()=>go(S.tab||'today'));   /* then again from the spine, if rea
      same way a link would: the Program row the runner reads and the coach
      record the page rebuilds it from, then one reload so every screen
      reads it. Nothing newer, nothing happens; no identity, nothing happens. */
-  import { fetchMyProgram } from './js/core/backend.js';
+  import { fetchMyProgram, ackProgram } from './js/core/backend.js';
   async function takeCloudProgram() {
     try {
       const user = localStorage.getItem('fj.user');
@@ -7217,6 +7217,10 @@ loadTheme().then(()=>go(S.tab||'today'));   /* then again from the spine, if rea
           if (pr && pr.a) { pr.a.name = nm; localStorage.setItem(pk, JSON.stringify(pr)); }
         });
       }
+      /* Tell the coach it landed, before the reload takes this frame
+         away. Allowed to fail: a receipt that does not arrive must never
+         stop somebody training. */
+      ackProgram(p.id).catch(() => {});
       localStorage.setItem(stamp, String(p.updatedAt));
       /* A PROGRAM ARRIVED AND NOTHING SAID SO.
 

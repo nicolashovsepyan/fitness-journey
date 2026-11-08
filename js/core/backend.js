@@ -311,6 +311,36 @@ export async function publishProgram({ clientId, program, released = null, clien
   }
 }
 
+/** THE PHONE SAYS IT GOT IT.
+ *
+ *  A coach releasing a program could see that the write succeeded and
+ *  never that anybody received it, which is the half that matters: "sent"
+ *  is about this computer, "received" is about them.
+ *
+ *  No schema change and no new policy: `program_id` is already on the
+ *  users row and means exactly this, `users_update_self` already lets a
+ *  person write their own row, and `users_read_own_clients` already lets
+ *  their coach read it. The phone stamps the id of the program it took;
+ *  the console compares it with the id it published.
+ *
+ *  Allowed to fail and silent when it does. A receipt that does not
+ *  arrive must never stop somebody training. */
+export async function ackProgram(programId) {
+  const c = cloud();
+  if (!c || !c.userId || !programId) return { ok: false, reason: 'not signed in' };
+  try {
+    const a = cloudAdapter();
+    const me = await a.getUser(c.userId);
+    if (!me) return { ok: false, reason: 'no row yet' };
+    if (me.programId === programId) return { ok: true, already: true };
+    await a.saveUser({ ...me, programId, status: 'active',
+      updatedAt: new Date().toISOString() });
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, reason: readable(e) };
+  }
+}
+
 export async function fetchMyProgram() {
   const c = cloud();
   if (!c || !c.userId) return { ok: false, reason: 'not signed in' };
