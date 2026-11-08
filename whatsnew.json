@@ -1,6 +1,9 @@
 {
-  "version": "2026-11-08.3",
+  "version": "2026-11-08.4",
   "notes": [
+    "Coach console: tapping a movement now opens the whole block. The mode, the rounds and the rest are at the top, every movement is listed under them with the joins drawn between, and you can join, break, reorder, swap, add and remove without closing it.",
+    "Coach console: a superset looks like a superset. Joined movements share a bracket down the side, and Straight blocks have a join to the next one button between every pair.",
+    "Coach console: drag a block out of the day and drop it on the red strip to delete it.",
     "Coach console: fold a block down to a single ribbon, and Close every block or Open every block in one tap, so the one you are writing is at the top of the screen.",
     "Coach console: Open a program now shows when each one was written and when it was last edited.",
     "Five and Soccer: the big upper day moved to Saturday. Thursday, the morning after the match, is now 14 minutes - push-ups on the minute and ten minutes of stretching.",

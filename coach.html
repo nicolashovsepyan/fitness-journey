@@ -1102,6 +1102,84 @@ button.nbnum.jump:hover{ opacity:1; border-color:var(--accent); color:var(--acce
 .nbblock.fold:not(.peek) .nbfold{ padding-top:5px; padding-bottom:5px; opacity:.72 }
 .nbblock.fold:not(.peek) .nbfold:hover{ opacity:1 }
 
+/* THE SHEET IS THE BLOCK, so it is wider than one movement's numbers and
+   it is divided: how it runs, the movements, the note. */
+.nbsheet.wide{ width:min(620px,100%) }
+.nbsheetnm{ flex:1; min-width:0; font:700 16px/1.2 inherit; color:var(--ink);
+  background:none; border:none; border-bottom:1px dashed var(--line); padding:3px 2px }
+.nbsheetnm:focus{ outline:none; border-bottom-color:var(--accent) }
+.nbsec{ padding:14px 0; border-top:1px solid var(--line) }
+.nbsec:first-child{ border-top:none; padding-top:4px }
+.nbsec h4{ margin:0 0 9px; font:700 11px/1 inherit; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--ink3); display:flex; align-items:baseline; gap:8px }
+.nbsec h4 small{ font:600 11px/1 ui-monospace,monospace; letter-spacing:0;
+  text-transform:none; color:var(--ink4) }
+.nbmoderow{ display:flex; flex-wrap:wrap; gap:4px }
+.nbmoderow button{ flex:1 1 auto; cursor:pointer; font:650 12px inherit; padding:7px 9px;
+  border:1px solid var(--line); background:var(--sunk); color:var(--ink2); border-radius:9px }
+.nbmoderow button:hover{ border-color:var(--accent); color:var(--accent) }
+.nbmoderow button.on{ background:var(--accent); border-color:var(--accent); color:var(--accent-on) }
+.nbmodewhy{ margin:7px 0 0; font-size:11.5px; color:var(--ink3) }
+.nbbigs{ display:flex; flex-wrap:wrap; gap:14px }
+.nbbigs > .nbbig{ flex:1 1 140px; min-width:0; border-bottom:0; padding:10px 0 0 }
+.nbbigs .nbbigrow input,.nbmbody .nbbigrow input{ font-size:21px }
+.nbbigs .nbbigrow button,.nbmbody .nbbigrow button{ width:32px; height:32px; font-size:15px }
+.nbbigs .nbbigchips,.nbmbody .nbbigchips{ margin-top:6px; gap:4px }
+.nbbigs .nbbigchips button,.nbmbody .nbbigchips button{ padding:2px 8px; font-size:10.5px }
+.nbnotein{ width:100%; font:inherit; font-size:13px; color:var(--ink); resize:vertical;
+  background:var(--tint); border:1px solid var(--line); border-radius:8px; padding:8px 10px }
+
+/* ONE ROW PER MOVEMENT, AND THE JOIN DRAWN BETWEEN THEM. A superset that
+   reads as two unrelated lines is the thing he could not see. */
+.nbtieall{ margin:0 0 9px; font-size:12px; color:var(--ink3);
+  background:var(--tint); border-radius:8px; padding:7px 10px }
+.nbmoves{ display:flex; flex-direction:column; gap:4px }
+.nbmrow{ position:relative; border:1px solid var(--line); border-radius:9px;
+  background:var(--card,var(--tint)); padding-left:11px }
+.nbmrow.on{ border-color:var(--accent) }
+.nbmtie{ position:absolute; left:4px; top:0; bottom:0; width:3px; border-radius:2px; background:none }
+.nbmrow.tied > .nbmtie{ background:var(--accent) }
+.nbmrow.tied.tfirst > .nbmtie{ top:9px }
+.nbmrow.tied.tlast  > .nbmtie{ bottom:9px }
+.nbmhead{ display:flex; align-items:center; gap:9px; width:100%; text-align:left;
+  background:none; border:none; cursor:pointer; padding:9px 10px 9px 4px; color:inherit }
+.nbmhead:hover{ background:color-mix(in srgb, var(--accent) 7%, transparent) }
+.nbmlt{ font:700 11px/1 ui-monospace,monospace; color:var(--ink4); width:13px; flex:none }
+.nbmnm{ flex:1; min-width:0; display:flex; flex-direction:column; gap:2px }
+.nbmnm b{ font-weight:600; font-size:13px; color:var(--ink) }
+.nbmnm em{ font-style:normal; font:600 11px ui-monospace,monospace; color:var(--ink3) }
+.nbmchev{ font-size:9px; color:var(--ink4); flex:none }
+.nbmbody{ padding:2px 11px 11px; display:flex; flex-wrap:wrap; gap:14px }
+.nbmbody > .nbbig{ flex:1 1 140px; min-width:0; border-bottom:0; padding:4px 0 0 }
+.nbmacts{ flex:1 1 100%; display:flex; flex-wrap:wrap; gap:14px; padding-top:4px;
+  border-top:1px solid var(--line) }
+.nbmacts .nblnk:disabled{ opacity:.3; cursor:default }
+.nblnk.warn{ color:var(--bad,#c0392b) }
+.btn.warn{ color:var(--bad,#c0392b); border-color:color-mix(in srgb, var(--bad,#c0392b) 40%, transparent) }
+.nbjoin{ display:block; width:calc(100% - 22px); margin:0 11px 8px; padding:4px 9px;
+  font:600 11px/1.3 inherit; text-align:left; cursor:pointer; border-radius:0 0 7px 7px;
+  color:var(--ink4); background:none; border:1px dashed var(--line); border-top:none }
+.nbjoin:hover{ color:var(--accent); border-color:var(--accent) }
+.nbjoin.on{ color:var(--accent); border-style:solid;
+  border-color:color-mix(in srgb, var(--accent) 45%, transparent);
+  background:color-mix(in srgb, var(--accent) 9%, transparent) }
+
+/* DRAG A BLOCK OUT TO DELETE IT. Nothing to see until a block is in the
+   air, and then it is the only thing at the bottom of the day. */
+.nbtrash{ display:none }
+body.nbdragblock .nbtrash{ display:flex; align-items:center; justify-content:center;
+  margin:8px 0; padding:14px; border:2px dashed color-mix(in srgb, var(--bad,#c0392b) 55%, transparent);
+  border-radius:11px; color:var(--bad,#c0392b); font-size:12px;
+  background:color-mix(in srgb, var(--bad,#c0392b) 6%, transparent) }
+body.nbdragblock .nbtrash.over{ border-style:solid;
+  background:color-mix(in srgb, var(--bad,#c0392b) 16%, transparent) }
+
+/* THE CROSS ON THE BANNER, LEGIBLE. It was 9px of --ink4, which on a
+   tinted banner is a smudge - he looked for it twice and did not find it. */
+.nbfold .nbdel{ font-size:15px; line-height:1; padding:2px 5px; border-radius:5px;
+  color:var(--ink3) }
+.nbfold .nbdel:hover{ color:#fff; background:var(--bad,#c0392b) }
+
 /* The two day-level actions on one row: add a block, and fold the lot. */
 .nbdayacts{ display:flex; align-items:center; gap:12px; margin-top:4px }
 .nbdayacts .btn.wide{ flex:1 }
@@ -5005,7 +5083,7 @@ let nbDragBlock = null;
    decision, not a single pick. It closes on Done, on Escape, and on the
    backdrop.
    ============================================================ */
-let nbSheet = null;                       // {kind:'move'|'block', bi, ii}
+let nbSheet = null;                       // {bi, ii} - ii is the focused movement, or null
 
 const NB_CHIPS = {
   reps: [5,6,8,10,12,15,20],
@@ -5036,91 +5114,171 @@ addEventListener('keydown', e => {
   if(e.key === 'Escape' && nbSheet){ e.preventDefault(); nbCloseSheet(); }
 });
 
-function nbOpenMoveSheet(bi,ii){ nbSheet = {kind:'move',bi,ii}; drawProgram(); }
-function nbOpenBlockSheet(bi){ nbSheet = {kind:'block',bi}; drawProgram(); }
+function nbOpenMoveSheet(bi,ii){ nbSheet = {bi,ii}; drawProgram(); }
+function nbOpenBlockSheet(bi){ nbSheet = {bi,ii:null}; drawProgram(); }
 function nbCloseSheet(){ nbSheet = null; drawProgram(); }
 
+/* ONE POPUP, THE WHOLE BLOCK.
+
+   The first version had two sheets: one for a movement and one for the
+   block it sits in. Tapping a dip opened the dip, and the dip on its own
+   is not the thing you are writing. You are writing "three rounds of a
+   dip into a row, 75 seconds between" - and the sheet showed you a dip,
+   with a line of small print saying the rounds were somewhere else.
+
+   So there is one sheet now, and it is the block. How it runs is at the
+   top with its rounds and its rest. Every movement in it is listed under
+   that, in order, with the joins drawn between them, so a superset looks
+   like a superset. Tapping a movement opens its numbers in place and
+   leaves the rest of the block on screen around it. You can join, break,
+   reorder, swap, add and remove without closing anything, and the block
+   is finished when you say Done.
+
+   Opening it from a movement focuses that movement. Opening it from the
+   gear focuses nothing, which is the right start when what you came to
+   change is the mode. */
 function nbSheetHTML(){
   if(!nbSheet) return '';
   const day = PROG.days[PDAY]; if(!day) return '';
-  const b = (day.blocks||[])[nbSheet.bi]; if(!b) return '';
-  const spec = NB_SPEC[b.type || 'Straight'] || NB_SPEC.Straight;
-  let body = '', title = '', sub = '';
+  const bi = nbSheet.bi, b = (day.blocks||[])[bi]; if(!b) return '';
+  const type = b.type || 'Straight';
+  const spec = NB_SPEC[type] || NB_SPEC.Straight;
+  const items = b.items || [];
+  /* A Straight block is the only one where joining two movements means
+     anything of its own: everything else already runs its movements
+     together by definition, and a "join" inside a circuit is a promise
+     the engine cannot keep. */
+  const canJoin = type === 'Straight';
 
-  if(nbSheet.kind === 'move'){
-    const it = (b.items||[])[nbSheet.ii]; if(!it) return '';
-    const m = MV(it.ex), pr = nbParse(it.pres);
-    title = m.n; sub = [m.g,(m.p||[])[0]].filter(Boolean).join(' · ');
+  /* The run of movements this one belongs to, so the bracket knows where
+     it starts and ends. */
+  const runOf = ii => {
+    const sg = items[ii] && items[ii].sg;
+    if(sg == null) return { first:true, last:true, n:1 };
+    let a = ii, z = ii;
+    while(a > 0 && items[a-1].sg === sg) a--;
+    while(z < items.length-1 && items[z+1].sg === sg) z++;
+    return { first:a === ii, last:z === ii, n:z-a+1 };
+  };
+
+  const rows = items.map((it, ii) => {
+    const m = MV(it.ex), pr = nbParse(it.pres), on = nbSheet.ii === ii;
+    const r = canJoin ? runOf(ii) : { first:ii===0, last:ii===items.length-1, n:items.length };
+    const tied = canJoin ? (it.sg != null && r.n > 1) : items.length > 1;
+    const letter = canJoin && tied
+      ? String.fromCharCode(65+ii) : (type==='Straight' ? String.fromCharCode(65+ii) : ii+1);
     const unit = pr.mins ? 'min' : pr.hold ? 'sec' : 'reps';
-    body = `
-      ${spec.item.indexOf('sets') >= 0
-        ? nbBig({ label:'Sets', val:pr.told?pr.sets:null, def:3, unit:'×',
-                  chips:NB_CHIPS.sets, on:'nbSheetNum.bind(null,\'sets\')' })
-        : `<p class="nbbignote">The rounds are on the block. Open its settings to change them.</p>`}
-      ${spec.item.indexOf('val') >= 0
-        ? nbBig({ label: pr.hold ? 'Hold' : 'Reps', val:pr.val, def:10, unit,
-                  step: pr.hold ? 5 : 1,
-                  chips: pr.hold ? NB_CHIPS.sec : NB_CHIPS.reps,
-                  on:'nbSheetNum.bind(null,\'val\')',
-                  note:`<button class="nblnk" onclick="nbSheetUnit()">Count this in ${
-                    pr.hold ? 'reps' : 'seconds'} instead</button>` })
-        : `<p class="nbbignote">The clock decides this one. Open the block's settings.</p>`}
-      ${spec.item.indexOf('rest') >= 0
-        ? nbBig({ label:'Rest between sets', val:nbRestOf(it,b), def:90, unit:'sec', step:15,
-                  chips:NB_CHIPS.rest, on:'nbSheetNum.bind(null,\'rest\')' })
-        : `<p class="nbbignote">The rest is on the block.</p>`}
-      ${nbBig({ label:'Starting weight', val:it.weight, def:0, unit:'lb', step:5,
-                on:'nbSheetNum.bind(null,\'weight\')',
-                note:'Left empty it follows whatever they last logged.' })}
-      <div class="nbbig">
-        <label>Tempo</label>
-        <input class="nbtempoin" type="text" placeholder="3-1-1" value="${esc(it.tempo||'')}"
-               onchange="nbSheetTempo(this.value)">
-        <p class="nbbignote">Seconds down, pause, up.</p>
-      </div>`;
-  } else {
-    title = b.name || 'Block';
-    sub = 'How this block runs';
-    body = `
-      <div class="nbbig">
-        <label>Name</label>
-        <input class="nbtempoin" type="text" value="${esc(b.name||'')}" placeholder="Name this block"
-               onchange="nbSetBlock(${nbSheet.bi},'name',this.value)">
-      </div>
-      <div class="nbbig">
-        <label>Part of the session</label>
-        <div class="nbseg wide">${['Prime','Work','Finish'].map(r=>
-          `<button class="${b.role===r?'on':''}"
-            onclick="nbSetBlock(${nbSheet.bi},'role','${r}')">${r}</button>`).join('')}</div>
-      </div>
-      <div class="nbbig">
-        <label>How it runs</label>
-        <div class="nbmodes">${NB_TYPES.map(t=>
-          `<button class="nbmode ${(b.type||'Straight')===t?'on':''}"
-            onclick="nbSetType(${nbSheet.bi},'${t}')">
-            <b>${t}</b><small>${esc(NB_SPEC[t].blurb)}</small></button>`).join('')}</div>
-      </div>
-      ${spec.block.map(k => { const f = NB_FIELD[k];
-        return nbBig({ label:f[0][0].toUpperCase()+f[0].slice(1),
-          val: b.cfg && b.cfg[k] != null ? b.cfg[k] : null, def: NB_DEF[k],
-          unit: f[1] || '', step: k==='rest' ? 15 : 1,
-          chips: k==='rounds' ? NB_CHIPS.rounds : k==='rest' ? NB_CHIPS.rest : null,
-          on:`nbSheetCfg.bind(null,'${k}')` });
-      }).join('')}`;
-  }
+    const summary = [
+      it.pres || '',
+      spec.item.indexOf('rest') >= 0 && nbRestOf(it,b) != null ? nbRestOf(it,b)+'s rest' : '',
+      it.weight != null ? it.weight+' lb' : '',
+      it.tempo ? 'tempo '+it.tempo : '',
+    ].filter(Boolean).join(' \u00B7 ');
+
+    return `<div class="nbmrow ${on?'on':''} ${tied?'tied':''} ${tied&&r.first?'tfirst':''} ${
+                 tied&&r.last?'tlast':''}">
+      <span class="nbmtie" aria-hidden="true"></span>
+      <button class="nbmhead" onclick="nbSheetFocus(${on?'null':ii})">
+        <span class="nbmlt">${letter}</span>
+        <span class="dot" style="--c:${NBC(m.g)}"></span>
+        <span class="nbmnm"><b>${esc(m.n)}${m.f?'<u class="fundtag">Fundamental</u>':''}</b>
+          <em>${esc(summary) || 'nothing set yet'}</em></span>
+        <span class="nbmchev">${on?'\u25B4':'\u25BE'}</span>
+      </button>
+      ${on ? `<div class="nbmbody">
+        ${spec.item.indexOf('sets') >= 0
+          ? nbBig({ label:'Sets', val:pr.told?pr.sets:null, def:3, unit:'\u00D7',
+                    chips:NB_CHIPS.sets, on:'nbSheetNum.bind(null,\'sets\')' })
+          : `<p class="nbbignote">The rounds belong to the block - they are at the top of this sheet.</p>`}
+        ${spec.item.indexOf('val') >= 0
+          ? nbBig({ label: pr.hold ? 'Hold' : 'Reps', val:pr.val, def:10, unit,
+                    step: pr.hold ? 5 : 1,
+                    chips: pr.hold ? NB_CHIPS.sec : NB_CHIPS.reps,
+                    on:'nbSheetNum.bind(null,\'val\')',
+                    note:`<button class="nblnk" onclick="nbSheetUnit()">Count this in ${
+                      pr.hold ? 'reps' : 'seconds'} instead</button>` })
+          : `<p class="nbbignote">The clock decides this one.</p>`}
+        ${spec.item.indexOf('rest') >= 0
+          ? nbBig({ label:'Rest after the set', val:nbRestOf(it,b), def:90, unit:'sec', step:15,
+                    chips:NB_CHIPS.rest, on:'nbSheetNum.bind(null,\'rest\')' })
+          : ''}
+        ${nbBig({ label:'Starting weight', val:it.weight, def:0, unit:'lb', step:5,
+                  on:'nbSheetNum.bind(null,\'weight\')',
+                  note:'Left empty it follows whatever they last logged.' })}
+        <div class="nbbig">
+          <label>Tempo</label>
+          <input class="nbtempoin" type="text" placeholder="3-1-1" value="${esc(it.tempo||'')}"
+                 onchange="nbSheetTempo(this.value)">
+          <p class="nbbignote">Seconds down, pause, up.</p>
+        </div>
+        <div class="nbmacts">
+          <button class="nblnk" onclick="nbSheetMove(${ii},-1)" ${ii===0?'disabled':''}>Move up</button>
+          <button class="nblnk" onclick="nbSheetMove(${ii},1)" ${ii===items.length-1?'disabled':''}>Move down</button>
+          <button class="nblnk" onclick="nbSheetSwap(${ii})">Change movement</button>
+          <button class="nblnk warn" onclick="nbSheetDelete(${ii})">Remove</button>
+        </div>
+      </div>` : ''}
+      ${canJoin && ii < items.length-1 ? `<button class="nbjoin ${
+          items[ii].sg != null && items[ii+1].sg === items[ii].sg ? 'on' : ''}"
+          onclick="nbSheetJoin(${ii})">${
+          items[ii].sg != null && items[ii+1].sg === items[ii].sg
+            ? 'joined \u2014 back to back, no rest between. Tap to break'
+            : 'join to the next one \u2014 make it a superset'}</button>` : ''}
+    </div>`;
+  }).join('');
 
   return `<div class="nbsheetwrap" onclick="nbCloseSheet()">
-    <div class="nbsheet" role="dialog" aria-label="${esc(title)}" onclick="event.stopPropagation()">
+    <div class="nbsheet wide" role="dialog" aria-label="${esc(b.name||'Block')}"
+         onclick="event.stopPropagation()">
       <div class="nbsheethd">
-        <span><b>${esc(title)}</b><small>${esc(sub)}</small></span>
-        ${nbSheet.kind === 'move'
-          ? `<button class="nblnk" onclick="nbSheetSwap()">Change movement</button>` : ''}
+        <input class="nbsheetnm" type="text" value="${esc(b.name||'')}" placeholder="Name this block"
+               onchange="nbSetBlock(${bi},'name',this.value)">
         <button class="nbpickx" title="Done (Esc)" onclick="nbCloseSheet()">&times;</button>
       </div>
-      <div class="nbsheetbody">${body}</div>
+      <div class="nbsheetbody">
+
+        <section class="nbsec">
+          <h4>How this block runs</h4>
+          <div class="nbmoderow">${NB_TYPES.map(t =>
+            `<button class="${type===t?'on':''}" title="${esc(NB_SPEC[t].blurb)}"
+              onclick="nbSheetType('${t}')">${t}</button>`).join('')}</div>
+          <p class="nbmodewhy">${esc(spec.blurb)}</p>
+          ${spec.block.length ? `<div class="nbbigs">${spec.block.map(k => {
+            const f = NB_FIELD[k];
+            return nbBig({ label:f[0][0].toUpperCase()+f[0].slice(1),
+              val: b.cfg && b.cfg[k] != null ? b.cfg[k] : null, def: NB_DEF[k],
+              unit: f[1] || '', step: k==='rest' ? 15 : 1,
+              chips: k==='rounds' ? NB_CHIPS.rounds : k==='rest' ? NB_CHIPS.rest : null,
+              on:`nbSheetCfg.bind(null,'${k}')` });
+          }).join('')}</div>` : `<p class="nbbignote">Straight sets: each movement carries its own
+             sets, reps and rest, below.</p>`}
+          <div class="nbbig">
+            <label>Part of the session</label>
+            <div class="nbseg wide">${['Prime','Work','Finish'].map(r =>
+              `<button class="${b.role===r?'on':''}"
+                onclick="nbSetBlock(${bi},'role','${r}');nbSheetRedraw()">${r}</button>`).join('')}</div>
+          </div>
+        </section>
+
+        <section class="nbsec">
+          <h4>The movements ${items.length ? `<small>${nbMins(b)} min${
+            nbShape(b) ? ' \u00B7 ' + nbShape(b) : ''}</small>` : ''}</h4>
+          ${!canJoin && items.length > 1 ? `<p class="nbtieall">All ${items.length} run together
+            as one ${type.toLowerCase()}. ${
+            type==='Superset'||type==='Circuit' ? 'The rest above is taken after the last one, not between them.'
+            : 'The clock decides the order.'}</p>` : ''}
+          <div class="nbmoves">${rows || '<p class="nbbignote">Nothing in this block yet.</p>'}</div>
+          <button class="nbaddit" onclick="nbSheetAdd()">+ Add a movement</button>
+        </section>
+
+        <section class="nbsec">
+          <h4>Coach's note</h4>
+          <textarea class="nbnotein" rows="2" placeholder="What you want them to know about this block"
+            onchange="nbSetBlock(${bi},'note',this.value);nbSheetRedraw()">${esc(b.note||'')}</textarea>
+        </section>
+      </div>
       <div class="nbsheetft">
-        ${nbSheet.kind === 'move'
-          ? `<button class="btn" onclick="nbSheetDelete()">Remove from the block</button>` : ''}
+        <button class="btn warn" onclick="nbSheetDelBlock()">Delete this block</button>
         <span class="sp"></span>
         <button class="btn primary" onclick="nbCloseSheet()">Done</button>
       </div>
@@ -5128,9 +5286,12 @@ function nbSheetHTML(){
 }
 
 /* The sheet edits through the same setters the rows always used, so
-   nothing here is a second way to write a program. */
+   nothing here is a second way to write a program. Each one puts the
+   sheet back afterwards, because every setter ends at drawProgram(). */
+function nbSheetRedraw(){ const k = nbSheet; nbSheet = k; drawProgram(); }
+function nbSheetFocus(ii){ if(!nbSheet) return; nbSheet = { bi:nbSheet.bi, ii }; drawProgram(); }
 function nbSheetNum(f, v){
-  if(!nbSheet) return;
+  if(!nbSheet || nbSheet.ii == null) return;
   const keep = nbSheet;
   nbSetNum(keep.bi, keep.ii, f, v === '' ? '' : String(Math.max(0, +v || 0)));
   nbSheet = keep; drawProgram();
@@ -5140,14 +5301,45 @@ function nbSheetCfg(k, v){
   nbSetCfg(keep.bi, k, String(Math.max(0, +v || 0)));
   nbSheet = keep; drawProgram();
 }
-function nbSheetTempo(v){ if(!nbSheet) return; const k = nbSheet;
+function nbSheetType(t){ if(!nbSheet) return; const k = nbSheet;
+  nbSetType(k.bi, t); nbSheet = k; nbSel = null; drawProgram(); }
+function nbSheetTempo(v){ if(!nbSheet || nbSheet.ii == null) return; const k = nbSheet;
   nbSetTempo(k.bi, k.ii, v); nbSheet = k; drawProgram(); }
-function nbSheetUnit(){ if(!nbSheet) return; const k = nbSheet;
+function nbSheetUnit(){ if(!nbSheet || nbSheet.ii == null) return; const k = nbSheet;
   nbToggleUnit(k.bi, k.ii); nbSheet = k; drawProgram(); }
-function nbSheetDelete(){ if(!nbSheet) return; const k = nbSheet;
-  nbDel(k.bi, k.ii); nbSheet = null; drawProgram(); }
-function nbSheetSwap(){ if(!nbSheet) return; const k = nbSheet;
-  nbSheet = null; nbPickReset(); nbSwap = k.bi + ':' + k.ii; drawProgram(); }
+function nbSheetJoin(ii){ if(!nbSheet) return; const k = nbSheet;
+  nbToggleJoin(k.bi, ii); nbSheet = k; drawProgram(); }
+function nbSheetMove(ii, dir){
+  if(!nbSheet) return; const k = nbSheet, bi = k.bi;
+  const its = PROG.days[PDAY].blocks[bi].items, j = ii + dir;
+  if(j < 0 || j >= its.length) return;
+  nbAt(bi);
+  [its[ii], its[j]] = [its[j], its[ii]];
+  nbSheet = { bi, ii:j }; nbSave(); nbSheet = { bi, ii:j }; drawProgram();
+}
+/* REMOVING THE LAST MOVEMENT REMOVES THE BLOCK. nbDel has always done
+   that, and a sheet pointing at a block that no longer exists renders
+   nothing - so the sheet closes with it rather than going blank. */
+function nbSheetDelete(ii){
+  if(!nbSheet) return; const bi = nbSheet.bi;
+  const last = (PROG.days[PDAY].blocks[bi].items || []).length <= 1;
+  nbDel(bi, ii);
+  nbSheet = last ? null : { bi, ii:null };
+  drawProgram();
+}
+function nbSheetDelBlock(){
+  if(!nbSheet) return; const bi = nbSheet.bi;
+  const before = (PROG.days[PDAY].blocks || []).length;
+  nbDelBlock(bi);
+  if((PROG.days[PDAY].blocks || []).length < before) nbSheet = null;
+  drawProgram();
+}
+/* Adding goes through the picker, which is the full search with the
+   filters and the suggestions on it - not a second, smaller one. */
+function nbSheetAdd(){ if(!nbSheet) return; const bi = nbSheet.bi;
+  nbSheet = null; nbPickInto(bi); }
+function nbSheetSwap(ii){ if(!nbSheet) return; const k = nbSheet;
+  nbSheet = null; nbPickReset(); nbSwap = k.bi + ':' + (ii != null ? ii : k.ii); drawProgram(); }
 
 function nbBlockKey(e, bi){
   if(!e.altKey) return;
@@ -5164,6 +5356,23 @@ function nbBlockDrag(e, bi){
 function nbBlockEnd(){
   nbDragBlock = null;
   document.body.classList.remove('nbdragging', 'nbdragblock');
+  document.querySelector('.nbtrash.over')?.classList.remove('over');
+}
+/* The strip under the day. It accepts a block and nothing else: a
+   movement dragged onto it is a near miss on the way to another block,
+   and deleting it because the aim was off is not what was asked. */
+function nbTrashOver(e){
+  if(nbDragBlock == null) return;
+  e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+  e.currentTarget.classList.add('over');
+}
+function nbTrashOut(e){ e.currentTarget.classList.remove('over'); }
+function nbTrashDrop(e){
+  if(nbDragBlock == null) return;
+  e.preventDefault(); e.stopPropagation();
+  const bi = nbDragBlock;
+  nbBlockEnd();
+  nbDelBlock(bi);
 }
 function nbBlockDrop(bi){
   const from = nbDragBlock, blocks = PROG.days[PDAY].blocks;
@@ -5985,7 +6194,16 @@ function nbMiddle(){
 
   {
     const n = (day.blocks||[]).length, shut = (day.blocks||[]).filter((_,i)=>nbPeek.has(i)).length;
-    h += `<div class="nbdayacts">
+    /* DRAG IT OUT TO GET RID OF IT. The cross on the banner is there and
+       he could not find it twice, which makes it the wrong answer however
+       many times it is pointed at. Picking the block up and dropping it
+       out of the day is the gesture people already know from every phone
+       they own, and the strip only exists while something is in the air,
+       so it is never one more control to read. */
+    h += `<div class="nbtrash" ondragover="nbTrashOver(event)" ondragleave="nbTrashOut(event)"
+                ondrop="nbTrashDrop(event)">
+       <b>Drop here to delete this block</b></div>
+     <div class="nbdayacts">
       <button class="btn wide" onclick="nbNewBlock()">+ Add a block</button>
       ${n > 1 ? `<button class="lnk" onclick="nbFoldAll(${shut < n})">${
         shut < n ? 'Close every block' : 'Open every block'}</button>` : ''}
