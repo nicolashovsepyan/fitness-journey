@@ -1,6 +1,9 @@
 {
-  "version": "2026-11-08.6",
+  "version": "2026-11-08.7",
   "notes": [
+    "Coach console: Change movement works. It used to close the popup and do nothing; the search opens inside the row now, with the fundamentals filter, the body areas and the progressions for that movement.",
+    "Coach console: in a straight block the sets sit on a bar above the group, not on each movement. Write 4 there and all of them are 4, and a joined pair reads \"3 rounds of the pair\". The rest is taken after the group, where it is actually taken.",
+    "Coach console: dates read 02-Sep-26 instead of Sep 2, so the year is there and they line up.",
     "Coach console: the block popup is in four numbered sections with the same heading on each - how it runs, part of the session, the movements, the note - and the time estimate sits under the movements it is counting.",
     "Coach console: the block popup is one card now. The mode is a row of six, the block says what it does in a line you type numbers into, and every movement is one line with only the fields its mode gives it. The number pads and the 2 3 4 5 6 chips are gone.",
     "Coach console: changing the mode changes the movements with it. Straight to circuit drops the set counts the circuit does not use; circuit back to straight puts them back. A rest written on a row is dropped when the block takes the rest over.",

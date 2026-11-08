@@ -1136,6 +1136,18 @@ button.nbinu.lnkish:hover{ color:var(--accent) }
 .nbrq{ font-size:11.5px; color:var(--ink3); margin:0 3px 0 7px }
 .nbsay{ margin:9px 0 0; font-size:12.5px; color:var(--ink2); line-height:2 }
 
+/* THE BAR THAT OWNS THE GROUP. Reads as a heading for the movements
+   under it, not as another row of its own. */
+.nbgrpbar{ display:flex; align-items:center; flex-wrap:wrap; padding:0 2px 5px 11px }
+.nbgrpbar .nbrq{ margin:0 2px 0 4px }
+.nbmrow + .nbgrpbar{ margin-top:4px }
+
+/* The picker opens in the row, pushing the rest of the block down,
+   because the sheet scrolls and a popover inside it would be clipped. */
+.nbpickslot{ padding:0 10px 10px }
+.nbpickslot .nbpick{ position:static; box-shadow:none; padding:9px 10px 7px }
+.nbmrow.swapping{ border-color:var(--accent) }
+
 .nbest{ margin:9px 0 0; font:600 11px ui-monospace,monospace; color:var(--ink3);
   text-align:right }
 .nbest b{ color:var(--ink2) }
@@ -3069,8 +3081,14 @@ function deleteSavedProgram(id){
    do. Only one shows when both land on the same day, because "made
    today, edited today" is noise. Programs saved before this existed have
    one timestamp, so they get one date. */
-const nbDay = t => { const d = new Date(t);
-  return isNaN(d) ? '' : d.toLocaleDateString(undefined,{ day:'numeric', month:'short' }); };
+/* 02-Sep-26, not "Sep 2". A bare day and month drops the year, which a
+   list of programs written across months badly needs, and "2" beside "12"
+   does not line up. Two digits, the month in letters so 02-03 is never a
+   question, and the year. */
+const NB_MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const nbDay = t => { const d = new Date(t); if(isNaN(d)) return '';
+  return String(d.getDate()).padStart(2,'0') + '-' + NB_MON[d.getMonth()] + '-' +
+         String(d.getFullYear()).slice(-2); };
 function nbWhen(p){
   const made = nbDay(p.madeAt || p.savedAt), upd = nbDay(p.savedAt);
   if(!made && !upd) return '';
@@ -5185,7 +5203,9 @@ function nbBig(o){
 }
 
 addEventListener('keydown', e => {
-  if(e.key === 'Escape' && nbSheet){ e.preventDefault(); nbCloseSheet(); }
+  /* The picker owns Escape while it is open - backing out of a swap is
+     not the same gesture as closing the block. */
+  if(e.key === 'Escape' && nbSheet && !nbSwap){ e.preventDefault(); nbCloseSheet(); }
 });
 
 function nbOpenMoveSheet(bi,ii){ nbSheet = {bi,ii}; drawProgram(); }
@@ -5253,38 +5273,59 @@ function nbSheetHTML(){
      it starts and ends. */
   const runOf = ii => {
     const sg = items[ii] && items[ii].sg;
-    if(sg == null) return { first:true, last:true, n:1 };
+    if(sg == null) return { a:ii, z:ii, first:true, last:true, n:1 };
     let a = ii, z = ii;
     while(a > 0 && items[a-1].sg === sg) a--;
     while(z < items.length-1 && items[z+1].sg === sg) z++;
-    return { first:a === ii, last:z === ii, n:z-a+1 };
+    return { a, z, first:a === ii, last:z === ii, n:z-a+1 };
   };
 
   const rows = items.map((it, ii) => {
     const m = MV(it.ex), pr = nbParse(it.pres), on = nbSheet.ii === ii;
-    const r = canJoin ? runOf(ii) : { first:ii===0, last:ii===items.length-1, n:items.length };
+    const r = canJoin ? runOf(ii) : { a:0, z:items.length-1, first:ii===0,
+                                      last:ii===items.length-1, n:items.length };
     const tied = canJoin ? (it.sg != null && r.n > 1) : items.length > 1;
     const unit = pr.mins ? 'min' : pr.hold ? 'sec' : 'reps';
     const owns = spec.item;
+    const swapping = nbSwap === (bi + ':' + ii);
+
+    /* THE SETS BELONG TO THE GROUP, NOT TO EACH MOVEMENT.
+
+       Almost nothing in a straight block is three sets of one thing and
+       four of the next; it is three sets of the block, or three of the
+       pair and four of the one after it. Typing the same number onto
+       every row was work the model should have been doing, and two rows
+       of a superset left disagreeing is a program that cannot be run.
+
+       So a straight block's sets sit on a bar above each group - a group
+       being a joined run, or a single movement on its own - and writing
+       there writes to every movement under it. The rest goes there too,
+       because the rest in a straight block is taken after the group, not
+       after each movement inside it.
+
+       Every other mode already puts its rounds or its clock on the
+       block, in section 1, so there is no bar: the rows carry reps only. */
+    const bar = (canJoin && r.first) ? `<div class="nbgrpbar">
+        ${nbIn(pr.told ? pr.sets : null, 3, `nbSheetGrpSets.bind(null,${r.a},${r.z})`, '', 34)}
+        <span class="nbrq">${r.n > 1
+          ? 'rounds of ' + (r.n === 2 ? 'the pair' : 'all ' + r.n)
+          : ((pr.told ? pr.sets : 3) === 1 ? 'set' : 'sets')} \u00B7 rest</span>${
+        nbIn(nbRestOf(items[r.z], b), 90, `nbSheetGrpRest.bind(null,${r.a},${r.z})`, 's', 44)}
+        <span class="nbrq">between</span>
+      </div>` : '';
 
     /* The movement's own numbers, and only the ones its mode gives it. */
     let line = '';
     if(!owns.length){
       line = `<span class="nbrq">the clock decides</span>`;
-    } else {
-      if(owns.indexOf('sets') >= 0)
-        line += nbIn(pr.told?pr.sets:null, 3, `nbSheetNum.bind(null,'sets',${ii})`, '×', 34);
-      if(owns.indexOf('val') >= 0)
-        line += nbIn(pr.val, 10, `nbSheetNum.bind(null,'val',${ii})`, '', 42) +
-          `<button class="nbinu lnkish" title="Count this in ${pr.hold?'reps':'seconds'} instead"
-            onclick="event.stopPropagation();nbSheetUnit(${ii})">${unit}${pr.side?'/side':''}</button>`;
-      if(owns.indexOf('rest') >= 0)
-        line += `<span class="nbrq">rest</span>` +
-          nbIn(nbRestOf(it,b), 90, `nbSheetNum.bind(null,'rest',${ii})`, 's', 44);
+    } else if(owns.indexOf('val') >= 0){
+      line = nbIn(pr.val, 10, `nbSheetNum.bind(null,'val',${ii})`, '', 42) +
+        `<button class="nbinu lnkish" title="Count this in ${pr.hold?'reps':'seconds'} instead"
+          onclick="event.stopPropagation();nbSheetUnit(${ii})">${unit}${pr.side?'/side':''}</button>`;
     }
 
-    return `<div class="nbmrow ${on?'on':''} ${tied?'tied':''} ${tied&&r.first?'tfirst':''} ${
-                 tied&&r.last?'tlast':''}">
+    return bar + `<div class="nbmrow ${on?'on':''} ${swapping?'swapping':''} ${tied?'tied':''} ${
+                 tied&&r.first?'tfirst':''} ${tied&&r.last?'tlast':''}">
       <span class="nbmtie" aria-hidden="true"></span>
       <div class="nbmline" onclick="nbSheetFocus(${on?'null':ii})">
         <span class="dot" style="--c:${NBC(m.g)}"></span>
@@ -5293,7 +5334,8 @@ function nbSheetHTML(){
         <button class="nbmmore" title="Weight, tempo, swap, remove"
                 onclick="event.stopPropagation();nbSheetFocus(${on?'null':ii})">${on?'▴':'⋯'}</button>
       </div>
-      ${on ? `<div class="nbmbody">
+      ${swapping ? `<div class="nbpickslot">${nbPickerHTML(bi, ii, m)}</div>` : ''}
+      ${on && !swapping ? `<div class="nbmbody">
         <span class="nbmf"><label>Weight</label>${
           nbIn(it.weight, 0, `nbSheetNum.bind(null,'weight',${ii})`, 'lb', 46)}</span>
         <span class="nbmf"><label>Tempo</label><input class="nbinl" type="text" style="width:56px"
@@ -5301,7 +5343,7 @@ function nbSheetHTML(){
         <span class="sp"></span>
         <button class="nblnk" onclick="nbSheetMove(${ii},-1)" ${ii===0?'disabled':''}>Up</button>
         <button class="nblnk" onclick="nbSheetMove(${ii},1)" ${ii===items.length-1?'disabled':''}>Down</button>
-        <button class="nblnk" onclick="nbSheetSwap(${ii})">Swap</button>
+        <button class="nblnk" onclick="nbSheetSwap(${ii})">Change movement</button>
         <button class="nblnk warn" onclick="nbSheetDelete(${ii})">Remove</button>
       </div>` : ''}
       ${canJoin && ii < items.length-1 ? `<button class="nbjoin ${
@@ -5433,8 +5475,51 @@ function nbSheetDelBlock(){
    filters and the suggestions on it - not a second, smaller one. */
 function nbSheetAdd(){ if(!nbSheet) return; const bi = nbSheet.bi;
   nbSheet = null; nbPickInto(bi); }
-function nbSheetSwap(ii){ if(!nbSheet) return; const k = nbSheet;
-  nbSheet = null; nbPickReset(); nbSwap = k.bi + ':' + (ii != null ? ii : k.ii); drawProgram(); }
+/* CHANGING A MOVEMENT USED TO CLOSE THE BLOCK.
+
+   It set nbSwap and shut the sheet, on the assumption that the picker
+   would appear on the row in the open block editor below - which is the
+   view nobody uses any more, because every block is a banner now. So
+   pressing it did exactly one visible thing: it closed the popup. The
+   picker is rendered inside the row instead, where the movement is. */
+function nbSheetSwap(ii){
+  if(!nbSheet) return;
+  const at = ii != null ? ii : nbSheet.ii; if(at == null) return;
+  nbPickReset();
+  nbSwap = nbSheet.bi + ':' + at;
+  nbSheet = { bi:nbSheet.bi, ii:at };
+  drawProgram();
+}
+
+/* ONE NUMBER FOR THE WHOLE GROUP. Writing straight through the items
+   rather than calling nbSetNum per row, so the program is saved and
+   redrawn once instead of once per movement. */
+function nbSheetGrpSets(a, z, v){
+  if(!nbSheet) return; const keep = nbSheet, bi = keep.bi;
+  const its = PROG.days[PDAY].blocks[bi].items;
+  const n = v === '' ? null : Math.max(1, parseInt(v,10) || 1);
+  nbAt(bi);
+  for(let i = a; i <= z && its[i]; i++){
+    const pr = nbParse(its[i].pres);
+    if(pr.val == null) continue;
+    if(n == null){ pr.sets = 1; pr.told = false; } else { pr.sets = n; pr.told = true; }
+    its[i].pres = nbFmt(pr);
+    if(its[i].plan) nbFitPlan(its[i]);
+  }
+  nbSave(); nbSheet = keep; drawProgram();
+}
+/* The rest in a straight block is taken after the GROUP, so it lives on
+   the last movement in it and nowhere else - two rests inside one run is
+   a rest the runner will take in the middle of a superset. */
+function nbSheetGrpRest(a, z, v){
+  if(!nbSheet) return; const keep = nbSheet, bi = keep.bi;
+  const its = PROG.days[PDAY].blocks[bi].items;
+  const n = v === '' ? null : Math.max(0, parseInt(v,10) || 0);
+  nbAt(bi);
+  for(let i = a; i < z && its[i]; i++) delete its[i].rest;
+  if(its[z]){ if(n == null) delete its[z].rest; else its[z].rest = n; }
+  nbSave(); nbSheet = keep; drawProgram();
+}
 
 function nbBlockKey(e, bi){
   if(!e.altKey) return;
@@ -7135,7 +7220,7 @@ function drawClients(){
       ? REAL_SURVEY.filter(k => itk.answers[k] != null && itk.answers[k] !== '').length : 0;
     const thin = itk && v !== 0 && answered < 3;
     const when = itk && itk.submittedAt
-      ? new Date(itk.submittedAt).toLocaleDateString(undefined,{day:'numeric',month:'short'}) : null;
+      ? nbDay(itk.submittedAt) : null;
     const src = !itk ? null
       : v === 0 ? 'no survey yet'
       : thin ? `from a link, not a survey${when ? ' \u00B7 ' + when : ''}`
