@@ -1,6 +1,7 @@
 {
-  "version": "2026-11-08.9",
+  "version": "2026-11-08.10",
   "notes": [
+    "Fixed: the coach console never asked for a refresh. The update check compared the cached copy against the live one, which only means something on a page a service worker controls, and the console registers none. It remembers what it loaded with now, and asks every minute while it is in front of you.",
     "Coach console: every number is entered the same way now, and it is the work timer way. Tap the value, get plus above and minus below a big figure with the common values as chips, press Done. Sets, rounds, reps, seconds, rest, minutes, caps and weight all go through it.",
     "Coach console: every movement in the picker and in the progressions shows its drawing and a play button for its clip, so you can check it is the one you mean before you take it.",
     "Coach console: dragging shows where it lands. The gap opens under the pointer with a line in it, above or below depending on which half of the row you are over.",

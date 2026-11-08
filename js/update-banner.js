@@ -29,11 +29,23 @@ export async function runningVersion() { return (await whatsNew())?.version || '
    announce one (a home-screen app can miss that and sit on an old build).
    canShow() lets a page hold the bar back, e.g. during a workout. */
 let lastCheck = 0;
+/* THE VERSION THIS PAGE IS ACTUALLY RUNNING, which is not always what
+   the cache says. The check compared "cached" against "live", and that
+   only means something on a page a service worker controls. The coach
+   console registers none, so both fetches hit the same server, the two
+   versions were always equal, and the bar could never fire there - you
+   had to reload and hope. Remembering what the page loaded with answers
+   it on any page: if the site is now serving something else, there is
+   something else to take. */
+let loaded = null;
 export async function checkForUpdate({ manual = false, canShow = () => true } = {}) {
   if (!manual && Date.now() - lastCheck < 60000) return false;
   lastCheck = Date.now();
   const [now, live] = await Promise.all([whatsNew(), whatsNew(true)]);
-  const newer = !!(now?.version && live?.version && live.version !== now.version);
+  if (loaded == null) loaded = now?.version || live?.version || null;
+  const newer = !!(live?.version && (
+    (now?.version && live.version !== now.version) ||      /* a cache is holding an old build */
+    (loaded && live.version !== loaded)));                  /* or the site moved under us */
   if (newer) { try { (await navigator.serviceWorker?.getRegistration())?.update(); } catch (e) {} }
   if (newer && canShow()) updateReady(live);
   else if (manual) toast(newer ? t('An update is ready. Finish your workout, then refresh.') : t("You're on the latest version ({v}).", { v: now?.version || t('this one') }));
@@ -43,6 +55,12 @@ export async function checkForUpdate({ manual = false, canShow = () => true } = 
 export function watchForUpdates(canShow) {
   checkForUpdate({ canShow });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) checkForUpdate({ canShow }); });
+  /* AND WHILE YOU ARE SITTING ON THE PAGE. It asked on open and on coming
+     back to the front, which means a release that lands while the page is
+     in front of you goes unannounced until you leave and return. Every
+     minute, only while visible; checkForUpdate throttles itself to the
+     same minute, so a tab switch and a tick never both pay for it. */
+  setInterval(() => { if (!document.hidden) checkForUpdate({ canShow }); }, 60000);
 }
 function toast(text) {
   style();
