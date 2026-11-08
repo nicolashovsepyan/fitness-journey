@@ -1134,11 +1134,11 @@ button.nbinu.lnkish{ background:none; border:none; cursor:pointer; padding:0 1px
   text-decoration:underline dotted; text-underline-offset:2px }
 button.nbinu.lnkish:hover{ color:var(--accent) }
 .nbrq{ font-size:11.5px; color:var(--ink3); margin:0 3px 0 7px }
-.nbsay{ margin:9px 0 13px; font-size:12.5px; color:var(--ink2); line-height:2 }
+.nbsay{ margin:9px 0 0; font-size:12.5px; color:var(--ink2); line-height:2 }
 
-.nbsheetrole{ flex:none; font:600 11px inherit; color:var(--ink2); cursor:pointer;
-  background:var(--sunk); border:1px solid var(--line); border-radius:7px; padding:4px 6px }
-.nbftmin{ font:600 11px ui-monospace,monospace; color:var(--ink3); margin-right:10px }
+.nbest{ margin:9px 0 0; font:600 11px ui-monospace,monospace; color:var(--ink3);
+  text-align:right }
+.nbest b{ color:var(--ink2) }
 
 .nbmoderow{ display:flex; flex-wrap:wrap; gap:4px }
 .nbmoderow button{ flex:1 1 auto; cursor:pointer; font:650 12px inherit; padding:7px 9px;
@@ -5320,27 +5320,57 @@ function nbSheetHTML(){
       <div class="nbsheethd">
         <input class="nbsheetnm" type="text" value="${esc(b.name||'')}" placeholder="Name this block"
                onchange="nbSetBlock(${bi},'name',this.value)">
-        <select class="nbsheetrole" onchange="nbSetBlock(${bi},'role',this.value);nbSheetRedraw()">
-          ${['Prime','Work','Finish'].map(r =>
-            `<option ${b.role===r?'selected':''}>${r}</option>`).join('')}</select>
         <button class="nbpickx" title="Done (Esc)" onclick="nbCloseSheet()">&times;</button>
       </div>
       <div class="nbsheetbody">
-        <div class="nbmoderow">${NB_TYPES.map(t =>
-          `<button class="${type===t?'on':''}" title="${esc(NB_SPEC[t].blurb)}"
-            onclick="nbSheetType('${t}')">${t}</button>`).join('')}</div>
-        <p class="nbsay">${say}</p>
 
-        <div class="nbmoves">${rows || '<p class="nbbignote">Nothing in this block yet.</p>'}</div>
-        <button class="nbaddit" onclick="nbSheetAdd()">+ Add a movement</button>
+        <!-- FOUR PARTS, ONE HEADING. The sheet had a mode row, a sentence,
+             a list and a textarea running into one another with nothing
+             to say where one ended, so reading it meant working out the
+             grouping every time. Same heading, same rule above it, four
+             times - and then you can land on the part you came for. -->
+        <section class="nbsec">
+          <h4>1 &middot; How this block runs</h4>
+          <div class="nbmoderow">${NB_TYPES.map(t =>
+            `<button class="${type===t?'on':''}" title="${esc(NB_SPEC[t].blurb)}"
+              onclick="nbSheetType('${t}')">${t}</button>`).join('')}</div>
+          <p class="nbsay">${say}</p>
+        </section>
 
-        <textarea class="nbnotein" rows="2" placeholder="A note for them about this block"
-          onchange="nbSetBlock(${bi},'note',this.value);nbSheetRedraw()">${esc(b.note||'')}</textarea>
+        <section class="nbsec">
+          <h4>2 &middot; Part of the session</h4>
+          <div class="nbseg wide">${[
+            ['Prime','Warming up and getting ready'],
+            ['Work','The reason the session exists'],
+            ['Finish','What is left over at the end'],
+          ].map(([r,why]) =>
+            `<button class="${b.role===r?'on':''}" title="${why}"
+              onclick="nbSetBlock(${bi},'role','${r}');nbSheetRedraw()">${r}</button>`).join('')}</div>
+        </section>
+
+        <section class="nbsec">
+          <h4>3 &middot; The movements</h4>
+          <div class="nbmoves">${rows || '<p class="nbbignote">Nothing in this block yet.</p>'}</div>
+          <button class="nbaddit" onclick="nbSheetAdd()">+ Add a movement</button>
+          <!-- THE ESTIMATE BELONGS TO THE MOVEMENTS. It was in the footer
+               beside Done, where it read as a property of the dialog. It
+               is a result of what is in this section and what the mode
+               above does with it, so it sits underneath them and moves
+               when either changes. -->
+          <p class="nbest">${items.length
+            ? `About <b>${nbMins(b)} min</b>${nbShape(b) ? ' \u00B7 ' + nbShape(b) : ''}`
+            : 'No movements, no time.'}</p>
+        </section>
+
+        <section class="nbsec">
+          <h4>4 &middot; Coach's note</h4>
+          <textarea class="nbnotein" rows="2" placeholder="What you want them to know about this block"
+            onchange="nbSetBlock(${bi},'note',this.value);nbSheetRedraw()">${esc(b.note||'')}</textarea>
+        </section>
       </div>
       <div class="nbsheetft">
         <button class="btn warn" onclick="nbSheetDelBlock()">Delete this block</button>
         <span class="sp"></span>
-        <span class="nbftmin">${nbMins(b)} min</span>
         <button class="btn primary" onclick="nbCloseSheet()">Done</button>
       </div>
     </div></div>`;

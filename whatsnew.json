@@ -1,6 +1,7 @@
 {
-  "version": "2026-11-08.5",
+  "version": "2026-11-08.6",
   "notes": [
+    "Coach console: the block popup is in four numbered sections with the same heading on each - how it runs, part of the session, the movements, the note - and the time estimate sits under the movements it is counting.",
     "Coach console: the block popup is one card now. The mode is a row of six, the block says what it does in a line you type numbers into, and every movement is one line with only the fields its mode gives it. The number pads and the 2 3 4 5 6 chips are gone.",
     "Coach console: changing the mode changes the movements with it. Straight to circuit drops the set counts the circuit does not use; circuit back to straight puts them back. A rest written on a row is dropped when the block takes the rest over.",
     "Coach console: the big number at the top is the program now, days and minutes a week, not how many layers are agreed.",
