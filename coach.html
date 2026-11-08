@@ -589,6 +589,50 @@ select.pin{appearance:none;cursor:pointer}
 /* THE DIALS, ON TOP. Three cells side by side on a wide window, and
    they stack before they get cramped rather than after. */
 .nbtoppanel{ margin-top:10px; }
+/* folded readouts: a summary you can read without opening it */
+.nbtoppanel > summary{ cursor:pointer; list-style:none; padding:11px 14px;
+  display:flex; align-items:baseline; gap:10px; flex-wrap:wrap }
+.nbtoppanel > summary::-webkit-details-marker{ display:none }
+.nbtoppanel > summary b{ font-size:13px }
+.nbtoppanel > summary small{ color:var(--ink3); font-size:11.5px }
+.nbtoppanel > summary small i{ font-style:normal }
+.nbtoppanel > summary small i.warn{ color:var(--gold) }
+.nbtoppanel > summary:before{ content:"\25B8"; color:var(--ink4); font-size:10px }
+.nbtoppanel[open] > summary:before{ content:"\25BE" }
+
+/* THE WEEK. Seven columns, their answers on them, the program's days
+   sitting where they fall. */
+.nbweek{ margin-top:10px; border:1px solid var(--line); border-radius:12px;
+  background:var(--card); overflow:hidden }
+.nbwhead{ display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+  padding:10px 13px 8px }
+.nbwhead b{ font-size:13px }
+.nbwhead small{ color:var(--ink3); font-size:11.5px }
+.nbwrow{ display:grid; grid-template-columns:repeat(7,1fr); gap:1px;
+  background:var(--line); border-top:1px solid var(--line) }
+.nbwday{ background:var(--bg); min-height:84px; padding:7px 6px;
+  display:flex; flex-direction:column; gap:4px; min-width:0 }
+.nbwday > b{ font:600 9.5px ui-monospace,monospace; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--ink4) }
+.nbwday.has > b{ color:var(--ink3) }
+.nbwcard{ display:block; width:100%; text-align:left; cursor:grab;
+  border:1px solid var(--line2); border-left:3px solid var(--accent);
+  border-radius:7px; background:var(--sunk); padding:5px 6px; font:inherit }
+.nbwcard:hover{ border-color:var(--accent) }
+.nbwcard.on{ background:var(--accent-soft); border-color:var(--accent) }
+.nbwcard .nm{ display:block; font-size:11px; font-weight:600; color:var(--ink);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.nbwcard .mn{ display:block; font:600 9.5px ui-monospace,monospace; color:var(--ink3) }
+.nbwsport{ font:600 9.5px ui-monospace,monospace; color:var(--q-aerobic,var(--ink3));
+  border:1px dashed var(--line2); border-radius:6px; padding:4px 5px;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.nbwrest{ font:600 9.5px ui-monospace,monospace; color:var(--ink4) }
+.nbwday.free{ background:color-mix(in srgb, var(--accent) 5%, var(--bg)) }
+.nbdragging .nbwday{ outline:1px dashed var(--line2); outline-offset:-3px }
+.nbdragging .nbwday:hover{ outline-color:var(--accent); background:var(--accent-soft) }
+@media (max-width:820px){
+  .nbwrow{ grid-template-columns:repeat(4,1fr) }
+}
 .nbweak{ font-size:11.5px; line-height:1.5; color:var(--ink2); margin:10px 2px 0; }
 .nbweak b{ color:var(--ink); }
 .nbweak.ok{ color:var(--ink3); }
@@ -4562,6 +4606,123 @@ function nbSwapTo(bi,ii,id){
    of the work bouts was fixed at whatever the writer or the template
    decided. Putting the pull-ups first - the lift you want fresh - meant
    deleting and rebuilding two blocks. */
+/* Shut unless it was opened; the choice survives a redraw but not a
+   reload, because the useful default is shut. */
+let nbTopOpen = false;
+
+/* ============================================================
+   THE WEEK, AS THEY ACTUALLY LIVE IT
+
+   The builder showed a day at a time and the program as a list of days,
+   so the shape of somebody's week - which days are training, which are
+   theirs, what else is already on them - existed only in the rail as the
+   sentence "4 days · 35 min · Mon Tue Thu Fri", several hundred pixels
+   away from the thing being built.
+
+   The survey collects more than that and none of it was on screen: the
+   days they picked, the sport they already do and which days it lands on,
+   and when in the day they train. A coach placing a hard session the day
+   before their football match should be able to see that they are doing
+   it. This is that view: seven columns, their answers drawn on it, and
+   the program's days sitting where they fall.
+
+   Clicking a day opens it in the builder. Dragging one moves it to
+   another weekday, which is the only edit this view makes - the order of
+   the days IS which weekday each one is on.
+   ============================================================ */
+const NB_DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+function nbWeekHTML(){
+  const ids = Object.keys(PROG.days || {});
+  if(!ids.length) return '';
+  /* trainDays is Sunday-based by the time it reaches here - clientAnswers
+     converts it at the boundary. An answer with fewer days than the
+     program has simply runs out, and the rest fall on the days left. */
+  const want = (Array.isArray(A.trainDays) && A.trainDays.length) ? A.trainDays.slice() : null;
+  const sport = new Set(Array.isArray(A.actDays) ? A.actDays : []);
+  const sportName = (() => {
+    const s = [].concat(A.otherAct || []).filter(x => x && x !== 'none');
+    return s.length ? lbl(s[0]) : 'Sport';
+  })();
+  const sportMins = A.otherLoad && A.otherLoad.mins ? ` · ${A.otherLoad.mins} min` : '';
+
+  /* Which weekday each program day sits on. Saved on the program so it
+     survives; falls back to their answered days, then to consecutive. */
+  const slot = PROG.weekSlots || {};
+  const place = {};
+  ids.forEach((k,i) => {
+    place[k] = slot[k] != null ? slot[k]
+             : (want && want[i] != null) ? want[i]
+             : (i + 1) % 7;
+  });
+
+  const cells = NB_DOW.map((nm, d) => {
+    const here = ids.filter(k => place[k] === d);
+    const isSport = sport.has(d);
+    const asked = want ? want.indexOf(d) >= 0 : false;
+    return `<div class="nbwday ${here.length?'has':''} ${isSport?'sport':''} ${asked&&!here.length?'free':''}"
+        ondragover="nbWeekOver(event)" ondrop="nbWeekDrop(event,${d})">
+      <b>${nm}</b>
+      ${here.map(k => {
+        const d2 = PROG.days[k];
+        const mins = (d2.blocks||[]).reduce((t,b)=>t+(+nbMins(b)||0),0);
+        return `<button class="nbwcard ${k===PDAY?'on':''}" draggable="true"
+            ondragstart="nbWeekDrag(event,'${k}')" ondragend="nbWeekEnd()"
+            onclick="PDAY='${k}';drawProgram()"
+            title="${esc(d2.name||k)} · ${mins} min">
+          <span class="nm">${esc(d2.name||k)}</span><span class="mn">${mins} min</span></button>`;
+      }).join('')}
+      ${isSport ? `<span class="nbwsport" title="From their survey">${esc(sportName)}${sportMins}</span>` : ''}
+      ${!here.length && !isSport ? `<span class="nbwrest">${asked ? 'free' : 'rest'}</span>` : ''}
+    </div>`;
+  }).join('');
+
+  const when = A.when ? lbl(A.when) : null;
+  return `<div class="nbweek">
+    <div class="nbwhead">
+      <b>Their week</b>
+      <small>${ids.length} session${ids.length===1?'':'s'}${
+        when ? ` &middot; ${esc(when)}` : ''}${
+        sport.size ? ` &middot; ${esc(sportName)} on ${[...sport].map(d=>NB_DOW[d]).join(', ')}` : ''
+      } &middot; drag a day to move it</small>
+    </div>
+    <div class="nbwrow">${cells}</div>
+  </div>`;
+}
+
+let nbWeekHeld = null;
+function nbWeekDrag(e,k){ nbWeekHeld = k; e.dataTransfer.effectAllowed='move';
+  try{ e.dataTransfer.setData('text/plain',k); }catch(err){}
+  document.body.classList.add('nbdragging'); }
+function nbWeekEnd(){ nbWeekHeld = null; document.body.classList.remove('nbdragging'); }
+function nbWeekOver(e){ if(nbWeekHeld){ e.preventDefault(); e.dataTransfer.dropEffect='move'; } }
+function nbWeekDrop(e,d){
+  if(!nbWeekHeld) return;
+  e.preventDefault();
+  const k = nbWeekHeld; nbWeekEnd();
+  /* Recorded on the program, because which weekday a session lands on is
+     part of the program and not of the person's answers - their answers
+     say which days they CAN train. */
+  PROG.weekSlots = Object.assign({}, PROG.weekSlots || {}, { [k]: d });
+  nbSave();
+}
+
+/* WHAT THE FOLDED PANEL WOULD HAVE TOLD YOU. Patterns the week is short
+   of, and whether anything breaks one of their rules. If there is nothing
+   to say it says the minutes, which is the number you glance at most. */
+function nbTopGist(){
+  try{
+    const c = nbCounts();
+    const short = NB_GROUPS.filter(g => g !== 'mobility' && c[g] < 2);
+    const bits = [];
+    if(short.length) bits.push(`<i class="warn">short: ${short.join(', ')}</i>`);
+    const mins = Object.values(PROG.days||{}).reduce((t,d)=>
+      t + (d.blocks||[]).reduce((u,b)=>u+(+nbMins(b)||0),0), 0);
+    if(mins) bits.push(`<i>${mins} min this week</i>`);
+    return `<small>${bits.join(' &middot; ')}</small>`;
+  }catch(e){ return ''; }
+}
+
 function nbMoveBlock(bi, dir){
   const b = PROG.days[PDAY].blocks, j = bi + dir;
   if(j < 0 || j >= b.length) return;
@@ -5361,7 +5522,19 @@ function drawProgramBody(){
      inside the block that wants one. What is left is the program, and
      it gets the whole screen. */
   host.innerHTML = libRow()
-    + `<div class="panel nbtoppanel"><div class="pad" id="nbtop"></div></div>`
+    /* THE READOUTS FOLD AWAY.
+
+       Balance, patterns and the rule checks are 815 pixels of analysis
+       sitting between the program controls and the program - so building
+       a session began by scrolling past a report about the session that
+       did not exist yet. They are worth having and they are not worth
+       being first. Shut by default, with the one line that matters -
+       what the week is missing - on the summary, so closing them never
+       hides a problem. */
+    + nbWeekHTML()
+    + `<details class="nbtoppanel panel" id="nbtopwrap" ${nbTopOpen?'open':''}>
+         <summary><b>Balance, patterns and rules</b>${nbTopGist()}</summary>
+         <div class="pad" id="nbtop"></div></details>`
     + `<div class="nbcols one">
       <div class="nbcol mid"  id="nbmid"></div>
     </div><div class="pwarn" id="pwarn"></div>`;
@@ -5371,6 +5544,10 @@ function drawProgramBody(){
   document.getElementById('nbcov').innerHTML   = nbCovHTML();
 
   libWire();
+  /* Every edit redraws this panel, so the fold has to remember itself or
+     it snaps shut under you the first time you change a rep count. */
+  const tw = document.getElementById('nbtopwrap');
+  if(tw) tw.addEventListener('toggle', () => { nbTopOpen = tw.open; });
   /* the release switches are the program's days - resynced here so adding
      or renaming a day cannot leave the panel describing the old shape */
   syncRelease(); drawRelease();
