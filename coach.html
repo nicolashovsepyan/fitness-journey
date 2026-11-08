@@ -1066,6 +1066,27 @@ button.nbnum.jump:hover{ opacity:1; border-color:var(--accent); color:var(--acce
 .nbpickx{ flex:none; border:0; background:none; cursor:pointer; color:var(--ink3);
   font-size:17px; line-height:1; padding:0 2px }
 .nbpickx:hover{ color:var(--ink) }
+/* the ways in: a body area, or only the movements the method is built on */
+.nbchips{ display:flex; flex-wrap:wrap; gap:5px; margin-top:9px }
+.nbchip{ font:600 10.5px inherit; text-transform:capitalize; cursor:pointer;
+  color:var(--ink2); background:var(--sunk); border:1px solid var(--line);
+  border-radius:20px; padding:4px 10px; white-space:nowrap }
+.nbchip:hover{ border-color:var(--accent); color:var(--ink) }
+.nbchip.on{ background:var(--accent); border-color:var(--accent); color:var(--accent-on) }
+.nbchip.fund{ color:var(--gold); border-color:color-mix(in srgb, var(--gold) 40%, transparent) }
+.nbchip.fund.on{ background:var(--gold); border-color:var(--gold); color:#1A1206 }
+
+/* A FUNDAMENTAL WAS A STAR AFTER THE NAME, which is the smallest, least
+   distinct mark on a row and sat where a name happens to end, so it
+   landed in a different place on every line. These are the 25 movements
+   the whole method is built on and they should be the easiest thing in
+   the list to find. */
+.fundtag{ display:inline-block; text-decoration:none; vertical-align:1px;
+  font:700 8.5px ui-monospace,monospace; letter-spacing:.09em; text-transform:uppercase;
+  color:var(--gold); background:color-mix(in srgb, var(--gold) 15%, transparent);
+  border:1px solid color-mix(in srgb, var(--gold) 45%, transparent);
+  border-radius:4px; padding:1px 4px; margin-left:6px }
+
 .nbpicklbl{ margin:9px 0 5px; font:600 9.5px ui-monospace,monospace; letter-spacing:.12em;
   text-transform:uppercase; color:var(--ink4) }
 .nbpickmore{ margin:7px 0 2px; font-size:11px; color:var(--ink4) }
@@ -4632,7 +4653,7 @@ function nbSwapTo(bi,ii,id){
   if(ref){ b.name = cur.replace(ref, newName); renamed = true; }
   else if(wasAuto){ b.name = pre + nbAutoName(b.items); renamed = true; }
 
-  nbSwap = null; nbSwapQ = ''; nbOpen = bi + ':' + ii; nbSave();
+  nbSwap = null; nbPickReset(); nbOpen = bi + ':' + ii; nbSave();
   toast(`Swapped in ${newName}${renamed ? ` \u2014 block is now "${b.name}"` : ''}`);
 }
 /* DRAGGING STOPPED AT THE EDGE OF A BLOCK.
@@ -4969,21 +4990,42 @@ function nbCard(m, extra){
         so a swap is a swap rather than a jump up or down a level.
 
    A typed query drops rule 2, because the words are the intent by then. */
+/* A CHIP IS A TYPED WORD YOU DID NOT HAVE TO TYPE.
+
+   "Search by targeted area" and "fundamentals easy to spot" are the same
+   request from two sides: a coach knows what they want before they know
+   what it is called. Each area chip runs its own word through the matcher
+   that already understands it - "back" already means lats and rows, not
+   the letters b-a-c-k - so this adds a way IN to the engine and not a
+   second engine beside it. Type, tap a chip, or both; they narrow
+   together. */
+const NB_AREAS = ['legs','glutes','core','chest','back','shoulders','arms','carry','conditioning'];
+let nbPickArea = null, nbPickFund = false;
+
 function nbAlts(bi,ii){
   const b = PROG.days[PDAY].blocks[bi], m = MV(b.items[ii].ex);
   const here = new Set(b.items.map(x=>x.ex));
   const w = nbWords(nbSwapQ);
+  const aw = nbPickArea ? nbWords(nbPickArea) : [];
   const searching = w.length > 0;
-  const pool = searching ? MOVES.filter(x=>!here.has(x.id) && nbMatch(x,w))
-                         : MOVES.filter(x=>x.g===m.g && !here.has(x.id));
+  /* Any filter at all means the whole catalogue is in play. Without
+     words or chips the question is still "what else fits this slot", so
+     the pool stays the movement's own group. */
+  const filtering = searching || aw.length > 0 || nbPickFund;
+  const pool = filtering
+    ? MOVES.filter(x => !here.has(x.id)
+        && (!searching || nbMatch(x, w))
+        && (!aw.length || nbMatch(x, aw))
+        && (!nbPickFund || x.f))
+    : MOVES.filter(x => x.g === m.g && !here.has(x.id));
   const pats = new Set(m.p || []);
   const df = m.df;
+  /* Whatever was asked for ranks it: typed words first, then the chip. */
+  const by = searching ? w : aw;
   const rank = x => [
     nbForbidden(x) ? 1 : 0,
-    /* when words were typed, THEY are the intent: relevance decides the
-       order and the same-pattern rule steps aside */
-    searching ? nbRel(x, w) : ((x.p || []).some(p => pats.has(p)) ? 0 : 1),
-    searching ? 0 : (x.f ? 0 : 1),
+    by.length ? nbRel(x, by) : ((x.p || []).some(p => pats.has(p)) ? 0 : 1),
+    by.length ? 0 : (x.f ? 0 : 1),
     (df != null && x.df != null) ? Math.abs(x.df - df) : 9,
   ];
   return pool.sort((a,c) => {
@@ -5004,7 +5046,7 @@ function nbAltsHTML(bi,ii,given){
   return list.map((a,n)=>`<div class="nbalt ${nbFlagCls(a)} ${a.id===here?'isnow':''}"
     id="nbopt${n}" role="option" ${a.id===here?'aria-selected="true"':''} style="--c:${NBC(a.g)}"
     onclick="event.stopPropagation();nbSwapTo(${bi},${ii},'${a.id}')">
-    <span class="dot"></span><span><b>${esc(a.n)}${a.f?' ★':''}</b><br>
+    <span class="dot"></span><span><b>${esc(a.n)}</b>${a.f?'<u class="fundtag">Fundamental</u>':''}<br>
       <small>${esc(nbFlagWhy(a) || [a.g,(a.mus||[]).slice(0,2).join('/'),a.mod].filter(Boolean).join(' · '))}</small>
     </span><span class="go">${a.id===here?'in use':'use'}</span></div>`).join('');
 }
@@ -5056,7 +5098,7 @@ function nbLadder(bi,ii){
       const lab = here ? 'in the program now' : i < at ? 'easier' : 'harder';
       return `<div class="nbrung ${nbFlagCls(a)} ${here?'here':''}" style="--c:${NBC(a.g)}"
         ${here ? '' : `onclick="event.stopPropagation();nbSwapTo(${bi},${ii},'${a.id}')"`}>
-        <span class="ar">${dir}</span><span><b>${esc(a.n)}${a.f?' ★':''}</b><br>
+        <span class="ar">${dir}</span><span><b>${esc(a.n)}</b>${a.f?'<u class="fundtag">Fundamental</u>':''}<br>
         <small>${lab}${a.df!=null?` · level ${a.df}`:''}${nbFlagWhy(a)?' · '+esc(nbFlagWhy(a)):''}</small></span>
         ${here ? '' : '<span class="go">use</span>'}</div>`;
     }).join('')}</div>`;
@@ -5087,7 +5129,7 @@ function nbPickerHTML(bi, ii, m){
     <div class="nbpickhd">
       <span>Replacing<b>${esc(m.n)}</b></span>
       <button class="nbpickx" title="Cancel (Esc)"
-        onclick="event.stopPropagation();nbSwap=null;nbSwapQ='';drawProgram()">&#215;</button>
+        onclick="event.stopPropagation();nbPickReset();nbSwap=null;drawProgram()">&#215;</button>
     </div>
     <input class="nbsearch sm" id="nbpickq" role="combobox" aria-expanded="true"
            aria-controls="nbaltlist" aria-autocomplete="list" autocomplete="off"
@@ -5095,9 +5137,17 @@ function nbPickerHTML(bi, ii, m){
            placeholder="Type to search all ${MOVES.length}"
            oninput="nbSwapSearch(${bi},${ii},this.value)"
            onkeydown="nbPickKey(event,${bi},${ii})">
-    ${searching ? '' : nbLadder(bi,ii)}
-    <p class="nbpicklbl">${searching
-      ? `${all.length} match${all.length===1?'':'es'}`
+    <div class="nbchips">
+      <button class="nbchip fund ${nbPickFund?'on':''}"
+        onclick="event.stopPropagation();nbPickFilter(${bi},${ii},'fund')"
+        title="Only the 25 movements the method is built on">★ Fundamentals</button>
+      ${NB_AREAS.map(x=>`<button class="nbchip ${nbPickArea===x?'on':''}"
+        onclick="event.stopPropagation();nbPickFilter(${bi},${ii},'area','${x}')">${esc(x)}</button>`).join('')}
+    </div>
+    ${(searching || nbPickArea || nbPickFund) ? '' : nbLadder(bi,ii)}
+    <p class="nbpicklbl">${(searching || nbPickArea || nbPickFund)
+      ? `${all.length} match${all.length===1?'':'es'}${
+          nbPickFund ? ' \u00B7 fundamentals' : ''}${nbPickArea ? ' \u00B7 '+esc(nbPickArea) : ''}`
       : `Closest in the same pattern`}</p>
     <div id="nbaltlist" role="listbox" aria-label="Movements">${nbAltsHTML(bi,ii,list)}</div>
     ${more > 0 ? `<p class="nbpickmore">${more} more. Type to search all ${MOVES.length}.</p>` : ''}
@@ -5107,6 +5157,19 @@ function nbPickerHTML(bi, ii, m){
 /* Arrow keys walk the options, Enter takes the focused one, Escape backs
    out with nothing changed. Focus stays in the search box throughout -
    the combobox pattern - so typing never needs a click to resume. */
+/* One chip at a time for areas - two areas at once is a question nobody
+   asks - and the fundamentals toggle stacks on top of whichever is on. */
+/* A filter belongs to the picking, not to the console. Left set, the
+   next movement you open would open pre-narrowed by a choice made about
+   a different slot. */
+function nbPickReset(){ nbSwapQ=''; nbPickArea=null; nbPickFund=false; }
+
+function nbPickFilter(bi, ii, kind, val){
+  if(kind === 'fund') nbPickFund = !nbPickFund;
+  else nbPickArea = (nbPickArea === val) ? null : val;
+  nbSwapSearch(bi, ii, nbSwapQ);
+}
+
 function nbPickKey(e, bi, ii){
   const host = document.getElementById('nbaltlist');
   if(!host) return;
@@ -5123,7 +5186,7 @@ function nbPickKey(e, bi, ii){
   if(e.key === 'ArrowDown'){ e.preventDefault(); go(at < 0 ? 0 : at+1); }
   else if(e.key === 'ArrowUp'){ e.preventDefault(); go(at < 0 ? opts.length-1 : at-1); }
   else if(e.key === 'Enter'){ e.preventDefault(); (opts[at] || opts[0])?.click(); }
-  else if(e.key === 'Escape'){ e.preventDefault(); nbSwap=null; nbSwapQ=''; drawProgram(); }
+  else if(e.key === 'Escape'){ e.preventDefault(); nbPickReset(); nbSwap=null; drawProgram(); }
 }
 
 /* Typing redraws only the inside of the picker, never the page: a full
@@ -5456,7 +5519,7 @@ function nbMiddle(){
                rarer question and no longer in the way of the common one. -->
           <span class="nm">
             <button class="nbsel ${nbSwap===key?'on':''}" title="Change this movement"
-              onclick="event.stopPropagation();nbSwapQ='';nbSwap=${nbSwap===key?'null':"'"+key+"'"};drawProgram()"
+              onclick="event.stopPropagation();nbPickReset();nbSwap=${nbSwap===key?'null':"'"+key+"'"};drawProgram()"
               ><b>${esc(m.n)}${m.f?' ★':''}</b><i>&#9662;</i></button>${
               it.plan && !nbPlanOpen.has(key) ? `<u class="nbplantag" title="${
                 it.plan.map((st,n)=>`set ${n+1}: ${st.v??'—'}${st.w!=null?' @ '+st.w:''}`).join(', ')
