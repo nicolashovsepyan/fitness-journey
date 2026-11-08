@@ -1,6 +1,9 @@
 {
-  "version": "2026-11-08.2",
+  "version": "2026-11-08.3",
   "notes": [
+    "Coach console: fold a block down to a single ribbon, and Close every block or Open every block in one tap, so the one you are writing is at the top of the screen.",
+    "Coach console: Open a program now shows when each one was written and when it was last edited.",
+    "Five and Soccer: the big upper day moved to Saturday. Thursday, the morning after the match, is now 14 minutes - push-ups on the minute and ten minutes of stretching.",
     "Your app tells your coach when a program has reached you, so they can see it landed.",
     "When your coach sends a program, the app now says so: \"Your program is here\", with its name and how many days.",
     "Your records: up to 3, each a slim line with a drop-down for the details. A set test that was not passed shows Not yet in red, a passed one ✓ Passed",
