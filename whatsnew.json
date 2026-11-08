@@ -1,6 +1,7 @@
 {
   "version": "2026-11-08.12",
   "notes": [
+    "Coach console: the name of a field and its value are one box now, with the word set big enough to read. ROUNDS and REST sit on the right with the rest of the numbers, so a block has one column to read down instead of two.",
     "New timer: Sets. Pick your exercises, how many sets and the rest. Each set shows your reps and weight to adjust, Set done starts the rest, and the clock only measures how long it took.",
     "Sets: fix any set during the rest (tap it on the rest screen) or at the end, reps and weight.",
     "Keep going: after any timer, add another block. Every block you do joins one workout day until you tap Done for today.",
