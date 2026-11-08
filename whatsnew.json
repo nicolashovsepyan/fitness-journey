@@ -1,6 +1,11 @@
 {
-  "version": "2026-11-08.10",
+  "version": "2026-11-08.11",
   "notes": [
+    "Coach console: ROUNDS and REST are a labeled pair sitting between the part of the session and the movements they govern, instead of being written into a sentence.",
+    "Coach console: every movement carries REPS, WEIGHT and TEMPO labeled down its right-hand side, so you can read a block without opening anything.",
+    "Coach console: a weight says what it is held in. The sheet offers barbell, dumbbells, kettlebell, vest and band, drawn with the same icons the onboarding uses.",
+    "Coach console: movements are dragged within a block by the handle, with the gap showing where it lands. The up and down buttons are gone.",
+    "Coach console: tempo is set in the same sheet as every other value, with the common ones as chips.",
     "Fixed: the coach console never asked for a refresh. The update check compared the cached copy against the live one, which only means something on a page a service worker controls, and the console registers none. It remembers what it loaded with now, and asks every minute while it is in front of you.",
     "Coach console: every number is entered the same way now, and it is the work timer way. Tap the value, get plus above and minus below a big figure with the common values as chips, press Done. Sets, rounds, reps, seconds, rest, minutes, caps and weight all go through it.",
     "Coach console: every movement in the picker and in the progressions shows its drawing and a play button for its clip, so you can check it is the one you mean before you take it.",

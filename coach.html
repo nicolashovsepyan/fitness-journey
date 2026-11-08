@@ -1133,6 +1133,53 @@ button.nbnum.jump:hover{ opacity:1; border-color:var(--accent); color:var(--acce
 .nbval:hover{ border-color:var(--accent) }
 .nbval.on{ border-color:var(--accent); background:color-mix(in srgb, var(--accent) 14%, transparent) }
 .nbval b{ font:650 14px/1 ui-monospace,monospace; color:var(--accent) }
+.nbval.txt b{ font-size:12px }
+.nbvkit{ display:block; width:15px; height:15px; margin-bottom:1px }
+.nbvkit svg{ width:100%; height:100%; stroke:var(--accent); stroke-width:1.7; fill:none;
+  stroke-linecap:round; stroke-linejoin:round }
+
+/* LABEL ABOVE VALUE: ROUNDS 2, REST 90sec, REPS 15. The label says what
+   it is and the pill holds it, which is how a form has read for fifty
+   years and needs no learning at all. */
+.nblf{ display:inline-flex; flex-direction:column; align-items:flex-start; gap:3px }
+.nblf > label{ font:600 8.5px ui-monospace,monospace; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--ink4); padding-left:3px }
+.nblf .nbval{ margin:0 }
+
+/* the block's own numbers, between the part of the session and the
+   movements they govern */
+.nbblocknums{ display:flex; flex-wrap:wrap; gap:14px; padding:10px 0 2px;
+  border-top:1px solid var(--line) }
+
+/* A MOVEMENT'S NUMBERS LIVE DOWN ONE SIDE, so you can read the weights
+   of a block without opening anything. */
+.nbmfields{ flex:none; display:flex; align-items:flex-start; gap:12px; cursor:default }
+.nbgrab{ flex:none; cursor:grab; color:var(--ink4); letter-spacing:-3px;
+  font-size:13px; line-height:1; padding:2px 1px 2px 0; user-select:none }
+.nbgrab:active{ cursor:grabbing }
+.nbgrab:hover{ color:var(--accent) }
+.nbrowpic{ width:34px; height:34px; flex:none; padding:0; border-radius:7px; cursor:pointer;
+  overflow:hidden; background:var(--sunk); border:1px solid var(--line); display:block }
+.nbrowpic img{ width:100%; height:100%; object-fit:cover; display:block }
+.nbrowpic:hover{ border-color:var(--accent) }
+.nbrowpic.none{ cursor:default; background:color-mix(in srgb, var(--c) 30%, transparent);
+  border-color:color-mix(in srgb, var(--c) 45%, transparent) }
+.nbgrptag{ font:600 9px ui-monospace,monospace; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--accent); align-self:center; margin-left:2px }
+
+/* the implements, drawn the way the onboarding draws them */
+.nbnpkit{ display:flex; gap:4px }
+.nbnpkit button{ flex:1; display:flex; flex-direction:column; align-items:center; gap:3px;
+  cursor:pointer; padding:7px 2px; border:1px solid var(--line); background:var(--sunk);
+  border-radius:9px; color:var(--ink3) }
+.nbnpkit button svg{ width:22px; height:22px; stroke:currentColor; stroke-width:1.6; fill:none;
+  stroke-linecap:round; stroke-linejoin:round }
+.nbnpkit button span{ font:600 8px ui-monospace,monospace; letter-spacing:.04em;
+  text-transform:uppercase }
+.nbnpkit button:hover{ border-color:var(--accent); color:var(--accent) }
+.nbnpkit button.on{ border-color:var(--accent); color:var(--accent);
+  background:color-mix(in srgb, var(--accent) 15%, transparent) }
+.nbnpv.text{ font-size:26px; text-align:center }
 .nbval small{ font:600 9px/1 ui-monospace,monospace; letter-spacing:.04em; color:var(--ink4);
   white-space:nowrap }
 
@@ -1188,7 +1235,12 @@ button.nbnum.jump:hover{ opacity:1; border-color:var(--accent); color:var(--acce
 
 /* THE BAR THAT OWNS THE GROUP. Reads as a heading for the movements
    under it, not as another row of its own. */
-.nbgrpbar{ display:flex; align-items:center; flex-wrap:wrap; gap:4px; padding:0 2px 6px 9px }
+.nbgrpbar{ display:flex; align-items:center; flex-wrap:wrap; gap:14px; padding:0 2px 7px 11px }
+@media (max-width:560px){
+  .nbmline{ flex-wrap:wrap }
+  .nbmnm{ flex:1 1 100%; order:-1 }
+  .nbmfields{ flex:1 1 100%; gap:10px }
+}
 .nbgrpbar .nbrq{ margin:0 2px 0 4px }
 .nbmrow + .nbgrpbar{ margin-top:4px }
 
@@ -1228,7 +1280,7 @@ button.nbnum.jump:hover{ opacity:1; border-color:var(--accent); color:var(--acce
 .nbmrow.tied.tlast  > .nbmtie{ bottom:9px }
 /* ONE LINE PER MOVEMENT: the name, then its numbers, then the way in to
    the two things that are not always the point. */
-.nbmline{ display:flex; align-items:center; gap:8px; padding:8px 8px 8px 4px; cursor:pointer }
+.nbmline{ display:flex; align-items:center; gap:9px; padding:8px 8px 8px 4px }
 .nbmline:hover{ background:color-mix(in srgb, var(--accent) 6%, transparent) }
 .nbmnm{ flex:1; min-width:0; font-weight:600; font-size:13px; color:var(--ink);
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
@@ -1237,13 +1289,9 @@ button.nbnum.jump:hover{ opacity:1; border-color:var(--accent); color:var(--acce
 .nbmmore{ flex:none; border:none; background:none; cursor:pointer; color:var(--ink4);
   font-size:13px; line-height:1; padding:2px 4px; border-radius:5px }
 .nbmmore:hover{ color:var(--accent); background:color-mix(in srgb, var(--accent) 12%, transparent) }
-.nbmbody{ display:flex; flex-wrap:wrap; align-items:center; gap:7px 14px;
+.nbmbody{ display:flex; align-items:center; gap:14px;
   padding:7px 11px 9px 11px; border-top:1px solid var(--line) }
-.nbmf{ display:flex; align-items:center; gap:5px }
-.nbmf label{ font:600 9.5px ui-monospace,monospace; letter-spacing:.1em;
-  text-transform:uppercase; color:var(--ink4) }
 .nbmbody .sp{ flex:1 }
-.nbmbody .nblnk:disabled{ opacity:.3; cursor:default; text-decoration:none }
 .nblnk.warn{ color:var(--bad,#c0392b) }
 .btn.warn{ color:var(--bad,#c0392b); border-color:color-mix(in srgb, var(--bad,#c0392b) 40%, transparent) }
 /* The join sits in the gap between two rows, where the thing it makes is. */
@@ -5387,8 +5435,28 @@ const NB_NUMF = {
   cap:      { label:'Cap',       unit:'min',  lo:1,  hi:120,  step:1,  chips:[6,8,10,12,15,20] },
   work:     { label:'Work',      unit:'sec',  lo:5,  hi:300,  step:5,  chips:[20,30,40,45,60] },
   off:      { label:'Off',       unit:'sec',  lo:0,  hi:300,  step:5,  chips:[10,15,20,30] },
-  weight:   { label:'Weight',    unit:'lb',   lo:0,  hi:1000, step:5,  chips:[10,15,25,35,45,53], none:true },
+  weight:   { label:'Weight',    unit:'lb',   lo:0,  hi:1000, step:5,  chips:[10,15,25,35,45,53], none:true, kit:true },
+  /* not a number, but it is a value on a row and it opens the same
+     sheet, because "one way to enter things" has to include this one */
+  tempo:    { label:'Tempo',     unit:'',     text:true, none:true,
+              chips:['3-1-1','2-0-2','3-0-1','4-0-1','2-1-2'] },
 };
+
+/* WHAT IS IN YOUR HANDS. A weight with no implement is a number you have
+   to guess at: 45 is a bar, a plate, or a dumbbell you do not own. These
+   are the loadable ones, drawn with the same icons the onboarding uses
+   to ask what kit you have, so the question looks the same in both
+   places. */
+const NB_KIT = [
+  ['bb',   'Barbell',    'M2 10v4M5 7v10M19 7v10M22 10v4M5 12h14'],
+  ['db',   'Dumbbells',  'M3 9v6M6.5 6v12M17.5 6v12M21 9v6M6.5 12h11'],
+  ['kb',   'Kettlebell', 'M9 7.5a3 3 0 016 0M8.5 9.5h7M8 9.5C5.5 12 4.5 15 5.5 20h13c1-5 0-8-2.5-10.5'],
+  ['vest', 'Vest',       'M8.5 3l3.5 2.5L15.5 3 18.5 5v13a2 2 0 01-2 2h-9a2 2 0 01-2-2V5zM12 5.5V20'],
+  ['band', 'Band',       'M4 8v8M20 8v8M4.5 12c4-6 11 6 15 0'],
+];
+const nbKitSvg = d => '<svg viewBox="0 0 24 24">' + d.split('M').filter(Boolean)
+  .map(x => '<path d="M' + x + '"/>').join('') + '</svg>';
+const nbKitName = id => (NB_KIT.find(k => k[0] === id) || [])[1] || '';
 
 /* THE VALUE ON THE CARD. Same shape wherever a number appears - the
    figure, its unit under it, and a tap to change it. A dash means
@@ -5399,10 +5467,15 @@ let nbNumKey = null;                // identifies which value is open, so only t
 function nbVal(key, kind, v, opts){
   const f = NB_NUMF[kind] || NB_NUMF.reps, o = opts || {};
   const unit = o.unit != null ? o.unit : f.unit;
-  const face = v == null || v === '' ? '–' : v;
-  return `<button class="nbval ${nbNumKey === key ? 'on' : ''}" type="button"
-    title="${esc((o.label || f.label) + ' · tap to change')}"
-    onclick="event.stopPropagation();nbNumOpen('${key}')"><b>${face}</b><small>${esc(unit)}</small></button>`;
+  const face = (v == null || v === '') ? '–' : String(v);
+  /* A WEIGHT SAYS WHAT IT IS HELD IN, because 45 is a bar, a plate, or a
+     dumbbell you do not own. */
+  const kit = o.kit ? (NB_KIT.find(k => k[0] === o.kit) || null) : null;
+  return `<button class="nbval ${nbNumKey === key ? 'on' : ''} ${f.text ? 'txt' : ''}" type="button"
+    title="${esc((o.label || f.label) + ' \u00B7 tap to change')}"
+    onclick="event.stopPropagation();nbNumOpen('${key}')"${
+    kit ? `><i class="nbvkit" title="${esc(kit[1])}">${nbKitSvg(kit[2])}</i>` : '>'
+    }<b>${esc(face)}</b>${unit ? `<small>${esc(unit)}</small>` : ''}</button>`;
 }
 
 /* The sheet is opened by key, not by closure, because every edit redraws
@@ -5421,11 +5494,12 @@ function nbNumOpen(key){
 function nbNumClose(){ nbNumAt = null; nbNumKey = null; drawProgram(); }
 function nbNumLim(n){
   const f = nbNumAt.f;
+  if(f.text) return (String(n == null ? '' : n).trim()) || null;
   if(n === '' || n == null) return f.none ? null : f.lo;
   return Math.min(f.hi, Math.max(f.lo, Math.round(Number(n) || 0)));
 }
 function nbNumStep(d){
-  if(!nbNumAt) return; const f = nbNumAt.f, k = f.step;
+  if(!nbNumAt || nbNumAt.f.text) return; const f = nbNumAt.f, k = f.step;
   const v = nbNumAt.v == null ? (d > 0 ? f.lo : f.lo) : nbNumAt.v;
   /* snaps to the field's own step rather than drifting off it, which is
      what the timer does and why 47 seconds of rest never happens there */
@@ -5434,6 +5508,15 @@ function nbNumStep(d){
 }
 function nbNumType(raw){ if(!nbNumAt) return; nbNumAt.v = nbNumLim(raw); nbNumChips(); }
 function nbNumChip(c){ if(!nbNumAt) return; nbNumAt.v = nbNumLim(c); nbNumDone(); }
+/* WHICH IMPLEMENT THE WEIGHT IS IN. It is a property of the movement,
+   not of the number, so it is written straight away and the sheet stays
+   open on the number you came to set. */
+function nbNumKit(id){
+  if(!nbNumAt || !nbNumAt.kitSet) return;
+  nbNumAt.kit = (nbNumAt.kit === id) ? null : id;
+  nbNumAt.kitSet(nbNumAt.kit);
+  nbNumPaint();
+}
 function nbNumClear(){ if(!nbNumAt) return; nbNumAt.v = null; nbNumDone(); }
 function nbNumSeg(id){
   if(!nbNumAt || !nbNumAt.seg) return;
@@ -5473,18 +5556,25 @@ function nbNumHTML(){
       ${nbNumAt.seg ? `<div class="nbnpseg">${nbNumAt.seg.opts.map(([id,l]) =>
         `<button class="${id === nbNumAt.seg.cur ? 'on' : ''}"
           onclick="nbNumSeg('${id}')">${esc(l)}</button>`).join('')}</div>` : ''}
-      <div class="nbnptp">
+      ${f.kit && nbNumAt.kitSet ? `<div class="nbnpkit">${NB_KIT.map(([id,name,d]) =>
+        `<button class="${nbNumAt.kit === id ? 'on' : ''}" title="${esc(name)}"
+          onclick="nbNumKit('${id}')">${nbKitSvg(d)}<span>${esc(name)}</span></button>`).join('')}</div>` : ''}
+      ${f.text ? `<input id="nbnpv" class="nbnpv text" type="text"
+               value="${esc(v == null ? '' : v)}" placeholder="${esc(nbNumAt.hint || '3-1-1')}"
+               oninput="nbNumType(this.value)"
+               onkeydown="if(event.key==='Enter'){event.preventDefault();nbNumDone();}">`
+      : `<div class="nbnptp">
         <button type="button" aria-label="More" onclick="nbNumStep(1)">+</button>
         <input id="nbnpv" class="nbnpv" type="number" inputmode="numeric"
-               value="${v == null ? '' : v}" placeholder="${f.none ? 'none' : '–'}"
+               value="${v == null ? '' : v}" placeholder="${f.none ? 'none' : '-'}"
                oninput="nbNumType(this.value)"
                onkeydown="if(event.key==='Enter'){event.preventDefault();nbNumDone();}">
         <small>${esc(f.unit)}</small>
         <button type="button" aria-label="Less" onclick="nbNumStep(-1)">&minus;</button>
-      </div>
+      </div>`}
       <div class="nbnpc">${(f.chips || []).map(c =>
         `<button data-nc="${c}" class="${String(c) === String(v) ? 'on' : ''}"
-          onclick="nbNumChip(${c})">${c}</button>`).join('')}</div>
+          onclick="nbNumChip('${c}')">${c}</button>`).join('')}</div>
       <button class="btn primary wide" onclick="nbNumDone()">Done</button>
       ${f.none ? `<button class="nbnpfoot" onclick="nbNumClear()">${
         esc(nbNumAt.noneLabel || ('No ' + f.label.toLowerCase()))}</button>` : ''}
@@ -5514,10 +5604,11 @@ function nbSheetHTML(){
   const cfgIn = k => {
     const v = b.cfg && b.cfg[k] != null ? b.cfg[k] : NB_DEF[k];
     const key = reg('cfg:' + k, { kind:k === 'rest' ? 'rest' : k, v,
+      label: NB_FIELD[k][0][0].toUpperCase() + NB_FIELD[k][0].slice(1),
       apply: x => nbSheetCfg(k, x) });
-    return nbVal(key, k === 'rest' ? 'rest' : k, v, { unit: NB_FIELD[k][1] || NB_FIELD[k][0] });
+    return nbVal(key, k === 'rest' ? 'rest' : k, v,
+      { unit: k === 'rounds' ? '' : (NB_FIELD[k][1] === 's' ? 'sec' : NB_FIELD[k][1] || '') });
   };
-  const say = (NB_SAY[type] || NB_SAY.Straight)(cfgIn);
 
   /* The run of movements this one belongs to, so the bracket knows where
      it starts and ends. */
@@ -5530,80 +5621,92 @@ function nbSheetHTML(){
     return { a, z, first:a === ii, last:z === ii, n:z-a+1 };
   };
 
+  /* A LABEL AND ITS VALUE, which is the shape he asked for and the shape
+     a form has had for fifty years: ROUNDS: 2, REST: 90s, REPS: 15. The
+     label says what it is, the pill holds the number, and the unit is on
+     the pill only when the label does not already imply it. */
+  const lf = (label, pill) =>
+    `<span class="nblf"><label>${esc(label)}</label>${pill}</span>`;
+
   const rows = items.map((it, ii) => {
     const m = MV(it.ex), pr = nbParse(it.pres), on = nbSheet.ii === ii;
     const r = canJoin ? runOf(ii) : { a:0, z:items.length-1, first:ii===0,
                                       last:ii===items.length-1, n:items.length };
     const tied = canJoin ? (it.sg != null && r.n > 1) : items.length > 1;
-    const unit = pr.mins ? 'min' : pr.hold ? 'sec' : 'reps';
     const owns = spec.item;
     const swapping = !nbAdding && nbSwap === (bi + ':' + ii);
 
-    /* THE SETS BELONG TO THE GROUP, NOT TO EACH MOVEMENT.
-
-       Almost nothing in a straight block is three sets of one thing and
-       four of the next; it is three sets of the block, or three of the
-       pair and four of the one after it. Typing the same number onto
-       every row was work the model should have been doing, and two rows
-       of a superset left disagreeing is a program that cannot be run.
-
-       So a straight block's sets sit on a bar above each group - a group
-       being a joined run, or a single movement on its own - and writing
-       there writes to every movement under it. The rest goes there too,
-       because the rest in a straight block is taken after the group, not
-       after each movement inside it.
-
-       Every other mode already puts its rounds or its clock on the
-       block, in section 1, so there is no bar: the rows carry reps only. */
+    /* THE SETS BELONG TO THE GROUP, NOT TO EACH MOVEMENT. Almost nothing
+       in a straight block is three sets of one thing and four of the
+       next; it is three sets of the block, or three of the pair and four
+       of the one after it. A straight block's numbers therefore sit on a
+       bar above each group - a group being a joined run, or a single
+       movement on its own - and writing there writes to all of them. The
+       rest goes there too, because the rest is taken after the group and
+       not after each movement inside it. Every other mode puts its
+       numbers on the block, in the strip above the list. */
     const bar = (canJoin && r.first) ? `<div class="nbgrpbar">
-        ${nbVal(reg('grp:' + r.a, { kind:'sets', v: pr.told ? pr.sets : null,
+        ${lf(r.n > 1 ? 'Rounds' : 'Sets',
+          nbVal(reg('grp:' + r.a, { kind:'sets', v: pr.told ? pr.sets : null,
+            label: r.n > 1 ? 'Rounds of the ' + (r.n === 2 ? 'pair' : 'group') : 'Sets',
             apply: x => nbSheetGrpSets(r.a, r.z, x) }), 'sets', pr.told ? pr.sets : null,
-            { unit: r.n > 1 ? (r.n === 2 ? 'rounds of the pair' : 'rounds of all ' + r.n) : 'sets' })}
-        ${nbVal(reg('grest:' + r.a, { kind:'rest', v: nbRestOf(items[r.z], b),
+            { unit:'' }))}
+        ${lf('Rest',
+          nbVal(reg('grest:' + r.a, { kind:'rest', v: nbRestOf(items[r.z], b),
             label:'Rest after the ' + (r.n > 1 ? 'round' : 'set'), noneLabel:'No rest',
             apply: x => nbSheetGrpRest(r.a, r.z, x) }), 'rest', nbRestOf(items[r.z], b),
-            { unit:'s rest' })}
+            { unit:'sec' }))}
+        ${r.n > 1 ? `<span class="nbgrptag">run back to back</span>` : ''}
       </div>` : '';
 
-    /* The movement's own numbers, and only the ones its mode gives it. */
-    let line = '';
-    if(!owns.length){
-      line = `<span class="nbrq">the clock decides</span>`;
-    } else if(owns.indexOf('val') >= 0){
-      /* reps or seconds is the same decision the timer puts on its own
-         number sheet, so it lives there too rather than as a third
-         kind of control beside the figure */
-      const key = reg('val:' + ii, { kind: pr.hold ? 'sec' : 'reps', v: pr.val,
-        label: m.n, apply: x => nbSheetNum('val', ii, x),
-        seg: { opts:[['reps','Reps'],['sec','Seconds']], cur: pr.hold ? 'sec' : 'reps',
-               pick: id => ({ after: () => { if((id === 'sec') !== !!pr.hold) nbSheetUnit(ii); } }) } });
-      line = nbVal(key, pr.hold ? 'sec' : 'reps', pr.val,
-        { unit: unit + (pr.side ? '/side' : '') });
-    }
+    /* EVERY NUMBER ON THIS MOVEMENT, DOWN THE RIGHT. They used to be in
+       three places: the reps beside the name, the weight and the tempo
+       hidden behind a dot-dot-dot. Three fields in one column means you
+       can read the weights down a block without opening anything. */
+    const fields = !owns.length
+      ? `<span class="nbrq">the clock decides</span>`
+      : [
+          owns.indexOf('val') >= 0 ? lf(pr.hold ? 'Hold' : pr.mins ? 'For' : 'Reps',
+            nbVal(reg('val:' + ii, { kind: pr.hold ? 'sec' : pr.mins ? 'min' : 'reps', v: pr.val,
+              label: m.n, apply: x => nbSheetNum('val', ii, x),
+              seg: { opts:[['reps','Reps'],['sec','Seconds']], cur: pr.hold ? 'sec' : 'reps',
+                     pick: id => ({ after: () => { if((id === 'sec') !== !!pr.hold) nbSheetUnit(ii); } }) } }),
+              pr.hold ? 'sec' : pr.mins ? 'min' : 'reps', pr.val,
+              { unit: pr.side ? '/side' : '' })) : '',
+          lf('Weight', nbVal(reg('wt:' + ii, { kind:'weight', v: it.weight,
+            label: m.n + ' \u00B7 weight', noneLabel:'No weight', kit: it.kit || null,
+            kitSet: id => nbSheetKitAt(ii, id),
+            apply: x => nbSheetNum('weight', ii, x) }), 'weight', it.weight,
+            { unit:'lb', kit: it.kit || null })),
+          lf('Tempo', nbVal(reg('tp:' + ii, { kind:'tempo', v: it.tempo || null,
+            label: m.n + ' · tempo', noneLabel:'No tempo',
+            apply: x => nbSheetTempoAt(ii, x) }), 'tempo', it.tempo || null, { unit:'' })),
+        ].filter(Boolean).join('');
 
     return bar + `<div class="nbmrow ${on?'on':''} ${swapping?'swapping':''} ${tied?'tied':''} ${
-                 tied&&r.first?'tfirst':''} ${tied&&r.last?'tlast':''}">
+                 tied&&r.first?'tfirst':''} ${tied&&r.last?'tlast':''}"
+         ondragover="nbSheetOver(event)" ondrop="nbSheetDrop(event,${ii})">
       <span class="nbmtie" aria-hidden="true"></span>
-      <div class="nbmline" onclick="nbSheetFocus(${on?'null':ii})">
-        <span class="dot" style="--c:${NBC(m.g)}"></span>
+      <div class="nbmline">
+        <span class="nbgrab" draggable="true" title="Drag to move it in the block"
+              ondragstart="nbSheetDragStart(event,${ii})" ondragend="nbSheetDragEnd()">&#8942;&#8942;</span>
+        ${m.art
+          ? `<button class="nbrowpic" title="See it bigger"
+               onclick="event.stopPropagation();nbZoom('${esc(m.art)}','${esc(m.n)}')"
+             ><img src="${esc(m.art)}" alt="" loading="lazy" decoding="async"></button>`
+          : `<span class="nbrowpic none" style="--c:${NBC(m.g)}" aria-hidden="true"></span>`}
         <b class="nbmnm">${esc(m.n)}${m.f?'<u class="fundtag">F</u>':''}</b>
-        <span class="nbmfields" onclick="event.stopPropagation()">${line}</span>
-        <button class="nbmmore" title="Weight, tempo, swap, remove"
+        ${m.vid ? `<button class="nbaltvid" title="Watch it"
+            onclick="event.stopPropagation();nbPlay('${esc(m.vid)}','${esc(m.n)}')">&#9654;</button>` : ''}
+        <span class="nbmfields">${fields}</span>
+        <button class="nbmmore" title="Change movement, remove"
                 onclick="event.stopPropagation();nbSheetFocus(${on?'null':ii})">${on?'▴':'⋯'}</button>
       </div>
       ${swapping ? `<div class="nbpickslot">${nbPickerHTML(bi, ii, m)}</div>` : ''}
       ${on && !swapping ? `<div class="nbmbody">
-        <span class="nbmf"><label>Weight</label>${
-          nbVal(reg('wt:' + ii, { kind:'weight', v: it.weight, label: m.n + ' \u00B7 weight',
-            noneLabel:'No weight', apply: x => nbSheetNum('weight', ii, x) }),
-            'weight', it.weight)}</span>
-        <span class="nbmf"><label>Tempo</label><input class="nbinl" type="text" style="width:56px"
-          placeholder="3-1-1" value="${esc(it.tempo||'')}" onchange="nbSheetTempo(this.value)"></span>
-        <span class="sp"></span>
-        <button class="nblnk" onclick="nbSheetMove(${ii},-1)" ${ii===0?'disabled':''}>Up</button>
-        <button class="nblnk" onclick="nbSheetMove(${ii},1)" ${ii===items.length-1?'disabled':''}>Down</button>
         <button class="nblnk" onclick="nbSheetSwap(${ii})">Change movement</button>
-        <button class="nblnk warn" onclick="nbSheetDelete(${ii})">Remove</button>
+        <span class="sp"></span>
+        <button class="nblnk warn" onclick="nbSheetDelete(${ii})">Remove from the block</button>
       </div>` : ''}
       ${canJoin && ii < items.length-1 ? `<button class="nbjoin ${
           items[ii].sg != null && items[ii+1].sg === items[ii].sg ? 'on' : ''}"
@@ -5635,7 +5738,7 @@ function nbSheetHTML(){
           <div class="nbmoderow">${NB_TYPES.map(t =>
             `<button class="${type===t?'on':''}" title="${esc(NB_SPEC[t].blurb)}"
               onclick="nbSheetType('${t}')">${t}</button>`).join('')}</div>
-          <p class="nbsay">${say}</p>
+          <p class="nbmodewhy">${esc(spec.blurb)}</p>
         </section>
 
         <section class="nbsec">
@@ -5651,6 +5754,17 @@ function nbSheetHTML(){
             `<button class="${b.role===r?'on':''}" style="--rc:${c}" title="${why}"
               onclick="nbSetBlock(${bi},'role','${r}');nbSheetRedraw()">${r}</button>`).join('')}</div>
         </section>
+
+        <!-- THE BLOCK'S OWN NUMBERS, BETWEEN THE TWO THINGS THEY SIT
+             BETWEEN. They were written into a sentence, which reads well
+             once and is a poor place to find a number twice. Labelled,
+             side by side, and directly above the movements they govern -
+             which is where you look when you are about to change them.
+             A straight block has none: its sets and its rest belong to
+             each group and are on the group's own bar below. -->
+        ${spec.block.length ? `<div class="nbblocknums">${
+          spec.block.map(k => `<span class="nblf"><label>${
+            esc(NB_FIELD[k][0])}</label>${cfgIn(k)}</span>`).join('')}</div>` : ''}
 
         <section class="nbsec">
           <h4>3 &middot; The movements</h4>
@@ -5706,6 +5820,59 @@ function nbSheetType(t){ if(!nbSheet) return; const k = nbSheet;
   nbSetType(k.bi, t); nbSheet = k; nbSel = null; drawProgram(); }
 function nbSheetTempo(v){ if(!nbSheet || nbSheet.ii == null) return; const k = nbSheet;
   nbSetTempo(k.bi, k.ii, v); nbSheet = k; drawProgram(); }
+function nbSheetTempoAt(ii, v){ if(!nbSheet) return; const k = nbSheet;
+  nbSetTempo(k.bi, ii, v == null ? '' : v); nbSheet = k; drawProgram(); }
+function nbSheetKitAt(ii, id){
+  if(!nbSheet) return; const bi = nbSheet.bi;
+  const it = PROG.days[PDAY].blocks[bi].items[ii]; if(!it) return;
+  nbAt(bi);
+  if(id) it.kit = id; else delete it.kit;
+  /* nbSave redraws, which tears down the open number sheet - so the open
+     state is put back on the other side of it */
+  const keepSheet = nbSheet, keepNum = nbNumAt, keepKey = nbNumKey;
+  nbSave();
+  nbSheet = keepSheet; nbNumAt = keepNum; nbNumKey = keepKey;
+}
+
+/* DRAGGING A MOVEMENT INSIDE THE BLOCK, instead of two buttons that move
+   it one place per press and say nothing about where it lands. The gap
+   opens the way it does on the day, and nothing re-renders while a drag
+   is running - a redraw destroys the node the browser is tracking and
+   the drag dies with it. */
+let nbSheetDragIi = null;
+function nbSheetDragStart(e, ii){
+  e.stopPropagation();
+  nbSheetDragIi = ii;
+  e.dataTransfer.effectAllowed = 'move';
+  try{ e.dataTransfer.setData('text/plain', 'row:' + ii); }catch(err){}
+}
+function nbSheetDragEnd(){ nbSheetDragIi = null; nbClearMark(); }
+function nbSheetOver(e){
+  if(nbSheetDragIi == null) return;
+  e.preventDefault(); e.stopPropagation(); e.dataTransfer.dropEffect = 'move';
+  const el = e.currentTarget, r = el.getBoundingClientRect();
+  nbDropAfter = (e.clientY - r.top) > r.height / 2;
+  if(nbMark && nbMark !== el) nbMark.classList.remove('dropA','dropB');
+  el.classList.toggle('dropA', nbDropAfter);
+  el.classList.toggle('dropB', !nbDropAfter);
+  nbMark = el;
+}
+function nbSheetDrop(e, ii){
+  if(nbSheetDragIi == null) return;
+  e.preventDefault(); e.stopPropagation();
+  const from = nbSheetDragIi, after = nbDropAfter;
+  nbSheetDragIi = null; nbClearMark();
+  if(!nbSheet) return;
+  const bi = nbSheet.bi, its = PROG.days[PDAY].blocks[bi].items;
+  let at = ii + (after ? 1 : 0);
+  if(from < at) at--;
+  if(from === at) return;
+  nbAt(bi);
+  const [moved] = its.splice(from, 1);
+  its.splice(Math.max(0, Math.min(at, its.length)), 0, moved);
+  const keep = { bi, ii: at };
+  nbSave(); nbSheet = keep; drawProgram();
+}
 function nbSheetUnit(ii){ if(!nbSheet) return; const k = nbSheet;
   const at = ii != null ? ii : k.ii; if(at == null) return;
   nbToggleUnit(k.bi, at); nbSheet = k; drawProgram(); }

@@ -172,3 +172,17 @@ build rather than after you release.
 coach's own identity; the client app has none, so a person who fills the
 survey on a laptop can never link their phone except by the handoff link.
 That is the remaining gap and it belongs to whoever owns the app shell.
+
+## Request from the coach console to the dashboard chat (8 Nov 2026)
+
+A prescribed movement can now carry `kit` — which implement the weight is
+in: `bb`, `db`, `kb`, `vest` or `band`. The coach console sets it on the
+weight sheet (the same five icons the onboarding uses to ask what kit
+somebody has) and shows it on the movement's weight field.
+
+Nothing in the app reads it yet, which is safe — it is an extra field on
+an item and the runner ignores what it does not know. But "45 lb" on a
+phone is still ambiguous in exactly the way it was on the console, so the
+runner would be better for showing it: `45 lb · dumbbells`, or the icon.
+
+The field is optional and absent on every program written before today.
