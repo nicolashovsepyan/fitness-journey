@@ -809,6 +809,16 @@ select.pin{appearance:none;cursor:pointer}
 .nbit + .nbit{ border-top:1px solid var(--tint2) }
 .nbit:hover{ background:color-mix(in srgb, var(--c) 9%, transparent) }
 .nbit .hand{ color:var(--ink4); cursor:grab; font-size:12px }
+/* WHILE SOMETHING IS IN THE AIR, SAY WHERE IT CAN LAND. A drag with no
+   target shown is a guess, and the whole point of allowing cross-block
+   drops is that the other blocks are now targets too. */
+.nbdragging .nbblock{ outline:1px dashed var(--line2); outline-offset:2px }
+.nbdragging .nbblock:hover{ outline-color:var(--accent); background:var(--accent-soft) }
+.nbdragging .nbit{ pointer-events:auto }
+.nbord{ border:none; background:none; cursor:pointer; color:var(--ink4); font-size:9px;
+  line-height:1; padding:2px 3px }
+.nbord:hover:not(:disabled){ color:var(--accent) }
+.nbord:disabled{ opacity:.25; cursor:default }
 .nbit .ss{ font:600 9.5px ui-monospace,monospace; color:var(--ink3); text-align:center }
 .nbit .nm{ cursor:pointer; min-width:0 }
 /* the swap caret, in the name cell: quiet until the row is under the cursor */
@@ -3805,6 +3815,19 @@ function nbHay(m){
           m.fam||'', m.fml||'', m.f?'fundamental':''].join(' ').toLowerCase();
   return m._h;
 }
+/* THE SAME TEXT WITH THE PUNCTUATION TAKEN OUT.
+
+   The database writes "Bent-Over Row" and "Pull-Up". A coach types
+   "bentover row" or "pullup", because that is how people type, and got
+   nothing: the hyphen was in the haystack and not in the query. Matching
+   a squashed copy as well means the spelling of the hyphen stops being
+   something anyone has to get right. */
+function nbHaySq(m){
+  if(m._hq) return m._hq;
+  m._hq = nbHay(m).replace(/[^a-z0-9]+/g,'');
+  return m._hq;
+}
+const nbSquash = x => x.replace(/[^a-z0-9]+/g,'');
 const nbWords = q => String(q||'').toLowerCase().split(/\s+/).filter(Boolean);
 
 /* PLURALS RETURNED NOTHING AT ALL.
@@ -3825,17 +3848,28 @@ const NB_IRREG = { calves:'calf', glutes:'glute', quads:'quad', abs:'abs', lats:
    exercise in the database. Short words are not stemmed, and no stem
    below three characters is kept. */
 function nbStems(x){
-  const out = [x];
-  if(NB_IRREG[x]) out.push(NB_IRREG[x]);
+  /* THE WORD ITSELF IS NEVER DROPPED.
+
+     The length filter below exists so a DERIVED stem cannot be two
+     letters - "abs" cut to "ab" matched "cable" and "abduction". It was
+     applied to the whole list, original included, so any query word under
+     three characters produced an empty list and matched nothing. Typing
+     "pull up" found zero movements: "pull" was fine, "up" was deleted, and
+     every word has to match. The thing a coach types most often - the name
+     of an exercise - was the thing most likely to contain a short word. */
+  const derived = [];
+  if(NB_IRREG[x]) derived.push(NB_IRREG[x]);
   if(x.length >= 5){
-    if(/ies$/.test(x)) out.push(x.slice(0,-3)+'y');
-    else if(/es$/.test(x)) out.push(x.slice(0,-2));
+    if(/ies$/.test(x)) derived.push(x.slice(0,-3)+'y');
+    else if(/es$/.test(x)) derived.push(x.slice(0,-2));
   }
-  if(x.length >= 4 && /s$/.test(x) && !/ss$/.test(x)) out.push(x.slice(0,-1));
-  return [...new Set(out)].filter(s => s.length >= 3);
+  if(x.length >= 4 && /s$/.test(x) && !/ss$/.test(x)) derived.push(x.slice(0,-1));
+  return [...new Set([x, ...derived.filter(s => s.length >= 3)])];
 }
 const nbHit = (m,x) => nbStems(x).some(s =>
-  nbHay(m).includes(s) || (NB_SYN[s]||[]).some(y=>nbHay(m).includes(y)));
+  nbHay(m).includes(s)
+  || (s.length >= 4 && nbHaySq(m).includes(nbSquash(s)))
+  || (NB_SYN[s]||[]).some(y=>nbHay(m).includes(y)));
 const nbMatch = (m,w) => w.every(x => nbHit(m,x));
 
 /* AND THE ORDER WAS ALPHABETICAL, WHICH IS NO ORDER AT ALL.
@@ -3860,7 +3894,14 @@ function nbField(m, x){
   for(const s of nbStems(x)){
     const syn = NB_SYN[s] || [];
     const hit = (hay, y) => hay.some(h => h.includes(y));
-    if(n === s) return 0;
+    const concept = syn.length > 0;
+    if(n === s || nbSquash(n) === nbSquash(s)) return 0;
+    /* "pullup" is the name of "Pull-Up" as far as anybody typing is
+       concerned, so it is scored like a name match, not like a stray
+       substring. Four characters minimum: squashing makes short words
+       promiscuous. */
+    if(s.length >= 4 && nbSquash(n).includes(nbSquash(s)))
+      best = Math.min(best, concept ? 2 : 1);
     /* A CONCEPT WORD BEATS A NAME THAT MERELY CONTAINS IT.
 
        "back", "legs", "arms", "core" are in NB_SYN because they name a
@@ -3870,7 +3911,6 @@ function nbField(m, x){
        name happens to hold the word. So for the words the synonym table
        knows, meaning outranks spelling. Everything else - squat, press,
        row, hollow - is a name and is ranked as one. */
-    const concept = syn.length > 0;
     if(concept && syn.some(y => g.includes(y) || hit(pats,y))) best = Math.min(best,1);
     if(new RegExp('\\b'+s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).test(n)) best = Math.min(best, concept ? 2 : 1);
     if(concept && syn.some(y => hit(mus,y))) best = Math.min(best,5);
@@ -4505,11 +4545,72 @@ function nbSwapTo(bi,ii,id){
   nbSwap = null; nbSwapQ = ''; nbOpen = bi + ':' + ii; nbSave();
   toast(`Swapped in ${newName}${renamed ? ` \u2014 block is now "${b.name}"` : ''}`);
 }
-function nbDragStart(e,bi,ii){ nbDrag={bi,ii}; e.dataTransfer.effectAllowed='move'; }
-function nbDragOver(e,bi){ if(nbDrag && nbDrag.bi===bi){ e.preventDefault(); e.dataTransfer.dropEffect='move'; } }
-function nbDrop(e,bi,ii){ if(!nbDrag||nbDrag.bi!==bi) return; nbAt(bi); e.preventDefault();
-  const items=PROG.days[PDAY].blocks[bi].items;
-  const [m]=items.splice(nbDrag.ii,1); items.splice(ii,0,m); nbDrag=null; nbOpen=null; nbSave(); }
+/* DRAGGING STOPPED AT THE EDGE OF A BLOCK.
+
+   `nbDrag.bi !== bi` turned every cross-block drop into a no-op: pick up
+   the bent-over row, carry it to the overhead press block to superset the
+   two, let go, and nothing happens. Reordering inside a block was the only
+   move the builder allowed, and the move a coach actually wants is the
+   other one - a movement in the wrong block is far more common than one
+   in the wrong order within the right block.
+
+   A drop into another block is a move, not a copy: it leaves where it was
+   and lands where it was dropped, so it cannot quietly duplicate. */
+/* A BLOCK CAN MOVE UP THE DAY.
+
+   The old editor had these and the rebuilt builder did not, so the order
+   of the work bouts was fixed at whatever the writer or the template
+   decided. Putting the pull-ups first - the lift you want fresh - meant
+   deleting and rebuilding two blocks. */
+function nbMoveBlock(bi, dir){
+  const b = PROG.days[PDAY].blocks, j = bi + dir;
+  if(j < 0 || j >= b.length) return;
+  [b[bi], b[j]] = [b[j], b[bi]];
+  /* the selection and any open panels follow the block, not the index */
+  if(nbSel === bi) nbSel = j; else if(nbSel === j) nbSel = bi;
+  nbOpen = null; nbSwap = null;
+  nbAt(j); nbSave();
+}
+
+function nbDragStart(e,bi,ii){
+  nbDrag={bi,ii}; e.dataTransfer.effectAllowed='move';
+  try{ e.dataTransfer.setData('text/plain', bi+':'+ii); }catch(err){}
+  document.body.classList.add('nbdragging');
+}
+function nbDragEnd(){ nbDrag=null; document.body.classList.remove('nbdragging'); }
+function nbDragOver(e){ if(!nbDrag) return; e.preventDefault(); e.dataTransfer.dropEffect='move'; }
+
+/* ii is where in the target block it lands; null means on the end. */
+function nbDrop(e,bi,ii){
+  if(!nbDrag) return;
+  e.preventDefault(); e.stopPropagation();
+  const from = nbDrag, blocks = PROG.days[PDAY].blocks;
+  nbDrag = null; document.body.classList.remove('nbdragging');
+  if(!blocks[from.bi] || !blocks[bi]) return;
+  nbAt(bi);
+  const src = blocks[from.bi].items, dst = (blocks[bi].items ||= []);
+  const [m] = src.splice(from.ii, 1);
+  if(!m) return;
+  /* Same block, dropping below where it came from: the splice above has
+     already shifted everything up by one. */
+  let at = (ii == null) ? dst.length : ii;
+  if(from.bi === bi && from.ii < at) at--;
+  dst.splice(Math.max(0, Math.min(at, dst.length)), 0, m);
+  /* A MOVE BETWEEN BLOCKS CHANGES WHAT OWNS THE NUMBERS. In a straight
+     block the sets live on the row; in a superset or a circuit the rounds
+     live on the block. Carrying "3 x 8" into a circuit would state a set
+     count the block already decides, so the row keeps its reps and drops
+     the count it no longer owns. */
+  if(from.bi !== bi){
+    const was = blocks[from.bi].type || 'Straight', now = blocks[bi].type || 'Straight';
+    const rowOwned = t => (NB_SPEC[t] || NB_SPEC.Straight).item.indexOf('sets') >= 0;
+    if(rowOwned(was) && !rowOwned(now)){
+      const p = nbParse(m.pres); p.told = false; p.sets = 1; m.pres = nbFmt(p);
+    }
+    if(!rowOwned(was) && rowOwned(now) && m.rest == null) m.rest = blocks[from.bi].cfg?.rest ?? null;
+  }
+  nbOpen = null; nbSwap = null; nbSave();
+}
 
 /* SOMEWHERE TO GO AND WATCH IT.
 
@@ -4936,7 +5037,12 @@ function nbMiddle(){
       return;
     }
 
+    /* THE WHOLE BLOCK IS A DROP TARGET, not only its rows. Aiming at the
+       gap between two movements to land in a block is a game of pixels;
+       dropping anywhere on the block means the end of it, which is where
+       a movement carried in from elsewhere almost always belongs. */
     h += `<div class="nbblock ${sel?'sel':''} ${b.locked?'locked':''}" data-bi="${bi}" style="--rc:${RC}"
+            ondragover="nbDragOver(event)" ondrop="nbDrop(event,${bi},null)"
             onclick="${b.locked?'':'nbSel='+bi+';drawProgram()'}">
       <div class="nbbhead">
         <select class="nbrole" onclick="event.stopPropagation()" onchange="nbSetBlock(${bi},'role',this.value)">
@@ -4954,6 +5060,10 @@ function nbMiddle(){
               value="${b.cfg[k] != null ? b.cfg[k] : NB_DEF[k]}"
               onchange="nbSetCfg(${bi},'${k}',this.value)"><em>${f[1]||f[0]}</em></span>`;}).join('')}
           <span class="nbmin"><b>${nbMins(b)}</b><em>min</em></span>
+          <button class="nbord" title="Move this block up" ${bi===0?'disabled':''}
+                  onclick="event.stopPropagation();nbMoveBlock(${bi},-1)">&#9650;</button>
+          <button class="nbord" title="Move this block down" ${bi===(day.blocks||[]).length-1?'disabled':''}
+                  onclick="event.stopPropagation();nbMoveBlock(${bi},1)">&#9660;</button>
           <button class="nblock" title="Lock and fold this away"
                   onclick="event.stopPropagation();nbToggleLock(${bi})">&#128275;</button>
         </span></div>`;
@@ -4968,8 +5078,8 @@ function nbMiddle(){
         const key = bi+':'+ii, isOpen = nbOpen===key, rest = nbRestOf(it,b);
         const ss = pair ? String.fromCharCode(65+gi)+(grp.idx.indexOf(ii)+1) : '';
         h += `<div class="nbit" style="--c:${NBC(m.g)}" draggable="true"
-            ondragstart="nbDragStart(event,${bi},${ii})" ondragover="nbDragOver(event,${bi})"
-            ondrop="nbDrop(event,${bi},${ii})">
+            ondragstart="nbDragStart(event,${bi},${ii})" ondragend="nbDragEnd()"
+            ondragover="nbDragOver(event)" ondrop="nbDrop(event,${bi},${ii})">
           <span class="hand">⠿</span><span class="ss">${ss}</span>
           <!-- THE NAME IS THE CONTROL.
 
