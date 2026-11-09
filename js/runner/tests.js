@@ -24,6 +24,22 @@ export const TESTS = [
   { id: 'b100', fam: 'Burpees', group: 'For time', lvl: 2, name: '100 Burpees', sub: 'As fast as you can', metric: 'time', fmt: 'fortime', cfg: { ftRounds: 1, ftCap: 0 }, m: [['burpee', 100]] },
   { id: 'opm', fam: 'Classics', group: 'For time', lvl: 2, name: 'One Punch Man', sub: '100 push-ups, 100 sit-ups, 100 squats', metric: 'time', fmt: 'fortime', cfg: { ftRounds: 1, ftCap: 0 }, m: [['pushup', 100], ['sit_up', 100], ['bodyweight_squat', 100]] },
   { id: 'angie', fam: 'Classics', group: 'For time', lvl: 3, name: 'Angie', sub: '100 pull-ups, 100 push-ups, 100 sit-ups, 100 squats', metric: 'time', fmt: 'fortime', cfg: { ftRounds: 1, ftCap: 0 }, m: [['pullup', 100], ['pushup', 100], ['sit_up', 100], ['bodyweight_squat', 100]] },
+  /* MORE FOR TIME (Nico, 8 Nov 2026: "100 Navy SEALs, 200 and 300 burpees, man makers… the fundamentals") */
+  { id: 'b200', fam: 'Burpees', group: 'For time', lvl: 3, name: '200 Burpees', sub: 'As fast as you can', metric: 'time', fmt: 'fortime', cfg: { ftRounds: 1, ftCap: 0 }, m: [['burpee', 200]] },
+  { id: 'b300', fam: 'Burpees', group: 'For time', lvl: 3, name: '300 Burpees', sub: 'As fast as you can', metric: 'time', fmt: 'fortime', cfg: { ftRounds: 1, ftCap: 0 }, m: [['burpee', 300]] },
+  { id: 'seal100', fam: 'Burpees', group: 'For time', lvl: 3, name: '100 Navy SEAL Burpees', sub: 'Burpee, 3 push-ups, 3 knee tucks. As fast as you can', metric: 'time', fmt: 'fortime', cfg: { ftRounds: 1, ftCap: 0 }, m: [['navy_seal_burpee', 100]] },
+  { id: 'seal50', fam: 'Burpees', group: 'For time', lvl: 2, name: '50 Navy SEAL Burpees', sub: 'As fast as you can', metric: 'time', fmt: 'fortime', cfg: { ftRounds: 1, ftCap: 0 }, m: [['navy_seal_burpee', 50]] },
+  { id: 'bpu50', fam: 'Burpees', group: 'For time', lvl: 3, name: '50 Burpee Pull-ups', sub: 'As fast as you can', metric: 'time', fmt: 'fortime', cfg: { ftRounds: 1, ftCap: 0 }, m: [['burpee_pull_up', 50]] },
+  { id: 'mm50', fam: 'Burpees', group: 'For time', lvl: 3, name: '50 Man-Makers', sub: 'Two dumbbells, as fast as you can', metric: 'time', fmt: 'fortime', cfg: { ftRounds: 1, ftCap: 0 }, m: [['man_maker', 50]] },
+  { id: 'mm100', fam: 'Burpees', group: 'For time', lvl: 3, name: '100 Man-Makers', sub: 'Two dumbbells, as fast as you can', metric: 'time', fmt: 'fortime', cfg: { ftRounds: 1, ftCap: 0 }, m: [['man_maker', 100]] },
+  { id: 'pu100', fam: 'Pull-ups and dips', group: 'For time', lvl: 3, name: '100 Pull-ups', sub: 'Any sets you like, as fast as you can', metric: 'time', fmt: 'fortime', cfg: { ftRounds: 1, ftCap: 0 }, m: [['pullup', 100]] },
+  { id: 'dip100', fam: 'Pull-ups and dips', group: 'For time', lvl: 2, name: '100 Dips', sub: 'Any sets you like, as fast as you can', metric: 'time', fmt: 'fortime', cfg: { ftRounds: 1, ftCap: 0 }, m: [['dip', 100]] },
+  { id: 'kbs100', fam: 'Classics', group: 'For time', lvl: 2, name: '100 Kettlebell Swings', sub: 'As fast as you can', metric: 'time', fmt: 'fortime', cfg: { ftRounds: 1, ftCap: 0 }, m: [['kb_swing', 100]] },
+  { id: 'mxmu', fam: 'Pull-ups and dips', group: 'Max reps', lvl: 3, name: 'Max Muscle-ups', sub: 'One set, as many as you can', metric: 'reps', fmt: 'amrap', cfg: { cap: 5 }, m: [['muscle_up_bar', '']] },
+  { id: 'mxttb', fam: 'Pull-ups and dips', group: 'Max reps', lvl: 2, name: 'Max Toes-to-Bar', sub: 'One set, as many as you can', metric: 'reps', fmt: 'amrap', cfg: { cap: 5 }, m: [['toes_to_bar', '']] },
+  { id: 'mxhspu', fam: 'Push-ups', group: 'Max reps', lvl: 3, name: 'Max Handstand Push-ups', sub: 'One set, as many as you can', metric: 'reps', fmt: 'amrap', cfg: { cap: 5 }, m: [['handstand_push_up', '']] },
+  { id: 'mxjs', fam: 'Squats', group: 'Max reps', lvl: 2, name: 'Max Jump Squats', sub: 'One set, no stopping', metric: 'reps', fmt: 'amrap', cfg: { cap: 5 }, m: [['jump_squat', '']] },
+  { id: 'mxbur', fam: 'Burpees', group: 'Max reps', lvl: 2, name: 'Max Burpees', sub: 'One set, no stopping', metric: 'reps', fmt: 'amrap', cfg: { cap: 10 }, m: [['burpee', '']] },
   /* CALISTHENICS: Nico's level tests, sets with a rest, for time (the rest counts) */
   { id: 'caliI', fam: 'Calisthenics', group: 'Calisthenics', lvl: 2, name: 'Calisthenics Test: Intermediate', sub: '12 pull-ups, 20 dips, 40 push-ups. 2 sets, 2 min rest', metric: 'time', fmt: 'fortime', cfg: { ftRounds: 2, ftCap: 0, ftRest: 120 }, m: [['pullup', 12], ['dip', 20], ['pushup', 40]] },
   { id: 'caliE', fam: 'Calisthenics', group: 'Calisthenics', lvl: 3, name: 'Calisthenics Test: Expert', sub: '15 pull-ups, 20 dips, 40 push-ups. 3 sets, 2 min rest', metric: 'time', fmt: 'fortime', cfg: { ftRounds: 3, ftCap: 0, ftRest: 120 }, m: [['pullup', 15], ['dip', 20], ['pushup', 40]] },
@@ -57,6 +73,9 @@ export const TESTS = [
    less space, easier to find"). The first test of a family is its main one. */
 export const FAMILIES = ['Push-ups', 'Squats', 'Pull-ups and dips', 'Calisthenics', 'Burpees', 'Holds', 'Classics', 'Running'];
 export const MAIN_TEST = { 'Push-ups': 'cadence' };
+/* THE OTHER WAY TO BROWSE: by the kind of test */
+export const TYPES = ['For time', 'Max reps', 'Max hold', 'Sets'];
+export const typeOf = x => x.cfg?.ftRest ? 'Sets' : x.metric === 'hold' ? 'Max hold' : x.metric === 'reps' ? 'Max reps' : 'For time';
 export const testSig = id => 'test|' + id;
 /* the number an attempt scored */
 export function scoreOf(rec, def) {

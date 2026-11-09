@@ -30,7 +30,7 @@ import { t, t2, num, exName, exCues, lang, setLang } from '../i18n.js';
 import { PICKS, LEVEL } from './quick-picks.js';
 import { buildFromGoal, burpeeClub } from './rep-goal.js';
 import { getDay, endDay } from './day.js';
-import { TESTS, FAMILIES, MAIN_TEST, testSig, bestOf, attempts, scoreOf } from './tests.js';
+import { TESTS, FAMILIES, MAIN_TEST, TYPES, typeOf, testSig, bestOf, attempts, scoreOf } from './tests.js';
 import { videoEmbed, videoSearch } from '../data/exercise-videos.js';
 import { VOICE_CUES } from '../data/voice-cues.js';
 import { isInstalled, isIOS, isIOSSafari, isIOSOtherBrowser, isAndroid, canPromptInstall, promptInstall, onInstallStateChange } from '../install.js';
@@ -792,27 +792,55 @@ const testDef = () => allTests().find(x => x.id === cfg.testId) || TESTS[0];
 const passTag = d => d?.passed == null ? '' : d.passed ? ` · ✓ ${t('Passed')}` : ` · ${t('Not yet')}`;
 const setLine = (d, k) => d.sets[k].map((r, i) => `${r} ${esc(d.names[i] || '')}${d.brk?.[k]?.[i] != null ? ` (${t('broke at {n}', { n: d.brk[k][i] })})` : ''}`).join(' · ');
 const testShow = (def, v) => v == null ? '' : def.metric === 'reps' ? t('{n} reps', { n: v }) : fmt(v);
-function testsList() {
+/* FIND YOUR NEXT TEST (Nico, 8 Nov 2026: "search a max rep and see which
+   exercises, or go by type… and get tempted"). Three ways: type in the
+   search (a name, a move, "max", "100"…), browse by exercise or by type,
+   or Surprise me (a test you have not tried yet). */
+const testFam = x => x.custom ? 'Your tests' : x.fam || x.group;
+const testHay = x => `${t(x.name)} ${x.name} ${t(x.sub)} ${t(testFam(x))} ${testFam(x)} ${t(typeOf(x))} ${typeOf(x)}`.toLowerCase();
+function testRow(x) {
+  const b = bestOf(hist, x), n = attempts(hist, x).length, last = attempts(hist, x)[0];
+  /* a set-by-set test: what was done, not only the time (Nico, 3 Nov 2026), in a drop-down */
+  const det = last?.detail && x.id === cfg.testId ? `<details class="qt-tdet"><summary>${t('Last')} · ${shortDate(last.at)} · ${t2(last.detail.sets.length, '{n} set', '{n} sets')} · ${testShow(x, scoreOf(last, x)) || t('Not finished')}${passTag(last.detail)}</summary>
+    ${last.detail.sets.map((reps, k) => `<div><span>${t('Set {n}', { n: k + 1 })}</span><small>${setLine(last.detail, k)}</small>${last.detail.times?.[k] ? `<b>${fmt(last.detail.times[k])}</b>` : ''}</div>`).join('')}</details>` : '';
+  return `<button class="qt-test ${x.id === cfg.testId ? 'on' : ''}" data-test="${x.id}"><span><b>${t(x.name)}</b><small>${t(x.sub)}</small></span>
+    <em>${b ? `<i>${t('Best')}</i>${testShow(x, scoreOf(b, x))}` : `<i>${t('New')}</i>`}${n ? `<small>${t2(n, '{n} try', '{n} tries')}</small>` : ''}</em></button>${det}`;
+}
+function testsBrowse(q = '') {
   const list = allTests();
-  /* ONE ROW PER FAMILY (Nico, 8 Nov 2026): Push-ups, Squats… Tap it and its
-     tests open under it; the family of the test you picked stays open. */
-  const famOf = x => x.custom ? 'Your tests' : x.fam || x.group;
-  const fams = [...FAMILIES, 'Your tests'].filter(f => list.some(x => famOf(x) === f));
-  list.forEach(x => { if (!fams.includes(famOf(x))) fams.push(famOf(x)); });
-  const row = x => {
-    const b = bestOf(hist, x), n = attempts(hist, x).length, last = attempts(hist, x)[0];
-    /* a set-by-set test: what was done, not only the time (Nico, 3 Nov 2026), in a drop-down */
-    const det = last?.detail && x.id === cfg.testId ? `<details class="qt-tdet"><summary>${t('Last')} · ${shortDate(last.at)} · ${t2(last.detail.sets.length, '{n} set', '{n} sets')} · ${testShow(x, scoreOf(last, x)) || t('Not finished')}${passTag(last.detail)}</summary>
-      ${last.detail.sets.map((reps, k) => `<div><span>${t('Set {n}', { n: k + 1 })}</span><small>${setLine(last.detail, k)}</small>${last.detail.times?.[k] ? `<b>${fmt(last.detail.times[k])}</b>` : ''}</div>`).join('')}</details>` : '';
-    return `<button class="qt-test ${x.id === cfg.testId ? 'on' : ''}" data-test="${x.id}"><span><b>${t(x.name)}</b><small>${t(x.sub)}</small></span>
-      <em>${b ? `<i>${t('Best')}</i>${testShow(x, scoreOf(b, x))}` : `<i>${t('New')}</i>`}${n ? `<small>${t2(n, '{n} try', '{n} tries')}</small>` : ''}</em></button>${det}`;
-  };
-  return `<div class="qt-tfams">${fams.map(f => {
-    const xs = list.filter(x => famOf(x) === f).sort((a, b) => (b.id === MAIN_TEST[f]) - (a.id === MAIN_TEST[f])), on = xs.some(x => x.id === cfg.testId);   // the main test first
-    const done = xs.filter(x => attempts(hist, x).length).length;
-    return `<details class="qt-tfam ${on ? 'has' : ''}" name="qtfam" ${on ? 'open' : ''}><summary><b>${t(f)}</b><small>${t2(xs.length, '{n} test', '{n} tests')}${done ? ` · ${t('{n} tried', { n: done })}` : ''}</small><span class="qt-chev">▾</span></summary>
-      <div class="qt-tests">${xs.map(row).join('')}</div></details>`;
+  q = q.trim().toLowerCase();
+  if (q) {
+    const words = q.split(/\s+/), hits = list.filter(x => words.every(w => testHay(x).includes(w)));
+    return hits.length ? `<div class="qt-tests">${hits.map(testRow).join('')}</div>` : `<p class="muted center">${t('No test matches. Make it your own below.')}</p>`;
+  }
+  const byType = cfg.testView === 'type', keyOf = byType ? typeOf : testFam;
+  const keys = byType ? [...TYPES, 'Your tests'] : [...FAMILIES, 'Your tests'];
+  const groups = keys.filter(k => list.some(x => (byType && x.custom ? 'Your tests' : keyOf(x)) === k));
+  list.forEach(x => { const k = keyOf(x); if (!groups.includes(k)) groups.push(k); });
+  return `<div class="qt-tfams">${groups.map(f => {
+    const xs = list.filter(x => (byType && x.custom ? 'Your tests' : keyOf(x)) === f).sort((a, b) => (b.id === MAIN_TEST[f]) - (a.id === MAIN_TEST[f])), on = xs.some(x => x.id === cfg.testId);   // the main test first
+    const fresh = xs.filter(x => !attempts(hist, x).length).length;
+    return `<details class="qt-tfam ${on ? 'has' : ''}" name="qtfam" ${on ? 'open' : ''}><summary><b>${t(f)}</b><small>${t2(xs.length, '{n} test', '{n} tests')}${fresh && fresh < xs.length ? ` · ${t('{n} new to you', { n: fresh })}` : ''}</small><span class="qt-chev">▾</span></summary>
+      <div class="qt-tests">${xs.map(testRow).join('')}</div></details>`;
   }).join('')}</div>`;
+}
+function testsList() {
+  return `<div class="qt-tfind"><input id="qtTSearch" type="search" placeholder="${esc(t('Search: max, burpees, 100, hold…'))}" autocomplete="off"/><button id="qtTLucky">🎲 ${t('Surprise me')}</button></div>
+    ${segRow('Browse', 'violet', [['fam', 'By exercise'], ['type', 'By type']], cfg.testView === 'type' ? 'type' : 'fam', 'data-tview')}
+    <div id="qtTRes">${testsBrowse()}</div>`;
+}
+let testJump = false;   // after Surprise me: bring the picked test into view
+function wireTests(scope) {
+  const res = scope.querySelector('#qtTRes'); if (!res) return;
+  if (testJump) { testJump = false; requestAnimationFrame(() => res.querySelector('.qt-test.on')?.scrollIntoView({ block: 'center', behavior: 'smooth' })); }
+  const bind = () => res.querySelectorAll('[data-test]').forEach(b => b.addEventListener('click', () => { cfg.testId = b.dataset.test; persist(); draw(); }));
+  scope.querySelector('#qtTSearch')?.addEventListener('input', e => { res.innerHTML = testsBrowse(e.target.value); bind(); });
+  scope.querySelectorAll('[data-tview]').forEach(b => b.addEventListener('click', () => { cfg.testView = b.dataset.tview; persist(); draw(); }));
+  /* a test you have not tried, picked for you */
+  scope.querySelector('#qtTLucky')?.addEventListener('click', () => {
+    const pool = allTests().filter(x => !attempts(hist, x).length && x.id !== cfg.testId), all = pool.length ? pool : allTests();
+    const x = all[Math.floor(Math.random() * all.length)]; cfg.testId = x.id; testJump = true; persist(); draw(); toast(t('Try this one: {x}', { x: t(x.name) }));
+  });
 }
 const testMoves = def => def.m.map(([k, a, b]) => { const ex = EXERCISES[k], base = ex ? { exId: k, name: ex.name } : { exId: null, name: t(k) };
   return ['ladder', 'deathby'].includes(def.fmt) ? { ...base, reps: '', ldStart: a, ldStep: b } : { ...base, reps: a }; });
@@ -1803,6 +1831,7 @@ function wire(scope = host) {
   }));
   host.querySelectorAll('[data-ldmode]').forEach(b => b.addEventListener('click', () => { MV()[+b.dataset.ldmode].ldMode = b.dataset.v; persist(); draw(); }));
   host.querySelectorAll('[data-test]').forEach(b => b.addEventListener('click', () => { cfg.testId = b.dataset.test; persist(); draw(); }));
+  wireTests(host);
   host.querySelectorAll('[data-goalas]').forEach(b => b.addEventListener('click', () => { cfg.goalAs = b.dataset.goalas; persist(); draw(); }));
   host.querySelectorAll('[data-igrest]').forEach(b => b.addEventListener('click', () => { cfg.igRest = b.dataset.igrest; persist(); draw(); }));
   $('#qtGoalOpen')?.addEventListener('click', () => {
@@ -1928,6 +1957,9 @@ function injectStyle() {
   .qt-day { display:flex; align-items:center; gap: 10px; margin: 0 0 6px; padding: 8px 10px 8px 14px; border-radius: 14px; background: color-mix(in srgb, var(--wm-neon) 12%, var(--box)); border: 1px solid color-mix(in srgb, var(--wm-neon) 45%, var(--line)); }
   .qt-day span { flex: 1; min-width: 0; display:flex; flex-direction:column; } .qt-day b { font-size: 14px; color: var(--wm-neon); } .qt-day small { font-size: 12px; color: var(--muted); }
   .qt-day button { flex: none; height: 34px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--wm-neon); background: none; color: var(--wm-neon); font-weight: 800; font-size: 13px; cursor: pointer; }
+  .qt-tfind { display:flex; gap: 8px; margin: 4px 0 8px; }
+  .qt-tfind input { flex: 1; min-width: 0; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--box); color: var(--text); padding: 0 14px; font-size: 16px; }
+  .qt-tfind button { flex: none; height: 44px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--wm-accent); background: none; color: var(--wm-accent); font-weight: 800; font-size: 14px; cursor: pointer; }
   .qt-tfams { display:flex; flex-direction:column; gap: 8px; margin-bottom: 10px; }
   .qt-tfam { background: var(--box); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
   .qt-tfam.has { border-color: color-mix(in srgb, var(--wm-accent) 55%, var(--line)); }

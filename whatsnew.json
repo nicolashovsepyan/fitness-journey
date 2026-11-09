@@ -1,6 +1,9 @@
 {
-  "version": "2026-11-08.12",
+  "version": "2026-11-08.13",
   "notes": [
+    "Test yourself: a search (try max, burpees, 100, hold), browse by exercise or by type (For time, Max reps, Max hold, Sets), and Surprise me picks a test you have not tried yet.",
+    "New tests: 100 and 50 Navy SEAL burpees, 200 and 300 burpees, 50 and 100 man-makers, 50 burpee pull-ups, 100 pull-ups, 100 dips, 100 kettlebell swings, and max muscle-ups, toes-to-bar, handstand push-ups, jump squats and burpees.",
+    "Sets: the play button on a timed move is small again, so the name has room.",
     "Coach console: the name of a field and its value are one box now, with the word set big enough to read. ROUNDS and REST sit on the right with the rest of the numbers, so a block has one column to read down instead of two.",
     "New timer: Sets. Pick your exercises, how many sets and the rest. Each set shows your reps and weight to adjust, Set done starts the rest, and the clock only measures how long it took.",
     "Sets: fix any set during the rest (tap it on the rest screen) or at the end, reps and weight.",
@@ -152,6 +155,9 @@
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
   ],
   "notes_fr": [
+    "Teste-toi : une recherche (essaie max, burpees, 100, gainage), parcours par exercice ou par type (Chrono, Max de reps, Maintien max, Séries), et Surprends-moi choisit un test que tu n’as pas encore fait.",
+    "Nouveaux tests : 100 et 50 burpees Navy SEAL, 200 et 300 burpees, 50 et 100 man-makers, 50 burpees tractions, 100 tractions, 100 dips, 100 swings kettlebell, et max de muscle-ups, toes-to-bar, pompes en équilibre, squats sautés et burpees.",
+    "Séries : le bouton lecture d’un exercice chronométré est de nouveau petit, le nom a de la place.",
     "Nouveau timer : Séries. Choisis tes exercices, le nombre de séries et le repos. Chaque série affiche tes reps et ta charge à ajuster, Série faite lance le repos, et le chrono mesure juste le temps que ça t’a pris.",
     "Séries : corrige n’importe quelle série pendant le repos (touche-la sur l’écran de repos) ou à la fin, reps et charge.",
     "Continuer : après n’importe quel timer, ajoute un autre bloc. Chaque bloc rejoint une seule séance du jour jusqu’à ce que tu touches Fini pour aujourd’hui.",

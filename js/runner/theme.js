@@ -334,7 +334,7 @@ function injectStyle() {
   html.wm .st-done, html.wm .st-det { display:flex; flex-direction:column; gap: 6px; margin: 10px 0; }
   html.wm .st-edit, html.wm .st-ask { z-index: 160; }
   html.wm .tm-sides { display:flex; justify-content:center; gap: 10px; margin: 6px 0 10px; } html.wm .tm-sides span { padding: 4px 12px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); font-size: 13px; font-weight: 800; font-family: var(--tnum); } html.wm .tm-sides span.on { border-color: var(--wm-neon); color: var(--wm-neon); } html.wm .tm-sides span.done { text-decoration: line-through; }
-  html.wm .st-row .bt-tmr { margin-right: 6px; }
+  html.wm .st-row .bt-tmr.iv-tmr { flex: none; display:inline-grid; place-items:center; width: 40px; height: 40px; margin: 0 6px 0 0; padding: 0; border-radius: 12px; }
   html.wm .day-bar { display:flex; flex-direction:column; gap: 8px; }
   html.wm .day-card .eff-row span { min-width: 0; }
   html.wm .st-done > button { display:flex; align-items:baseline; gap: 8px; width: 100%; background: var(--box); border: 1px solid var(--line); border-radius: 12px; padding: 9px 12px; text-align:left; color: var(--text); font: inherit; cursor: pointer; }
