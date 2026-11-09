@@ -4190,12 +4190,19 @@ function nbGroups(b){
   return out;
 }
 const NB_DEF = { rounds:3, rest:90, mins:10, interval:60, cap:12, work:20, off:10 };
+/* A MODE'S OWN DEFAULT, WHERE THE GENERAL ONE IS WRONG. Three rounds is
+   the right guess for a superset or a circuit and the wrong one for a
+   tabata: a tabata is eight rounds of twenty on and ten off, which is
+   the whole protocol and not a number anybody picked. */
+const NB_MDEF = { Tabata:{ rounds:8, work:20, off:10 } };
+const nbDef = (type, k) => ((NB_MDEF[type] || {})[k] != null ? NB_MDEF[type][k] : NB_DEF[k]);
+const nbCfg = (b, k) => (b.cfg && b.cfg[k] != null) ? b.cfg[k] : nbDef(b.type, k);
 function nbBlockSec(b){
   const cfg = b.cfg || {}, items = b.items || [];
   if(!items.length) return 0;
   if(b.type==='EMOM')   return (cfg.mins ?? NB_DEF.mins)*60;
   if(b.type==='AMRAP')  return (cfg.cap  ?? NB_DEF.cap)*60;
-  if(b.type==='Tabata') return (cfg.rounds ?? NB_DEF.rounds)*items.length*((cfg.work ?? NB_DEF.work)+(cfg.off ?? NB_DEF.off));
+  if(b.type==='Tabata') return nbCfg(b,'rounds')*items.length*(nbCfg(b,'work')+nbCfg(b,'off'));
   if(b.type==='Circuit'){
     const r = cfg.rounds ?? NB_DEF.rounds;
     return r*items.reduce((t,it)=>t+nbWork(it)+NB_TRANS,0) + Math.max(0,r-1)*(cfg.rest ?? NB_DEF.rest);
@@ -4239,7 +4246,7 @@ function nbWorkSec(b){
   const cfg = b.cfg || {};
   const per = items.reduce((t, it) => t + nbWork(it), 0);
   if(b.type === 'Tabata')
-    return (cfg.rounds ?? NB_DEF.rounds) * items.length * (cfg.work ?? NB_DEF.work);
+    return nbCfg(b,'rounds') * items.length * nbCfg(b,'work');
   if(b.type === 'Circuit') return (cfg.rounds ?? NB_DEF.rounds) * per;
   if(b.type === 'EMOM'){
     /* one movement on the top of each interval, so the work is however
@@ -4814,7 +4821,7 @@ const NB_FIELD = { rounds:['rounds',''], rest:['rest','s'], mins:['length','min'
    on two thirds of the blocks in a day is noise that teaches you to skip the
    chip on the third. */
 function nbShape(b){
-  const c = b.cfg || {}, g = k => c[k] != null ? c[k] : NB_DEF[k];
+  const g = k => nbCfg(b, k);
   switch(b.type){
     case 'Superset': return `superset &middot; ${g('rounds')} rounds`;
     case 'Circuit':  return `circuit &middot; ${g('rounds')} rounds`;
@@ -4834,7 +4841,7 @@ function nbSetType(bi,t){ nbAt(bi); const b=PROG.days[PDAY].blocks[bi]; b.type=t
      as something else by whatever comes next. */
   const keep = NB_SPEC[t].block;
   const cfg = {};
-  for(const k of keep) cfg[k] = (b.cfg && b.cfg[k] != null) ? b.cfg[k] : NB_DEF[k];
+  for(const k of keep) cfg[k] = (b.cfg && b.cfg[k] != null) ? b.cfg[k] : nbDef(t, k);
   b.cfg = cfg;
   /* AND THE MOVEMENTS FOLLOW IT.
 
@@ -5427,18 +5434,18 @@ const NB_SAY = {
    everywhere.
    ============================================================ */
 const NB_NUMF = {
-  sets:     { label:'Sets',      unit:'sets', lo:1,  hi:20,   step:1,  chips:[2,3,4,5,6] },
-  rounds:   { label:'Rounds',    unit:'rounds', lo:1, hi:30,  step:1,  chips:[2,3,4,5,6,8] },
-  reps:     { label:'Reps',      unit:'reps', lo:1,  hi:999,  step:1,  chips:[5,8,10,12,15,20] },
-  sec:      { label:'Hold',      unit:'sec',  lo:1,  hi:600,  step:5,  chips:[15,20,30,45,60,90] },
-  min:      { label:'For',       unit:'min',  lo:1,  hi:120,  step:1,  chips:[5,8,10,12,15,20] },
-  rest:     { label:'Rest',      unit:'sec',  lo:0,  hi:600,  step:15, chips:[30,45,60,90,120,150,180], none:true },
-  mins:     { label:'Length',    unit:'min',  lo:1,  hi:120,  step:1,  chips:[6,8,10,12,15,20] },
-  interval: { label:'Every',     unit:'sec',  lo:10, hi:300,  step:5,  chips:[30,45,60,90,120] },
-  cap:      { label:'Cap',       unit:'min',  lo:1,  hi:120,  step:1,  chips:[6,8,10,12,15,20] },
-  work:     { label:'Work',      unit:'sec',  lo:5,  hi:300,  step:5,  chips:[20,30,40,45,60] },
-  off:      { label:'Off',       unit:'sec',  lo:0,  hi:300,  step:5,  chips:[10,15,20,30] },
-  weight:   { label:'Weight',    unit:'lb',   lo:0,  hi:1000, step:5,  chips:[10,15,25,35,45,53], none:true, kit:true },
+  sets:     { label:'Sets',      unit:'sets',   lo:1,  hi:20,   step:1  },
+  rounds:   { label:'Rounds',    unit:'rounds', lo:1,  hi:30,   step:1  },
+  reps:     { label:'Reps',      unit:'reps',   lo:1,  hi:999,  step:1  },
+  sec:      { label:'Hold',      unit:'sec',    lo:1,  hi:600,  step:5  },
+  min:      { label:'For',       unit:'min',    lo:1,  hi:120,  step:1  },
+  rest:     { label:'Rest',      unit:'sec',    lo:0,  hi:600,  step:15, none:true },
+  mins:     { label:'Length',    unit:'min',    lo:1,  hi:120,  step:1  },
+  interval: { label:'Every',     unit:'sec',    lo:10, hi:300,  step:5  },
+  cap:      { label:'Cap',       unit:'min',    lo:1,  hi:120,  step:1  },
+  work:     { label:'Work',      unit:'sec',    lo:5,  hi:300,  step:5  },
+  off:      { label:'Off',       unit:'sec',    lo:0,  hi:300,  step:5  },
+  weight:   { label:'Weight',    unit:'lb',     lo:0,  hi:1000, step:5,  none:true, kit:true },
   /* not a number, but it is a value on a row and it opens the same
      sheet, because "one way to enter things" has to include this one */
   tempo:    { label:'Tempo',     unit:'',     text:true, none:true,
@@ -5581,9 +5588,9 @@ function nbNumHTML(){
         <small>${esc(f.unit)}</small>
         <button type="button" aria-label="Less" onclick="nbNumStep(-1)">&minus;</button>
       </div>`}
-      <div class="nbnpc">${(f.chips || []).map(c =>
+      ${f.text && (f.chips || []).length ? `<div class="nbnpc">${f.chips.map(c =>
         `<button data-nc="${c}" class="${String(c) === String(v) ? 'on' : ''}"
-          onclick="nbNumChip('${c}')">${c}</button>`).join('')}</div>
+          onclick="nbNumChip('${c}')">${c}</button>`).join('')}</div>` : ''}
       <button class="btn primary wide" onclick="nbNumDone()">Done</button>
       ${f.none ? `<button class="nbnpfoot" onclick="nbNumClear()">${
         esc(nbNumAt.noneLabel || ('No ' + f.label.toLowerCase()))}</button>` : ''}
@@ -5611,7 +5618,7 @@ function nbSheetHTML(){
 
   /* The block's own numbers, set the same way as every other number. */
   const cfgIn = k => {
-    const v = b.cfg && b.cfg[k] != null ? b.cfg[k] : NB_DEF[k];
+    const v = nbCfg(b, k);
     const key = reg('cfg:' + k, { kind:k === 'rest' ? 'rest' : k, v,
       label: NB_FIELD[k][0][0].toUpperCase() + NB_FIELD[k][0].slice(1),
       apply: x => nbSheetCfg(k, x) });

@@ -1,6 +1,8 @@
 {
   "version": "2026-11-08.13",
   "notes": [
+    "Coach console: tabata starts at 8 rounds of 20 on and 10 off, which is the protocol, instead of the 3 rounds every other mode defaults to.",
+    "Coach console: the row of preset numbers under the figure is gone. Plus, minus and the keyboard are the three ways to set a number. Tempo keeps its list, because a tempo is neither stepped nor quick to type.",
     "Test yourself: a search (try max, burpees, 100, hold), browse by exercise or by type (For time, Max reps, Max hold, Sets), and Surprise me picks a test you have not tried yet.",
     "New tests: 100 and 50 Navy SEAL burpees, 200 and 300 burpees, 50 and 100 man-makers, 50 burpee pull-ups, 100 pull-ups, 100 dips, 100 kettlebell swings, and max muscle-ups, toes-to-bar, handstand push-ups, jump squats and burpees.",
     "Sets: the play button on a timed move is small again, so the name has room.",
