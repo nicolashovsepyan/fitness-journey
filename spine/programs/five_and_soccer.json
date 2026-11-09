@@ -1,6 +1,6 @@
 {
   "id": "five_and_soccer",
-  "version": 3,
+  "version": 4,
   "name": "Five and Soccer",
   "who": "Nicolas",
   "source": "written 8 Nov 2026 from his own brief, revised the same day: the big upper day moved off the morning after soccer, and core became two blocks of its own rather than a hold tacked onto the end.",
@@ -209,12 +209,11 @@
         {
           "role": "Work",
           "name": "100 Burpees for time",
-          "note": "100 reps, broken however you like, clock running from the first one. Write the time down. Best so far: 8:34. Alternate weeks with the pull-up ladder: minute 1 is 1 rep, minute 2 is 2, until a minute you cannot finish.",
+          "note": "100 reps, broken however you like, clock running from the first one. Write the time down. Best so far: 8:34. Alternate weeks with the pull-up ladder.",
           "mins": 11,
-          "type": "Straight",
+          "type": "Goal",
           "cfg": {
-            "rounds": 1,
-            "rest": 0
+            "cap": 20
           },
           "items": [
             {

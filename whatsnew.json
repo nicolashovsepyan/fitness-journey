@@ -1,6 +1,10 @@
 {
   "version": "2026-11-08.14",
   "notes": [
+    "Coach console: nine modes instead of six, and the mode is a drop-down with the timer own pictures. New: Rep goal, Ladder, Death By, Test yourself and VO2 max.",
+    "Coach console: Straight, Superset and Circuit are one mode called Sets. Joining two movements makes a superset, joining them all makes a circuit, and the block says which it has become. Old programs are converted when you open them.",
+    "Coach console: click the name of a movement to change it. No menu.",
+    "Five and Soccer: the 100 burpees is a rep goal now instead of a set of 100, which is what the timer will run it as.",
     "Test yourself: By exercise is a strip of pictures you scroll, the name under each. Tap one and its tests show under it, each with its own picture.",
     "Random replaces Surprise me: it shows one test, big, with Let's do it or Another one.",
     "By type reads Best time, Max reps, Longest hold and Calisthenics benchmarks.",
