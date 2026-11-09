@@ -186,3 +186,23 @@ phone is still ambiguous in exactly the way it was on the console, so the
 runner would be better for showing it: `45 lb · dumbbells`, or the icon.
 
 The field is optional and absent on every program written before today.
+
+## Two chats picked the same whatsnew version (8 Nov 2026)
+
+Tonight the Work Mode chat and the coach console chat both released as
+`2026-11-08.14`, minutes apart. The second commit's notes merged in fine
+— the parent was the first — but the version string did not change, and
+the version string is the whole mechanism: `checkForUpdate` compares the
+one the page loaded with against the one the site is serving. Two
+releases with one number means the second one is invisible to anybody
+already on the first.
+
+**Before you bump it, read what is there.** `git fetch && git show
+origin/main:whatsnew.json | head -2` — then go one past that, not one
+past whatever your working tree happens to say.
+
+A build was also lost in the same window: the Pages workflow started for
+the first push and never ran for the second, so the tip commit sat
+undeployed with no failure anywhere. If the site is serving an old page
+while `git log origin/main` says otherwise, check
+`gh run list` for a run on the tip commit before assuming cache.

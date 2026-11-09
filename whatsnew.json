@@ -1,5 +1,5 @@
 {
-  "version": "2026-11-08.14",
+  "version": "2026-11-08.15",
   "notes": [
     "Coach console: nine modes instead of six, and the mode is a drop-down with the timer own pictures. New: Rep goal, Ladder, Death By, Test yourself and VO2 max.",
     "Coach console: Straight, Superset and Circuit are one mode called Sets. Joining two movements makes a superset, joining them all makes a circuit, and the block says which it has become. Old programs are converted when you open them.",
