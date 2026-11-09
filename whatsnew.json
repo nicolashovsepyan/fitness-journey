@@ -1,6 +1,7 @@
 {
   "version": "2026-11-08.15",
   "notes": [
+    "Test yourself looks like picking a timer now: one exercise big in the middle with its name, swipe for the next. Its tests sit under it, slim, with a picture each. Search and Random are the two icons at the top.",
     "Coach console: nine modes instead of six, and the mode is a drop-down with the timer own pictures. New: Rep goal, Ladder, Death By, Test yourself and VO2 max.",
     "Coach console: Straight, Superset and Circuit are one mode called Sets. Joining two movements makes a superset, joining them all makes a circuit, and the block says which it has become. Old programs are converted when you open them.",
     "Coach console: click the name of a movement to change it. No menu.",
@@ -164,6 +165,7 @@
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
   ],
   "notes_fr": [
+    "Teste-toi ressemble au choix d’un timer : un exercice en grand au milieu avec son nom, glisse pour le suivant. Ses tests sont dessous, fins, chacun avec son image. Recherche et Au hasard sont les deux icônes en haut.",
     "Teste-toi : Par exercice est une bande d’images à faire défiler, le nom sous chacune. Touches-en une et ses tests s’affichent dessous, chacun avec son image.",
     "Au hasard remplace Surprends-moi : un seul test, en grand, avec On y va ou Un autre.",
     "Par type affiche Meilleur temps, Max de reps, Maintien le plus long et Benchmarks calisthenics.",

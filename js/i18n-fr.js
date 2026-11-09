@@ -7,6 +7,9 @@
    shows in English.
    ============================================================ */
 export const FR = {
+  'Find a test': 'Trouver un test',
+  'Your own test': 'Ton propre test',
+  'No test matches. Make it your own.': 'Aucun test ne correspond. Crée le tien.',
   'Random': 'Au hasard',
   'Another one': 'Un autre',
   'Let\'s do it': 'On y va',

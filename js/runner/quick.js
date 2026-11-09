@@ -803,7 +803,7 @@ function testRow(x) {
   /* a set-by-set test: what was done, not only the time (Nico, 3 Nov 2026), in a drop-down */
   const det = last?.detail && x.id === cfg.testId ? `<details class="qt-tdet"><summary>${t('Last')} · ${shortDate(last.at)} · ${t2(last.detail.sets.length, '{n} set', '{n} sets')} · ${testShow(x, scoreOf(last, x)) || t('Not finished')}${passTag(last.detail)}</summary>
     ${last.detail.sets.map((reps, k) => `<div><span>${t('Set {n}', { n: k + 1 })}</span><small>${setLine(last.detail, k)}</small>${last.detail.times?.[k] ? `<b>${fmt(last.detail.times[k])}</b>` : ''}</div>`).join('')}</details>` : '';
-  return `<button class="qt-test ${x.id === cfg.testId ? 'on' : ''}" data-test="${x.id}">${testPic(x, 'sm')}<span><b>${t(x.name)}</b><small>${t(x.sub)}</small></span>
+  return `<button class="qt-test ${x.id === cfg.testId ? 'on' : ''}" data-test="${x.id}">${testPic(x, 'sm')}<span><b>${t(x.name)}</b>${x.id === cfg.testId ? `<small>${t(x.sub)}</small>` : ''}</span>
     <em>${b ? `<i>${t('Best')}</i>${testShow(x, scoreOf(b, x))}` : `<i>${t('New')}</i>`}${n ? `<small>${t2(n, '{n} try', '{n} tries')}</small>` : ''}</em></button>${det}`;
 }
 const famPic = f => { const k = FAMILY_PIC[f] || 'mode:test';
@@ -821,35 +821,35 @@ function testFams() {
   list.forEach(x => { if (!fams.includes(testFam(x))) fams.push(testFam(x)); });
   return fams.map(f => ({ f, xs: list.filter(x => testFam(x) === f).sort((a, b) => (b.id === MAIN_TEST[f]) - (a.id === MAIN_TEST[f])) }));
 }
-function testsBrowse(q = '') {
-  const list = allTests();
-  q = q.trim().toLowerCase();
-  if (q) {
-    const words = q.split(/\s+/), hits = list.filter(x => words.every(w => testHay(x).includes(w)));
-    return hits.length ? `<div class="qt-tests">${hits.map(testRow).join('')}</div>` : `<p class="muted center">${t('No test matches. Make it your own below.')}</p>`;
-  }
-  /* BY EXERCISE (Nico, 8 Nov 2026: "an image and the name under it, like the
-     timer's modes, I scroll through"): a strip of pictures; the one picked
-     shows its tests under it */
-  if (cfg.testView !== 'type') {
-    const fams = testFams(), cur = fams.find(g => g.f === cfg.testFam) || fams.find(g => g.xs.some(x => x.id === cfg.testId)) || fams[0];
-    return `<div class="qt-fstrip" id="qtFStrip">${fams.map(g => `<button class="qt-fam ${g === cur ? 'on' : ''}" data-tfam="${esc(g.f)}">${famPic(g.f)}<b>${t(g.f)}</b><small>${t2(g.xs.length, '{n} test', '{n} tests')}</small></button>`).join('')}</div>
-      <div class="qt-tests">${cur.xs.map(testRow).join('')}</div>`;
-  }
-  /* BY TYPE: a drop-down each */
-  const groups = [...TYPES, 'Your tests'].filter(k => list.some(x => (x.custom ? 'Your tests' : typeOf(x)) === k));
-  return `<div class="qt-tfams">${groups.map(f => {
-    const xs = list.filter(x => (x.custom ? 'Your tests' : typeOf(x)) === f), on = xs.some(x => x.id === cfg.testId);
-    return `<details class="qt-tfam ${on ? 'has' : ''}" name="qtfam" ${on ? 'open' : ''}><summary><b>${t(f)}</b><small>${t2(xs.length, '{n} test', '{n} tests')}</small><span class="qt-chev">▾</span></summary>
-      <div class="qt-tests">${xs.map(testRow).join('')}</div></details>`;
-  }).join('')}</div>`;
+/* SEARCH RESULTS: every word has to match the name, description, family or type */
+function testsFound(q) {
+  const words = q.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (!words.length) return '';
+  const hits = allTests().filter(x => words.every(w => testHay(x).includes(w)));
+  return hits.length ? `<div class="qt-tests">${hits.map(testRow).join('')}</div>` : `<p class="muted center">${t('No test matches. Make it your own.')}</p>`;
 }
+/* PICKING A TEST, LIKE PICKING A TIMER (Nico, 8 Nov 2026, two screenshots:
+   "too busy… make it look like the timer selection"): one family at a time,
+   big, in the middle (its picture, its name), the neighbours peeking in;
+   swipe through. Its tests under it, slim. Search and Random sit on top. */
+const curFam = () => { const fams = testFams(); return fams.find(g => g.f === cfg.testFam) || fams.find(g => g.xs.some(x => x.id === cfg.testId)) || fams[0]; };
+const famTests = g => `<div class="qt-tests">${g.xs.map(testRow).join('')}</div>`;
 function testsList() {
-  return `<div class="qt-tfind"><input id="qtTSearch" type="search" placeholder="${esc(t('Search: max, burpees, 100, hold…'))}" autocomplete="off"/><button id="qtTLucky">🎲 ${t('Random')}</button></div>
-    ${segRow('Browse', 'violet', [['fam', 'By exercise'], ['type', 'By type']], cfg.testView === 'type' ? 'type' : 'fam', 'data-tview')}
-    <div id="qtTRes">${testsBrowse()}</div>`;
+  const fams = testFams(), cur = curFam(), d = testDef(), n = attempts(hist, d).length;
+  return `<div class="qt-hero qt-fhero"><div class="qt-hs" id="qtFHs">${fams.map(g => { const tried = g.xs.filter(x => attempts(hist, x).length).length;
+    return `<div class="qt-hslide" data-fhs="${esc(g.f)}">${famPic(g.f)}<b class="qt-hname">${t(g.f)}</b><p class="qt-hline">${t2(g.xs.length, '{n} test', '{n} tests')}${tried ? ` · ${t('{n} tried', { n: tried })}` : ''}</p></div>`; }).join('')}</div>
+    <div class="qt-hdots" aria-hidden="true">${fams.map(g => `<i class="${g.f === cur.f ? 'on' : ''}" data-fd="${esc(g.f)}"></i>`).join('')}</div></div>
+    <div id="qtTRes">${famTests(cur)}</div>
+    <div class="qt-tlinks"><button id="qtTries">${t(d.name)} · ${n ? t2(n, '{n} try', '{n} tries') : t('your tries')} ›</button><button id="qtMyTest">+ ${t('Your own test')}</button></div>`;
 }
-/* RANDOM (Nico: "just Random, and only show it for me to accept or roll again") */
+/* search, in a sheet */
+function openTestSearch() {
+  const { ov, close } = sheet(`<div class="qt-sheet-h">${t('Find a test')}</div><input class="qt-tsin" id="tsIn" type="search" placeholder="${esc(t('Search: max, burpees, 100, hold…'))}" autocomplete="off"/><div id="tsRes" class="qt-tsres"></div>`, 'tall');
+  const inp = ov.querySelector('#tsIn'), res = ov.querySelector('#tsRes');
+  const paint = () => { res.innerHTML = testsFound(inp.value);
+    res.querySelectorAll('[data-test]').forEach(b => b.addEventListener('click', () => { const x = allTests().find(y => y.id === b.dataset.test); cfg.testId = x.id; cfg.testFam = testFam(x); testJump = true; persist(); close(); setTimeout(draw, 200); })); };
+  inp.addEventListener('input', paint); setTimeout(() => inp.focus(), 80);
+}
 function openRandomTest() {
   const pool = () => { const p = allTests().filter(x => !attempts(hist, x).length); return p.length ? p : allTests(); };
   let x = null;
@@ -869,18 +869,32 @@ function openRandomTest() {
 }
 let testJump = false;   // after Surprise me: bring the picked test into view
 function wireTests(scope) {
-  const res = scope.querySelector('#qtTRes'); if (!res) return;
-  if (testJump) { testJump = false; requestAnimationFrame(() => res.querySelector('.qt-test.on')?.scrollIntoView({ block: 'center', behavior: 'smooth' })); }
+  const res = scope.querySelector('#qtTRes'), hs = scope.querySelector('#qtFHs'); if (!res || !hs) return;
   const bind = () => res.querySelectorAll('[data-test]').forEach(b => b.addEventListener('click', () => { cfg.testId = b.dataset.test; persist(); draw(); }));
-  scope.querySelector('#qtTSearch')?.addEventListener('input', e => { res.innerHTML = testsBrowse(e.target.value); bind(); });
-  scope.querySelectorAll('[data-tview]').forEach(b => b.addEventListener('click', () => { cfg.testView = b.dataset.tview; persist(); draw(); }));
-  const bindFams = () => res.querySelectorAll('[data-tfam]').forEach(b => b.addEventListener('click', () => {
-    cfg.testFam = b.dataset.tfam; persist(); const x = res.querySelector('#qtFStrip')?.scrollLeft || 0;
-    res.innerHTML = testsBrowse(); bind(); bindFams(); const st = res.querySelector('#qtFStrip'); if (st) st.scrollLeft = x;
-  }));
-  bindFams();
-  /* the picked family in view on the strip */
-  requestAnimationFrame(() => { const st = res.querySelector('#qtFStrip'), on = st?.querySelector('.qt-fam.on'); if (st && on) st.scrollLeft = on.offsetLeft - (st.clientWidth - on.offsetWidth) / 2; });
+  /* the family carousel: scale by distance from the middle, settle on one */
+  const paint = () => { const mid = hs.scrollLeft + hs.clientWidth / 2;
+    hs.querySelectorAll('.qt-hslide').forEach(el => el.style.setProperty('--d', Math.min(1.6, Math.abs(el.offsetLeft + el.offsetWidth / 2 - mid) / el.offsetWidth).toFixed(3))); };
+  const center = smooth => { const el = hs.querySelector(`[data-fhs="${CSS.escape(curFam().f)}"]`); if (el) hs.scrollTo({ left: el.offsetLeft - (hs.clientWidth - el.offsetWidth) / 2, behavior: smooth ? 'smooth' : 'instant' }); paint(); };
+  center(false); requestAnimationFrame(() => center(false)); setTimeout(() => center(false), 200);
+  let raf = 0, settle = 0;
+  hs.addEventListener('scroll', () => {
+    if (!raf) raf = requestAnimationFrame(() => { raf = 0; paint(); });
+    clearTimeout(settle);
+    settle = setTimeout(() => {
+      if (!hs.isConnected) return;
+      const mid = hs.scrollLeft + hs.clientWidth / 2; let best = null, bd = 1e9;
+      hs.querySelectorAll('.qt-hslide').forEach(el => { const dd = Math.abs(el.offsetLeft + el.offsetWidth / 2 - mid); if (dd < bd) { bd = dd; best = el; } });
+      const f = best?.dataset.fhs;
+      if (f && f !== curFam().f) {
+        cfg.testFam = f; persist(); try { navigator.vibrate?.(6); } catch (e) {}
+        scope.querySelectorAll('[data-fd]').forEach(i => i.classList.toggle('on', i.dataset.fd === f));
+        res.innerHTML = famTests(curFam()); bind();
+      }
+    }, 120);
+  }, { passive: true });
+  hs.querySelectorAll('.qt-hslide').forEach(el => el.addEventListener('click', () => { if (el.dataset.fhs !== curFam().f) { cfg.testFam = el.dataset.fhs; center(true); } }));
+  if (testJump) { testJump = false; requestAnimationFrame(() => res.querySelector('.qt-test.on')?.scrollIntoView({ block: 'center', behavior: 'smooth' })); }
+  scope.querySelector('#qtTFind')?.addEventListener('click', openTestSearch);
   scope.querySelector('#qtTLucky')?.addEventListener('click', openRandomTest);
 }
 const testMoves = def => def.m.map(([k, a, b]) => { const ex = EXERCISES[k], base = ex ? { exId: k, name: ex.name } : { exId: null, name: t(k) };
@@ -1241,8 +1255,7 @@ function step2Body() {
   if (f === 'goal') parts.push(segRow('Run it as', 'accent', GOAL_AS, cfg.goalAs, 'data-goalas'));
   if (f === 'igyg') parts.push(segRow('Rest', 'neon', [['same', 'Same as your set'], ['fixed', 'Fixed']], cfg.igRest, 'data-igrest'), ...(cfg.igRest === 'fixed' ? [homeRow('igRestSec')] : []));
   if (f === 'test') { const d = testDef(), n = attempts(hist, d).length;
-    parts.push(`<button class="qt-last" id="qtTries"><span>${t(d.name)} · ${t('your tries')}</span><b>${n ? t2(n, '{n} try', '{n} tries') : t('none yet')}</b><i>›</i></button>`, testsList(),
-      `<button class="qt-hr qt-hexadd" id="qtMyTest"><span>+ ${t('Create your own test')}</span><i>›</i></button>`); }
+    parts.push(testsList()); }
   if (cfg.makeTest && f !== 'test') parts.unshift(`<div class="qt-mkt"><span>${t('Building your test: set it up, then Save as a test.')}</span><button id="qtMkX" aria-label="${t('Cancel')}">✕</button></div>`);
   else if (def.moves) parts.push(`${sec(f === 'goal' ? 'Your totals' : f === 'igyg' ? 'Sets, in order' : 'Exercises', MOVES_OPTIONAL.has(f) ? `<small>${t('optional')}</small>` : f === 'ladder' ? `<button class="qt-seclink" id="qtPresets">${t('Presets')}</button>` : '')}${movesCard()}`);
   if (f === 'goal' && goalBuilt()) parts.push(`<div class="qt-goalbox ${goalTight(goalBuilt()) ? 'warn' : ''}"><b>${t('The plan')}</b><strong>${goalTotals()}</strong><span>${esc(goalPreview())}</span>${goalTight(goalBuilt()) ? `<em>${t('Tight: about {n} min of pure work. Give yourself more time or fewer reps.', { n: Math.ceil(goalBuilt().work) })}</em>` : ''}${cfg.goalAs !== 'ladder' ? `<button class="qt-link" id="qtGoalOpen">${t('Open it as {x} to adjust', { x: t(GOAL_AS.find(x => x[0] === cfg.goalAs)[1]) })}</button>` : ''}</div>`);
@@ -1254,9 +1267,10 @@ function step2Body() {
   const tot = totalSec();
   return `<div class="qt-s2top">
       <button class="qt-back2" id="qtHome" aria-label="${t('Back')}">‹</button>
-      ${modeIcon(f, 'qt-micon s2')}
-      <span class="qt-s2t"><b>${t(def.name)}</b><small>${esc(summary() || '')}</small></span>
-      ${NEEDS[f] ? `<em class="qt-s2step">${t('Step 2 of 2')}</em>` : ''}
+      ${f === 'test' ? '' : modeIcon(f, 'qt-micon s2')}
+      <span class="qt-s2t"><b>${t(def.name)}</b>${f === 'test' ? '' : `<small>${esc(summary() || '')}</small>`}</span>
+      ${f === 'test' ? `<button class="qt-star qt-tico" id="qtTFind" aria-label="${t('Find a test')}"><svg width="20" height="20" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9.5" cy="9.5" r="6.5"/><path d="M14.5 14.5 20 20"/></svg></button><button class="qt-star qt-tico" id="qtTLucky" aria-label="${t('Random')}">🎲</button>`
+        : NEEDS[f] ? `<em class="qt-s2step">${t('Step 2 of 2')}</em>` : ''}
       <button class="qt-star qt-s2gear" id="qtS2Prefs" aria-label="${t('Timer settings')}">⚙︎</button>
     </div>
     ${lastLine()}
@@ -1998,6 +2012,18 @@ function injectStyle() {
   .qt-day { display:flex; align-items:center; gap: 10px; margin: 0 0 6px; padding: 8px 10px 8px 14px; border-radius: 14px; background: color-mix(in srgb, var(--wm-neon) 12%, var(--box)); border: 1px solid color-mix(in srgb, var(--wm-neon) 45%, var(--line)); }
   .qt-day span { flex: 1; min-width: 0; display:flex; flex-direction:column; } .qt-day b { font-size: 14px; color: var(--wm-neon); } .qt-day small { font-size: 12px; color: var(--muted); }
   .qt-day button { flex: none; height: 34px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--wm-neon); background: none; color: var(--wm-neon); font-weight: 800; font-size: 13px; cursor: pointer; }
+  .qt-fhero { margin-top: 0; padding-top: 2px; }
+  .qt-fhero .qt-hslide .qt-fpic { width: min(150px, 19vh); height: min(150px, 19vh); border-radius: 28px; flex: none; pointer-events: none; }
+  .qt-fhero .qt-hslide .qt-fpic .qt-fpi { width: 80%; height: 80%; }
+  .qt-fhero .qt-hname { font-size: clamp(26px, 4.4vh, 36px); cursor: default; }
+  .qt-fhero .qt-hline { min-height: 0; }
+  .qt-s2 .qt-tests .qt-test { padding: 8px 12px; }
+  .qt-tlinks { display:flex; justify-content:space-between; gap: 10px; margin: 6px 2px 0; }
+  .qt-tlinks button { background: none; border: 0; color: var(--muted); font-size: 13.5px; font-weight: 700; padding: 8px 0; cursor: pointer; text-align:left; }
+  .qt-tlinks button:last-child { color: var(--wm-accent); text-align:right; }
+  .qt-tico { font-size: 19px; } .qt-s2top .qt-tico { width: 34px; min-width: 34px; padding: 0; } .qt-s2top:has(.qt-tico) { gap: 6px; }
+  .qt-tsin { width: 100%; height: 48px; border-radius: 12px; border: 1px solid var(--line); background: var(--box); color: var(--text); padding: 0 14px; font-size: 16px; box-sizing: border-box; margin-bottom: 10px; }
+  .qt-tsres { min-height: 40vh; }
   .qt-fstrip { display:flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 2px 2px 10px; margin: 0 -2px 4px; scrollbar-width: none; }
   .qt-fstrip::-webkit-scrollbar { display:none; }
   .qt-fam { flex: 0 0 104px; scroll-snap-align: center; display:flex; flex-direction:column; align-items:center; gap: 4px; padding: 8px 6px 10px; border-radius: 16px; border: 1px solid var(--line); background: var(--box); color: var(--text); cursor: pointer; }
