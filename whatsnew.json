@@ -1,6 +1,9 @@
 {
-  "version": "2026-11-08.13",
+  "version": "2026-11-08.14",
   "notes": [
+    "Test yourself: By exercise is a strip of pictures you scroll, the name under each. Tap one and its tests show under it, each with its own picture.",
+    "Random replaces Surprise me: it shows one test, big, with Let's do it or Another one.",
+    "By type reads Best time, Max reps, Longest hold and Calisthenics benchmarks.",
     "Coach console: tabata starts at 8 rounds of 20 on and 10 off, which is the protocol, instead of the 3 rounds every other mode defaults to.",
     "Coach console: the row of preset numbers under the figure is gone. Plus, minus and the keyboard are the three ways to set a number. Tempo keeps its list, because a tempo is neither stepped nor quick to type.",
     "Test yourself: a search (try max, burpees, 100, hold), browse by exercise or by type (For time, Max reps, Max hold, Sets), and Surprise me picks a test you have not tried yet.",
@@ -157,6 +160,9 @@
     "Ring lab: Core softness and Core brightness, so the white core can melt into the ring colour"
   ],
   "notes_fr": [
+    "Teste-toi : Par exercice est une bande d’images à faire défiler, le nom sous chacune. Touches-en une et ses tests s’affichent dessous, chacun avec son image.",
+    "Au hasard remplace Surprends-moi : un seul test, en grand, avec On y va ou Un autre.",
+    "Par type affiche Meilleur temps, Max de reps, Maintien le plus long et Benchmarks calisthenics.",
     "Teste-toi : une recherche (essaie max, burpees, 100, gainage), parcours par exercice ou par type (Chrono, Max de reps, Maintien max, Séries), et Surprends-moi choisit un test que tu n’as pas encore fait.",
     "Nouveaux tests : 100 et 50 burpees Navy SEAL, 200 et 300 burpees, 50 et 100 man-makers, 50 burpees tractions, 100 tractions, 100 dips, 100 swings kettlebell, et max de muscle-ups, toes-to-bar, pompes en équilibre, squats sautés et burpees.",
     "Séries : le bouton lecture d’un exercice chronométré est de nouveau petit, le nom a de la place.",

@@ -7,6 +7,12 @@
    shows in English.
    ============================================================ */
 export const FR = {
+  'Random': 'Au hasard',
+  'Another one': 'Un autre',
+  'Let\'s do it': 'On y va',
+  'Best time': 'Meilleur temps',
+  'Longest hold': 'Maintien le plus long',
+  'Calisthenics benchmarks': 'Benchmarks calisthenics',
   'Browse': 'Parcourir',
   'By exercise': 'Par exercice',
   'By type': 'Par type',

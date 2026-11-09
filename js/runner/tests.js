@@ -74,8 +74,11 @@ export const TESTS = [
 export const FAMILIES = ['Push-ups', 'Squats', 'Pull-ups and dips', 'Calisthenics', 'Burpees', 'Holds', 'Classics', 'Running'];
 export const MAIN_TEST = { 'Push-ups': 'cadence' };
 /* THE OTHER WAY TO BROWSE: by the kind of test */
-export const TYPES = ['For time', 'Max reps', 'Max hold', 'Sets'];
-export const typeOf = x => x.cfg?.ftRest ? 'Sets' : x.metric === 'hold' ? 'Max hold' : x.metric === 'reps' ? 'Max reps' : 'For time';
+/* (Nico, 8 Nov 2026: "for time should read best time; max reps; the same for hold; the sets ones are the cali benchmarks") */
+export const TYPES = ['Best time', 'Max reps', 'Longest hold', 'Calisthenics benchmarks'];
+export const typeOf = x => x.cfg?.ftRest ? 'Calisthenics benchmarks' : x.metric === 'hold' ? 'Longest hold' : x.metric === 'reps' ? 'Max reps' : 'Best time';
+/* each family's picture: a move from the library (exercise-images.js), or a mode icon */
+export const FAMILY_PIC = { 'Push-ups': 'pushup', 'Squats': 'bodyweight_squat', 'Pull-ups and dips': 'pullup', 'Calisthenics': 'muscle_up_bar', 'Burpees': 'navy_seal_burpee', 'Holds': 'forearm_plank', 'Classics': 'kb_swing', 'Running': 'mode:vo2', 'Your tests': 'mode:test' };
 export const testSig = id => 'test|' + id;
 /* the number an attempt scored */
 export function scoreOf(rec, def) {
