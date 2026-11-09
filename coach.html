@@ -205,6 +205,8 @@ header:after{
   color:var(--neon);margin-bottom:8px}
 .mast .sub{font-size:13px;color:var(--ink2);margin-top:7px;max-width:56ch}
 .mast .grow{flex:1;min-width:260px}
+.mast .mastbuild{margin-top:5px;font:600 9.5px ui-monospace,monospace;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink4);min-height:12px}
 .mast .meter{flex:none;text-align:right}
 .mast .meter .big{font-size:34px;font-weight:550;letter-spacing:-.03em;line-height:1}
 .mast .meter .big i{font-style:normal;color:var(--ink3);font-size:17px}
@@ -246,6 +248,7 @@ header:after{
   .mast .meter .big i{ font-size:12px }
   .mast .meter .lbl{ font-size:8.5px; letter-spacing:.1em; margin-top:2px }
   .mast .metersub{ font-size:8.5px }
+  .mast .mastbuild{ font-size:8.5px; letter-spacing:.04em; margin-top:4px }
   /* The dock is 168px tall once its buttons wrap, against 120px of padding
      reserved for it - so it sat on top of the last thing on the page. */
   body{ padding-bottom:190px }
@@ -1532,7 +1535,14 @@ body.nbdragblock .nbtrash.over{ border-style:solid;
       <path d="M66.8 40.7 V89.3" stroke-width="9.9"/><path d="M193.2 40.7 V89.3" stroke-width="9.9"/>
       <path d="M52.4 47.5 V82.5" stroke-width="7.13"/><path d="M207.6 47.5 V82.5" stroke-width="7.13"/>
     </svg>
-    <div class="grow"><h1>Building <span id="mastWho">Ozzy</span>'s program</h1></div>
+    <div class="grow"><h1>Building <span id="mastWho">Ozzy</span>'s program</h1>
+      <!-- WHEN THIS BUILD LANDED. The console is a page you keep open for an
+           hour at a time while something else ships a fix to it, and the only
+           way to tell whether you had the fix was to ask. The update bar says
+           when something NEW is waiting; this says what you are standing on,
+           which is the other half of the question. Day, time and version of
+           the build the site is serving right now. -->
+      <div class="mastbuild" id="mastBuild" title="The build this console is running"></div></div>
     <!-- WHAT THE BIGGEST NUMBER ON THE PAGE IS FOR.
 
          It was "0/10 LAYERS AGREED", set at 34px above everything else.
@@ -8331,6 +8341,41 @@ addEventListener('visibilitychange', function(){
   targets.forEach(t => io.observe(t));
 })();
 </script>
+<!-- ============================================================
+     THE LINE UNDER THE HEADLINE.
+
+     whatsnew.json carries the version; the server carries the day and the
+     time it was published, in the Last-Modified header of that same
+     request. One fetch answers both, and the console asks for it with the
+     cache turned off, so what it reads is what the site is serving this
+     minute and not what a proxy kept. Asked again every minute, because a
+     release can land while the page is sitting in front of you - which is
+     exactly when you want to know.
+     ============================================================ -->
+<script>
+(function(){
+  const el = document.getElementById('mastBuild'); if(!el) return;
+  const clock = d => { const m = String(d.getMinutes()).padStart(2,'0');
+    const h = d.getHours(); return (h % 12 || 12) + ':' + m + ' ' + (h < 12 ? 'AM' : 'PM'); };
+  async function show(){
+    try{
+      const r = await fetch('whatsnew.json?live=' + Date.now(), { cache:'no-store' });
+      if(!r.ok) return;
+      const w = await r.json().catch(() => ({}));
+      /* the header is the publish time and it is what we want. A server
+         that does not send one (the local dev server is one) still gives
+         the day, because every version is stamped 2026-11-08.15 - so the
+         line never reads "Updated" and nothing else. */
+      const lm = r.headers.get('Last-Modified'), d = lm ? new Date(lm) : null;
+      const when = d && !isNaN(d) ? nbDay(d) + ' \u00B7 ' + clock(d)
+                 : nbDay((String(w.version || '').match(/^\d{4}-\d{2}-\d{2}/) || [''])[0] + 'T12:00');
+      el.textContent = 'Updated ' + [when, w.version].filter(Boolean).join(' \u00B7 ');
+    }catch(e){}
+  }
+  show(); setInterval(show, 60000);
+})();
+</script>
+
 <!-- ============================================================
      THE DOORWAY TO THE DATABASE.
 
